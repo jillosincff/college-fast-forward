@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Lock } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const isFastIQ = (user) =>
@@ -28,34 +28,29 @@ function useRoadmapState(user) {
   const industries = goals?.industries || user?.target_industries || [];
   const goalsSaved = !!(goals?.saved_at);
 
-  // Step 1
   let step1 = 'not_started';
   if (goalsSaved) {
     const hasAll = goals.role && industries.length > 0 && (targetCompanies.length > 0 || goals.companies_skipped);
     step1 = hasAll ? 'done' : 'in_progress';
   }
 
-  // Step 2 — tracked via localStorage
   const companyViews = parseInt(typeof window !== 'undefined' ? (localStorage.getItem('cff_company_views') || '0') : '0');
   let step2 = 'not_started';
   if (companyViews >= 3) step2 = 'done';
   else if (companyViews >= 1) step2 = 'in_progress';
 
-  // Step 3
   let step3 = 'not_started';
   if (targetCompanies.length >= 3) step3 = 'done';
   else if (targetCompanies.length >= 1) step3 = 'in_progress';
 
-  // Steps 4-6
   let step4 = fastiq ? (pipelineCount === 0 ? 'not_started' : pipelineCount >= targetCompanies.length && targetCompanies.length > 0 ? 'done' : 'in_progress') : 'locked';
   let step5 = fastiq ? (resumeCount === 0 ? 'not_started' : 'in_progress') : 'locked';
   let step6 = fastiq ? (pipelineCount === 0 ? 'not_started' : hasOffer ? 'done' : 'in_progress') : 'locked';
 
   const allStatuses = [step1, step2, step3, step4, step5, step6];
-  const currentStep = allStatuses.findIndex(s => s !== 'done' && s !== 'locked') + 1 || 6;
   const completedCount = allStatuses.filter(s => s === 'done').length;
 
-  return { step1, step2, step3, step4, step5, step6, currentStep, completedCount, targetCompanies, pipelineCount, resumeCount, hasOffer, fastiq };
+  return { step1, step2, step3, step4, step5, step6, completedCount, targetCompanies, pipelineCount, resumeCount, hasOffer, fastiq };
 }
 
 function StepCircle({ status, number }) {
@@ -66,7 +61,7 @@ function StepCircle({ status, number }) {
   );
   if (status === 'locked') return (
     <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#F0F0F0', border: '2px solid #CCCCCC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <Lock style={{ width: 13, height: 13, color: '#AAAAAA' }} />
+      <span style={{ fontSize: 14 }}>🔒</span>
     </div>
   );
   if (status === 'in_progress') return (
@@ -100,40 +95,25 @@ function CTAButton({ label, onClick, variant = 'outline', fullWidth = false }) {
   const solid   = { ...base, background: '#E85D20', color: '#fff', border: 'none' };
   const outline = { ...base, background: 'transparent', color: '#E85D20', border: '1.5px solid #E85D20' };
   const muted   = { ...base, background: 'none', border: 'none', color: '#999', textDecoration: 'underline', padding: '4px 0', fontSize: 12 };
-  const style = variant === 'solid' ? solid : variant === 'muted' ? muted : outline;
+  const style = { ...(variant === 'solid' ? solid : variant === 'muted' ? muted : outline) };
   if (fullWidth) style.width = '100%';
   return <button style={style} onClick={onClick}>{label}</button>;
 }
 
-function LockedCTAs({ onOpenUpgrade }) {
-  return (
-    <div className="space-y-2 mt-3">
-      <CTAButton label="Unlock FastIQ →" variant="solid" fullWidth onClick={onOpenUpgrade} />
-      <CTAButton label="Ask My Parent to Activate →" variant="outline" fullWidth onClick={onOpenUpgrade} />
-    </div>
-  );
-}
-
 function StepCard({ status, number, title, tag, description, children }) {
-  const isDone = status === 'done';
   const isLocked = status === 'locked';
+  const isDone = status === 'done';
   const lineColor = isDone ? '#E85D20' : '#E0E0E0';
 
   return (
     <div style={{ display: 'flex', gap: 0, position: 'relative', zIndex: 1 }}>
-      {/* Left column: circle + connector line */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 16, flexShrink: 0 }}>
         <StepCircle status={status} number={number} />
         {number < 6 && (
           <div style={{ width: 2, flex: 1, minHeight: 16, background: lineColor, marginTop: 4 }} />
         )}
       </div>
-
-      {/* Card */}
-      <div style={{
-        flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12,
-        padding: 16, marginBottom: 0, opacity: isLocked ? 0.92 : 1,
-      }}>
+      <div style={{ flex: 1, background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: 16, marginBottom: 0, opacity: isLocked ? 0.92 : 1 }}>
         <div className="flex items-start justify-between gap-2 mb-2">
           <div style={{ flex: 1 }}>
             <div className="flex items-center gap-2 flex-wrap">
@@ -153,7 +133,7 @@ function StepCard({ status, number, title, tag, description, children }) {
 }
 
 export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
-  const { step1, step2, step3, step4, step5, step6, currentStep, completedCount, targetCompanies, pipelineCount, hasOffer, fastiq } = useRoadmapState(user);
+  const { step1, step2, step3, step4, step5, step6, completedCount, targetCompanies, pipelineCount, hasOffer } = useRoadmapState(user);
   const firstName = user?.full_name?.split(' ')[0] || 'You';
   const school = user?.school || user?.university || 'your school';
   const alumniCount = targetCompanies.length > 0 ? targetCompanies.length * 4 : 12;
@@ -176,7 +156,6 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
 
   return (
     <section>
-      {/* Progress summary */}
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#999', marginBottom: 12 }}>
         {summaryText}
       </p>
@@ -227,6 +206,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           )}
         </StepCard>
 
+        {/* Step 4 — PRIMARY conversion moment: solid orange CTA */}
         <StepCard status={step4} number={4} title="Reach Out to Alumni" tag="FastIQ"
           description="Find alumni at your target companies and send personalized warm outreach — the warm path that cold applications never create.">
           {step4 === 'locked' ? (
@@ -234,7 +214,10 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontStyle: 'italic', color: '#E85D20', textAlign: 'center', margin: '8px 0' }}>
                 {alumniCount}+ alumni from {school} work at companies like yours. One message could change everything.
               </p>
-              <LockedCTAs onOpenUpgrade={onOpenUpgrade} />
+              <div className="space-y-2 mt-3">
+                <CTAButton label="Unlock FastIQ →" variant="solid" fullWidth onClick={onOpenUpgrade} />
+                <CTAButton label="Ask My Parent to Activate →" variant="outline" fullWidth onClick={onOpenUpgrade} />
+              </div>
             </div>
           ) : step4 === 'in_progress' ? (
             <CTAButton label={`Continue Outreach → (${pipelineCount} contacted)`} variant="solid" onClick={() => onTabChange('home')} />
@@ -245,6 +228,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           )}
         </StepCard>
 
+        {/* Step 5 — secondary: outlined CTA */}
         <StepCard status={step5} number={5} title="Optimize Your Profile" tag="FastIQ"
           description="Tailor your resume for each role and get your LinkedIn profile recruiter-ready. First impressions happen before the interview.">
           {step5 === 'locked' ? (
@@ -252,13 +236,17 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '8px 0', lineHeight: 1.5 }}>
                 FastIQ tailors your resume for each specific role — ATS-optimized and matched to the job description.
               </p>
-              <LockedCTAs onOpenUpgrade={onOpenUpgrade} />
+              <div className="space-y-2 mt-3">
+                <CTAButton label="Unlock FastIQ →" variant="outline" fullWidth onClick={onOpenUpgrade} />
+                <button onClick={onOpenUpgrade} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#999', textDecoration: 'underline', minHeight: 'auto', padding: '4px 0', width: '100%' }}>Ask My Parent to Activate →</button>
+              </div>
             </div>
           ) : (
             <CTAButton label="Tailor My Resume →" variant="solid" onClick={() => onTabChange('career_center')} />
           )}
         </StepCard>
 
+        {/* Step 6 — tertiary: outlined CTA */}
         <StepCard status={step6} number={6} title="Follow Up & Track Everything" tag="FastIQ"
           description="Never let a conversation go cold. Track every application, every conversation, and every follow-up in your job search CRM.">
           {step6 === 'locked' ? (
@@ -266,7 +254,10 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '8px 0', lineHeight: 1.5 }}>
                 FastIQ reminds you when to follow up and drafts the message for you — so momentum never stalls.
               </p>
-              <LockedCTAs onOpenUpgrade={onOpenUpgrade} />
+              <div className="space-y-2 mt-3">
+                <CTAButton label="Unlock FastIQ →" variant="outline" fullWidth onClick={onOpenUpgrade} />
+                <button onClick={onOpenUpgrade} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#999', textDecoration: 'underline', minHeight: 'auto', padding: '4px 0', width: '100%' }}>Ask My Parent to Activate →</button>
+              </div>
             </div>
           ) : (
             <CTAButton label="Open My Job Search CRM →" variant="solid" onClick={() => onTabChange('home')} />
@@ -275,7 +266,6 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
 
       </div>
 
-      {/* Closing line */}
       <div style={{ marginTop: 24, textAlign: 'center' }}>
         {hasOffer ? (
           <div>
@@ -296,7 +286,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
               Rinse and repeat until you find your role.
             </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA' }}>
-              Most students who follow this plan consistently land interviews within 6–8 weeks.
+              Students who work through all six steps report significantly better results than those who apply cold.
             </p>
           </div>
         )}
