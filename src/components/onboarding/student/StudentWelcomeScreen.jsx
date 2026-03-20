@@ -16,7 +16,7 @@ export default function StudentWelcomeScreen({ firstName, onComplete }) {
     const t1 = setTimeout(() => setH1Visible(true), 200);
     const t2 = setTimeout(() => setSubVisible(true), 700);
     const t3 = setTimeout(() => setLineVisible(true), 1200);
-    const t4 = setTimeout(() => onComplete(), 2200);
+    const t4 = setTimeout(() => onComplete(), 4500);
     return () => { [t1, t2, t3, t4].forEach(clearTimeout); };
   }, [onComplete]);
 
