@@ -183,38 +183,77 @@ Deno.serve(async (req) => {
     const industriesStr = industriesArr.join(', ');
     const locationsStr = locationsArr.join(', ');
 
-    console.log('getFreeTierCompanyRecs query:', JSON.stringify({ role, industriesStr, locationsStr, primarySize }));
+    console.log('Starting company recommendations query for:', JSON.stringify({ role, industriesStr, locationsStr, primarySize }));
 
-    // Run both queries in parallel
-    const makeExternalCall = () => getExternalRecs(base44, role, industriesStr, locationsStr, primarySize, secondarySize, existingTargets);
+    // Run both queries in parallel — fault tolerant via allSettled
+    const makeExternalCall = () => Promise.race([
+      getExternalRecs(base44, role, industriesStr, locationsStr, primarySize, secondarySize, existingTargets),
+      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000)),
+    ]);
     const makeInternalCall = () => getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, studentSchool);
 
-    let external = [], internal = [];
-    try {
-      [external, internal] = await Promise.all([
-        Promise.race([makeExternalCall(), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000))]),
-        makeInternalCall(),
-      ]);
-    } catch (firstErr) {
-      console.warn('First attempt failed, retrying external query:', firstErr.message);
+    const [externalResult, internalResult] = await Promise.allSettled([
+      makeExternalCall(),
+      makeInternalCall(),
+    ]);
+
+    const external = externalResult.status === 'fulfilled' ? (externalResult.value || []) : [];
+    const internal = internalResult.status === 'fulfilled' ? (internalResult.value || []) : [];
+
+    if (externalResult.status === 'rejected') console.warn('External query failed:', externalResult.reason?.message);
+    if (internalResult.status === 'rejected') console.warn('Internal CFF query failed:', internalResult.reason?.message);
+
+    console.log('External results count:', external.length);
+    console.log('Internal CFF results count:', internal.length);
+
+    // If both failed, retry external once
+    let finalExternal = external;
+    if (external.length === 0 && internal.length === 0) {
+      console.warn('Both queries returned empty — retrying external once...');
       await new Promise(r => setTimeout(r, 3000));
-      try {
-        [external, internal] = await Promise.all([
-          Promise.race([makeExternalCall(), new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000))]),
-          makeInternalCall(),
-        ]);
-      } catch (secondErr) {
-        console.error('Both attempts failed:', secondErr.message);
-        // Try to at least return internal results
-        try { internal = await makeInternalCall(); } catch (_) {}
+      try { finalExternal = await makeExternalCall(); } catch (retryErr) {
+        console.error('Retry also failed:', retryErr.message);
       }
     }
 
-    const companies = mergeAndRank(external, internal, sizePref);
-    console.log('getFreeTierCompanyRecs merged result count:', companies.length);
+    // If still both empty, fall back to CompanyIntelCache
+    let companies;
+    if (finalExternal.length === 0 && internal.length === 0) {
+      console.log('Both sources empty — falling back to CompanyIntelCache');
+      try {
+        const cached = await base44.asServiceRole.entities.CompanyIntelCache.list('-hiring_score', 10);
+        const industryMatches = cached.filter(c => {
+          if (!c.company_name) return false;
+          // no industry filter if no industries specified
+          if (industriesArr.length === 0) return true;
+          return true; // return all cached for now as fallback
+        }).slice(0, 5);
+        companies = industryMatches.map(c => ({
+          name: c.company_name,
+          industry: '',
+          size: null,
+          hiring_signal: c.hiring_signal || 'warm',
+          hiring_description: c.intel_summary || c.recommendation_text || '',
+          why_recommended: null,
+          careers_url: '',
+          score: c.hiring_score || 50,
+          cff_data: null,
+          is_fallback: true,
+        }));
+        console.log('Fallback from CompanyIntelCache returned:', companies.length, 'companies');
+      } catch (cacheErr) {
+        console.error('CompanyIntelCache fallback also failed:', cacheErr.message);
+        companies = [];
+      }
+    } else {
+      companies = mergeAndRank(finalExternal, internal, sizePref);
+    }
+
+    console.log('Rendering', companies.length, 'company cards');
 
     return Response.json({
       companies,
+      is_fallback: finalExternal.length === 0 && internal.length === 0,
       generated_at: new Date().toISOString(),
       internal_generated_at: new Date().toISOString(),
     });
