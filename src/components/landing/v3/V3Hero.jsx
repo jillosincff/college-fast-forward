@@ -43,7 +43,7 @@ export default function V3Hero({ onCTA }) {
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: 0 }}>
             College Fast Forward
           </p>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888888', margin: '4px 0 0', letterSpacing: 'normal' }}>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#0021A5', margin: '4px 0 0', letterSpacing: 'normal' }}>
             powered by{' '}
             <span style={{ color: '#E85D20' }}>
               FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>™</sup>
@@ -78,7 +78,7 @@ export default function V3Hero({ onCTA }) {
 
         {/* SUBHEAD */}
         <div className="hf" style={{ animationDelay: '1500ms', marginBottom: 40 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 18px)', fontWeight: 400, color: '#fff', lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 18px)', fontWeight: 400, color: '#0021A5', lineHeight: 1.6, margin: 0 }}>
             We combine parent connections with an AI career engine to help your student access opportunities beyond cold applications.
           </p>
         </div>
