@@ -40,7 +40,7 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
           <WelcomeExpectationCard
             icon="👥"
             title="You're in the directory."
-            body="Your professional background is now visible to students and other parents in the network. Students targeting your industry may reach out directly for advice or introductions. You can update your visibility anytime from your profile settings."
+            body="Your professional background is now searchable by students in the network. A student targeting your industry or a company you've worked at can find your profile and reach out directly for guidance. You decide how much you engage — but showing up here could change someone's life."
           />
 
           <WelcomeExpectationCard

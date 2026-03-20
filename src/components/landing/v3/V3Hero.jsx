@@ -90,7 +90,7 @@ export default function V3Hero({ onCTA }) {
               Icon: Users,
               label: 'You Provide',
               title: 'The network.',
-              body: 'Your connections, your advocacy, and your word open doors that cold applications never will.',
+              body: 'Your professional background becomes searchable by students in the network. A student targeting your industry or a company you\'ve worked at can find your profile and reach out directly for guidance. You decide how much you engage — but showing up here could change someone\'s life.',
               delay: '2000ms',
             },
             {

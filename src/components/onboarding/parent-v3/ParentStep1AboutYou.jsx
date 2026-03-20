@@ -47,6 +47,17 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
         This helps us match your connections to students who need them.
       </p>
 
+      {/* Framing card */}
+      <div style={{ background: '#1A1A1A', borderLeft: '3px solid #E85D20', borderRadius: 12, padding: 16, marginBottom: 24 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: ORANGE, margin: '0 0 8px' }}>WHY WE ASK</p>
+        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', lineHeight: 1.65, margin: '0 0 8px' }}>
+          Your professional background is your superpower here. When you complete your profile, students targeting your industry can find you and reach out directly for guidance or introductions.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, fontStyle: 'italic', color: ORANGE, margin: 0 }}>
+          You decide how much you engage — but showing up here could change someone's life.
+        </p>
+      </div>
+
       {/* Full Name */}
       <div style={{ marginBottom: 20 }}>
         <FieldLabel required>Full Name</FieldLabel>
