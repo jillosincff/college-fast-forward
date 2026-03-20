@@ -41,7 +41,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
   const [showResults, setShowResults] = useState(false);
   const resultsRef = useRef(null);
 
-  // Pre-populate from saved values
   useEffect(() => {
     const g = user?.career_goals;
     if (g) {
@@ -66,8 +65,11 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
     }
   }, [user]);
 
-
-
+  useEffect(() => {
+    if (showResults && resultsRef.current) {
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+  }, [showResults]);
 
   const handleSave = async () => {
     setBtnState(BTN.saving);
@@ -97,7 +99,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       if (onGoalsSaved) onGoalsSaved();
       setTimeout(() => setBtnState(BTN.idle), 3000);
     } catch (err) {
-      console.error('Failed to save goals:', err);
       setBtnState(BTN.error);
       setBtnError('Something went wrong. Please try again.');
       setTimeout(() => { setBtnState(BTN.idle); setBtnError(''); }, 3000);
@@ -112,14 +113,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
     if (btnState === BTN.error) return '#EF4444';
     return '#E85D20';
   };
-
-  useEffect(() => {
-    if (showResults && resultsRef.current) {
-      setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
-    }
-  }, [showResults]);
 
   const primaryIndustry = industries[0] || user?.career_goals?.industries?.[0] || 'your target industry';
   const school = user?.school || user?.university || 'your school';
@@ -137,7 +130,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       </p>
 
       <div className="space-y-6">
-        {/* Role */}
+
         <div>
           <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">What kind of role are you looking for?</label>
           <input
@@ -149,7 +142,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           />
         </div>
 
-        {/* Industries */}
         <div>
           <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">What industries interest you?</label>
           <div className="flex flex-wrap gap-2">
@@ -157,9 +149,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               <button
                 key={ind}
                 onClick={() => toggleIndustry(ind)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  industries.includes(ind) ? 'bg-[#E85D20] text-white' : 'bg-white text-[#666666] border border-[#E0E0E0] hover:border-[#E85D20]'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${industries.includes(ind) ? 'bg-[#E85D20] text-white' : 'bg-white text-[#666666] border border-[#E0E0E0] hover:border-[#E85D20]'}`}
                 style={{ minHeight: 'auto' }}
               >
                 {ind}
@@ -168,12 +158,11 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           </div>
         </div>
 
-        {/* Companies */}
         <div>
           <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">What are your target companies?</label>
           {companySkipped ? (
             <p style={{ fontSize: 13, color: '#999', fontStyle: 'italic' }}>
-              <span style={{ color: '#E85D20' }}>✓</span> Skipped — FastIQ will suggest companies for you after setup.
+              <span style={{ color: '#E85D20' }}>&#10003;</span> Skipped &mdash; FastIQ will suggest companies for you after setup.
             </p>
           ) : (
             <>
@@ -194,7 +183,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
                 {companies.map((c, i) => (
                   <span key={i} className="px-3 py-1 bg-[#E85D20]/10 text-[#E85D20] text-sm rounded-full flex items-center gap-2">
                     {c}
-                    <button onClick={() => setCompanies(prev => prev.filter((_, idx) => idx !== i))} style={{ minHeight: 'auto', minWidth: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20' }}>×</button>
+                    <button onClick={() => setCompanies(prev => prev.filter((_, idx) => idx !== i))} style={{ minHeight: 'auto', minWidth: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20' }}>x</button>
                   </span>
                 ))}
               </div>
@@ -202,16 +191,16 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
                 <div className="rounded-lg border border-[#E0E0E0] bg-[#FAFAFA] p-4 mt-1">
                   <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', marginBottom: 8 }}>NOT SURE WHERE TO START?</p>
                   <ul style={{ fontSize: 13, color: '#555', lineHeight: 1.8, paddingLeft: 18, margin: '4px 0 12px' }}>
-                    <li>Companies you've seen in your major's coursework</li>
+                    <li>Companies you&apos;ve seen in your major&apos;s coursework</li>
                     <li>Brands you use or admire</li>
                     <li>Places your friends or family work</li>
-                    <li>Companies that come up when you search "[your major] jobs"</li>
+                    <li>Companies that come up when you search &quot;[your major] jobs&quot;</li>
                   </ul>
                   <button
                     onClick={() => setCompanySkipped(true)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#999', minHeight: 'auto', padding: 0 }}
                   >
-                    Skip for now — FastIQ will suggest companies based on your goals.
+                    Skip for now &mdash; FastIQ will suggest companies based on your goals.
                   </button>
                 </div>
               )}
@@ -219,7 +208,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           )}
         </div>
 
-        {/* Company Size Preference */}
         <CompanySizeRankField
           value={companySizePref}
           skipped={companySizeSkipped}
@@ -228,7 +216,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           onSkip={() => setCompanySizeSkipped(true)}
         />
 
-        {/* Graduation Year */}
         <div>
           <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Graduation year</label>
           <select value={gradYear} onChange={(e) => setGradYear(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-[#E0E0E0] bg-white text-[#1A1A1A]">
@@ -237,7 +224,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           </select>
         </div>
 
-        {/* Locations */}
         <div>
           <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Where are you open to working?</label>
           <div className="flex flex-wrap gap-2">
@@ -245,9 +231,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               <button
                 key={loc}
                 onClick={() => toggleLocation(loc)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  locations.includes(loc) ? 'bg-[#E85D20] text-white' : 'bg-white text-[#666666] border border-[#E0E0E0] hover:border-[#E85D20]'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${locations.includes(loc) ? 'bg-[#E85D20] text-white' : 'bg-white text-[#666666] border border-[#E0E0E0] hover:border-[#E85D20]'}`}
                 style={{ minHeight: 'auto' }}
               >
                 {loc}
@@ -256,7 +240,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           </div>
         </div>
 
-        {/* Save Button */}
         <button
           onClick={handleSave}
           disabled={btnState === BTN.saving}
@@ -275,19 +258,16 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
         )}
       </div>
 
-      {/* ── POST-SAVE RESULTS ── */}
       {showResults && (
         <div ref={resultsRef} style={{ marginTop: 24 }}>
 
-          {/* Section 1 — Confirmation header */}
           <div className="flex items-center gap-2" style={{ marginBottom: 32 }}>
             <CheckCircle2 style={{ width: 18, height: 18, color: '#22C55E', flexShrink: 0 }} />
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-              Goals saved. Here's what we found for you.
+              Goals saved. Here&apos;s what we found for you.
             </p>
           </div>
 
-          {/* Section 2 — AI company recommendations */}
           <section style={{ marginBottom: 40 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 10 }}>
               COMPANIES HIRING IN YOUR INDUSTRIES
@@ -310,11 +290,10 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               onClick={() => onTabChange && onTabChange('company_intel')}
               style={{ marginTop: 12, fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
             >
-              See all companies in your industries →
+              See all companies in your industries
             </button>
           </section>
 
-          {/* Section 3 — Alumni network teaser */}
           <section style={{ marginBottom: 40 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 10 }}>
               YOUR NETWORK
@@ -331,8 +310,12 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
                     <p style={{ fontSize: 12, color: '#999' }}>Alumni</p>
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <button onClick={onOpenUpgrade} className="bg-[#E85D20] text-white px-3 py-1.5 rounded-full text-xs font-semibold" style={{ minHeight: 'auto' }}>
-                      🔒 See who to contact →
+                    <button
+                      onClick={onOpenUpgrade}
+                      className="bg-[#E85D20] text-white px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{ minHeight: 'auto' }}
+                    >
+                      See who to contact
                     </button>
                   </div>
                 </div>
@@ -342,11 +325,10 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               onClick={() => onTabChange && onTabChange('alumni_network')}
               style={{ fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
             >
-              See all alumni in your network →
+              See all alumni in your network
             </button>
           </section>
 
-          {/* Section 4 — Career path suggestion */}
           <section style={{ marginBottom: 40 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 10 }}>
               EXPLORE YOUR PATH
@@ -363,12 +345,11 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
                 className="border border-[#E85D20] text-[#E85D20] px-6 py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
                 style={{ minHeight: 'auto' }}
               >
-                Explore Career Paths →
+                Explore Career Paths
               </button>
             </div>
           </section>
 
-          {/* Section 5 — Soft upgrade prompt */}
           <section>
             <div style={{ height: 1, background: '#E85D20', opacity: 0.3, marginBottom: 28 }} />
             <div className="text-center">
@@ -376,7 +357,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
                 Want to see exactly who to contact and get a personalized outreach plan?
               </p>
               <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 16, color: '#E85D20', marginBottom: 20 }}>
-                That's what FastIQ is built for.
+                That&apos;s what FastIQ is built for.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <button
@@ -384,14 +365,14 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
                   className="border border-[#E85D20] text-[#E85D20] px-6 py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
                   style={{ minHeight: 'auto' }}
                 >
-                  Unlock FastIQ →
+                  Unlock FastIQ
                 </button>
                 <button
                   onClick={onOpenUpgrade}
                   className="border border-[#E85D20] text-[#E85D20] px-6 py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
                   style={{ minHeight: 'auto' }}
                 >
-                  Ask My Parent to Activate →
+                  Ask My Parent to Activate
                 </button>
               </div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', marginTop: 12 }}>
