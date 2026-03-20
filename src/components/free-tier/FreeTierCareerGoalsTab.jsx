@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 
@@ -60,6 +60,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
   const [btnState, setBtnState] = useState(BTN.idle);
   const [btnError, setBtnError] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const resultsRef = useRef(null);
   const [savedIndustries, setSavedIndustries] = useState([]);
   const [savedCompanies, setSavedCompanies] = useState([]);
 
@@ -136,6 +137,9 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       setSavedIndustries(industries);
       setSavedCompanies(companies);
       setShowResults(true);
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
       if (onGoalsSaved) onGoalsSaved();
       setTimeout(() => setBtnState(BTN.idle), 3000);
     } catch (err) {
@@ -304,6 +308,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
 
       {/* ── POST-SAVE RESULTS ── */}
       {showResults && (
+        <div ref={resultsRef} />
         <div style={{ marginTop: 24 }}>
 
           {/* Section 1 — Confirmation header */}
