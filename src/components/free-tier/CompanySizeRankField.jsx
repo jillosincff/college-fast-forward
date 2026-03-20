@@ -54,11 +54,11 @@ const CARDS = {
 
 const SIZE_LABELS = { large: 'Large Company', mid: 'Mid-Size Company', startup: 'Startup' };
 
-export default function CompanySizeRankField({ value, skipped, onChange, onSkip }) {
+export default function CompanySizeRankField({ value, skipped, isSaved, onChange, onSkip }) {
   // value: ['large','mid','startup'] ordered array, or null if skipped
   const [order, setOrder] = useState(value || ['large', 'mid', 'startup']);
   const [isSkipped, setIsSkipped] = useState(skipped || false);
-  const [collapsed, setCollapsed] = useState(!!(value || skipped));
+  const [collapsed, setCollapsed] = useState(!!(isSaved || skipped));
   const [draggingIdx, setDraggingIdx] = useState(null);
   const [dragOverIdx, setDragOverIdx] = useState(null);
   const dragItem = useRef(null);

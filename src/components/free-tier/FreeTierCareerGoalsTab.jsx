@@ -277,6 +277,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
         <CompanySizeRankField
           value={companySizePref}
           skipped={companySizeSkipped}
+          isSaved={!!(user?.career_goals?.saved_at)}
           onChange={(newOrder) => { setCompanySizePref(newOrder); setCompanySizeSkipped(false); }}
           onSkip={() => setCompanySizeSkipped(true)}
         />
