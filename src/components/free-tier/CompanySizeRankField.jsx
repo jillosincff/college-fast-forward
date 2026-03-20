@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { GripVertical, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { GripVertical, HelpCircle } from 'lucide-react';
 
 const CARDS = {
   large: {
@@ -39,7 +39,7 @@ const CARDS = {
     title: 'Startup',
     size: 'Under 100 employees',
     pros: [
-      'Wear many hats — you\'ll learn more in one year than three at a big company',
+      "Wear many hats — you'll learn more in one year than three at a big company",
       'Direct access to founders and leadership from day one',
       'Equity potential — if it works, you were there early',
     ],
@@ -54,14 +54,29 @@ const CARDS = {
 
 const SIZE_LABELS = { large: 'Large Company', mid: 'Mid-Size Company', startup: 'Startup' };
 
+const isMobile = () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+
 export default function CompanySizeRankField({ value, skipped, isSaved, onChange, onSkip }) {
-  // value: ['large','mid','startup'] ordered array, or null if skipped
   const [order, setOrder] = useState(value || ['large', 'mid', 'startup']);
   const [isSkipped, setIsSkipped] = useState(skipped || false);
   const [collapsed, setCollapsed] = useState(!!(isSaved || skipped));
   const [draggingIdx, setDraggingIdx] = useState(null);
   const [dragOverIdx, setDragOverIdx] = useState(null);
+  const [hasDragged, setHasDragged] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [bouncing, setBouncing] = useState(false);
   const dragItem = useRef(null);
+  const mobile = isMobile();
+
+  // Single bounce animation on first load
+  useEffect(() => {
+    if (collapsed) return;
+    const t = setTimeout(() => {
+      setBouncing(true);
+      setTimeout(() => setBouncing(false), 600);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [collapsed]);
 
   const handleDragStart = (e, idx) => {
     dragItem.current = idx;
@@ -83,6 +98,7 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
     newOrder.splice(idx, 0, moved);
     setOrder(newOrder);
     onChange(newOrder);
+    setHasDragged(true);
     dragItem.current = null;
     setDraggingIdx(null);
     setDragOverIdx(null);
@@ -105,7 +121,6 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
     setCollapsed(false);
   };
 
-  // Collapsed summary row
   if (collapsed) {
     return (
       <div>
@@ -135,11 +150,54 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-[#1A1A1A] mb-1">
-        What kind of company do you see yourself at?
-      </label>
-      <p style={{ fontSize: 12, color: '#999', marginBottom: 12 }}>
+      <style>{`
+        @keyframes cardBounce {
+          0%   { transform: translateY(0) scale(1); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+          40%  { transform: translateY(-4px) scale(1.01); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+          70%  { transform: translateY(-1px) scale(1.005); }
+          100% { transform: translateY(0) scale(1); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        }
+        .card-bounce { animation: cardBounce 0.6s ease-in-out; }
+        .drag-label { transition: opacity 0.4s ease; }
+      `}</style>
+
+      {/* Label + tooltip */}
+      <div className="flex items-center gap-2 mb-1">
+        <label className="block text-sm font-semibold text-[#1A1A1A]">
+          What kind of company do you see yourself at?
+        </label>
+        <div className="relative" style={{ display: 'inline-flex' }}>
+          <HelpCircle
+            style={{ width: 15, height: 15, color: '#BBBBBB', cursor: 'pointer', flexShrink: 0 }}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            onTouchStart={() => setShowTooltip(v => !v)}
+          />
+          {showTooltip && (
+            <div style={{
+              position: 'absolute', bottom: '110%', left: '50%', transform: 'translateX(-50%)',
+              background: '#1A1A1A', color: '#fff', fontSize: 12, lineHeight: 1.5,
+              padding: '8px 12px', borderRadius: 8, width: 240, zIndex: 50,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)', pointerEvents: 'none',
+            }}>
+              Drag the cards to rank your preference — #1 at the top means we'll show you more of that type. Not sure? Skip it and we'll show a mix.
+              <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid #1A1A1A' }} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Helper text */}
+      <p style={{ fontSize: 12, color: '#999', marginBottom: 10 }}>
         This helps us find companies that actually fit how you like to work — not just the biggest names everyone already knows.
+      </p>
+
+      {/* Instruction line */}
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#444444', textAlign: 'center', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <span style={{ fontSize: 16 }}>↕</span>
+        {mobile
+          ? 'Tap and hold to reorder from most to least preferred.'
+          : 'Drag to rank from most preferred to least preferred. Your #1 choice shapes which companies we surface first.'}
       </p>
 
       <div className="space-y-3">
@@ -147,6 +205,7 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
           const card = CARDS[id];
           const isDragging = draggingIdx === idx;
           const isDragOver = dragOverIdx === idx && draggingIdx !== idx;
+          const isFirstCard = idx === 0;
           return (
             <div
               key={id}
@@ -155,23 +214,29 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
               onDragOver={e => handleDragOver(e, idx)}
               onDrop={e => handleDrop(e, idx)}
               onDragEnd={handleDragEnd}
+              className={isFirstCard && bouncing ? 'card-bounce' : ''}
               style={{
                 background: '#fff',
                 border: isDragOver ? '1.5px solid #E85D20' : '1px solid #E5E5E5',
                 borderRadius: 12,
                 padding: 16,
                 cursor: 'grab',
-                transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+                transform: isDragging ? 'scale(1.02)' : undefined,
                 boxShadow: isDragging ? '0 8px 24px rgba(0,0,0,0.12)' : '0 1px 3px rgba(0,0,0,0.05)',
                 opacity: isDragging ? 0.85 : 1,
-                transition: 'transform 0.15s, box-shadow 0.15s, border-color 0.15s',
+                transition: 'box-shadow 0.15s, border-color 0.15s, opacity 0.15s',
                 userSelect: 'none',
               }}
             >
               <div className="flex items-start gap-3">
                 {/* Drag handle + rank */}
-                <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0">
-                  <GripVertical style={{ width: 16, height: 16, color: '#CCCCCC' }} />
+                <div className="flex flex-col items-center gap-1 pt-0.5 flex-shrink-0" style={{ minWidth: 28 }}>
+                  <GripVertical style={{ width: 20, height: 20, color: '#E85D20' }} />
+                  {!hasDragged && (
+                    <span className="drag-label" style={{ fontSize: 9, fontWeight: 700, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.08em', opacity: hasDragged ? 0 : 1 }}>
+                      DRAG
+                    </span>
+                  )}
                   <span style={{ fontSize: 20, fontWeight: 700, color: '#E85D20', lineHeight: 1 }}>{idx + 1}</span>
                 </div>
 
