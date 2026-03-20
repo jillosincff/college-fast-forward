@@ -39,6 +39,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
   const [btnState, setBtnState] = useState(BTN.idle);
   const [btnError, setBtnError] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [alumniCount, setAlumniCount] = useState(null);
   const resultsRef = useRef(null);
 
   useEffect(() => {
@@ -70,6 +71,33 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     }
   }, [showResults]);
+
+  // Query alumni count when results shown
+  useEffect(() => {
+    if (!showResults || !user?.email) return;
+    const studentSchool = (user?.school || user?.university || '').toLowerCase().trim();
+    const targetIndustriesLower = (user?.career_goals?.industries || user?.target_industries || []).map(i => i.toLowerCase());
+    const targetCompaniesLower = (user?.career_goals?.target_companies || user?.target_companies || []).map(c => c.toLowerCase());
+
+    base44.entities.User.filter({}).then(users => {
+      const matched = users.filter(u => {
+        if (u.id === user.id) return false;
+        if (u.persona !== 'parent' && u.persona !== 'alumni') return false;
+        const uSchool = (u.school || u.university || '').toLowerCase();
+        if (!studentSchool || !uSchool) return false;
+        const schoolWord = studentSchool.split(' ')[0];
+        const schoolMatch = uSchool.includes(schoolWord) || studentSchool.includes(uSchool.split(' ')[0]);
+        if (!schoolMatch) return false;
+        if (targetIndustriesLower.length === 0 && targetCompaniesLower.length === 0) return true;
+        const uIndustry = (u.industry || '').toLowerCase();
+        const uCompany = (u.company || u.current_company || '').toLowerCase();
+        const industryMatch = targetIndustriesLower.some(i => uIndustry.includes(i.split(',')[0].trim()));
+        const companyMatch = targetCompaniesLower.some(c => uCompany.includes(c));
+        return industryMatch || companyMatch;
+      });
+      setAlumniCount(matched.length);
+    }).catch(() => setAlumniCount(0));
+  }, [showResults, user?.email]);
 
   const handleSave = async () => {
     setBtnState(BTN.saving);
@@ -116,6 +144,19 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
 
   const primaryIndustry = industries[0] || user?.career_goals?.industries?.[0] || 'your target industry';
   const school = user?.school || user?.university || 'your school';
+
+  const renderAlumniCount = () => {
+    if (alumniCount === null) {
+      return <><strong>Alumni</strong> from {school} work at companies in your target industries. The more parents who join, the more possibilities you have.</>;
+    }
+    if (alumniCount === 0) {
+      return <>Alumni from <strong>{school}</strong> are joining the network every day.</>;
+    }
+    if (alumniCount <= 5) {
+      return <><strong>{alumniCount} alumni</strong> from <strong>{school}</strong> are already in your network.</>;
+    }
+    return <><strong>{alumniCount}+ alumni</strong> from <strong>{school}</strong> work at companies in your target industries.</>;
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
@@ -299,7 +340,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               YOUR NETWORK
             </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', marginBottom: 16 }}>
-              <strong>Alumni</strong> from {school} work at companies in your target industries. The more parents who join, the more possibilities you have.
+              {renderAlumniCount()}
             </p>
             <div className="grid md:grid-cols-3 gap-4 mb-3">
               {[1, 2, 3].map((i) => (
