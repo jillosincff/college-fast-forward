@@ -48,31 +48,57 @@ export function useCompanyRecs(user) {
     setError(false);
     setCompanies(null);
 
-    const makeCall = () => Promise.race([
-      getFreeTierCompanyRecs({ career_goals: user?.career_goals }),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 20000)),
-    ]);
+    const QUERY_TIMEOUT = 15000;
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Query timeout')), QUERY_TIMEOUT)
+    );
 
     try {
-      let result;
-      try {
-        result = await makeCall();
-      } catch (firstErr) {
-        await new Promise(r => setTimeout(r, 3000));
-        result = await makeCall();
-      }
+      const result = await Promise.race([
+        getFreeTierCompanyRecs({ career_goals: user?.career_goals }),
+        timeoutPromise,
+      ]);
+
       const data = result?.data || result;
       const list = data?.companies || [];
 
-      memCache.data = list;
-      memCache.key = cacheKey;
-      memCache.externalAt = now;
-      memCache.internalAt = now;
-
-      setCompanies(list);
-    } catch (e) {
-      setError(true);
-      setCompanies(null);
+      if (list.length > 0) {
+        memCache.data = list;
+        memCache.key = cacheKey;
+        memCache.externalAt = now;
+        memCache.internalAt = now;
+        setCompanies(list);
+      } else {
+        console.warn('Company recommendations returned empty list — showing fallback');
+        setError(true);
+        setCompanies(null);
+      }
+    } catch (err) {
+      console.error('Company recommendations failed:', err.message);
+      // Try one more time with a shorter window before giving up
+      try {
+        const retry = await Promise.race([
+          getFreeTierCompanyRecs({ career_goals: user?.career_goals }),
+          new Promise((_, r) => setTimeout(() => r(new Error('retry timeout')), 10000)),
+        ]);
+        const retryData = retry?.data || retry;
+        const retryList = retryData?.companies || [];
+        if (retryList.length > 0) {
+          memCache.data = retryList;
+          memCache.key = cacheKey;
+          memCache.externalAt = now;
+          memCache.internalAt = now;
+          setCompanies(retryList);
+        } else {
+          setError(true);
+          setCompanies(null);
+        }
+      } catch (retryErr) {
+        console.error('Retry also failed:', retryErr.message);
+        setError(true);
+        setCompanies(null);
+      }
     } finally {
       setLoading(false);
     }
