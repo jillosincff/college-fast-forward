@@ -7,8 +7,20 @@ const SAMPLE_ALUMNI = [
 ];
 
 export default function FreeTierAlumniNetworkTab({ user, onOpenUpgrade }) {
-  const hasGoals = !!(user?.target_industries?.length || user?.target_companies?.length);
+  const savedGoals = user?.career_goals;
+  const targetCompanies = savedGoals?.target_companies || user?.target_companies || [];
+  const targetIndustries = savedGoals?.industries || user?.target_industries || [];
+  const hasGoals = !!(targetIndustries.length || targetCompanies.length);
   const school = user?.school || user?.university || 'UF';
+
+  // Show target companies first if set, then fill with sample
+  const personalizedAlumni = targetCompanies.length > 0
+    ? [
+        ...targetCompanies.map(name => ({ company: name, count: Math.floor(Math.random() * 15) + 3, roles: [{ title: 'Analyst', count: 2 }, { title: 'Associate', count: 1 }, { title: 'Manager', count: 1 }] })),
+        ...SAMPLE_ALUMNI.filter(a => !targetCompanies.some(t => a.company.toLowerCase().includes(t.toLowerCase()))),
+      ]
+    : SAMPLE_ALUMNI;
+  const displayAlumni = hasGoals ? personalizedAlumni : SAMPLE_ALUMNI;
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
@@ -37,7 +49,7 @@ export default function FreeTierAlumniNetworkTab({ user, onOpenUpgrade }) {
         </div>
       ) : (
         <div className="space-y-6">
-          {SAMPLE_ALUMNI.map(item => (
+          {displayAlumni.map(item => (
             <div key={item.company} className="bg-white rounded-xl p-6 border border-[#E0E0E0]">
               <h3 className="font-bold text-[#1A1A1A] text-lg mb-2">{item.company}</h3>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', marginBottom: 16 }}>

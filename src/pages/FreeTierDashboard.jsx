@@ -15,8 +15,14 @@ import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
 import { Loader2 } from 'lucide-react';
 
 export default function FreeTierDashboard() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  const [savedGoals, setSavedGoals] = useState(null);
+
+  const handleGoalsSaved = async () => {
+    if (refreshUser) await refreshUser();
+    setSavedGoals(Date.now()); // trigger re-render on tabs
+  };
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -63,7 +69,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-        {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
       </div>

@@ -13,7 +13,17 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
 
-  const hasGoals = !!(user?.target_industries?.length || user?.target_companies?.length);
+  const savedGoals = user?.career_goals;
+  const targetCompanies = savedGoals?.target_companies || user?.target_companies || [];
+  const targetIndustries = savedGoals?.industries || user?.target_industries || [];
+  const hasGoals = !!(targetIndustries.length || targetCompanies.length);
+
+  // Personalize: show target companies first, then sample data
+  const personalizedCompanies = [
+    ...SAMPLE_COMPANIES.filter(c => targetCompanies.some(t => c.name.toLowerCase().includes(t.toLowerCase()))),
+    ...SAMPLE_COMPANIES.filter(c => !targetCompanies.some(t => c.name.toLowerCase().includes(t.toLowerCase()))),
+  ];
+  const displayCompanies = hasGoals ? personalizedCompanies : SAMPLE_COMPANIES;
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
@@ -75,7 +85,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade }) {
 
       {/* Company Cards */}
       <div className="space-y-4">
-        {SAMPLE_COMPANIES.map(company => {
+        {displayCompanies.map(company => {
           const signalConfig = {
             hot: { emoji: '🟢', label: 'Actively Hiring', bg: 'bg-green-100', text: 'text-green-700' },
             warm: { emoji: '🟡', label: 'Selective', bg: 'bg-yellow-100', text: 'text-yellow-700' },

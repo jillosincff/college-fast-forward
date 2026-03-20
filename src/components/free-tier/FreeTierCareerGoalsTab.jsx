@@ -20,49 +20,91 @@ const INDUSTRIES = [
 const LOCATIONS = ['Remote', 'New York', 'Los Angeles', 'Chicago', 'Boston', 'Miami', 'San Francisco', 'Other'];
 const GRAD_YEARS = ['2025', '2026', '2027', '2028', '2029', '2030'];
 
-export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade }) {
+// Button states
+const BTN = { idle: 'idle', saving: 'saving', saved: 'saved', error: 'error' };
+
+export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSaved }) {
   const [role, setRole] = useState('');
   const [industries, setIndustries] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [gradYear, setGradYear] = useState('');
   const [locations, setLocations] = useState([]);
-  const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [companyInput, setCompanyInput] = useState('');
   const [companySkipped, setCompanySkipped] = useState(false);
+  const [btnState, setBtnState] = useState(BTN.idle);
+  const [btnError, setBtnError] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
+  // Pre-populate from saved values
   useEffect(() => {
-    setRole(user?.target_role || '');
-    setIndustries(user?.target_industries || []);
-    setCompanies(user?.target_companies || []);
-    setGradYear(user?.graduation_year?.toString() || '');
-    setLocations(user?.location_preferences || []);
+    const g = user?.career_goals;
+    if (g) {
+      setRole(g.role || user?.target_role || '');
+      setIndustries(g.industries || user?.target_industries || []);
+      setCompanies(g.target_companies || user?.target_companies || []);
+      setGradYear(g.graduation_year?.toString() || user?.graduation_year?.toString() || '');
+      setLocations(g.locations || user?.location_preferences || []);
+      setCompanySkipped(g.companies_skipped || false);
+      if (g.saved_at) setShowConfirmation(true);
+    } else {
+      // Fall back to flat fields
+      setRole(user?.target_role || '');
+      setIndustries(user?.target_industries || []);
+      setCompanies(user?.target_companies || []);
+      setGradYear(user?.graduation_year?.toString() || '');
+      setLocations(user?.location_preferences || []);
+    }
   }, [user]);
 
   const handleSave = async () => {
-    setSaving(true);
+    setBtnState(BTN.saving);
+    setBtnError('');
     try {
       await base44.auth.updateMe({
+        // Flat fields for backward compat with other tabs
         target_role: role,
         target_industries: industries,
         target_companies: companies,
         graduation_year: gradYear ? parseInt(gradYear) : null,
         location_preferences: locations,
+        firstVisitComplete: true,
+        // Nested career_goals object
+        career_goals: {
+          role,
+          industries,
+          target_companies: companies,
+          graduation_year: gradYear ? parseInt(gradYear) : null,
+          locations,
+          companies_skipped: companySkipped,
+          saved_at: new Date().toISOString(),
+        },
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setBtnState(BTN.saved);
+      setShowConfirmation(true);
+      if (onGoalsSaved) onGoalsSaved();
+      setTimeout(() => setBtnState(BTN.idle), 3000);
     } catch (err) {
       console.error('Failed to save goals:', err);
+      setBtnState(BTN.error);
+      setBtnError('Something went wrong. Please try again.');
+      setTimeout(() => setBtnState(BTN.idle), 3000);
     }
-    setSaving(false);
   };
 
-  const toggleIndustry = (ind) => {
-    setIndustries(prev => prev.includes(ind) ? prev.filter(i => i !== ind) : [...prev, ind]);
+  const toggleIndustry = (ind) => setIndustries(prev => prev.includes(ind) ? prev.filter(i => i !== ind) : [...prev, ind]);
+  const toggleLocation = (loc) => setLocations(prev => prev.includes(loc) ? prev.filter(l => l !== loc) : [...prev, loc]);
+
+  const btnLabel = () => {
+    if (btnState === BTN.saving) return null;
+    if (btnState === BTN.saved) return 'Goals Saved ✓';
+    if (btnState === BTN.error) return 'Save Failed — Try Again';
+    return 'Save My Goals →';
   };
 
-  const toggleLocation = (loc) => {
-    setLocations(prev => prev.includes(loc) ? prev.filter(l => l !== loc) : [...prev, loc]);
+  const btnBg = () => {
+    if (btnState === BTN.saved) return '#22C55E';
+    if (btnState === BTN.error) return '#EF4444';
+    return '#E85D20';
   };
 
   return (
@@ -156,9 +198,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade }) {
               {companyInput.length === 0 && companies.length === 0 && (
                 <div className="rounded-lg border border-[#E0E0E0] bg-[#FAFAFA] p-4 mt-1">
                   <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', marginBottom: 8 }}>NOT SURE WHERE TO START?</p>
-                  <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 0 }}>
-                    Think about:
-                  </p>
+                  <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 0 }}>Think about:</p>
                   <ul style={{ fontSize: 13, color: '#555', lineHeight: 1.8, paddingLeft: 18, margin: '4px 0 12px' }}>
                     <li>Companies you've seen in your major's coursework</li>
                     <li>Brands you use or admire</li>
@@ -179,9 +219,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade }) {
 
         {/* Graduation Year */}
         <div>
-          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-            Graduation year
-          </label>
+          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Graduation year</label>
           <select
             value={gradYear}
             onChange={(e) => setGradYear(e.target.value)}
@@ -194,9 +232,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade }) {
 
         {/* Locations */}
         <div>
-          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">
-            Where are you open to working?
-          </label>
+          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Where are you open to working?</label>
           <div className="flex flex-wrap gap-2">
             {LOCATIONS.map(loc => (
               <button
@@ -218,40 +254,53 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade }) {
         {/* Save Button */}
         <button
           onClick={handleSave}
-          disabled={saving}
-          className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
-          style={{ minHeight: 'auto' }}
+          disabled={btnState === BTN.saving}
+          className="w-full text-white px-6 py-3 rounded-full font-semibold transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+          style={{ minHeight: 'auto', background: btnBg(), transition: 'background 0.3s' }}
         >
-          {saving ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Save My Goals →'}
+          {btnState === BTN.saving ? (
+            <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</>
+          ) : (
+            btnLabel()
+          )}
         </button>
 
-        {/* Confirmation + Upgrade */}
-        {saved && (
-          <div className="bg-white rounded-xl p-6 border border-green-200">
-            <div className="flex items-center gap-2 mb-4">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-              <p className="text-sm font-semibold text-green-600">Goals saved.</p>
+        {btnState === BTN.error && btnError && (
+          <p style={{ fontSize: 13, color: '#EF4444', textAlign: 'center', marginTop: -8 }}>{btnError}</p>
+        )}
+
+        {/* Post-save confirmation card */}
+        {showConfirmation && (
+          <div style={{ background: '#1A1A1A', borderLeft: '3px solid #E85D20', borderRadius: 12, padding: 16 }}>
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: 0 }}>Goals saved.</p>
             </div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', marginBottom: 12, lineHeight: 1.5 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', lineHeight: 1.6, marginBottom: 8 }}>
               FastIQ uses these goals to find your alumni, build your outreach, and create your daily action plan.
+            </p>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 15, color: '#E85D20', marginBottom: 16 }}>
               Your goals are set. Now let FastIQ put them to work.
             </p>
             <div className="space-y-2">
               <button
                 onClick={onOpenUpgrade}
-                className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
+                className="w-full border border-[#E85D20] text-[#E85D20] py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
                 style={{ minHeight: 'auto' }}
               >
                 Unlock FastIQ →
               </button>
               <button
                 onClick={onOpenUpgrade}
-                className="w-full border border-[#E85D20] text-[#E85D20] px-6 py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
+                className="w-full border border-[#E85D20] text-[#E85D20] py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
                 style={{ minHeight: 'auto' }}
               >
                 Ask My Parent to Activate →
               </button>
             </div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#555', marginTop: 10, textAlign: 'center' }}>
+              Free 7-day trial included. Cancel anytime.
+            </p>
           </div>
         )}
       </div>
