@@ -325,6 +325,9 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               error={recsError}
               onRefetch={refetchRecs}
               onTabChange={onTabChange}
+              onOpenUpgrade={onOpenUpgrade}
+              user={user}
+              isFastIQ={false}
               dark={false}
             />
             <button
