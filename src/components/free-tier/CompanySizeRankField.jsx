@@ -66,6 +66,8 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
   const [showTooltip, setShowTooltip] = useState(false);
   const [bouncing, setBouncing] = useState(false);
   const dragItem = useRef(null);
+  const touchStartY = useRef(null);
+  const itemRefs = useRef([]);
   const mobile = isMobile();
 
   // Single bounce animation on first load
@@ -108,6 +110,41 @@ export default function CompanySizeRankField({ value, skipped, isSaved, onChange
     setDraggingIdx(null);
     setDragOverIdx(null);
     dragItem.current = null;
+  };
+
+  // Touch drag support
+  const handleTouchStart = (e, idx) => {
+    dragItem.current = idx;
+    setDraggingIdx(idx);
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    if (dragItem.current === null) return;
+    const touchY = e.touches[0].clientY;
+    // Find which item we're hovering over
+    let overIdx = null;
+    itemRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (touchY >= rect.top && touchY <= rect.bottom) overIdx = i;
+    });
+    if (overIdx !== null && overIdx !== dragItem.current) setDragOverIdx(overIdx);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragItem.current !== null && dragOverIdx !== null && dragItem.current !== dragOverIdx) {
+      const newOrder = [...order];
+      const [moved] = newOrder.splice(dragItem.current, 1);
+      newOrder.splice(dragOverIdx, 0, moved);
+      setOrder(newOrder);
+      onChange(newOrder);
+      setHasDragged(true);
+    }
+    dragItem.current = null;
+    setDraggingIdx(null);
+    setDragOverIdx(null);
   };
 
   const handleSkip = () => {
