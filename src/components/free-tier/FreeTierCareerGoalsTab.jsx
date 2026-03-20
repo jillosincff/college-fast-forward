@@ -137,9 +137,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       setSavedIndustries(industries);
       setSavedCompanies(companies);
       setShowResults(true);
-      setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 150);
       if (onGoalsSaved) onGoalsSaved();
       setTimeout(() => setBtnState(BTN.idle), 3000);
     } catch (err) {
@@ -158,6 +155,14 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
     if (btnState === BTN.error) return '#EF4444';
     return '#E85D20';
   };
+
+  useEffect(() => {
+    if (showResults && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [showResults]);
 
   const primaryIndustry = savedIndustries[0] || industries[0] || 'your target industry';
   const personalizedCompanies = getPersonalizedCompanies(savedIndustries, savedCompanies);
@@ -308,9 +313,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
 
       {/* ── POST-SAVE RESULTS ── */}
       {showResults && (
-        <>
-        <div ref={resultsRef} />
-        <div style={{ marginTop: 24 }}>
+        <div ref={resultsRef} style={{ marginTop: 24 }}>
 
           {/* Section 1 — Confirmation header */}
           <div className="flex items-center gap-2" style={{ marginBottom: 32 }}>
@@ -453,7 +456,6 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           </section>
 
         </div>
-        </>
       )}
     </div>
   );
