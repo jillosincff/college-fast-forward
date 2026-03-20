@@ -1,42 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2, X } from 'lucide-react';
-
-const COMPANIES_BY_SIZE = {
-  startup: [
-    { name: 'Notion', signal: 'hot', insight: 'Rapidly scaling — hiring across product, engineering, and growth roles.' },
-    { name: 'Linear', signal: 'hot', insight: 'Small team, high impact — great for new grads who want ownership fast.' },
-    { name: 'Figma', signal: 'warm', insight: 'Selective hiring post-Adobe deal — strong for design and PM candidates.' },
-  ],
-  mid: [
-    { name: 'HubSpot', signal: 'hot', insight: 'Consistent entry-level hiring across sales, marketing, and engineering.' },
-    { name: 'Duolingo', signal: 'warm', insight: 'Growing product and data teams — strong internship-to-hire pipeline.' },
-    { name: 'Zoom', signal: 'warm', insight: 'Selective hiring focused on enterprise sales and product roles.' },
-  ],
-  large: [
-    { name: 'Google', signal: 'hot', insight: 'Actively hiring for entry-level roles across multiple teams.' },
-    { name: 'Nike', signal: 'warm', insight: 'Selective hiring — focus on brand marketing and product roles.' },
-    { name: 'Goldman Sachs', signal: 'warm', insight: 'Summer analyst applications open for investment banking division.' },
-  ],
-};
-
-function getPersonalizedHomeCompanies(user) {
-  const sizePref = user?.career_goals?.company_size_preference || ['large', 'mid', 'startup'];
-  const results = [];
-  for (const size of sizePref) {
-    const pool = COMPANIES_BY_SIZE[size] || [];
-    for (const c of pool) {
-      if (!results.find(r => r.name === c.name)) {
-        results.push(c);
-        if (results.length === 3) return results;
-      }
-    }
-  }
-  return results;
-}
+import { useCompanyRecs } from '@/components/free-tier/useCompanyRecs';
+import AICompanyCards from '@/components/free-tier/AICompanyCards';
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
+  const { companies, loading: recsLoading, error: recsError, refetch } = useCompanyRecs(user);
 
   const [parentEmail, setParentEmail] = useState('');
   const [nudgeSent, setNudgeSent] = useState(false);
@@ -207,35 +177,20 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
         {/* Company Intel Preview */}
         <section>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-          COMPANY INTEL
-        </p>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
-          What's happening at companies that matter.
-        </h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          {getPersonalizedHomeCompanies(user).map(company => (
-            <div key={company.name} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: 16 }}>
-              <h3 style={{ fontWeight: 700, color: '#fff', marginBottom: 8 }}>{company.name}</h3>
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  company.signal === 'hot' ? 'bg-green-900/40 text-green-400' :
-                  company.signal === 'warm' ? 'bg-yellow-900/40 text-yellow-400' :
-                  'bg-red-900/40 text-red-400'
-                }`}>
-                  {company.signal === 'hot' ? '🟢 Hot' : company.signal === 'warm' ? '🟡 Selective' : '🔴 Freeze'}
-                </span>
-              </div>
-              <p style={{ fontSize: 12, color: '#888', marginBottom: 12, lineHeight: 1.5 }}>{company.insight}</p>
-              <button
-                onClick={() => onTabChange('company_intel')}
-                style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
-              >
-                View Full Intel →
-              </button>
-            </div>
-          ))}
-        </div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
+            COMPANY INTEL
+          </p>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
+            What's happening at companies that matter.
+          </h2>
+          <AICompanyCards
+            companies={companies}
+            loading={recsLoading}
+            error={recsError}
+            onRefetch={refetch}
+            onTabChange={onTabChange}
+            dark={true}
+          />
         </section>
 
         {/* Alumni Network Teaser */}
