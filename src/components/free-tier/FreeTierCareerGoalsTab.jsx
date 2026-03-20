@@ -453,6 +453,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           </section>
 
         </div>
+        </>
       )}
     </div>
   );
