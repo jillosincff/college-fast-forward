@@ -316,6 +316,7 @@ export function useCompanyRecs(user) {
   const [companies, setCompanies] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [noIndustry, setNoIndustry] = useState(false);
   const [weeklyNewCount, setWeeklyNewCount] = useState(null);
 
   const fetchRecs = useCallback(async () => {
@@ -325,9 +326,15 @@ export function useCompanyRecs(user) {
       : user?.target_industries?.length > 0 ? user.target_industries : [];
 
     const role = user?.career_goals?.role || user?.target_role || '';
-    const inferredIndustries = rawIndustries.length === 0 && role
-      ? (inferIndustryFromRole(role) ? [inferIndustryFromRole(role)] : [])
-      : rawIndustries;
+    const inferred = rawIndustries.length === 0 && role ? inferIndustryFromRole(role) : null;
+    const inferredIndustries = rawIndustries.length > 0 ? rawIndustries : (inferred ? [inferred] : []);
+
+    if (inferredIndustries.length === 0) {
+      setNoIndustry(true);
+      setLoading(false);
+      return;
+    }
+    setNoIndustry(false);
 
     const goals = {
       target_companies: user?.career_goals?.target_companies || user?.target_companies || [],
@@ -394,5 +401,5 @@ export function useCompanyRecs(user) {
 
   useEffect(() => { fetchRecs(); }, [fetchRecs]);
 
-  return { companies, loading, error, weeklyNewCount, refetch: fetchRecs };
+  return { companies, loading, error, noIndustry, weeklyNewCount, refetch: fetchRecs };
 }
