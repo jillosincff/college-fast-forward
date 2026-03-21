@@ -6,6 +6,27 @@ import ParentMessageComposer from './ParentMessageComposer';
 
 const FILTERS = ['All', 'Your Industry', 'Actively Helping', 'Recently Active'];
 
+const WAYS_TO_HELP_LABELS = {
+  'networking_intros': 'Introductions',
+  'intros': 'Introductions',
+  'introductions': 'Introductions',
+  'job_referrals': 'Job Referrals',
+  'referrals': 'Job Referrals',
+  'can_provide_referrals': 'Job Referrals',
+  'resume_review': 'Resume Review',
+  'career_advice': 'Career Advice',
+  'industry_insights': 'Industry Insights',
+  'mock_interviews': 'Mock Interviews',
+  'mentorship': 'Mentorship',
+  'networking': 'Networking Help',
+};
+
+function formatWaysToHelp(tags) {
+  if (!tags || tags.length === 0) return [];
+  const mapped = tags.map(tag => WAYS_TO_HELP_LABELS[tag.toLowerCase()] || tag.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  return [...new Set(mapped)].slice(0, 3);
+}
+
 function getInitials(name) {
   if (!name) return 'P';
   const parts = name.trim().split(' ');
@@ -22,16 +43,16 @@ function maskName(fullName) {
 
 const AVAILABILITY_CONFIG = {
   yes: { dot: '#22C55E', label: 'Happy to help' },
+  happy_to_help: { dot: '#22C55E', label: 'Happy to help' },
   occasionally: { dot: '#EAB308', label: 'Occasionally available' },
   not_now: { dot: '#9CA3AF', label: 'Not right now' },
+  not_right_now: { dot: '#9CA3AF', label: 'Not right now' },
+  unknown: { dot: '#D1D5DB', label: 'Availability unknown' },
 };
 
 function ParentCard({ parent, user, onMessage }) {
-  const availability = parent.intro_willingness || parent.introWillingness || 'yes';
-  const avail = AVAILABILITY_CONFIG[availability] || AVAILABILITY_CONFIG.yes;
-  const masked = maskName(parent.full_name);
-  const initials = getInitials(parent.full_name);
-  const canMessage = availability !== 'not_now';
+  const availability = parent.intro_willingness || 'unknown';
+  const canMessage = availability !== 'not_now' && availability !== 'not_right_now';
 
   return (
     <div style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 12, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -42,7 +63,13 @@ function ParentCard({ parent, user, onMessage }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{masked}</p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{parent.company || 'Company not listed'}</p>
+          {parent.company ? (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {parent.company}{parent.job_title ? ` · ${parent.job_title}` : ''}
+            </p>
+          ) : (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '2px 0 0', fontStyle: 'italic' }}>Profile incomplete</p>
+          )}
         </div>
       </div>
 
@@ -100,7 +127,8 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
       try {
         const res = await getDirectoryUsers({});
         const all = res?.data?.data || [];
-        setParents(all.filter(p => p.persona === 'parent' && p.full_name && p.company));
+        // Accept any parent with a name — backend already filtered
+        setParents(all.filter(p => p.full_name));
       } catch (e) {
         console.error('Directory load error:', e);
         setParents([]);
@@ -127,7 +155,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     const matchesSearch = !q || (p.full_name || '').toLowerCase().includes(q) || (p.company || '').toLowerCase().includes(q) || (p.industry || '').toLowerCase().includes(q);
     if (!matchesSearch) return false;
     if (filter === 'Your Industry') return (user?.target_industries || []).some(i => p.industry === i);
-    if (filter === 'Actively Helping') return (p.intro_willingness || p.introWillingness) === 'yes';
+    if (filter === 'Actively Helping') return p.intro_willingness === 'yes' || p.intro_willingness === 'happy_to_help';
     if (filter === 'Recently Active') return !!p.updated_date && (Date.now() - new Date(p.updated_date).getTime()) < 7 * 24 * 60 * 60 * 1000;
     return true;
   });
@@ -185,7 +213,17 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 text-[#E85D20] animate-spin" /></div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-xl p-12 border border-[#E0E0E0] text-center">
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666' }}>No parents found matching your search.</p>
+          {search || filter !== 'All' ? (
+            <>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 8 }}>No professionals found matching your search.</p>
+              <button onClick={() => { setSearch(''); setFilter('All'); }} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>Clear Search →</button>
+            </>
+          ) : (
+            <>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 8 }}>The network is growing every day.</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#999' }}>Be the first to connect with professionals in your field.</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
