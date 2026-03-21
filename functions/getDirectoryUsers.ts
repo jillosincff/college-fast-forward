@@ -1,16 +1,111 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+
+const TEST_NAMES = ['test', 'movie', 'demo', 'sample', 'fake'];
+const TEST_EMAIL_PATTERNS = ['test', 'demo'];
+
+function isTestAccount(u) {
+  const name = (u.full_name || u.first_name || '').toLowerCase().trim();
+  const email = (u.email || '').toLowerCase();
+  if (TEST_NAMES.some(t => name === t || name.startsWith(t + ' '))) return true;
+  if (TEST_EMAIL_PATTERNS.some(p => email.includes(p))) return true;
+  return false;
+}
+
+function getCompany(u) {
+  return u.company || u.current_company || u.employer || null;
+}
+
+function getIndustry(u) {
+  return u.industry || u.industry_category || null;
+}
+
+function hasMinimumData(u) {
+  const name = u.full_name || u.first_name;
+  return !!(name && (getCompany(u) || getIndustry(u) || u.onboarding_completed));
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // Verify user is authenticated
+
     const user = await base44.auth.me();
     if (!user) {
-      return Response.json({ 
-        error: 'Unauthorized',
-        details: 'You must be logged in to view the directory'
-      }, { status: 401 });
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Fetch all users - we'll filter server-side for max compatibility with old data
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
+
+    const directoryUsers = [];
+
+    for (const u of (allUsers || [])) {
+      // Must be a parent
+      const isParent = u.persona === 'parent' || u.roles?.includes('parent');
+      if (!isParent) continue;
+
+      // Must have a real name
+      const hasName = !!(u.full_name || u.first_name);
+      if (!hasName) continue;
+
+      // Exclude test accounts
+      if (isTestAccount(u)) continue;
+
+      // Must have at least company OR industry OR completed onboarding
+      if (!hasMinimumData(u)) continue;
+
+      const company = getCompany(u);
+      const industry = getIndustry(u);
+      const jobTitle = u.job_title || u.current_position || null;
+
+      // Availability — map all known field names/values
+      let availability = 'unknown';
+      const rawAvail = u.intro_willingness || u.intro_availability || u.open_to_intros || u.availability;
+      if (['yes', 'happy_to_help', 'open', true, 'true', '1'].includes(rawAvail)) availability = 'yes';
+      else if (['occasionally', 'sometimes', 'maybe'].includes(rawAvail)) availability = 'occasionally';
+      else if (['no', 'not_now', 'not_right_now', false, 'false', '0'].includes(rawAvail)) availability = 'not_now';
+
+      // Ways to help — check all known field names
+      const waysToHelp = u.ways_to_help || u.expertise_areas || u.help_categories || [];
+
+      let fullName = u.full_name;
+      if (!fullName || fullName.includes('@')) {
+        const parts = [u.first_name, u.last_name].filter(Boolean);
+        fullName = parts.length > 0 ? parts.join(' ') : (u.email || '').split('@')[0];
+      }
+
+      directoryUsers.push({
+        id: u.id,
+        email: u.email,
+        full_name: fullName,
+        first_name: u.first_name || fullName.split(' ')[0] || '',
+        last_name: u.last_name || '',
+        persona: 'parent',
+        company,
+        industry,
+        job_title: jobTitle,
+        linkedin_url: u.linkedin_url || '',
+        ways_to_help: waysToHelp,
+        intro_willingness: availability,
+        is_founding_member: u.is_founding_member || false,
+        onboarding_completed: u.onboarding_completed || false,
+        profile_image_url: u.profile_image_url || '',
+        updated_date: u.updated_date,
+      });
+    }
+
+    console.log(`Directory: returning ${directoryUsers.length} parents`);
+
+    return Response.json({
+      success: true,
+      data: directoryUsers,
+      count: directoryUsers.length,
+    });
+
+  } catch (error) {
+    console.error('getDirectoryUsers error:', error);
+    return Response.json({ error: 'Failed to load directory', details: error.message }, { status: 500 });
+  }
+});
     }
 
     // Fetch users in batches of 500 to get all onboarded users
