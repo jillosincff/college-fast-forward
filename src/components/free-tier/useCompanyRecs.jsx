@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
 
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour — reflects new parent joins quickly
-const MIN_SKELETON_MS = 400;
+const CACHE_TTL_MS = 60 * 60 * 1000;
+const MIN_SKELETON_MS = 600;
+const SEARCH_TIMEOUT = 12000;
 
-// In-memory cache keyed by studentId
 const memCache = {};
 
 function inferIndustryFromRole(role) {
@@ -324,26 +325,18 @@ export function useCompanyRecs(user) {
 
     const rawIndustries = user?.career_goals?.industries?.length > 0 ? user.career_goals.industries
       : user?.target_industries?.length > 0 ? user.target_industries : [];
-
     const role = user?.career_goals?.role || user?.target_role || '';
     const inferred = rawIndustries.length === 0 && role ? inferIndustryFromRole(role) : null;
-    const inferredIndustries = rawIndustries.length > 0 ? rawIndustries : (inferred ? [inferred] : []);
+    const industries = rawIndustries.length > 0 ? rawIndustries : (inferred ? [inferred] : []);
 
-    if (inferredIndustries.length === 0) {
+    if (industries.length === 0 && !role) {
       setNoIndustry(true);
       setLoading(false);
       return;
     }
     setNoIndustry(false);
 
-    const goals = {
-      target_companies: user?.career_goals?.target_companies || user?.target_companies || [],
-      industries: inferredIndustries,
-      role,
-      university: user?.school || user?.university || '',
-    };
-
-    const cacheKey = `network_recs_${user.id || user.email}_${JSON.stringify(goals.industries)}_${JSON.stringify(goals.target_companies)}`;
+    const cacheKey = `recs_${user.id || user.email}_${JSON.stringify(industries)}_${role}`;
     const now = Date.now();
     const cached = memCache[cacheKey];
     if (cached && (now - cached.ts < CACHE_TTL_MS)) {
@@ -355,28 +348,30 @@ export function useCompanyRecs(user) {
     setLoading(true);
     setError(false);
     setCompanies(null);
-
     const startTime = Date.now();
 
-    // Hard cap: 2s max skeleton time
-    const maxTimer = setTimeout(async () => {
-      const fallback = await getGapFillCompanies(goals, [], 3);
-      fallback.forEach(c => { c.why_recommended = generateWhyRecommended(c, goals); });
-      setCompanies(fallback);
-      setLoading(false);
-    }, 2000);
+    const goals = {
+      role,
+      industries,
+      target_companies: user?.career_goals?.target_companies || user?.target_companies || [],
+      locations: user?.career_goals?.locations || user?.location_preferences || [],
+      company_size_preference: user?.career_goals?.company_size_preference || ['large', 'mid', 'startup'],
+    };
 
     try {
-      // Fetch weekly new parent count in parallel
-      const [results, allRecentUsers] = await Promise.all([
-        getNetworkFirstRecommendations(goals, user.id),
-        base44.entities.User.filter({ persona: 'parent' }, '-created_date', 20).catch(() => []),
+      const res = await Promise.race([
+        getFreeTierCompanyRecs({ career_goals: goals }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), SEARCH_TIMEOUT)),
       ]);
 
-      clearTimeout(maxTimer);
+      const results = res?.data?.companies || [];
 
-      const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const weeklyCount = allRecentUsers.filter(u => u.created_date > oneWeekAgo).length;
+      // Fetch weekly new parent count in parallel
+      const weeklyCount = await base44.entities.User.filter({ persona: 'parent' }, '-created_date', 20)
+        .then(users => {
+          const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+          return users.filter(u => u.created_date > oneWeekAgo).length;
+        }).catch(() => 0);
 
       memCache[cacheKey] = { data: results, ts: now, weeklyCount };
 
@@ -388,16 +383,14 @@ export function useCompanyRecs(user) {
       setCompanies(results);
       setWeeklyNewCount(weeklyCount);
     } catch (err) {
-      clearTimeout(maxTimer);
-      console.error('Network-first recs failed:', err.message);
-      const fallback = await getGapFillCompanies(goals, [], 3).catch(() => []);
-      fallback.forEach(c => { c.why_recommended = generateWhyRecommended(c, goals); });
+      console.error('getFreeTierCompanyRecs failed:', err.message);
+      const fallback = await getGapFillCompanies({ industries }, [], 3).catch(() => []);
       setCompanies(fallback.length > 0 ? fallback : null);
       setError(fallback.length === 0);
     } finally {
       setLoading(false);
     }
-  }, [user?.email, user?.id, JSON.stringify(user?.career_goals)]);
+  }, [user?.email, user?.id, JSON.stringify(user?.career_goals), user?.target_role, JSON.stringify(user?.target_industries)]);
 
   useEffect(() => { fetchRecs(); }, [fetchRecs]);
 
