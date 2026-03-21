@@ -53,6 +53,9 @@ const AVAILABILITY_CONFIG = {
 function ParentCard({ parent, user, onMessage }) {
   const availability = parent.intro_willingness || 'unknown';
   const canMessage = availability !== 'not_now' && availability !== 'not_right_now';
+  const avail = AVAILABILITY_CONFIG[availability] || AVAILABILITY_CONFIG.unknown;
+  const masked = maskName(parent.full_name);
+  const initials = getInitials(parent.full_name);
 
   return (
     <div style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 12, padding: 20, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: 12 }}>
