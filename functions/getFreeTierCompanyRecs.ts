@@ -82,18 +82,17 @@ async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, s
   // Include all parents/alumni with a company set, unless explicitly opted out
   const eligible = allUsers.filter(u => {
     if (u.persona !== 'parent' && u.persona !== 'alumni') return false;
-    // Skip only if they've explicitly opted out
     if (u.show_in_directory === false || u.directory_visible === false || u.is_directory_visible === false) return false;
     const company = (u.company || u.current_company || '').trim();
     if (!company) return false;
     const uIndustry = (typeof u.industry === 'string' ? u.industry : Array.isArray(u.expertise_areas) ? u.expertise_areas.join(' ') : (u.expertise_areas || '')).toLowerCase();
     const uCompany = company.toLowerCase();
-    // Broad industry match — check any keyword overlap
     const industryKeywords = industriesLower.flatMap(i => i.toLowerCase().split(/[,&\s]+/).filter(w => w.length > 3));
     const industryMatch = industriesLower.length === 0 || industryKeywords.some(kw => uIndustry.includes(kw));
     const companyMatch = companiesLower.some(c => c && uCompany.includes(c));
     return industryMatch || companyMatch;
   });
+  console.log('Eligible CFF members:', eligible.length, eligible.map(u => ({ name: u.full_name, company: u.company, industry: u.industry })));
 
   // Group by company
   const companyMap = {};
