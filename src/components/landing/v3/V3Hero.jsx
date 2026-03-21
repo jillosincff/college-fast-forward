@@ -123,8 +123,7 @@ export default function V3Hero({ onCTA }) {
               {Array.isArray(card.body) ? card.body.map((para, pi) => (
                 <p key={pi} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#AAAAAA', lineHeight: '22px', margin: pi === 0 ? '0 0 12px' : 0 }}>{para}</p>
               )) : (
-              <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#888888', lineHeight: 1.6, margin: 0 }}>
-              </p>
+                <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#888888', lineHeight: 1.6, margin: 0 }}>{card.body}</p>
               )}
             </div>
           ))}
