@@ -26,7 +26,7 @@ const GRAD_YEARS = ['2025', '2026', '2027', '2028', '2029', '2030'];
 const BTN = { idle: 'idle', saving: 'saving', saved: 'saved', error: 'error' };
 
 export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSaved, onTabChange }) {
-  const { companies: aiCompanies, loading: recsLoading, error: recsError, refetch: refetchRecs } = useCompanyRecs(user);
+  const { companies: aiCompanies, loading: recsLoading, error: recsError, weeklyNewCount, refetch: refetchRecs } = useCompanyRecs(user);
   const [role, setRole] = useState('');
   const [industries, setIndustries] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -328,6 +328,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
               onOpenUpgrade={onOpenUpgrade}
               user={user}
               isFastIQ={false}
+              weeklyNewCount={weeklyNewCount}
               dark={false}
             />
             <button
