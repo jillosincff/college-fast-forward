@@ -57,7 +57,7 @@ export default function V3Hero({ onCTA }) {
             The power of your network.
           </p>
           <p className="hf" style={{ animationDelay: '550ms', fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>
-            The precision of AI.
+            The intelligence of AI.
           </p>
           <p className="hf8" style={{ animationDelay: '700ms', fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 28px)', fontStyle: 'italic', fontWeight: 400, color: '#E85D20', margin: 0 }}>
             Your student's competitive advantage.
@@ -96,8 +96,8 @@ export default function V3Hero({ onCTA }) {
             {
               Icon: Zap,
               label: 'FastIQ Provides',
-              title: 'The speed.',
-              body: 'AI handles the research, tailoring, and follow-up that usually takes hundreds of hours.',
+              title: 'The intelligence.',
+              body: 'FastIQ is your student\'s 24/7 AI-powered career center — and it never closes.\n\nIt proactively scouts opportunities, researches company intelligence, and finds alumni connections across the entire web. And its most powerful feature: for every job your student targets, FastIQ creates an ATS-optimized resume tailored to that specific role in 60 seconds — a service that typically costs hundreds of dollars.',
               delay: '2000ms',
             },
           ].map((card, i) => (
