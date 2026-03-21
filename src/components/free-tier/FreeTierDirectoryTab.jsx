@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Loader2, Linkedin } from 'lucide-react';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
+import { base44 } from '@/api/base44Client';
 import ParentMessageComposer from './ParentMessageComposer';
 
 const FILTERS = ['All', 'Your Industry', 'Actively Helping', 'Recently Active'];
@@ -113,7 +114,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     if (!user?.email) return;
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    import('@/api/base44Client').then(({ base44 }) => base44.entities.Message.filter({ sender_email: user.email, message_type: 'directory_initial' }))
+    base44.entities.Message.filter({ sender_email: user.email, message_type: 'directory_initial' })
       .then(msgs => {
         const thisMonth = (msgs || []).filter(m => m.created_date >= monthStart);
         const uniqueRecipients = new Set(thisMonth.map(m => m.recipient_email));
