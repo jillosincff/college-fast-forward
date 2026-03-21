@@ -71,10 +71,6 @@ Return exactly 5 companies as a JSON array.`;
 
 async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, studentSchool) {
   const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
-  console.log('Total users fetched:', allUsers.length);
-  const healthcareUsers = allUsers.filter(u => (u.persona === 'parent' || u.persona === 'alumni') && (u.industry || '').toLowerCase().includes('health'));
-  console.log('Healthcare parent/alumni count:', healthcareUsers.length, healthcareUsers.slice(0,3).map(u => ({ industry: u.industry, company: u.company, show_in_directory: u.show_in_directory, directory_visible: u.directory_visible })));
-
   const industriesLower = industriesArr.map(i => i.toLowerCase());
   const companiesLower = targetCompaniesArr.map(c => c.toLowerCase());
   const schoolWord = (studentSchool || '').toLowerCase().split(' ')[0];
@@ -92,7 +88,7 @@ async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, s
     const companyMatch = companiesLower.some(c => c && uCompany.includes(c));
     return industryMatch || companyMatch;
   });
-  console.log('Eligible CFF members:', eligible.length, eligible.map(u => ({ name: u.full_name, company: u.company, industry: u.industry })));
+  console.log('Eligible CFF members:', eligible.length, eligible.filter(u => u.company || u.current_company).map(u => u.company || u.current_company));
 
   // Group by company
   const companyMap = {};
@@ -180,7 +176,10 @@ function mergeAndRank(external, internal, sizePref) {
   }
 
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, 5);
+  // Always keep top 5 external + any CFF-only companies that didn't overlap
+  const top5 = scored.slice(0, 5);
+  const cffOnly = scored.slice(5).filter(c => c.cff_data && c.cff_data.cff_connection_count > 0);
+  return [...top5, ...cffOnly];
 }
 
 Deno.serve(async (req) => {
