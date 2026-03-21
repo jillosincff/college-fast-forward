@@ -76,13 +76,16 @@ async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, s
   const companiesLower = targetCompaniesArr.map(c => c.toLowerCase());
   const schoolWord = (studentSchool || '').toLowerCase().split(' ')[0];
 
-  // Only include users who have opted into directory visibility
+  // Include all parents/alumni with a company set, unless explicitly opted out
   const eligible = allUsers.filter(u => {
     if (u.persona !== 'parent' && u.persona !== 'alumni') return false;
-    if (!u.show_in_directory && !u.directory_visible && !u.is_directory_visible) return false;
+    // Skip only if they've explicitly opted out
+    if (u.show_in_directory === false || u.directory_visible === false || u.is_directory_visible === false) return false;
+    const company = (u.company || u.current_company || '').trim();
+    if (!company) return false;
     const uIndustry = (typeof u.industry === 'string' ? u.industry : Array.isArray(u.expertise_areas) ? u.expertise_areas.join(' ') : (u.expertise_areas || '')).toLowerCase();
-    const uCompany = (u.company || u.current_company || '').toLowerCase();
-    const industryMatch = industriesLower.some(i => uIndustry.includes(i.split(',')[0].trim()));
+    const uCompany = company.toLowerCase();
+    const industryMatch = industriesLower.length === 0 || industriesLower.some(i => uIndustry.includes(i.split(',')[0].trim().toLowerCase().substring(0, 8)));
     const companyMatch = companiesLower.some(c => c && uCompany.includes(c));
     return industryMatch || companyMatch;
   });
