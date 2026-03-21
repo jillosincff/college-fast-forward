@@ -7,25 +7,28 @@ import ParentMessageComposer from './ParentMessageComposer';
 const FILTERS = ['All', 'Your Industry', 'Actively Helping', 'Recently Active'];
 
 const WAYS_TO_HELP_LABELS = {
-  'networking_intros': 'Introductions',
-  'intros': 'Introductions',
-  'introductions': 'Introductions',
-  'job_referrals': 'Job Referrals',
-  'referrals': 'Job Referrals',
-  'can_provide_referrals': 'Job Referrals',
-  'resume_review': 'Resume Review',
-  'career_advice': 'Career Advice',
-  'industry_insights': 'Industry Insights',
-  'mock_interviews': 'Mock Interviews',
-  'mentorship': 'Mentorship',
-  'networking': 'Networking Help',
+  networking_intros: 'Introductions',
+  intros: 'Introductions',
+  introductions: 'Introductions',
+  job_referrals: 'Job Referrals',
+  referrals: 'Job Referrals',
+  can_provide_referrals: 'Job Referrals',
+  resume_review: 'Resume Review',
+  career_advice: 'Career Advice',
+  industry_insights: 'Industry Insights',
+  mock_interviews: 'Mock Interviews',
+  mentorship: 'Mentorship',
+  networking: 'Networking Help',
 };
 
-function formatWaysToHelp(tags) {
-  if (!tags || tags.length === 0) return [];
-  const mapped = tags.map(tag => WAYS_TO_HELP_LABELS[tag.toLowerCase()] || tag.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
-  return [...new Set(mapped)].slice(0, 3);
-}
+const AVAILABILITY_CONFIG = {
+  yes: { dot: '#22C55E', label: 'Happy to help' },
+  happy_to_help: { dot: '#22C55E', label: 'Happy to help' },
+  occasionally: { dot: '#EAB308', label: 'Occasionally available' },
+  not_now: { dot: '#9CA3AF', label: 'Not right now' },
+  not_right_now: { dot: '#9CA3AF', label: 'Not right now' },
+  unknown: { dot: '#D1D5DB', label: 'Availability unknown' },
+};
 
 function getInitials(name) {
   if (!name) return 'P';
@@ -41,16 +44,7 @@ function maskName(fullName) {
   return `${parts[0]} ${parts[parts.length - 1][0]}.`;
 }
 
-const AVAILABILITY_CONFIG = {
-  yes: { dot: '#22C55E', label: 'Happy to help' },
-  happy_to_help: { dot: '#22C55E', label: 'Happy to help' },
-  occasionally: { dot: '#EAB308', label: 'Occasionally available' },
-  not_now: { dot: '#9CA3AF', label: 'Not right now' },
-  not_right_now: { dot: '#9CA3AF', label: 'Not right now' },
-  unknown: { dot: '#D1D5DB', label: 'Availability unknown' },
-};
-
-function ParentCard({ parent, user, onMessage }) {
+function ParentCard({ parent, onMessage }) {
   const availability = parent.intro_willingness || 'unknown';
   const canMessage = availability !== 'not_now' && availability !== 'not_right_now';
   const avail = AVAILABILITY_CONFIG[availability] || AVAILABILITY_CONFIG.unknown;
@@ -70,14 +64,16 @@ function ParentCard({ parent, user, onMessage }) {
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {parent.company}{parent.job_title ? ` · ${parent.job_title}` : ''}
             </p>
+          ) : parent.industry ? (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '2px 0 0' }}>{parent.industry}</p>
           ) : (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '2px 0 0', fontStyle: 'italic' }}>Profile incomplete</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '2px 0 0', fontStyle: 'italic' }}>Parent</p>
           )}
         </div>
       </div>
 
       {/* Industry pill */}
-      {parent.industry && (
+      {parent.industry && parent.company && (
         <span style={{ display: 'inline-block', background: '#FFF5F0', color: '#E85D20', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100, border: '1px solid #FDDBC8', alignSelf: 'flex-start' }}>
           {parent.industry}
         </span>
@@ -130,7 +126,6 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
       try {
         const res = await getDirectoryUsers({});
         const all = res?.data?.data || [];
-        // Accept any parent with a name — backend already filtered
         setParents(all.filter(p => p.full_name));
       } catch (e) {
         console.error('Directory load error:', e);
@@ -155,7 +150,10 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
 
   const filtered = parents.filter(p => {
     const q = search.toLowerCase();
-    const matchesSearch = !q || (p.full_name || '').toLowerCase().includes(q) || (p.company || '').toLowerCase().includes(q) || (p.industry || '').toLowerCase().includes(q);
+    const matchesSearch = !q ||
+      (p.full_name || '').toLowerCase().includes(q) ||
+      (p.company || '').toLowerCase().includes(q) ||
+      (p.industry || '').toLowerCase().includes(q);
     if (!matchesSearch) return false;
     if (filter === 'Your Industry') return (user?.target_industries || []).some(i => p.industry === i);
     if (filter === 'Actively Helping') return p.intro_willingness === 'yes' || p.intro_willingness === 'happy_to_help';
@@ -234,7 +232,6 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
             <ParentCard
               key={p.id}
               parent={p}
-              user={user}
               onMessage={(parent) => {
                 if (isFree && monthlyCount >= FREE_LIMIT) { onOpenUpgrade(); return; }
                 setSelectedParent(parent);
