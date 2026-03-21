@@ -136,7 +136,7 @@ function CompanyCard({ company, onTabChange, onOpenUpgrade, isFastIQ, user, dark
   );
 }
 
-export default function AICompanyCards({ companies, loading, error, onRefetch, onTabChange, onOpenUpgrade, isFastIQ, user, weeklyNewCount, dark = true }) {
+export default function AICompanyCards({ companies, loading, error, noIndustry, onRefetch, onTabChange, onOpenUpgrade, isFastIQ, user, weeklyNewCount, dark = true }) {
   const school = user?.school || user?.university || 'your school';
   const isAnyFallback = companies?.every(c => c.gap_fill || c.is_fallback);
 
@@ -149,6 +149,25 @@ export default function AICompanyCards({ companies, loading, error, onRefetch, o
         <div className="grid md:grid-cols-3 gap-4">
           <SkeletonCard dark={dark} /><SkeletonCard dark={dark} /><SkeletonCard dark={dark} />
         </div>
+      </div>
+    );
+  }
+
+  if (noIndustry) {
+    return (
+      <div style={{ background: dark ? '#1A1A1A' : '#F9F9F9', border: `1px solid ${dark ? '#2A2A2A' : '#E0E0E0'}`, borderRadius: 12, padding: 24, textAlign: 'center' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: dark ? '#fff' : '#1A1A1A', marginBottom: 8 }}>
+          We need a bit more to find the right matches.
+        </p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: dark ? '#888' : '#666', marginBottom: 20, lineHeight: 1.6 }}>
+          Tell us what industry you're interested in and we'll find companies with CFF connections in your field.
+        </p>
+        <button
+          onClick={() => onTabChange?.('career_goals')}
+          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
+        >
+          Update Career Goals →
+        </button>
       </div>
     );
   }

@@ -1,5 +1,28 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
+function inferIndustryFromRole(role) {
+  if (!role) return null;
+  const r = role.toLowerCase();
+  const map = [
+    { k: ['nurse','nursing','rn ','lpn','cna','physical therapist','occupational therapist','physician','doctor','medical','healthcare','hospital','clinical','pharmacist','pharmacy','surgeon','dentist','dental','radiologist','speech therapist','respiratory','paramedic','emt ','health','patient care'], v: 'Healthcare & Pharmaceuticals' },
+    { k: ['investment banking','banker','finance','financial','accounting','accountant','cpa','portfolio','wealth management','private equity','hedge fund','trading','trader','actuary','insurance'], v: 'Finance & Insurance' },
+    { k: ['software','engineer','developer','coding','programming','data science','data scientist','machine learning','product manager','ux ','ui ','cyber','devops','cloud','tech','information technology'], v: 'Technology, Information & Media' },
+    { k: ['marketing','brand','advertising','social media','content','public relations','communications','digital marketing','seo','copywriter','creative'], v: 'Advertising & PR' },
+    { k: ['sports','entertainment','music','film',' tv ','television','journalism','broadcast','athletic','coaching','talent agent'], v: 'Sports & Entertainment' },
+    { k: ['consulting','consultant','strategy','management consulting','advisory'], v: 'Professional Services' },
+    { k: ['teacher','teaching','education','school','professor','tutor','curriculum','instructional'], v: 'Education & Training' },
+    { k: ['real estate','property','construction','architecture','contractor'], v: 'Construction & Agriculture' },
+    { k: ['retail','consumer goods','merchandise','buying','fashion','apparel','ecommerce','e-commerce'], v: 'Retail & Consumer Goods' },
+    { k: ['law','lawyer','attorney','legal','paralegal','litigation','compliance'], v: 'Professional Services' },
+    { k: ['government','federal','policy','public sector','nonprofit','non-profit','ngo','advocacy'], v: 'Government & Public Sector' },
+    { k: ['logistics','supply chain','transportation','shipping','warehouse','procurement'], v: 'Transportation & Logistics' },
+  ];
+  for (const { k, v } of map) {
+    if (k.some(kw => r.includes(kw))) return v;
+  }
+  return null;
+}
+
 async function getExternalRecs(base44, role, industriesStr, locationsStr, primarySize, secondarySize, existingTargets) {
   const prompt = `You are a career research assistant helping a college student find companies actively hiring right now.
 
@@ -163,9 +186,19 @@ Deno.serve(async (req) => {
     const goals = body.career_goals || user.career_goals || {};
 
     // Apply fallback defaults
-    const role = goals.role || 'entry-level roles';
-    const industriesArr = (goals.industries?.length > 0) ? goals.industries
-      : (user.target_industries?.length > 0) ? user.target_industries : ['general business'];
+    const role = goals.role || user.target_role || 'entry-level roles';
+
+    // Infer industry from role if none saved
+    let rawIndustries = goals.industries?.length > 0 ? goals.industries
+      : user.target_industries?.length > 0 ? user.target_industries : [];
+    if (rawIndustries.length === 0) {
+      const inferred = inferIndustryFromRole(role);
+      if (inferred) {
+        rawIndustries = [inferred];
+        console.log(`Inferred industry "${inferred}" from role "${role}"`);
+      }
+    }
+    const industriesArr = rawIndustries.length > 0 ? rawIndustries : ['general business'];
     const locationsArr = (goals.locations?.length > 0) ? goals.locations
       : (user.location_preferences?.length > 0) ? user.location_preferences : ['United States'];
     const targetCompaniesArr = goals.target_companies || user.target_companies || [];
