@@ -37,11 +37,17 @@ Deno.serve(async (req) => {
     const isGator = persona === 'gator' || persona === 'student';
 
     // Anti-spam via shared helper
-    const canSendResult = await base44.functions.invoke('emailHelpers', {
-      action: 'canSendEmail', userEmail, userId, emailType: 'welcome'
-    });
-    if (!canSendResult.data?.canSend) {
-      return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
+    let canSend = true;
+    try {
+      const canSendResult = await base44.asServiceRole.functions.invoke('emailHelpers', {
+        action: 'canSendEmail', userEmail, userId, emailType: 'welcome'
+      });
+      canSend = canSendResult.data?.canSend !== false;
+      if (!canSend) {
+        return Response.json({ success: true, skipped: true, reason: canSendResult.data?.reason || 'Rate limited' });
+      }
+    } catch (e) {
+      console.log('emailHelpers check failed (non-critical), continuing:', e.message);
     }
 
     // ── Fetch live stats and matched question ──
