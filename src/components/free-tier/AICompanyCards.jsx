@@ -137,6 +137,10 @@ function CompanyCard({ company, onTabChange, onOpenUpgrade, isFastIQ, user, dark
 }
 
 export default function AICompanyCards({ companies, loading, error, noIndustry, onRefetch, onTabChange, onOpenUpgrade, isFastIQ, user, weeklyNewCount, dark = true }) {
+  const role = user?.career_goals?.role || user?.target_role || '';
+  const loadingMessage = role
+    ? `FastIQ is searching for ${role} opportunities right now...`
+    : 'FastIQ is finding companies that match your goals...';
   const school = user?.school || user?.university || 'your school';
   const isAnyFallback = companies?.every(c => c.gap_fill || c.is_fallback);
 
@@ -144,7 +148,7 @@ export default function AICompanyCards({ companies, loading, error, noIndustry, 
     return (
       <div>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999', marginBottom: 12 }}>
-          Finding warm paths in the CFF network...
+          {loadingMessage}
         </p>
         <div className="grid md:grid-cols-3 gap-4">
           <SkeletonCard dark={dark} /><SkeletonCard dark={dark} /><SkeletonCard dark={dark} />
