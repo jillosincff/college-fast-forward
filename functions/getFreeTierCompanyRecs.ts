@@ -85,7 +85,9 @@ async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, s
     if (!company) return false;
     const uIndustry = (typeof u.industry === 'string' ? u.industry : Array.isArray(u.expertise_areas) ? u.expertise_areas.join(' ') : (u.expertise_areas || '')).toLowerCase();
     const uCompany = company.toLowerCase();
-    const industryMatch = industriesLower.length === 0 || industriesLower.some(i => uIndustry.includes(i.split(',')[0].trim().toLowerCase().substring(0, 8)));
+    // Broad industry match — check any keyword overlap
+    const industryKeywords = industriesLower.flatMap(i => i.toLowerCase().split(/[,&\s]+/).filter(w => w.length > 3));
+    const industryMatch = industriesLower.length === 0 || industryKeywords.some(kw => uIndustry.includes(kw));
     const companyMatch = companiesLower.some(c => c && uCompany.includes(c));
     return industryMatch || companyMatch;
   });
