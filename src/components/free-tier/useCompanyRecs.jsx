@@ -4,7 +4,7 @@ import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const MIN_SKELETON_MS = 600;
-const SEARCH_TIMEOUT = 12000;
+const SEARCH_TIMEOUT = 30000;
 
 const memCache = {};
 
@@ -336,7 +336,8 @@ export function useCompanyRecs(user) {
     }
     setNoIndustry(false);
 
-    const cacheKey = `recs_${user.id || user.email}_${JSON.stringify(industries)}_${role}`;
+    const savedAt = user?.career_goals?.saved_at || '';
+    const cacheKey = `recs_${user.id || user.email}_${JSON.stringify(industries)}_${role}_${savedAt}`;
     const now = Date.now();
     const cached = memCache[cacheKey];
     if (cached && (now - cached.ts < CACHE_TTL_MS)) {
