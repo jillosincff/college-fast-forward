@@ -7,6 +7,29 @@ const MIN_SKELETON_MS = 400;
 // In-memory cache keyed by studentId
 const memCache = {};
 
+function inferIndustryFromRole(role) {
+  if (!role) return null;
+  const r = role.toLowerCase();
+  const map = [
+    { k: ['nurse','nursing','rn ','lpn','cna','physical therapist','occupational therapist','physician','doctor','medical','healthcare','hospital','clinical','pharmacist','pharmacy','surgeon','dentist','dental','radiologist','speech therapist','respiratory','paramedic','emt ','health','patient care'], v: 'Healthcare & Pharmaceuticals' },
+    { k: ['investment banking','banker','finance','financial','accounting','accountant','cpa','portfolio','wealth management','private equity','hedge fund','trading','trader','actuary','insurance'], v: 'Finance & Insurance' },
+    { k: ['software','engineer','developer','coding','programming','data science','data scientist','machine learning','product manager','ux ','ui ','cyber','devops','cloud','tech','information technology'], v: 'Technology, Information & Media' },
+    { k: ['marketing','brand','advertising','social media','content','public relations','communications','digital marketing','seo','copywriter','creative'], v: 'Advertising & PR' },
+    { k: ['sports','entertainment','music','film',' tv ','television','journalism','broadcast','athletic','coaching','talent agent'], v: 'Sports & Entertainment' },
+    { k: ['consulting','consultant','strategy','management consulting','advisory'], v: 'Professional Services' },
+    { k: ['teacher','teaching','education','school','professor','tutor','curriculum','instructional'], v: 'Education & Training' },
+    { k: ['real estate','property','construction','architecture','contractor'], v: 'Construction & Agriculture' },
+    { k: ['retail','consumer goods','merchandise','buying','fashion','apparel','ecommerce','e-commerce'], v: 'Retail & Consumer Goods' },
+    { k: ['law','lawyer','attorney','legal','paralegal','litigation','compliance'], v: 'Professional Services' },
+    { k: ['government','federal','policy','public sector','nonprofit','non-profit','ngo','advocacy'], v: 'Government & Public Sector' },
+    { k: ['logistics','supply chain','transportation','shipping','warehouse','procurement'], v: 'Transportation & Logistics' },
+  ];
+  for (const { k, v } of map) {
+    if (k.some(kw => r.includes(kw))) return v;
+  }
+  return null;
+}
+
 // ─── Company size classification ───
 const SIZE_MAP = {
   'notion': 'startup', 'linear': 'startup', 'figma': 'startup', 'canva': 'mid',
@@ -298,11 +321,18 @@ export function useCompanyRecs(user) {
   const fetchRecs = useCallback(async () => {
     if (!user?.email) return;
 
+    const rawIndustries = user?.career_goals?.industries?.length > 0 ? user.career_goals.industries
+      : user?.target_industries?.length > 0 ? user.target_industries : [];
+
+    const role = user?.career_goals?.role || user?.target_role || '';
+    const inferredIndustries = rawIndustries.length === 0 && role
+      ? (inferIndustryFromRole(role) ? [inferIndustryFromRole(role)] : [])
+      : rawIndustries;
+
     const goals = {
       target_companies: user?.career_goals?.target_companies || user?.target_companies || [],
-      industries: user?.career_goals?.industries || user?.target_industries || [],
-      locations: user?.career_goals?.locations || user?.location_preferences || [],
-      company_size_preference: user?.career_goals?.company_size_preference || ['large', 'mid', 'startup'],
+      industries: inferredIndustries,
+      role,
       university: user?.school || user?.university || '',
     };
 
