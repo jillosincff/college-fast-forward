@@ -10,7 +10,7 @@ import FreeTierCareerPathTab from '@/components/free-tier/FreeTierCareerPathTab'
 import FreeTierCareerCenterTab from '@/components/free-tier/FreeTierCareerCenterTab';
 import FreeTierCareerGoalsTab from '@/components/free-tier/FreeTierCareerGoalsTab';
 import FreeTierAlumniNetworkTab from '@/components/free-tier/FreeTierAlumniNetworkTab';
-import FreeTierDirectoryTab from '@/components/free-tier/FreeTierDirectoryTab.jsx';
+import FreeTierDirectoryTab from '@/components/free-tier/FreeTierDirectoryTab.js';
 import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
 import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeUpgradeModal';
