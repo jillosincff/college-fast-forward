@@ -80,7 +80,7 @@ async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, s
   const eligible = allUsers.filter(u => {
     if (u.persona !== 'parent' && u.persona !== 'alumni') return false;
     if (!u.show_in_directory && !u.directory_visible && !u.is_directory_visible) return false;
-    const uIndustry = (u.industry || u.expertise_areas || '').toLowerCase();
+    const uIndustry = (typeof u.industry === 'string' ? u.industry : Array.isArray(u.expertise_areas) ? u.expertise_areas.join(' ') : (u.expertise_areas || '')).toLowerCase();
     const uCompany = (u.company || u.current_company || '').toLowerCase();
     const industryMatch = industriesLower.some(i => uIndustry.includes(i.split(',')[0].trim()));
     const companyMatch = companiesLower.some(c => c && uCompany.includes(c));
@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
     // Run both queries in parallel — fault tolerant via allSettled
     const makeExternalCall = () => Promise.race([
       getExternalRecs(base44, role, industriesStr, locationsStr, primarySize, secondarySize, existingTargets),
-      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000)),
+      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 35000)),
     ]);
     const makeInternalCall = () => getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, studentSchool);
 
@@ -239,45 +239,32 @@ Deno.serve(async (req) => {
     console.log('External results count:', external.length);
     console.log('Internal CFF results count:', internal.length);
 
-    // If both failed, retry external once
-    let finalExternal = external;
-    if (external.length === 0 && internal.length === 0) {
-      console.warn('Both queries returned empty — retrying external once...');
-      await new Promise(r => setTimeout(r, 3000));
-      try { finalExternal = await makeExternalCall(); } catch (retryErr) {
-        console.error('Retry also failed:', retryErr.message);
-      }
-    }
+    const finalExternal = external;
 
-    // If still both empty, fall back to CompanyIntelCache
+    // If both failed, fall back to hardcoded industry-specific companies
     let companies;
     if (finalExternal.length === 0 && internal.length === 0) {
-      console.log('Both sources empty — falling back to CompanyIntelCache');
-      try {
-        const cached = await base44.asServiceRole.entities.CompanyIntelCache.list('-hiring_score', 10);
-        const industryMatches = cached.filter(c => {
-          if (!c.company_name) return false;
-          // no industry filter if no industries specified
-          if (industriesArr.length === 0) return true;
-          return true; // return all cached for now as fallback
-        }).slice(0, 5);
-        companies = industryMatches.map(c => ({
-          name: c.company_name,
-          industry: '',
-          size: null,
-          hiring_signal: c.hiring_signal || 'warm',
-          hiring_description: c.intel_summary || c.recommendation_text || '',
-          why_recommended: null,
-          careers_url: '',
-          score: c.hiring_score || 50,
-          cff_data: null,
-          is_fallback: true,
-        }));
-        console.log('Fallback from CompanyIntelCache returned:', companies.length, 'companies');
-      } catch (cacheErr) {
-        console.error('CompanyIntelCache fallback also failed:', cacheErr.message);
-        companies = [];
-      }
+      console.log('Both sources empty — using hardcoded industry fallback');
+      const HARDCODED = {
+        'Healthcare & Pharmaceuticals': [
+          { name: 'HCA Healthcare', industry: 'Healthcare', size: 'large', hiring_signal: 'hot', hiring_description: 'One of the largest hospital networks in the US, consistently hiring nurses across hundreds of facilities.' },
+          { name: 'CVS Health', industry: 'Healthcare', size: 'large', hiring_signal: 'hot', hiring_description: 'Hiring nurses and clinical staff for pharmacy and MinuteClinic locations nationwide.' },
+          { name: 'Mayo Clinic', industry: 'Healthcare', size: 'large', hiring_signal: 'warm', hiring_description: 'World-renowned medical center with strong nursing programs and career development.' },
+        ],
+        'Finance & Insurance': [
+          { name: 'JPMorgan', industry: 'Finance', size: 'large', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles nationwide.' },
+          { name: 'Goldman Sachs', industry: 'Finance', size: 'large', hiring_signal: 'warm', hiring_description: 'Summer analyst applications open for investment banking division.' },
+          { name: 'Deloitte', industry: 'Consulting', size: 'large', hiring_signal: 'hot', hiring_description: 'Hiring consultants and business analysts nationwide.' },
+        ],
+      };
+      const primaryIndustry = industriesArr[0] || '';
+      const fallbackList = HARDCODED[primaryIndustry] || [
+        { name: 'Deloitte', industry: 'Consulting', size: 'large', hiring_signal: 'hot', hiring_description: 'Hiring consultants and business analysts nationwide.' },
+        { name: 'Amazon', industry: 'Technology', size: 'large', hiring_signal: 'hot', hiring_description: 'Hiring across logistics, technology, and business operations.' },
+        { name: 'JPMorgan', industry: 'Finance', size: 'large', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles.' },
+      ];
+      companies = fallbackList.map(c => ({ ...c, why_recommended: `Actively hiring in ${primaryIndustry || 'your target industries'} right now`, cff_data: null, is_fallback: true }));
+      console.log('Hardcoded fallback returned:', companies.length, 'companies');
     } else {
       companies = mergeAndRank(finalExternal, internal, sizePref);
     }
