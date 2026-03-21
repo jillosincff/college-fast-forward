@@ -97,7 +97,10 @@ export default function V3Hero({ onCTA }) {
               Icon: Zap,
               label: 'FastIQ Provides',
               title: 'The intelligence.',
-              body: 'FastIQ is your student\'s 24/7 AI-powered career center — and it never closes.\n\nIt proactively scouts opportunities, researches company intelligence, and finds alumni connections across the entire web. And its most powerful feature: for every job your student targets, FastIQ creates an ATS-optimized resume tailored to that specific role in 60 seconds — a service that typically costs hundreds of dollars.',
+              body: [
+                'FastIQ is your student\'s 24/7 AI-powered career center — and it never closes.',
+                'It proactively scouts opportunities, researches company intelligence, and finds alumni connections across the entire web. And its most powerful feature: for every job your student targets, FastIQ creates an ATS-optimized resume tailored to that specific role in 60 seconds — a service that typically costs hundreds of dollars.',
+              ],
               delay: '2000ms',
             },
           ].map((card, i) => (
@@ -117,9 +120,12 @@ export default function V3Hero({ onCTA }) {
               <p style={{ fontFamily: playfair, fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 10px' }}>
                 {card.title}
               </p>
+              {Array.isArray(card.body) ? card.body.map((para, pi) => (
+                <p key={pi} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#AAAAAA', lineHeight: '22px', margin: pi === 0 ? '0 0 12px' : 0 }}>{para}</p>
+              )) : (
               <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#888888', lineHeight: 1.6, margin: 0 }}>
-                {card.body}
               </p>
+              )}
             </div>
           ))}
         </div>
