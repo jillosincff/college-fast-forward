@@ -4,7 +4,7 @@ import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const MIN_SKELETON_MS = 600;
-const SEARCH_TIMEOUT = 30000;
+const SEARCH_TIMEOUT = 45000;
 
 const memCache = {};
 
@@ -138,18 +138,23 @@ async function getGapFillCompanies(goals, excludeNames, count) {
     }
   } catch { /* fall through */ }
 
-  // Hardcoded last resort
+  // Hardcoded last resort — industry-aware
   const primaryIndustry = goals.industries?.[0];
   const HARDCODED = {
-    'Technology, Information & Media': [
-      { name: 'Google', industry: 'Technology', hiring_signal: 'hot', hiring_description: 'Actively hiring for entry-level roles across multiple teams.' },
-      { name: 'Microsoft', industry: 'Technology', hiring_signal: 'hot', hiring_description: 'Strong entry-level and internship programs across all divisions.' },
-      { name: 'Spotify', industry: 'Media & Tech', hiring_signal: 'warm', hiring_description: 'Hiring for marketing, product, and engineering roles.' },
+    'Healthcare & Pharmaceuticals': [
+      { name: 'HCA Healthcare', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'One of the largest hospital networks in the US, consistently hiring nurses and clinical staff.' },
+      { name: 'CVS Health', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'Hiring nurses and clinical staff for pharmacy and MinuteClinic locations nationwide.' },
+      { name: 'Mayo Clinic', industry: 'Healthcare', hiring_signal: 'warm', hiring_description: 'World-renowned medical center with strong nursing programs and career development.' },
     ],
     'Finance & Insurance': [
       { name: 'JPMorgan', industry: 'Finance', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles nationwide.' },
-      { name: 'Goldman Sachs', industry: 'Finance', hiring_signal: 'warm', hiring_description: 'Summer analyst applications open for investment banking division.' },
+      { name: 'Goldman Sachs', industry: 'Finance', hiring_signal: 'warm', hiring_description: 'Analyst programs open across investment banking and operations.' },
       { name: 'Deloitte', industry: 'Consulting', hiring_signal: 'hot', hiring_description: 'Hiring consultants and business analysts nationwide.' },
+    ],
+    'Technology, Information & Media': [
+      { name: 'Google', industry: 'Technology', hiring_signal: 'hot', hiring_description: 'Actively hiring for entry-level roles across multiple teams.' },
+      { name: 'Microsoft', industry: 'Technology', hiring_signal: 'hot', hiring_description: 'Strong entry-level and internship programs across all divisions.' },
+      { name: 'Salesforce', industry: 'Technology', hiring_signal: 'warm', hiring_description: 'Hiring for engineering, sales, and business operations roles.' },
     ],
     'Advertising & PR': [
       { name: 'Edelman', industry: 'PR', hiring_signal: 'hot', hiring_description: 'Actively hiring communications and PR associates.' },
@@ -160,11 +165,6 @@ async function getGapFillCompanies(goals, excludeNames, count) {
       { name: 'Live Nation', industry: 'Entertainment', hiring_signal: 'hot', hiring_description: 'Entry-level roles in events, marketing, and operations.' },
       { name: 'ESPN', industry: 'Sports Media', hiring_signal: 'warm', hiring_description: 'Hiring for content, production, and marketing roles.' },
       { name: 'Nike', industry: 'Sports & Consumer', hiring_signal: 'warm', hiring_description: 'Brand marketing and product roles for recent grads.' },
-    ],
-    'Healthcare & Pharmaceuticals': [
-      { name: 'Johnson & Johnson', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'Large rotational programs for recent graduates.' },
-      { name: 'CVS Health', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'Operations and management training programs nationwide.' },
-      { name: 'Pfizer', industry: 'Pharmaceuticals', hiring_signal: 'warm', hiring_description: 'Entry-level roles in research, sales, and operations.' },
     ],
     'Professional Services': [
       { name: 'PwC', industry: 'Accounting', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for audit, tax, and advisory.' },
@@ -179,7 +179,7 @@ async function getGapFillCompanies(goals, excludeNames, count) {
   };
   const fallback = HARDCODED[primaryIndustry] || [
     { name: 'Deloitte', industry: 'Consulting', hiring_signal: 'hot', hiring_description: 'Hiring consultants and business analysts nationwide.' },
-    { name: 'Google', industry: 'Technology', hiring_signal: 'hot', hiring_description: 'Actively hiring for entry-level roles across multiple teams.' },
+    { name: 'PwC', industry: 'Accounting', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for audit, tax, and advisory.' },
     { name: 'JPMorgan', industry: 'Finance', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles.' },
   ];
   const excludeLower = excludeNames.map(n => n.toLowerCase());

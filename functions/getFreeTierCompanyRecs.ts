@@ -221,7 +221,7 @@ Deno.serve(async (req) => {
     // Run both queries in parallel — fault tolerant via allSettled
     const makeExternalCall = () => Promise.race([
       getExternalRecs(base44, role, industriesStr, locationsStr, primarySize, secondarySize, existingTargets),
-      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 35000)),
+      new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 40000)),
     ]);
     const makeInternalCall = () => getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, studentSchool);
 
