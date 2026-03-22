@@ -1,5 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
+
+const searchingStyles = `
+  @keyframes orbPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.4); opacity: 0.2; }
+  }
+  @keyframes searchFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes dotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-6px); opacity: 1; }
+  }
+  .fastiq-orb-pulse { animation: orbPulse 1.5s ease-in-out infinite; }
+  .fastiq-search-text { animation: searchFadeIn 0.4s ease-in-out; }
+  .fastiq-dot { animation: dotBounce 1.2s ease-in-out infinite; }
+`;
+
+function FastIQSearchingAnimation({ role, industries }) {
+  const searchTerms = [
+    `Scanning job boards for ${role || industries?.[0] || 'your field'}...`,
+    'Checking hiring signals across 10,000+ companies...',
+    'Cross-referencing CFF network connections...',
+    'Finding warm paths in your target industries...',
+    'Analyzing real-time hiring data...',
+    'Almost ready...',
+  ];
+  const [currentTerm, setCurrentTerm] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTerm(prev => prev < searchTerms.length - 1 ? prev + 1 : prev);
+    }, 1400);
+    return () => clearInterval(interval);
+  }, []);
+  return (
+    <>
+      <style>{searchingStyles}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', gap: 16 }}>
+        <div style={{ position: 'relative', width: 64, height: 64 }}>
+          <div className="fastiq-orb-pulse" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(232,93,32,0.15)' }} />
+          <div style={{ position: 'absolute', inset: 8, borderRadius: '50%', background: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>⚡</div>
+        </div>
+        <p key={currentTerm} className="fastiq-search-text" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', textAlign: 'center', minHeight: 20, margin: 0 }}>
+          {searchTerms[currentTerm]}
+        </p>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {[0, 200, 400].map(delay => (
+            <span key={delay} className="fastiq-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', display: 'inline-block', animationDelay: `${delay}ms` }} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
 
 function SkeletonCard() {
   return (
@@ -243,22 +298,19 @@ function getHeaderCopy(tier1, tier2, tier3, role) {
 }
 
 export default function AICompanyCards({
-  companies, loading, error, noIndustry,
+  companies, loading, searching, error, noIndustry,
   onRefetch, onTabChange, onOpenUpgrade,
   isFastIQ, user, weeklyNewCount, dark = true,
 }) {
   const role = user?.career_goals?.role || user?.target_role || '';
 
   if (loading) {
+    // No fallback yet — show animated AI search indicator
     return (
-      <div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: dark ? '#999' : '#666', marginBottom: 12 }}>
-          {role ? `FastIQ is searching for ${role} opportunities right now...` : 'FastIQ is finding companies that match your goals...'}
-        </p>
-        <div className="grid md:grid-cols-3 gap-3">
-          <SkeletonCard /><SkeletonCard /><SkeletonCard />
-        </div>
-      </div>
+      <FastIQSearchingAnimation
+        role={role}
+        industries={user?.career_goals?.industries || user?.target_industries}
+      />
     );
   }
 
