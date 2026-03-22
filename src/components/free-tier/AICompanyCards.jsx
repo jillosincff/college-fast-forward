@@ -1,157 +1,181 @@
 import React from 'react';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
-const SIGNAL_CONFIG = {
-  hot:     { emoji: '🟢', label: 'Actively Hiring' },
-  warm:    { emoji: '🟡', label: 'Selective' },
-  cool:    { emoji: '🔴', label: 'Freeze' },
-  unknown: { emoji: '⚪', label: 'Signal Unknown' },
-};
-
-const WARM_PATH_BADGE = {
-  very_strong: { label: '🤝 Very Strong Warm Path', bg: '#14532D', color: '#fff' },
-  strong:      { label: '🤝 Warm Path Available',   bg: '#1A3A1A', color: '#4ADE80' },
-  moderate:    { label: '🤝 CFF Connection',         bg: '#1c2b1c', color: '#86efac' },
-  none:        { label: '📊 No CFF connections yet', bg: '#1e1e1e', color: '#888' },
-};
-
-const WARM_PATH_BADGE_LIGHT = {
-  very_strong: { label: '🤝 Very Strong Warm Path', bg: '#DCFCE7', color: '#14532D' },
-  strong:      { label: '🤝 Warm Path Available',   bg: '#F0FFF4', color: '#16A34A' },
-  moderate:    { label: '🤝 CFF Connection',         bg: '#F0FFF4', color: '#15803D' },
-  none:        { label: '📊 No CFF connections yet', bg: '#F5F5F5', color: '#888' },
-};
-
-function SkeletonCard({ dark }) {
-  const bg = dark ? '#2A2A2A' : '#E5E5E5';
-  const cardBg = dark ? '#1A1A1A' : '#F5F5F5';
+function SkeletonCard() {
   return (
-    <div style={{ background: cardBg, border: `1px solid ${dark ? '#2A2A2A' : '#E0E0E0'}`, borderRadius: 12, padding: 16 }}>
-      <div style={{ background: bg, borderRadius: 6, height: 18, width: '55%', marginBottom: 10 }} />
-      <div style={{ background: bg, borderRadius: 100, height: 22, width: '45%', marginBottom: 10 }} />
-      <div style={{ background: bg, borderRadius: 4, height: 12, width: '90%', marginBottom: 6 }} />
-      <div style={{ background: bg, borderRadius: 4, height: 12, width: '70%' }} />
+    <div style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 12, padding: 16 }}>
+      <div style={{ background: '#E5E5E5', borderRadius: 6, height: 18, width: '55%', marginBottom: 10 }} />
+      <div style={{ background: '#E5E5E5', borderRadius: 4, height: 12, width: '90%', marginBottom: 6 }} />
+      <div style={{ background: '#E5E5E5', borderRadius: 4, height: 12, width: '70%' }} />
     </div>
   );
 }
 
-function ConnectionLine({ company, school, dark }) {
-  const textColor = dark ? '#E85D20' : '#C2440F';
-  const lines = [];
+const SIGNAL_LABEL = {
+  hot: { emoji: '🟢', label: 'Actively Hiring' },
+  warm: { emoji: '🟡', label: 'Selective' },
+  cool: { emoji: '🔴', label: 'Freeze' },
+  unknown: null,
+};
 
-  if (company.alumni_count > 0 && company.school_match) {
-    lines.push(`🟠 ${company.alumni_count} ${school || 'school'} alumni work here`);
-  } else if (company.cff_connection_count > 0 && company.connection_type === 'alumni') {
-    lines.push(`🟠 ${company.cff_connection_count} CFF alumni work here`);
-  }
-
-  if (company.connection_type === 'parent' || company.connection_type === 'both') {
-    const parentCount = company.connection_type === 'both'
-      ? company.cff_connection_count - (company.alumni_count || 0)
-      : company.cff_connection_count;
-    const introText = company.open_to_intro ? ` — open to introductions` : '';
-    if (parentCount > 0) {
-      lines.push(`🟠 ${parentCount} CFF parent${parentCount > 1 ? 's' : ''}${introText}`);
-    }
-  }
-
-  if (lines.length === 0) return null;
-
-  return (
-    <div style={{ borderTop: `1px solid ${dark ? '#2A2A2A' : '#E5E5E5'}`, borderBottom: `1px solid ${dark ? '#2A2A2A' : '#E5E5E5'}`, margin: '10px 0', padding: '8px 0' }}>
-      {lines.map((line, i) => (
-        <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: textColor, margin: '2px 0', lineHeight: 1.5 }}>{line}</p>
-      ))}
-    </div>
-  );
-}
-
-function CompanyCard({ company, onTabChange, onOpenUpgrade, isFastIQ, user, dark }) {
-  const cardBg     = dark ? '#1A1A1A' : '#ffffff';
-  const cardBorder = dark ? '#2A2A2A' : '#E0E0E0';
-  const nameColor  = dark ? '#ffffff' : '#1A1A1A';
-  const descColor  = dark ? '#888888' : '#666666';
-  const whyColor   = dark ? '#999999' : '#888888';
+function TierCard({ company, tier, user, onTabChange, onOpenUpgrade, isFastIQ }) {
   const school = user?.school || user?.university || 'your school';
-  const hasCFF = company.cff_connection_count > 0;
-  const warmStrength = company.warm_path_strength || 'none';
-  const badgeCfg = (dark ? WARM_PATH_BADGE : WARM_PATH_BADGE_LIGHT)[warmStrength];
-  const sig = SIGNAL_CONFIG[company.hiring_signal] || SIGNAL_CONFIG.warm;
-  const borderColor = hasCFF ? '#E85D20' : cardBorder;
-
-  const handleWarmPathClick = () => {
-    if (isFastIQ) onTabChange?.('company_intel');
-    else onOpenUpgrade?.();
-  };
+  const sig = SIGNAL_LABEL[company.hiring_signal];
+  const borderColor = tier === 1 ? '#E85D20' : tier === 2 ? '#4F8CFF' : '#D0D0D0';
 
   return (
-    <div style={{ background: cardBg, border: `1px solid ${borderColor}`, borderRadius: 12, padding: 16, position: 'relative', display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {/* Warm path badge */}
-      <button
-        onClick={hasCFF ? handleWarmPathClick : undefined}
-        style={{
-          alignSelf: 'flex-start',
-          background: badgeCfg.bg, color: badgeCfg.color,
-          fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 100,
-          border: 'none', cursor: hasCFF ? 'pointer' : 'default',
-          minHeight: 'auto', fontFamily: "'DM Sans', sans-serif",
-        }}
-      >
-        {badgeCfg.label}
-      </button>
-
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+    <div style={{
+      background: '#fff',
+      border: '1px solid #E5E5E5',
+      borderLeft: `3px solid ${borderColor}`,
+      borderRadius: 10,
+      padding: 16,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+    }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
         <div>
-          <h3 style={{ fontWeight: 700, color: nameColor, fontSize: 15, margin: 0 }}>{company.name}</h3>
+          <p style={{ fontWeight: 700, fontSize: 15, color: '#1A1A1A', margin: 0 }}>{company.name}</p>
           {company.industry && (
-            <p style={{ fontSize: 11, color: whyColor, margin: '2px 0 0' }}>{company.industry}</p>
+            <p style={{ fontSize: 12, color: '#888', margin: '2px 0 0' }}>{company.industry}</p>
           )}
         </div>
-        {company.hiring_signal && company.hiring_signal !== 'unknown' && (
-          <span style={{ fontSize: 11, color: whyColor, whiteSpace: 'nowrap', paddingTop: 2 }}>
+        {sig && (
+          <span style={{ fontSize: 11, color: '#666', whiteSpace: 'nowrap', paddingTop: 2 }}>
             {sig.emoji} {sig.label}
           </span>
         )}
       </div>
 
+      {/* Hiring description */}
       {company.hiring_description && (
-        <p style={{ fontSize: 12, color: descColor, lineHeight: 1.5, margin: 0 }}>{company.hiring_description}</p>
+        <p style={{ fontSize: 12, color: '#555', lineHeight: 1.5, margin: 0 }}>{company.hiring_description}</p>
       )}
 
-      <ConnectionLine company={company} school={school} dark={dark} />
+      {/* CFF Connections block */}
+      {(company.cff_parent_count > 0 || company.school_alumni_count > 0) ? (
+        <div style={{ borderTop: '1px solid #F0F0F0', borderBottom: '1px solid #F0F0F0', padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {company.cff_parent_count > 0 && (
+            <p style={{ fontSize: 12, color: '#E85D20', margin: 0 }}>
+              🤝 {company.cff_parent_count} CFF parent{company.cff_parent_count > 1 ? 's' : ''} work here
+              {company.open_to_intro_count > 0 && ` — ${company.open_to_intro_count} open to intros`}
+            </p>
+          )}
+          {company.school_alumni_count > 0 && (
+            <p style={{ fontSize: 12, color: '#4F8CFF', margin: 0 }}>
+              🎓 {company.school_alumni_count} {school} alumni in the network
+            </p>
+          )}
+          {company.sample_roles?.length > 0 && (
+            <p style={{ fontSize: 11, color: '#888', margin: 0 }}>
+              {company.sample_roles.join(' · ')}
+            </p>
+          )}
+        </div>
+      ) : tier === 3 ? (
+        <div style={{ borderTop: '1px solid #F0F0F0', borderBottom: '1px solid #F0F0F0', padding: '8px 0' }}>
+          <p style={{ fontSize: 12, color: '#999', margin: 0, fontStyle: 'italic' }}>
+            👤 No CFF connections yet — be the first {school} student to build a path here.
+          </p>
+        </div>
+      ) : null}
 
+      {/* Why recommended */}
       {company.why_recommended && (
-        <p style={{ fontSize: 11, fontStyle: 'italic', color: dark ? '#E85D20' : '#C2440F', margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 11, color: '#C2440F', fontStyle: 'italic', margin: 0, lineHeight: 1.5 }}>
           {company.why_recommended}
         </p>
       )}
 
-      <button
-        onClick={() => onTabChange?.('company_intel')}
-        style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0 0', textAlign: 'left' }}
-      >
-        View Full Intel →
-      </button>
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 2 }}>
+        <button
+          onClick={() => onTabChange?.('company_intel')}
+          style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
+        >
+          View Full Intel →
+        </button>
+        {tier <= 2 && (company.cff_parent_count > 0 || company.school_alumni_count > 0) && (
+          isFastIQ ? (
+            <button
+              onClick={() => onTabChange?.('alumni_network')}
+              style={{ fontSize: 12, color: '#4F8CFF', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
+            >
+              See Who to Contact →
+            </button>
+          ) : (
+            <button
+              onClick={() => onOpenUpgrade?.()}
+              style={{ fontSize: 12, color: '#4F8CFF', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
+            >
+              🔒 See Who to Contact →
+            </button>
+          )
+        )}
+      </div>
     </div>
   );
 }
 
-export default function AICompanyCards({ companies, loading, error, noIndustry, onRefetch, onTabChange, onOpenUpgrade, isFastIQ, user, weeklyNewCount, dark = true }) {
+function TierSection({ tier, companies, label, subhead, user, onTabChange, onOpenUpgrade, isFastIQ }) {
+  if (!companies || companies.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>
+        {label}
+      </p>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '0 0 12px', lineHeight: 1.5 }}>
+        {subhead}
+      </p>
+      <div className="grid md:grid-cols-3 gap-3">
+        {companies.map(c => (
+          <TierCard
+            key={c.name}
+            company={c}
+            tier={tier}
+            user={user}
+            onTabChange={onTabChange}
+            onOpenUpgrade={onOpenUpgrade}
+            isFastIQ={isFastIQ}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function getHeaderCopy(tier1, tier2, tier3, role) {
+  const r = role || 'roles in your field';
+  if (tier1.length > 0) {
+    return `FastIQ found ${tier1.length} compan${tier1.length > 1 ? 'ies' : 'y'} actively hiring ${r}s where someone in the CFF network can open a door.`;
+  }
+  if (tier2.length > 0) {
+    const total = tier2.length;
+    return `${total} compan${total > 1 ? 'ies' : 'y'} in your field have CFF network connections.${tier3.length > 0 ? ` Plus ${tier3.length} actively hiring right now.` : ''}`;
+  }
+  if (tier3.length > 0) {
+    return `FastIQ found ${tier3.length} compan${tier3.length > 1 ? 'ies' : 'y'} actively hiring ${r}s right now. No CFF connections yet — but every parent who joins expands your warm path possibilities.`;
+  }
+  return `FastIQ is searching for ${r} opportunities right now.`;
+}
+
+export default function AICompanyCards({
+  companies, loading, error, noIndustry,
+  onRefetch, onTabChange, onOpenUpgrade,
+  isFastIQ, user, weeklyNewCount, dark = true,
+}) {
   const role = user?.career_goals?.role || user?.target_role || '';
-  const loadingMessage = role
-    ? `FastIQ is searching for ${role} opportunities right now...`
-    : 'FastIQ is finding companies that match your goals...';
-  const school = user?.school || user?.university || 'your school';
-  const isAnyFallback = companies?.every(c => c.gap_fill || c.is_fallback);
 
   if (loading) {
     return (
       <div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999', marginBottom: 12 }}>
-          {loadingMessage}
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: dark ? '#999' : '#666', marginBottom: 12 }}>
+          {role ? `FastIQ is searching for ${role} opportunities right now...` : 'FastIQ is finding companies that match your goals...'}
         </p>
-        <div className="grid md:grid-cols-3 gap-4">
-          <SkeletonCard dark={dark} /><SkeletonCard dark={dark} /><SkeletonCard dark={dark} />
+        <div className="grid md:grid-cols-3 gap-3">
+          <SkeletonCard /><SkeletonCard /><SkeletonCard />
         </div>
       </div>
     );
@@ -189,35 +213,59 @@ export default function AICompanyCards({ companies, loading, error, noIndustry, 
     );
   }
 
+  const tier1 = companies.filter(c => c.tier === 1);
+  const tier2 = companies.filter(c => c.tier === 2);
+  const tier3 = companies.filter(c => c.tier === 3);
+
+  const headerCopy = getHeaderCopy(tier1, tier2, tier3, role);
+
+  const wrapStyle = dark
+    ? { background: '#111', borderRadius: 12, padding: 20 }
+    : {};
+
   return (
-    <div>
-      {isAnyFallback && (
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontStyle: 'italic', color: '#999', marginBottom: 12 }}>
-          Showing general results for your industries — personalized AI matches coming soon.
+    <div style={wrapStyle}>
+      {/* Dynamic header */}
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: dark ? '#aaa' : '#666', marginBottom: 20, lineHeight: 1.5 }}>
+        {headerCopy}
+      </p>
+
+      <TierSection
+        tier={1}
+        companies={tier1}
+        label="YOUR STRONGEST OPPORTUNITIES"
+        subhead="Actively hiring AND someone in the network can open the door."
+        user={user}
+        onTabChange={onTabChange}
+        onOpenUpgrade={onOpenUpgrade}
+        isFastIQ={isFastIQ}
+      />
+      <TierSection
+        tier={2}
+        companies={tier2}
+        label="WARM PATHS IN YOUR FIELD"
+        subhead="People in the CFF network work here. A conversation could open the door."
+        user={user}
+        onTabChange={onTabChange}
+        onOpenUpgrade={onOpenUpgrade}
+        isFastIQ={isFastIQ}
+      />
+      <TierSection
+        tier={3}
+        companies={tier3}
+        label="ACTIVELY HIRING RIGHT NOW"
+        subhead="No CFF connections yet — but the opportunity is real. Be the first to build a path here."
+        user={user}
+        onTabChange={onTabChange}
+        onOpenUpgrade={onOpenUpgrade}
+        isFastIQ={isFastIQ}
+      />
+
+      {weeklyNewCount != null && weeklyNewCount > 0 && (
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: dark ? '#444' : '#aaa', marginTop: 8, textAlign: 'center', fontStyle: 'italic' }}>
+          <strong style={{ color: '#E85D20' }}>{weeklyNewCount} new connection{weeklyNewCount !== 1 ? 's' : ''}</strong> added to the network this week.
         </p>
       )}
-
-      <div className="grid md:grid-cols-3 gap-4">
-        {companies.slice(0, 3).map(company => (
-          <CompanyCard
-            key={company.name}
-            company={company}
-            onTabChange={onTabChange}
-            onOpenUpgrade={onOpenUpgrade}
-            isFastIQ={isFastIQ}
-            user={user}
-            dark={dark}
-          />
-        ))}
-      </div>
-
-      {/* Network growth message */}
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: dark ? '#555' : '#999', marginTop: 16, textAlign: 'center', fontStyle: 'italic' }}>
-        Every parent who joins CFF expands the warm path possibilities for every student.
-        {weeklyNewCount != null && weeklyNewCount > 0 && (
-          <> <strong style={{ color: '#E85D20' }}>{weeklyNewCount} new connection{weeklyNewCount !== 1 ? 's' : ''}</strong> added to the network this week.</>
-        )}
-      </p>
     </div>
   );
 }
