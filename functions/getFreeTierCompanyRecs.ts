@@ -70,7 +70,7 @@ Return exactly 5 companies as a JSON array.`;
 }
 
 async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, studentSchool) {
-  const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
+  const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 200);
   const industriesLower = industriesArr.map(i => i.toLowerCase());
   const companiesLower = targetCompaniesArr.map(c => c.toLowerCase());
   const schoolWord = (studentSchool || '').toLowerCase().split(' ')[0];
