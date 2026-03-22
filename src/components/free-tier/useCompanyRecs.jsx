@@ -437,14 +437,8 @@ export function useCompanyRecs(user) {
       return;
     }
 
-    // STEP 1: Show fallback IMMEDIATELY (<100ms) — student never stares at blank screen
-    const fallbackIndustries = industries.length > 0 ? industries : (inferred ? [inferred] : []);
-    const immediateFallback = await getGapFillCompanies({ industries: fallbackIndustries }, [], 3).catch(() => []);
-    if (immediateFallback.length > 0) {
-      setCompanies(immediateFallback);
-    }
-    setLoading(false); // fallback is showing — never block on spinner
-    setSearching(true); // subtle background indicator
+    setLoading(true);
+    setSearching(false);
     setError(false);
 
     const goals = {
@@ -455,7 +449,7 @@ export function useCompanyRecs(user) {
       company_size_preference: user?.career_goals?.company_size_preference || ['large', 'mid', 'startup'],
     };
 
-    // STEP 2: Run both functions in parallel — each is lightweight enough to stay within CPU limit
+    // Run both in parallel
     if (!inFlightRequests[cacheKey]) {
       inFlightRequests[cacheKey] = Promise.allSettled([
         getCFFNetworkMatchesFn({ career_goals: goals, university: user?.school || user?.university || '' }),
@@ -465,29 +459,30 @@ export function useCompanyRecs(user) {
           const network = networkRes.status === 'fulfilled' ? (networkRes.value?.data?.companies || []) : [];
           const jobs = jobsRes.status === 'fulfilled' ? (jobsRes.value?.data?.companies || []) : [];
           console.log(`✅ Network: ${network.length} companies, Jobs: ${jobs.length} companies`);
-          if (networkRes.status === 'rejected') console.error('Network fn failed:', networkRes.reason);
-          if (jobsRes.status === 'rejected') console.error('Jobs fn failed:', jobsRes.reason);
           return { data: mergeResults(network, jobs, goals, user?.school || '') };
         })
         .catch(err => {
-          console.error('Background search failed — fallback stays:', err);
+          console.error('Search failed:', err);
           return { data: null };
         })
         .finally(() => { delete inFlightRequests[cacheKey]; });
     }
 
     const { data: merged } = await inFlightRequests[cacheKey];
-    const results = merged?.companies?.length > 0 ? merged.companies : null;
+    let results = merged?.companies?.length > 0 ? merged.companies : null;
     const weeklyCount = merged?.weekly_new_count ?? 0;
 
-    // STEP 3: Silently replace fallback with real results when they arrive
-    if (results) {
-      console.log(`✅ Real results arrived — updating ${results.length} companies`);
+    // Last resort hardcoded fallback only if both sources returned nothing
+    if (!results) {
+      console.log('Both sources empty — using hardcoded fallback');
+      const fallbackIndustries = industries.length > 0 ? industries : (inferred ? [inferred] : []);
+      results = await getGapFillCompanies({ industries: fallbackIndustries, company_size_preference: goals.company_size_preference }, [], 5).catch(() => []);
+    }
+
+    if (results && results.length > 0) {
       memCache[cacheKey] = { data: results, ts: now, weeklyCount };
       setCompanies(results);
       setWeeklyNewCount(weeklyCount);
-    } else {
-      console.log('Background search empty — fallback stays');
     }
 
     setLoading(false);

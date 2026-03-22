@@ -19,42 +19,25 @@ const searchingStyles = `
   .fastiq-dot { animation: dotBounce 1.2s ease-in-out infinite; }
 `;
 
-function FastIQSearchingAnimation({ role, industries }) {
+function FastIQSearchingAnimation({ role, industries, user }) {
+  const location = user?.career_goals?.locations?.[0] || user?.location_preferences?.[0] || 'the US';
+  const size = user?.career_goals?.company_size_preference?.[0] || 'large';
+  const sizeLabel = size === 'startup' ? 'startup' : size === 'mid' ? 'mid-size' : 'large';
+  const roleLabel = role || industries?.[0] || 'your field';
+
   const searchTerms = [
-    `Scanning job boards for ${role || industries?.[0] || 'your field'}...`,
-    'Checking hiring signals across 10,000+ companies...',
+    `Searching for ${roleLabel} opportunities in ${location}...`,
+    `Checking hiring signals at ${sizeLabel} companies...`,
     'Cross-referencing CFF network connections...',
-    'Finding warm paths in your target industries...',
-    'Analyzing real-time hiring data...',
-    'Almost ready...',
+    'Building your personalized results...',
   ];
   const [currentTerm, setCurrentTerm] = useState(0);
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTerm(prev => prev < searchTerms.length - 1 ? prev + 1 : prev);
-    }, 1400);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
-  return (
-    <>
-      <style>{searchingStyles}</style>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', gap: 16 }}>
-        <div style={{ position: 'relative', width: 64, height: 64 }}>
-          <div className="fastiq-orb-pulse" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(232,93,32,0.15)' }} />
-          <div style={{ position: 'absolute', inset: 8, borderRadius: '50%', background: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>⚡</div>
-        </div>
-        <p key={currentTerm} className="fastiq-search-text" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', textAlign: 'center', minHeight: 20, margin: 0 }}>
-          {searchTerms[currentTerm]}
-        </p>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {[0, 200, 400].map(delay => (
-            <span key={delay} className="fastiq-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', display: 'inline-block', animationDelay: `${delay}ms` }} />
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
 
 function SkeletonCard() {
   return (
