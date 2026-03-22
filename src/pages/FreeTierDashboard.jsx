@@ -209,7 +209,7 @@ export default function FreeTierDashboard() {
         <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
       </div>
       <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
-        {activeTab === 'home' && <FreeTierHomeTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
+        {activeTab === 'home' && <FreeTierHomeTab key={savedGoals || 'home'} user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
         {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
