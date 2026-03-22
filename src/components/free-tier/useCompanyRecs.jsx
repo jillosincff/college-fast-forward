@@ -4,7 +4,10 @@ import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const MIN_SKELETON_MS = 600;
-const SEARCH_TIMEOUT = 8000;
+const SEARCH_TIMEOUT = 50000; // LLM+web search can take 20-40s
+
+// In-flight deduplication — prevents double calls from React StrictMode / dual mounts
+const inFlightRequests = {};
 
 const memCache = {};
 
@@ -371,12 +374,18 @@ export function useCompanyRecs(user) {
     const timeoutPromise = new Promise((resolve) => {
       setTimeout(() => resolve({ timedOut: true, data: null }), SEARCH_TIMEOUT);
     });
-    const searchPromise = getFreeTierCompanyRecs({ career_goals: goals })
-      .then(res => ({ timedOut: false, data: res }))
-      .catch(err => {
-        console.error('Search failed:', err);
-        return { timedOut: true, data: null };
-      });
+
+    // Deduplicate in-flight requests with the same cache key
+    if (!inFlightRequests[cacheKey]) {
+      inFlightRequests[cacheKey] = getFreeTierCompanyRecs({ career_goals: goals })
+        .then(res => ({ timedOut: false, data: res }))
+        .catch(err => {
+          console.error('Search failed:', err);
+          return { timedOut: true, data: null };
+        })
+        .finally(() => { delete inFlightRequests[cacheKey]; });
+    }
+    const searchPromise = inFlightRequests[cacheKey];
 
     const { timedOut, data: res } = await Promise.race([searchPromise, timeoutPromise]);
 
