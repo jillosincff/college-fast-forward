@@ -114,13 +114,10 @@ const DEFAULT_COMPANIES = [
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
+    // No auth needed — pure in-memory lookup, no DB calls, no user data
     const body = await req.json().catch(() => ({}));
     const goals = body.career_goals || {};
-    let industries = goals.industries?.length > 0 ? goals.industries : (user.target_industries || []);
+    let industries = goals.industries?.length > 0 ? goals.industries : [];
     // If still no industries, infer from role
     if (industries.length === 0 && goals.role) {
       const inferred = inferIndustryFromRole(goals.role);
