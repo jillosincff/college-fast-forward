@@ -146,6 +146,11 @@ async function getGapFillCompanies(goals, excludeNames, count) {
       { name: 'Mayo Clinic', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'Top-ranked hospital system with strong nursing and clinical programs across multiple campuses.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — top-ranked hospital system' },
       { name: 'Northwell Health', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: "New York's largest health system — extensive openings for RNs across all specialties.", size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — largest health system in New York' },
     ],
+    'Sports & Entertainment': [
+      { name: 'ESPN', industry: 'Sports & Entertainment', hiring_signal: 'warm', hiring_description: 'Hiring for content, production, and marketing roles in sports media.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Top sports media employer — strong entry-level programs' },
+      { name: 'Live Nation', industry: 'Entertainment', hiring_signal: 'hot', hiring_description: 'Entry-level roles in events, marketing, and operations at the world’s largest live entertainment company.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring in live events and marketing' },
+      { name: 'Nike', industry: 'Sports & Consumer', hiring_signal: 'warm', hiring_description: 'Brand marketing and product roles for recent grads with sports or business backgrounds.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Iconic sports brand with strong entry-level marketing programs' },
+    ],
     'Finance & Insurance': [
       { name: 'JPMorgan', industry: 'Finance', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles nationwide.' },
       { name: 'Goldman Sachs', industry: 'Finance', hiring_signal: 'warm', hiring_description: 'Analyst programs open across investment banking and operations.' },
