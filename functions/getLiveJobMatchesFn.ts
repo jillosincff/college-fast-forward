@@ -376,7 +376,7 @@ Deno.serve(async (req) => {
     const result = companies.slice(0, 5).map(c => ({
       name: c.name,
       industry: industries[0] || '',
-      size: c.size || sizePreference[0] || 'large',
+      size: c.size || 'large',
       hiring_signal: c.hiring_signal,
       hiring_description: c.hiring_description,
       has_web_result: true,
