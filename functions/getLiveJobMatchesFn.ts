@@ -73,11 +73,11 @@ const INDUSTRY_COMPANIES = {
     { name: 'C.H. Robinson', hiring_signal: 'warm', hiring_description: 'Supply chain and freight brokerage roles with strong training programs.' },
   ],
   'Construction & Agriculture': [
-    { name: 'Turner Construction', hiring_signal: 'hot', hiring_description: 'Project management and field engineering roles for construction graduates.' },
-    { name: 'Skanska', hiring_signal: 'warm', hiring_description: 'Construction and civil engineering entry-level programs.' },
-    { name: 'Jacobs Engineering', hiring_signal: 'warm', hiring_description: 'Technical and engineering consulting roles for recent grads.' },
-    { name: 'AECOM', hiring_signal: 'warm', hiring_description: 'Infrastructure and engineering firm with strong new grad programs.' },
-    { name: 'Cargill', hiring_signal: 'warm', hiring_description: 'Agricultural and food production roles with rotational programs.' },
+    { name: 'Turner Construction', hiring_signal: 'hot', hiring_description: 'One of the largest construction firms in the US — hiring project managers and engineers nationwide.' },
+    { name: 'CBRE', hiring_signal: 'hot', hiring_description: "World's largest commercial real estate services firm — strong project management division." },
+    { name: 'AECOM', hiring_signal: 'hot', hiring_description: 'Global infrastructure firm — extensive project management roles across the US.' },
+    { name: 'Bechtel', hiring_signal: 'warm', hiring_description: 'Major engineering and construction company — project management roles nationwide.' },
+    { name: 'Hines', hiring_signal: 'warm', hiring_description: 'Global real estate firm with strong development and construction management programs.' },
   ],
 };
 
