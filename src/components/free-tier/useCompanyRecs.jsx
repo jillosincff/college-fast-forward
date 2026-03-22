@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
+import { getCFFNetworkMatchesFn } from '@/functions/getCFFNetworkMatchesFn';
+import { getLiveJobMatchesFn } from '@/functions/getLiveJobMatchesFn';
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const MIN_SKELETON_MS = 600;
@@ -316,6 +317,93 @@ async function getNetworkFirstRecommendations(goals, userId) {
   return sorted.slice(0, 5);
 }
 
+// ─── Merge network + job results into tiered list ───
+function mergeResults(networkCompanies, jobCompanies, goals, university) {
+  const companyMap = new Map();
+
+  // Add job search results first
+  jobCompanies.forEach(c => {
+    const key = c.name.toLowerCase();
+    companyMap.set(key, {
+      ...c,
+      has_web_result: true,
+      cff_parent_count: 0,
+      school_alumni_count: 0,
+      open_to_intro_count: 0,
+      sample_roles: [],
+    });
+  });
+
+  // Merge in CFF network data
+  networkCompanies.forEach(c => {
+    const key = c.name.toLowerCase();
+    if (companyMap.has(key)) {
+      const existing = companyMap.get(key);
+      companyMap.set(key, {
+        ...existing,
+        cff_parent_count: c.cff_parent_count || 0,
+        school_alumni_count: c.school_alumni_count || 0,
+        open_to_intro_count: c.open_to_intro_count || 0,
+        sample_roles: c.sample_roles || [],
+        school_match: c.school_match || false,
+        industry: existing.industry || c.industry || '',
+      });
+    } else {
+      companyMap.set(key, {
+        name: c.name,
+        industry: c.industry || '',
+        size: 'mid',
+        hiring_signal: 'unknown',
+        hiring_description: '',
+        has_web_result: false,
+        cff_parent_count: c.cff_parent_count || 0,
+        school_alumni_count: c.school_alumni_count || 0,
+        open_to_intro_count: c.open_to_intro_count || 0,
+        sample_roles: c.sample_roles || [],
+        school_match: c.school_match || false,
+      });
+    }
+  });
+
+  const role = goals.role || '';
+  const school = university || 'your school';
+
+  // Assign tiers and why_recommended
+  const companies = Array.from(companyMap.values()).map(c => {
+    const hasHiring = c.has_web_result && c.hiring_signal !== 'cool';
+    const hasCFF = (c.cff_parent_count || 0) > 0 || (c.school_alumni_count || 0) > 0;
+    const tier = hasHiring && hasCFF ? 1 : hasCFF ? 2 : hasHiring ? 3 : 4;
+
+    let why = '';
+    if (tier === 1) {
+      if (c.open_to_intro_count > 0) why = `Hiring ${role}s now + ${c.open_to_intro_count} CFF parent${c.open_to_intro_count > 1 ? 's' : ''} ready to intro`;
+      else if (c.school_alumni_count > 0) why = `Hiring ${role}s now + ${c.school_alumni_count} ${school} alumni in the network`;
+      else why = `Actively hiring with a CFF network connection`;
+    } else if (tier === 2) {
+      if (c.school_alumni_count > 0 && c.cff_parent_count > 0) why = `${c.school_alumni_count} ${school} alumni and ${c.cff_parent_count} CFF parents work here`;
+      else if (c.school_alumni_count > 0) why = `${c.school_alumni_count} ${school} alumni in the network`;
+      else if (c.open_to_intro_count > 0) why = `${c.open_to_intro_count} CFF parent${c.open_to_intro_count > 1 ? 's' : ''} open to introductions`;
+      else why = `${c.cff_parent_count} CFF connection${c.cff_parent_count > 1 ? 's' : ''} work here`;
+    } else if (tier === 3) {
+      why = `Actively hiring ${role}s — be the first ${school} student here`;
+    }
+
+    return { ...c, tier, why_recommended: why };
+  });
+
+  companies.sort((a, b) => {
+    if (a.tier !== b.tier) return a.tier - b.tier;
+    const aScore = (a.cff_parent_count * 2) + (a.school_alumni_count * 1.5) + (a.open_to_intro_count * 3);
+    const bScore = (b.cff_parent_count * 2) + (b.school_alumni_count * 1.5) + (b.open_to_intro_count * 3);
+    return bScore - aScore;
+  });
+
+  const tier1 = companies.filter(c => c.tier === 1).slice(0, 3);
+  const tier2 = companies.filter(c => c.tier === 2).slice(0, 3);
+  const tier3 = companies.filter(c => c.tier === 3).slice(0, 3);
+  return { companies: [...tier1, ...tier2, ...tier3], weekly_new_count: 0 };
+}
+
 export function useCompanyRecs(user) {
   const [companies, setCompanies] = useState(null);
   const [loading, setLoading] = useState(false); // true only when no fallback yet
@@ -368,11 +456,20 @@ export function useCompanyRecs(user) {
       company_size_preference: user?.career_goals?.company_size_preference || ['large', 'mid', 'startup'],
     };
 
-    // STEP 2: Run real search in background — no timeout, fallback already showing
-    // Deduplicate in-flight requests with the same cache key
+    // STEP 2: Run both functions in parallel — each is lightweight enough to stay within CPU limit
     if (!inFlightRequests[cacheKey]) {
-      inFlightRequests[cacheKey] = getFreeTierCompanyRecs({ career_goals: goals })
-        .then(res => ({ data: res }))
+      inFlightRequests[cacheKey] = Promise.allSettled([
+        getCFFNetworkMatchesFn({ career_goals: goals, university: user?.school || user?.university || '' }),
+        getLiveJobMatchesFn({ career_goals: goals }),
+      ])
+        .then(([networkRes, jobsRes]) => {
+          const network = networkRes.status === 'fulfilled' ? (networkRes.value?.data?.companies || []) : [];
+          const jobs = jobsRes.status === 'fulfilled' ? (jobsRes.value?.data?.companies || []) : [];
+          console.log(`✅ Network: ${network.length} companies, Jobs: ${jobs.length} companies`);
+          if (networkRes.status === 'rejected') console.error('Network fn failed:', networkRes.reason);
+          if (jobsRes.status === 'rejected') console.error('Jobs fn failed:', jobsRes.reason);
+          return { data: mergeResults(network, jobs, goals, user?.school || '') };
+        })
         .catch(err => {
           console.error('Background search failed — fallback stays:', err);
           return { data: null };
@@ -380,9 +477,9 @@ export function useCompanyRecs(user) {
         .finally(() => { delete inFlightRequests[cacheKey]; });
     }
 
-    const { data: res } = await inFlightRequests[cacheKey];
-    const results = res?.data?.companies?.length > 0 ? res.data.companies : null;
-    const weeklyCount = res?.data?.weekly_new_count ?? 0;
+    const { data: merged } = await inFlightRequests[cacheKey];
+    const results = merged?.companies?.length > 0 ? merged.companies : null;
+    const weeklyCount = merged?.weekly_new_count ?? 0;
 
     // STEP 3: Silently replace fallback with real results when they arrive
     if (results) {
