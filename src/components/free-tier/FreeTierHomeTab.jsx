@@ -6,7 +6,7 @@ import AICompanyCards from '@/components/free-tier/AICompanyCards';
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
-  const { companies, loading: recsLoading, error: recsError, noIndustry: recsNoIndustry, weeklyNewCount, refetch } = useCompanyRecs(user);
+  const { companies, loading: recsLoading, searching: recsSearching, error: recsError, noIndustry: recsNoIndustry, weeklyNewCount, refetch } = useCompanyRecs(user);
 
   const [parentEmail, setParentEmail] = useState('');
   const [nudgeSent, setNudgeSent] = useState(false);
@@ -186,6 +186,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
           <AICompanyCards
             companies={companies}
             loading={recsLoading}
+            searching={recsSearching}
             error={recsError}
             noIndustry={recsNoIndustry}
             onRefetch={refetch}
