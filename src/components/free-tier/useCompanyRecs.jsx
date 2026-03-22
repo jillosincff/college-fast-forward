@@ -355,7 +355,6 @@ export function useCompanyRecs(user) {
 
     setLoading(true);
     setError(false);
-    const startTime = Date.now();
 
     const goals = {
       role,
