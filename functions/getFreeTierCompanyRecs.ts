@@ -96,28 +96,30 @@ async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, s
     const company = (u.company || u.current_company || '').trim();
     if (!company) continue;
     if (!companyMap[company]) {
-      companyMap[company] = { name: company, connections: [], alumni_count: 0, parent_count: 0 };
+      companyMap[company] = { name: company, connections: [], alumni_count: 0, parent_count: 0, open_to_intro_count: 0 };
     }
     const uSchool = (u.school || u.university || '').toLowerCase();
     const isSchoolMatch = schoolWord && uSchool.includes(schoolWord);
+    const isOpenToIntro = u.intro_availability === 'happy_to_help' || u.intro_availability === 'yes' || u.intro_availability === 'open' || u.open_to_intro === true;
     companyMap[company].connections.push({
       persona: u.persona,
       role: u.role_title || u.current_role || '',
       school_match: isSchoolMatch,
     });
     if (u.persona === 'alumni') companyMap[company].alumni_count++;
-    else companyMap[company].parent_count++;
+    else { companyMap[company].parent_count++; if (isOpenToIntro) companyMap[company].open_to_intro_count++; }
   }
 
   return Object.values(companyMap).map(c => {
-    const hasAlumni = c.alumni_count > 0;
-    const hasParent = c.parent_count > 0;
     const schoolMatch = c.connections.some(conn => conn.school_match);
-    const connectionType = hasAlumni && hasParent ? 'both' : hasAlumni ? 'alumni' : 'parent';
+    const connectionType = c.alumni_count > 0 && c.parent_count > 0 ? 'both' : c.alumni_count > 0 ? 'alumni' : 'parent';
     const sampleRoles = [...new Set(c.connections.map(conn => conn.role).filter(Boolean))].slice(0, 3);
     return {
       name: c.name,
       cff_connection_count: c.connections.length,
+      cff_parent_count: c.parent_count,
+      school_alumni_count: c.alumni_count,
+      open_to_intro_count: c.open_to_intro_count,
       connection_type: connectionType,
       school_match: schoolMatch,
       sample_roles: sampleRoles,
