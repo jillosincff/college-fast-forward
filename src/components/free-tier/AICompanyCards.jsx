@@ -400,6 +400,11 @@ export default function AICompanyCards({
           <strong style={{ color: '#E85D20' }}>{weeklyNewCount} new connection{weeklyNewCount !== 1 ? 's' : ''}</strong> added to the network this week.
         </p>
       )}
+      {searching && (
+        <p style={{ fontSize: 12, color: '#888', fontStyle: 'italic', textAlign: 'center', marginTop: 8 }}>
+          ⚡ FastIQ is finding personalized matches — results may update shortly.
+        </p>
+      )}
     </div>
   );
 }
