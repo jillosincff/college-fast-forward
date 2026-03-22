@@ -168,7 +168,7 @@ function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
 }
 
 export default function FreeTierDashboard() {
-  const { user, refreshUser } = useAuth();
+  const { user, isLoadingAuth, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [savedGoals, setSavedGoals] = useState(null);
 
@@ -181,6 +181,7 @@ export default function FreeTierDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (isLoadingAuth) return; // wait for auth to resolve
     if (!user) {
       navigate('LandingPage');
       return;
@@ -190,7 +191,7 @@ export default function FreeTierDashboard() {
       return;
     }
     setLoading(false);
-  }, [user]);
+  }, [user, isLoadingAuth]);
 
   if (loading || !user) {
     return (
