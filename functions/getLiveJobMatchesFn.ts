@@ -1,5 +1,28 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
+function inferIndustryFromRole(role) {
+  if (!role) return null;
+  const r = role.toLowerCase();
+  const map = [
+    { k: ['construction', 'superintendent', 'contractor', 'general contractor', 'subcontractor', 'civil engineer', 'structural engineer', 'architect', 'architecture', 'real estate', 'property manager', 'facilities', 'estimator', 'foreman', 'site manager', 'infrastructure', 'real estate developer'], v: 'Construction & Agriculture' },
+    { k: ['nurse', 'nursing', ' rn ', 'registered nurse', 'lpn', 'cna', 'physical therapist', 'occupational therapist', 'physician', 'doctor', 'medical doctor', 'surgeon', 'dentist', 'dental', 'pharmacist', 'pharmacy', 'radiologist', 'paramedic', 'emt', 'speech therapist', 'respiratory therapist', 'clinical', 'patient care', 'healthcare worker', 'health aide', 'medical assistant', 'hospital administrator'], v: 'Healthcare & Pharmaceuticals' },
+    { k: ['investment banking','banker','finance','financial','accounting','accountant','cpa','portfolio','wealth','trading','trader','actuary','insurance'], v: 'Finance & Insurance' },
+    { k: ['software','developer','coding','programming','data science','machine learning','product manager','ux ','ui ','cyber','devops','cloud','tech','information technology'], v: 'Technology, Information & Media' },
+    { k: ['marketing','brand','advertising','social media','content','public relations','communications','digital marketing','seo','copywriter','creative'], v: 'Advertising & PR' },
+    { k: ['sports','entertainment','music','film',' tv ','television','journalism','broadcast','athletic','coaching'], v: 'Sports & Entertainment' },
+    { k: ['consulting','consultant','strategy','management consulting','advisory'], v: 'Professional Services' },
+    { k: ['teacher','teaching','education','school','professor','tutor','curriculum'], v: 'Education & Training' },
+    { k: ['retail','consumer goods','merchandise','buying','fashion','apparel','ecommerce'], v: 'Retail & Consumer Goods' },
+    { k: ['law','lawyer','attorney','legal','paralegal','litigation','compliance'], v: 'Professional Services' },
+    { k: ['government','federal','policy','public sector','nonprofit','non-profit','ngo'], v: 'Government & Public Sector' },
+    { k: ['logistics','supply chain','transportation','shipping','warehouse','procurement'], v: 'Transportation & Logistics' },
+  ];
+  for (const { k, v } of map) {
+    if (k.some(kw => r.includes(kw))) return v;
+  }
+  return null;
+}
+
 // Industry-aware hardcoded companies — instant, no DB, always relevant
 const INDUSTRY_COMPANIES = {
   'Healthcare & Pharmaceuticals': [
@@ -97,7 +120,12 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const goals = body.career_goals || {};
-    const industries = goals.industries?.length > 0 ? goals.industries : (user.target_industries || []);
+    let industries = goals.industries?.length > 0 ? goals.industries : (user.target_industries || []);
+    // If still no industries, infer from role
+    if (industries.length === 0 && goals.role) {
+      const inferred = inferIndustryFromRole(goals.role);
+      if (inferred) industries = [inferred];
+    }
     const excludeNames = (goals.target_companies || []).map(c => c.toLowerCase());
 
     // Try to find matching industry companies
