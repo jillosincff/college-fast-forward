@@ -118,91 +118,88 @@ async function enrichWithHiringSignals(companies) {
 
 // ─── Gap fill from CompanyIntelCache ───
 async function getGapFillCompanies(goals, excludeNames, count) {
-  try {
-    const cached = await base44.entities.CompanyIntelCache.list('-hiring_score', 50);
-    const excludeLower = excludeNames.map(n => n.toLowerCase());
-    const matches = cached.filter(c => {
-      if (!c.company_name) return false;
-      if (excludeLower.includes(c.company_name.toLowerCase())) return false;
-      return c.hiring_signal === 'hot' || c.hiring_signal === 'warm';
-    }).slice(0, count);
-
-    if (matches.length > 0) {
-      return matches.map(c => ({
-        name: c.company_name,
-        industry: '',
-        hiring_signal: c.hiring_signal || 'warm',
-        hiring_description: c.intel_summary || c.recommendation_text || '',
-        cff_connection_count: 0,
-        connection_type: 'none',
-        warm_path_strength: 'none',
-        size: classifySize(c.company_name),
-        source: 'intel_cache',
-        gap_fill: true,
-        has_intel: true,
-      }));
-    }
-  } catch { /* fall through */ }
-
-  // Hardcoded last resort — industry-aware
   const primaryIndustry = goals.industries?.[0];
-  const HARDCODED = {
+  const sizePreference = goals.company_size_preference || ['large', 'mid', 'startup'];
+
+  const SIZE_AWARE = {
     'Healthcare & Pharmaceuticals': [
-      { name: 'HCA Healthcare', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'One of the largest hospital networks in the US — actively hiring nurses and clinical staff nationwide.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — major employer in your field' },
-      { name: 'Mayo Clinic', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'Top-ranked hospital system with strong nursing and clinical programs across multiple campuses.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — top-ranked hospital system' },
-      { name: 'Northwell Health', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: "New York's largest health system — extensive openings for RNs across all specialties.", size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — largest health system in New York' },
-    ],
-    'Sports & Entertainment': [
-      { name: 'ESPN', industry: 'Sports & Entertainment', hiring_signal: 'warm', hiring_description: 'Hiring for content, production, and marketing roles in sports media.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Top sports media employer — strong entry-level programs' },
-      { name: 'Live Nation', industry: 'Entertainment', hiring_signal: 'hot', hiring_description: 'Entry-level roles in events, marketing, and operations at the world’s largest live entertainment company.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring in live events and marketing' },
-      { name: 'Nike', industry: 'Sports & Consumer', hiring_signal: 'warm', hiring_description: 'Brand marketing and product roles for recent grads with sports or business backgrounds.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Iconic sports brand with strong entry-level marketing programs' },
-    ],
-    'Finance & Insurance': [
-      { name: 'JPMorgan', industry: 'Finance', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles nationwide.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Top finance employer — actively hiring entry-level analysts' },
-      { name: 'Goldman Sachs', industry: 'Finance', hiring_signal: 'warm', hiring_description: 'Analyst programs open across investment banking and operations.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Prestigious analyst program — strong entry point in finance' },
-      { name: 'BlackRock', industry: 'Finance', hiring_signal: 'warm', hiring_description: "World's largest asset manager with analyst programs across multiple divisions.", size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Leading asset manager — strong analyst program for finance students' },
+      { name: 'HCA Healthcare', hiring_signal: 'hot', size: 'large', hiring_description: 'One of the largest hospital networks in the US — actively hiring nurses.' },
+      { name: 'Mayo Clinic', hiring_signal: 'hot', size: 'large', hiring_description: 'Top-ranked hospital system with strong nursing programs.' },
+      { name: 'Carbon Health', hiring_signal: 'hot', size: 'startup', hiring_description: 'Tech-enabled primary care startup rapidly expanding clinical teams.' },
+      { name: 'CVS Health', hiring_signal: 'hot', size: 'large', hiring_description: 'Hiring nurses and clinical staff for pharmacy and MinuteClinic locations.' },
+      { name: 'AdventHealth', hiring_signal: 'hot', size: 'mid', hiring_description: 'Faith-based hospital network with strong nursing culture.' },
     ],
     'Technology, Information & Media': [
-      { name: 'Google', industry: 'Technology', hiring_signal: 'hot', hiring_description: 'Actively hiring for entry-level roles across multiple teams.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Top tech employer with strong new grad programs' },
-      { name: 'Microsoft', industry: 'Technology', hiring_signal: 'hot', hiring_description: 'Strong entry-level and internship programs across all divisions.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Large-scale hiring for engineers and business roles' },
-      { name: 'Adobe', industry: 'Technology', hiring_signal: 'warm', hiring_description: 'Hiring across engineering, design, and marketing technology roles.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Strong culture and career development for new grads' },
+      { name: 'Ramp', hiring_signal: 'hot', size: 'startup', hiring_description: 'Fast-growing fintech — real ownership from day one.' },
+      { name: 'Google', hiring_signal: 'hot', size: 'large', hiring_description: 'Entry-level roles across engineering and business.' },
+      { name: 'Duolingo', hiring_signal: 'hot', size: 'mid', hiring_description: 'Fast-growing edtech with analyst and product roles.' },
+      { name: 'Linear', hiring_signal: 'warm', size: 'startup', hiring_description: 'Project management startup — data and analytics roles.' },
+      { name: 'Microsoft', hiring_signal: 'hot', size: 'large', hiring_description: 'Strong new grad programs across all divisions.' },
     ],
-    'Advertising & PR': [
-      { name: 'Edelman', industry: 'PR', hiring_signal: 'hot', hiring_description: 'Actively hiring communications and PR associates worldwide.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: "World's largest PR firm — great entry point for communications" },
-      { name: 'Ogilvy', industry: 'Advertising', hiring_signal: 'warm', hiring_description: 'Creative and account management roles for recent grads.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Iconic agency with strong creative and account programs' },
-      { name: 'TBWA', industry: 'Advertising', hiring_signal: 'warm', hiring_description: 'Disruption-focused global agency hiring for creative and strategy roles.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Top global agency — creative and strategy roles for new grads' },
+    'Finance & Insurance': [
+      { name: 'Ramp', hiring_signal: 'hot', size: 'startup', hiring_description: 'Fast-growing fintech — finance analyst roles with real ownership.' },
+      { name: 'JPMorgan', hiring_signal: 'hot', size: 'large', hiring_description: 'Large-scale hiring for finance and operations analyst roles.' },
+      { name: 'SoFi', hiring_signal: 'hot', size: 'mid', hiring_description: 'Personal finance platform hiring in analytics and operations.' },
+      { name: 'Brex', hiring_signal: 'hot', size: 'startup', hiring_description: 'Corporate spend management startup — finance analyst roles.' },
+      { name: 'Goldman Sachs', hiring_signal: 'warm', size: 'large', hiring_description: 'Analyst programs open for investment banking division.' },
     ],
-    'Professional Services': [
-      { name: 'McKinsey', industry: 'Consulting', hiring_signal: 'warm', hiring_description: 'Business analyst roles for top undergraduates.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Top consulting firm — BA program is a launchpad for any career' },
-      { name: 'PwC', industry: 'Accounting', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for audit, tax, and advisory.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Big 4 firm actively hiring across all service lines' },
-      { name: 'EY', industry: 'Accounting', hiring_signal: 'hot', hiring_description: 'Entry-level associate roles across all service lines.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Big 4 firm with strong new grad rotational programs' },
-    ],
-    'Retail & Consumer Goods': [
-      { name: 'Procter & Gamble', industry: 'Consumer Goods', hiring_signal: 'hot', hiring_description: 'Brand management and operations roles for recent grads.' },
-      { name: 'Target', industry: 'Retail', hiring_signal: 'hot', hiring_description: 'Store leadership and corporate rotational programs.' },
-      { name: 'Unilever', industry: 'Consumer Goods', hiring_signal: 'warm', hiring_description: 'Future Leaders Program for top undergraduates.' },
+    'Construction & Agriculture': [
+      { name: 'Turner Construction', hiring_signal: 'hot', size: 'large', hiring_description: 'One of the largest US construction firms — hiring project managers.' },
+      { name: 'Procore', hiring_signal: 'hot', size: 'startup', hiring_description: 'Construction management software — sales and customer success roles.' },
+      { name: 'DPR Construction', hiring_signal: 'hot', size: 'mid', hiring_description: 'Employee-owned builder with strong entry-level project management.' },
+      { name: 'AECOM', hiring_signal: 'hot', size: 'large', hiring_description: 'Global infrastructure firm — project management roles across the US.' },
+      { name: 'Hines', hiring_signal: 'warm', size: 'mid', hiring_description: 'Real estate firm with construction management programs.' },
     ],
   };
-  const fallback = HARDCODED[primaryIndustry] || [
-    { name: 'Deloitte', industry: 'Consulting', hiring_signal: 'hot', hiring_description: 'Hiring consultants and business analysts nationwide.' },
-    { name: 'PwC', industry: 'Accounting', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for audit, tax, and advisory.' },
-    { name: 'JPMorgan', industry: 'Finance', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles.' },
-  ];
+
+  const DEFAULT_BY_SIZE = {
+    large: [
+      { name: 'Deloitte', hiring_signal: 'hot', size: 'large', hiring_description: 'Hiring consultants and analysts nationwide.' },
+      { name: 'JPMorgan', hiring_signal: 'hot', size: 'large', hiring_description: 'Large-scale hiring for finance and operations roles.' },
+      { name: 'Google', hiring_signal: 'hot', size: 'large', hiring_description: 'Entry-level roles across multiple teams.' },
+    ],
+    mid: [
+      { name: 'Duolingo', hiring_signal: 'hot', size: 'mid', hiring_description: 'Fast-growing edtech with strong culture.' },
+      { name: 'Canva', hiring_signal: 'hot', size: 'mid', hiring_description: 'Design platform scaling rapidly.' },
+      { name: 'SoFi', hiring_signal: 'warm', size: 'mid', hiring_description: 'Personal finance platform with analyst roles.' },
+    ],
+    startup: [
+      { name: 'Ramp', hiring_signal: 'hot', size: 'startup', hiring_description: 'Fast-growing fintech — real ownership from day one.' },
+      { name: 'Linear', hiring_signal: 'warm', size: 'startup', hiring_description: 'Project management startup with a culture of craft.' },
+      { name: 'Retool', hiring_signal: 'warm', size: 'startup', hiring_description: 'Internal tools startup — broad exposure and fast learning.' },
+    ],
+  };
+
+  const pool = SIZE_AWARE[primaryIndustry] || null;
   const excludeLower = excludeNames.map(n => n.toLowerCase());
-  return fallback
-    .filter(c => !excludeLower.includes(c.name.toLowerCase()))
-    .slice(0, count)
-    .map(c => ({
-      ...c,
-      cff_connection_count: 0,
-      connection_type: 'none',
-      warm_path_strength: 'none',
-      size: classifySize(c.name),
-      source: 'hardcoded',
-      gap_fill: true,
-      has_intel: false,
-      is_fallback: true,
-    }));
+
+  let candidates;
+  if (pool) {
+    // Sort pool by size preference
+    const sizeRank = Object.fromEntries(sizePreference.map((s, i) => [s, i]));
+    candidates = [...pool]
+      .sort((a, b) => (sizeRank[a.size] ?? 99) - (sizeRank[b.size] ?? 99))
+      .filter(c => !excludeLower.includes(c.name.toLowerCase()));
+  } else {
+    const pref = sizePreference[0] || 'large';
+    candidates = (DEFAULT_BY_SIZE[pref] || DEFAULT_BY_SIZE.large)
+      .filter(c => !excludeLower.includes(c.name.toLowerCase()));
+  }
+
+  return candidates.slice(0, count).map(c => ({
+    name: c.name,
+    industry: primaryIndustry || '',
+    hiring_signal: c.hiring_signal,
+    hiring_description: c.hiring_description || '',
+    cff_connection_count: 0,
+    connection_type: 'none',
+    warm_path_strength: 'none',
+    size: c.size || classifySize(c.name),
+    source: 'hardcoded',
+    gap_fill: true,
+    has_intel: false,
+    is_fallback: true,
+  }));
 }
 
 // ─── MAIN QUERY — Network-first ───
