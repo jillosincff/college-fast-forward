@@ -136,7 +136,45 @@ function assignTier(company) {
   return 4;
 }
 
-function mergeAndRank(external, internal, sizePref) {
+function generateWhyRecommended(company, goals) {
+  const university = goals.university || 'your school';
+  const role = goals.role || 'candidates';
+
+  if (company.tier === 1) {
+    if (company.open_to_intro_count > 0 && company.school_alumni_count > 0) {
+      return `Hiring ${role}s now + ${company.school_alumni_count} ${university} alumni + ${company.open_to_intro_count} CFF parent${company.open_to_intro_count > 1 ? 's' : ''} ready to make intros — your strongest opportunity`;
+    }
+    if (company.open_to_intro_count > 0) {
+      return `Hiring ${role}s now + ${company.open_to_intro_count} CFF parent${company.open_to_intro_count > 1 ? 's' : ''} ready to make introductions`;
+    }
+    if (company.school_alumni_count > 0) {
+      return `Hiring ${role}s now + ${company.school_alumni_count} ${university} alumni in the network`;
+    }
+    return `Actively hiring ${role}s with a CFF network connection — your strongest opportunity`;
+  }
+
+  if (company.tier === 2) {
+    if (company.school_alumni_count > 0 && company.cff_parent_count > 0) {
+      return `${company.school_alumni_count} ${university} alumni and ${company.cff_parent_count} CFF parents work here — warm path available even before a job is posted`;
+    }
+    if (company.school_alumni_count > 0) {
+      return `${company.school_alumni_count} ${university} alumni in the CFF network — reach out before a job is even posted`;
+    }
+    if (company.open_to_intro_count > 0) {
+      return `${company.open_to_intro_count} CFF parent${company.open_to_intro_count > 1 ? 's' : ''} ready to make introductions`;
+    }
+    return `${company.cff_parent_count} CFF network connection${company.cff_parent_count > 1 ? 's' : ''} work here`;
+  }
+
+  if (company.tier === 3) {
+    return `Actively hiring ${role}s right now — be the first ${university} student to build a warm path here`;
+  }
+
+  return `Matches your goals`;
+}
+
+function mergeAndRank(external, internal, sizePref, goals) {
+
   const internalMap = {};
   for (const c of internal) internalMap[c.name.toLowerCase()] = c;
 
@@ -188,11 +226,11 @@ function mergeAndRank(external, internal, sizePref) {
     });
   }
 
-  // Assign tiers and sort
-  const companies = Array.from(companyMap.values()).map(c => ({
-    ...c,
-    tier: assignTier(c),
-  }));
+  // Assign tiers, sort, and generate why_recommended
+  const companies = Array.from(companyMap.values()).map(c => {
+    const tier = assignTier(c);
+    return { ...c, tier, why_recommended: generateWhyRecommended({ ...c, tier }, goals) };
+  });
 
   companies.sort((a, b) => {
     if (a.tier !== b.tier) return a.tier - b.tier;
@@ -257,6 +295,14 @@ Deno.serve(async (req) => {
     ]);
     const makeInternalCall = () => getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, studentSchool);
 
+    // Real weekly new parent count
+    const weeklyCountResult = await base44.asServiceRole.entities.User.filter(
+      { persona: 'parent' }, '-created_date', 50
+    ).then(users => {
+      const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      return users.filter(u => u.created_date > cutoff && (u.company || u.industry)).length;
+    }).catch(() => 0);
+
     const [externalResult, internalResult] = await Promise.allSettled([
       makeExternalCall(),
       makeInternalCall(),
@@ -295,19 +341,24 @@ Deno.serve(async (req) => {
         { name: 'Amazon', industry: 'Technology', size: 'large', hiring_signal: 'hot', hiring_description: 'Hiring across logistics, technology, and business operations.' },
         { name: 'JPMorgan', industry: 'Finance', size: 'large', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles.' },
       ];
-      companies = fallbackList.map(c => ({ ...c, why_recommended: `Actively hiring in ${primaryIndustry || 'your target industries'} right now`, cff_data: null, is_fallback: true }));
+      const fbGoals = { role, university: studentSchool };
+      companies = fallbackList.map(c => {
+        const tier = 3;
+        return { ...c, tier, has_web_result: true, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0, sample_roles: [], is_fallback: true, why_recommended: generateWhyRecommended({ ...c, tier, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0 }, fbGoals) };
+      });
       console.log('Hardcoded fallback returned:', companies.length, 'companies');
     } else {
-      companies = mergeAndRank(finalExternal, internal, sizePref);
+      const mergeGoals = { role, university: studentSchool };
+      companies = mergeAndRank(finalExternal, internal, sizePref, mergeGoals);
     }
 
     console.log('Rendering', companies.length, 'company cards');
 
     return Response.json({
       companies,
+      weekly_new_count: weeklyCountResult,
       is_fallback: finalExternal.length === 0 && internal.length === 0,
       generated_at: new Date().toISOString(),
-      internal_generated_at: new Date().toISOString(),
     });
 
   } catch (error) {
