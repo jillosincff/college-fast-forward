@@ -365,32 +365,34 @@ export function useCompanyRecs(user) {
       company_size_preference: user?.career_goals?.company_size_preference || ['large', 'mid', 'startup'],
     };
 
-    try {
-      const res = await Promise.race([
-        getFreeTierCompanyRecs({ career_goals: goals }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), SEARCH_TIMEOUT)),
-      ]);
+    // Step 1: Resolve-based timeout so Promise.race always settles cleanly
+    const timeoutPromise = new Promise((resolve) => {
+      setTimeout(() => resolve({ timedOut: true, data: null }), SEARCH_TIMEOUT);
+    });
+    const searchPromise = getFreeTierCompanyRecs({ career_goals: goals })
+      .then(res => ({ timedOut: false, data: res }))
+      .catch(err => {
+        console.error('Search failed:', err);
+        return { timedOut: true, data: null };
+      });
 
-      const results = res?.data?.companies || [];
-      const weeklyCount = res?.data?.weekly_new_count ?? 0;
+    const { timedOut, data: res } = await Promise.race([searchPromise, timeoutPromise]);
 
+    const results = !timedOut && res?.data?.companies?.length > 0 ? res.data.companies : null;
+    const weeklyCount = res?.data?.weekly_new_count ?? 0;
+
+    if (results) {
       memCache[cacheKey] = { data: results, ts: now, weeklyCount };
-
-      const elapsed = Date.now() - startTime;
-      if (elapsed < MIN_SKELETON_MS) {
-        await new Promise(r => setTimeout(r, MIN_SKELETON_MS - elapsed));
-      }
-
       setCompanies(results);
       setWeeklyNewCount(weeklyCount);
-    } catch (err) {
-      console.error('getFreeTierCompanyRecs failed:', err.message);
-      const fallback = await getGapFillCompanies({ industries }, [], 3).catch(() => []);
+    } else {
+      console.log('Using hardcoded fallback (timeout or empty results)');
+      const fallback = await getGapFillCompanies({ industries: fallbackIndustries }, [], 3).catch(() => []);
       setCompanies(fallback.length > 0 ? fallback : null);
       setError(fallback.length === 0);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   }, [user?.email, user?.id, JSON.stringify(user?.career_goals), user?.target_role, JSON.stringify(user?.target_industries)]);
 
   useEffect(() => { fetchRecs(); }, [fetchRecs]);
