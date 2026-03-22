@@ -366,13 +366,7 @@ export function useCompanyRecs(user) {
       ]);
 
       const results = res?.data?.companies || [];
-
-      // Fetch weekly new parent count in parallel
-      const weeklyCount = await base44.entities.User.filter({ persona: 'parent' }, '-created_date', 20)
-        .then(users => {
-          const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-          return users.filter(u => u.created_date > oneWeekAgo).length;
-        }).catch(() => 0);
+      const weeklyCount = res?.data?.weekly_new_count ?? 0;
 
       memCache[cacheKey] = { data: results, ts: now, weeklyCount };
 
