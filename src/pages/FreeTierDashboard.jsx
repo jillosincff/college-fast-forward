@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Search, Loader2, Linkedin } from 'lucide-react';
@@ -168,7 +168,7 @@ function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
 }
 
 export default function FreeTierDashboard() {
-  const { user, isLoadingAuth, refreshUser } = useAuth();
+  const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [savedGoals, setSavedGoals] = useState(null);
 
@@ -181,7 +181,7 @@ export default function FreeTierDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isLoadingAuth) return; // wait for auth to resolve
+    if (isLoadingAuth) return;
     if (!user) {
       navigate('LandingPage');
       return;
