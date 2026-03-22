@@ -59,7 +59,9 @@ Deno.serve(async (req) => {
 
       const uIndustry = (u.industry || '').toLowerCase();
       const uCompany = company.toLowerCase();
-      const industryMatch = industriesLower.length === 0 || industriesLower.some(i => uIndustry.includes(i.split(',')[0].trim()));
+      // Flexible industry match — check any keyword overlap
+      const industryKeywords = industriesLower.flatMap(i => i.split(/[&,\s]+/).filter(w => w.length > 3));
+      const industryMatch = industriesLower.length === 0 || industryKeywords.some(kw => uIndustry.includes(kw));
       const companyMatch = companiesLower.some(c => c && uCompany.includes(c));
       if (!industryMatch && !companyMatch) return;
 
