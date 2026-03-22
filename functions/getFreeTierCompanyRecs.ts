@@ -127,70 +127,85 @@ async function getCFFNetworkMatches(base44, industriesArr, targetCompaniesArr, s
   });
 }
 
+function assignTier(company) {
+  const hasHiring = company.has_web_result && company.hiring_signal !== 'cool';
+  const hasCFF = (company.cff_parent_count || 0) > 0 || (company.school_alumni_count || 0) > 0;
+  if (hasHiring && hasCFF) return 1;
+  if (hasCFF) return 2;
+  if (hasHiring) return 3;
+  return 4;
+}
+
 function mergeAndRank(external, internal, sizePref) {
   const internalMap = {};
   for (const c of internal) internalMap[c.name.toLowerCase()] = c;
 
   const seen = new Set();
-  const scored = [];
+  const companyMap = new Map();
 
+  // Add external results
   for (const c of external) {
     const key = c.name.toLowerCase();
     seen.add(key);
-    const cffData = internalMap[key];
-    let score = 1; // external only baseline
-    if (cffData) {
-      score += 3; // appears in both
-    }
-    if (c.hiring_signal === 'hot') score += 2;
-    else if (c.hiring_signal === 'warm') score += 1;
-    if (sizePref[0] && c.size === sizePref[0]) score += 1;
-    if (cffData?.school_match) score += 0.5;
-
-    // Build merged why_recommended
-    let why = c.why_recommended || '';
-    if (cffData && cffData.cff_connection_count > 0) {
-      if (c.hiring_signal === 'hot' || c.hiring_signal === 'warm') {
-        why = `Actively hiring + ${cffData.cff_connection_count} CFF connection${cffData.cff_connection_count > 1 ? 's' : ''} — your strongest opportunity`;
-      } else {
-        why = `${cffData.cff_connection_count} CFF connection${cffData.cff_connection_count > 1 ? 's' : ''} work here — warm path available`;
-      }
-    }
-
-    // Determine warm_path_strength from cffData
-    let warmPathStrength = 'none';
-    if (cffData) {
-      if (cffData.connection_type === 'both') warmPathStrength = 'very_strong';
-      else if (cffData.school_match) warmPathStrength = 'strong';
-      else warmPathStrength = 'moderate';
-    }
-    scored.push({ ...c, score, cff_data: cffData || null, why_recommended: why, warm_path_strength: warmPathStrength });
-  }
-
-  // Add internal-only companies (not in external results)
-  for (const c of internal) {
-    const key = c.name.toLowerCase();
-    if (seen.has(key)) continue;
-    const internalWarmPath = c.connection_type === 'both' ? 'very_strong' : c.school_match ? 'strong' : 'moderate';
-    scored.push({
+    const cffData = internalMap[key] || null;
+    companyMap.set(key, {
       name: c.name,
-      industry: '',
-      size: null,
-      hiring_signal: 'warm',
-      hiring_description: `${c.cff_connection_count} CFF member${c.cff_connection_count > 1 ? 's' : ''} work here.`,
-      why_recommended: `${c.cff_connection_count} CFF connection${c.cff_connection_count > 1 ? 's' : ''} work here — warm path available`,
-      careers_url: '',
-      score: 2 + (c.school_match ? 0.5 : 0),
-      cff_data: c,
-      warm_path_strength: internalWarmPath,
+      industry: c.industry || '',
+      size: c.size || null,
+      hiring_signal: c.hiring_signal || 'warm',
+      hiring_description: c.hiring_description || '',
+      why_recommended: c.why_recommended || '',
+      careers_url: c.careers_url || '',
+      has_web_result: true,
+      cff_parent_count: cffData?.cff_parent_count || 0,
+      school_alumni_count: cffData?.school_alumni_count || 0,
+      open_to_intro_count: cffData?.open_to_intro_count || 0,
+      sample_roles: cffData?.sample_roles || [],
+      connection_type: cffData?.connection_type || null,
+      school_match: cffData?.school_match || false,
     });
   }
 
-  scored.sort((a, b) => b.score - a.score);
-  // Always keep top 5 external + any CFF-only companies that didn't overlap
-  const top5 = scored.slice(0, 5);
-  const cffOnly = scored.slice(5).filter(c => c.cff_data && c.cff_data.cff_connection_count > 0);
-  return [...top5, ...cffOnly];
+  // Add CFF-only companies not in external results
+  for (const c of internal) {
+    const key = c.name.toLowerCase();
+    if (seen.has(key)) continue;
+    companyMap.set(key, {
+      name: c.name,
+      industry: '',
+      size: null,
+      hiring_signal: 'unknown',
+      hiring_description: '',
+      why_recommended: '',
+      careers_url: '',
+      has_web_result: false,
+      cff_parent_count: c.cff_parent_count || 0,
+      school_alumni_count: c.school_alumni_count || 0,
+      open_to_intro_count: c.open_to_intro_count || 0,
+      sample_roles: c.sample_roles || [],
+      connection_type: c.connection_type || null,
+      school_match: c.school_match || false,
+    });
+  }
+
+  // Assign tiers and sort
+  const companies = Array.from(companyMap.values()).map(c => ({
+    ...c,
+    tier: assignTier(c),
+  }));
+
+  companies.sort((a, b) => {
+    if (a.tier !== b.tier) return a.tier - b.tier;
+    const aScore = (a.cff_parent_count * 2) + (a.school_alumni_count * 1.5) + (a.open_to_intro_count * 3);
+    const bScore = (b.cff_parent_count * 2) + (b.school_alumni_count * 1.5) + (b.open_to_intro_count * 3);
+    return bScore - aScore;
+  });
+
+  // Return up to 3 per tier
+  const tier1 = companies.filter(c => c.tier === 1).slice(0, 3);
+  const tier2 = companies.filter(c => c.tier === 2).slice(0, 3);
+  const tier3 = companies.filter(c => c.tier === 3).slice(0, 3);
+  return [...tier1, ...tier2, ...tier3];
 }
 
 Deno.serve(async (req) => {
