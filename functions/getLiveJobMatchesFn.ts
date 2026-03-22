@@ -313,12 +313,12 @@ function getCompaniesBySize(industryData, sizePreference) {
   const pref = sizePreference?.length > 0 ? sizePreference : ['large', 'mid', 'startup'];
   const results = [];
 
-  // Rank 1 (most preferred): take up to 3
-  const rank1 = industryData[pref[0]] || [];
+  // Rank 1 (most preferred): take up to 3, tag with size
+  const rank1 = (industryData[pref[0]] || []).map(c => ({ ...c, size: pref[0] }));
   results.push(...rank1.slice(0, 3));
 
-  // Rank 2: take up to 2
-  const rank2 = industryData[pref[1]] || [];
+  // Rank 2: take up to 2, tag with size
+  const rank2 = (industryData[pref[1]] || []).map(c => ({ ...c, size: pref[1] }));
   results.push(...rank2.slice(0, 2));
 
   // Deduplicate
