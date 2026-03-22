@@ -350,16 +350,14 @@ export function useCompanyRecs(user) {
       return;
     }
 
-    // Step 3: Show fallback immediately — do NOT block on live search
+    // STEP 1: Show fallback IMMEDIATELY (<100ms) — student never stares at blank screen
     const fallbackIndustries = industries.length > 0 ? industries : (inferred ? [inferred] : []);
     const immediateFallback = await getGapFillCompanies({ industries: fallbackIndustries }, [], 3).catch(() => []);
     if (immediateFallback.length > 0) {
       setCompanies(immediateFallback);
-      setLoading(false); // fallback is showing — no need for full loading state
-    } else {
-      setLoading(true); // truly nothing to show yet
     }
-    setSearching(true);
+    setLoading(false); // fallback is showing — never block on spinner
+    setSearching(true); // subtle background indicator
     setError(false);
 
     const goals = {
@@ -370,35 +368,30 @@ export function useCompanyRecs(user) {
       company_size_preference: user?.career_goals?.company_size_preference || ['large', 'mid', 'startup'],
     };
 
-    // Step 1: Resolve-based timeout so Promise.race always settles cleanly
-    const timeoutPromise = new Promise((resolve) => {
-      setTimeout(() => resolve({ timedOut: true, data: null }), SEARCH_TIMEOUT);
-    });
-
+    // STEP 2: Run real search in background — no timeout, fallback already showing
     // Deduplicate in-flight requests with the same cache key
     if (!inFlightRequests[cacheKey]) {
       inFlightRequests[cacheKey] = getFreeTierCompanyRecs({ career_goals: goals })
-        .then(res => ({ timedOut: false, data: res }))
+        .then(res => ({ data: res }))
         .catch(err => {
-          console.error('Search failed:', err);
-          return { timedOut: true, data: null };
+          console.error('Background search failed — fallback stays:', err);
+          return { data: null };
         })
         .finally(() => { delete inFlightRequests[cacheKey]; });
     }
-    const searchPromise = inFlightRequests[cacheKey];
 
-    const { timedOut, data: res } = await Promise.race([searchPromise, timeoutPromise]);
-
-    const results = !timedOut && res?.data?.companies?.length > 0 ? res.data.companies : null;
+    const { data: res } = await inFlightRequests[cacheKey];
+    const results = res?.data?.companies?.length > 0 ? res.data.companies : null;
     const weeklyCount = res?.data?.weekly_new_count ?? 0;
 
+    // STEP 3: Silently replace fallback with real results when they arrive
     if (results) {
+      console.log(`✅ Real results arrived — updating ${results.length} companies`);
       memCache[cacheKey] = { data: results, ts: now, weeklyCount };
       setCompanies(results);
       setWeeklyNewCount(weeklyCount);
     } else {
-      // Live search timed out — fallback already showing, just keep it
-      console.log('Live search timed out — keeping immediate fallback');
+      console.log('Background search empty — fallback stays');
     }
 
     setLoading(false);
