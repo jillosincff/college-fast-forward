@@ -315,7 +315,8 @@ async function getNetworkFirstRecommendations(goals, userId) {
 
 export function useCompanyRecs(user) {
   const [companies, setCompanies] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // true only when no fallback yet
+  const [searching, setSearching] = useState(false); // live search running in bg
   const [error, setError] = useState(false);
   const [noIndustry, setNoIndustry] = useState(false);
   const [weeklyNewCount, setWeeklyNewCount] = useState(null);
@@ -346,14 +347,16 @@ export function useCompanyRecs(user) {
       return;
     }
 
-    // Step 3: Show fallback immediately so UI is never blank
+    // Step 3: Show fallback immediately — do NOT block on live search
     const fallbackIndustries = industries.length > 0 ? industries : (inferred ? [inferred] : []);
     const immediateFallback = await getGapFillCompanies({ industries: fallbackIndustries }, [], 3).catch(() => []);
     if (immediateFallback.length > 0) {
       setCompanies(immediateFallback);
+      setLoading(false); // fallback is showing — no need for full loading state
+    } else {
+      setLoading(true); // truly nothing to show yet
     }
-
-    setLoading(true);
+    setSearching(true);
     setError(false);
 
     const goals = {
@@ -385,16 +388,15 @@ export function useCompanyRecs(user) {
       setCompanies(results);
       setWeeklyNewCount(weeklyCount);
     } else {
-      console.log('Using hardcoded fallback (timeout or empty results)');
-      const fallback = await getGapFillCompanies({ industries: fallbackIndustries }, [], 3).catch(() => []);
-      setCompanies(fallback.length > 0 ? fallback : null);
-      setError(fallback.length === 0);
+      // Live search timed out — fallback already showing, just keep it
+      console.log('Live search timed out — keeping immediate fallback');
     }
 
     setLoading(false);
+    setSearching(false);
   }, [user?.email, user?.id, JSON.stringify(user?.career_goals), user?.target_role, JSON.stringify(user?.target_industries)]);
 
   useEffect(() => { fetchRecs(); }, [fetchRecs]);
 
-  return { companies, loading, error, noIndustry, weeklyNewCount, refetch: fetchRecs };
+  return { companies, loading, searching, error, noIndustry, weeklyNewCount, refetch: fetchRecs };
 }
