@@ -4,7 +4,7 @@ import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const MIN_SKELETON_MS = 600;
-const SEARCH_TIMEOUT = 45000;
+const SEARCH_TIMEOUT = 8000;
 
 const memCache = {};
 
@@ -142,9 +142,9 @@ async function getGapFillCompanies(goals, excludeNames, count) {
   const primaryIndustry = goals.industries?.[0];
   const HARDCODED = {
     'Healthcare & Pharmaceuticals': [
-      { name: 'HCA Healthcare', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'One of the largest hospital networks in the US, consistently hiring nurses and clinical staff.' },
-      { name: 'CVS Health', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'Hiring nurses and clinical staff for pharmacy and MinuteClinic locations nationwide.' },
-      { name: 'Mayo Clinic', industry: 'Healthcare', hiring_signal: 'warm', hiring_description: 'World-renowned medical center with strong nursing programs and career development.' },
+      { name: 'HCA Healthcare', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'One of the largest hospital networks in the US — actively hiring nurses and clinical staff nationwide.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — major employer in your field' },
+      { name: 'Mayo Clinic', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: 'Top-ranked hospital system with strong nursing and clinical programs across multiple campuses.', size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — top-ranked hospital system' },
+      { name: 'Northwell Health', industry: 'Healthcare', hiring_signal: 'hot', hiring_description: "New York's largest health system — extensive openings for RNs across all specialties.", size: 'large', tier: 3, cff_connection_count: 0, why_recommended: 'Actively hiring nurses right now — largest health system in New York' },
     ],
     'Finance & Insurance': [
       { name: 'JPMorgan', industry: 'Finance', hiring_signal: 'hot', hiring_description: 'Large-scale hiring for finance and operations roles nationwide.' },
@@ -346,9 +346,15 @@ export function useCompanyRecs(user) {
       return;
     }
 
+    // Step 3: Show fallback immediately so UI is never blank
+    const fallbackIndustries = industries.length > 0 ? industries : (inferred ? [inferred] : []);
+    const immediateFallback = await getGapFillCompanies({ industries: fallbackIndustries }, [], 3).catch(() => []);
+    if (immediateFallback.length > 0) {
+      setCompanies(immediateFallback);
+    }
+
     setLoading(true);
     setError(false);
-    setCompanies(null);
     const startTime = Date.now();
 
     const goals = {
