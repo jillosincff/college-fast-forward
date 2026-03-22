@@ -44,10 +44,11 @@ Deno.serve(async (req) => {
     const schoolWord = studentSchool.toLowerCase().split(' ')[0];
 
     // Database only — fetch max 50 users per query, no LLM
-    const [parents, alumni] = await Promise.all([
-      base44.asServiceRole.entities.User.filter({ persona: 'parent' }, '-created_date', 50),
-      base44.asServiceRole.entities.User.filter({ persona: 'alumni' }, '-created_date', 50),
-    ]);
+    // Use list() since persona field may be stored in roles array or persona field
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 100);
+    const parents = allUsers.filter(u => u.persona === 'parent' || u.roles?.includes('parent'));
+    const alumni = allUsers.filter(u => u.persona === 'alumni' || u.roles?.includes('alumni'));
+    console.log(`📊 Total users: ${allUsers.length}, parents: ${parents.length}, alumni: ${alumni.length}`);
 
     const companyMap = {};
 

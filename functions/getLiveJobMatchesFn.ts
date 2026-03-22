@@ -69,10 +69,10 @@ Deno.serve(async (req) => {
         .filter(c => {
           if (!c.company_name) return false;
           if (excludeNames.includes(c.company_name.toLowerCase())) return false;
-          // If we have industries, try to match; otherwise include all
+          // If no industries specified, include all; otherwise require an industry match
           if (industryKeywords.length === 0) return true;
-          const summary = (c.intel_summary || c.recommendation_text || '').toLowerCase();
-          return industryKeywords.some(kw => summary.includes(kw)) || c.hiring_signal === 'hot';
+          const summary = (c.intel_summary || c.recommendation_text || c.company_name || '').toLowerCase();
+          return industryKeywords.some(kw => summary.includes(kw));
         })
         .slice(0, 5)
         .map(c => ({
