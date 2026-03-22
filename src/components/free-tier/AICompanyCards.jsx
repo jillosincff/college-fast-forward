@@ -39,6 +39,27 @@ function FastIQSearchingAnimation({ role, industries, user }) {
     return () => clearInterval(interval);
   }, []);
 
+  return (
+    <>
+      <style>{searchingStyles}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', gap: 16 }}>
+        <div style={{ position: 'relative', width: 64, height: 64 }}>
+          <div className="fastiq-orb-pulse" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(232,93,32,0.15)' }} />
+          <div style={{ position: 'absolute', inset: 8, borderRadius: '50%', background: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>⚡</div>
+        </div>
+        <p key={currentTerm} className="fastiq-search-text" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', textAlign: 'center', minHeight: 20, margin: 0 }}>
+          {searchTerms[currentTerm]}
+        </p>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {[0, 200, 400].map(delay => (
+            <span key={delay} className="fastiq-dot" style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', display: 'inline-block', animationDelay: `${delay}ms` }} />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 function SkeletonCard() {
   return (
     <div style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 12, padding: 16 }}>
