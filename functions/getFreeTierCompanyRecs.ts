@@ -303,10 +303,9 @@ Deno.serve(async (req) => {
       return users.filter(u => u.created_date > cutoff && (u.company || u.industry)).length;
     }).catch(() => 0);
 
-    const [externalResult, internalResult] = await Promise.allSettled([
-      makeExternalCall(),
-      makeInternalCall(),
-    ]);
+    // Run sequentially to avoid CPU limit — LLM web search alone uses most of the budget
+    const externalResult = await makeExternalCall().then(v => ({ status: 'fulfilled', value: v })).catch(e => ({ status: 'rejected', reason: e }));
+    const internalResult = await makeInternalCall().then(v => ({ status: 'fulfilled', value: v })).catch(e => ({ status: 'rejected', reason: e }));
 
     const external = externalResult.status === 'fulfilled' ? (externalResult.value || []) : [];
     const internal = internalResult.status === 'fulfilled' ? (internalResult.value || []) : [];
