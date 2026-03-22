@@ -330,13 +330,64 @@ function getCompaniesBySize(industryData, sizePreference) {
   }).slice(0, 5);
 }
 
+async function getLiveJobMatches(base44, goals, industries, sizePreference) {
+  const role = goals.role || 'entry level';
+  const location = goals.locations?.[0] || 'United States';
+  const industry = industries[0] || 'general business';
+  const size = sizePreference[0] || 'any size';
+
+  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt: `Search for companies actively hiring ${role}s in ${location} in 2025. Focus on ${size} companies in ${industry}.
+
+Return exactly 5 companies that are currently hiring for this role.
+For each company include:
+- The real company name
+- A one-sentence description of what they are hiring for
+- Whether they are hot (aggressively hiring), warm (selectively hiring), or cool (limited openings)
+- The company size: startup (under 100), mid (100-999), or large (1000+)
+
+Only include real companies you found evidence of hiring. Do not include companies with no hiring activity.`,
+    add_context_from_internet: true,
+    model: 'gemini_3_flash',
+    response_json_schema: {
+      type: 'object',
+      properties: {
+        companies: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              description: { type: 'string' },
+              hiring_signal: { type: 'string', enum: ['hot', 'warm', 'cool'] },
+              size: { type: 'string', enum: ['startup', 'mid', 'large'] },
+            },
+            required: ['name', 'description', 'hiring_signal', 'size'],
+          },
+        },
+      },
+    },
+  });
+
+  const companies = (result?.companies || []).map(c => ({
+    name: c.name,
+    industry,
+    hiring_signal: c.hiring_signal,
+    hiring_description: c.description,
+    size: c.size,
+    has_web_result: true,
+  }));
+
+  console.log('✅ Live search companies:', companies.map(c => `${c.name} (${c.size}, ${c.hiring_signal})`).join(', '));
+  return companies;
+}
+
 Deno.serve(async (req) => {
   try {
-    // No auth needed — pure in-memory lookup, no DB calls
+    const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
     const goals = body.career_goals || {};
     let industries = goals.industries?.length > 0 ? goals.industries : [];
-    // Infer from role if no industries specified
     if (industries.length === 0 && goals.role) {
       const inferred = inferIndustryFromRole(goals.role);
       if (inferred) industries = [inferred];
@@ -344,30 +395,39 @@ Deno.serve(async (req) => {
     const sizePreference = goals.company_size_preference || ['large', 'mid', 'startup'];
     const excludeNames = (goals.target_companies || []).map(c => c.toLowerCase());
 
+    // Try live LLM search first
     let companies = [];
+    try {
+      companies = await Promise.race([
+        getLiveJobMatches(base44, goals, industries, sizePreference),
+        new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 35000)),
+      ]);
+    } catch (liveErr) {
+      console.warn('Live search failed, using hardcoded fallback:', liveErr.message);
+    }
 
-    // Find matching industry data
-    if (industries.length > 0) {
-      const primary = industries[0];
-      const industryData = INDUSTRY_COMPANIES[primary];
-
-      if (industryData) {
-        companies = getCompaniesBySize(industryData, sizePreference);
-      } else {
-        // Try partial match
-        for (const [key, data] of Object.entries(INDUSTRY_COMPANIES)) {
-          if (key.toLowerCase().includes(primary.toLowerCase().split(' ')[0])) {
-            companies = getCompaniesBySize(data, sizePreference);
-            break;
+    // Fall back to hardcoded if live search returned nothing
+    if (!companies || companies.length === 0) {
+      console.log('Using hardcoded fallback');
+      if (industries.length > 0) {
+        const primary = industries[0];
+        const industryData = INDUSTRY_COMPANIES[primary];
+        if (industryData) {
+          companies = getCompaniesBySize(industryData, sizePreference);
+        } else {
+          for (const [key, data] of Object.entries(INDUSTRY_COMPANIES)) {
+            if (key.toLowerCase().includes(primary.toLowerCase().split(' ')[0])) {
+              companies = getCompaniesBySize(data, sizePreference);
+              break;
+            }
           }
         }
       }
-    }
-
-    // Default fallback
-    if (companies.length === 0) {
-      const pref = sizePreference[0] || 'large';
-      companies = DEFAULT_COMPANIES[pref] || DEFAULT_COMPANIES.large;
+      if (companies.length === 0) {
+        const pref = sizePreference[0] || 'large';
+        companies = DEFAULT_COMPANIES[pref] || DEFAULT_COMPANIES.large;
+      }
+      companies = companies.map(c => ({ ...c, has_web_result: true }));
     }
 
     // Apply exclude filter
@@ -375,7 +435,7 @@ Deno.serve(async (req) => {
 
     const result = companies.slice(0, 5).map(c => ({
       name: c.name,
-      industry: industries[0] || '',
+      industry: c.industry || industries[0] || '',
       size: c.size || 'large',
       hiring_signal: c.hiring_signal,
       hiring_description: c.hiring_description,
