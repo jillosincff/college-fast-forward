@@ -155,13 +155,21 @@ function mergeAndRank(external, internal, sizePref) {
       }
     }
 
-    scored.push({ ...c, score, cff_data: cffData || null, why_recommended: why });
+    // Determine warm_path_strength from cffData
+    let warmPathStrength = 'none';
+    if (cffData) {
+      if (cffData.connection_type === 'both') warmPathStrength = 'very_strong';
+      else if (cffData.school_match) warmPathStrength = 'strong';
+      else warmPathStrength = 'moderate';
+    }
+    scored.push({ ...c, score, cff_data: cffData || null, why_recommended: why, warm_path_strength: warmPathStrength });
   }
 
   // Add internal-only companies (not in external results)
   for (const c of internal) {
     const key = c.name.toLowerCase();
     if (seen.has(key)) continue;
+    const internalWarmPath = c.connection_type === 'both' ? 'very_strong' : c.school_match ? 'strong' : 'moderate';
     scored.push({
       name: c.name,
       industry: '',
@@ -172,6 +180,7 @@ function mergeAndRank(external, internal, sizePref) {
       careers_url: '',
       score: 2 + (c.school_match ? 0.5 : 0),
       cff_data: c,
+      warm_path_strength: internalWarmPath,
     });
   }
 
