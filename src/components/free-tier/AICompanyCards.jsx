@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 
 function SkeletonCard() {
@@ -18,10 +18,81 @@ const SIGNAL_LABEL = {
   unknown: null,
 };
 
+function isRelevantEmployer(company, studentRole) {
+  const roleLower = studentRole?.toLowerCase() || '';
+  const companyLower = company.name?.toLowerCase() || '';
+  const industryLower = company.industry?.toLowerCase() || '';
+  const isHealthcareRole = ['nurs', 'doctor', 'physician', 'therapist',
+    'medical', 'clinical', 'pharma', 'health'].some(k => roleLower.includes(k));
+  if (isHealthcareRole) {
+    const isSchool = ['school', 'university', 'college', 'academy',
+      'institute', 'education', 'district'].some(k =>
+        companyLower.includes(k) || industryLower.includes(k));
+    if (isSchool) return false;
+  }
+  return true;
+}
+
+function InviteModal({ companyName, onClose }) {
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const handleSend = async () => {
+    if (!email.trim()) return;
+    setSending(true);
+    try {
+      const { base44 } = await import('@/api/base44Client');
+      await base44.integrations.Core.SendEmail({
+        to: email.trim(),
+        subject: 'You\'ve been invited to join College Fast Forward',
+        body: `Hi,\n\nA student thought you might be a great addition to College Fast Forward — a network connecting college students with parents and alumni for career guidance.\n\nJoin here: ${window.location.origin}\n\n— The CFF Team`,
+      });
+      setSent(true);
+    } catch (e) {
+      console.error('Invite send failed:', e);
+    }
+    setSending(false);
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={onClose}>
+      <div style={{ background: '#fff', borderRadius: 16, padding: 24, width: '100%', maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+        <p style={{ fontWeight: 700, fontSize: 16, color: '#1A1A1A', marginBottom: 6 }}>Invite someone to CFF</p>
+        <p style={{ fontSize: 13, color: '#666', marginBottom: 16, lineHeight: 1.5 }}>
+          Enter their email and we'll send them an invitation to join College Fast Forward.
+        </p>
+        {sent ? (
+          <p style={{ fontSize: 14, color: '#22C55E', fontWeight: 600, textAlign: 'center' }}>✓ Invitation sent!</p>
+        ) : (
+          <>
+            <input
+              type="email"
+              placeholder="their@email.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              style={{ width: '100%', padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, fontSize: 14, marginBottom: 12, boxSizing: 'border-box' }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!email.trim() || sending}
+              style={{ width: '100%', background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 0', fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: (!email.trim() || sending) ? 0.6 : 1, minHeight: 'auto' }}
+            >
+              {sending ? 'Sending...' : 'Send Invitation →'}
+            </button>
+          </>
+        )}
+        <button onClick={onClose} style={{ marginTop: 10, width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#999', minHeight: 'auto' }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
 function TierCard({ company, tier, user, onTabChange, onOpenUpgrade, isFastIQ }) {
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const school = user?.school || user?.university || 'your school';
   const sig = SIGNAL_LABEL[company.hiring_signal];
-  const borderColor = tier === 1 ? '#E85D20' : tier === 2 ? '#4F8CFF' : '#D0D0D0';
+  const borderColor = tier === 1 ? '#E85D20' : tier === 2 ? '#E85D20' : '#D0D0D0';
 
   return (
     <div style={{
@@ -76,8 +147,17 @@ function TierCard({ company, tier, user, onTabChange, onOpenUpgrade, isFastIQ })
         </div>
       ) : tier === 3 ? (
         <div style={{ borderTop: '1px solid #F0F0F0', borderBottom: '1px solid #F0F0F0', padding: '8px 0' }}>
-          <p style={{ fontSize: 12, color: '#999', margin: 0, fontStyle: 'italic' }}>
+          <p style={{ fontSize: 12, color: '#999', margin: '0 0 4px', fontStyle: 'italic' }}>
             👤 No CFF connections yet — be the first {school} student to build a path here.
+          </p>
+          <p style={{ fontSize: 12, color: '#999', margin: 0, fontStyle: 'italic' }}>
+            Know someone who works here?{' '}
+            <button
+              onClick={() => setShowInviteModal(true)}
+              style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, fontStyle: 'normal' }}
+            >
+              Invite them to CFF →
+            </button>
           </p>
         </div>
       ) : null}
@@ -101,20 +181,21 @@ function TierCard({ company, tier, user, onTabChange, onOpenUpgrade, isFastIQ })
           isFastIQ ? (
             <button
               onClick={() => onTabChange?.('alumni_network')}
-              style={{ fontSize: 12, color: '#4F8CFF', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
+              style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
             >
               See Who to Contact →
             </button>
           ) : (
             <button
               onClick={() => onOpenUpgrade?.()}
-              style={{ fontSize: 12, color: '#4F8CFF', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
+              style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
             >
               🔒 See Who to Contact →
             </button>
           )
         )}
       </div>
+      {showInviteModal && <InviteModal companyName={company.name} onClose={() => setShowInviteModal(false)} />}
     </div>
   );
 }
@@ -213,8 +294,9 @@ export default function AICompanyCards({
     );
   }
 
+  const studentRole = user?.career_goals?.role || user?.target_role || '';
   const tier1 = companies.filter(c => c.tier === 1);
-  const tier2 = companies.filter(c => c.tier === 2);
+  const tier2 = companies.filter(c => c.tier === 2 && isRelevantEmployer(c, studentRole));
   const tier3 = companies.filter(c => c.tier === 3);
 
   const headerCopy = getHeaderCopy(tier1, tier2, tier3, role);
