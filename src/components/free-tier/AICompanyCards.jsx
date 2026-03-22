@@ -288,11 +288,11 @@ export default function AICompanyCards({
   const role = user?.career_goals?.role || user?.target_role || '';
 
   if (loading) {
-    // No fallback yet — show animated AI search indicator
     return (
       <FastIQSearchingAnimation
         role={role}
         industries={user?.career_goals?.industries || user?.target_industries}
+        user={user}
       />
     );
   }
