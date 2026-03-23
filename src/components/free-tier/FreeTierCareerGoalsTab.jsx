@@ -300,6 +300,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       await base44.auth.updateMe({
         career_goals: goalsData,
         ...(prelimArch?.name ? { preliminary_archetype: prelimArch.name } : {}),
+        ...(goalsSummary?.graduation_year ? { graduation_year: goalsSummary.graduation_year } : {}),
       });
       setSavedGoals(goalsData);
       setConversationDone(true);
@@ -403,23 +404,26 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
         {/* Refresh link + missing goals prompt */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, margin: '8px 0 16px' }}>
-          {/* Missing goals nudge */}
+          {/* Missing goals nudge card */}
           {(() => {
             const g = savedGoals || user?.career_goals;
             const missing = [];
-            if (!g?.graduation_year) missing.push({ key: 'grad', label: '+ Add graduation year' });
-            if (!g?.dream_company) missing.push({ key: 'dream', label: '+ Add dream company' });
-            if (!g?.company_size_preference?.length) missing.push({ key: 'size', label: '+ Add company size preference' });
+            if (!g?.graduation_year) missing.push({ key: 'grad', label: '+ Graduation year' });
+            if (!g?.dream_company) missing.push({ key: 'dream', label: '+ Dream company' });
+            if (!g?.company_size_preference?.length) missing.push({ key: 'size', label: '+ Company size preference' });
             if (missing.length === 0) return null;
             return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888' }}>⚡ Complete your profile for better matches:</span>
-                {missing.map(m => (
-                  <button key={m.key} onClick={startChat}
-                    style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', color: '#E85D20', borderRadius: 100, padding: '3px 12px', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
-                    {m.label}
-                  </button>
-                ))}
+              <div style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 12, padding: '14px 18px' }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#E85D20', margin: '0 0 4px' }}>⚡ Add {missing.length} more detail{missing.length > 1 ? 's' : ''} for better lead matches</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '0 0 10px' }}>These fields help FastIQ find more relevant parents and alumni for you.</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {missing.map(m => (
+                    <button key={m.key} onClick={startChat}
+                      style={{ background: '#fff', border: '1px solid #FDDBC8', color: '#E85D20', borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             );
           })()}
