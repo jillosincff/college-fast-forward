@@ -2,21 +2,56 @@ import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-function maskName(fullName) {
-  if (!fullName) return 'Parent';
-  const parts = fullName.trim().split(' ');
-  if (parts.length === 1) return parts[0];
-  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+function generateSubjectLine(parent, student) {
+  const company = parent.company || parent.current_company || parent.employer || null;
+  const school = student?.school || student?.university || 'University of Florida';
+  if (company) return `${school} student — quick question about ${company}`;
+  return `${school} student seeking career guidance`;
+}
+
+function generateOutreachMessage(student, parent) {
+  const studentName = student?.first_name || student?.full_name?.split(' ')[0] || 'a student';
+  const studentSchool = student?.school || student?.university || 'University of Florida';
+  const studentRole = student?.career_goals?.role || null;
+  const studentIndustry = student?.career_goals?.industries?.[0] || null;
+
+  const parentFirstName = parent.first_name || parent.full_name?.split(' ')[0] || 'there';
+  const parentTitle = parent.job_title || parent.role_title || parent.current_role || null;
+  const parentCompany = parent.company || parent.current_company || parent.employer || 'your company';
+  const parentIndustry = parent.industry || studentIndustry || 'your field';
+
+  let opening = '';
+  if (parentTitle && parentCompany) {
+    opening = `I came across your profile and noticed you're a ${parentTitle} at ${parentCompany}`;
+  } else if (parentCompany && parentCompany !== 'your company') {
+    opening = `I came across your profile and noticed you work at ${parentCompany}`;
+  } else if (parentIndustry) {
+    opening = `I came across your profile and noticed your background in ${parentIndustry}`;
+  } else {
+    opening = `I came across your profile on College Fast Forward`;
+  }
+
+  let ask = '';
+  if (studentRole) {
+    ask = `I'm currently exploring opportunities in ${studentRole} and would love to hear about your experience and any advice you might have for someone starting out in this field.`;
+  } else if (studentIndustry) {
+    ask = `I'm currently exploring careers in ${studentIndustry} and would love to hear about your career path and any advice for someone just starting out.`;
+  } else {
+    ask = `I would love to hear about your career path and any advice you might have for a student entering the workforce.`;
+  }
+
+  return `Hi ${parentFirstName},\n\nMy name is ${studentName} and I'm a student at ${studentSchool}. ${opening}.\n\n${ask}\n\nWould you be open to a brief 15-minute conversation? I'd really appreciate any guidance you could offer.\n\nThank you,\n${studentName}`;
 }
 
 export default function ParentMessageComposer({ user, parent, onClose, onSent }) {
-  const parentMasked = maskName(parent.full_name);
-  const parentFirst = parent.full_name?.split(' ')[0] || 'there';
-  const defaultSubject = `Quick question about your experience at ${parent.company || 'your company'}`;
-  const defaultBody = `Hi ${parentFirst}, I'm a${user?.major ? ` ${user.major}` : ''} student at ${user?.school || user?.university || 'my university'} interested in ${parent.industry || 'your industry'}. I noticed you work at ${parent.company || 'your company'} and would love to hear about your experience. Would you be open to a brief conversation?`;
+  const parentFirst = parent.first_name || parent.full_name?.split(' ')[0] || 'there';
+  const parentLastInitial = (parent.last_name || parent.full_name?.split(' ').slice(1).join(' ') || '')[0];
+  const parentDisplayName = `${parentFirst}${parentLastInitial ? ` ${parentLastInitial.toUpperCase()}.` : ''}`;
+  const parentTitle = parent.job_title || parent.role_title || parent.current_role || null;
+  const parentCompany = parent.company || parent.current_company || parent.employer || null;
 
-  const [subject, setSubject] = useState(defaultSubject);
-  const [body, setBody] = useState(defaultBody);
+  const [subject, setSubject] = useState(() => generateSubjectLine(parent, user));
+  const [body, setBody] = useState(() => generateOutreachMessage(user, parent));
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [threadState, setThreadState] = useState('loading'); // loading | fresh | awaiting_reply | awaiting_followup | blocked
@@ -99,23 +134,34 @@ export default function ParentMessageComposer({ user, parent, onClose, onSent })
       <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div className="flex items-start justify-between p-6 pb-4 border-b border-[#F0F0F0]">
-          <div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px' }}>
-              Message {parentMasked}
-            </h2>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0 }}>
-              {parent.company && <span>{parent.company}</span>}
-              {parent.company && parent.industry && <span> · </span>}
-              {parent.industry && <span>{parent.industry}</span>}
-              {parent.linkedin_url && (
-                <a href={parent.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: '#E85D20', marginLeft: 8, fontWeight: 500 }}>LinkedIn →</a>
-              )}
-            </p>
-          </div>
+        <div className="flex items-start justify-between p-6 pb-3 border-b border-[#F0F0F0]">
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+            Message {parentDisplayName}
+          </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', color: '#999', padding: 4 }}>
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Recipient context strip */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 24px', background: '#F9F9F9', borderBottom: '1px solid #EEEEEE' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+            {(parentFirst[0] || '').toUpperCase()}{(parentLastInitial || '').toUpperCase()}
+          </div>
+          <div>
+            <p style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A', margin: 0 }}>{parentDisplayName}</p>
+            {(parentTitle || parentCompany) && (
+              <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>
+                {parentTitle}{parentTitle && parentCompany ? ' · ' : ''}{parentCompany}
+              </p>
+            )}
+            {parent.linkedin_url && (
+              <a href={parent.linkedin_url} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: 11, color: '#0077B5', textDecoration: 'none', marginTop: 2, display: 'inline-block' }}>
+                View LinkedIn →
+              </a>
+            )}
+          </div>
         </div>
 
         <div className="overflow-y-auto flex-1 p-6">
