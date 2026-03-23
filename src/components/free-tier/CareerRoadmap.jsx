@@ -208,7 +208,9 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
 
         {/* Step 4 — PRIMARY conversion moment: solid orange CTA */}
         <StepCard status={step4} number={4} title="Reach Out to Alumni" tag="FastIQ"
-          description="Find alumni at your target companies and send personalized warm outreach — the warm path that cold applications never create.">
+          description={user?.career_goals?.archetype
+            ? `As ${user.career_goals.archetype}, your warmest paths come through direct alumni contact. FastIQ finds the right people and writes the outreach for you.`
+            : 'Find alumni at your target companies and send personalized warm outreach — the warm path that cold applications never create.'}>
           {step4 === 'locked' ? (
             <div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontStyle: 'italic', color: '#E85D20', textAlign: 'center', margin: '8px 0' }}>
