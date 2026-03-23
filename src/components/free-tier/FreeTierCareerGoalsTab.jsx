@@ -178,6 +178,12 @@ function TypingIndicator() {
 
 export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   const [mode, setMode] = useState(hasExistingGoals(user) ? 'summary' : 'chat');
+  const [showLeads, setShowLeads] = useState(false);
+  const [showLeadsArrow, setShowLeadsArrow] = useState(false);
+  const [savedLeads, setSavedLeads] = useState(() => user?.saved_leads || []);
+  const [activeComposer, setActiveComposer] = useState(null); // lead object
+  const leadsRef = useRef(null);
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const [messages, setMessages] = useState([]);
   const [suggestedPrompts, setSuggestedPrompts] = useState([]);
   const [input, setInput] = useState('');
@@ -199,12 +205,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   const [honestChallenge, setHonestChallenge] = useState(null);
   const [cffNetwork, setCffNetwork] = useState(null);
   const [prelimArchetype, setPrelimArchetype] = useState(null);
-  const [showLeads, setShowLeads] = useState(false);
-  const [savedLeads, setSavedLeads] = useState(() => user?.saved_leads || []);
-  const [activeComposer, setActiveComposer] = useState(null);
-  const leadsRef = useRef(null);
   const bottomRef = useRef(null);
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
 
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
@@ -308,39 +309,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     }
   };
 
-  const handleFindLeads = () => {
-    setShowLeads(true);
-    setTimeout(() => leadsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-  };
-
-  const handleSaveLead = (lead) => {
-    const newLead = { ...lead, saved_at: new Date().toISOString(), contacted: false };
-    const updated = [...savedLeads.filter(l => l.id !== lead.id), newLead];
-    setSavedLeads(updated);
-    base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
-    const toast = document.createElement('div');
-    toast.textContent = 'Saved to your leads list 🔖';
-    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;z-index:9999;pointer-events:none;';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
-  };
-
-  const handleUnsaveLead = (id) => {
-    const updated = savedLeads.filter(l => l.id !== String(id));
-    setSavedLeads(updated);
-    base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
-  };
-
-  const handleMarkContacted = (lead) => {
-    const updated = savedLeads.map(l =>
-      l.id === lead.id ? { ...l, contacted: true, contacted_at: new Date().toISOString() } : l
-    );
-    const notInList = !updated.find(l => l.id === lead.id);
-    const final = notInList ? [...updated, { ...lead, contacted: true, contacted_at: new Date().toISOString(), saved_at: new Date().toISOString() }] : updated;
-    setSavedLeads(final);
-    base44.auth.updateMe({ saved_leads: final }).catch(() => {});
-  };
-
   const startChat = () => {
     // Clear saved conversation from DB
     base44.auth.updateMe({ career_goals_conversation: null, career_goals_conversation_updated_at: null }).catch(() => {});
@@ -363,6 +331,49 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     setRestoredAt(null);
   };
 
+  const handleFindLeads = () => {
+    setShowLeads(true);
+    setShowLeadsArrow(true);
+    setTimeout(() => {
+      leadsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setShowLeadsArrow(false);
+    }, 600);
+  };
+
+  const handleSaveLead = async (lead) => {
+    const updated = [...savedLeads.filter(l => l.id !== lead.id), { ...lead, saved_at: new Date().toISOString(), contacted: false, contacted_at: null, follow_up_sent: false }];
+    setSavedLeads(updated);
+    await base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
+    // toast
+    const el = document.createElement('div');
+    el.textContent = '🔖 Saved to your leads list';
+    el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  };
+
+  const handleUnsaveLead = async (id) => {
+    const updated = savedLeads.filter(l => l.id !== String(id));
+    setSavedLeads(updated);
+    await base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
+  };
+
+  const handleMarkContacted = async (leadId) => {
+    const updated = savedLeads.map(l => l.id === String(leadId || activeComposer?.id)
+      ? { ...l, contacted: true, contacted_at: new Date().toISOString() } : l);
+    // If lead wasn't saved yet, add it as contacted
+    if (activeComposer && !updated.find(l => l.id === String(activeComposer.id))) {
+      updated.push({ ...activeComposer, saved_at: new Date().toISOString(), contacted: true, contacted_at: new Date().toISOString(), follow_up_sent: false });
+    }
+    setSavedLeads(updated);
+    await base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
+    const el = document.createElement('div');
+    el.textContent = 'Marked as contacted.';
+    el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2500);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
@@ -375,30 +386,32 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   // ── Summary view (returning user) ──────────────────────────────────────────
   if (mode === 'summary') {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
         {/* Page header */}
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>Your Goals & Leads.</h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 24px' }}>
-          Set your goals. See who can help. Start making moves.
-        </p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Your Goals &amp; Leads.</h1>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 28px', lineHeight: 1.5 }}>Set your goals. See who can help. Start making moves.</p>
 
-        {/* Goals card with overridden CTA */}
+        {/* Goals card */}
         <GoalsSummaryCard
           goals={savedGoals || user?.career_goals}
           onTabChange={onTabChange}
+          onFindLeads={handleFindLeads}
           onRestart={startChat}
-          primaryLabel="Find My Leads →"
-          onPrimaryClick={handleFindLeads}
+          showLeadsArrow={showLeadsArrow}
         />
 
+        {/* Refresh link (if leads already shown) */}
         {showLeads && (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <div style={{ height: 1, flex: 1, background: '#E0E0E0' }} />
-              <span style={{ fontSize: 18, animation: 'bounce 1s ease-in-out 2' }}>↓</span>
-              <div style={{ height: 1, flex: 1, background: '#E0E0E0' }} />
-            </div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', textAlign: 'right', margin: '-12px 0 16px', cursor: 'pointer' }}
+            onClick={() => { setShowLeads(false); setTimeout(() => setShowLeads(true), 100); }}>
+            Refresh my leads
+          </p>
+        )}
+
+        {/* Leads section */}
+        {showLeads && (
+          <>
             <LeadsSection
               user={user}
               onContact={setActiveComposer}
@@ -413,20 +426,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
               onContact={setActiveComposer}
               onRemove={handleUnsaveLead}
             />
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', textAlign: 'center', marginTop: 16, cursor: 'pointer' }}
-              onClick={() => { setShowLeads(false); setTimeout(() => { setShowLeads(true); leadsRef.current?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}>↻ Refresh my leads</p>
-          </div>
+          </>
         )}
-
-        <div style={{ textAlign: 'center', padding: '24px 0', borderTop: '1px solid #F0F0F0', marginTop: 24 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', marginBottom: 12 }}>
-            Want to update your goals? FastIQ will re-personalize everything.
-          </p>
-          <button onClick={startChat}
-            style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
-            Update My Goals →
-          </button>
-        </div>
 
         {/* Inline message composer */}
         {activeComposer && (
@@ -435,17 +436,19 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
             user={user}
             isFastIQ={isFastIQ}
             onClose={() => setActiveComposer(null)}
-            onMarkContacted={() => handleMarkContacted(activeComposer)}
-            onSaveToNotebook={(content) => {
+            onMarkContacted={handleMarkContacted}
+            onSaveToNotebook={(msg) => {
               base44.entities.NotebookEntry.create({
-                user_email: user.email, content,
-                source_page: 'career_goals', source_label: 'Career Goals',
-                tags: ['outreach'], saved_at: new Date().toISOString(),
+                user_email: user.email,
+                content: msg,
+                source_page: 'career_goals',
+                source_label: 'Outreach Message',
+                tags: ['outreach'],
+                saved_at: new Date().toISOString(),
               }).catch(() => {});
             }}
           />
         )}
-        <style>{`@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }`}</style>
       </div>
     );
   }
