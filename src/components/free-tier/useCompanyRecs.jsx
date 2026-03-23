@@ -405,8 +405,9 @@ function mergeResults(networkCompanies, jobCompanies, goals, university) {
 
 export function useCompanyRecs(user) {
   const [companies, setCompanies] = useState(null);
-  const [loading, setLoading] = useState(false); // true only when no fallback yet
-  const [searching, setSearching] = useState(false); // live search running in bg
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState(false);
   const [noIndustry, setNoIndustry] = useState(false);
   const [weeklyNewCount, setWeeklyNewCount] = useState(null);
@@ -456,19 +457,21 @@ export function useCompanyRecs(user) {
         getLiveJobMatchesFn({ career_goals: goals }),
       ])
         .then(([networkRes, jobsRes]) => {
-          const network = networkRes.status === 'fulfilled' ? (networkRes.value?.data?.companies || []) : [];
+          const networkData = networkRes.status === 'fulfilled' ? networkRes.value?.data : {};
+          const network = networkData?.companies || [];
+          const networkMembers = networkData?.members || [];
           const jobs = jobsRes.status === 'fulfilled' ? (jobsRes.value?.data?.companies || []) : [];
-          console.log(`✅ Network: ${network.length} companies, Jobs: ${jobs.length} companies`);
-          return { data: mergeResults(network, jobs, goals, user?.school || '') };
+          console.log(`✅ Network: ${network.length} companies, ${networkMembers.length} members, Jobs: ${jobs.length} companies`);
+          return { data: mergeResults(network, jobs, goals, user?.school || ''), members: networkMembers };
         })
         .catch(err => {
           console.error('Search failed:', err);
-          return { data: null };
+          return { data: null, members: [] };
         })
         .finally(() => { delete inFlightRequests[cacheKey]; });
     }
 
-    const { data: merged } = await inFlightRequests[cacheKey];
+    const { data: merged, members: fetchedMembers } = await inFlightRequests[cacheKey];
     let results = merged?.companies?.length > 0 ? merged.companies : null;
     const weeklyCount = merged?.weekly_new_count ?? 0;
 
@@ -484,6 +487,9 @@ export function useCompanyRecs(user) {
       setCompanies(results);
       setWeeklyNewCount(weeklyCount);
     }
+    if (fetchedMembers?.length > 0) {
+      setMembers(fetchedMembers);
+    }
 
     setLoading(false);
     setSearching(false);
@@ -491,5 +497,5 @@ export function useCompanyRecs(user) {
 
   useEffect(() => { fetchRecs(); }, [fetchRecs]);
 
-  return { companies, loading, searching, error, noIndustry, weeklyNewCount, refetch: fetchRecs };
+  return { companies, members, loading, searching, error, noIndustry, weeklyNewCount, refetch: fetchRecs };
 }

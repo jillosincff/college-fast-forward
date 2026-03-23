@@ -45,43 +45,63 @@ Deno.serve(async (req) => {
     const companiesLower = targetCompanies.map(c => c.toLowerCase());
     const schoolWord = studentSchool.toLowerCase().split(' ')[0];
 
-    // Database only — fetch max 50 users per query, no LLM
-    // Use list() since persona field may be stored in roles array or persona field
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 100);
-    const parents = allUsers.filter(u => u.persona === 'parent' || u.roles?.includes('parent'));
-    const alumni = allUsers.filter(u => u.persona === 'alumni' || u.roles?.includes('alumni'));
-    console.log(`📊 Total users: ${allUsers.length}, parents: ${parents.length}, alumni: ${alumni.length}`);
+    console.log('🔍 getCFFNetworkMatchesFn searching for industries:', industries);
+
+    // Fetch all users — no visibility filter to maximize matches
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 300);
+    const eligible = allUsers.filter(u =>
+      u.persona === 'parent' || u.persona === 'alumni' ||
+      u.roles?.includes('parent') || u.roles?.includes('alumni')
+    );
+    console.log(`📊 Total users: ${allUsers.length}, eligible: ${eligible.length}`);
+
+    // Healthcare-specific keywords for job title / company name matching
+    const HEALTHCARE_TITLE_KEYWORDS = ['nurs', 'health', 'medical', 'clinical', 'pharma', 'hospital', 'patient', 'physician', 'doctor', 'therapist', 'care'];
+    const HEALTHCARE_COMPANY_KEYWORDS = ['health', 'hospital', 'medical', 'clinic', 'pharma', 'care', 'baptist', 'mayo', 'kaiser', 'uhealth'];
+    const isHealthcareSearch = industries.some(i => i.toLowerCase().includes('health') || i.toLowerCase().includes('pharma'));
 
     const companyMap = {};
+    const membersList = [];
 
-    const processUser = (u, type) => {
-      if (u.show_in_directory === false || u.directory_visible === false) return;
-      const company = (u.company || u.current_company || '').trim();
+    const processUser = (u) => {
+      const company = (u.company || u.current_company || u.employer || '').trim();
       if (!company) return;
 
       const uIndustry = (u.industry || '').toLowerCase();
       const uCompany = company.toLowerCase();
-      // Flexible industry match — check any keyword overlap
-      const industryKeywords = industriesLower.flatMap(i => i.split(/[&,\s]+/).filter(w => w.length > 3));
-      const industryMatch = industriesLower.length === 0 || industryKeywords.some(kw => uIndustry.includes(kw));
-      const companyMatch = companiesLower.some(c => c && uCompany.includes(c));
-      if (!industryMatch && !companyMatch) return;
-
+      const uJobTitle = (u.job_title || u.role_title || u.current_role || '').toLowerCase();
       const uSchool = (u.school || u.university || '').toLowerCase();
+
+      // Industry keyword match
+      const industryKeywords = industriesLower.flatMap(i => i.split(/[&,\s]+/).filter(w => w.length > 3));
+      const industryMatch = industriesLower.length === 0 ||
+        industryKeywords.some(kw => uIndustry.includes(kw));
+
+      // Company target match
+      const companyTargetMatch = companiesLower.some(c => c && uCompany.includes(c));
+
+      // Healthcare-specific fallback matching
+      const healthcareTitleMatch = isHealthcareSearch &&
+        HEALTHCARE_TITLE_KEYWORDS.some(kw => uJobTitle.includes(kw));
+      const healthcareCompanyMatch = isHealthcareSearch &&
+        HEALTHCARE_COMPANY_KEYWORDS.some(kw => uCompany.includes(kw));
+
+      const isMatch = industryMatch || companyTargetMatch || healthcareTitleMatch || healthcareCompanyMatch;
+      if (!isMatch) return;
+
+      // Skip obvious test accounts
+      const firstName = (u.first_name || u.full_name?.split(' ')[0] || '').toLowerCase();
+      if (['test', 'demo', 'sample', 'fake', 'movie'].includes(firstName)) return;
+
       const schoolMatch = schoolWord && uSchool.includes(schoolWord);
-      const isOpenToIntro = u.intro_availability === 'happy_to_help' || u.intro_availability === 'yes' || u.open_to_intro === true;
+      const isOpenToIntro = ['happy_to_help', 'yes', 'open', 'true', '1', 'actively_helping',
+        'actively helping', 'happy to help'].some(v =>
+          (u.intro_availability || '').toLowerCase().includes(v));
+      const type = (u.persona === 'parent' || u.roles?.includes('parent')) ? 'parent' : 'alumni';
 
       const key = uCompany;
       if (!companyMap[key]) {
-        companyMap[key] = {
-          name: company,
-          industry: u.industry || '',
-          cff_parent_count: 0,
-          school_alumni_count: 0,
-          open_to_intro_count: 0,
-          sample_roles: [],
-          school_match: false,
-        };
+        companyMap[key] = { name: company, industry: u.industry || '', cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0, sample_roles: [], school_match: false };
       }
       if (type === 'parent') {
         companyMap[key].cff_parent_count++;
@@ -90,26 +110,45 @@ Deno.serve(async (req) => {
         companyMap[key].school_alumni_count++;
         if (schoolMatch) companyMap[key].school_match = true;
       }
-      const role = u.role_title || u.current_role || '';
-      if (role && !companyMap[key].sample_roles.includes(role)) {
-        companyMap[key].sample_roles.push(role);
+      const roleTitle = u.role_title || u.job_title || u.current_role || '';
+      if (roleTitle && !companyMap[key].sample_roles.includes(roleTitle)) {
+        companyMap[key].sample_roles.push(roleTitle);
       }
+
+      // Add to members list for people-first display
+      membersList.push({
+        id: u.id,
+        first_name: u.first_name || u.full_name?.split(' ')[0] || '',
+        last_name: u.last_name || u.full_name?.split(' ').slice(1).join(' ') || '',
+        company_name: company,
+        job_title: u.job_title || u.role_title || u.current_role || '',
+        industry: u.industry || '',
+        intro_availability: u.intro_availability || '',
+        school_match: schoolMatch,
+        school: u.school || u.university || '',
+        email: u.email || '',
+        persona: type,
+      });
     };
 
-    parents.forEach(u => processUser(u, 'parent'));
-    alumni.forEach(u => processUser(u, 'alumni'));
+    eligible.forEach(u => processUser(u));
 
-    const results = Object.values(companyMap).map(c => ({
-      ...c,
-      sample_roles: c.sample_roles.slice(0, 3),
-    }));
+    const companies = Object.values(companyMap).map(c => ({ ...c, sample_roles: c.sample_roles.slice(0, 3) }));
 
-    console.log(`✅ CFF network: ${results.length} companies from ${parents.length + alumni.length} users`);
+    // Sort members: school match + open to intro first
+    membersList.sort((a, b) => {
+      const aScore = (a.school_match ? 2 : 0) + (['happy_to_help','yes','open','actively_helping'].includes(a.intro_availability) ? 1 : 0);
+      const bScore = (b.school_match ? 2 : 0) + (['happy_to_help','yes','open','actively_helping'].includes(b.intro_availability) ? 1 : 0);
+      return bScore - aScore;
+    });
 
-    return Response.json({ companies: results });
+    console.log(`✅ CFF network: ${companies.length} companies, ${membersList.length} individual members`);
+    console.log('🔍 Sample members:', membersList.slice(0, 3).map(m => ({ name: `${m.first_name} ${m.last_name}`, company: m.company_name, industry: m.industry, intro: m.intro_availability })));
+
+    return Response.json({ companies, members: membersList });
 
   } catch (error) {
     console.error('getCFFNetworkMatchesFn error:', error.message);
-    return Response.json({ error: error.message, companies: [] }, { status: 500 });
+    return Response.json({ error: error.message, companies: [], members: [] }, { status: 500 });
   }
 });
