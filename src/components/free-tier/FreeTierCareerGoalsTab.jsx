@@ -536,6 +536,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
             preliminaryArchetype={prelimArchetype}
             userEmail={user?.email}
             onTabChange={onTabChange}
+            onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
             onRestart={startChat}
             onPromptSelect={handleChipSelect}
           />
@@ -543,7 +544,12 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
 
         {/* Path A summary card */}
         {conversationDone && !roleRecs?.length && savedGoals && (
-          <GoalsSummaryCard goals={savedGoals} onTabChange={onTabChange} onRestart={startChat} />
+          <GoalsSummaryCard
+            goals={savedGoals}
+            onTabChange={onTabChange}
+            onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
+            onRestart={startChat}
+          />
         )}
 
         {/* Error states */}
