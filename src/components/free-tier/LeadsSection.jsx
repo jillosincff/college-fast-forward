@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, Bookmark } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 
 const isFastIQUser = (user) =>
   !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
@@ -81,6 +82,7 @@ function WarmLeadCard({ company, alumni, onContact, onSave, onUnsave, isSaved, i
 
   const handleContact = () => {
     if (!isFastIQ) { onUpgrade?.(); return; }
+
     if (alumni.length === 1) {
       const a = alumni[0];
       onContact({ id: a.id, type: 'warm', name: a.full_name || a.name, title: a.job_title || a.role, company: company.name, email: a.email });
@@ -207,7 +209,7 @@ function BestOpportunityCard({ combo, onContact, onSave, isSaved, isFastIQ }) {
   );
 }
 
-export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, onUnsaveLead, onUpgrade, leadsRef }) {
+export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, onUnsaveLead, onUpgrade, onOpenUpgrade, leadsRef }) {
   const [loading, setLoading] = useState(true);
   const [hotLeads, setHotLeads] = useState([]);
   const [warmLeads, setWarmLeads] = useState([]);
@@ -229,10 +231,11 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
     const schoolWord = school.toLowerCase().split(' ')[0];
 
     try {
-      const [allUsers, discoveredAlumni] = await Promise.all([
-        base44.entities.User.list('-created_date', 500).catch(() => []),
+      const [dirRes, discoveredAlumni] = await Promise.all([
+        getDirectoryUsers({}).then(r => r?.data?.data || []).catch(() => []),
         base44.entities.DiscoveredAlumni.filter({}, '-created_date', 300).catch(() => []),
       ]);
+      const allUsers = dirRes;
 
       // Hot leads — CFF parents matching industry
       const industryLower = industries.map(i => i.toLowerCase());

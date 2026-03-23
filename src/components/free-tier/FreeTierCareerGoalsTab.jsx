@@ -176,7 +176,7 @@ function TypingIndicator() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
+export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrade }) {
   const [mode, setMode] = useState(hasExistingGoals(user) ? 'summary' : 'chat');
   const [showLeads, setShowLeads] = useState(false);
   const [showLeadsArrow, setShowLeadsArrow] = useState(false);
