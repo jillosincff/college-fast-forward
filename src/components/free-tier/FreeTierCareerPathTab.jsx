@@ -33,12 +33,6 @@ function buildOpeningMessage(goals) {
     return `You've been exploring opportunities in ${industry}. Want to map out what career paths are most common there, or dig into a specific role?`;
   }
   return `I don't see any career goals set yet — but that's okay. Just tell me what you're interested in and we'll explore together. Or head to Career Goals to set your target industries and roles so I can give you a fully personalized path breakdown.`;
-} roles in ${industry}. Want to explore what a typical career path looks like, what skills you'll need, or what your first 1–3 years might involve?`;
-  }
-  if (industry) {
-    return `You've been exploring opportunities in ${industry}. Want to map out what career paths are most common there, or dig into a specific role?`;
-  }
-  return `I don't see any career goals set yet — but that's okay. Just tell me what you're interested in and we'll explore together. Or head to Career Goals to set your target industries and roles so I can give you a fully personalized path breakdown.`;
 }
 
 function MessageBubble({ message }) {
