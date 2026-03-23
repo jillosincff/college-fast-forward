@@ -102,7 +102,14 @@ function getResultsSummary(members, companies, goals) {
 }
 
 // ─── Company Contacts Modal ──────────────────────────────────────────────────
-function CompanyContactsModal({ company, user, onClose, onOpenComposer }) {
+const mobileSheetStyles = `
+  @media (max-width: 640px) {
+    .cff-contacts-overlay { align-items: flex-end !important; padding: 0 !important; }
+    .cff-contacts-card { border-radius: 16px 16px 0 0 !important; max-height: 90vh !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; max-width: 100% !important; }
+  }
+`;
+
+function CompanyContactsModal({ company, user, onClose, onOpenComposer, onTabChange }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -141,11 +148,15 @@ function CompanyContactsModal({ company, user, onClose, onOpenComposer }) {
   const schoolWord = (user?.school || user?.university || '').toLowerCase().split(' ')[0];
 
   return (
+    <>
+      <style>{mobileSheetStyles}</style>
     <div
+      className="cff-contacts-overlay"
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}
       onClick={onClose}
     >
       <div
+        className="cff-contacts-card"
         style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
         onClick={e => e.stopPropagation()}
       >
@@ -164,7 +175,7 @@ function CompanyContactsModal({ company, user, onClose, onOpenComposer }) {
         {/* Loading */}
         {loading && (
           <div style={{ padding: '32px 24px', textAlign: 'center', color: '#888', fontSize: 14, fontStyle: 'italic', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <Loader2 style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }} />
+            <Loader2 className="animate-spin" style={{ width: 16, height: 16 }} />
             Finding your connections at {company.name}...
           </div>
         )}
@@ -214,12 +225,16 @@ function CompanyContactsModal({ company, user, onClose, onOpenComposer }) {
 
         {/* Footer */}
         <div style={{ padding: '16px 24px', borderTop: '1px solid #F5F5F5', textAlign: 'center' }}>
-          <button onClick={onClose} style={{ color: '#E85D20', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>
+          <button
+            onClick={() => { onClose(); onTabChange?.('directory'); }}
+            style={{ color: '#E85D20', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}
+          >
             See full directory filtered by {company.name} →
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -509,6 +524,7 @@ export default function AICompanyCards({
           user={user}
           onClose={() => setContactsCompany(null)}
           onOpenComposer={(member) => setSelectedMember(member)}
+          onTabChange={onTabChange}
         />
       )}
     </div>
