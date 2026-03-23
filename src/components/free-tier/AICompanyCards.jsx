@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
+import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 
 const searchingStyles = `
   @keyframes orbPulse {
@@ -301,8 +303,83 @@ function getHeaderCopy(tier1, tier2, tier3, role) {
   return `FastIQ is searching for ${r} opportunities right now.`;
 }
 
+function getAvailabilityLabel(availability) {
+  const val = (availability || '').toLowerCase();
+  if (['happy_to_help', 'yes', 'open', 'true', '1', 'actively_helping', 'actively helping', 'happy to help'].some(v => val.includes(v))) {
+    return '🟢 Happy to help';
+  }
+  if (['occasionally', 'sometimes', 'maybe'].some(v => val.includes(v))) {
+    return '🟡 Occasionally available';
+  }
+  return '⚪ In the network';
+}
+
+function getInitials(firstName, lastName) {
+  return ((firstName?.[0] || '') + (lastName?.[0] || '')).toUpperCase() || '?';
+}
+
+function CFFMembersSection({ members, industry, user, onTabChange }) {
+  const [selectedMember, setSelectedMember] = useState(null);
+  if (!members || members.length === 0) return null;
+  const industryLabel = industry || 'your industry';
+  return (
+    <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E5E5', borderLeft: '3px solid #E85D20', padding: 20, marginBottom: 24 }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 8px' }}>CFF MEMBERS IN YOUR FIELD</p>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#1A1A1A', margin: '0 0 6px' }}>
+        The following CFF members work in {industryLabel}. We suggest reaching out for guidance.
+      </h3>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px', lineHeight: 1.5 }}>
+        These are real professionals who joined CFF specifically to help students like you. One conversation could open a door.
+      </p>
+      {members.slice(0, 6).map(member => (
+        <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid #F5F5F5' }}>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+            {getInitials(member.first_name, member.last_name)}
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A', margin: 0 }}>
+              {member.first_name} {member.last_name?.[0] ? `${member.last_name[0]}.` : ''}
+            </p>
+            <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>
+              {member.job_title || 'Professional'}{member.company_name ? ` · ${member.company_name}` : ''}
+            </p>
+            {member.school_match && (
+              <p style={{ fontSize: 11, color: '#E85D20', margin: '2px 0 0' }}>
+                🎓 {user?.school || 'Your school'} connection
+              </p>
+            )}
+            <p style={{ fontSize: 11, color: '#888', margin: '2px 0 0' }}>{getAvailabilityLabel(member.intro_availability)}</p>
+          </div>
+          <button
+            onClick={() => setSelectedMember(member)}
+            style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
+          >
+            Send a Message →
+          </button>
+        </div>
+      ))}
+      {members.length > 6 && (
+        <button
+          onClick={() => onTabChange?.('directory')}
+          style={{ display: 'block', textAlign: 'center', color: '#E85D20', fontSize: 13, marginTop: 12, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', width: '100%' }}
+        >
+          See all {members.length} CFF members in {industryLabel} →
+        </button>
+      )}
+      {selectedMember && (
+        <ParentMessageComposer
+          user={user}
+          parent={selectedMember}
+          onClose={() => setSelectedMember(null)}
+          onSent={() => setSelectedMember(null)}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function AICompanyCards({
-  companies, loading, searching, error, noIndustry,
+  companies, members = [], loading, searching, error, noIndustry,
   onRefetch, onTabChange, onOpenUpgrade,
   isFastIQ, user, weeklyNewCount, dark = true,
 }) {
@@ -351,6 +428,7 @@ export default function AICompanyCards({
   }
 
   const studentRole = user?.career_goals?.role || user?.target_role || '';
+  const primaryIndustry = user?.career_goals?.industries?.[0] || user?.target_industries?.[0] || '';
   const tier1 = companies.filter(c => c.tier === 1);
   const tier2 = companies.filter(c => c.tier === 2 && isRelevantEmployer(c, studentRole));
   const tier3 = companies.filter(c => c.tier === 3);
@@ -367,6 +445,14 @@ export default function AICompanyCards({
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: dark ? '#aaa' : '#666', marginBottom: 20, lineHeight: 1.5 }}>
         {headerCopy}
       </p>
+
+      {/* CFF Members — people first */}
+      <CFFMembersSection
+        members={members}
+        industry={primaryIndustry}
+        user={user}
+        onTabChange={onTabChange}
+      />
 
       <TierSection
         tier={1}
