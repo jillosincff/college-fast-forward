@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Target, ChevronDown } from 'lucide-react';
+import EditGoalsModal from './EditGoalsModal';
 
-export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRestart, showLeadsArrow }) {
+export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRestart, showLeadsArrow, user, onGoalsUpdated }) {
+  const [showEditModal, setShowEditModal] = useState(false);
   const roles = goals?.target_roles?.join(', ') || goals?.role || '—';
   const industries = goals?.target_industries?.join(', ') || goals?.industries?.join(', ') || '—';
   const seeking = goals?.seeking || '—';
@@ -9,12 +11,14 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
   const location = goals?.location_preference || goals?.locations?.[0] || '—';
   const dreamCo = goals?.dream_company || '—';
   const experience = goals?.experience_level || '—';
+  const major = goals?.major || '—';
 
   const rows = [
     ['Target Roles', roles],
     ['Industries', industries],
     ['Looking for', `${seeking}${gradYear !== '—' ? ` · Graduating ${gradYear}` : ''}`],
     ['Location', location],
+    ['Major', major],
     ['Dream Company', dreamCo],
     ['Experience', experience],
   ];
@@ -43,13 +47,23 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
           style={{ background: 'none', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
           Dig Into Career Paths →
         </button>
-        {onRestart && (
-          <button onClick={onRestart}
-            style={{ background: 'none', border: 'none', color: '#999', fontSize: 13, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: '10px 4px' }}>
-            Update my goals
-          </button>
-        )}
+        <button onClick={() => setShowEditModal(true)}
+          style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: '10px 4px' }}>
+          Update my goals
+        </button>
       </div>
+      {showEditModal && (
+        <EditGoalsModal
+          goals={goals}
+          user={user}
+          onClose={() => setShowEditModal(false)}
+          onSave={(updated) => {
+            onGoalsUpdated?.(updated);
+            setShowEditModal(false);
+          }}
+          onStartFresh={onRestart}
+        />
+      )}
       <style>{`@keyframes bounceDown { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }`}</style>
     </div>
   );
