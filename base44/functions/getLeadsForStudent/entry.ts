@@ -103,11 +103,11 @@ Deno.serve(async (req) => {
       return keywords.filter(k => text.includes(k)).length;
     };
 
-    // RED HOT — same school
+    // RED HOT — same school + matching industries/roles
     const redHot = cffMembers
       .filter(u => {
         const ms = normalizeSchool(u.school || u.university || '');
-        return ms === studentSchool && ms !== '';
+        return ms === studentSchool && ms !== '' && scoreMatch(u) > 0;
       })
       .sort((a, b) => scoreMatch(b) - scoreMatch(a))
       .slice(0, 20)
@@ -125,11 +125,11 @@ Deno.serve(async (req) => {
         match_score: scoreMatch(u)
       }));
 
-    // HOT — different school
+    // HOT — different school + matching industries/roles
     const hot = cffMembers
       .filter(u => {
         const ms = normalizeSchool(u.school || u.university || '');
-        return ms !== studentSchool && ms !== '';
+        return ms !== studentSchool && ms !== '' && scoreMatch(u) > 0;
       })
       .sort((a, b) => scoreMatch(b) - scoreMatch(a))
       .slice(0, 20)
