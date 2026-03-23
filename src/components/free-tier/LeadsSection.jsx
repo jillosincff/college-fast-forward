@@ -120,9 +120,14 @@ function MatchBadge({ score }) {
   );
 }
 
-function HotLeadCard({ parent, briefing, onContact, onSave, onUnsave, isSaved }) {
+function HotLeadCard({ parent, briefing, onContact, onSave, onUnsave, isSaved, currentUser }) {
   const initials = (parent.full_name || 'P').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
-  const score = parent.intro_availability === 'happy_to_help' || parent.intro_willingness === 'happy_to_help' ? 80 : 65;
+  const baseScore = parent.intro_availability === 'happy_to_help' || parent.intro_willingness === 'happy_to_help' ? 80 : 65;
+  const userSchool = (currentUser?.school || currentUser?.university || '').toLowerCase();
+  const parentSchool = (parent.school || parent.university || '').toLowerCase();
+  const sameSchool = !!(userSchool && parentSchool && userSchool.split(' ')[0] === parentSchool.split(' ')[0]);
+  const score = baseScore + (sameSchool ? 15 : 0);
+  const schoolLabel = parent.school || parent.university || 'CFF';
   return (
     <div style={{ background: '#fff', border: '1px solid #E0E0E0', borderLeft: '3px solid #E85D20', borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between' }}>
@@ -132,7 +137,8 @@ function HotLeadCard({ parent, briefing, onContact, onSave, onUnsave, isSaved })
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: '#1A1A1A', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {parent.full_name?.split(' ')[0]} {parent.full_name?.split(' ').slice(-1)[0]?.[0]}.
             </p>
-            {parent.job_title && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: 0 }}>{parent.job_title}{parent.company ? ` · ${parent.company}` : ''}</p>}
+            {parent.job_title && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: '0 0 2px' }}>{parent.job_title}{parent.company ? ` · ${parent.company}` : ''}</p>}
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: sameSchool ? '#E85D20' : '#888', margin: 0, fontWeight: 500 }}>🏫 {schoolLabel} Parent</p>
           </div>
         </div>
         <MatchBadge score={score} />
@@ -150,7 +156,7 @@ function HotLeadCard({ parent, briefing, onContact, onSave, onUnsave, isSaved })
       )}
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', margin: 0, fontWeight: 600 }}>✓ Open to intro requests</p>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <button onClick={() => onContact({ id: parent.id, type: 'hot', name: parent.full_name, title: parent.job_title, company: parent.company, email: parent.email })}
+        <button onClick={() => onContact({ id: parent.id, type: 'hot', name: parent.full_name, title: parent.job_title, company: parent.company, email: parent.email, school: parent.school || parent.university })}
           style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
           Contact Now →
         </button>
@@ -284,7 +290,7 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       ]);
       const allUsers = dirRes;
 
-      // ── HOT LEADS: 5-level cascade ─────────────────────────────────────────
+      // ── HOT LEADS: ALL parents across ALL schools, no school filter ──────────
       const allParents = allUsers.filter(u =>
         (u.persona === 'parent' || u.roles?.includes('parent')) && u.full_name
       );
@@ -293,7 +299,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         u.intro_willingness === 'happy_to_help' || u.intro_willingness === 'yes'
       );
 
-      // Debug info
       const parentsWithIndustry = allParents.filter(u => u.industry);
       setDebugInfo({
         searching: industries,
@@ -339,21 +344,27 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         level = 5;
       }
 
+      // Sort: same school first, then by open-to-intro
+      const userSchoolWord = (user?.school || user?.university || '').toLowerCase().split(' ')[0];
+      hot.sort((a, b) => {
+        const aSchool = userSchoolWord && (a.school || a.university || '').toLowerCase().includes(userSchoolWord) ? 1 : 0;
+        const bSchool = userSchoolWord && (b.school || b.university || '').toLowerCase().includes(userSchoolWord) ? 1 : 0;
+        return bSchool - aSchool;
+      });
+
       const parents = hot.slice(0, 6);
       setHotLeads(parents);
       setHotLevel(level);
 
-      // ── WARM LEADS: 5-level cascade ────────────────────────────────────────
+      // ── WARM LEADS ─────────────────────────────────────────────────────────
       const allMembers = allUsers.filter(u => u.full_name && u.email !== user?.email);
 
-      // Build company name → member count map for chips
       const compMap = {};
       allMembers.forEach(u => {
         const co = memberCompany(u);
         if (co) compMap[co.toLowerCase()] = (compMap[co.toLowerCase()] || 0) + 1;
       });
 
-      // L1: members at exact named target companies
       let warm = [];
       let wLevel = 1;
       let wLabel = '';
@@ -365,7 +376,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         });
       }
 
-      // Also check industry-based — generate target list via LLM if no named companies
       let generatedCompanies = targetCompanies;
       if (targetCompanies.length === 0 && industries.length > 0) {
         try {
@@ -375,14 +385,12 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
           });
           generatedCompanies = llmRes?.companies || [];
           if (generatedCompanies.length > 0) {
-            // Count members at each suggested company
             const counts = {};
             generatedCompanies.forEach(c => {
               counts[c] = allMembers.filter(u => memberCompany(u).toLowerCase().includes(c.toLowerCase())).length;
             });
             setCompanyCounts(counts);
             setSuggestedCompanies(generatedCompanies);
-            // Try matching against generated list
             if (warm.length === 0) {
               warm = allMembers.filter(u => {
                 const co = memberCompany(u).toLowerCase();
@@ -393,7 +401,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         } catch { generatedCompanies = []; }
       }
 
-      // L2: members with job title matching role keywords
       if (warm.length === 0 && roleKeywords.length > 0) {
         warm = allMembers.filter(u => {
           const title = (u.job_title || u.current_role || '').toLowerCase();
@@ -402,7 +409,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         if (warm.length > 0) { wLevel = 2; wLabel = 'Alumni in your target role'; }
       }
 
-      // L3: members in target industry regardless of company
       if (warm.length === 0 && expandedIndustries.length > 0) {
         warm = allMembers.filter(u => {
           const text = memberTextField(u);
@@ -411,7 +417,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         if (warm.length > 0) { wLevel = 3; wLabel = 'Alumni in your target field'; }
       }
 
-      // L4: members in target location
       if (warm.length === 0 && location) {
         const locLower = location.toLowerCase().split(/[,\s]+/)[0];
         warm = allMembers.filter(u => {
@@ -421,12 +426,11 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         if (warm.length > 0) { wLevel = 4; wLabel = `CFF members in ${location}`; }
       }
 
-      // L5: most recently active members (any alumni-type or graduated 2+ years ago)
       if (warm.length === 0) {
         warm = allMembers.filter(u =>
           u.persona === 'alumni' || u.roles?.includes('alumni') || isRecentGrad(u)
         ).slice(0, 6);
-        if (warm.length === 0) warm = allMembers.slice(0, 6); // absolute safety net
+        if (warm.length === 0) warm = allMembers.slice(0, 6);
         wLevel = 5;
         wLabel = 'Active CFF alumni open to helping students';
       }
@@ -435,7 +439,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       setWarmLevel(wLevel);
       setWarmLabel(wLabel);
 
-      // Combo lead (parent + warm member at same company)
       let best = null;
       for (const m of warm.slice(0, 6)) {
         const co = memberCompany(m);
@@ -448,7 +451,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       }
       setComboLead(best);
 
-      // Briefings (async, non-blocking)
       if (parents.length > 0 && (industries.length > 0 || targetRoles.length > 0)) {
         base44.integrations.Core.InvokeLLM({
           prompt: `You are FastIQ. For each parent, write a 1-2 sentence explanation of why they are a valuable lead for a student targeting ${targetRoles.join(', ') || 'business roles'} in ${industries.join(', ') || 'finance'}.\n\nParents:\n${parents.map((p, i) => `${i + 1}. ${p.full_name} — ${p.job_title || 'Professional'} at ${p.company || 'their company'} (${p.industry || 'business'})`).join('\n')}\n\nReturn exactly ${parents.length} strings.`,
@@ -492,21 +494,21 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       {/* HOT LEADS */}
       <section style={{ marginBottom: 36 }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>🔥 HOT LEADS</p>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>CFF Parents Open to Intros</h3>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>CFF Parents Across the Network</h3>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 12px', lineHeight: 1.5 }}>Parents from CFF schools who work in your target field and are open to helping students.</p>
         <LevelBanner level={hotLevel} context={primaryIndustry} />
         {hotLeads.length > 0 ? (
           <>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
-              {hotLeads.length} parent{hotLeads.length > 1 ? 's' : ''} ready to help — reach out directly.
+              {hotLeads.length} parent{hotLeads.length > 1 ? 's' : ''} across the CFF network ready to help — reach out directly.
             </p>
             <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
               {hotLeads.map(p => (
-                <HotLeadCard key={p.id} parent={p} briefing={briefings[p.id]} onContact={onContact} onSave={onSaveLead} onUnsave={onUnsaveLead} isSaved={isSaved(p.id)} />
+                <HotLeadCard key={p.id} parent={p} briefing={briefings[p.id]} onContact={onContact} onSave={onSaveLead} onUnsave={onUnsaveLead} isSaved={isSaved(p.id)} currentUser={user} />
               ))}
             </div>
           </>
         ) : (
-          // Should never reach here with Level 5, but show debug if it does
           <div style={{ background: '#F9F9F9', border: '1px dashed #E0E0E0', borderRadius: 10, padding: '20px 24px' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 12px' }}>No parents found. Help us grow the network!</p>
             <button onClick={() => {}} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Invite a Parent →</button>
