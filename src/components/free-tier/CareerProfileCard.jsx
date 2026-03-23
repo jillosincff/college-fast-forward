@@ -7,7 +7,7 @@ const cffIntroLabel = { high: '🤝 CFF intro: highly valuable', medium: '🤝 C
 export default function CareerProfileCard({
   careerProfile, roleRecommendations, aboutYou, topStrengths,
   workEnvironment, honestChallenge, cffNetwork, preliminaryArchetype,
-  onTabChange, onRestart, onPromptSelect, userEmail,
+  onTabChange, onFindLeads, onRestart, onPromptSelect, userEmail,
 }) {
   // Auto-save to notebook on render
   useEffect(() => {
