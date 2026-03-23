@@ -22,7 +22,14 @@ Rules:
 - For Path A: set is_final=true after Q8 with goals_summary populated
 - For Path B: set is_final=true after B9 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
 
-Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips), goals_summary (null until final), career_profile (null unless Path B final), role_recommendations (null unless Path B final)`;
+CRITICAL RULES:
+- GRADUATION YEAR: After the internship vs full-time question, if graduation year was not explicitly stated, ask: "Just so I can give you accurate timeline advice — what year do you graduate? 2025, 2026, 2027?" with suggested_prompts chips: ["2025", "2026", "2027", "2028+"]. NEVER assume or hallucinate graduation timing.
+- NO EXPERIENCE ACKNOWLEDGMENT: When a student answers the experience question with "none", "no experience", or similar, your response MUST include this exact acknowledgment before moving on: "Starting from zero is totally fine — and honestly, a lot of CFF parents specifically remember what it felt like and are the most generous with their time. We'll build your path with that in mind."
+- ROLE QUALITY: Each role recommendation must use the specific role title (not generic), name specific company types or companies that hire for it, explain exactly why it fits THIS student based on their specific answers, give a specific honest challenge relevant to their experience level, and include no_experience_first_step if they have no experience.
+- HONEST CHALLENGE: The honest_challenge must be specific to this student — reference their experience level, goals, and answers. Never write advice that applies to any student.
+- PRELIMINARY ARCHETYPE: Always infer a preliminary_archetype from the conversation, even mid-conversation.
+
+Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)`;
 
 const SYNTHESIS_SUFFIX = `
 
@@ -40,25 +47,31 @@ const RESPONSE_SCHEMA = {
     message: { type: 'string' },
     is_final: { type: 'boolean' },
     suggested_prompts: { type: 'array', items: { type: 'string' } },
-    career_profile: {
+    preliminary_archetype: {
       type: 'object',
       properties: {
-        work_style: { type: 'string' },
-        environment_preference: { type: 'string' },
-        top_strengths: { type: 'array', items: { type: 'string' } },
-        motivated_by: { type: 'string' },
-        entrepreneurship_interest: { type: 'string' },
+        name: { type: 'string' },
+        confidence: { type: 'string' },
+        label: { type: 'string' },
       },
     },
+    about_you: { type: 'string' },
+    top_strengths: { type: 'array', items: { type: 'string' } },
+    work_environment: { type: 'string' },
+    honest_challenge: { type: 'string' },
+    cff_network_recommendation: { type: 'string' },
     role_recommendations: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
           title: { type: 'string' },
+          specific_companies: { type: 'array', items: { type: 'string' } },
           why_it_fits: { type: 'string' },
           honest_challenge: { type: 'string' },
-          cff_network_strength: { type: 'string' },
+          no_experience_first_step: { type: 'string' },
+          cff_intro_value: { type: 'string' },
+          entrepreneurship_path: { type: 'boolean' },
         },
       },
     },
@@ -75,8 +88,7 @@ const RESPONSE_SCHEMA = {
         dream_company: { type: 'string' },
         perceived_gap: { type: 'string' },
         work_environment: { type: 'string' },
-        work_style: { type: 'string' },
-        entrepreneurship_interest: { type: 'string' },
+        preliminary_archetype: { type: 'string' },
         career_profile_summary: { type: 'string' },
       },
     },
@@ -98,7 +110,7 @@ function MessageBubble({ message }) {
   return (
     <div style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', marginBottom: 14 }}>
       {!isUser && (
-        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, marginRight: 10, marginTop: 2 }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0d1117', border: '1px solid rgba(232,93,32,0.4)', color: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, marginRight: 10, marginTop: 2 }}>
           ⚡
         </div>
       )}
@@ -163,6 +175,12 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   const [conversationDone, setConversationDone] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [questionCount, setQuestionCount] = useState(0); // track how many AI turns to detect B9
+  const [aboutYou, setAboutYou] = useState(null);
+  const [topStrengths, setTopStrengths] = useState(null);
+  const [workEnvironment, setWorkEnvironment] = useState(null);
+  const [honestChallenge, setHonestChallenge] = useState(null);
+  const [cffNetwork, setCffNetwork] = useState(null);
+  const [prelimArchetype, setPrelimArchetype] = useState(null);
   const bottomRef = useRef(null);
 
   // Seed opener on chat start
@@ -215,7 +233,13 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
       if (isFinal) {
         if (result?.career_profile) setCareerProfile(result.career_profile);
         if (result?.role_recommendations?.length) setRoleRecs(result.role_recommendations);
-        if (result?.goals_summary) await saveGoals(result.goals_summary);
+        if (result?.about_you) setAboutYou(result.about_you);
+        if (result?.top_strengths?.length) setTopStrengths(result.top_strengths);
+        if (result?.work_environment) setWorkEnvironment(result.work_environment);
+        if (result?.honest_challenge) setHonestChallenge(result.honest_challenge);
+        if (result?.cff_network_recommendation) setCffNetwork(result.cff_network_recommendation);
+        if (result?.preliminary_archetype) setPrelimArchetype(result.preliminary_archetype);
+        if (result?.goals_summary) await saveGoals(result.goals_summary, result.preliminary_archetype);
         else setConversationDone(true);
       }
     } catch (e) {
@@ -229,10 +253,13 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     setIsSynthesizing(false);
   };
 
-  const saveGoals = async (goalsSummary) => {
+  const saveGoals = async (goalsSummary, prelimArch) => {
     try {
       const goalsData = { ...goalsSummary, saved_at: new Date().toISOString() };
-      await base44.auth.updateMe({ career_goals: goalsData });
+      await base44.auth.updateMe({
+        career_goals: goalsData,
+        ...(prelimArch?.name ? { preliminary_archetype: prelimArch.name } : {}),
+      });
       setSavedGoals(goalsData);
       setConversationDone(true);
     } catch (e) {
@@ -323,6 +350,12 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
           <CareerProfileCard
             careerProfile={careerProfile}
             roleRecommendations={roleRecs}
+            aboutYou={aboutYou}
+            topStrengths={topStrengths}
+            workEnvironment={workEnvironment}
+            honestChallenge={honestChallenge}
+            cffNetwork={cffNetwork}
+            preliminaryArchetype={prelimArchetype}
             onTabChange={onTabChange}
             onRestart={startChat}
             onPromptSelect={handleChipSelect}
