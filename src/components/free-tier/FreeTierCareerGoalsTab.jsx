@@ -567,9 +567,18 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         {/* Goals card */}
         <GoalsSummaryCard
           goals={savedGoals || user?.career_goals}
+          user={user}
           onTabChange={onTabChange}
           onFindLeads={handleFindLeads}
-          onRestart={startChat}
+          onGoalsUpdated={(updated) => {
+            setSavedGoals({ ...(savedGoals || user?.career_goals), ...updated });
+            // Toast
+            const el = document.createElement('div');
+            el.textContent = '✓ Goals updated — refreshing your leads...';
+            el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2500);
+          }}
           showLeadsArrow={showLeadsArrow}
         />
 
@@ -865,6 +874,10 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         @keyframes dotBounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
           40% { transform: translateY(-6px); opacity: 1; }
+        }
+        button:focus {
+          outline: none;
+          box-shadow: 0 0 0 2px #E85D20;
         }
       `}</style>
     </div>
