@@ -317,8 +317,214 @@ function PersonCard({ member, user, onOpenComposer }) {
   );
 }
 
+// ─── Company Intel Modal ─────────────────────────────────────────────────────
+const intelMobileStyles = `
+  @media (max-width: 640px) {
+    .cff-intel-overlay { align-items: flex-end !important; padding: 0 !important; }
+    .cff-intel-card { border-radius: 16px 16px 0 0 !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; max-width: 100% !important; max-height: 90vh !important; }
+  }
+`;
+
+function CompanyIntelModal({ company, user, onClose, onOpenContacts, isFastIQ, onOpenUpgrade }) {
+  const [intel, setIntel] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        // Check cache first
+        const cached = await base44.entities.CompanyIntelCache.filter(
+          { company_name: company.name }, '-updated_date', 1
+        );
+        const record = cached?.[0];
+        if (record && record.expires_at && new Date(record.expires_at) > new Date()) {
+          if (!cancelled) setIntel(record);
+          if (!cancelled) setLoading(false);
+          return;
+        }
+        // Fetch fresh via LLM
+        const fresh = await base44.integrations.Core.InvokeLLM({
+          prompt: `Research ${company.name} as a potential employer for an entry-level candidate in ${company.industry || 'their field'}. Provide: 1) current hiring status 2) a short description of what's happening now 3) open role categories 4) one culture insight for new grads 5) any warning signals (layoffs/freeze/financial trouble) 6) 2-3 similar companies 7) a hiring score 0-100.`,
+          add_context_from_internet: true,
+          model: 'gemini_3_flash',
+          response_json_schema: {
+            type: 'object',
+            properties: {
+              hiring_signal: { type: 'string', enum: ['hot', 'warm', 'cool'] },
+              hiring_score: { type: 'number' },
+              intel_summary: { type: 'string' },
+              open_roles_categories: { type: 'array', items: { type: 'string' } },
+              culture_insight: { type: 'string' },
+              warning_signals: { type: 'array', items: { type: 'object', properties: { text: { type: 'string' } } } },
+              similar_companies: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' } } } },
+            },
+          },
+        });
+        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        const payload = {
+          company_name: company.name,
+          hiring_signal: fresh.hiring_signal || company.hiring_signal || 'warm',
+          hiring_score: fresh.hiring_score || null,
+          intel_summary: fresh.intel_summary || company.hiring_description || '',
+          open_roles_count: fresh.open_roles_categories?.length || 0,
+          warning_signals: fresh.warning_signals || [],
+          similar_companies: fresh.similar_companies || [],
+          recommendation_text: fresh.culture_insight || '',
+          expires_at: expires,
+        };
+        if (record) {
+          await base44.entities.CompanyIntelCache.update(record.id, payload);
+        } else {
+          await base44.entities.CompanyIntelCache.create(payload);
+        }
+        if (!cancelled) setIntel({ ...payload, open_roles_categories: fresh.open_roles_categories, culture_insight: fresh.culture_insight });
+      } catch (e) {
+        console.warn('Intel load failed:', e);
+        if (!cancelled) setIntel({
+          hiring_signal: company.hiring_signal || 'warm',
+          intel_summary: company.hiring_description || '',
+          open_roles_categories: [],
+          warning_signals: [],
+          similar_companies: [],
+        });
+      }
+      if (!cancelled) setLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [company.name]);
+
+  const sigColor = { hot: '#22C55E', warm: '#F59E0B', cool: '#EF4444' }[intel?.hiring_signal] || '#888';
+  const sigLabel = { hot: 'Actively Hiring', warm: 'Selective Hiring', cool: 'Limited Openings' }[intel?.hiring_signal] || 'Checking...';
+  const warnings = Array.isArray(intel?.warning_signals) ? intel.warning_signals : [];
+  const similar = Array.isArray(intel?.similar_companies) ? intel.similar_companies : [];
+  const roles = Array.isArray(intel?.open_roles_categories) ? intel.open_roles_categories : [];
+  const hasConnections = (company.cff_parent_count || 0) + (company.school_alumni_count || 0) > 0;
+
+  return (
+    <>
+      <style>{intelMobileStyles}</style>
+      <div className="cff-intel-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001, padding: 20 }} onClick={onClose}>
+        <div className="cff-intel-card" style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 560, maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '24px 24px 16px', borderBottom: '1px solid #F5F5F5', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+            <div>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{company.name}</p>
+              {company.industry && <p style={{ fontSize: 13, color: '#888', margin: '2px 0 0' }}>{company.industry}</p>}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {intel && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: sigColor }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: sigColor, display: 'inline-block', flexShrink: 0 }} />
+                  {sigLabel}
+                </span>
+              )}
+              <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#888', minHeight: 'auto', minWidth: 'auto', padding: 4 }}>✕</button>
+            </div>
+          </div>
+
+          {/* Loading */}
+          {loading && (
+            <div style={{ padding: '48px 24px', textAlign: 'center', color: '#888' }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>⚡</div>
+              <p style={{ fontSize: 14, margin: 0 }}>FastIQ is researching {company.name}...</p>
+            </div>
+          )}
+
+          {/* Content */}
+          {!loading && intel && (
+            <div style={{ flex: 1 }}>
+              {/* Score bar */}
+              {intel.hiring_score > 0 && (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #F9F9F9' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', margin: '0 0 8px' }}>HIRING SIGNAL SCORE</p>
+                  <div style={{ height: 6, background: '#F0F0F0', borderRadius: 3, overflow: 'hidden', marginBottom: 4 }}>
+                    <div style={{ height: '100%', width: `${intel.hiring_score}%`, background: sigColor, borderRadius: 3, transition: 'width 0.6s ease' }} />
+                  </div>
+                  <p style={{ fontSize: 13, color: '#888', textAlign: 'right', margin: 0 }}>{intel.hiring_score}/100</p>
+                </div>
+              )}
+              {/* Description */}
+              {intel.intel_summary && (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #F9F9F9' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', margin: '0 0 8px' }}>WHAT'S HAPPENING NOW</p>
+                  <p style={{ fontSize: 14, color: '#333', lineHeight: 1.6, margin: 0 }}>{intel.intel_summary}</p>
+                </div>
+              )}
+              {/* Open roles */}
+              {roles.length > 0 && (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #F9F9F9' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', margin: '0 0 8px' }}>OPEN ROLE CATEGORIES</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {roles.map((r, i) => (
+                      <span key={i} style={{ background: '#F5F5F5', color: '#333', borderRadius: 20, padding: '4px 12px', fontSize: 12 }}>{r}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Culture insight */}
+              {intel.culture_insight && (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #F9F9F9' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', margin: '0 0 8px' }}>CULTURE INSIGHTS</p>
+                  <p style={{ fontSize: 14, color: '#333', lineHeight: 1.6, margin: 0 }}>{intel.recommendation_text || intel.culture_insight}</p>
+                </div>
+              )}
+              {/* Warnings */}
+              {warnings.length > 0 && (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #F9F9F9' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#EF4444', letterSpacing: '0.15em', margin: '0 0 8px' }}>⚠ WARNING SIGNALS</p>
+                  {warnings.map((w, i) => (
+                    <div key={i} style={{ fontSize: 13, color: '#EF4444', borderLeft: '2px solid #EF4444', paddingLeft: 10, marginBottom: 6 }}>{w.text || w}</div>
+                  ))}
+                </div>
+              )}
+              {/* CFF Network */}
+              {hasConnections && (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #F9F9F9', background: '#FFF8F5' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', margin: '0 0 8px' }}>CFF NETWORK</p>
+                  <p style={{ fontSize: 14, color: '#E85D20', fontWeight: 600, margin: '0 0 8px' }}>
+                    🤝 {(company.cff_parent_count || 0) + (company.school_alumni_count || 0)} CFF {company.connection_type === 'alumni' ? 'alumni' : 'members'} work here
+                  </p>
+                  {(isFastIQ || true) && (
+                    <button onClick={() => { onClose(); onOpenContacts(company); }}
+                      style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+                      See Who to Contact →
+                    </button>
+                  )}
+                </div>
+              )}
+              {/* Similar companies */}
+              {similar.length > 0 && (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid #F9F9F9' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', margin: '0 0 8px' }}>SIMILAR COMPANIES TO CONSIDER</p>
+                  <p style={{ fontSize: 13, color: '#666' }}>{similar.map(s => s.name || s).join(' · ')}</p>
+                </div>
+              )}
+              {/* Upgrade prompt */}
+              {!isFastIQ && (
+                <div style={{ margin: 16, background: '#F9F9F9', border: '1px solid #E5E5E5', borderRadius: 12, padding: 16, textAlign: 'center' }}>
+                  <p style={{ fontSize: 13, color: '#666', margin: '0 0 10px' }}>Want FastIQ to find alumni at {company.name} and write your outreach message?</p>
+                  <button onClick={onOpenUpgrade} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Unlock FastIQ →</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={{ padding: '12px 24px', borderTop: '1px solid #F5F5F5', textAlign: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: '#BBB', fontStyle: 'italic' }}>Updated every 24 hours</span>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Company Card ─────────────────────────────────────────────────────────────
-function CompanyCard({ company, user, onTabChange, isFastIQ, onOpenUpgrade, onSeeContacts }) {
+function CompanyCard({ company, user, onViewIntel, isFastIQ, onOpenUpgrade, onSeeContacts }) {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const hasConnections = (company.cff_parent_count || 0) + (company.school_alumni_count || 0) > 0;
   const sig = company.hiring_signal === 'hot' ? { emoji: '🟢', label: 'Actively Hiring' }
@@ -365,7 +571,7 @@ function CompanyCard({ company, user, onTabChange, isFastIQ, onOpenUpgrade, onSe
       )}
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 2 }}>
-        <button onClick={() => onTabChange?.('company_intel')}
+        <button onClick={() => onViewIntel?.(company)}
           style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>
           View Full Intel →
         </button>
@@ -392,6 +598,7 @@ export default function AICompanyCards({
 }) {
   const [selectedMember, setSelectedMember] = useState(null);
   const [contactsCompany, setContactsCompany] = useState(null);
+  const [intelCompany, setIntelCompany] = useState(null);
 
   const role = user?.career_goals?.role || user?.target_role || '';
   const primaryIndustry = user?.career_goals?.industries?.[0] || user?.target_industries?.[0] || 'your field';
@@ -497,7 +704,7 @@ export default function AICompanyCards({
                 key={c.name}
                 company={c}
                 user={user}
-                onTabChange={onTabChange}
+                onViewIntel={setIntelCompany}
                 isFastIQ={isFastIQ}
                 onOpenUpgrade={onOpenUpgrade}
                 onSeeContacts={setContactsCompany}
@@ -520,6 +727,18 @@ export default function AICompanyCards({
           parent={selectedMember}
           onClose={() => setSelectedMember(null)}
           onSent={() => setSelectedMember(null)}
+        />
+      )}
+
+      {/* Company Intel Modal */}
+      {intelCompany && (
+        <CompanyIntelModal
+          company={intelCompany}
+          user={user}
+          isFastIQ={isFastIQ}
+          onOpenUpgrade={onOpenUpgrade}
+          onClose={() => setIntelCompany(null)}
+          onOpenContacts={(c) => { setIntelCompany(null); setContactsCompany(c); }}
         />
       )}
 
