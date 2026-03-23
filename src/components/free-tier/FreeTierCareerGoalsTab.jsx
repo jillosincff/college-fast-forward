@@ -375,6 +375,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     setSuggestedPrompts([]);
     const major = user?.major || user?.career_goals?.major || '';
     const isLikelyB9 = questionCount >= 10;
+    const newMessages = [...messages, { role: 'user', content: trimmed }];
+    setMessages(newMessages);
+    setLoading(true);
 
     try {
       const history = newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n');
