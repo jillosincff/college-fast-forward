@@ -2,9 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Bookmark, Lock, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
-import { SCHOOL_NAMES, normalizeSchool } from '@/lib/schoolNames';
+import { normalizeSchool } from '@/lib/schoolNames';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function industryMatch(member, goals) {
+  if (!goals?.target_industries?.length) return 0;
+  const memberText = [
+    member.industry,
+    member.industries,
+    member.job_title,
+    member.current_role,
+    member.company
+  ].filter(Boolean).join(' ').toLowerCase();
+  return goals.target_industries.filter(ind => memberText.includes(ind.toLowerCase())).length;
+}
 
 const INDUSTRY_ALIASES = {
   'real estate': ['real estate', 'property', 'construction', 'finance', 'investment', 'reit', 'mortgage'],
@@ -217,41 +229,34 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
   const fetchCFFLeads = async () => {
     setLoading(true);
-    const industries = goals.target_industries || goals.industries || [];
-    const expanded = expandIndustries(industries);
+    const goals = user?.career_goals || {};
+    const studentSchool = normalizeSchool(user?.school);
 
     try {
       const allUsers = await getDirectoryUsers({}).then(r => r?.data?.data || []).catch(() => []);
       const eligible = allUsers.filter(u =>
         u.id !== user?.id &&
         u.full_name &&
-        u.onboarding_completed !== false &&
-        u.show_in_directory !== false
+        u.show_in_directory !== false &&
+        (u.persona === 'parent' || u.roles?.includes('parent') || u.persona === 'alumni')
       );
 
-      // TIER 1 — Red Hot: same school
-      const tier1 = eligible.filter(u => sameSchool(u, user));
-      tier1.sort((a, b) => {
-        const aM = hasIndustryMatch(a, expanded) ? 1 : 0;
-        const bM = hasIndustryMatch(b, expanded) ? 1 : 0;
-        if (aM !== bM) return bM - aM;
-        const aP = (a.persona === 'parent' || a.roles?.includes('parent')) ? 1 : 0;
-        const bP = (b.persona === 'parent' || b.roles?.includes('parent')) ? 1 : 0;
-        return bP - aP;
+      // TIER 1 — Red Hot: same school, ALL members regardless of industry
+      const redHot = eligible.filter(u => {
+        const memberSchool = normalizeSchool(u.school || u.university || '');
+        return memberSchool === studentSchool;
       });
-      setRedHotLeads(tier1.slice(0, 6));
+      // Sort by industry relevance
+      redHot.sort((a, b) => industryMatch(b, goals) - industryMatch(a, goals));
+      setRedHotLeads(redHot.slice(0, 6));
 
-      // TIER 2 — Hot: different school CFF members
-      const tier2 = eligible.filter(u => !sameSchool(u, user) && (u.school || u.university));
-      tier2.sort((a, b) => {
-        const aM = hasIndustryMatch(a, expanded) ? 1 : 0;
-        const bM = hasIndustryMatch(b, expanded) ? 1 : 0;
-        if (aM !== bM) return bM - aM;
-        const aP = (a.persona === 'parent' || a.roles?.includes('parent')) ? 1 : 0;
-        const bP = (b.persona === 'parent' || b.roles?.includes('parent')) ? 1 : 0;
-        return bP - aP;
+      // TIER 2 — Hot: different school, has school value, sorted by industry relevance
+      const hotLeads = eligible.filter(u => {
+        const memberSchool = normalizeSchool(u.school || u.university || '');
+        return memberSchool && memberSchool !== studentSchool;
       });
-      setHotLeads(tier2.slice(0, 6));
+      hotLeads.sort((a, b) => industryMatch(b, goals) - industryMatch(a, goals));
+      setHotLeads(hotLeads.slice(0, 6));
     } catch (e) {
       console.error('CFF leads fetch failed:', e);
     }
