@@ -6,6 +6,25 @@ export default function ArchetypeCard({ result, onTabChange, onRetake }) {
   const cardRef = useRef(null);
 
   useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (!result) return null;
+
+  const {
+    archetype_name, primary_holland_code, secondary_holland_code,
+    archetype_description, top_strengths, work_environment,
+    best_fit_roles, roles_to_avoid, famous_examples,
+    honest_challenge, cff_network_recommendation,
+  } = result;
+
+  const archetypeKey = (archetype_name || '').replace('THE ', '').trim();
+  const archetypeColors = {
+    BUILDER: '#E85D20', ANALYST: '#4F8CFF', CREATOR: '#A855F7',
+    CONNECTOR: '#22C55E', CHAMPION: '#F59E0B', OPERATOR: '#94A3B8',
+  };
+  const accentColor = archetypeColors[archetypeKey] || '#E85D20';
 
   const handleShare = async () => {
     setSharing(true);
@@ -28,28 +47,13 @@ export default function ArchetypeCard({ result, onTabChange, onRetake }) {
     setSharing(false);
   };
 
-  const {
-    archetype_name, primary_holland_code, secondary_holland_code,
-    archetype_description, top_strengths, work_environment,
-    best_fit_roles, roles_to_avoid, famous_examples,
-    honest_challenge, cff_network_recommendation,
-  } = result;
-
-  const archetypeKey = (archetype_name || '').replace('THE ', '').trim();
-  const archetypeColors = {
-    BUILDER: '#E85D20', ANALYST: '#4F8CFF', CREATOR: '#A855F7',
-    CONNECTOR: '#22C55E', CHAMPION: '#F59E0B', OPERATOR: '#94A3B8',
-  };
-  const accentColor = archetypeColors[archetypeKey] || '#E85D20';
-
   return (
     <div style={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(20px)',
       transition: 'opacity 0.6s ease, transform 0.6s ease',
     }}>
-    <div ref={cardRef}>
-      <div style={{
+      <div ref={cardRef} style={{
         background: '#0d1117',
         border: `1px solid ${accentColor}40`,
         borderRadius: 20,
@@ -178,8 +182,6 @@ export default function ArchetypeCard({ result, onTabChange, onRetake }) {
           </div>
         )}
       </div>
-
-    </div>
 
       {/* Share button */}
       <div style={{ marginBottom: 16, textAlign: 'center' }}>
