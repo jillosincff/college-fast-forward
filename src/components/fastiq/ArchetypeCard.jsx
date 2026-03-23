@@ -1,14 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function ArchetypeCard({ result, onTabChange, onRetake }) {
   const [visible, setVisible] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const cardRef = useRef(null);
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 100);
-    return () => clearTimeout(t);
-  }, []);
 
-  if (!result) return null;
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#0d1117',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `fastiq-${(archetype_name || 'archetype').toLowerCase().replace(/\s+/g, '-')}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (e) {
+      console.error('Share failed:', e);
+    }
+    setSharing(false);
+  };
 
   const {
     archetype_name, primary_holland_code, secondary_holland_code,
@@ -30,6 +48,7 @@ export default function ArchetypeCard({ result, onTabChange, onRetake }) {
       transform: visible ? 'translateY(0)' : 'translateY(20px)',
       transition: 'opacity 0.6s ease, transform 0.6s ease',
     }}>
+    <div ref={cardRef}>
       <div style={{
         background: '#0d1117',
         border: `1px solid ${accentColor}40`,
@@ -158,6 +177,20 @@ export default function ArchetypeCard({ result, onTabChange, onRetake }) {
             </p>
           </div>
         )}
+      </div>
+
+    </div>
+
+      {/* Share button */}
+      <div style={{ marginBottom: 16, textAlign: 'center' }}>
+        <button
+          onClick={handleShare}
+          disabled={sharing}
+          style={{ background: 'rgba(232,93,32,0.12)', border: '1.5px solid rgba(232,93,32,0.4)', color: '#E85D20', borderRadius: 100, padding: '10px 24px', fontSize: 13, fontWeight: 600, cursor: sharing ? 'default' : 'pointer', minHeight: 'auto', opacity: sharing ? 0.7 : 1 }}
+        >
+          {sharing ? 'Generating...' : '📸 Share My Archetype'}
+        </button>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '6px 0 0' }}>Downloads as an image — perfect for LinkedIn or Instagram</p>
       </div>
 
       {/* CTAs */}
