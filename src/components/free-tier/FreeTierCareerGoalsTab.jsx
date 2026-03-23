@@ -247,7 +247,47 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [majorSaved, setMajorSaved] = useState(!!(user?.major || user?.career_goals?.major));
   const [majorFilter, setMajorFilter] = useState('');
   const [awaitingMajor, setAwaitingMajor] = useState(false);
+  const [debugData, setDebugData] = useState(null);
   const bottomRef = useRef(null);
+
+  // ── Diagnostic on mount ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user?.email) return;
+    (async () => {
+      try {
+        const allUsers = await base44.entities.User.list('-created_date', 1000);
+        console.log('🔍 Total users in DB:', allUsers.length);
+        const byPersona = allUsers.filter(u => u.persona === 'parent');
+        console.log('🔍 persona=parent:', byPersona.length);
+        const byRoles = allUsers.filter(u => u.roles?.includes('parent'));
+        console.log('🔍 roles includes parent:', byRoles.length);
+        const allParents = allUsers.filter(u => u.persona === 'parent' || u.roles?.includes('parent'));
+        console.log('🔍 Total parents (combined):', allParents.length);
+        const goals = user?.career_goals || {};
+        console.log('🔍 Current user school:', user?.school);
+        console.log('🔍 Current user industries:', goals.target_industries || goals.industries);
+        allParents.slice(0, 3).forEach(p => console.log('🔍 sample parent:', { name: p.full_name, school: p.school, industry: p.industry, persona: p.persona, roles: p.roles, show_in_directory: p.show_in_directory, onboarding_completed: p.onboarding_completed }));
+        const sameSchool = allParents.filter(p => (p.school || p.university || '').toLowerCase() === (user?.school || '').toLowerCase());
+        console.log('🔍 Same school parents:', sameSchool.length);
+        const visible = allParents.filter(p => p.show_in_directory !== false && p.onboarding_completed !== false);
+        console.log('🔍 Visible + onboarding complete:', visible.length);
+        setDebugData({
+          totalUsers: allUsers.length,
+          parentsByPersona: byPersona.length,
+          parentsByRoles: byRoles.length,
+          allParents: allParents.length,
+          currentUserSchool: user?.school,
+          currentUserIndustries: goals.target_industries || goals.industries,
+          sameSchool: sameSchool.length,
+          visibleParents: visible.length,
+          sampleParent: allParents[0] ? { name: allParents[0].full_name, school: allParents[0].school, industry: allParents[0].industry, persona: allParents[0].persona, roles: allParents[0].roles } : null
+        });
+      } catch (e) {
+        console.error('🔍 Diagnostic error:', e);
+        setDebugData({ error: e.message });
+      }
+    })();
+  }, [user?.email]);
 
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
@@ -616,6 +656,13 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   // ── Chat view ──────────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '70vh' }}>
+      {/* DEBUG PANEL */}
+      {debugData && (
+        <div style={{ background: '#FFFACD', border: '2px solid #FFD700', padding: '16px', margin: '12px', borderRadius: '8px', fontSize: '12px', fontFamily: 'monospace', overflowX: 'auto', maxHeight: '200px', overflowY: 'auto' }}>
+          <p style={{ margin: '0 0 8px', fontWeight: 'bold', color: '#333' }}>🔍 DIAGNOSTIC DEBUG</p>
+          <pre style={{ margin: 0, color: '#555', whiteSpace: 'pre-wrap' }}>{JSON.stringify(debugData, null, 2)}</pre>
+        </div>
+      )}
       {/* Header */}
       <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>
