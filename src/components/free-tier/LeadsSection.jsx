@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bookmark, Lock, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
-import { normalizeSchool } from '@/lib/schoolNames';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -212,7 +210,7 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const fetchCFFLeads = async () => {
     setLoading(true);
     try {
-      const result = await getLeadsForStudent({ student_id: user?.id });
+      const result = await base44.functions.invoke('getLeadsForStudent', { student_id: user?.id });
       
       if (result.error) {
         console.error('Error fetching leads:', result.error);
