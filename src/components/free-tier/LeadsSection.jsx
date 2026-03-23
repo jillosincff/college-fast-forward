@@ -6,18 +6,6 @@ import { normalizeSchool } from '@/lib/schoolNames';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function industryMatch(member, goals) {
-  if (!goals?.target_industries?.length) return 0;
-  const memberText = [
-    member.industry,
-    member.industries,
-    member.job_title,
-    member.current_role,
-    member.company
-  ].filter(Boolean).join(' ').toLowerCase();
-  return goals.target_industries.filter(ind => memberText.includes(ind.toLowerCase())).length;
-}
-
 const INDUSTRY_ALIASES = {
   'real estate': ['real estate', 'property', 'construction', 'finance', 'investment', 'reit', 'mortgage'],
   'finance': ['finance', 'financial', 'banking', 'investment', 'insurance', 'accounting', 'fintech', 'wealth'],
@@ -51,12 +39,6 @@ function memberCompany(u) {
 
 function initials(name) {
   return (name || '?').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
-}
-
-function sameSchool(a, b) {
-  const aS = normalizeSchool((a?.school || a?.university || '').trim());
-  const bS = normalizeSchool((b?.school || b?.university || '').trim());
-  return !!(aS && bS && aS === bS);
 }
 
 function hasIndustryMatch(member, expanded) {
@@ -229,50 +211,27 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
   const fetchCFFLeads = async () => {
     setLoading(true);
-    const goals = user?.career_goals || {};
-    const studentSchool = normalizeSchool(user?.school);
-
-    console.log('🔍 DEBUG: studentSchool raw input:', JSON.stringify(user?.school));
-    console.log('🔍 DEBUG: studentSchool normalized:', studentSchool);
-
     try {
-      const allUsers = await getDirectoryUsers({}).then(r => r?.data?.data || []).catch(() => []);
-      console.log('🔍 DEBUG: Total users returned:', allUsers.length);
-      console.log('🔍 DEBUG: Sample school values:', allUsers.slice(0, 5).map(u => ({ name: u.full_name, school: JSON.stringify(u.school), persona: u.persona })));
-      const eligible = allUsers.filter(u =>
-        u.id !== user?.id &&
-        u.full_name &&
-        u.show_in_directory !== false &&
-        (u.persona === 'parent' || u.roles?.includes('parent') || u.persona === 'alumni')
-      );
+      const result = await getLeadsForStudent({ student_id: user?.id });
+      
+      if (result.error) {
+        console.error('Error fetching leads:', result.error);
+        setRedHotLeads([]);
+        setHotLeads([]);
+        return;
+      }
 
-      // TIER 1 — Red Hot: same school, ALL members regardless of industry
-      const redHot = eligible.filter(u => {
-        const memberSchool = normalizeSchool(u.school || u.university || '');
-        const matches = memberSchool === studentSchool;
-        if (u.full_name?.includes('Test') || u.full_name?.includes('test')) {
-          console.log(`🔍 DEBUG: ${u.full_name} - memberSchool: ${memberSchool}, studentSchool: ${studentSchool}, matches: ${matches}`);
-        }
-        return matches;
-      });
-      console.log('🔍 DEBUG: Red Hot count:', redHot.length);
-      // Sort by industry relevance
-      redHot.sort((a, b) => industryMatch(b, goals) - industryMatch(a, goals));
-      setRedHotLeads(redHot.slice(0, 6));
-
-      // TIER 2 — Hot: different school, has school value, sorted by industry relevance
-      const hotLeads = eligible.filter(u => {
-        const memberSchool = normalizeSchool(u.school || u.university || '');
-        return memberSchool && memberSchool !== studentSchool;
-      });
-      hotLeads.sort((a, b) => industryMatch(b, goals) - industryMatch(a, goals));
-      setHotLeads(hotLeads.slice(0, 6));
+      console.log('✓ Red Hot count:', result.redHotTotal);
+      console.log('✓ Hot count:', result.hotTotal);
+      
+      setRedHotLeads(result.redHot || []);
+      setHotLeads(result.hot || []);
     } catch (e) {
       console.error('CFF leads fetch failed:', e);
+      setRedHotLeads([]);
+      setHotLeads([]);
     }
     setLoading(false);
-
-    // Load warm leads separately (cached or fresh)
     fetchWarmLeads();
   };
 
