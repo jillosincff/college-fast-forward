@@ -201,6 +201,12 @@ function CompanyContactsModal({ company, user, onClose, onOpenComposer, onTabCha
                     <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>{title}</p>
                     {isSchoolMatch && <p style={{ fontSize: 11, color: '#E85D20', margin: '2px 0 0' }}>🎓 {user?.school || 'Your school'} alumni</p>}
                     <p style={{ fontSize: 11, color: '#888', margin: '2px 0 0' }}>{getAvailabilityLabel(m.intro_availability)}</p>
+                    {m.linkedin_url && (
+                      <a href={m.linkedin_url} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 11, color: '#0077B5', textDecoration: 'none', marginTop: 2, display: 'inline-block' }}>
+                        View LinkedIn →
+                      </a>
+                    )}
                   </div>
                   <button
                     onClick={() => { onClose(); onOpenComposer(m); }}
