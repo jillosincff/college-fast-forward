@@ -1,452 +1,371 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { CheckCircle2, Loader2 } from 'lucide-react';
-import CompanySizeRankField from '@/components/free-tier/CompanySizeRankField';
-import { useCompanyRecs } from '@/components/free-tier/useCompanyRecs';
-import AICompanyCards from '@/components/free-tier/AICompanyCards';
+import { Send, RefreshCw, Loader2, Target } from 'lucide-react';
 
-const INDUSTRIES = [
-  'Technology, Information & Media',
-  'Healthcare & Pharmaceuticals',
-  'Manufacturing & Industrial',
-  'Finance & Insurance',
-  'Professional Services',
-  'Retail & Consumer Goods',
-  'Construction & Agriculture',
-  'Transportation & Logistics',
-  'Education & Training',
-  'Government & Public Sector',
-  'Advertising & PR',
-  'Sports & Entertainment',
-  'Other',
-];
-const LOCATIONS = ['Remote', 'New York', 'Los Angeles', 'Chicago', 'Boston', 'Miami', 'San Francisco', 'Other'];
-const GRAD_YEARS = ['2025', '2026', '2027', '2028', '2029', '2030'];
+const SYSTEM_PROMPT = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are conducting a friendly, one-question-at-a-time intake conversation to understand a college student's career goals.
 
-const BTN = { idle: 'idle', saving: 'saving', saved: 'saved', error: 'error' };
+Your job is to:
+- Ask each question conversationally and warmly — not like a form
+- Acknowledge what the student says before moving to the next question (e.g., "Finance — great, lots of strong CFF connections there.")
+- If a student says "I don't know" or is unsure, respond supportively and move on — never push
+- Keep your responses short — one acknowledgment sentence + the next question only
+- The questions to work through (in order):
+  Q1: What kind of role are they hoping to land?
+  Q2: What industries are they most drawn to?
+  Q3: Internship vs full-time + graduation year?
+  Q4: Location preferences?
+  Q5: Any prior internships or work experience?
+  Q6: Company size preference?
+  Q7: Dream company (even if it feels like a stretch)?
+  Q8: What do they feel is missing / holding them back?
+- After Q8 is answered, give a warm closing message and set is_final to true with a populated goals_summary
+- Never repeat a question already answered
 
-export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSaved, onTabChange }) {
-  const { companies: aiCompanies, members: aiMembers, loading: recsLoading, searching: recsSearching, error: recsError, noIndustry: recsNoIndustry, weeklyNewCount, refetch: refetchRecs } = useCompanyRecs(user);
-  const [role, setRole] = useState('');
-  const [industries, setIndustries] = useState([]);
-  const [companies, setCompanies] = useState([]);
-  const [gradYear, setGradYear] = useState('');
-  const [locations, setLocations] = useState([]);
-  const [companyInput, setCompanyInput] = useState('');
-  const [companySkipped, setCompanySkipped] = useState(false);
-  const [companySizePref, setCompanySizePref] = useState(['large', 'mid', 'startup']);
-  const [companySizeSkipped, setCompanySizeSkipped] = useState(false);
-  const [btnState, setBtnState] = useState(BTN.idle);
-  const [btnError, setBtnError] = useState('');
-  const [showResults, setShowResults] = useState(false);
-  const [formCollapsed, setFormCollapsed] = useState(false);
-  const [alumniCount, setAlumniCount] = useState(null);
-  const resultsRef = useRef(null);
+Return your response as JSON with these exact fields:
+- "message": your conversational reply
+- "is_final": boolean (true only after Q8 is answered)
+- "suggested_prompts": array of 2-3 short chips the student can tap (e.g., "I'm not sure yet", "Open to anything")
+- "goals_summary": null unless is_final is true, then a structured object`;
 
-  useEffect(() => {
-    const g = user?.career_goals;
-    // Sanitize role — reject single chars, digits, or obvious bad values
-    const sanitizeRole = (r) => (r && r.trim().length > 1 && !/^\d+$/.test(r.trim())) ? r.trim() : '';
-    if (g) {
-      setRole(sanitizeRole(g.role || user?.target_role || ''));
-      setIndustries(g.industries || user?.target_industries || []);
-      setCompanies(g.target_companies || user?.target_companies || []);
-      setGradYear(g.graduation_year?.toString() || user?.graduation_year?.toString() || '');
-      setLocations(g.locations || user?.location_preferences || []);
-      setCompanySkipped(g.companies_skipped || false);
-      if (g.company_size_preference) {
-        setCompanySizePref(g.company_size_preference);
-      } else if (g.company_size_preference === null) {
-        setCompanySizeSkipped(true);
-      }
-      if (g.saved_at) { setShowResults(true); setFormCollapsed(true); }
-    } else {
-      setRole(sanitizeRole(user?.target_role || ''));
-      setIndustries(user?.target_industries || []);
-      setCompanies(user?.target_companies || []);
-      setGradYear(user?.graduation_year?.toString() || '');
-      setLocations(user?.location_preferences || []);
-    }
-  }, [user]);
+const RESPONSE_SCHEMA = {
+  type: 'object',
+  properties: {
+    message: { type: 'string' },
+    is_final: { type: 'boolean' },
+    suggested_prompts: { type: 'array', items: { type: 'string' } },
+    goals_summary: {
+      type: 'object',
+      properties: {
+        target_roles: { type: 'array', items: { type: 'string' } },
+        target_industries: { type: 'array', items: { type: 'string' } },
+        seeking: { type: 'string' },
+        graduation_year: { type: 'string' },
+        location_preference: { type: 'string' },
+        experience_level: { type: 'string' },
+        company_size_preference: { type: 'array', items: { type: 'string' } },
+        dream_company: { type: 'string' },
+        perceived_gap: { type: 'string' },
+      },
+    },
+  },
+  required: ['message', 'is_final', 'suggested_prompts'],
+};
 
-  useEffect(() => {
-    if (showResults && resultsRef.current) {
-      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-    }
-  }, [showResults]);
-
-  // Query alumni count when results shown
-  useEffect(() => {
-    if (!showResults || !user?.email) return;
-    const studentSchool = (user?.school || user?.university || '').toLowerCase().trim();
-    const targetIndustriesLower = (user?.career_goals?.industries || user?.target_industries || []).map(i => i.toLowerCase());
-    const targetCompaniesLower = (user?.career_goals?.target_companies || user?.target_companies || []).map(c => c.toLowerCase());
-
-    base44.entities.User.filter({}).then(users => {
-      const matched = users.filter(u => {
-        if (u.id === user.id) return false;
-        if (u.persona !== 'parent' && u.persona !== 'alumni') return false;
-        const uSchool = (u.school || u.university || '').toLowerCase();
-        if (!studentSchool || !uSchool) return false;
-        const schoolWord = studentSchool.split(' ')[0];
-        const schoolMatch = uSchool.includes(schoolWord) || studentSchool.includes(uSchool.split(' ')[0]);
-        if (!schoolMatch) return false;
-        if (targetIndustriesLower.length === 0 && targetCompaniesLower.length === 0) return true;
-        const uIndustry = (u.industry || '').toLowerCase();
-        const uCompany = (u.company || u.current_company || '').toLowerCase();
-        const industryMatch = targetIndustriesLower.some(i => uIndustry.includes(i.split(',')[0].trim()));
-        const companyMatch = targetCompaniesLower.some(c => uCompany.includes(c));
-        return industryMatch || companyMatch;
-      });
-      setAlumniCount(matched.length);
-    }).catch(() => setAlumniCount(0));
-  }, [showResults, user?.email]);
-
-  const handleSave = async () => {
-    setBtnState(BTN.saving);
-    setBtnError('');
-    try {
-      await base44.auth.updateMe({
-        target_role: role,
-        target_industries: industries,
-        target_companies: companies,
-        graduation_year: gradYear ? parseInt(gradYear) : null,
-        location_preferences: locations,
-        firstVisitComplete: true,
-        career_goals: {
-          role,
-          industries,
-          target_companies: companies,
-          graduation_year: gradYear ? parseInt(gradYear) : null,
-          locations,
-          companies_skipped: companySkipped,
-          company_size_preference: companySizeSkipped ? null : companySizePref,
-          saved_at: new Date().toISOString(),
-        },
-      });
-      setBtnState(BTN.saved);
-      setShowResults(true);
-      setFormCollapsed(true);
-      refetchRecs();
-      if (onGoalsSaved) onGoalsSaved();
-      setTimeout(() => setBtnState(BTN.idle), 3000);
-    } catch (err) {
-      setBtnState(BTN.error);
-      setBtnError('Something went wrong. Please try again.');
-      setTimeout(() => { setBtnState(BTN.idle); setBtnError(''); }, 3000);
-    }
-  };
-
-  const toggleIndustry = (ind) => setIndustries(prev => prev.includes(ind) ? prev.filter(i => i !== ind) : [...prev, ind]);
-  const toggleLocation = (loc) => setLocations(prev => prev.includes(loc) ? prev.filter(l => l !== loc) : [...prev, loc]);
-
-  const btnBg = () => {
-    if (btnState === BTN.saved) return '#22C55E';
-    if (btnState === BTN.error) return '#EF4444';
-    return '#E85D20';
-  };
-
-  const primaryIndustry = industries[0] || user?.career_goals?.industries?.[0] || 'your target industry';
-  const school = user?.school || user?.university || 'your school';
-
-  const renderAlumniCount = () => {
-    if (alumniCount === null) {
-      return <><strong>Alumni</strong> from {school} work at companies in your target industries. The more parents who join, the more possibilities you have.</>;
-    }
-    if (alumniCount === 0) {
-      return <>Alumni from <strong>{school}</strong> are joining the network every day.</>;
-    }
-    if (alumniCount <= 5) {
-      return <><strong>{alumniCount} alumni</strong> from <strong>{school}</strong> are already in your network.</>;
-    }
-    return <><strong>{alumniCount}+ alumni</strong> from <strong>{school}</strong> work at companies in your target industries.</>;
-  };
+function GoalsSummaryCard({ goals, onTabChange, onRestart }) {
+  const roles = goals?.target_roles?.join(', ') || goals?.role || '—';
+  const industries = goals?.target_industries?.join(', ') || goals?.industries?.join(', ') || '—';
+  const seeking = goals?.seeking || '—';
+  const gradYear = goals?.graduation_year || goals?.graduation_year?.toString() || '—';
+  const location = goals?.location_preference || (goals?.locations?.[0]) || '—';
+  const dreamCo = goals?.dream_company || '—';
+  const experience = goals?.experience_level || '—';
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8">
-      <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
-        <div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: 0 }}>CAREER GOALS</p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '4px 0 0' }}>Build your career target list.</h1>
-        </div>
-        {formCollapsed && (
-          <button
-            onClick={() => setFormCollapsed(false)}
-            style={{ fontSize: 13, color: '#E85D20', fontWeight: 600, background: 'none', border: '1px solid #E85D20', borderRadius: 100, padding: '6px 16px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
-          >
-            Edit Goals
+    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: 24, marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+        <Target style={{ width: 20, height: 20, color: '#E85D20' }} />
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Career Goals</p>
+      </div>
+      <div style={{ display: 'grid', gap: 8 }}>
+        {[
+          ['Target Roles', roles],
+          ['Industries', industries],
+          ['Looking for', `${seeking}${gradYear !== '—' ? ` · Graduating ${gradYear}` : ''}`],
+          ['Location', location],
+          ['Dream Company', dreamCo],
+          ['Experience', experience],
+        ].map(([label, value]) => (
+          <div key={label} style={{ display: 'flex', gap: 8 }}>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#888', minWidth: 120 }}>{label}:</span>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A' }}>{value}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
+        <button onClick={() => onTabChange?.('company_intel')}
+          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+          Explore My Company List →
+        </button>
+        <button onClick={() => onTabChange?.('career_path')}
+          style={{ background: 'none', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+          Explore Career Paths →
+        </button>
+        {onRestart && (
+          <button onClick={onRestart}
+            style={{ background: 'none', border: 'none', color: '#999', fontSize: 13, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: '10px 4px' }}>
+            Update my goals
           </button>
         )}
       </div>
+    </div>
+  );
+}
 
-      {!formCollapsed && (
-        <>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 32 }}>
-            The clearer your goals, the better FastIQ can help you.
-          </p>
-          <div className="space-y-6">
-
-        <div>
-          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">What kind of role are you looking for?</label>
-          <input
-            type="text"
-            placeholder="Marketing Manager, Investment Banking Analyst, Software Engineer..."
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border border-[#E0E0E0] bg-white text-[#1A1A1A]"
-          />
+function MessageBubble({ message }) {
+  const isUser = message.role === 'user';
+  return (
+    <div style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', marginBottom: 14 }}>
+      {!isUser && (
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, marginRight: 10, marginTop: 2 }}>
+          ⚡
         </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">What industries interest you?</label>
-          <div className="flex flex-wrap gap-2">
-            {INDUSTRIES.map(ind => (
-              <button
-                key={ind}
-                onClick={() => toggleIndustry(ind)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${industries.includes(ind) ? 'bg-[#E85D20] text-white' : 'bg-white text-[#666666] border border-[#E0E0E0] hover:border-[#E85D20]'}`}
-                style={{ minHeight: 'auto' }}
-              >
-                {ind}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">What are your target companies?</label>
-          {companySkipped ? (
-            <p style={{ fontSize: 13, color: '#999', fontStyle: 'italic' }}>
-              <span style={{ color: '#E85D20' }}>&#10003;</span> Skipped &mdash; FastIQ will suggest companies for you after setup.
-            </p>
-          ) : (
-            <>
-              <input
-                type="text"
-                placeholder="Type a company name and press Enter..."
-                value={companyInput}
-                onChange={e => setCompanyInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-[#E0E0E0] bg-white text-[#1A1A1A] mb-2"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && companyInput.trim()) {
-                    setCompanies(prev => [...prev, companyInput.trim()]);
-                    setCompanyInput('');
-                  }
-                }}
-              />
-              <div className="flex flex-wrap gap-2 mb-2">
-                {companies.map((c, i) => (
-                  <span key={i} className="px-3 py-1 bg-[#E85D20]/10 text-[#E85D20] text-sm rounded-full flex items-center gap-2">
-                    {c}
-                    <button onClick={() => setCompanies(prev => prev.filter((_, idx) => idx !== i))} style={{ minHeight: 'auto', minWidth: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20' }}>x</button>
-                  </span>
-                ))}
-              </div>
-              {companyInput.length === 0 && companies.length === 0 && (
-                <div className="rounded-lg border border-[#E0E0E0] bg-[#FAFAFA] p-4 mt-1">
-                  <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', marginBottom: 8 }}>NOT SURE WHERE TO START?</p>
-                  <ul style={{ fontSize: 13, color: '#555', lineHeight: 1.8, paddingLeft: 18, margin: '4px 0 12px' }}>
-                    <li>Companies you&apos;ve seen in your major&apos;s coursework</li>
-                    <li>Brands you use or admire</li>
-                    <li>Places your friends or family work</li>
-                    <li>Companies that come up when you search &quot;[your major] jobs&quot;</li>
-                  </ul>
-                  <button
-                    onClick={() => setCompanySkipped(true)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#999', minHeight: 'auto', padding: 0 }}
-                  >
-                    Skip for now &mdash; FastIQ will suggest companies based on your goals.
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <CompanySizeRankField
-          value={companySizePref}
-          skipped={companySizeSkipped}
-          isSaved={false}
-          onChange={(newOrder) => { setCompanySizePref(newOrder); setCompanySizeSkipped(false); }}
-          onSkip={() => setCompanySizeSkipped(true)}
-        />
-
-        <div>
-          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Graduation year</label>
-          <select value={gradYear} onChange={(e) => setGradYear(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-[#E0E0E0] bg-white text-[#1A1A1A]">
-            <option value="">Select year</option>
-            {GRAD_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">Where are you open to working?</label>
-          <div className="flex flex-wrap gap-2">
-            {LOCATIONS.map(loc => (
-              <button
-                key={loc}
-                onClick={() => toggleLocation(loc)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${locations.includes(loc) ? 'bg-[#E85D20] text-white' : 'bg-white text-[#666666] border border-[#E0E0E0] hover:border-[#E85D20]'}`}
-                style={{ minHeight: 'auto' }}
-              >
-                {loc}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <button
-          onClick={handleSave}
-          disabled={btnState === BTN.saving}
-          className="w-full text-white px-6 py-3 rounded-full font-semibold disabled:opacity-70 flex items-center justify-center gap-2"
-          style={{ minHeight: 'auto', background: btnBg(), transition: 'background 0.3s' }}
-        >
-          {btnState === BTN.saving ? (
-            <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</>
-          ) : btnState === BTN.saved ? 'Goals Saved ✓'
-          : btnState === BTN.error ? 'Save Failed — Try Again'
-          : 'Save My Goals →'}
-        </button>
-
-        {btnError && (
-          <p style={{ fontSize: 13, color: '#EF4444', textAlign: 'center', marginTop: -8 }}>{btnError}</p>
-        )}
-      </div>
-        </>
       )}
+      <div style={{
+        maxWidth: '80%',
+        background: isUser ? '#1A1A1A' : '#fff',
+        color: isUser ? '#fff' : '#1A1A1A',
+        border: isUser ? 'none' : '1px solid #E5E5E5',
+        borderRadius: isUser ? '18px 18px 4px 18px' : '4px 18px 18px 18px',
+        padding: '12px 16px',
+        fontSize: 14,
+        lineHeight: 1.6,
+        whiteSpace: 'pre-wrap',
+        fontFamily: "'DM Sans', sans-serif",
+      }}>
+        {message.content}
+      </div>
+    </div>
+  );
+}
 
-      {showResults && (
-        <div ref={resultsRef} style={{ marginTop: 24 }}>
+function SuggestedPrompts({ prompts, onSelect }) {
+  if (!prompts?.length) return null;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginLeft: 42, marginBottom: 16 }}>
+      {prompts.map((p, i) => (
+        <button key={i} onClick={() => onSelect(p)}
+          style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto' }}>
+          {p}
+        </button>
+      ))}
+    </div>
+  );
+}
 
-          <div className="flex items-center gap-2" style={{ marginBottom: 32 }}>
-            <CheckCircle2 style={{ width: 18, height: 18, color: '#22C55E', flexShrink: 0 }} />
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-              Goals saved. Here&apos;s what we found for you.
-            </p>
+export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
+  const hasGoals = !!(user?.career_goals?.target_roles?.length || user?.career_goals?.target_industries?.length || user?.career_goals?.role || user?.career_goals?.industries?.length);
+
+  const [mode, setMode] = useState(hasGoals ? 'summary' : 'chat'); // 'summary' | 'chat'
+  const [messages, setMessages] = useState([]);
+  const [suggestedPrompts, setSuggestedPrompts] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // null | 'llm' | 'save'
+  const [retryText, setRetryText] = useState('');
+  const [savedGoals, setSavedGoals] = useState(user?.career_goals || null);
+  const [conversationDone, setConversationDone] = useState(false);
+  const bottomRef = useRef(null);
+
+  // Seed opening message when chat starts
+  useEffect(() => {
+    if (mode !== 'chat' || messages.length > 0) return;
+    const firstName = user?.full_name?.split(' ')[0] || 'there';
+    setMessages([{
+      role: 'assistant',
+      content: `Hey ${firstName}! I'm going to ask you a few quick questions so I can personalize your entire CFF experience — company lists, career paths, outreach help, all of it. Let's start simple: what kind of role are you hoping to land? Could be a specific title, a general field, or even just "I'm not sure yet" — all good.`,
+    }]);
+    setSuggestedPrompts(["I'm not sure yet", "A few different things", "Let me think..."]);
+  }, [mode, user]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, suggestedPrompts, loading]);
+
+  const sendMessage = async (text) => {
+    const trimmed = (text || input).trim();
+    if (!trimmed || loading) return;
+    setInput('');
+    setError(null);
+    setSuggestedPrompts([]);
+
+    const newMessages = [...messages, { role: 'user', content: trimmed }];
+    setMessages(newMessages);
+    setLoading(true);
+
+    try {
+      const history = newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n');
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `${SYSTEM_PROMPT}\n\nConversation so far:\n${history}\n\nNow respond to the student's latest message. Remember: one acknowledgment + next question only (unless this is the final question).`,
+        response_json_schema: RESPONSE_SCHEMA,
+      });
+
+      const reply = result?.message || 'I had trouble generating a response. Please try again.';
+      const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : [];
+      const isFinal = result?.is_final === true;
+      const goalsSummary = result?.goals_summary || null;
+
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      setSuggestedPrompts(prompts);
+
+      if (isFinal && goalsSummary) {
+        await saveGoals(goalsSummary);
+      }
+    } catch (e) {
+      console.error('Goals chat failed:', e);
+      setError('llm');
+      setRetryText(trimmed);
+      setMessages(prev => prev.slice(0, -1));
+      setInput(trimmed);
+    }
+    setLoading(false);
+  };
+
+  const saveGoals = async (goalsSummary) => {
+    try {
+      const goalsData = {
+        ...goalsSummary,
+        saved_at: new Date().toISOString(),
+      };
+      await base44.auth.updateMe({ career_goals: goalsData });
+      setSavedGoals(goalsData);
+      setConversationDone(true);
+    } catch (e) {
+      console.error('Goals save failed:', e);
+      setError('save');
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  const startChat = () => {
+    setMode('chat');
+    setMessages([]);
+    setSuggestedPrompts([]);
+    setConversationDone(false);
+    setError(null);
+  };
+
+  // Summary view for returning users
+  if (mode === 'summary') {
+    return (
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>Your Goals</h1>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 24px' }}>
+          Tell FastIQ what you're looking for. The more you share, the smarter your entire experience gets.
+        </p>
+        <GoalsSummaryCard goals={savedGoals || user?.career_goals} onTabChange={onTabChange} onRestart={startChat} />
+        <div style={{ textAlign: 'center', padding: '16px 0', borderTop: '1px solid #F0F0F0' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', marginBottom: 12 }}>
+            Want to update your goals? FastIQ will re-personalize everything.
+          </p>
+          <button onClick={startChat}
+            style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+            Update My Goals →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Chat view
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '70vh' }}>
+      {/* Header */}
+      <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>
+          CAREER GOALS
+        </p>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
+          Tell FastIQ what you're looking for.
+        </h1>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>
+          The more you share, the smarter your entire experience gets.
+        </p>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 8px' }}>
+
+        {/* Post-conversation summary */}
+        {conversationDone && savedGoals && (
+          <div style={{ marginBottom: 24 }}>
+            <GoalsSummaryCard goals={savedGoals} onTabChange={onTabChange} />
           </div>
+        )}
 
-          <section style={{ marginBottom: 40 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 10 }}>
-              COMPANIES HIRING IN YOUR INDUSTRIES
-            </p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-              Based on your goals, FastIQ found these companies actively hiring right now.
-            </h2>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#999', marginBottom: 16 }}>
-              Updated every 24 hours. The more specific your goals, the better the matches.
-            </p>
-            <AICompanyCards
-              companies={aiCompanies}
-              members={aiMembers}
-              loading={recsLoading}
-              searching={recsSearching}
-              error={recsError}
-              noIndustry={recsNoIndustry}
-              onRefetch={refetchRecs}
-              onTabChange={onTabChange}
-              onOpenUpgrade={onOpenUpgrade}
-              user={user}
-              isFastIQ={false}
-              weeklyNewCount={weeklyNewCount}
-              dark={false}
-            />
-            <button
-              onClick={() => onTabChange && onTabChange('company_intel')}
-              style={{ marginTop: 12, fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
-            >
-              See all companies in your industries
-            </button>
-          </section>
+        {messages.map((msg, i) => {
+          const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading && !conversationDone;
+          return (
+            <React.Fragment key={i}>
+              <MessageBubble message={msg} />
+              {isLastAssistant && (
+                <SuggestedPrompts prompts={suggestedPrompts} onSelect={sendMessage} />
+              )}
+            </React.Fragment>
+          );
+        })}
 
-          <section style={{ marginBottom: 40 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 10 }}>
-              YOUR NETWORK
-            </p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', marginBottom: 16 }}>
-              {renderAlumniCount()}
-            </p>
-            <div className="grid md:grid-cols-3 gap-4 mb-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="relative rounded-lg p-4 border border-[#E0E0E0] bg-[#F5F5F5]">
-                  <div className="filter blur-sm">
-                    <div className="w-10 h-10 bg-gray-300 rounded-full mb-2" />
-                    <p style={{ fontWeight: 700, fontSize: 13, color: '#888', margin: '0 0 2px' }}>Profile Hidden</p>
-                    <p style={{ fontSize: 12, color: '#999' }}>Alumni</p>
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
-                      onClick={onOpenUpgrade}
-                      className="bg-[#E85D20] text-white px-3 py-1.5 rounded-full text-xs font-semibold"
-                      style={{ minHeight: 'auto' }}
-                    >
-                      See who to contact
-                    </button>
-                  </div>
-                </div>
+        {loading && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>⚡</div>
+            <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '4px 18px 18px 18px', padding: '12px 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
+              {[0, 150, 300].map(d => (
+                <span key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', display: 'inline-block', animation: 'dotBounce 1.2s ease-in-out infinite', animationDelay: `${d}ms` }} />
               ))}
             </div>
-            <button
-              onClick={() => onTabChange && onTabChange('alumni_network')}
-              style={{ fontSize: 13, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
-            >
-              See all alumni in your network
+          </div>
+        )}
+
+        {error === 'llm' && (
+          <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <p style={{ fontSize: 13, color: '#E85D20', margin: 0 }}>FastIQ hit a snag. Tap to retry.</p>
+            <button onClick={() => { setError(null); sendMessage(retryText); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600 }}>
+              <RefreshCw style={{ width: 14, height: 14 }} /> Retry
             </button>
-          </section>
+          </div>
+        )}
 
-          <section style={{ marginBottom: 40 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 10 }}>
-              EXPLORE YOUR PATH
-            </p>
-            <div className="bg-white rounded-xl p-6 border border-[#E0E0E0]">
-              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', marginBottom: 8 }}>
-                What does a career in {primaryIndustry} actually look like?
-              </h3>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 16 }}>
-                Explore real career paths, role breakdowns, and salary ranges for your target industries.
-              </p>
-              <button
-                onClick={() => onTabChange && onTabChange('career_path')}
-                className="border border-[#E85D20] text-[#E85D20] px-6 py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
-                style={{ minHeight: 'auto' }}
-              >
-                Explore Career Paths
-              </button>
-            </div>
-          </section>
+        {error === 'save' && (
+          <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <p style={{ fontSize: 13, color: '#E85D20', margin: 0 }}>Your goals couldn't be saved. Try again.</p>
+            <button onClick={() => saveGoals(savedGoals)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600 }}>
+              <RefreshCw style={{ width: 14, height: 14 }} /> Retry
+            </button>
+          </div>
+        )}
 
-          <section>
-            <div style={{ height: 1, background: '#E85D20', opacity: 0.3, marginBottom: 28 }} />
-            <div className="text-center">
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', marginBottom: 6 }}>
-                Want to see exactly who to contact and get a personalized outreach plan?
-              </p>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 16, color: '#E85D20', marginBottom: 20 }}>
-                That&apos;s what FastIQ is built for.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-3">
-                <button
-                  onClick={onOpenUpgrade}
-                  className="border border-[#E85D20] text-[#E85D20] px-6 py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
-                  style={{ minHeight: 'auto' }}
-                >
-                  Unlock FastIQ
-                </button>
-                <button
-                  onClick={onOpenUpgrade}
-                  className="border border-[#E85D20] text-[#E85D20] px-6 py-2.5 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
-                  style={{ minHeight: 'auto' }}
-                >
-                  Ask My Parent to Activate
-                </button>
-              </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', marginTop: 12 }}>
-                Free 7-day trial included. Cancel anytime.
-              </p>
-            </div>
-          </section>
+        <div ref={bottomRef} />
+      </div>
 
+      {/* Input bar — hidden when done */}
+      {!conversationDone && (
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 16, padding: '8px 12px' }}>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your answer..."
+              rows={1}
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', resize: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', lineHeight: 1.5, maxHeight: 120, overflowY: 'auto' }}
+            />
+            <button
+              onClick={() => sendMessage()}
+              disabled={!input.trim() || loading}
+              style={{ background: input.trim() && !loading ? '#E85D20' : '#E0E0E0', border: 'none', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'default', flexShrink: 0, minHeight: 'auto', transition: 'background 0.2s' }}
+            >
+              {loading
+                ? <Loader2 style={{ width: 16, height: 16, color: '#fff', animation: 'spin 1s linear infinite' }} />
+                : <Send style={{ width: 16, height: 16, color: '#fff' }} />}
+            </button>
+          </div>
+          <p style={{ fontSize: 11, color: '#BBB', textAlign: 'center', margin: '6px 0 0', fontFamily: "'DM Sans', sans-serif" }}>
+            Press Enter to send · Shift+Enter for new line
+          </p>
         </div>
       )}
+
+      <style>{`
+        @keyframes dotBounce {
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+          40% { transform: translateY(-6px); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
