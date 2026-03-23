@@ -86,6 +86,14 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 400, color: '#888888', marginBottom: 20 }}>
             powered by <span style={{ color: '#E85D20' }}>FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>™</sup></span>
           </p>
+          {user?.career_goals?.archetype && (
+            <button
+              onClick={() => onTabChange?.('career_goals')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.35)', borderRadius: 100, padding: '6px 14px', marginBottom: 16, cursor: 'pointer', minHeight: 'auto' }}>
+              <span style={{ fontSize: 14 }}>⚡</span>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#E85D20' }}>{user.career_goals.archetype}</span>
+            </button>
+          )}
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: '#fff', lineHeight: 1.2, marginBottom: 12 }}>
             Your career doesn't start with a resume.
           </h1>

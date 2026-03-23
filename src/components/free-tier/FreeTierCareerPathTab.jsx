@@ -17,11 +17,23 @@ Guidelines:
 - You are NOT a job board. You help students understand paths, build strategy, and think clearly about their future.`;
 
 function buildOpeningMessage(goals) {
+  const archetype = goals?.archetype;
   const role = goals?.role || (goals?.target_roles?.[0]) || null;
   const industry = goals?.industries?.[0] || goals?.target_industries?.[0] || null;
 
+  if (archetype) {
+    const archetypeKey = archetype.replace('THE ', '').trim();
+    const topRoles = goals?.target_roles?.slice(0, 2).join(' and ') || role || 'your field';
+    return `As a ${archetype}, here are the paths where you'd likely thrive. Based on your profile, ${topRoles} roles tend to be a strong fit. Want to explore what that career path actually looks like, what skills separate good from great, or what your first 1–3 years might involve?`;
+  }
   if (role && industry) {
     return `You mentioned you're interested in ${role} roles in ${industry}. Want to explore what a typical career path looks like, what skills you'll need, or what your first 1–3 years might involve?`;
+  }
+  if (industry) {
+    return `You've been exploring opportunities in ${industry}. Want to map out what career paths are most common there, or dig into a specific role?`;
+  }
+  return `I don't see any career goals set yet — but that's okay. Just tell me what you're interested in and we'll explore together. Or head to Career Goals to set your target industries and roles so I can give you a fully personalized path breakdown.`;
+} roles in ${industry}. Want to explore what a typical career path looks like, what skills you'll need, or what your first 1–3 years might involve?`;
   }
   if (industry) {
     return `You've been exploring opportunities in ${industry}. Want to map out what career paths are most common there, or dig into a specific role?`;
