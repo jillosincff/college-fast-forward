@@ -250,44 +250,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [debugData, setDebugData] = useState(null);
   const bottomRef = useRef(null);
 
-  // ── Diagnostic on mount ──────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!user?.email) return;
-    (async () => {
-      try {
-        const allUsers = await base44.entities.User.list('-created_date', 1000);
-        console.log('🔍 Total users in DB:', allUsers.length);
-        const byPersona = allUsers.filter(u => u.persona === 'parent');
-        console.log('🔍 persona=parent:', byPersona.length);
-        const byRoles = allUsers.filter(u => u.roles?.includes('parent'));
-        console.log('🔍 roles includes parent:', byRoles.length);
-        const allParents = allUsers.filter(u => u.persona === 'parent' || u.roles?.includes('parent'));
-        console.log('🔍 Total parents (combined):', allParents.length);
-        const goals = user?.career_goals || {};
-        console.log('🔍 Current user school:', user?.school);
-        console.log('🔍 Current user industries:', goals.target_industries || goals.industries);
-        allParents.slice(0, 3).forEach(p => console.log('🔍 sample parent:', { name: p.full_name, school: p.school, industry: p.industry, persona: p.persona, roles: p.roles, show_in_directory: p.show_in_directory, onboarding_completed: p.onboarding_completed }));
-        const sameSchool = allParents.filter(p => (p.school || p.university || '').toLowerCase() === (user?.school || '').toLowerCase());
-        console.log('🔍 Same school parents:', sameSchool.length);
-        const visible = allParents.filter(p => p.show_in_directory !== false && p.onboarding_completed !== false);
-        console.log('🔍 Visible + onboarding complete:', visible.length);
-        setDebugData({
-          totalUsers: allUsers.length,
-          parentsByPersona: byPersona.length,
-          parentsByRoles: byRoles.length,
-          allParents: allParents.length,
-          currentUserSchool: user?.school,
-          currentUserIndustries: goals.target_industries || goals.industries,
-          sameSchool: sameSchool.length,
-          visibleParents: visible.length,
-          sampleParent: allParents[0] ? { name: allParents[0].full_name, school: allParents[0].school, industry: allParents[0].industry, persona: allParents[0].persona, roles: allParents[0].roles } : null
-        });
-      } catch (e) {
-        console.error('🔍 Diagnostic error:', e);
-        setDebugData({ error: e.message });
-      }
-    })();
-  }, [user?.email]);
+  // Removed frontend diagnostic block — now using backend getLeadsForStudent
 
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
