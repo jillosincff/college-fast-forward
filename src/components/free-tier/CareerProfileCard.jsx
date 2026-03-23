@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 
 const cffIntroColor = { high: '#22C55E', medium: '#F59E0B', low: '#94A3B8' };
 const cffIntroLabel = { high: '🤝 CFF intro: highly valuable', medium: '🤝 CFF intro: helpful', low: '🤝 CFF intro: optional' };
@@ -6,8 +7,26 @@ const cffIntroLabel = { high: '🤝 CFF intro: highly valuable', medium: '🤝 C
 export default function CareerProfileCard({
   careerProfile, roleRecommendations, aboutYou, topStrengths,
   workEnvironment, honestChallenge, cffNetwork, preliminaryArchetype,
-  onTabChange, onRestart, onPromptSelect,
+  onTabChange, onRestart, onPromptSelect, userEmail,
 }) {
+  // Auto-save to notebook on render
+  useEffect(() => {
+    if (!roleRecommendations?.length || !userEmail) return;
+    const content = [
+      preliminaryArchetype?.label ? `Career Profile: ${preliminaryArchetype.label}` : 'Career Goals Profile',
+      aboutYou ? `\nAbout You: ${aboutYou}` : '',
+      topStrengths?.length ? `\nTop Strengths: ${topStrengths.join(', ')}` : '',
+      roleRecommendations.length ? `\nBest-Fit Roles: ${roleRecommendations.map(r => r.title).join(', ')}` : '',
+    ].filter(Boolean).join('');
+    base44.entities.NotebookEntry.create({
+      user_email: userEmail,
+      content,
+      source_page: 'career_goals',
+      source_label: 'Career Goals',
+      tags: ['career_goals', 'profile'],
+      saved_at: new Date().toISOString(),
+    }).catch(() => {});
+  }, []);
   const suggestedPrompts = roleRecommendations?.length > 0 ? [
     `Tell me more about ${roleRecommendations[0]?.title}`,
     'Show me companies hiring for these roles',

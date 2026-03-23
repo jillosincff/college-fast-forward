@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
 
 export default function ArchetypeCard({ result, onTabChange, onRetake }) {
   const [visible, setVisible] = useState(false);
@@ -9,6 +10,23 @@ export default function ArchetypeCard({ result, onTabChange, onRetake }) {
     const t = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(t);
   }, []);
+
+  // Auto-save to Notebook on render
+  useEffect(() => {
+    if (!result || !result.archetype_name) return;
+    const content = `${result.archetype_name}\n\n${result.archetype_description || ''}\n\nTop Strengths: ${(result.top_strengths || []).join(', ')}\n\nBest-Fit Roles: ${(result.best_fit_roles || []).map(r => r.title).join(', ')}`;
+    base44.auth.me().then(user => {
+      if (!user?.email) return;
+      base44.entities.NotebookEntry.create({
+        user_email: user.email,
+        content,
+        source_page: 'assessment',
+        source_label: 'Career Assessment',
+        tags: ['assessment', 'archetype'],
+        saved_at: new Date().toISOString(),
+      }).catch(() => {});
+    }).catch(() => {});
+  }, [result?.archetype_name]);
 
   if (!result) return null;
 

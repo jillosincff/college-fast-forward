@@ -436,6 +436,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
             honestChallenge={honestChallenge}
             cffNetwork={cffNetwork}
             preliminaryArchetype={prelimArchetype}
+            userEmail={user?.email}
             onTabChange={onTabChange}
             onRestart={startChat}
             onPromptSelect={handleChipSelect}
