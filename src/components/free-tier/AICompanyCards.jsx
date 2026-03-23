@@ -313,6 +313,11 @@ function getAvailabilityLabel(availability) {
   return '⚪ In the network';
 }
 
+function capitalizeName(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 function getInitials(firstName, lastName) {
   return ((firstName?.[0] || '') + (lastName?.[0] || '')).toUpperCase() || '?';
 }
@@ -337,7 +342,7 @@ function CFFMembersSection({ members, industry, user, onTabChange }) {
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A', margin: 0 }}>
-              {member.first_name} {member.last_name?.[0] ? `${member.last_name[0]}.` : ''}
+              {capitalizeName(member.first_name)} {member.last_name?.[0] ? `${member.last_name[0].toUpperCase()}.` : ''}
             </p>
             <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>
               {member.job_title || 'Professional'}{member.company_name ? ` · ${member.company_name}` : ''}

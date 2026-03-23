@@ -39,13 +39,16 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
   const [btnState, setBtnState] = useState(BTN.idle);
   const [btnError, setBtnError] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [formCollapsed, setFormCollapsed] = useState(false);
   const [alumniCount, setAlumniCount] = useState(null);
   const resultsRef = useRef(null);
 
   useEffect(() => {
     const g = user?.career_goals;
+    // Sanitize role — reject single chars, digits, or obvious bad values
+    const sanitizeRole = (r) => (r && r.trim().length > 1 && !/^\d+$/.test(r.trim())) ? r.trim() : '';
     if (g) {
-      setRole(g.role || user?.target_role || '');
+      setRole(sanitizeRole(g.role || user?.target_role || ''));
       setIndustries(g.industries || user?.target_industries || []);
       setCompanies(g.target_companies || user?.target_companies || []);
       setGradYear(g.graduation_year?.toString() || user?.graduation_year?.toString() || '');
@@ -58,7 +61,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       }
       if (g.saved_at) setShowResults(true);
     } else {
-      setRole(user?.target_role || '');
+      setRole(sanitizeRole(user?.target_role || ''));
       setIndustries(user?.target_industries || []);
       setCompanies(user?.target_companies || []);
       setGradYear(user?.graduation_year?.toString() || '');
@@ -123,6 +126,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       });
       setBtnState(BTN.saved);
       setShowResults(true);
+      setFormCollapsed(true);
       refetchRecs();
       if (onGoalsSaved) onGoalsSaved();
       setTimeout(() => setBtnState(BTN.idle), 3000);
@@ -160,17 +164,27 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-        CAREER GOALS
-      </p>
-      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', marginBottom: 8 }}>
-        Build your career target list.
-      </h1>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 32 }}>
-        The clearer your goals, the better FastIQ can help you.
-      </p>
+      <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+        <div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: 0 }}>CAREER GOALS</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '4px 0 0' }}>Build your career target list.</h1>
+        </div>
+        {formCollapsed && (
+          <button
+            onClick={() => setFormCollapsed(false)}
+            style={{ fontSize: 13, color: '#E85D20', fontWeight: 600, background: 'none', border: '1px solid #E85D20', borderRadius: 100, padding: '6px 16px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}
+          >
+            Edit Goals
+          </button>
+        )}
+      </div>
 
-      <div className="space-y-6">
+      {!formCollapsed && (
+        <>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 32 }}>
+            The clearer your goals, the better FastIQ can help you.
+          </p>
+          <div className="space-y-6">
 
         <div>
           <label className="block text-sm font-semibold text-[#1A1A1A] mb-2">What kind of role are you looking for?</label>
@@ -252,7 +266,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
         <CompanySizeRankField
           value={companySizePref}
           skipped={companySizeSkipped}
-          isSaved={!!(user?.career_goals?.saved_at)}
+          isSaved={false}
           onChange={(newOrder) => { setCompanySizePref(newOrder); setCompanySizeSkipped(false); }}
           onSkip={() => setCompanySizeSkipped(true)}
         />
@@ -298,6 +312,8 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
           <p style={{ fontSize: 13, color: '#EF4444', textAlign: 'center', marginTop: -8 }}>{btnError}</p>
         )}
       </div>
+        </>
+      )}
 
       {showResults && (
         <div ref={resultsRef} style={{ marginTop: 24 }}>
