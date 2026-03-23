@@ -182,10 +182,10 @@ export default function CareerProfileCard({
       </div>
 
       {/* CTAs */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-        <button onClick={() => onTabChange?.('company_intel')}
-          style={{ background: accentColor, color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
-          Explore My Company List →
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button onClick={onFindLeads || (() => onTabChange?.('company_intel'))}
+          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+          Find My Leads →
         </button>
         <button onClick={() => onTabChange?.('career_path')}
           style={{ background: 'none', border: `1.5px solid ${accentColor}`, color: accentColor, borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
