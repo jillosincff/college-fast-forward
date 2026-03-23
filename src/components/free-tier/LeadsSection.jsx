@@ -210,20 +210,23 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const fetchCFFLeads = async () => {
     setLoading(true);
     try {
-      const result = await base44.functions.invoke('getLeadsForStudent', { student_id: user?.id });
+      const response = await base44.functions.invoke('getLeadsForStudent', { student_id: user?.id });
+      const result = response?.data || response;
       
-      if (result.error) {
+      if (result?.error) {
         console.error('Error fetching leads:', result.error);
         setRedHotLeads([]);
         setHotLeads([]);
+        setLoading(false);
         return;
       }
 
-      console.log('✓ Red Hot count:', result.redHotTotal);
-      console.log('✓ Hot count:', result.hotTotal);
+      console.log('✓ Leads debug:', result?.debug);
+      console.log('✓ Red Hot count:', result?.redHotTotal);
+      console.log('✓ Hot count:', result?.hotTotal);
       
-      setRedHotLeads(result.redHot || []);
-      setHotLeads(result.hot || []);
+      setRedHotLeads(result?.redHot || []);
+      setHotLeads(result?.hot || []);
     } catch (e) {
       console.error('CFF leads fetch failed:', e);
       setRedHotLeads([]);
