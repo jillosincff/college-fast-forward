@@ -53,20 +53,9 @@ export default function CareerProfileCard({
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: accentColor, margin: '0 0 6px' }}>
             ⚡ YOUR FASTIQ CAREER PROFILE
           </p>
-          {archetypeLabel && (
-            <>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: accentColor, margin: '0 0 4px' }}>
-                {archetypeLabel}
-              </p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0, fontStyle: 'italic' }}>
-                Preview — based on your goals conversation.{' '}
-                <button
-                  onClick={() => onTabChange?.('assessment')}
-                  title="Take the full 10-minute FastIQ Assessment to confirm and deepen your archetype"
-                  style={{ background: 'none', border: 'none', color: accentColor, cursor: 'pointer', fontSize: 12, padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
-                >
-                  Take the full assessment to confirm →
-                </button>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '0 0 12px', lineHeight: 1.5 }}>
+            Based on everything you shared — here's what we found for you.
+          </p>
               </p>
             </>
           )}
