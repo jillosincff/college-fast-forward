@@ -1,7 +1,43 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Loader2, Bookmark } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Loader2, Bookmark, RefreshCw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
+
+// ─── Industry taxonomy: expand student industry to related terms ───
+const INDUSTRY_ALIASES = {
+  'real estate': ['real estate', 'property', 'construction', 'finance', 'financial', 'investment', 'reit', 'mortgage', 'commercial real estate'],
+  'finance': ['finance', 'financial', 'banking', 'investment', 'insurance', 'accounting', 'fintech', 'wealth', 'capital', 'asset management'],
+  'technology': ['tech', 'software', 'it ', 'information technology', 'saas', 'digital', 'data', 'engineering'],
+  'healthcare': ['health', 'medical', 'clinical', 'pharma', 'biotech', 'hospital', 'nursing'],
+  'marketing': ['marketing', 'advertising', 'pr', 'communications', 'brand', 'media'],
+  'consulting': ['consulting', 'advisory', 'strategy', 'management consulting'],
+};
+
+function getIndustryAliases(industries) {
+  const all = new Set();
+  industries.forEach(ind => {
+    const indLower = ind.toLowerCase();
+    all.add(indLower);
+    for (const [key, aliases] of Object.entries(INDUSTRY_ALIASES)) {
+      if (indLower.includes(key) || aliases.some(a => indLower.includes(a))) {
+        aliases.forEach(a => all.add(a));
+      }
+    }
+  });
+  return [...all];
+}
+
+function matchesIndustry(parent, expandedTerms, targetRoles) {
+  const uIndustry = (parent.industry || '').toLowerCase();
+  const uTitle = (parent.job_title || parent.current_role || '').toLowerCase();
+  const uCompany = (parent.company || '').toLowerCase();
+  if (expandedTerms.some(t => uIndustry.includes(t))) return 'exact';
+  if (targetRoles?.some(r => uTitle.includes(r.toLowerCase().split(' ')[0]))) return 'role';
+  // Adjacent: finance-adjacent for real estate etc.
+  const adjacentTerms = expandedTerms.slice(0, 5);
+  if (adjacentTerms.some(t => uTitle.includes(t) || uCompany.includes(t))) return 'adjacent';
+  return null;
+}
 
 const isFastIQUser = (user) =>
   !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
@@ -223,12 +259,20 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
     fetchLeads();
   }, [user?.email, JSON.stringify(goals.target_industries)]);
 
+  const [adjacentLeads, setAdjacentLeads] = useState([]);
+  const [suggestedCompanies, setSuggestedCompanies] = useState([]);
+
   const fetchLeads = async () => {
     setLoading(true);
+    setAdjacentLeads([]);
+    setSuggestedCompanies([]);
     const industries = goals.target_industries || goals.industries || [];
-    const targetCompanies = goals.target_companies || [];
+    const targetRoles = goals.target_roles || [];
+    const targetCompanies = goals.target_companies || (goals.dream_company ? [goals.dream_company] : []);
+    const location = goals.location_preference || goals.locations?.[0] || 'the United States';
     const school = user?.school || user?.university || '';
     const schoolWord = school.toLowerCase().split(' ')[0];
+    const expandedIndustries = getIndustryAliases(industries);
 
     try {
       const [dirRes, discoveredAlumni] = await Promise.all([
@@ -237,29 +281,45 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       ]);
       const allUsers = dirRes;
 
-      // Hot leads — CFF parents matching industry
-      const industryLower = industries.map(i => i.toLowerCase());
-      const parents = allUsers.filter(u => {
-        if (u.persona !== 'parent' && !u.roles?.includes('parent')) return false;
-        if (!u.show_in_directory && !u.directory_visible && !u.is_directory_visible) return false;
-        if (!u.full_name) return false;
-        const uIndustry = (u.industry || '').toLowerCase();
+      // Hot leads — fuzzy/taxonomy matching
+      const exactParents = [], adjacentParents = [];
+      allUsers.forEach(u => {
+        if (u.persona !== 'parent' && !u.roles?.includes('parent')) return;
+        if (!u.show_in_directory && !u.directory_visible && !u.is_directory_visible) return;
+        if (!u.full_name) return;
         const openToIntro = u.intro_availability === 'happy_to_help' || u.intro_availability === 'yes' || u.intro_willingness === 'happy_to_help' || u.intro_willingness === 'yes';
-        const industryMatch = industryLower.length === 0 || industryLower.some(i => uIndustry.includes(i.split(' ')[0]));
-        return industryMatch && openToIntro;
-      }).slice(0, 6);
+        if (!openToIntro) return;
+        const match = industries.length === 0 ? 'exact' : matchesIndustry(u, expandedIndustries, targetRoles);
+        if (match === 'exact' || match === 'role') exactParents.push(u);
+        else if (match === 'adjacent') adjacentParents.push(u);
+      });
 
+      const parents = exactParents.slice(0, 6);
       setHotLeads(parents);
+      if (parents.length === 0) setAdjacentLeads(adjacentParents.slice(0, 4));
 
-      // Warm leads — alumni grouped by company
+      // Warm leads — Mode A (named companies) or Mode B (LLM-generated)
+      let companyTargets = targetCompanies;
+      if (companyTargets.length === 0 && industries.length > 0) {
+        // Mode B: generate company list via LLM
+        try {
+          const llmRes = await base44.integrations.Core.InvokeLLM({
+            prompt: `Generate a list of 12 real companies that a student targeting ${targetRoles.join(', ') || 'entry-level roles'} in ${industries.join(', ')} in ${location} should be targeting. Include major employers, known campus recruiters, and 2-3 growing mid-size companies. Return ONLY a JSON array of company name strings.`,
+            response_json_schema: { type: 'object', properties: { companies: { type: 'array', items: { type: 'string' } } } },
+          });
+          companyTargets = llmRes?.companies || [];
+          if (companyTargets.length > 0) setSuggestedCompanies(companyTargets);
+        } catch { companyTargets = []; }
+      }
+
       const companyAlumniMap = {};
       const addAlumni = (list, source) => {
         list.forEach(a => {
           const co = (a.company || a.current_company || '').trim();
           if (!co) return;
-          const isTarget = targetCompanies.length === 0 || targetCompanies.some(t => co.toLowerCase().includes(t.toLowerCase()));
-          const isIndustry = industryLower.length === 0 || industryLower.some(i => (a.industry || '').toLowerCase().includes(i.split(' ')[0]));
-          const isSchoolAlum = schoolWord && (a.school || a.university || '').toLowerCase().includes(schoolWord);
+          const isTarget = companyTargets.length === 0 || companyTargets.some(t => co.toLowerCase().includes(t.toLowerCase()));
+          const isIndustry = expandedIndustries.length === 0 || expandedIndustries.some(i => (a.industry || '').toLowerCase().includes(i));
+          const isSchoolAlum = !schoolWord || (a.school || a.university || '').toLowerCase().includes(schoolWord);
           if ((isTarget || isIndustry) && isSchoolAlum) {
             if (!companyAlumniMap[co]) companyAlumniMap[co] = { name: co, industry: a.industry || '', hiring_signal: 'warm', alumni: [] };
             companyAlumniMap[co].alumni.push({ ...a, source });
@@ -275,10 +335,9 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         .filter(c => c.alumni.length > 0)
         .sort((a, b) => b.alumni.length - a.alumni.length)
         .slice(0, 6);
-
       setWarmLeads(warmCompanies);
 
-      // Combo lead — company with both parent + alumni
+      // Combo lead
       let best = null;
       for (const co of warmCompanies) {
         const parent = parents.find(p => (p.company || '').toLowerCase() === co.name.toLowerCase());
@@ -289,22 +348,22 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       }
       setComboLead(best);
 
-      // Generate briefings for hot leads
-      if (parents.length > 0 && (industries.length > 0 || goals.target_roles?.length > 0)) {
+      // Briefings for hot leads
+      if (parents.length > 0 && (industries.length > 0 || targetRoles.length > 0)) {
         setLoadingBriefings(true);
         base44.integrations.Core.InvokeLLM({
           prompt: `You are FastIQ generating brief lead briefings for a student.
 
 Student goals:
-- Target roles: ${goals.target_roles?.join(', ') || 'not set'}
+- Target roles: ${targetRoles.join(', ') || 'not set'}
 - Target industries: ${industries.join(', ') || 'not set'}
 
-For each parent below, write a 1-2 sentence explanation of why they are a hot lead for this student. Be specific about their industry/company and how it relates to the student's goals.
+For each parent below, write a 1-2 sentence explanation of why they are a hot lead. Be specific.
 
 Parents:
 ${parents.map((p, i) => `${i + 1}. ${p.full_name} — ${p.job_title || 'Professional'} at ${p.company || 'their company'} (${p.industry || 'unknown industry'})`).join('\n')}
 
-Return an array of exactly ${parents.length} strings, one per parent.`,
+Return an array of exactly ${parents.length} strings.`,
           response_json_schema: { type: 'object', properties: { briefings: { type: 'array', items: { type: 'string' } } } },
         }).then(res => {
           const arr = res?.briefings || [];
@@ -313,10 +372,9 @@ Return an array of exactly ${parents.length} strings, one per parent.`,
           setBriefings(map);
         }).catch(() => {}).finally(() => setLoadingBriefings(false));
 
-        // Generate combo reason
         if (best) {
           base44.integrations.Core.InvokeLLM({
-            prompt: `In 2 sentences, explain why ${best.company} (${best.industry}) is the #1 opportunity for a student targeting ${goals.target_roles?.join(', ') || 'general business'} in ${industries.join(', ')}. They have a CFF parent contact open to intros and ${best.alumniCount} alumni in the network. Be specific and motivating.`,
+            prompt: `In 2 sentences, explain why ${best.company} (${best.industry}) is the #1 opportunity for a student targeting ${targetRoles.join(', ') || 'general business'} in ${industries.join(', ')}. They have a CFF parent contact open to intros and ${best.alumniCount} alumni in the network. Be specific and motivating.`,
           }).then(reason => {
             setComboLead(prev => prev ? { ...prev, reason: typeof reason === 'string' ? reason : reason?.message || '' } : prev);
           }).catch(() => {});
@@ -379,9 +437,30 @@ Return an array of exactly ${parents.length} strings, one per parent.`,
               ))}
             </div>
           </>
+        ) : adjacentLeads.length > 0 ? (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#E85D20', margin: 0 }}>
+                No parents in your exact industry yet — but these parents in adjacent fields may still open doors:
+              </p>
+            </div>
+            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+              {adjacentLeads.map(p => (
+                <HotLeadCard
+                  key={p.id} parent={p}
+                  briefing={briefings[p.id]}
+                  user={user}
+                  onContact={onContact}
+                  onSave={onSaveLead}
+                  onUnsave={onUnsaveLead}
+                  isSaved={isSaved(p.id)}
+                />
+              ))}
+            </div>
+          </div>
         ) : (
           <div style={{ background: '#F9F9F9', border: '1px dashed #E0E0E0', borderRadius: 10, padding: '20px 24px', marginTop: 8 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 4px' }}>No CFF parents in your exact industry yet.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 4px' }}>No CFF parents in your industry yet.</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 12px' }}>Know a parent who should join?</p>
             <button onClick={() => {}} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Invite a Parent →</button>
           </div>
@@ -413,10 +492,21 @@ Return an array of exactly ${parents.length} strings, one per parent.`,
               ))}
             </div>
           </>
+        ) : suggestedCompanies.length > 0 ? (
+          <div style={{ background: '#F0F7FF', border: '1px solid #BFDBFE', borderRadius: 12, padding: '20px 24px', marginTop: 8 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#1E40AF', margin: '0 0 6px' }}>🎯 We're still building alumni coverage in your field.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '0 0 16px', lineHeight: 1.5 }}>Here are the top companies you should be targeting — invite alumni you know to join CFF:</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+              {suggestedCompanies.slice(0, 10).map((c, i) => (
+                <span key={i} style={{ background: '#fff', border: '1px solid #93C5FD', color: '#1E40AF', borderRadius: 100, padding: '5px 14px', fontSize: 13, fontWeight: 500 }}>{c}</span>
+              ))}
+            </div>
+            <button onClick={() => {}} style={{ background: '#4F8CFF', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>+ Invite Alumni →</button>
+          </div>
         ) : (
           <div style={{ background: '#F9F9F9', border: '1px dashed #E0E0E0', borderRadius: 10, padding: '20px 24px', marginTop: 8 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: 0 }}>
-              No alumni found yet at your target companies. Add target companies to your goals to see warm leads.
+              No alumni found yet. Try updating your goals with specific target companies or industries.
             </p>
           </div>
         )}

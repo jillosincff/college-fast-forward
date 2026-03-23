@@ -401,13 +401,37 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           showLeadsArrow={showLeadsArrow}
         />
 
-        {/* Refresh link (if leads already shown) */}
-        {showLeads && (
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', textAlign: 'right', margin: '-12px 0 16px', cursor: 'pointer' }}
-            onClick={() => { setShowLeads(false); setTimeout(() => setShowLeads(true), 100); }}>
-            Refresh my leads
-          </p>
-        )}
+        {/* Refresh link + missing goals prompt */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, margin: '8px 0 16px' }}>
+          {/* Missing goals nudge */}
+          {(() => {
+            const g = savedGoals || user?.career_goals;
+            const missing = [];
+            if (!g?.graduation_year) missing.push({ key: 'grad', label: '+ Add graduation year' });
+            if (!g?.dream_company) missing.push({ key: 'dream', label: '+ Add dream company' });
+            if (!g?.company_size_preference?.length) missing.push({ key: 'size', label: '+ Add company size preference' });
+            if (missing.length === 0) return null;
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888' }}>⚡ Complete your profile for better matches:</span>
+                {missing.map(m => (
+                  <button key={m.key} onClick={startChat}
+                    style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', color: '#E85D20', borderRadius: 100, padding: '3px 12px', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
+          {/* Refresh leads */}
+          {showLeads && (
+            <button
+              onClick={() => { setShowLeads(false); setTimeout(() => setShowLeads(true), 100); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, minHeight: 'auto', marginLeft: 'auto' }}>
+              ⟳ Refresh My Leads
+            </button>
+          )}
+        </div>
 
         {/* Leads section */}
         {showLeads && (
