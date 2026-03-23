@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 
