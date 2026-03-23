@@ -38,9 +38,14 @@ Contact details:
 - Connection type: ${isAlumni ? 'alumni cold outreach' : 'CFF parent intro request'}
 ${lead.graduation_year ? `- Graduation year: ${lead.graduation_year}` : ''}
 
-Write a concise, warm, specific outreach message. 2-3 short paragraphs. First paragraph: who the student is and why they're reaching out. Second paragraph: specific question or ask. Third: brief thank you. Never start with "I hope this finds you well." Be direct and respectful. Under 150 words.
+The student's school: ${user.school || user.university || 'University of Florida'}
+The parent's school: ${lead.school || lead.university || ''}
+Same school: ${(user.school || user.university || '') === (lead.school || lead.university || '') ? 'YES' : 'NO'}
 
-Also write a subject line (under 10 words).`,
+If same school: use the school as the shared connection: "As a fellow [school] family, I found your profile on College Fast Forward..."
+If different school: use CFF as the shared connection: "I found your profile on College Fast Forward — we're both part of the CFF network, which connects parents and students across schools for career conversations."
+
+Write a concise, warm, specific outreach message. 2-3 short paragraphs.
           response_json_schema: {
             type: 'object',
             properties: {
