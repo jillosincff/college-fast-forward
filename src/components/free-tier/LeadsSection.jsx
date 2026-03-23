@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bookmark, Lock, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
+import { SCHOOL_NAMES, normalizeSchool } from '@/lib/schoolNames';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -41,8 +42,8 @@ function initials(name) {
 }
 
 function sameSchool(a, b) {
-  const aS = (a?.school || a?.university || '').toLowerCase().trim();
-  const bS = (b?.school || b?.university || '').toLowerCase().trim();
+  const aS = normalizeSchool((a?.school || a?.university || '').trim());
+  const bS = normalizeSchool((b?.school || b?.university || '').trim());
   return !!(aS && bS && aS === bS);
 }
 
