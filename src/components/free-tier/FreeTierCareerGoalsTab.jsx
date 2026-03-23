@@ -16,7 +16,13 @@ The conversation has TWO paths:
 - PATH A: Student has direction → ask Q1–Q8 (role, industry, internship/fulltime+grad year, location, experience, company size, dream company, gaps). One question at a time.
 - PATH B: Student is undecided → ask B1–B9 discovery questions one at a time (work environment, variety vs routine, desk/field/remote, strengths, role in groups, problem type, motivation, entrepreneurship interest, self-assessment). After B9, synthesize and generate role recommendations.
 
-Current path is determined by the student's opening response. If they said something like "I have a pretty good idea" → Path A. If "no idea" or "still figuring it out" → Path B.
+Current path is determined by the student's opening response. If they said "Let's go" or has direction → Path A. If undecided or says "later" → Path B.
+
+ACKNOWLEDGMENT STYLE — after key answers, occasionally remind the student their data is being used. Examples:
+- After industry/role: "Finance — that unlocks a lot of strong paths. Already narrowing your company list."
+- After location: "New York City — noted. Focusing your leads on NYC-based opportunities now."
+- After experience: "Starting from zero — got it. We'll prioritize parents and alumni who are especially open to helping students at your stage."
+Make the student feel like something just got smarter in the background — because it did.
 
 Rules:
 - Always acknowledge the student's previous answer warmly before asking the next question (1 sentence max)
@@ -32,6 +38,7 @@ CRITICAL RULES:
 - ROLE QUALITY: Each role recommendation must use the specific role title (not generic), name specific company types or companies that hire for it, explain exactly why it fits THIS student based on their specific answers, give a specific honest challenge relevant to their experience level, and include no_experience_first_step if they have no experience.
 - HONEST CHALLENGE: The honest_challenge must be specific to this student — reference their experience level, goals, and answers. Never write advice that applies to any student.
 - PRELIMINARY ARCHETYPE: Always infer a preliminary_archetype from the conversation, even mid-conversation.
+- SKIP CHIPS: When offering skip as an option in suggested_prompts, always phrase it as: "Skip this → (we'll be less accurate)"
 
 Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)`;
 
@@ -224,9 +231,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     const firstName = user?.full_name?.split(' ')[0] || 'there';
     setMessages([{
       role: 'assistant',
-      content: `Hey ${firstName}! I'm going to ask you a few questions so I can personalize your entire CFF experience. There are no wrong answers — even "I have no idea" is a great place to start. So let's begin: do you have a sense of what kind of work you're looking for, or are you still figuring that out?`,
+      content: `Hey ${firstName}! I have 8 quick questions — takes about 3 minutes. The more we know about you, the better we can help you. No wrong answers, and you can skip anything. Ready?`,
     }]);
-    setSuggestedPrompts(["I have a pretty good idea", "I have some ideas but I'm not sure", "Honestly no idea yet"]);
+    setSuggestedPrompts(["Let's go →", "I'll do it later"]);
     setQuestionCount(1);
   }, [mode, messages.length, user]);
 
@@ -391,7 +398,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         {/* Page header */}
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Your Goals &amp; Leads.</h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 28px', lineHeight: 1.5 }}>Set your goals. See who can help. Start making moves.</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 28px', lineHeight: 1.5 }}>The more we know about you, the better we can help you.</p>
 
         {/* Goals card */}
         <GoalsSummaryCard
@@ -494,9 +501,20 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           Tell FastIQ what you're looking for.
         </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>
-          The more you share, the smarter your entire experience gets.
+          The more we know about you, the better we can help you.
         </p>
       </div>
+
+      {/* Progress bar */}
+      {questionCount > 1 && !conversationDone && (
+        <div style={{ padding: '8px 24px 0', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #F5F5F5' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: '0 0 8px', flexShrink: 0 }}>The more you share, the better we can help you.</p>
+          <div style={{ flex: 1, height: 4, background: '#F0F0F0', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount - 1, 8) / 8) * 100))}%`, background: '#E85D20', borderRadius: 2, transition: 'width 0.4s ease' }} />
+          </div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: '0 0 8px', flexShrink: 0 }}>{Math.min(questionCount - 1, 8)} of 8</p>
+        </div>
+      )}
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 8px' }}>
