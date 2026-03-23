@@ -252,6 +252,8 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const [comboLead, setComboLead] = useState(null);
   const [briefings, setBriefings] = useState({});
   const [loadingBriefings, setLoadingBriefings] = useState(false);
+  const [debugInfo, setDebugInfo] = useState(null);
+  const [hotLeadLevel, setHotLeadLevel] = useState(1); // 1=exact, 2=role, 3=any
   const fastiq = isFastIQUser(user);
   const goals = user?.career_goals || {};
 
@@ -281,22 +283,57 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       ]);
       const allUsers = dirRes;
 
-      // Hot leads — fuzzy/taxonomy matching
-      const exactParents = [], adjacentParents = [];
-      allUsers.forEach(u => {
-        if (u.persona !== 'parent' && !u.roles?.includes('parent')) return;
-        if (!u.show_in_directory && !u.directory_visible && !u.is_directory_visible) return;
-        if (!u.full_name) return;
-        const openToIntro = u.intro_availability === 'happy_to_help' || u.intro_availability === 'yes' || u.intro_willingness === 'happy_to_help' || u.intro_willingness === 'yes';
-        if (!openToIntro) return;
-        const match = industries.length === 0 ? 'exact' : matchesIndustry(u, expandedIndustries, targetRoles);
-        if (match === 'exact' || match === 'role') exactParents.push(u);
-        else if (match === 'adjacent') adjacentParents.push(u);
+      // Collect ALL parents for debug + 3-level matching
+      const allParents = allUsers.filter(u => {
+        if (u.persona !== 'parent' && !u.roles?.includes('parent')) return false;
+        return !!(u.show_in_directory || u.directory_visible || u.is_directory_visible || u.full_name);
+      });
+      const parentsWithIndustry = allParents.filter(u => u.industry);
+      const sampleIndustries = [...new Set(parentsWithIndustry.slice(0, 20).map(u => u.industry))].slice(0, 5);
+      setDebugInfo({
+        searching: industries,
+        totalParents: allParents.length,
+        withIndustry: parentsWithIndustry.length,
+        sampleIndustries,
       });
 
-      const parents = exactParents.slice(0, 6);
+      // LEVEL 1 — industry/taxonomy match (open to intro)
+      const openParents = allParents.filter(u =>
+        u.intro_availability === 'happy_to_help' || u.intro_availability === 'yes' ||
+        u.intro_willingness === 'happy_to_help' || u.intro_willingness === 'yes'
+      );
+      let level1 = openParents.filter(u => {
+        const match = industries.length === 0 ? 'exact' : matchesIndustry(u, expandedIndustries, targetRoles);
+        return match === 'exact' || match === 'role';
+      });
+
+      // LEVEL 2 — role/title keyword fallback (all titles, open to intro)
+      let level2 = [];
+      if (level1.length === 0 && targetRoles.length > 0) {
+        const roleKeywords = targetRoles.flatMap(r => r.toLowerCase().split(/[\s,]+/)).filter(w => w.length > 3);
+        level2 = openParents.filter(u => {
+          const title = (u.job_title || u.current_role || '').toLowerCase();
+          return roleKeywords.some(k => title.includes(k));
+        });
+      }
+
+      // LEVEL 3 — any business/finance parent (open to intro)
+      let level3 = [];
+      const broadTerms = ['finance', 'business', 'investment', 'banking', 'accounting', 'real estate', 'property', 'consulting', 'analyst', 'manager', 'director', 'executive', 'president', 'vp ', 'cfo', 'ceo', 'partner'];
+      if (level1.length === 0 && level2.length === 0) {
+        level3 = openParents.filter(u => {
+          const text = ((u.job_title || '') + ' ' + (u.industry || '')).toLowerCase();
+          return broadTerms.some(t => text.includes(t));
+        });
+        // If still nothing, just take any open-to-intro parent
+        if (level3.length === 0) level3 = openParents;
+      }
+
+      const level = level1.length > 0 ? 1 : level2.length > 0 ? 2 : 3;
+      const parents = (level === 1 ? level1 : level === 2 ? level2 : level3).slice(0, 6);
+      setHotLeadLevel(level);
       setHotLeads(parents);
-      if (parents.length === 0) setAdjacentLeads(adjacentParents.slice(0, 4));
+      if (parents.length === 0) setAdjacentLeads(openParents.filter(u => !parents.includes(u)).slice(0, 4));
 
       // Warm leads — Mode A (named companies) or Mode B (LLM-generated)
       let companyTargets = targetCompanies;
@@ -420,6 +457,16 @@ Return an array of exactly ${parents.length} strings.`,
         <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>CFF Parents in Your Industries</h3>
         {hotLeads.length > 0 ? (
           <>
+            {hotLeadLevel === 2 && (
+              <div style={{ background: '#FFF8E7', border: '1px solid #FDE68A', borderRadius: 8, padding: '8px 14px', marginBottom: 12 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#92400E', margin: 0 }}>No parents in your exact industry yet — showing parents whose titles match your target roles.</p>
+              </div>
+            )}
+            {hotLeadLevel === 3 && (
+              <div style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 8, padding: '8px 14px', marginBottom: 12 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0 }}>No exact match yet — showing finance & business parents who may still be helpful:</p>
+              </div>
+            )}
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
               {hotLeads.length} parent{hotLeads.length > 1 ? 's' : ''} in your network {hotLeads.length === 1 ? 'is' : 'are'} ready to help students targeting {(goals.target_industries || goals.industries || [])[0] || 'your field'}.
             </p>
@@ -437,32 +484,19 @@ Return an array of exactly ${parents.length} strings.`,
               ))}
             </div>
           </>
-        ) : adjacentLeads.length > 0 ? (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#E85D20', margin: 0 }}>
-                No parents in your exact industry yet — but these parents in adjacent fields may still open doors:
-              </p>
-            </div>
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-              {adjacentLeads.map(p => (
-                <HotLeadCard
-                  key={p.id} parent={p}
-                  briefing={briefings[p.id]}
-                  user={user}
-                  onContact={onContact}
-                  onSave={onSaveLead}
-                  onUnsave={onUnsaveLead}
-                  isSaved={isSaved(p.id)}
-                />
-              ))}
-            </div>
-          </div>
         ) : (
           <div style={{ background: '#F9F9F9', border: '1px dashed #E0E0E0', borderRadius: 10, padding: '20px 24px', marginTop: 8 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 4px' }}>No CFF parents in your industry yet.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 4px' }}>No CFF parents found yet.</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 12px' }}>Know a parent who should join?</p>
             <button onClick={() => {}} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Invite a Parent →</button>
+            {debugInfo && (
+              <div style={{ marginTop: 16, padding: '10px 12px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, fontFamily: 'monospace', fontSize: 11, color: '#856404' }}>
+                <p style={{ margin: '0 0 4px', fontWeight: 700 }}>Debug: Hot Leads</p>
+                <p style={{ margin: '0 0 2px' }}>Searching industries: {JSON.stringify(debugInfo.searching)}</p>
+                <p style={{ margin: '0 0 2px' }}>Total parents: {debugInfo.totalParents} | With industry set: {debugInfo.withIndustry}</p>
+                <p style={{ margin: 0 }}>Sample industry values: {debugInfo.sampleIndustries.join(', ') || '(none found)'}</p>
+              </div>
+            )}
           </div>
         )}
       </section>
@@ -496,9 +530,17 @@ Return an array of exactly ${parents.length} strings.`,
           <div style={{ background: '#F0F7FF', border: '1px solid #BFDBFE', borderRadius: 12, padding: '20px 24px', marginTop: 8 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#1E40AF', margin: '0 0 6px' }}>🎯 We're still building alumni coverage in your field.</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '0 0 16px', lineHeight: 1.5 }}>Here are the top companies you should be targeting — invite alumni you know to join CFF:</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10, marginBottom: 16 }}>
               {suggestedCompanies.slice(0, 10).map((c, i) => (
-                <span key={i} style={{ background: '#fff', border: '1px solid #93C5FD', color: '#1E40AF', borderRadius: 100, padding: '5px 14px', fontSize: 13, fontWeight: 500 }}>{c}</span>
+                <div key={i} style={{ background: '#fff', border: '1px solid #BFDBFE', borderRadius: 10, padding: '12px 14px' }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, color: '#1E3A8A', margin: '0 0 4px' }}>{c}</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#64748B', margin: '0 0 8px' }}>{(goals.target_industries || [])[0] || 'Your field'}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: '#888' }}>🎓 ? alumni</span>
+                    <span style={{ fontSize: 11, color: '#15803D', fontWeight: 600 }}>🟢 Hiring</span>
+                  </div>
+                  <button onClick={() => {}} style={{ background: 'none', border: '1px solid #93C5FD', color: '#1E40AF', borderRadius: 100, padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', width: '100%' }}>Invite Alumni →</button>
+                </div>
               ))}
             </div>
             <button onClick={() => {}} style={{ background: '#4F8CFF', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>+ Invite Alumni →</button>
