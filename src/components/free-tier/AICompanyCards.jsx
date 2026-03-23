@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { RefreshCw, X, Loader2 } from 'lucide-react';
 import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
+import { base44 } from '@/api/base44Client';
 
 // ─── Animations ───────────────────────────────────────────────────────────────
 const searchingStyles = `
@@ -100,6 +101,128 @@ function getResultsSummary(members, companies, goals) {
   return `FastIQ found ${parts.join(' and ')}.`;
 }
 
+// ─── Company Contacts Modal ──────────────────────────────────────────────────
+function CompanyContactsModal({ company, user, onClose, onOpenComposer }) {
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      try {
+        const allUsers = await base44.entities.User.list('-created_date', 300);
+        const companyLower = company.name.toLowerCase();
+        const schoolWord = (user?.school || user?.university || '').toLowerCase().split(' ')[0];
+        const filtered = allUsers.filter(u => {
+          const uCompany = (u.company || u.current_company || u.employer || '').toLowerCase();
+          if (!uCompany.includes(companyLower)) return false;
+          const firstName = (u.first_name || u.full_name?.split(' ')[0] || '').toLowerCase();
+          if (['test', 'movie', 'demo', 'sample', 'fake'].includes(firstName)) return false;
+          return true;
+        });
+        // Sort: school match + open to intros first
+        filtered.sort((a, b) => {
+          const aSchool = schoolWord && (a.school || a.university || '').toLowerCase().includes(schoolWord) ? 1 : 0;
+          const bSchool = schoolWord && (b.school || b.university || '').toLowerCase().includes(schoolWord) ? 1 : 0;
+          const aOpen = ['happy_to_help','yes','open','actively_helping'].includes(a.intro_availability) ? 1 : 0;
+          const bOpen = ['happy_to_help','yes','open','actively_helping'].includes(b.intro_availability) ? 1 : 0;
+          return (bSchool + bOpen) - (aSchool + aOpen);
+        });
+        setMembers(filtered);
+      } catch (e) {
+        console.error('CompanyContactsModal load failed:', e);
+        setMembers([]);
+      }
+      setLoading(false);
+    }
+    load();
+  }, [company.name]);
+
+  const schoolWord = (user?.school || user?.university || '').toLowerCase().split(' ')[0];
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}
+      onClick={onClose}
+    >
+      <div
+        style={{ background: '#fff', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '24px 24px 16px', borderBottom: '1px solid #F5F5F5', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', margin: '0 0 4px' }}>CFF CONNECTIONS</p>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: '#1A1A1A', margin: '0 0 4px' }}>Who you know at {company.name}</h2>
+            <p style={{ fontSize: 13, color: '#888', margin: 0 }}>These CFF members work here and may be able to help you get in the door.</p>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: '#888', padding: 4, marginLeft: 16, flexShrink: 0, minHeight: 'auto' }}>
+            <X style={{ width: 18, height: 18 }} />
+          </button>
+        </div>
+
+        {/* Loading */}
+        {loading && (
+          <div style={{ padding: '32px 24px', textAlign: 'center', color: '#888', fontSize: 14, fontStyle: 'italic', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Loader2 style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }} />
+            Finding your connections at {company.name}...
+          </div>
+        )}
+
+        {/* Members */}
+        {!loading && members.length > 0 && (
+          <div style={{ padding: '8px 0' }}>
+            {members.map(m => {
+              const firstName = m.first_name || m.full_name?.split(' ')[0] || '';
+              const lastName = m.last_name || m.full_name?.split(' ').slice(1).join(' ') || '';
+              const initials = ((firstName[0] || '') + (lastName[0] || '')).toUpperCase() || '?';
+              const title = m.job_title || m.role_title || m.current_role || 'Professional';
+              const isSchoolMatch = schoolWord && (m.school || m.university || '').toLowerCase().includes(schoolWord);
+              return (
+                <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 24px', borderBottom: '1px solid #F9F9F9' }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
+                    {initials}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 600, fontSize: 14, color: '#1A1A1A', margin: 0 }}>
+                      {capitalizeName(firstName)} {lastName[0] ? `${lastName[0].toUpperCase()}.` : ''}
+                    </p>
+                    <p style={{ fontSize: 12, color: '#666', margin: '2px 0 0' }}>{title}</p>
+                    {isSchoolMatch && <p style={{ fontSize: 11, color: '#E85D20', margin: '2px 0 0' }}>🎓 {user?.school || 'Your school'} alumni</p>}
+                    <p style={{ fontSize: 11, color: '#888', margin: '2px 0 0' }}>{getAvailabilityLabel(m.intro_availability)}</p>
+                  </div>
+                  <button
+                    onClick={() => { onClose(); onOpenComposer(m); }}
+                    style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
+                  >
+                    Send a Message →
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Empty */}
+        {!loading && members.length === 0 && (
+          <div style={{ padding: '32px 24px', textAlign: 'center', color: '#888', fontSize: 14 }}>
+            <p style={{ margin: '0 0 8px' }}>We couldn't find specific members at {company.name}.</p>
+            <p style={{ margin: '0 0 12px', fontSize: 13, color: '#aaa' }}>The connection count may reflect a recent join — check back shortly.</p>
+            <button onClick={onClose} style={{ color: '#E85D20', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>Browse the full directory →</button>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{ padding: '16px 24px', borderTop: '1px solid #F5F5F5', textAlign: 'center' }}>
+          <button onClick={onClose} style={{ color: '#E85D20', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>
+            See full directory filtered by {company.name} →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Invite Modal ─────────────────────────────────────────────────────────────
 function InviteModal({ onClose }) {
   const [email, setEmail] = useState('');
@@ -174,7 +297,7 @@ function PersonCard({ member, user, onOpenComposer }) {
 }
 
 // ─── Company Card ─────────────────────────────────────────────────────────────
-function CompanyCard({ company, user, onTabChange }) {
+function CompanyCard({ company, user, onTabChange, isFastIQ, onOpenUpgrade, onSeeContacts }) {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const hasConnections = (company.cff_parent_count || 0) + (company.school_alumni_count || 0) > 0;
   const sig = company.hiring_signal === 'hot' ? { emoji: '🟢', label: 'Actively Hiring' }
@@ -226,9 +349,11 @@ function CompanyCard({ company, user, onTabChange }) {
           View Full Intel →
         </button>
         {hasConnections && (
-          <button onClick={() => onTabChange?.('directory')}
-            style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>
-            See Who to Contact →
+          <button
+            onClick={() => isFastIQ ? onSeeContacts(company) : onOpenUpgrade?.()}
+            style={{ fontSize: 12, color: '#E85D20', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}
+          >
+            {isFastIQ ? 'See Who to Contact →' : '🔒 See Who to Contact →'}
           </button>
         )}
       </div>
