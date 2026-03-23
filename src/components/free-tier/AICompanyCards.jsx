@@ -370,6 +370,7 @@ export default function AICompanyCards({
   isFastIQ, user, weeklyNewCount, dark = true,
 }) {
   const [selectedMember, setSelectedMember] = useState(null);
+  const [contactsCompany, setContactsCompany] = useState(null);
 
   const role = user?.career_goals?.role || user?.target_role || '';
   const primaryIndustry = user?.career_goals?.industries?.[0] || user?.target_industries?.[0] || 'your field';
@@ -471,7 +472,15 @@ export default function AICompanyCards({
 
           <div className="grid md:grid-cols-3 gap-3">
             {sortedCompanies.map(c => (
-              <CompanyCard key={c.name} company={c} user={user} onTabChange={onTabChange} />
+              <CompanyCard
+                key={c.name}
+                company={c}
+                user={user}
+                onTabChange={onTabChange}
+                isFastIQ={isFastIQ}
+                onOpenUpgrade={onOpenUpgrade}
+                onSeeContacts={setContactsCompany}
+              />
             ))}
           </div>
         </div>
@@ -490,6 +499,16 @@ export default function AICompanyCards({
           parent={selectedMember}
           onClose={() => setSelectedMember(null)}
           onSent={() => setSelectedMember(null)}
+        />
+      )}
+
+      {/* Company Contacts Modal */}
+      {contactsCompany && (
+        <CompanyContactsModal
+          company={contactsCompany}
+          user={user}
+          onClose={() => setContactsCompany(null)}
+          onOpenComposer={(member) => setSelectedMember(member)}
         />
       )}
     </div>
