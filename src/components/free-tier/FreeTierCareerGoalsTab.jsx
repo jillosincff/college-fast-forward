@@ -4,6 +4,9 @@ import { Send, RefreshCw, Loader2 } from 'lucide-react';
 import GoalsSummaryCard from './GoalsSummaryCard';
 import CareerProfileCard from './CareerProfileCard';
 import SaveToNotebookButton from './SaveToNotebookButton';
+import LeadsSection from './LeadsSection';
+import SavedLeads from './SavedLeads';
+import InlineMessageComposer from './InlineMessageComposer';
 
 // ─── System prompts ───────────────────────────────────────────────────────────
 
@@ -196,7 +199,12 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   const [honestChallenge, setHonestChallenge] = useState(null);
   const [cffNetwork, setCffNetwork] = useState(null);
   const [prelimArchetype, setPrelimArchetype] = useState(null);
+  const [showLeads, setShowLeads] = useState(false);
+  const [savedLeads, setSavedLeads] = useState(() => user?.saved_leads || []);
+  const [activeComposer, setActiveComposer] = useState(null);
+  const leadsRef = useRef(null);
   const bottomRef = useRef(null);
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
 
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
@@ -300,6 +308,39 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     }
   };
 
+  const handleFindLeads = () => {
+    setShowLeads(true);
+    setTimeout(() => leadsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  };
+
+  const handleSaveLead = (lead) => {
+    const newLead = { ...lead, saved_at: new Date().toISOString(), contacted: false };
+    const updated = [...savedLeads.filter(l => l.id !== lead.id), newLead];
+    setSavedLeads(updated);
+    base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
+    const toast = document.createElement('div');
+    toast.textContent = 'Saved to your leads list 🔖';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;z-index:9999;pointer-events:none;';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  };
+
+  const handleUnsaveLead = (id) => {
+    const updated = savedLeads.filter(l => l.id !== String(id));
+    setSavedLeads(updated);
+    base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
+  };
+
+  const handleMarkContacted = (lead) => {
+    const updated = savedLeads.map(l =>
+      l.id === lead.id ? { ...l, contacted: true, contacted_at: new Date().toISOString() } : l
+    );
+    const notInList = !updated.find(l => l.id === lead.id);
+    const final = notInList ? [...updated, { ...lead, contacted: true, contacted_at: new Date().toISOString(), saved_at: new Date().toISOString() }] : updated;
+    setSavedLeads(final);
+    base44.auth.updateMe({ saved_leads: final }).catch(() => {});
+  };
+
   const startChat = () => {
     // Clear saved conversation from DB
     base44.auth.updateMe({ career_goals_conversation: null, career_goals_conversation_updated_at: null }).catch(() => {});
@@ -333,16 +374,51 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
 
   // ── Summary view (returning user) ──────────────────────────────────────────
   if (mode === 'summary') {
-    const isPathB = !!(user?.career_goals?.career_profile_summary || user?.career_goals?.work_style);
     return (
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px' }}>
+        {/* Page header */}
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>Your Goals</h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>Your Goals & Leads.</h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 24px' }}>
-          Tell FastIQ what you're looking for. The more you share, the smarter your entire experience gets.
+          Set your goals. See who can help. Start making moves.
         </p>
-        <GoalsSummaryCard goals={savedGoals || user?.career_goals} onTabChange={onTabChange} onRestart={startChat} />
-        <div style={{ textAlign: 'center', padding: '16px 0', borderTop: '1px solid #F0F0F0' }}>
+
+        {/* Goals card with overridden CTA */}
+        <GoalsSummaryCard
+          goals={savedGoals || user?.career_goals}
+          onTabChange={onTabChange}
+          onRestart={startChat}
+          primaryLabel="Find My Leads →"
+          onPrimaryClick={handleFindLeads}
+        />
+
+        {showLeads && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div style={{ height: 1, flex: 1, background: '#E0E0E0' }} />
+              <span style={{ fontSize: 18, animation: 'bounce 1s ease-in-out 2' }}>↓</span>
+              <div style={{ height: 1, flex: 1, background: '#E0E0E0' }} />
+            </div>
+            <LeadsSection
+              user={user}
+              onContact={setActiveComposer}
+              savedLeads={savedLeads}
+              onSaveLead={handleSaveLead}
+              onUnsaveLead={handleUnsaveLead}
+              onUpgrade={onOpenUpgrade}
+              leadsRef={leadsRef}
+            />
+            <SavedLeads
+              savedLeads={savedLeads}
+              onContact={setActiveComposer}
+              onRemove={handleUnsaveLead}
+            />
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', textAlign: 'center', marginTop: 16, cursor: 'pointer' }}
+              onClick={() => { setShowLeads(false); setTimeout(() => { setShowLeads(true); leadsRef.current?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}>↻ Refresh my leads</p>
+          </div>
+        )}
+
+        <div style={{ textAlign: 'center', padding: '24px 0', borderTop: '1px solid #F0F0F0', marginTop: 24 }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', marginBottom: 12 }}>
             Want to update your goals? FastIQ will re-personalize everything.
           </p>
@@ -351,6 +427,25 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
             Update My Goals →
           </button>
         </div>
+
+        {/* Inline message composer */}
+        {activeComposer && (
+          <InlineMessageComposer
+            lead={activeComposer}
+            user={user}
+            isFastIQ={isFastIQ}
+            onClose={() => setActiveComposer(null)}
+            onMarkContacted={() => handleMarkContacted(activeComposer)}
+            onSaveToNotebook={(content) => {
+              base44.entities.NotebookEntry.create({
+                user_email: user.email, content,
+                source_page: 'career_goals', source_label: 'Career Goals',
+                tags: ['outreach'], saved_at: new Date().toISOString(),
+              }).catch(() => {});
+            }}
+          />
+        )}
+        <style>{`@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }`}</style>
       </div>
     );
   }
