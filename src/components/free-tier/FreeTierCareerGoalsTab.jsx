@@ -59,7 +59,7 @@ export default function FreeTierCareerGoalsTab({ user, onOpenUpgrade, onGoalsSav
       } else if (g.company_size_preference === null) {
         setCompanySizeSkipped(true);
       }
-      if (g.saved_at) setShowResults(true);
+      if (g.saved_at) { setShowResults(true); setFormCollapsed(true); }
     } else {
       setRole(sanitizeRole(user?.target_role || ''));
       setIndustries(user?.target_industries || []);
