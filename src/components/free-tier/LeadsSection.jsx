@@ -232,8 +232,13 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
     const goals = user?.career_goals || {};
     const studentSchool = normalizeSchool(user?.school);
 
+    console.log('🔍 DEBUG: studentSchool raw input:', JSON.stringify(user?.school));
+    console.log('🔍 DEBUG: studentSchool normalized:', studentSchool);
+
     try {
       const allUsers = await getDirectoryUsers({}).then(r => r?.data?.data || []).catch(() => []);
+      console.log('🔍 DEBUG: Total users returned:', allUsers.length);
+      console.log('🔍 DEBUG: Sample school values:', allUsers.slice(0, 5).map(u => ({ name: u.full_name, school: JSON.stringify(u.school), persona: u.persona })));
       const eligible = allUsers.filter(u =>
         u.id !== user?.id &&
         u.full_name &&
@@ -244,8 +249,13 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       // TIER 1 — Red Hot: same school, ALL members regardless of industry
       const redHot = eligible.filter(u => {
         const memberSchool = normalizeSchool(u.school || u.university || '');
-        return memberSchool === studentSchool;
+        const matches = memberSchool === studentSchool;
+        if (u.full_name?.includes('Test') || u.full_name?.includes('test')) {
+          console.log(`🔍 DEBUG: ${u.full_name} - memberSchool: ${memberSchool}, studentSchool: ${studentSchool}, matches: ${matches}`);
+        }
+        return matches;
       });
+      console.log('🔍 DEBUG: Red Hot count:', redHot.length);
       // Sort by industry relevance
       redHot.sort((a, b) => industryMatch(b, goals) - industryMatch(a, goals));
       setRedHotLeads(redHot.slice(0, 6));
