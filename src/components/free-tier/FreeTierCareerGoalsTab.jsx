@@ -19,7 +19,7 @@ Q2: Do you have a clear direction or are you still figuring it out? Chips: ["I h
 PATH A (has direction — answered Q2 with direction):
 Q3: What role or type of work are you targeting?
 Q4: What industry? (3 chips relevant to their major + "Something else")
-Q5: Internship or full-time? If full-time, what year do you graduate? Chips: ["Internship", "Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027+"]
+Q5: Internship or full-time? If full-time, what year do you graduate? Chips: ["Internship", "Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027", "Full-time — graduating 2028", "Full-time — graduating 2029", "Full-time — graduating 2030"]
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
 Q8: Do you have a dream company in mind? And what's your biggest gap right now? Free text + chips: ["No dream company yet", "Still building skills"]
@@ -29,7 +29,7 @@ Q3: Work environment — what sounds most like you? Chips based on major.
 Q4: What's your natural strength? Chips: ["Talking to people / relationships", "Analyzing data / solving problems", "Creating things / design / writing", "Leading / organizing / making things happen"]
 Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Building something of my own", "Stability and work-life balance"]
 Q6: Are you interested in entrepreneurship or starting something? Chips: ["Definitely", "Maybe someday", "Not really"]
-Q7: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
+Q7: Graduation year? Chips: ["2025", "2026", "2027", "2028", "2029", "2030"]
 Q8: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Something else"]
 After Q8 on Path B: synthesize all answers into role recommendations.
 
