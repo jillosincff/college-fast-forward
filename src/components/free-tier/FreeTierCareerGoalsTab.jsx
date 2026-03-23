@@ -1,31 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, RefreshCw, Loader2, Target } from 'lucide-react';
+import { Send, RefreshCw, Loader2 } from 'lucide-react';
+import GoalsSummaryCard from './GoalsSummaryCard';
+import CareerProfileCard from './CareerProfileCard';
 
-const SYSTEM_PROMPT = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are conducting a friendly, one-question-at-a-time intake conversation to understand a college student's career goals.
+// ─── System prompts ───────────────────────────────────────────────────────────
 
-Your job is to:
-- Ask each question conversationally and warmly — not like a form
-- Acknowledge what the student says before moving to the next question (e.g., "Finance — great, lots of strong CFF connections there.")
-- If a student says "I don't know" or is unsure, respond supportively and move on — never push
-- Keep your responses short — one acknowledgment sentence + the next question only
-- The questions to work through (in order):
-  Q1: What kind of role are they hoping to land?
-  Q2: What industries are they most drawn to?
-  Q3: Internship vs full-time + graduation year?
-  Q4: Location preferences?
-  Q5: Any prior internships or work experience?
-  Q6: Company size preference?
-  Q7: Dream company (even if it feels like a stretch)?
-  Q8: What do they feel is missing / holding them back?
-- After Q8 is answered, give a warm closing message and set is_final to true with a populated goals_summary
-- Never repeat a question already answered
+const SYSTEM_PROMPT_BRANCHING = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are running a branching intake conversation to understand a college student's career goals.
 
-Return your response as JSON with these exact fields:
-- "message": your conversational reply
-- "is_final": boolean (true only after Q8 is answered)
-- "suggested_prompts": array of 2-3 short chips the student can tap (e.g., "I'm not sure yet", "Open to anything")
-- "goals_summary": null unless is_final is true, then a structured object`;
+The conversation has TWO paths:
+- PATH A: Student has direction → ask Q1–Q8 (role, industry, internship/fulltime+grad year, location, experience, company size, dream company, gaps). One question at a time.
+- PATH B: Student is undecided → ask B1–B9 discovery questions one at a time (work environment, variety vs routine, desk/field/remote, strengths, role in groups, problem type, motivation, entrepreneurship interest, self-assessment). After B9, synthesize and generate role recommendations.
+
+Current path is determined by the student's opening response. If they said something like "I have a pretty good idea" → Path A. If "no idea" or "still figuring it out" → Path B.
+
+Rules:
+- Always acknowledge the student's previous answer warmly before asking the next question (1 sentence max)
+- One question at a time — never list multiple questions
+- If student is unsure, be supportive and move on
+- Keep responses SHORT — one acknowledgment + the next question
+- For Path A: set is_final=true after Q8 with goals_summary populated
+- For Path B: set is_final=true after B9 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
+
+Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips), goals_summary (null until final), career_profile (null unless Path B final), role_recommendations (null unless Path B final)`;
+
+const SYNTHESIS_SUFFIX = `
+
+The student has completed the discovery questions. Now synthesize their responses and generate a personalized career profile and role recommendations.
+
+Be genuinely creative — consider: traditional corporate paths, startups, entrepreneurship/founder paths, field-based roles (sales, consulting, real estate, logistics), creative industries, mission-driven/nonprofit, emerging roles in AI/sustainability/creator economy, roles they may never have heard of but would love.
+
+For each recommended role explain WHY it fits THIS student, be honest about challenges, and note CFF network strength.
+
+Return 4-6 role recommendations ranked by fit. Set is_final=true and populate all fields.`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -33,6 +40,28 @@ const RESPONSE_SCHEMA = {
     message: { type: 'string' },
     is_final: { type: 'boolean' },
     suggested_prompts: { type: 'array', items: { type: 'string' } },
+    career_profile: {
+      type: 'object',
+      properties: {
+        work_style: { type: 'string' },
+        environment_preference: { type: 'string' },
+        top_strengths: { type: 'array', items: { type: 'string' } },
+        motivated_by: { type: 'string' },
+        entrepreneurship_interest: { type: 'string' },
+      },
+    },
+    role_recommendations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          why_it_fits: { type: 'string' },
+          honest_challenge: { type: 'string' },
+          cff_network_strength: { type: 'string' },
+        },
+      },
+    },
     goals_summary: {
       type: 'object',
       properties: {
@@ -45,61 +74,24 @@ const RESPONSE_SCHEMA = {
         company_size_preference: { type: 'array', items: { type: 'string' } },
         dream_company: { type: 'string' },
         perceived_gap: { type: 'string' },
+        work_environment: { type: 'string' },
+        work_style: { type: 'string' },
+        entrepreneurship_interest: { type: 'string' },
+        career_profile_summary: { type: 'string' },
       },
     },
   },
   required: ['message', 'is_final', 'suggested_prompts'],
 };
 
-function GoalsSummaryCard({ goals, onTabChange, onRestart }) {
-  const roles = goals?.target_roles?.join(', ') || goals?.role || '—';
-  const industries = goals?.target_industries?.join(', ') || goals?.industries?.join(', ') || '—';
-  const seeking = goals?.seeking || '—';
-  const gradYear = goals?.graduation_year || goals?.graduation_year?.toString() || '—';
-  const location = goals?.location_preference || (goals?.locations?.[0]) || '—';
-  const dreamCo = goals?.dream_company || '—';
-  const experience = goals?.experience_level || '—';
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  return (
-    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: 24, marginBottom: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <Target style={{ width: 20, height: 20, color: '#E85D20' }} />
-        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Career Goals</p>
-      </div>
-      <div style={{ display: 'grid', gap: 8 }}>
-        {[
-          ['Target Roles', roles],
-          ['Industries', industries],
-          ['Looking for', `${seeking}${gradYear !== '—' ? ` · Graduating ${gradYear}` : ''}`],
-          ['Location', location],
-          ['Dream Company', dreamCo],
-          ['Experience', experience],
-        ].map(([label, value]) => (
-          <div key={label} style={{ display: 'flex', gap: 8 }}>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#888', minWidth: 120 }}>{label}:</span>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A' }}>{value}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
-        <button onClick={() => onTabChange?.('company_intel')}
-          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
-          Explore My Company List →
-        </button>
-        <button onClick={() => onTabChange?.('career_path')}
-          style={{ background: 'none', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
-          Explore Career Paths →
-        </button>
-        {onRestart && (
-          <button onClick={onRestart}
-            style={{ background: 'none', border: 'none', color: '#999', fontSize: 13, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: '10px 4px' }}>
-            Update my goals
-          </button>
-        )}
-      </div>
-    </div>
-  );
+function hasExistingGoals(user) {
+  const g = user?.career_goals;
+  return !!(g?.target_roles?.length || g?.target_industries?.length || g?.role || g?.industries?.length);
 }
+
+// ─── Small UI components ──────────────────────────────────────────────────────
 
 function MessageBubble({ message }) {
   const isUser = message.role === 'user';
@@ -134,7 +126,7 @@ function SuggestedPrompts({ prompts, onSelect }) {
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginLeft: 42, marginBottom: 16 }}>
       {prompts.map((p, i) => (
         <button key={i} onClick={() => onSelect(p)}
-          style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto' }}>
+          style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textAlign: 'left' }}>
           {p}
         </button>
       ))}
@@ -142,10 +134,23 @@ function SuggestedPrompts({ prompts, onSelect }) {
   );
 }
 
-export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
-  const hasGoals = !!(user?.career_goals?.target_roles?.length || user?.career_goals?.target_industries?.length || user?.career_goals?.role || user?.career_goals?.industries?.length);
+function TypingIndicator() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>⚡</div>
+      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '4px 18px 18px 18px', padding: '12px 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
+        {[0, 150, 300].map(d => (
+          <span key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', display: 'inline-block', animation: 'dotBounce 1.2s ease-in-out infinite', animationDelay: `${d}ms` }} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  const [mode, setMode] = useState(hasGoals ? 'summary' : 'chat'); // 'summary' | 'chat'
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
+  const [mode, setMode] = useState(hasExistingGoals(user) ? 'summary' : 'chat');
   const [messages, setMessages] = useState([]);
   const [suggestedPrompts, setSuggestedPrompts] = useState([]);
   const [input, setInput] = useState('');
@@ -153,23 +158,28 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   const [error, setError] = useState(null); // null | 'llm' | 'save'
   const [retryText, setRetryText] = useState('');
   const [savedGoals, setSavedGoals] = useState(user?.career_goals || null);
+  const [careerProfile, setCareerProfile] = useState(null);
+  const [roleRecs, setRoleRecs] = useState(null);
   const [conversationDone, setConversationDone] = useState(false);
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [questionCount, setQuestionCount] = useState(0); // track how many AI turns to detect B9
   const bottomRef = useRef(null);
 
-  // Seed opening message when chat starts
+  // Seed opener on chat start
   useEffect(() => {
     if (mode !== 'chat' || messages.length > 0) return;
     const firstName = user?.full_name?.split(' ')[0] || 'there';
     setMessages([{
       role: 'assistant',
-      content: `Hey ${firstName}! I'm going to ask you a few quick questions so I can personalize your entire CFF experience — company lists, career paths, outreach help, all of it. Let's start simple: what kind of role are you hoping to land? Could be a specific title, a general field, or even just "I'm not sure yet" — all good.`,
+      content: `Hey ${firstName}! I'm going to ask you a few questions so I can personalize your entire CFF experience. There are no wrong answers — even "I have no idea" is a great place to start. So let's begin: do you have a sense of what kind of work you're looking for, or are you still figuring that out?`,
     }]);
-    setSuggestedPrompts(["I'm not sure yet", "A few different things", "Let me think..."]);
-  }, [mode, user]);
+    setSuggestedPrompts(["I have a pretty good idea", "I have some ideas but I'm not sure", "Honestly no idea yet"]);
+    setQuestionCount(1);
+  }, [mode, messages.length, user]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, suggestedPrompts, loading]);
+  }, [messages, suggestedPrompts, loading, conversationDone]);
 
   const sendMessage = async (text) => {
     const trimmed = (text || input).trim();
@@ -182,23 +192,31 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     setMessages(newMessages);
     setLoading(true);
 
+    // Detect if Path B is likely done (after ~10 AI turns = opener + B1-B9)
+    const isLikelyB9 = questionCount >= 10;
+
     try {
       const history = newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n');
+      const extraSuffix = isLikelyB9 ? SYNTHESIS_SUFFIX : '';
+
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `${SYSTEM_PROMPT}\n\nConversation so far:\n${history}\n\nNow respond to the student's latest message. Remember: one acknowledgment + next question only (unless this is the final question).`,
+        prompt: `${SYSTEM_PROMPT_BRANCHING}${extraSuffix}\n\nConversation so far:\n${history}\n\nRespond to the student's latest message.`,
         response_json_schema: RESPONSE_SCHEMA,
       });
 
-      const reply = result?.message || 'I had trouble generating a response. Please try again.';
+      const reply = result?.message || 'I had trouble responding. Please try again.';
       const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : [];
       const isFinal = result?.is_final === true;
-      const goalsSummary = result?.goals_summary || null;
 
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-      setSuggestedPrompts(prompts);
+      setSuggestedPrompts(isFinal ? [] : prompts);
+      setQuestionCount(prev => prev + 1);
 
-      if (isFinal && goalsSummary) {
-        await saveGoals(goalsSummary);
+      if (isFinal) {
+        if (result?.career_profile) setCareerProfile(result.career_profile);
+        if (result?.role_recommendations?.length) setRoleRecs(result.role_recommendations);
+        if (result?.goals_summary) await saveGoals(result.goals_summary);
+        else setConversationDone(true);
       }
     } catch (e) {
       console.error('Goals chat failed:', e);
@@ -208,14 +226,12 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
       setInput(trimmed);
     }
     setLoading(false);
+    setIsSynthesizing(false);
   };
 
   const saveGoals = async (goalsSummary) => {
     try {
-      const goalsData = {
-        ...goalsSummary,
-        saved_at: new Date().toISOString(),
-      };
+      const goalsData = { ...goalsSummary, saved_at: new Date().toISOString() };
       await base44.auth.updateMe({ career_goals: goalsData });
       setSavedGoals(goalsData);
       setConversationDone(true);
@@ -225,20 +241,29 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
   const startChat = () => {
     setMode('chat');
     setMessages([]);
     setSuggestedPrompts([]);
     setConversationDone(false);
+    setCareerProfile(null);
+    setRoleRecs(null);
     setError(null);
+    setQuestionCount(0);
   };
 
-  // Summary view for returning users
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  const handleChipSelect = (p) => {
+    if (p === "This doesn't feel right — let's try again") { startChat(); return; }
+    sendMessage(p);
+  };
+
+  // ── Summary view (returning user) ──────────────────────────────────────────
   if (mode === 'summary') {
+    const isPathB = !!(user?.career_goals?.career_profile_summary || user?.career_goals?.work_style);
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '32px 24px' }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
@@ -260,7 +285,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     );
   }
 
-  // Chat view
+  // ── Chat view ──────────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '70vh' }}>
       {/* Header */}
@@ -279,36 +304,37 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 8px' }}>
 
-        {/* Post-conversation summary */}
-        {conversationDone && savedGoals && (
-          <div style={{ marginBottom: 24 }}>
-            <GoalsSummaryCard goals={savedGoals} onTabChange={onTabChange} />
-          </div>
-        )}
-
         {messages.map((msg, i) => {
           const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading && !conversationDone;
           return (
             <React.Fragment key={i}>
               <MessageBubble message={msg} />
-              {isLastAssistant && (
-                <SuggestedPrompts prompts={suggestedPrompts} onSelect={sendMessage} />
+              {isLastAssistant && suggestedPrompts.length > 0 && (
+                <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} />
               )}
             </React.Fragment>
           );
         })}
 
-        {loading && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>⚡</div>
-            <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '4px 18px 18px 18px', padding: '12px 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
-              {[0, 150, 300].map(d => (
-                <span key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', display: 'inline-block', animation: 'dotBounce 1.2s ease-in-out infinite', animationDelay: `${d}ms` }} />
-              ))}
-            </div>
-          </div>
+        {loading && <TypingIndicator />}
+
+        {/* Path B reveal card */}
+        {conversationDone && roleRecs?.length > 0 && (
+          <CareerProfileCard
+            careerProfile={careerProfile}
+            roleRecommendations={roleRecs}
+            onTabChange={onTabChange}
+            onRestart={startChat}
+            onPromptSelect={handleChipSelect}
+          />
         )}
 
+        {/* Path A summary card */}
+        {conversationDone && !roleRecs?.length && savedGoals && (
+          <GoalsSummaryCard goals={savedGoals} onTabChange={onTabChange} onRestart={startChat} />
+        )}
+
+        {/* Error states */}
         {error === 'llm' && (
           <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <p style={{ fontSize: 13, color: '#E85D20', margin: 0 }}>FastIQ hit a snag. Tap to retry.</p>
@@ -322,7 +348,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
         {error === 'save' && (
           <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <p style={{ fontSize: 13, color: '#E85D20', margin: 0 }}>Your goals couldn't be saved. Try again.</p>
-            <button onClick={() => saveGoals(savedGoals)}
+            <button onClick={() => { setError(null); saveGoals(savedGoals); }}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600 }}>
               <RefreshCw style={{ width: 14, height: 14 }} /> Retry
             </button>
