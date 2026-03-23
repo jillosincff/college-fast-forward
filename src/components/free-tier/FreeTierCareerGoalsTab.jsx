@@ -10,37 +10,49 @@ import InlineMessageComposer from './InlineMessageComposer';
 
 // ─── System prompts ───────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT_BRANCHING = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are running a branching intake conversation to understand a college student's career goals.
+const SYSTEM_PROMPT_BRANCHING = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are running a structured 8-question intake conversation to understand a college student's career goals.
 
-The conversation has TWO paths:
-- PATH A: Student has direction → ask Q1–Q8 (role, industry, internship/fulltime+grad year, location, experience, company size, dream company, gaps). One question at a time.
-- PATH B: Student is undecided → ask B1–B9 discovery questions one at a time (work environment, variety vs routine, desk/field/remote, strengths, role in groups, problem type, motivation, entrepreneurship interest, self-assessment). After B9, synthesize and generate role recommendations.
+QUESTION SEQUENCE (exactly 8 questions):
+Q1 (already answered — major) — saved, skip to Q2.
+Q2: Do you have a clear direction or are you still figuring it out? Chips: ["I have a pretty good idea →", "Still figuring it out"]
 
-Current path is determined by the student's opening response. If they said "Let's go" or has direction → Path A. If undecided or says "later" → Path B.
+PATH A (has direction — answered Q2 with direction):
+Q3: What role or type of work are you targeting?
+Q4: What industry? (3 chips relevant to their major + "Something else")
+Q5: Internship or full-time? If full-time, what year do you graduate? Chips: ["Internship", "Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027+"]
+Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
+Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
+Q8: Do you have a dream company in mind? And what's your biggest gap right now? Free text + chips: ["No dream company yet", "Still building skills"]
 
-ACKNOWLEDGMENT STYLE — after key answers, occasionally remind the student their data is being used. Examples:
-- After industry/role: "Finance — that unlocks a lot of strong paths. Already narrowing your company list."
-- After location: "New York City — noted. Focusing your leads on NYC-based opportunities now."
-- After experience: "Starting from zero — got it. We'll prioritize parents and alumni who are especially open to helping students at your stage."
-Make the student feel like something just got smarter in the background — because it did.
+PATH B (figuring it out — answered Q2 with undecided):
+Q3: Work environment — what sounds most like you? Chips based on major.
+Q4: What's your natural strength? Chips: ["Talking to people / relationships", "Analyzing data / solving problems", "Creating things / design / writing", "Leading / organizing / making things happen"]
+Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Building something of my own", "Stability and work-life balance"]
+Q6: Are you interested in entrepreneurship or starting something? Chips: ["Definitely", "Maybe someday", "Not really"]
+Q7: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
+Q8: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Something else"]
+After Q8 on Path B: synthesize all answers into role recommendations.
+
+STUDENT MAJOR: The student's major is provided in the conversation context. ALWAYS use it to:
+1. Personalize acknowledgments ("Finance — great foundation for analyst roles." / "English — more flexible than people think. Consulting, marketing, media, law, and tech all hire English majors.")
+2. Only suggest roles realistic for their major — never suggest software engineering to a Communications major unless they explicitly want it
+3. Flag honest gaps: if their target doesn't match major, acknowledge directly
+4. Suggest major-specific clubs, certifications, or experiences
 
 Rules:
-- Always acknowledge the student's previous answer warmly before asking the next question (1 sentence max)
+- Always acknowledge the previous answer warmly before the next question (1 sentence max)
 - One question at a time — never list multiple questions
-- If student is unsure, be supportive and move on
+- After key answers, remind student their data is being used: "Finance — already narrowing your company list." / "NYC — focusing your leads there."
 - Keep responses SHORT — one acknowledgment + the next question
 - For Path A: set is_final=true after Q8 with goals_summary populated
-- For Path B: set is_final=true after B9 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
+- For Path B: set is_final=true after Q8 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
+- NEVER add guilt or pressure to skipped questions. If student skips, say "No problem — moving on." and ask the next question.
+- GRADUATION YEAR: If not captured by Q5/Q7, ask explicitly. NEVER assume.
+- NO EXPERIENCE: When student says no experience, say exactly: "Starting from zero is totally fine — and honestly, a lot of CFF parents specifically remember what it felt like and are the most generous with their time. We'll build your path with that in mind."
+- SKIP CHIPS: Always include suggested_prompts. Do NOT add skip to suggested_prompts — it's handled separately in the UI.
+- PRELIMINARY ARCHETYPE: Always infer preliminary_archetype from conversation, even mid-conversation.
 
-CRITICAL RULES:
-- GRADUATION YEAR: After the internship vs full-time question, if graduation year was not explicitly stated, ask: "Just so I can give you accurate timeline advice — what year do you graduate? 2025, 2026, 2027?" with suggested_prompts chips: ["2025", "2026", "2027", "2028+"]. NEVER assume or hallucinate graduation timing.
-- NO EXPERIENCE ACKNOWLEDGMENT: When a student answers the experience question with "none", "no experience", or similar, your response MUST include this exact acknowledgment before moving on: "Starting from zero is totally fine — and honestly, a lot of CFF parents specifically remember what it felt like and are the most generous with their time. We'll build your path with that in mind."
-- ROLE QUALITY: Each role recommendation must use the specific role title (not generic), name specific company types or companies that hire for it, explain exactly why it fits THIS student based on their specific answers, give a specific honest challenge relevant to their experience level, and include no_experience_first_step if they have no experience.
-- HONEST CHALLENGE: The honest_challenge must be specific to this student — reference their experience level, goals, and answers. Never write advice that applies to any student.
-- PRELIMINARY ARCHETYPE: Always infer a preliminary_archetype from the conversation, even mid-conversation.
-- SKIP CHIPS: When offering skip as an option in suggested_prompts, always phrase it as: "Skip this → (we'll be less accurate)"
-
-Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)`;
+Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips, NO skip option), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)`;
 
 const SYNTHESIS_SUFFIX = `
 
@@ -118,6 +130,14 @@ const RESPONSE_SCHEMA = {
   required: ['message', 'is_final', 'suggested_prompts'],
 };
 
+const MAJOR_SUGGESTIONS = [
+  'Finance', 'Accounting', 'Marketing', 'Management', 'Economics',
+  'Computer Science', 'Communications', 'Psychology', 'Biology',
+  'Political Science', 'English', 'History', 'Nursing', 'Engineering',
+  'Pre-Law', 'Real Estate', 'Business Administration', 'Journalism',
+  'Sociology', 'Criminal Justice', 'Undecided',
+];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function hasExistingGoals(user) {
@@ -154,16 +174,26 @@ function MessageBubble({ message }) {
   );
 }
 
-function SuggestedPrompts({ prompts, onSelect }) {
+function SuggestedPrompts({ prompts, onSelect, onSkip }) {
   if (!prompts?.length) return null;
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginLeft: 42, marginBottom: 16 }}>
-      {prompts.map((p, i) => (
-        <button key={i} onClick={() => onSelect(p)}
-          style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textAlign: 'left' }}>
-          {p}
-        </button>
-      ))}
+    <div style={{ marginLeft: 42, marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+        {prompts.map((p, i) => (
+          <button key={i} onClick={() => onSelect(p)}
+            style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textAlign: 'left' }}>
+            {p}
+          </button>
+        ))}
+      </div>
+      {onSkip && (
+        <div style={{ textAlign: 'right' }}>
+          <button onClick={onSkip}
+            style={{ background: 'none', border: 'none', color: '#AAAAAA', fontSize: 12, cursor: 'pointer', minHeight: 'auto', padding: '2px 0' }}>
+            Skip this →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -188,21 +218,21 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [showLeads, setShowLeads] = useState(false);
   const [showLeadsArrow, setShowLeadsArrow] = useState(false);
   const [savedLeads, setSavedLeads] = useState(() => user?.saved_leads || []);
-  const [activeComposer, setActiveComposer] = useState(null); // lead object
+  const [activeComposer, setActiveComposer] = useState(null);
   const leadsRef = useRef(null);
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const [messages, setMessages] = useState([]);
   const [suggestedPrompts, setSuggestedPrompts] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // null | 'llm' | 'save'
+  const [error, setError] = useState(null);
   const [retryText, setRetryText] = useState('');
   const [savedGoals, setSavedGoals] = useState(user?.career_goals || null);
   const [careerProfile, setCareerProfile] = useState(null);
   const [roleRecs, setRoleRecs] = useState(null);
   const [conversationDone, setConversationDone] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
-  const [questionCount, setQuestionCount] = useState(0); // track how many AI turns to detect B9
+  const [questionCount, setQuestionCount] = useState(0);
   const [restoredBanner, setRestoredBanner] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [restoredAt, setRestoredAt] = useState(null);
@@ -212,6 +242,11 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [honestChallenge, setHonestChallenge] = useState(null);
   const [cffNetwork, setCffNetwork] = useState(null);
   const [prelimArchetype, setPrelimArchetype] = useState(null);
+  // Major-first flow
+  const [majorInput, setMajorInput] = useState('');
+  const [majorSaved, setMajorSaved] = useState(!!(user?.major || user?.career_goals?.major));
+  const [majorFilter, setMajorFilter] = useState('');
+  const [awaitingMajor, setAwaitingMajor] = useState(false);
   const bottomRef = useRef(null);
 
   // Seed opener on chat start — restore saved conversation if exists
@@ -226,33 +261,119 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setQuestionCount(savedConv.length);
       setRestoredBanner(true);
       setRestoredAt(savedAt ? new Date(savedAt) : null);
+      setMajorSaved(true); // if conversation exists, major was already handled
       return;
     }
     const firstName = user?.full_name?.split(' ')[0] || 'there';
-    setMessages([{
-      role: 'assistant',
-      content: `Hey ${firstName}! I have 8 quick questions — takes about 3 minutes. The more we know about you, the better we can help you. No wrong answers, and you can skip anything. Ready?`,
-    }]);
-    setSuggestedPrompts(["Let's go →", "I'll do it later"]);
-    setQuestionCount(1);
+    const existingMajor = user?.major || user?.career_goals?.major;
+    if (existingMajor) {
+      // Skip major Q1 — go straight to opener
+      setMajorSaved(true);
+      setMessages([{
+        role: 'assistant',
+        content: `Hey ${firstName}! I have 8 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything. Let's figure out what you're looking for. Ready?`,
+      }]);
+      setSuggestedPrompts(["Let's go →", "I'll do it later"]);
+      setQuestionCount(1);
+    } else {
+      // Ask major first
+      setAwaitingMajor(true);
+      setMessages([{
+        role: 'assistant',
+        content: `Hey ${firstName}! I have 8 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything.\n\nFirst: what's your major? This helps me point you toward roles that actually make sense for your degree.`,
+      }]);
+      setSuggestedPrompts([]);
+      setQuestionCount(1);
+    }
   }, [mode, messages.length, user]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, suggestedPrompts, loading, conversationDone]);
 
+  const handleSkip = async () => {
+    if (loading) return;
+    setSuggestedPrompts([]);
+    const skipMsg = { role: 'user', content: 'Skip' };
+    const newMessages = [...messages, skipMsg];
+    setMessages(newMessages);
+    setLoading(true);
+    try {
+      const history = newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n');
+      const major = user?.major || user?.career_goals?.major || '';
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `${SYSTEM_PROMPT_BRANCHING}\n\nStudent major: ${major || 'not provided'}\n\nConversation so far:\n${history}\n\nThe student skipped this question. Acknowledge gracefully in one sentence ("No problem — moving on.") then ask the next question.`,
+        response_json_schema: RESPONSE_SCHEMA,
+      });
+      const reply = result?.message || 'No problem — moving on.';
+      const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : [];
+      const isFinal = result?.is_final === true;
+      const allMessages = [...newMessages, { role: 'assistant', content: reply, suggested_prompts: isFinal ? [] : prompts }];
+      setMessages(allMessages);
+      setSuggestedPrompts(isFinal ? [] : prompts);
+      setQuestionCount(prev => prev + 1);
+      base44.auth.updateMe({ career_goals_conversation: allMessages, career_goals_conversation_updated_at: new Date().toISOString() }).catch(() => {});
+      if (isFinal) {
+        if (result?.role_recommendations?.length) setRoleRecs(result.role_recommendations);
+        if (result?.about_you) setAboutYou(result.about_you);
+        if (result?.top_strengths?.length) setTopStrengths(result.top_strengths);
+        if (result?.work_environment) setWorkEnvironment(result.work_environment);
+        if (result?.honest_challenge) setHonestChallenge(result.honest_challenge);
+        if (result?.cff_network_recommendation) setCffNetwork(result.cff_network_recommendation);
+        if (result?.preliminary_archetype) setPrelimArchetype(result.preliminary_archetype);
+        if (result?.goals_summary) await saveGoals(result.goals_summary, result.preliminary_archetype);
+        else setConversationDone(true);
+      }
+    } catch (e) {
+      console.error('Skip failed:', e);
+    }
+    setLoading(false);
+  };
+
+  const handleMajorSubmit = async (major) => {
+    if (!major.trim()) return;
+    setAwaitingMajor(false);
+    setMajorSaved(true);
+    setMajorFilter('');
+    const userMsg = { role: 'user', content: major.trim() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    // Save major immediately
+    base44.auth.updateMe({ major: major.trim() }).catch(() => {});
+    setLoading(true);
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `${SYSTEM_PROMPT_BRANCHING}\n\nStudent major: ${major.trim()}\n\nConversation so far:\n${newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n')}\n\nThe student just told you their major. Acknowledge it with a brief personalized comment (1 sentence) that shows you understood the relevance of their major, then ask Q2: do they have a clear direction or are they still figuring it out?`,
+        response_json_schema: RESPONSE_SCHEMA,
+      });
+      const reply = result?.message || "Got it! Do you have a sense of what you want to do, or are you still figuring it out?";
+      const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : ["I have a pretty good idea →", "Still figuring it out"];
+      const allMessages = [...newMessages, { role: 'assistant', content: reply, suggested_prompts: prompts }];
+      setMessages(allMessages);
+      setSuggestedPrompts(prompts);
+      setQuestionCount(2);
+      base44.auth.updateMe({ career_goals_conversation: allMessages, career_goals_conversation_updated_at: new Date().toISOString() }).catch(() => {});
+    } catch (e) {
+      const fallback = [...newMessages, { role: 'assistant', content: "Got it! Do you have a sense of what you want to do, or are you still figuring it out?", suggested_prompts: ["I have a pretty good idea →", "Still figuring it out"] }];
+      setMessages(fallback);
+      setSuggestedPrompts(["I have a pretty good idea →", "Still figuring it out"]);
+      setQuestionCount(2);
+    }
+    setLoading(false);
+  };
+
   const sendMessage = async (text) => {
     const trimmed = (text || input).trim();
     if (!trimmed || loading) return;
+    // Handle "I'll do it later" on opener
+    if (trimmed === "I'll do it later") {
+      setMode('summary');
+      return;
+    }
     setInput('');
     setError(null);
     setSuggestedPrompts([]);
-
-    const newMessages = [...messages, { role: 'user', content: trimmed }];
-    setMessages(newMessages);
-    setLoading(true);
-
-    // Detect if Path B is likely done (after ~10 AI turns = opener + B1-B9)
+    const major = user?.major || user?.career_goals?.major || '';
     const isLikelyB9 = questionCount >= 10;
 
     try {
@@ -260,7 +381,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       const extraSuffix = isLikelyB9 ? SYNTHESIS_SUFFIX : '';
 
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `${SYSTEM_PROMPT_BRANCHING}${extraSuffix}\n\nConversation so far:\n${history}\n\nRespond to the student's latest message.`,
+        prompt: `${SYSTEM_PROMPT_BRANCHING}${extraSuffix}\n\nStudent major: ${major || 'not provided'}\n\nConversation so far:\n${history}\n\nRespond to the student's latest message.`,
         response_json_schema: RESPONSE_SCHEMA,
       });
 
@@ -506,13 +627,19 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       </div>
 
       {/* Progress bar */}
-      {questionCount > 1 && !conversationDone && (
-        <div style={{ padding: '8px 24px 0', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid #F5F5F5' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: '0 0 8px', flexShrink: 0 }}>The more you share, the better we can help you.</p>
-          <div style={{ flex: 1, height: 4, background: '#F0F0F0', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
-            <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount - 1, 8) / 8) * 100))}%`, background: '#E85D20', borderRadius: 2, transition: 'width 0.4s ease' }} />
+      {questionCount >= 1 && !conversationDone && (
+        <div style={{ padding: '10px 24px', background: '#FAFAFA', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
+              Question {Math.min(questionCount, 8)} of 8
+            </p>
+            <div style={{ flex: 1, height: 4, background: '#EEEEEE', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount, 8) / 8) * 100))}%`, background: '#E85D20', borderRadius: 2, transition: 'width 0.4s ease' }} />
+            </div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#E85D20', margin: 0, flexShrink: 0, fontWeight: 600 }}>
+              {Math.min(100, Math.round((Math.min(questionCount, 8) / 8) * 100))}%
+            </p>
           </div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: '0 0 8px', flexShrink: 0 }}>{Math.min(questionCount - 1, 8)} of 8</p>
         </div>
       )}
 
@@ -551,8 +678,41 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           );
         })()}
 
+        {/* Major input — shown before first AI exchange if no major saved */}
+        {awaitingMajor && !loading && (
+          <div style={{ marginLeft: 42, marginBottom: 16 }}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <input
+                type="text"
+                placeholder="e.g. Finance, Marketing, Engineering..."
+                value={majorFilter}
+                onChange={e => setMajorFilter(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && majorFilter.trim()) handleMajorSubmit(majorFilter); }}
+                style={{ flex: 1, padding: '8px 14px', border: '1px solid #E0E0E0', borderRadius: 10, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
+                autoFocus
+              />
+              <button onClick={() => handleMajorSubmit(majorFilter)} disabled={!majorFilter.trim()}
+                style={{ background: majorFilter.trim() ? '#E85D20' : '#E0E0E0', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: majorFilter.trim() ? 'pointer' : 'default', minHeight: 'auto' }}>
+                →
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {MAJOR_SUGGESTIONS
+                .filter(m => !majorFilter || m.toLowerCase().includes(majorFilter.toLowerCase()))
+                .slice(0, 8)
+                .map(m => (
+                  <button key={m} onClick={() => handleMajorSubmit(m)}
+                    style={{ background: '#F5F5F5', border: '1px solid #E0E0E0', color: '#444', borderRadius: 20, padding: '5px 12px', fontSize: 12, cursor: 'pointer', minHeight: 'auto' }}>
+                    {m}
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
+
         {messages.map((msg, i) => {
           const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading && !conversationDone;
+          const showSkip = isLastAssistant && !awaitingMajor && suggestedPrompts.length > 0 && questionCount > 1;
           return (
             <React.Fragment key={i}>
               <MessageBubble message={msg} />
@@ -562,7 +722,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                 </div>
               )}
               {isLastAssistant && suggestedPrompts.length > 0 && (
-                <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} />
+                <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} onSkip={showSkip ? handleSkip : null} />
               )}
             </React.Fragment>
           );
