@@ -45,7 +45,9 @@ Same school: ${(user.school || user.university || '') === (lead.school || lead.u
 If same school: use the school as the shared connection: "As a fellow [school] family, I found your profile on College Fast Forward..."
 If different school: use CFF as the shared connection: "I found your profile on College Fast Forward — we're both part of the CFF network, which connects parents and students across schools for career conversations."
 
-Write a concise, warm, specific outreach message. 2-3 short paragraphs.
+Write a concise, warm, specific outreach message. 2-3 short paragraphs. First paragraph: who the student is and why they're reaching out. Second paragraph: specific question or ask. Third: brief thank you. Never start with "I hope this finds you well." Be direct and respectful. Under 150 words.
+
+Also write a subject line (under 10 words).`,
           response_json_schema: {
             type: 'object',
             properties: {
