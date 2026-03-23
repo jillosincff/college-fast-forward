@@ -340,13 +340,22 @@ function CompanyIntelModal({ company, user, onClose, onOpenContacts, isFastIQ, o
         );
         const record = cached?.[0];
         if (record && record.expires_at && new Date(record.expires_at) > new Date()) {
-          if (!cancelled) setIntel(record);
+          // Normalize cache record to display shape
+          if (!cancelled) setIntel({
+            hiring_signal: record.hiring_signal,
+            hiring_score: record.hiring_score,
+            intel_summary: record.intel_summary || record.recommendation_text || '',
+            open_roles_categories: Array.isArray(record.open_roles_categories) ? record.open_roles_categories : [],
+            culture_insight: record.recommendation_text || '',
+            warning_signals: Array.isArray(record.warning_signals) ? record.warning_signals : [],
+            similar_companies: Array.isArray(record.similar_companies) ? record.similar_companies : [],
+          });
           if (!cancelled) setLoading(false);
           return;
         }
         // Fetch fresh via LLM
         const fresh = await base44.integrations.Core.InvokeLLM({
-          prompt: `Research ${company.name} as a potential employer for an entry-level candidate in ${company.industry || 'their field'}. Provide: 1) current hiring status 2) a short description of what's happening now 3) open role categories 4) one culture insight for new grads 5) any warning signals (layoffs/freeze/financial trouble) 6) 2-3 similar companies 7) a hiring score 0-100.`,
+          prompt: `Research ${company.name} as a potential employer for an entry-level candidate in ${company.industry || 'their field'}. Provide: 1) current hiring status 2) a short description of what's happening now (2-3 sentences) 3) open role categories as a flat string array 4) one culture insight for new grads 5) any warning signals such as layoffs, hiring freeze, or financial trouble as a flat string array 6) 2-3 similar companies as a flat string array 7) a hiring score 0-100.`,
           add_context_from_internet: true,
           model: 'gemini_3_flash',
           response_json_schema: {
@@ -357,35 +366,49 @@ function CompanyIntelModal({ company, user, onClose, onOpenContacts, isFastIQ, o
               intel_summary: { type: 'string' },
               open_roles_categories: { type: 'array', items: { type: 'string' } },
               culture_insight: { type: 'string' },
-              warning_signals: { type: 'array', items: { type: 'object', properties: { text: { type: 'string' } } } },
-              similar_companies: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' } } } },
+              warning_signals: { type: 'array', items: { type: 'string' } },
+              similar_companies: { type: 'array', items: { type: 'string' } },
             },
           },
         });
-        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-        const payload = {
-          company_name: company.name,
+        console.log('Intel LLM response:', JSON.stringify(fresh).substring(0, 300));
+        // Normalize to display shape
+        const normalized = {
           hiring_signal: fresh.hiring_signal || company.hiring_signal || 'warm',
           hiring_score: fresh.hiring_score || null,
           intel_summary: fresh.intel_summary || company.hiring_description || '',
-          open_roles_count: fresh.open_roles_categories?.length || 0,
-          warning_signals: fresh.warning_signals || [],
-          similar_companies: fresh.similar_companies || [],
-          recommendation_text: fresh.culture_insight || '',
+          open_roles_categories: Array.isArray(fresh.open_roles_categories) ? fresh.open_roles_categories : [],
+          culture_insight: fresh.culture_insight || '',
+          warning_signals: Array.isArray(fresh.warning_signals) ? fresh.warning_signals : [],
+          similar_companies: Array.isArray(fresh.similar_companies) ? fresh.similar_companies : [],
+        };
+        if (!cancelled) setIntel(normalized);
+        // Cache asynchronously — don't block display
+        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        const cachePayload = {
+          company_name: company.name,
+          hiring_signal: normalized.hiring_signal,
+          hiring_score: normalized.hiring_score,
+          intel_summary: normalized.intel_summary,
+          open_roles_categories: normalized.open_roles_categories,
+          recommendation_text: normalized.culture_insight,
+          warning_signals: normalized.warning_signals,
+          similar_companies: normalized.similar_companies,
           expires_at: expires,
         };
         if (record) {
-          await base44.entities.CompanyIntelCache.update(record.id, payload);
+          base44.entities.CompanyIntelCache.update(record.id, cachePayload).catch(() => {});
         } else {
-          await base44.entities.CompanyIntelCache.create(payload);
+          base44.entities.CompanyIntelCache.create(cachePayload).catch(() => {});
         }
-        if (!cancelled) setIntel({ ...payload, open_roles_categories: fresh.open_roles_categories, culture_insight: fresh.culture_insight });
       } catch (e) {
         console.warn('Intel load failed:', e);
         if (!cancelled) setIntel({
           hiring_signal: company.hiring_signal || 'warm',
-          intel_summary: company.hiring_description || '',
+          hiring_score: null,
+          intel_summary: company.hiring_description || 'Unable to load intel at this time.',
           open_roles_categories: [],
+          culture_insight: '',
           warning_signals: [],
           similar_companies: [],
         });
