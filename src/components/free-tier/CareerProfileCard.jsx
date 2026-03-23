@@ -56,9 +56,6 @@ export default function CareerProfileCard({
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '0 0 12px', lineHeight: 1.5 }}>
             Based on everything you shared — here's what we found for you.
           </p>
-              </p>
-            </>
-          )}
         </div>
 
         {/* About You */}
