@@ -37,9 +37,20 @@ The student has completed the discovery questions. Now synthesize their response
 
 Be genuinely creative — consider: traditional corporate paths, startups, entrepreneurship/founder paths, field-based roles (sales, consulting, real estate, logistics), creative industries, mission-driven/nonprofit, emerging roles in AI/sustainability/creator economy, roles they may never have heard of but would love.
 
-For each recommended role explain WHY it fits THIS student, be honest about challenges, and note CFF network strength.
+ROLE QUALITY REQUIREMENTS — for each best-fit role you MUST include:
+- The specific role title (not generic — "Real Estate Financial Analyst" not "Financial Analyst")
+- Which specific company types or named companies hire for this role
+- Exactly why it fits THIS student based on what they told you — every sentence must reference their actual answers
+- A specific, honest challenge relevant to their experience level and situation — NEVER generic advice
+- What the student needs to do first if they have no experience (no_experience_first_step)
+- Whether a CFF parent intro would be particularly valuable for this role
 
-Return 4-6 role recommendations ranked by fit. Set is_final=true and populate all fields.`;
+HONEST CHALLENGE REQUIREMENTS:
+BAD: "You might need to learn quickly on the job as this role can be fast-paced."
+GOOD: "Real talk — financial analyst roles at real estate firms almost always require Excel modeling and basic accounting. With no experience yet, your first move should be a free Excel modeling course (CFI has good ones) and one CFF parent coffee chat in the real estate space before you apply anywhere."
+Be honest. Be specific. Students trust advisors who tell them the truth.
+
+Return 4-6 role recommendations ranked by fit. Set is_final=true and populate ALL fields including about_you, top_strengths, work_environment, honest_challenge, cff_network_recommendation, and preliminary_archetype.`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -149,7 +160,7 @@ function SuggestedPrompts({ prompts, onSelect }) {
 function TypingIndicator() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>⚡</div>
+      <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0d1117', border: '1px solid rgba(232,93,32,0.4)', color: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>⚡</div>
       <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '4px 18px 18px 18px', padding: '12px 16px', display: 'flex', gap: 6, alignItems: 'center' }}>
         {[0, 150, 300].map(d => (
           <span key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', display: 'inline-block', animation: 'dotBounce 1.2s ease-in-out infinite', animationDelay: `${d}ms` }} />
@@ -277,6 +288,12 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     setRoleRecs(null);
     setError(null);
     setQuestionCount(0);
+    setAboutYou(null);
+    setTopStrengths(null);
+    setWorkEnvironment(null);
+    setHonestChallenge(null);
+    setCffNetwork(null);
+    setPrelimArchetype(null);
   };
 
   const handleKeyDown = (e) => {
