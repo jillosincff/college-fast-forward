@@ -247,7 +247,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [majorSaved, setMajorSaved] = useState(!!(user?.major || user?.career_goals?.major));
   const [majorFilter, setMajorFilter] = useState('');
   const [awaitingMajor, setAwaitingMajor] = useState(false);
-  const [debugData, setDebugData] = useState(null);
   const bottomRef = useRef(null);
 
   // Removed frontend diagnostic block — now using backend getLeadsForStudent
