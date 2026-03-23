@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Send, RefreshCw, Loader2 } from 'lucide-react';
+import SaveToNotebookButton from './SaveToNotebookButton';
 
 const SYSTEM_PROMPT = `You are FastIQ, the AI career intelligence engine inside College Fast Forward (CFF) — a platform that connects college students with parent and alumni professional networks.
 
@@ -82,13 +83,26 @@ export default function FreeTierCareerPathTab({ user, onTabChange }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [restoredBanner, setRestoredBanner] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [restoredAt, setRestoredAt] = useState(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Seed opening message on load
+  // Seed opening message on load — restore saved conversation if exists
   useEffect(() => {
     if (initialized) return;
     setInitialized(true);
+    const savedConv = user?.career_path_conversation;
+    const savedAt = user?.career_path_conversation_updated_at;
+    if (savedConv?.length > 0) {
+      setMessages(savedConv);
+      const lastAssistant = [...savedConv].reverse().find(m => m.role === 'assistant');
+      if (lastAssistant?.suggested_prompts) setSuggestedPrompts(lastAssistant.suggested_prompts);
+      setRestoredBanner(true);
+      setRestoredAt(savedAt ? new Date(savedAt) : null);
+      return;
+    }
     const goals = user?.career_goals || {};
     const opening = buildOpeningMessage(goals);
     setMessages([{ role: 'assistant', content: opening }]);
@@ -98,6 +112,17 @@ export default function FreeTierCareerPathTab({ user, onTabChange }) {
       'How competitive is this path for college students?',
     ]);
   }, [user, initialized]);
+
+  const startFresh = () => {
+    base44.auth.updateMe({ career_path_conversation: null, career_path_conversation_updated_at: null }).catch(() => {});
+    setMessages([]);
+    setSuggestedPrompts([]);
+    setError(false);
+    setRestoredBanner(false);
+    setConfirmClear(false);
+    setRestoredAt(null);
+    setInitialized(false); // triggers re-seed
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -145,8 +170,14 @@ export default function FreeTierCareerPathTab({ user, onTabChange }) {
       const reply = result?.response_text || 'I had trouble generating a response. Please try again.';
       const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : [];
 
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      const allMessages = [...newMessages, { role: 'assistant', content: reply, timestamp: new Date().toISOString(), suggested_prompts: prompts }];
+      setMessages(allMessages);
       setSuggestedPrompts(prompts);
+      // Persist conversation
+      base44.auth.updateMe({
+        career_path_conversation: allMessages,
+        career_path_conversation_updated_at: new Date().toISOString(),
+      }).catch(() => {});
     } catch (e) {
       console.error('Career path chat failed:', e);
       setError(true);
@@ -177,11 +208,48 @@ export default function FreeTierCareerPathTab({ user, onTabChange }) {
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 8px' }}>
+        {/* Restored conversation banner */}
+        {restoredBanner && (() => {
+          const daysDiff = restoredAt ? Math.floor((Date.now() - restoredAt.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+          const isStale = daysDiff >= 7;
+          return (
+            <div style={{ borderTop: '2px solid #E85D20', background: '#FFF5F0', padding: '10px 14px', borderRadius: 8, marginBottom: 14 }}>
+              {confirmClear ? (
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: '0 0 8px' }}>Start a new conversation? Your previous one will be cleared.</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={startFresh} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '6px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Yes, start fresh</button>
+                    <button onClick={() => setConfirmClear(false)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 100, padding: '6px 16px', fontSize: 12, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Never mind</button>
+                  </div>
+                </div>
+              ) : isStale ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0 }}>⚡ You have a saved conversation from {daysDiff} days ago.</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => setRestoredBanner(false)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Continue</button>
+                    <button onClick={() => setConfirmClear(true)} style={{ background: 'none', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Start Fresh</button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0 }}>⚡ Picking up where you left off</p>
+                  <button onClick={() => setConfirmClear(true)} style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>Start fresh →</button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {messages.map((msg, i) => {
           const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading;
           return (
             <React.Fragment key={i}>
               <MessageBubble message={msg} />
+              {msg.role === 'assistant' && (
+                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: 42, marginTop: -6, marginBottom: 8 }}>
+                  <SaveToNotebookButton content={msg.content} sourcePage="career_path_research" userEmail={user?.email} />
+                </div>
+              )}
               {isLastAssistant && (
                 <SuggestedPrompts prompts={suggestedPrompts} onSelect={(p) => sendMessage(p)} />
               )}

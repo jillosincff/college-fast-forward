@@ -16,6 +16,7 @@ import FreeTierAlumniNetworkTab from '@/components/free-tier/FreeTierAlumniNetwo
 import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
 import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeUpgradeModal';
+import NotebookPage from '@/components/free-tier/NotebookPage';
 
 const AVAILABILITY_CONFIG = {
   yes: { dot: '#22C55E', label: 'Happy to help' },
@@ -218,6 +219,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
+        {activeTab === 'notebook' && <NotebookPage user={user} />}
       </div>
       <div className="md:hidden">
         <FreeTierMobileNav activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin } from 'lucide-react';
+import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin, BookOpen, ClipboardList } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
@@ -25,7 +25,15 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
   const university = user?.school || user?.university || 'UF';
   const [showMenu, setShowMenu] = useState(false);
   const [conciergeOpen, setConciergeOpen] = useState(false);
+  const [notebookCount, setNotebookCount] = useState(0);
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!user?.email) return;
+    base44.entities.NotebookEntry.filter({ user_email: user.email }, '-saved_at', 200)
+      .then(data => setNotebookCount((data || []).length))
+      .catch(() => {});
+  }, [user?.email]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -108,6 +116,17 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
           </div>
         )}
 
+        {/* Career Assessment locked item */}
+        <button
+          onClick={onOpenUpgrade}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
+          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>⚡</span>
+          <span className="flex-1 text-left">Career Assessment</span>
+          <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>
+        </button>
+
         {/* FastIQ locked item */}
         <button
           onClick={onOpenUpgrade}
@@ -117,6 +136,19 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
           <Zap style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
           <span className="flex-1 text-left">FastIQ</span>
           <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>
+        </button>
+
+        {/* Notebook item */}
+        <button
+          onClick={() => onTabChange('notebook')}
+          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
+          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: activeTab === 'notebook' ? '3px solid #E85D20' : '3px solid transparent', color: activeTab === 'notebook' ? '#E85D20' : '#666666', cursor: 'pointer' }}
+        >
+          <BookOpen style={{ width: 16, height: 16, color: activeTab === 'notebook' ? '#E85D20' : '#999999', flexShrink: 0 }} />
+          <span className="flex-1 text-left">Notebook</span>
+          {notebookCount > 0 && (
+            <span style={{ padding: '1px 7px', background: '#E85D20', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 100 }}>{notebookCount}</span>
+          )}
         </button>
       </nav>
 

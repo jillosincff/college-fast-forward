@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Send, RefreshCw, Loader2 } from 'lucide-react';
 import GoalsSummaryCard from './GoalsSummaryCard';
 import CareerProfileCard from './CareerProfileCard';
+import SaveToNotebookButton from './SaveToNotebookButton';
 
 // ─── System prompts ───────────────────────────────────────────────────────────
 
@@ -186,6 +187,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   const [conversationDone, setConversationDone] = useState(false);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [questionCount, setQuestionCount] = useState(0); // track how many AI turns to detect B9
+  const [restoredBanner, setRestoredBanner] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [restoredAt, setRestoredAt] = useState(null);
   const [aboutYou, setAboutYou] = useState(null);
   const [topStrengths, setTopStrengths] = useState(null);
   const [workEnvironment, setWorkEnvironment] = useState(null);
@@ -194,9 +198,20 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   const [prelimArchetype, setPrelimArchetype] = useState(null);
   const bottomRef = useRef(null);
 
-  // Seed opener on chat start
+  // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
     if (mode !== 'chat' || messages.length > 0) return;
+    const savedConv = user?.career_goals_conversation;
+    const savedAt = user?.career_goals_conversation_updated_at;
+    if (savedConv?.length > 0) {
+      setMessages(savedConv);
+      const lastAssistant = [...savedConv].reverse().find(m => m.role === 'assistant');
+      if (lastAssistant?.suggested_prompts) setSuggestedPrompts(lastAssistant.suggested_prompts);
+      setQuestionCount(savedConv.length);
+      setRestoredBanner(true);
+      setRestoredAt(savedAt ? new Date(savedAt) : null);
+      return;
+    }
     const firstName = user?.full_name?.split(' ')[0] || 'there';
     setMessages([{
       role: 'assistant',
@@ -237,8 +252,14 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
       const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : [];
       const isFinal = result?.is_final === true;
 
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      const allMessages = [...newMessages, { role: 'assistant', content: reply, timestamp: new Date().toISOString(), suggested_prompts: isFinal ? [] : prompts }];
+      setMessages(allMessages);
       setSuggestedPrompts(isFinal ? [] : prompts);
+      // Persist conversation to DB
+      base44.auth.updateMe({
+        career_goals_conversation: allMessages,
+        career_goals_conversation_updated_at: new Date().toISOString(),
+      }).catch(() => {});
       setQuestionCount(prev => prev + 1);
 
       if (isFinal) {
@@ -280,6 +301,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
   };
 
   const startChat = () => {
+    // Clear saved conversation from DB
+    base44.auth.updateMe({ career_goals_conversation: null, career_goals_conversation_updated_at: null }).catch(() => {});
     setMode('chat');
     setMessages([]);
     setSuggestedPrompts([]);
@@ -294,6 +317,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
     setHonestChallenge(null);
     setCffNetwork(null);
     setPrelimArchetype(null);
+    setRestoredBanner(false);
+    setConfirmClear(false);
+    setRestoredAt(null);
   };
 
   const handleKeyDown = (e) => {
@@ -348,11 +374,48 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange }) {
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 8px' }}>
 
+        {/* Restored conversation banner */}
+        {restoredBanner && !conversationDone && (() => {
+          const daysDiff = restoredAt ? Math.floor((Date.now() - restoredAt.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+          const isStale = daysDiff >= 7;
+          return (
+            <div style={{ borderTop: '2px solid #E85D20', background: '#FFF5F0', padding: '10px 14px', borderRadius: 8, marginBottom: 14 }}>
+              {confirmClear ? (
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: '0 0 8px' }}>Start a new conversation? Your previous one will be cleared.</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={startChat} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '6px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Yes, start fresh</button>
+                    <button onClick={() => setConfirmClear(false)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 100, padding: '6px 16px', fontSize: 12, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Never mind</button>
+                  </div>
+                </div>
+              ) : isStale ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0 }}>⚡ You have a saved conversation from {daysDiff} days ago. Continue or start fresh?</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => setRestoredBanner(false)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Continue</button>
+                    <button onClick={() => setConfirmClear(true)} style={{ background: 'none', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Start Fresh</button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0 }}>⚡ Picking up where you left off</p>
+                  <button onClick={() => setConfirmClear(true)} style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>Start fresh →</button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {messages.map((msg, i) => {
           const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading && !conversationDone;
           return (
             <React.Fragment key={i}>
               <MessageBubble message={msg} />
+              {msg.role === 'assistant' && (
+                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: 42, marginTop: -6, marginBottom: 8 }}>
+                  <SaveToNotebookButton content={msg.content} sourcePage="career_goals" userEmail={user?.email} />
+                </div>
+              )}
               {isLastAssistant && suggestedPrompts.length > 0 && (
                 <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} />
               )}
