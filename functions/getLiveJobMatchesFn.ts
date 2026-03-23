@@ -344,16 +344,18 @@ async function getLiveJobMatches(base44, goals, industries, sizePreference) {
   const size = sizePreference[0] || 'any size';
 
   const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `Search for companies actively hiring ${role}s in ${location} in 2025. Focus on ${size} companies in ${industry}.
+    prompt: `Search the web RIGHT NOW for companies actively hiring ${role}s specifically in ${location} in 2025. Location is critical — only return companies with offices or positions available in ${location}.
 
-Return exactly 5 companies that are currently hiring for this role.
-For each company include:
-- The real company name
-- A one-sentence description of what they are hiring for
-- Whether they are hot (aggressively hiring), warm (selectively hiring), or cool (limited openings)
-- The company size: startup (under 100), mid (100-999), or large (1000+)
+Focus on ${size} companies in ${industry}.
 
-Only include real companies you found evidence of hiring. Do not include companies with no hiring activity.`,
+Return exactly 5 companies that have open ${role} positions in ${location} right now.
+For each company:
+- Real company name (must have presence in ${location})
+- One sentence describing the specific ${role} openings in ${location}
+- Hiring signal: hot (aggressively hiring), warm (selectively hiring), or cool (limited)
+- Company size: startup (<100), mid (100-999), or large (1000+)
+
+Do NOT return national defaults like HCA, Mayo Clinic, CVS unless they have specific openings in ${location}. Return locally relevant employers.`,
     add_context_from_internet: true,
     model: 'gemini_3_flash',
     response_json_schema: {

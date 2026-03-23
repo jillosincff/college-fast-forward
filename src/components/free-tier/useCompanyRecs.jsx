@@ -429,7 +429,10 @@ export function useCompanyRecs(user) {
     setNoIndustry(false);
 
     const savedAt = user?.career_goals?.saved_at || '';
-    const cacheKey = `recs_${user.id || user.email}_${JSON.stringify(industries)}_${role}_${savedAt}`;
+    const location0 = (user?.career_goals?.locations?.[0] || user?.location_preferences?.[0] || 'us').toLowerCase().replace(/\s/g, '_');
+    const roleSlug = (role || 'general').toLowerCase().replace(/\s/g, '_');
+    const cacheKey = `recs_${user.id || user.email}_${roleSlug}_${location0}_${JSON.stringify(industries)}_${savedAt}`;
+    console.log('🗂️ Cache key:', cacheKey);
     const now = Date.now();
     const cached = memCache[cacheKey];
     if (cached && (now - cached.ts < CACHE_TTL_MS)) {
