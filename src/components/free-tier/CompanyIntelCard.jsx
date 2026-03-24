@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 
 const SIGNAL_CONFIG = {
   active:    { label: 'Actively Hiring', color: '#22C55E', bg: '#F0FDF4' },
@@ -35,8 +36,8 @@ function HiringSignal({ signal }) {
 
 function CFFParentsModal({ company, onClose }) {
   const parents = company.cff_parents || [];
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+  return ReactDOM.createPortal(
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, maxWidth: 420, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
         <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -62,7 +63,8 @@ function CFFParentsModal({ company, onClose }) {
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '4px 0 0', textAlign: 'center' }}>Go to the Directory tab to message them directly.</p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
