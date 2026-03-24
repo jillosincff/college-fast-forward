@@ -20,8 +20,7 @@ const SCHOOL_NAMES = {
 };
 
 const normalizeSchool = (s) =>
-  SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] ||
-  s?.trim?.() || '';
+  SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.trim?.() || '';
 
 Deno.serve(async (req) => {
   try {
@@ -46,25 +45,18 @@ Deno.serve(async (req) => {
 
     const studentSchool = normalizeSchool(student.school || student.university || '');
 
-    // Support multi-school affiliations
+    // Multi-school support: use schools array if available
     const studentSchools = Array.isArray(student.schools) && student.schools.length > 0
       ? student.schools.map(s => normalizeSchool(s)).filter(Boolean)
       : [studentSchool].filter(Boolean);
-    // Ensure primary school is always included
+    // Always include primary school
     if (studentSchool && !studentSchools.includes(studentSchool)) {
       studentSchools.push(studentSchool);
     }
 
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
 
-    // Only same-school CFF members (any affiliated school)
-    const sameSchoolMembers = allUsers.filter(u => {
-      if (u.id === student_id) return false;
-      if (u.show_in_directory === false) return false;
-      const ms = normalizeSchool(u.school || u.university || '');
-      if (!studentSchools.includes(ms) || ms === '') return false;
-
-    // Industry/role matching from student's career goals
+    // Career goals for keyword matching
     const careerGoals = student.career_goals || {};
     const industries = [
       ...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean)),
@@ -90,38 +82,61 @@ Deno.serve(async (req) => {
       return keywords.filter(k => text.includes(k)).length;
     };
 
-    // How many schools does the student share with this member?
-    const sharedSchools = (u) => {
-      const ms = normalizeSchool(u.school || u.university || '');
-      const memberSchools = Array.isArray(u.schools) && u.schools.length > 0
-        ? u.schools.map(s => normalizeSchool(s)).filter(Boolean)
+    // Which schools does this student share with the member?
+    const getSharedSchools = (member) => {
+      const ms = normalizeSchool(member.school || member.university || '');
+      const memberSchools = Array.isArray(member.schools) && member.schools.length > 0
+        ? member.schools.map(s => normalizeSchool(s)).filter(Boolean)
         : [ms].filter(Boolean);
       return studentSchools.filter(ss => memberSchools.includes(ss) || ss === ms);
     };
 
-    const mapMember = (u) => ({
-      id: u.id,
-      full_name: u.full_name || u.name || '',
-      job_title: u.job_title || u.current_role || u.current_position || '',
-      company: u.company || u.current_company || u.employer || '',
-      industry: u.industry || '',
-      school: normalizeSchool(u.school || u.university || ''),
-      shared_schools: sharedSchools(u),
-      persona: u.persona,
-      email: u.email,
-      linkedin_url: u.linkedin_url || '',
-      intro_availability: u.intro_availability || 'happy_to_help',
-      match_score: scoreMatch(u) + (sharedSchools(u).length > 1 ? 2 : 0) // double-school boost
+    const mapMember = (member) => {
+      const shared = getSharedSchools(member);
+      return {
+        id: member.id,
+        full_name: member.full_name || member.name || '',
+        job_title: member.job_title || member.current_role || member.current_position || '',
+        company: member.company || member.current_company || member.employer || '',
+        industry: member.industry || '',
+        school: normalizeSchool(member.school || member.university || ''),
+        shared_schools: shared,
+        persona: member.persona,
+        email: member.email,
+        linkedin_url: member.linkedin_url || '',
+        intro_availability: member.intro_availability || 'happy_to_help',
+        match_score: scoreMatch(member) + (shared.length > 1 ? 2 : 0)
+      };
+    };
+
+    // Only same-school CFF members (parents + willing alumni) across all affiliated schools
+    const sameSchoolMembers = allUsers.filter(u => {
+      if (u.id === student_id) return false;
+      if (u.show_in_directory === false) return false;
+      const ms = normalizeSchool(u.school || u.university || '');
+      if (!studentSchools.includes(ms) || ms === '') return false;
+      return (
+        u.persona === 'parent' ||
+        u.roles?.includes('parent') ||
+        (
+          u.persona === 'alumni' &&
+          (
+            u.alumni_intent === 'giving_help' ||
+            u.help_types?.includes('career') ||
+            u.intro_availability === 'happy_to_help'
+          )
+        )
+      );
     });
 
-    // RED HOT — same school, matched by career goals
+    // RED HOT — any affiliated school, matched by career goals
     const redHot = sameSchoolMembers
       .filter(u => scoreMatch(u) > 0)
-      .sort((a, b) => scoreMatch(b) - scoreMatch(a))
+      .sort((a, b) => (scoreMatch(b) + (getSharedSchools(b).length > 1 ? 2 : 0)) - (scoreMatch(a) + (getSharedSchools(a).length > 1 ? 2 : 0)))
       .slice(0, 20)
       .map(mapMember);
 
-    // Fallback: same-school members when no exact keyword matches (show all, sorted best-effort)
+    // Fallback: same-school members when no exact keyword matches
     const redHotFallback = redHot.length === 0
       ? sameSchoolMembers
           .sort((a, b) => scoreMatch(b) - scoreMatch(a))
@@ -139,6 +154,7 @@ Deno.serve(async (req) => {
         totalUsersInDB: allUsers.length,
         sameSchoolTotal: sameSchoolMembers.length,
         studentSchool,
+        studentSchools,
         studentIndustries: industries,
         studentRoles: roles
       }
