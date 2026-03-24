@@ -682,8 +682,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>
           CAREER GOALS
         </p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
-          Tell FastIQ what you're looking for.
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', transition: 'opacity 0.3s' }}>
+          {conversationDone ? 'Your Career Goals.' : 'Tell FastIQ what you’re looking for.'}
         </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>
           The more we know about you, the better we can help you.
