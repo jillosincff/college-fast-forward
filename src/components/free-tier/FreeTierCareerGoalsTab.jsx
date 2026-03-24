@@ -100,7 +100,9 @@ BAD: "You might need to learn quickly on the job as this role can be fast-paced.
 GOOD: "Real talk — financial analyst roles at real estate firms almost always require Excel modeling and basic accounting. With no experience yet, your first move should be a free Excel modeling course (CFI has good ones) and one CFF parent coffee chat in the real estate space before you apply anywhere."
 Be honest. Be specific. Students trust advisors who tell them the truth.
 
-Return 4-6 role recommendations ranked by fit. Set is_final=true and populate ALL fields including about_you, top_strengths, work_environment, honest_challenge, cff_network_recommendation, and preliminary_archetype.`;
+Return 4-6 role recommendations ranked by fit. Set is_final=true and populate ALL fields including about_you, top_strengths, work_environment, honest_challenge, cff_network_recommendation, and preliminary_archetype.
+
+FINAL suggested_prompts rule: when is_final is true, suggested_prompts must be exactly 3 items, maximum 4 words each. Use: ["Tell me more →", "Show companies →", "Start over →"]`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -569,7 +571,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
         {/* Page header */}
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Your Goals &amp; Leads.</h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.02em', transition: 'opacity 0.3s' }}>
+          {showLeads ? 'Your Goals & Leads.' : 'Your Career Goals.'}
+        </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 28px', lineHeight: 1.5 }}>The more we know about you, the better we can help you.</p>
 
         {/* Goals card */}
