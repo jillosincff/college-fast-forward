@@ -101,6 +101,17 @@ Deno.serve(async (req) => {
         (u.persona === 'alumni' && (u.alumni_intent === 'giving_help' || u.help_types?.includes('career') || u.intro_availability === 'happy_to_help'));
     });
 
+    // FIX 6: Debug — log marketing-relevant members
+    const debugKeywords = ['marketing', 'advertising', 'brand', 'content', 'media', 'entertainment', 'communications', 'pr', 'creative'];
+    const debugMarketing = sameSchoolMembers.filter(u => {
+      const text = [u.industry, u.job_title, u.current_role, u.bio].filter(Boolean).join(' ').toLowerCase();
+      return debugKeywords.some(k => text.includes(k));
+    });
+    console.log('Marketing-relevant same-school members:', debugMarketing.length);
+    console.log('Sample:', JSON.stringify(debugMarketing.slice(0, 5).map(u => ({ name: u.full_name, title: u.job_title, industry: u.industry, school: u.school }))));
+    console.log('All same-school members count:', sameSchoolMembers.length);
+    console.log('Cluster keywords:', clusterKeywords.join(', '));
+
     const relevantMembers = sameSchoolMembers
       .filter(u => scoreMatch(u, clusterKeywords) > 0)
       .sort((a, b) => {
@@ -183,17 +194,33 @@ Deno.serve(async (req) => {
           try {
             const [alumniResult, teaserResult] = await Promise.all([
               base44.asServiceRole.integrations.Core.InvokeLLM({
-                prompt: `How many ${studentSchool || 'University of Florida'} alumni currently work at ${company}? Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence": "high|medium|low", "hiring_signal": "active|selective|freeze|unknown", "industry": "string", "location": "string" }. Return null for alumni_count if uncertain.`,
+                prompt: `Search for how many ${studentSchool || 'University of Florida'} alumni work at ${company}.
+
+ACCURACY RULES:
+- Only return numbers you can find evidence for from LinkedIn, company websites, or credible sources
+- If LinkedIn shows "X UF alumni" use that exact number as alumni_count with confidence "high"
+- If you cannot find a reliable number, return null for alumni_count — never guess
+- Conservative estimates only — better to under-report than over-report
+- Do NOT multiply or extrapolate
+- Numbers above 500 for any single university are almost certainly wrong — if you see this, return confidence "low"
+
+Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence": "high|medium|low", "source": "linkedin|estimate|unknown", "hiring_signal": "active|selective|freeze|unknown", "industry": "string", "location": "string" }`,
                 add_context_from_internet: true,
                 model: 'gemini_3_flash',
-                response_json_schema: { type: 'object', properties: { company: { type: 'string' }, alumni_count: { type: 'number' }, confidence: { type: 'string' }, hiring_signal: { type: 'string' }, industry: { type: 'string' }, location: { type: 'string' } } },
+                response_json_schema: { type: 'object', properties: { company: { type: 'string' }, alumni_count: { type: 'number' }, confidence: { type: 'string' }, source: { type: 'string' }, hiring_signal: { type: 'string' }, industry: { type: 'string' }, location: { type: 'string' } } },
               }),
               base44.asServiceRole.integrations.Core.InvokeLLM({
                 prompt: `Generate 3 realistic job titles that ${studentSchool || 'University of Florida'} alumni working at ${company} in the field of "${targetDesc}" might hold. Real titles only. Return JSON: { "roles": ["Title1", "Title2", "Title3"] }`,
                 response_json_schema: { type: 'object', properties: { roles: { type: 'array', items: { type: 'string' } } } },
               }),
             ]);
-            if (!alumniResult || alumniResult.alumni_count === null || alumniResult.confidence === 'low') return null;
+            if (!alumniResult) return null;
+            // Sanity cap — counts >500 with non-high confidence are almost certainly wrong
+            if (alumniResult.alumni_count > 500 && alumniResult.confidence !== 'high') {
+              alumniResult.alumni_count = null;
+              alumniResult.confidence = 'low';
+            }
+            if (alumniResult.alumni_count === null) return null;
             return { ...alumniResult, teaser_roles: teaserResult?.roles || [] };
           } catch { return null; }
         })

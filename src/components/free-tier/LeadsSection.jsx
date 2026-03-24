@@ -215,14 +215,17 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
     setWarmLoading(false);
   };
 
+  // FIX 1: Frontend self-exclusion safety net
+  const safeRedHotLeads = (redHotLeads || []).filter(
+    lead => lead.id !== user?.id && lead.email?.toLowerCase() !== user?.email?.toLowerCase()
+  );
+
   const isSaved = (id) => savedLeads.some(l => l.id === String(id));
-  const totalWarmAlumni = warmLeads.reduce((s, r) => s + (r.alumni_count || 0), 0);
+  // FIX 5: Only count high+medium confidence for hero number; use company count if totals are suspect
+  const verifiedWarmLeads = warmLeads.filter(r => r.alumni_count && (r.confidence === 'high' || r.confidence === 'medium'));
+  const highConfidenceTotal = verifiedWarmLeads.filter(r => r.confidence === 'high').reduce((s, r) => s + (r.alumni_count || 0), 0);
   const maxAlumni = Math.max(...warmLeads.map(c => c.alumni_count || 0), 1);
-
-  // FIX 8: Grammar fix for singular
-  const memberLabel = redHotLeads.length === 1 ? 'member' : 'members';
-
-  // Selected chip card
+  const memberLabel = safeRedHotLeads.length === 1 ? 'member' : 'members';
   const selectedCardData = selectedChip ? warmLeads.find(w => w.company === selectedChip) : null;
 
   if (loading) {
@@ -248,9 +251,9 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
           {redHotLeads.length > 0 ? 'Same school. Same field. Free to contact now.' : ''}
         </p>
-        {redHotLeads.length > 0 ? (
+        {safeRedHotLeads.length > 0 ? (
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-            {redHotLeads.map(m => (
+            {safeRedHotLeads.map(m => (
               <CFFMemberCard key={m.id} member={m} accentColor="#DC2626" onContact={onContact} onSave={onSaveLead} onUnsave={onUnsaveLead} isSaved={isSaved(m.id)} />
             ))}
           </div>
@@ -270,15 +273,24 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
             <div style={{ width: 20, height: 20, border: '2px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'lsSpin 0.8s linear infinite' }} />
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, margin: 0, color: '#888' }}>Searching for {university} alumni at your target companies...</p>
           </div>
-        ) : totalWarmAlumni > 0 ? (
+        ) : warmLeads.length > 0 ? (
           <>
             {/* Hero stat block */}
             <div style={{ marginBottom: 28, padding: '28px 32px', background: '#FAFAFA', border: '1px solid #F0F0F0', borderRadius: 16 }}>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 72, fontWeight: 700, color: '#0d1117', lineHeight: 1, margin: '0 0 8px' }}>
-                {totalWarmAlumni.toLocaleString()}
-              </p>
+              {highConfidenceTotal > 0 ? (
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 72, fontWeight: 700, color: '#0d1117', lineHeight: 1, margin: '0 0 8px' }}>
+                  {highConfidenceTotal.toLocaleString()}
+                </p>
+              ) : (
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 48, fontWeight: 700, color: '#0d1117', lineHeight: 1.1, margin: '0 0 8px' }}>
+                  {verifiedWarmLeads.length > 0 ? `${verifiedWarmLeads.length} companies` : 'UF alumni'}
+                </p>
+              )}
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#555', margin: '0 0 4px' }}>
-                {university} alumni are working at companies that hire{targetDesc ? ` ${targetDesc.split(',')[0]}` : ''}.
+                {highConfidenceTotal > 0
+                  ? `${university} alumni verified working at companies that hire${targetDesc ? ` ${targetDesc.split(',')[0]}` : ''}.`
+                  : `in your field are actively hiring${targetDesc ? ` ${targetDesc.split(',')[0]}` : ''} roles — and ${university} alumni work at all of them.`
+                }
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 20px' }}>
                 You can't see who they are yet.
@@ -289,29 +301,17 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
               </button>
             </div>
 
-            {/* Explore chips — FIX 4: horizontal scroll, no wrap */}
+            {/* Explore chips — horizontal scroll */}
             {exploreChips.length > 0 && (
               <div style={{ marginBottom: 24 }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 10px' }}>
-                  ⚡ EXPLORE COMPANIES IN YOUR FIELD
-                </p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 10px' }}>⚡ EXPLORE COMPANIES IN YOUR FIELD</p>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: 8, overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {exploreChips.map((chip, i) => {
                     const hasData = warmLeads.some(w => w.company === chip);
                     const isSelected = selectedChip === chip;
                     return (
-                      <button key={i}
-                        onClick={() => setSelectedChip(isSelected ? null : chip)}
-                        style={{
-                          background: isSelected ? '#FFF5F0' : '#fff',
-                          border: `1.5px solid ${isSelected ? '#E85D20' : '#e5e5e5'}`,
-                          borderRadius: 100, padding: '8px 16px',
-                          fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500,
-                          color: isSelected ? '#E85D20' : '#333',
-                          cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0,
-                          transition: 'all 0.2s ease',
-                          opacity: hasData ? 1 : 0.6,
-                        }}>
+                      <button key={i} onClick={() => setSelectedChip(isSelected ? null : chip)}
+                        style={{ background: isSelected ? '#FFF5F0' : '#fff', border: `1.5px solid ${isSelected ? '#E85D20' : '#e5e5e5'}`, borderRadius: 100, padding: '8px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: isSelected ? '#E85D20' : '#333', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s ease', opacity: hasData ? 1 : 0.6 }}>
                         {chip}
                       </button>
                     );
@@ -328,15 +328,7 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
             {/* All company cards */}
             <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
               {warmLeads.map((lead, i) => (
-                <WarmCompanyCard
-                  key={lead.company || i}
-                  lead={lead}
-                  maxAlumni={maxAlumni}
-                  university={university}
-                  onUnlock={(lead) => setUpgradeModal(lead)}
-                  onSave={onSaveLead}
-                  isSaved={isSaved(`alumni_${lead.company}`)}
-                />
+                <WarmCompanyCard key={lead.company || i} lead={lead} maxAlumni={maxAlumni} university={university} onUnlock={(lead) => setUpgradeModal(lead)} onSave={onSaveLead} isSaved={isSaved(`alumni_${lead.company}`)} />
               ))}
             </div>
           </>
