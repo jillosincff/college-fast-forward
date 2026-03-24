@@ -272,6 +272,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [majorFilter, setMajorFilter] = useState('');
   const [awaitingMajor, setAwaitingMajor] = useState(false);
   const bottomRef = useRef(null);
+  const freshStartRef = useRef(false);
 
   // Removed frontend diagnostic block — now using backend getLeadsForStudent
 
@@ -287,7 +288,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setQuestionCount(savedConv.length);
       setRestoredBanner(true);
       setRestoredAt(savedAt ? new Date(savedAt) : null);
-      setMajorSaved(true); // if conversation exists, major was already handled
+      setMajorSaved(true);
       return;
     }
     const firstName = user?.full_name?.split(' ')[0] || 'there';
@@ -468,6 +469,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   };
 
   const startChat = () => {
+    freshStartRef.current = true;
     // Clear saved conversation from DB
     base44.auth.updateMe({ career_goals_conversation: null, career_goals_conversation_updated_at: null }).catch(() => {});
     setMode('chat');
@@ -487,6 +489,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     setRestoredBanner(false);
     setConfirmClear(false);
     setRestoredAt(null);
+    setAwaitingMajor(false);
   };
 
   const handleFindLeads = () => {
