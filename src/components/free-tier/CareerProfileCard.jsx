@@ -101,43 +101,13 @@ export default function CareerProfileCard({
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: accentColor, margin: '0 0 14px' }}>
               YOUR BEST-FIT ROLES
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               {roleRecommendations.map((rec, i) => (
                 <div key={i} style={{ borderLeft: `3px solid ${accentColor}`, paddingLeft: 14 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 15, color: '#fff', margin: 0 }}>
+                    <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 18, color: '#fff', margin: 0 }}>
                       {i + 1}. {rec.title}
                     </p>
-                    {rec.entrepreneurship_path && (
-                      <span style={{ fontSize: 11, background: 'rgba(232,93,32,0.15)', color: accentColor, borderRadius: 100, padding: '2px 8px', fontWeight: 600 }}>🚀 Founder path</span>
-                    )}
-                  </div>
-                  {rec.specific_companies?.length > 0 && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 6px' }}>
-                      Where to look: {rec.specific_companies.join(', ')}
-                    </p>
-                  )}
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: '0 0 8px', lineHeight: 1.6 }}>
-                    {rec.why_it_fits}
-                  </p>
-                  {rec.honest_challenge && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,200,100,0.8)', margin: '0 0 6px', lineHeight: 1.5 }}>
-                      ⚠️ {rec.honest_challenge}
-                    </p>
-                  )}
-                  {rec.no_experience_first_step && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 6px', fontStyle: 'italic' }}>
-                      First step: {rec.no_experience_first_step}
-                    </p>
-                  )}
-                  {rec.cff_intro_value && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: cffIntroColor[rec.cff_intro_value] || '#888', margin: 0, fontWeight: 500 }}>
-                      {cffIntroLabel[rec.cff_intro_value] || ''}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
@@ -166,8 +136,11 @@ export default function CareerProfileCard({
         )}
       </div>
 
+      {/* Divider */}
+      <hr style={{ border: 'none', borderTop: '1px solid #e5e5e5', margin: '32px 0 24px 0' }} />
+
       {/* CTAs */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+      <div className="button-group" style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={onFindLeads || (() => onTabChange?.('company_intel'))}
           style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
           Find My Leads →
@@ -212,7 +185,14 @@ export default function CareerProfileCard({
           ))}
         </div>
       )}
-      <style>{`.profile-chip:hover { background: #E85D20 !important; color: #fff !important; }`}</style>
+      <style>{`
+        .profile-chip:hover { background: #E85D20 !important; color: #fff !important; }
+        @media (max-width: 768px) {
+          .button-group { flex-direction: column !important; gap: 10px !important; width: 100%; }
+          .button-group button { width: 100%; text-align: center; justify-content: center; }
+          .profile-card { padding: 20px 16px !important; }
+        }
+      `}</style>
     </div>
   );
 }

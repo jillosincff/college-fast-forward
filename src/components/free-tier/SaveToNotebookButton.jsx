@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Bookmark } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const SOURCE_LABELS = {
@@ -43,22 +42,30 @@ export default function SaveToNotebookButton({ content, sourcePage, userEmail, c
   };
 
   return (
-    <button
-      onClick={handleSave}
-      title={saved ? 'Saved to Notebook' : 'Save to FastIQ Notebook'}
-      style={{
-        background: 'none',
-        border: 'none',
-        cursor: saved ? 'default' : 'pointer',
-        padding: '2px 4px',
-        minHeight: 'auto',
-        display: 'flex',
-        alignItems: 'center',
-        transition: 'color 0.2s',
-        color: saved ? '#E85D20' : '#CCCCCC',
-      }}
-    >
-      <Bookmark style={{ width: 13, height: 13, fill: saved ? '#E85D20' : 'none' }} />
-    </button>
+    <>
+      <button
+        onClick={handleSave}
+        title={saved ? 'Saved to Notebook' : 'Save to FastIQ Notebook'}
+        className={`save-insight-btn${saved ? ' saved' : ''}`}
+        style={{
+          background: 'none', border: 'none',
+          cursor: saved ? 'default' : 'pointer',
+          padding: '2px 4px', minHeight: 'auto',
+          display: 'flex', alignItems: 'center', gap: 4,
+          opacity: saved ? 1 : 0.4,
+          color: saved ? '#E85D20' : '#888',
+          transition: 'opacity 0.2s, color 0.2s',
+          fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+        }}
+      >
+        <span>🔖</span>
+        <span className="save-label">{saved ? 'Saved' : 'Save'}</span>
+      </button>
+      <style>{`
+        .save-insight-btn:hover { opacity: 1 !important; color: #E85D20 !important; }
+        .save-insight-btn.saved { opacity: 1 !important; }
+        @media (max-width: 768px) { .save-label { opacity: 0.6; display: inline !important; } }
+      `}</style>
+    </>
   );
 }

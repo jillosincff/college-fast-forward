@@ -195,23 +195,25 @@ const cleanMessage = (text) => {
 function MessageBubble({ message }) {
   const isUser = message.role === 'user';
   return (
-    <div style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', marginBottom: 14 }}>
+    <div className="chat-exchange" style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', marginBottom: 24 }}>
       {!isUser && (
         <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0d1117', border: '1px solid rgba(232,93,32,0.4)', color: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, marginRight: 10, marginTop: 2 }}>
           ⚡
         </div>
       )}
-      <div style={{
-        maxWidth: '80%',
-        background: isUser ? '#1A1A1A' : '#fff',
+      <div className={isUser ? 'chat-bubble-user' : 'chat-bubble-ai'} style={{
+        maxWidth: isUser ? '65%' : '75%',
+        background: isUser ? '#0d1117' : '#fff',
         color: isUser ? '#fff' : '#1A1A1A',
         border: isUser ? 'none' : '1px solid #E5E5E5',
-        borderRadius: isUser ? '18px 18px 4px 18px' : '4px 18px 18px 18px',
-        padding: '12px 16px',
+        borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+        padding: isUser ? '12px 18px' : '14px 18px',
         fontSize: 14,
         lineHeight: 1.6,
         whiteSpace: 'pre-wrap',
         fontFamily: "'DM Sans', sans-serif",
+        boxShadow: isUser ? 'none' : '0 1px 3px rgba(0,0,0,0.08)',
+        marginBottom: 8,
       }}>
         {isUser ? message.content : cleanMessage(message.content)}
       </div>
@@ -223,10 +225,11 @@ function SuggestedPrompts({ prompts, onSelect, onSkip }) {
   if (!prompts?.length) return null;
   return (
     <div style={{ marginLeft: 42, marginBottom: 16 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+      <div className="chips-container" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
         {prompts.map((p, i) => (
           <button key={i} onClick={() => onSelect(p)}
-            style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textAlign: 'left' }}>
+            className="chat-chip"
+            style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', whiteSpace: 'nowrap', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
             {p}
           </button>
         ))}
@@ -692,16 +695,16 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
       {/* Progress bar */}
       {questionCount >= 1 && !conversationDone && (
-        <div style={{ padding: '10px 24px', background: '#FAFAFA', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
-              Question {Math.min(questionCount, 8)} of 8
+        <div style={{ padding: '12px 24px', background: '#FAFAFA', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
+              The more you share...
             </p>
-            <div style={{ flex: 1, height: 4, background: '#EEEEEE', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount, 8) / 8) * 100))}%`, background: '#E85D20', borderRadius: 2, transition: 'width 0.4s ease' }} />
+            <div style={{ flex: 1, height: 3, background: '#EEEEEE', borderRadius: 100, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount, 8) / 8) * 100))}%`, background: '#E85D20', borderRadius: 100, transition: 'width 0.4s ease' }} />
             </div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#E85D20', margin: 0, flexShrink: 0, fontWeight: 600 }}>
-              {Math.min(100, Math.round((Math.min(questionCount, 8) / 8) * 100))}%
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
+              {Math.min(questionCount, 8)} of 8
             </p>
           </div>
         </div>
@@ -849,7 +852,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
       {/* Input bar — hidden when done */}
       {!conversationDone && (
-        <div style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff' }}>
+        <div className="chat-input-bar" style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff', position: 'sticky', bottom: 0, zIndex: 100 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 16, padding: '8px 12px' }}>
             <textarea
               value={input}
@@ -880,9 +883,13 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
           40% { transform: translateY(-6px); opacity: 1; }
         }
-        button:focus {
-          outline: none;
-          box-shadow: 0 0 0 2px #E85D20;
+        button:focus { outline: none; box-shadow: 0 0 0 2px #E85D20; }
+        .chat-chip:hover { background: #E85D20 !important; color: #fff !important; }
+        @media (max-width: 768px) {
+          .chat-bubble-ai { max-width: 88% !important; }
+          .chat-bubble-user { max-width: 80% !important; }
+          .chips-container { flex-direction: column !important; width: 100%; }
+          .chips-container .chat-chip { width: 100%; text-align: center; }
         }
       `}</style>
     </div>
