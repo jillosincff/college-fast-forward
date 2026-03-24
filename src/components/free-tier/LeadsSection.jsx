@@ -85,6 +85,13 @@ function CFFMemberCard({ member, accentColor, schoolLabel, onContact, onSave, on
   const inits = initials(member.full_name);
   const industryMatch = hasIndustryMatch(member, expanded);
   const memberSchoolLabel = member.school || member.university || schoolLabel || 'CFF';
+  const sharedSchools = member.shared_schools || [];
+  const doubleConnection = sharedSchools.length > 1;
+  // Short label: abbreviate school names
+  const shortSchool = (s) => s.replace('University of ', '').replace('University', '').replace(' State University', ' State').trim();
+  const schoolBadgeLabel = doubleConnection
+    ? sharedSchools.map(shortSchool).join(' + ') + ' Alumni'
+    : shortSchool(memberSchoolLabel) + ' Alumni';
 
   return (
     <div style={{ background: '#fff', border: '1px solid #E0E0E0', borderLeft: `3px solid ${accentColor}`, borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -97,8 +104,8 @@ function CFFMemberCard({ member, accentColor, schoolLabel, onContact, onSave, on
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: 0 }}>
             {member.job_title || member.current_role || 'Professional'}{company ? ` · ${company}` : ''}
           </p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: accentColor, margin: '3px 0 0', fontWeight: 600 }}>
-            ● CFF Member · {memberSchoolLabel}
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: doubleConnection ? '#7C3AED' : accentColor, margin: '3px 0 0', fontWeight: 600 }}>
+            ● CFF Member · {doubleConnection ? '🏫 ' + schoolBadgeLabel : memberSchoolLabel}
           </p>
         </div>
         <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 10, fontWeight: 700, padding: '2px 9px', borderRadius: 100, whiteSpace: 'nowrap', flexShrink: 0 }}>✓ CFF Member</span>

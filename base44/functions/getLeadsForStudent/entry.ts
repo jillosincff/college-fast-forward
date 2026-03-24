@@ -46,27 +46,23 @@ Deno.serve(async (req) => {
 
     const studentSchool = normalizeSchool(student.school || student.university || '');
 
+    // Support multi-school affiliations
+    const studentSchools = Array.isArray(student.schools) && student.schools.length > 0
+      ? student.schools.map(s => normalizeSchool(s)).filter(Boolean)
+      : [studentSchool].filter(Boolean);
+    // Ensure primary school is always included
+    if (studentSchool && !studentSchools.includes(studentSchool)) {
+      studentSchools.push(studentSchool);
+    }
+
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
 
-    // Only same-school CFF members (parents + willing alumni)
+    // Only same-school CFF members (any affiliated school)
     const sameSchoolMembers = allUsers.filter(u => {
       if (u.id === student_id) return false;
       if (u.show_in_directory === false) return false;
       const ms = normalizeSchool(u.school || u.university || '');
-      if (ms !== studentSchool || ms === '') return false;
-      return (
-        u.persona === 'parent' ||
-        u.roles?.includes('parent') ||
-        (
-          u.persona === 'alumni' &&
-          (
-            u.alumni_intent === 'giving_help' ||
-            u.help_types?.includes('career') ||
-            u.intro_availability === 'happy_to_help'
-          )
-        )
-      );
-    });
+      if (!studentSchools.includes(ms) || ms === '') return false;
 
     // Industry/role matching from student's career goals
     const careerGoals = student.career_goals || {};
@@ -94,6 +90,15 @@ Deno.serve(async (req) => {
       return keywords.filter(k => text.includes(k)).length;
     };
 
+    // How many schools does the student share with this member?
+    const sharedSchools = (u) => {
+      const ms = normalizeSchool(u.school || u.university || '');
+      const memberSchools = Array.isArray(u.schools) && u.schools.length > 0
+        ? u.schools.map(s => normalizeSchool(s)).filter(Boolean)
+        : [ms].filter(Boolean);
+      return studentSchools.filter(ss => memberSchools.includes(ss) || ss === ms);
+    };
+
     const mapMember = (u) => ({
       id: u.id,
       full_name: u.full_name || u.name || '',
@@ -101,11 +106,12 @@ Deno.serve(async (req) => {
       company: u.company || u.current_company || u.employer || '',
       industry: u.industry || '',
       school: normalizeSchool(u.school || u.university || ''),
+      shared_schools: sharedSchools(u),
       persona: u.persona,
       email: u.email,
       linkedin_url: u.linkedin_url || '',
       intro_availability: u.intro_availability || 'happy_to_help',
-      match_score: scoreMatch(u)
+      match_score: scoreMatch(u) + (sharedSchools(u).length > 1 ? 2 : 0) // double-school boost
     });
 
     // RED HOT — same school, matched by career goals
@@ -128,6 +134,7 @@ Deno.serve(async (req) => {
       redHotFallback,
       redHotTotal: redHot.length + redHotFallback.length,
       studentSchool,
+      studentSchools,
       debug: {
         totalUsersInDB: allUsers.length,
         sameSchoolTotal: sameSchoolMembers.length,
