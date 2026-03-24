@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import { base44 } from '@/api/base44Client';
 
 const SIGNAL_CONFIG = {
   active:    { label: 'Actively Hiring', color: '#22C55E', bg: '#F0FDF4' },
@@ -34,33 +35,157 @@ function HiringSignal({ signal }) {
   );
 }
 
-function CFFParentsModal({ company, onClose }) {
+function generateDraft(user, parent, companyName) {
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const goals = user?.career_goals || {};
+  const major = user?.major || goals?.major || 'my field';
+  const role = (goals?.target_roles || [])[0] || 'roles';
+  const industry = (goals?.target_industries || [])[0] || 'the industry';
+  const parentFirst = (parent.full_name || 'there').split(' ')[0];
+  return `Hi ${parentFirst},
+
+I'm ${user?.full_name || firstName}, a student at UF studying ${major} and targeting ${role} roles in ${industry}. I came across your profile on CFF and noticed your connection to ${companyName} — I'd love to ask you a few quick questions about breaking into the industry.
+
+Would you be open to a brief call or email exchange?
+
+Thank you!
+${user?.full_name || firstName}`;
+}
+
+function CFFParentsModal({ company, user, onClose }) {
   const parents = company.cff_parents || [];
+  const [view, setView] = useState('list'); // 'list' | 'contact'
+  const [selectedParent, setSelectedParent] = useState(null);
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleContact = (parent) => {
+    setSelectedParent(parent);
+    setDraft(generateDraft(user, parent, company.name));
+    setView('contact');
+    setSent(false);
+  };
+
+  const handleSend = async () => {
+    if (!draft.trim() || sending) return;
+    setSending(true);
+    try {
+      await base44.entities.Message.create({
+        sender_email: user?.email,
+        sender_name: user?.full_name,
+        recipient_email: selectedParent.email,
+        subject: `CFF Introduction Request — ${company.name}`,
+        body: draft,
+        message_type: 'directory_initial',
+        is_read: false,
+      });
+      setSent(true);
+      // toast
+      const el = document.createElement('div');
+      el.textContent = `Message sent to ${selectedParent.full_name?.split(' ')[0]} ⚡`;
+      el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:999999;pointer-events:none;';
+      document.body.appendChild(el);
+      setTimeout(() => { el.remove(); onClose(); }, 2000);
+    } catch (e) {
+      console.error('Send failed:', e);
+    }
+    setSending(false);
+  };
+
+  const parentTitle = (p) => {
+    const title = p.job_title || p.current_role || '';
+    const co = p.company || p.current_company || company.name;
+    if (title) return `${title}${co ? ` · ${co}` : ''}`;
+    return 'CFF Parent';
+  };
+
   return ReactDOM.createPortal(
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, maxWidth: 420, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
-        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, maxWidth: 440, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 4px' }}>CFF NETWORK</p>
             <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#0d1117', margin: 0 }}>Parents at {company.name}</p>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#aaa', minHeight: 'auto', padding: 4, lineHeight: 1 }}>✕</button>
         </div>
-        <div style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {parents.length === 0 ? (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>No CFF parents found at this company.</p>
-          ) : parents.map((p, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
-                {(p.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.full_name}</p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.job_title || 'CFF Parent'}{p.school ? ` · ${p.school}` : ''}</p>
-              </div>
+
+        {/* Body */}
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          {view === 'list' ? (
+            <div style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {parents.length === 0 ? (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>No CFF parents found at this company.</p>
+              ) : parents.map((p, i) => (
+                <div key={i} style={{ background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
+                      {(p.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{p.full_name}</p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{parentTitle(p)}</p>
+                      {p.school && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', margin: '1px 0 0' }}>CFF Parent · {p.school}</p>}
+                    </div>
+                  </div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', fontWeight: 500, margin: 0 }}>✓ Open to intro requests</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => handleContact(p)}
+                      style={{ flex: 1, background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '9px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
+                    >
+                      Contact Now →
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '4px 0 0', textAlign: 'center' }}>Go to the Directory tab to message them directly.</p>
+          ) : (
+            <div style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Selected parent mini card */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0' }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
+                  {(selectedParent?.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                </div>
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{selectedParent?.full_name}</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: 0 }}>{parentTitle(selectedParent)}</p>
+                </div>
+              </div>
+
+              {/* Draft */}
+              <div>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 4 }}>⚡ FastIQ drafted this for you:</p>
+                <textarea
+                  value={draft}
+                  onChange={e => setDraft(e.target.value)}
+                  rows={10}
+                  style={{ width: '100%', border: '1px solid #e5e5e5', borderRadius: 10, padding: '12px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#333', lineHeight: 1.6, resize: 'vertical', outline: 'none', boxSizing: 'border-box', background: '#fafafa' }}
+                />
+              </div>
+
+              {sent ? (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#22C55E', fontWeight: 600, textAlign: 'center', margin: 0 }}>✓ Message sent!</p>
+              ) : (
+                <button
+                  onClick={handleSend}
+                  disabled={sending}
+                  style={{ background: sending ? '#ccc' : '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: sending ? 'default' : 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  {sending ? 'Sending...' : 'Send Message →'}
+                </button>
+              )}
+
+              <button
+                onClick={() => setView('list')}
+                style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', minHeight: 'auto', padding: 0, fontFamily: "'DM Sans', sans-serif", textAlign: 'left' }}
+              >
+                ← Back to profile
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>,
@@ -68,7 +193,7 @@ function CFFParentsModal({ company, onClose }) {
   );
 }
 
-export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResearch, savedCompanies, onSave, onUnsave }) {
+export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResearch, savedCompanies, onSave, onUnsave, user }) {
   const [expanded, setExpanded] = useState(false);
   const [showParentsModal, setShowParentsModal] = useState(false);
   const isSaved = savedCompanies?.includes(company.name);
@@ -93,7 +218,7 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
 
   return (
     <>
-      {showParentsModal && <CFFParentsModal company={company} onClose={() => setShowParentsModal(false)} />}
+      {showParentsModal && <CFFParentsModal company={company} user={user} onClose={() => setShowParentsModal(false)} />}
       <div style={cardStyle} onClick={isCollapsed ? () => setExpanded(true) : undefined}>
         {isBest && (
           <div style={{ position: 'absolute', top: -12, left: 16, background: '#E85D20', color: '#fff', fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 100 }}>

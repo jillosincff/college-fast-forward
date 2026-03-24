@@ -208,6 +208,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
               <CompanyIntelCard
                 key={company.name}
                 company={company}
+                user={user}
                 isFastIQ={isFastIQ}
                 onUpgrade={() => setUpgradeModal(company)}
                 onResearch={() => setResearchCompany(company)}
@@ -215,7 +216,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                 onSave={handleSave}
                 onUnsave={handleUnsave}
               />
-            ))}
+            )}
 
             {!showAll && filteredCompanies.length > 6 && (
               <button onClick={() => setShowAll(true)}
