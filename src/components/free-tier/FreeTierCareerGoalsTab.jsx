@@ -19,7 +19,8 @@ Q2: Do you have a clear direction or are you still figuring it out? Chips: ["I h
 PATH A (has direction — answered Q2 with direction):
 Q3: What role or type of work are you targeting?
 Q4: What industry? (3 chips relevant to their major + "Something else")
-Q5: Internship or full-time? If full-time, what year do you graduate? Chips: ["Internship", "Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027", "Full-time — graduating 2028", "Full-time — graduating 2029", "Full-time — graduating 2030"]
+Q5: Internship or full-time? Chips: ["Internship", "Full-time", "Both"]
+Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "2026", "2027", "2028+"]
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
 Q8: Do you have a dream company in mind? And what's your biggest gap right now? Free text + chips: ["No dream company yet", "Still building skills"]
@@ -29,7 +30,7 @@ Q3: Work environment — what sounds most like you? Chips based on major.
 Q4: What's your natural strength? Chips: ["Talking to people / relationships", "Analyzing data / solving problems", "Creating things / design / writing", "Leading / organizing / making things happen"]
 Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Building something of my own", "Stability and work-life balance"]
 Q6: Are you interested in entrepreneurship or starting something? Chips: ["Definitely", "Maybe someday", "Not really"]
-Q7: Graduation year? Chips: ["2025", "2026", "2027", "2028", "2029", "2030"]
+Q7: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
 Q8: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Something else"]
 After Q8 on Path B: synthesize all answers into role recommendations.
 
@@ -47,11 +48,23 @@ Rules:
 - For Path A: set is_final=true after Q8 with goals_summary populated
 - For Path B: set is_final=true after Q8 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
 - NEVER add guilt or pressure to skipped questions. If student skips, say "No problem — moving on." and ask the next question.
-- GRADUATION YEAR: If not captured by Q5/Q7, ask explicitly. NEVER assume. When asking graduation year, ALWAYS use exactly these chips: ["2025", "2026", "2027", "2028", "2029", "2030"]. NEVER use any other years.
+- GRADUATION YEAR: If not captured by Q5b/Q7, ask explicitly. NEVER assume. When asking graduation year, ALWAYS use exactly these 4 chips: ["2025", "2026", "2027", "2028+"]. NEVER use any other chips for this question.
 - NO EXPERIENCE: When student says no experience, say exactly: "Starting from zero is totally fine — and honestly, a lot of CFF parents specifically remember what it felt like and are the most generous with their time. We'll build your path with that in mind."
 - SKIP CHIPS: Always include suggested_prompts. Do NOT add skip to suggested_prompts — it's handled separately in the UI.
 - PRELIMINARY ARCHETYPE: Always infer preliminary_archetype from conversation, even mid-conversation.
 - CRITICAL: NEVER put chip options inside the message text. Do not write 'Chips: [...]' or list options in the message. The message field must read like natural speech. Options belong ONLY in suggested_prompts.
+
+CHIP RULES (HARD LIMITS):
+- Maximum 4 chips per question — NEVER more than 4
+- Each chip label maximum 4 words
+- Always include a catch-all as the last chip ("Something else" or "Not sure yet")
+- GOOD chips: ["Finance", "Tech", "Nonprofit", "Something else"]
+- BAD chips: ["Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027", "Full-time — graduating 2028"]
+- Graduation year chips must always be exactly: ["2025", "2026", "2027", "2028+"] — never more
+
+WRONG message field: "Fashion is great! What industry? Chips: ['Tech', 'Fashion', 'Healthcare']"
+CORRECT message field: "Fashion is great! What industry are you targeting for this role?"
+CORRECT suggested_prompts: ["Tech", "Fashion", "Healthcare", "Something else"]
 
 Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips, NO skip option), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)`;
 
@@ -148,6 +161,16 @@ function hasExistingGoals(user) {
 
 // ─── Small UI components ──────────────────────────────────────────────────────
 
+// Safety: strip any leaked chip instructions from LLM messages
+const cleanMessage = (text) => {
+  if (!text) return text;
+  return text
+    .replace(/Chips:\s*\[.*?\]/gs, '')
+    .replace(/Options:\s*\[.*?\]/gs, '')
+    .replace(/suggested_prompts:\s*\[.*?\]/gs, '')
+    .trim();
+};
+
 function MessageBubble({ message }) {
   const isUser = message.role === 'user';
   return (
@@ -169,7 +192,7 @@ function MessageBubble({ message }) {
         whiteSpace: 'pre-wrap',
         fontFamily: "'DM Sans', sans-serif",
       }}>
-        {message.content}
+        {isUser ? message.content : cleanMessage(message.content)}
       </div>
     </div>
   );
