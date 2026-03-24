@@ -48,58 +48,19 @@ export default function GatorDirectory() {
     setLoading(true);
     setError(null);
     try {
-      // Direct SDK call — no backend function needed. More reliable & faster.
-      const rawUsers = await base44.entities.User.filter(
-        { onboarding_completed: true },
-        '-created_date',
-        500
-      );
+      const response = await base44.functions.invoke('getDirectoryUsers', {});
+      const result = response?.data || response;
+      if (result?.error) throw new Error(result.error);
+      const rawUsers = result?.data || [];
 
-      const validUsers = (rawUsers || [])
-        .filter(u => {
-          if (!u) return false;
-          const hasName = (u.first_name && u.last_name) ||
-            (u.full_name && u.full_name.trim() !== '' && !u.full_name.includes('@'));
-          if (!hasName) return false;
-          const hasPersona = u.persona && ['student', 'alumni', 'parent', 'gator'].includes(u.persona);
-          const hasRole = u.roles && Array.isArray(u.roles) && u.roles.some(r => ['student', 'alumni', 'parent', 'gator'].includes(r));
-          const hasProfile = u.major || u.current_company || u.current_position || u.industry || u.bio || (u.graduation_year && u.graduation_year > 1900);
-          return hasPersona || hasRole || hasProfile;
-        })
-        .map(u => {
-          let fullName = u.full_name;
-          let firstName = u.first_name;
-          let lastName = u.last_name;
-          if (fullName && !fullName.includes('@') && (!firstName || !lastName)) {
-            const parts = fullName.trim().split(' ').filter(Boolean);
-            firstName = firstName || parts[0];
-            lastName = lastName || (parts.length >= 2 ? parts.slice(1).join(' ') : '');
-          }
-          if (!fullName || fullName.includes('@')) {
-            fullName = (firstName && lastName) ? `${firstName} ${lastName}`.trim()
-              : firstName || lastName || (u.email ? u.email.split('@')[0] : 'Member');
-          }
-          let displayPersona = u.persona;
-          if (displayPersona === 'gator') displayPersona = 'student';
-          if (!displayPersona && u.roles?.length > 0) {
-            displayPersona = u.roles[0] === 'gator' ? 'student' : u.roles[0];
-          }
-          return {
-            id: u.id, email: u.email,
-            first_name: firstName || '', last_name: lastName || '', full_name: fullName,
-            persona: displayPersona || 'alumni', roles: u.roles || [],
-            graduation_year: u.graduation_year || '', major: u.major || '',
-            company: u.current_company || u.company || '',
-            job_title: u.current_position || u.job_title || '',
-            industry: u.industry || '', linkedin_url: u.linkedin_url || '',
-            bio: u.bio || '', ways_to_help: u.ways_to_help || [],
-            expertise_areas: u.expertise_areas || [],
-            mentorship_topics: u.mentorship_topics || [],
-            can_provide_referrals: u.can_provide_referrals || false,
-            is_founding_member: u.is_founding_member || false,
-            profile_image_url: u.profile_image_url || '',
-          };
-        });
+      const validUsers = rawUsers.map(u => {
+        let displayPersona = u.persona;
+        if (displayPersona === 'gator') displayPersona = 'student';
+        return {
+          ...u,
+          persona: displayPersona || 'alumni',
+        };
+      });
 
       setAllUsers(validUsers);
 

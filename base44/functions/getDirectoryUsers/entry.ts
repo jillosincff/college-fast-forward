@@ -32,13 +32,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
 
     const directoryUsers = [];
 
     for (const u of (allUsers || [])) {
       const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
-      if (!isParent) continue;
+      const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
+      const isStudent = u.persona === 'gator' || u.persona === 'student' || (Array.isArray(u.roles) && (u.roles.includes('gator') || u.roles.includes('student')));
+      if (!isParent && !isAlumni && !isStudent) continue;
 
       const hasName = !!(u.full_name || u.first_name);
       if (!hasName) continue;
@@ -69,27 +71,38 @@ Deno.serve(async (req) => {
         fullName = parts.length > 0 ? parts.join(' ') : (u.email || '').split('@')[0];
       }
 
+      const persona = isParent ? 'parent' : isAlumni ? 'alumni' : 'student';
+
       directoryUsers.push({
         id: u.id,
         email: u.email,
         full_name: fullName,
         first_name: u.first_name || fullName.split(' ')[0] || '',
         last_name: u.last_name || '',
-        persona: 'parent',
+        persona,
+        roles: u.roles || [],
         company,
         industry,
         job_title: jobTitle,
+        major: u.major || '',
+        graduation_year: u.graduation_year || '',
+        school: u.school || u.university || '',
         linkedin_url: u.linkedin_url || '',
         ways_to_help: waysToHelp,
+        expertise_areas: u.expertise_areas || [],
+        mentorship_topics: u.mentorship_topics || [],
+        can_provide_referrals: u.can_provide_referrals || false,
         intro_willingness: availability,
+        bio: u.bio || '',
         is_founding_member: u.is_founding_member || false,
         onboarding_completed: u.onboarding_completed || false,
         profile_image_url: u.profile_image_url || '',
+        show_in_directory: u.show_in_directory,
         updated_date: u.updated_date,
       });
     }
 
-    console.log('Directory: returning ' + directoryUsers.length + ' parents');
+    console.log('Directory: returning ' + directoryUsers.length + ' members');
 
     return Response.json({
       success: true,
