@@ -39,16 +39,16 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
       </div>
       <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={onFindLeads || (() => onTabChange?.('company_intel'))}
-          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 8 }}>
           Find My Leads →
           {showLeadsArrow && <ChevronDown style={{ width: 16, height: 16, animation: 'bounceDown 1s ease-in-out infinite' }} />}
         </button>
         <button onClick={() => onTabChange?.('career_path')}
-          style={{ background: 'none', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+          style={{ background: '#fff', color: '#E85D20', border: '2px solid #E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
           Dig Into Career Paths →
         </button>
         <button onClick={() => setShowEditModal(true)}
-          style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: '10px 4px' }}>
+          style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: 0, fontFamily: "'DM Sans', sans-serif" }}>
           Update my goals
         </button>
       </div>
