@@ -1,0 +1,292 @@
+import React, { useState, useEffect } from 'react';
+import { Search, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { getCompanyIntel } from '@/functions/getCompanyIntel';
+import CompanyIntelCard from './CompanyIntelCard';
+import CompanyResearchChat from './CompanyResearchChat';
+
+// ── Upgrade Modal ─────────────────────────────────────────────────────────────
+
+function AlumniUpgradeModal({ company, university, onClose, onUpgrade }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: '#fff', borderRadius: 16, maxWidth: 400, width: '100%', overflow: 'hidden' }}>
+        <div style={{ background: '#0d1117', padding: '24px 24px 20px' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px' }}>⚡ FASTIQ</p>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+            See {university} Alumni at {company?.name}
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
+            FastIQ found {company?.alumni_count} {university} alumni at {company?.name}.
+          </p>
+        </div>
+        <div style={{ padding: '20px 24px' }}>
+          {[
+            'Full names and current roles',
+            'Who works in your target department',
+            'AI-drafted personalized outreach',
+            `Interview prep for ${company?.name}`,
+            'Follow-up reminders',
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <span style={{ color: '#22C55E', fontWeight: 700, fontSize: 16 }}>✓</span>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#333' }}>{item}</span>
+            </div>
+          ))}
+          <button onClick={onUpgrade}
+            style={{ width: '100%', background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '14px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", marginTop: 16 }}>
+            Unlock FastIQ — $29/month →
+          </button>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', textAlign: 'center', margin: '8px 0 0' }}>
+            ⭐ Founding rate: $187/year
+          </p>
+          <button onClick={onClose} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 13, marginTop: 8, minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+            Maybe later
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Goals gate ────────────────────────────────────────────────────────────────
+
+function NoGoalsGate({ onSetGoals }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 24 }}>
+      <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 16, padding: '40px 36px', maxWidth: 480, width: '100%', textAlign: 'center' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 16px' }}>COMPANY INTEL</p>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#fff', margin: '0 0 16px', lineHeight: 1.3 }}>
+          Your company list is personalized to your career goals.
+        </p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 28px', lineHeight: 1.7 }}>
+          We show you hiring signals, CFF network presence, and alumni counts for companies that actually matter for your path — not a generic list.
+        </p>
+        <button onClick={onSetGoals}
+          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+          Set My Career Goals →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Search suggestion ─────────────────────────────────────────────────────────
+
+function SearchSuggestion({ term, companies, targetRoles, onAdd, onResearch }) {
+  const exists = companies.some(c => c.name.toLowerCase().includes(term.toLowerCase()));
+  if (exists || term.length < 2) return null;
+  const role = targetRoles?.[0] || 'your target role';
+  return (
+    <div style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 12, padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+      <div>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#0d1117', margin: '0 0 2px' }}>"{term}" isn't in your current list</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0 }}>It may be a strong fit for {role} roles. Want to add it?</p>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+        <button onClick={() => onAdd(term)}
+          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+          Add to My List
+        </button>
+        <button onClick={() => onResearch(term)}
+          style={{ background: '#fff', color: '#333', border: '1px solid #e5e5e5', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+          Research {term}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+
+const FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'hiring', label: '🟢 Actively Hiring' },
+  { key: 'cff', label: '👥 CFF Network' },
+  { key: 'best', label: '⭐ Best Opportunities' },
+  { key: 'saved', label: '🔖 Saved' },
+];
+
+export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChange }) {
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [targetRoles, setTargetRoles] = useState([]);
+  const [targetIndustries, setTargetIndustries] = useState([]);
+  const [hasGoals, setHasGoals] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [upgradeModal, setUpgradeModal] = useState(null);
+  const [researchCompany, setResearchCompany] = useState(null);
+  const [savedCompanies, setSavedCompanies] = useState(() => user?.saved_company_intel || []);
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const university = user?.school || user?.university || 'UF';
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const goals = user?.career_goals || {};
+    const industries = [...(goals.target_industries || []), ...(user?.target_industries || [])].filter(Boolean);
+    const roles = [...(goals.target_roles || []), ...(user?.target_roles || [])].filter(Boolean);
+
+    if (!industries.length && !roles.length) {
+      setHasGoals(false);
+      setLoading(false);
+      return;
+    }
+
+    setTargetRoles(roles);
+    setTargetIndustries(industries);
+    setHasGoals(true);
+    loadCompanies();
+  }, [user?.id]);
+
+  const loadCompanies = async () => {
+    setLoading(true);
+    try {
+      const res = await getCompanyIntel({ student_id: user.id });
+      const data = res?.data || res;
+      if (data.noGoals) { setHasGoals(false); setLoading(false); return; }
+      setCompanies(data.companies || []);
+      setTargetRoles(data.targetRoles || []);
+      setTargetIndustries(data.targetIndustries || []);
+    } catch (e) {
+      console.error('Company intel error:', e);
+    }
+    setLoading(false);
+  };
+
+  const handleSave = async (name) => {
+    const updated = [...savedCompanies, name];
+    setSavedCompanies(updated);
+    await base44.auth.updateMe({ saved_company_intel: updated }).catch(() => {});
+  };
+
+  const handleUnsave = async (name) => {
+    const updated = savedCompanies.filter(c => c !== name);
+    setSavedCompanies(updated);
+    await base44.auth.updateMe({ saved_company_intel: updated }).catch(() => {});
+  };
+
+  const handleAddToList = async (name) => {
+    const goals = user?.career_goals || {};
+    const updated = [...(goals.target_companies || []), name];
+    await base44.auth.updateMe({ career_goals: { ...goals, target_companies: updated }, company_intel_cached_at: null }).catch(() => {});
+    setSearch('');
+    loadCompanies();
+  };
+
+  const filteredCompanies = companies.filter(c => {
+    if (search) return c.name.toLowerCase().includes(search.toLowerCase());
+    if (filter === 'hiring') return c.hiring_signal === 'active';
+    if (filter === 'cff') return c.cff_parent_count > 0 || c.alumni_count > 0;
+    if (filter === 'best') return c.is_combo;
+    if (filter === 'saved') return savedCompanies.includes(c.name);
+    return true;
+  });
+
+  if (!hasGoals) {
+    return <NoGoalsGate onSetGoals={() => onTabChange?.('career_goals')} />;
+  }
+
+  const role = targetRoles[0] || '';
+  const industry = targetIndustries[0] || '';
+
+  return (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
+      <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
+      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: '#0d1117', margin: '0 0 8px', lineHeight: 1.2 }}>
+        {role && industry ? `Companies hiring ${role} in ${industry}.` : role ? `Companies hiring ${role}.` : industry ? `Companies in ${industry}.` : 'Your Target Companies.'}
+      </h1>
+      <p style={{ fontSize: 14, color: '#888', margin: '0 0 28px' }}>Updated regularly by FastIQ.</p>
+
+      {/* Search */}
+      <div style={{ position: 'relative', marginBottom: 16 }}>
+        <Search style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 16, height: 16, color: '#aaa' }} />
+        <input
+          type="text"
+          placeholder="Search or research any company..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ width: '100%', paddingLeft: 42, paddingRight: 16, paddingTop: 12, paddingBottom: 12, borderRadius: 100, border: '1px solid #e5e5e5', background: '#fff', fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
+        />
+      </div>
+
+      {search.length >= 2 && (
+        <SearchSuggestion
+          term={search}
+          companies={companies}
+          targetRoles={targetRoles}
+          onAdd={handleAddToList}
+          onResearch={(name) => {
+            setResearchCompany({ name, hiring_signal: 'unknown', known_for: '', what_they_look_for: [], cff_parent_count: 0, alumni_count: null });
+          }}
+        />
+      )}
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+        {FILTERS.map(f => (
+          <button key={f.key} onClick={() => { setFilter(f.key); setSearch(''); }}
+            style={{ background: filter === f.key ? '#E85D20' : '#fff', color: filter === f.key ? '#fff' : '#666', border: `1px solid ${filter === f.key ? '#E85D20' : '#e5e5e5'}`, borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: filter === f.key ? 600 : 400, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Loading */}
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+          <Loader2 style={{ width: 32, height: 32, color: '#E85D20', animation: 'ciSpin 1s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#0d1117', margin: '0 0 8px' }}>⚡ FastIQ is building your company list...</p>
+          <p style={{ fontSize: 14, color: '#888', margin: 0 }}>Finding companies hiring {role}{industry ? ` in ${industry}` : ''}. This takes about 30 seconds.</p>
+        </div>
+      )}
+
+      {/* Cards */}
+      {!loading && (
+        filteredCompanies.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <p style={{ fontSize: 15, color: '#888', margin: '0 0 12px' }}>No companies match this filter.</p>
+            <button onClick={() => { setFilter('all'); setSearch(''); }}
+              style={{ background: 'none', border: '1px solid #e5e5e5', borderRadius: 100, padding: '8px 20px', fontSize: 13, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+              Show all companies
+            </button>
+          </div>
+        ) : (
+          filteredCompanies.map(company => (
+            <CompanyIntelCard
+              key={company.name}
+              company={company}
+              isFastIQ={isFastIQ}
+              onUpgrade={() => setUpgradeModal(company)}
+              onResearch={() => setResearchCompany(company)}
+              savedCompanies={savedCompanies}
+              onSave={handleSave}
+              onUnsave={handleUnsave}
+            />
+          ))
+        )
+      )}
+
+      {upgradeModal && (
+        <AlumniUpgradeModal
+          company={upgradeModal}
+          university={university}
+          onClose={() => setUpgradeModal(null)}
+          onUpgrade={() => { setUpgradeModal(null); onOpenUpgrade?.(); }}
+        />
+      )}
+      {researchCompany && (
+        <CompanyResearchChat
+          company={researchCompany}
+          user={user}
+          isFastIQ={isFastIQ}
+          onClose={() => setResearchCompany(null)}
+          onUpgrade={() => { setResearchCompany(null); onOpenUpgrade?.(); }}
+        />
+      )}
+
+      <style>{`@keyframes ciSpin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
