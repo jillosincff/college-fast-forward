@@ -38,29 +38,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Can only fetch own leads' }, { status: 403 });
     }
 
-    // Get student record
     const student = await base44.asServiceRole.entities.User.get(student_id);
 
     if (!student) {
-      return Response.json({
-        redHot: [],
-        hot: [],
-        redHotTotal: 0,
-        hotTotal: 0,
-        error: 'Student not found'
-      });
+      return Response.json({ redHot: [], redHotFallback: [], redHotTotal: 0, error: 'Student not found' });
     }
 
     const studentSchool = normalizeSchool(student.school || student.university || '');
 
-    // Fetch ALL users (service role has permission)
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
 
-    // CFF members
-    const cffMembers = allUsers.filter(u =>
-      u.id !== student_id &&
-      u.show_in_directory !== false &&
-      (
+    // Only same-school CFF members (parents + willing alumni)
+    const sameSchoolMembers = allUsers.filter(u => {
+      if (u.id === student_id) return false;
+      if (u.show_in_directory === false) return false;
+      const ms = normalizeSchool(u.school || u.university || '');
+      if (ms !== studentSchool || ms === '') return false;
+      return (
         u.persona === 'parent' ||
         u.roles?.includes('parent') ||
         (
@@ -71,29 +65,26 @@ Deno.serve(async (req) => {
             u.intro_availability === 'happy_to_help'
           )
         )
-      )
-    );
+      );
+    });
 
-    // Industry/role matching
-    const industries = Array.isArray(student.target_industries)
-      ? student.target_industries
-      : [student.target_industries].filter(Boolean);
-
-    const roles = Array.isArray(student.target_roles)
-      ? student.target_roles
-      : [student.target_roles].filter(Boolean);
+    // Industry/role matching from student's career goals
+    const careerGoals = student.career_goals || {};
+    const industries = [
+      ...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean)),
+      ...(Array.isArray(student.target_industries) ? student.target_industries : [student.target_industries].filter(Boolean)),
+    ];
+    const roles = [
+      ...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean)),
+      ...(Array.isArray(student.target_roles) ? student.target_roles : [student.target_roles].filter(Boolean)),
+    ];
 
     const scoreMatch = (member) => {
       const text = [
-        member.industry,
-        member.industries,
-        member.job_title,
-        member.current_role,
-        member.current_position,
-        member.company,
-        member.current_company,
-        member.expertise_areas,
-        member.bio
+        member.industry, member.industries, member.job_title,
+        member.current_role, member.current_position,
+        member.company, member.current_company,
+        member.expertise_areas, member.bio
       ].filter(Boolean).join(' ').toLowerCase();
 
       const keywords = [...industries, ...roles]
@@ -103,59 +94,43 @@ Deno.serve(async (req) => {
       return keywords.filter(k => text.includes(k)).length;
     };
 
-    // RED HOT — same school + matching industries/roles
-    const redHot = cffMembers
-      .filter(u => {
-        const ms = normalizeSchool(u.school || u.university || '');
-        return ms === studentSchool && ms !== '' && scoreMatch(u) > 0;
-      })
-      .sort((a, b) => scoreMatch(b) - scoreMatch(a))
-      .slice(0, 20)
-      .map(u => ({
-        id: u.id,
-        full_name: u.full_name || u.name || '',
-        job_title: u.job_title || u.current_role || u.current_position || '',
-        company: u.company || u.current_company || u.employer || '',
-        industry: u.industry || '',
-        school: normalizeSchool(u.school || u.university || ''),
-        persona: u.persona,
-        email: u.email,
-        linkedin_url: u.linkedin_url || '',
-        intro_availability: u.intro_availability || 'happy_to_help',
-        match_score: scoreMatch(u)
-      }));
+    const mapMember = (u) => ({
+      id: u.id,
+      full_name: u.full_name || u.name || '',
+      job_title: u.job_title || u.current_role || u.current_position || '',
+      company: u.company || u.current_company || u.employer || '',
+      industry: u.industry || '',
+      school: normalizeSchool(u.school || u.university || ''),
+      persona: u.persona,
+      email: u.email,
+      linkedin_url: u.linkedin_url || '',
+      intro_availability: u.intro_availability || 'happy_to_help',
+      match_score: scoreMatch(u)
+    });
 
-    // HOT — different school + matching industries/roles
-    const hot = cffMembers
-      .filter(u => {
-        const ms = normalizeSchool(u.school || u.university || '');
-        return ms !== studentSchool && ms !== '' && scoreMatch(u) > 0;
-      })
+    // RED HOT — same school, matched by career goals
+    const redHot = sameSchoolMembers
+      .filter(u => scoreMatch(u) > 0)
       .sort((a, b) => scoreMatch(b) - scoreMatch(a))
       .slice(0, 20)
-      .map(u => ({
-        id: u.id,
-        full_name: u.full_name || u.name || '',
-        job_title: u.job_title || u.current_role || u.current_position || '',
-        company: u.company || u.current_company || u.employer || '',
-        industry: u.industry || '',
-        school: normalizeSchool(u.school || u.university || ''),
-        persona: u.persona,
-        email: u.email,
-        linkedin_url: u.linkedin_url || '',
-        intro_availability: u.intro_availability || 'happy_to_help',
-        match_score: scoreMatch(u)
-      }));
+      .map(mapMember);
+
+    // Fallback: same-school members when no exact keyword matches (show all, sorted best-effort)
+    const redHotFallback = redHot.length === 0
+      ? sameSchoolMembers
+          .sort((a, b) => scoreMatch(b) - scoreMatch(a))
+          .slice(0, 10)
+          .map(mapMember)
+      : [];
 
     return Response.json({
       redHot,
-      hot,
-      redHotTotal: redHot.length,
-      hotTotal: hot.length,
+      redHotFallback,
+      redHotTotal: redHot.length + redHotFallback.length,
       studentSchool,
       debug: {
         totalUsersInDB: allUsers.length,
-        totalCffMembers: cffMembers.length,
+        sameSchoolTotal: sameSchoolMembers.length,
         studentSchool,
         studentIndustries: industries,
         studentRoles: roles

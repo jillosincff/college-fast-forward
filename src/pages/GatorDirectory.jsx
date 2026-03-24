@@ -24,6 +24,7 @@ export default function GatorDirectory() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ persona: 'all', industry: 'all', helpType: 'all' });
+  const [schoolFilter, setSchoolFilter] = useState('my_school');
   const [viewMode, setViewMode] = useState('grid');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -147,9 +148,19 @@ export default function GatorDirectory() {
     return null;
   };
 
+  const userSchool = user?.school || user?.university || '';
+
   // Filtered & sorted users
   const filteredUsers = useMemo(() => {
     let users = [...allUsers];
+
+    // School filter
+    if (schoolFilter === 'my_school' && userSchool) {
+      users = users.filter(u => {
+        const uSchool = u.school || u.university || '';
+        return uSchool.toLowerCase().trim() === userSchool.toLowerCase().trim();
+      });
+    }
 
     // Sort: premium/founding first, then parents, then rest
     users.sort((a, b) => {
@@ -201,13 +212,13 @@ export default function GatorDirectory() {
   }, [allUsers, searchTerm, filters]);
 
   // Reset visible count when filters change
-  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [searchTerm, filters]);
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [searchTerm, filters, schoolFilter]);
 
   const visibleUsers = filteredUsers.slice(0, visibleCount);
 
   const handleMessage = (u) => { setSelectedUser(u); setMessageModalOpen(true); };
   const handleViewProfile = (userId) => { setSelectedProfileId(userId); setProfileModalOpen(true); };
-  const resetFilters = () => { setSearchTerm(''); setFilters({ persona: 'all', industry: 'all', helpType: 'all' }); };
+  const resetFilters = () => { setSearchTerm(''); setFilters({ persona: 'all', industry: 'all', helpType: 'all' }); setSchoolFilter('my_school'); };
 
   if (loading) {
     return (
@@ -249,6 +260,25 @@ export default function GatorDirectory() {
     <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
       {/* Hero */}
       <DirectoryHero stats={stats} loading={loading} />
+
+      {/* School scope toggle */}
+      {userSchool && (
+        <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '10px 24px', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 13, color: '#888', marginRight: 4 }}>Show:</span>
+          <button
+            onClick={() => setSchoolFilter('my_school')}
+            style={{ background: schoolFilter === 'my_school' ? '#DC2626' : '#F5F5F5', color: schoolFilter === 'my_school' ? '#fff' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
+          >
+            My School ({userSchool})
+          </button>
+          <button
+            onClick={() => setSchoolFilter('all')}
+            style={{ background: schoolFilter === 'all' ? '#1A1A1A' : '#F5F5F5', color: schoolFilter === 'all' ? '#fff' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
+          >
+            All CFF Schools
+          </button>
+        </div>
+      )}
 
       {/* Sticky search + filters */}
       <DirectorySearchBar

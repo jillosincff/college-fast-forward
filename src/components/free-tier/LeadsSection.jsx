@@ -196,7 +196,7 @@ function LeadCountWidget({ emoji, label, sublabel, count, locked, onClick, accen
 export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, onUnsaveLead, onUpgrade, leadsRef }) {
   const [loading, setLoading] = useState(true);
   const [redHotLeads, setRedHotLeads] = useState([]);
-  const [hotLeads, setHotLeads] = useState([]);
+  const [redHotFallback, setRedHotFallback] = useState([]);
   const [warmLeads, setWarmLeads] = useState([]);
   const [warmLoading, setWarmLoading] = useState(false);
   const [upgradeModal, setUpgradeModal] = useState(null);
@@ -223,14 +223,13 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
       console.log('✓ Leads debug:', result?.debug);
       console.log('✓ Red Hot count:', result?.redHotTotal);
-      console.log('✓ Hot count:', result?.hotTotal);
       
       setRedHotLeads(result?.redHot || []);
-      setHotLeads(result?.hot || []);
+      setRedHotFallback(result?.redHotFallback || []);
     } catch (e) {
       console.error('CFF leads fetch failed:', e);
       setRedHotLeads([]);
-      setHotLeads([]);
+      setRedHotFallback([]);
     }
     setLoading(false);
     fetchWarmLeads();
@@ -303,8 +302,9 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   };
 
   const isSaved = (id) => savedLeads.some(l => l.id === String(id));
-  const primaryIndustry = (goals.target_industries || goals.industries || [])[0] || 'your field';
   const totalWarmAlumni = warmLeads.reduce((s, r) => s + (r.alumni_count || 0), 0);
+  const displayRedHot = redHotLeads.length > 0 ? redHotLeads : redHotFallback;
+  const isFallback = redHotLeads.length === 0 && redHotFallback.length > 0;
   const expanded = expandIndustries(goals.target_industries || goals.industries || []);
 
   return (
@@ -314,21 +314,12 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
         <LeadCountWidget
           emoji="🔴"
-          label={`${university} Members`}
+          label={`${university} CFF Members`}
           sublabel="Same school"
-          count={loading ? '...' : redHotLeads.length}
+          count={loading ? '...' : displayRedHot.length}
           locked={false}
           accentColor="#DC2626"
           onClick={() => document.getElementById('red-hot-section')?.scrollIntoView({ behavior: 'smooth' })}
-        />
-        <LeadCountWidget
-          emoji="🔥"
-          label="Network Members"
-          sublabel="Across CFF"
-          count={loading ? '...' : hotLeads.length}
-          locked={false}
-          accentColor="#E85D20"
-          onClick={() => document.getElementById('hot-section')?.scrollIntoView({ behavior: 'smooth' })}
         />
         <LeadCountWidget
           emoji="🌡️"
@@ -354,14 +345,21 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
           <section id="red-hot-section" style={{ marginBottom: 36 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#DC2626', margin: '0 0 4px' }}>🔴 RED HOT LEADS</p>
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
-              {redHotLeads.length} {university} CFF members ready to help
+              {displayRedHot.length} {university} CFF members ready to help
             </h3>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
               Same school. Same network. Reach out now.
             </p>
-            {redHotLeads.length > 0 ? (
+            {isFallback && (
+              <div style={{ background: '#FFF8F0', border: '1px solid #FDDBC8', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#E85D20', margin: 0 }}>
+                  No {university} CFF members in your exact field yet — here are other {university} members who may still be valuable:
+                </p>
+              </div>
+            )}
+            {displayRedHot.length > 0 ? (
               <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                {redHotLeads.map(m => (
+                {displayRedHot.map(m => (
                   <CFFMemberCard key={m.id} member={m} accentColor="#DC2626" schoolLabel={university} onContact={onContact} onSave={onSaveLead} onUnsave={onUnsaveLead} isSaved={isSaved(m.id)} currentUser={user} expanded={expanded} />
                 ))}
               </div>
@@ -369,30 +367,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
               <div style={{ background: '#FEF2F2', border: '1px dashed #FECACA', borderRadius: 10, padding: '20px 24px' }}>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: 0 }}>
                   No {university} CFF members found yet. The network is growing — invite a classmate or alumni to join.
-                </p>
-              </div>
-            )}
-          </section>
-
-          {/* ── TIER 2: HOT LEADS ── */}
-          <section id="hot-section" style={{ marginBottom: 36 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>🔥 HOT LEADS</p>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
-              {hotLeads.length} CFF members across the network
-            </h3>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
-              Different schools, same mission — helping students like you.
-            </p>
-            {hotLeads.length > 0 ? (
-              <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                {hotLeads.map(m => (
-                  <CFFMemberCard key={m.id} member={m} accentColor="#E85D20" onContact={onContact} onSave={onSaveLead} onUnsave={onUnsaveLead} isSaved={isSaved(m.id)} currentUser={user} expanded={expanded} />
-                ))}
-              </div>
-            ) : (
-              <div style={{ background: '#FFF5F0', border: '1px dashed #FDDBC8', borderRadius: 10, padding: '20px 24px' }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: 0 }}>
-                  No CFF members found in {primaryIndustry} yet across other schools. Check back soon.
                 </p>
               </div>
             )}
