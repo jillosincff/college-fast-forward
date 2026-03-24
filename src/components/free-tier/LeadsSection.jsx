@@ -124,26 +124,21 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSave
       {/* Blurred teaser names */}
       {lead.teaser_roles?.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {lead.teaser_roles.slice(0, 3).map((role, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 16 }}>👤</span>
-              <span style={{ display: 'inline-block', background: '#e0e0e0', borderRadius: 4, width: 110, height: 12, flexShrink: 0 }} />
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>· {role}</span>
-            </div>
-          ))}
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '2px 0 0', paddingLeft: 26 }}>
+          {lead.teaser_roles.slice(0, 3).map((role, i) => {
+            const WIDTHS = ['88px', '104px', '76px', '112px'];
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#e5e5e5', flexShrink: 0 }} />
+                <div style={{ height: 12, background: '#ddd', borderRadius: 4, flexShrink: 0, width: WIDTHS[i % 4] }} />
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}>· {role}</span>
+              </div>
+            );
+          })}
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '2px 0 0', paddingLeft: 32 }}>
             + {Math.max(0, lead.alumni_count - 3).toLocaleString()} more
           </p>
         </div>
       )}
-
-      {/* Lock row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 8, padding: '10px 14px' }}>
-        <Lock style={{ width: 14, height: 14, color: '#E85D20', flexShrink: 0 }} />
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0, fontWeight: 500 }}>
-          You're 1 upgrade away from seeing all of them
-        </p>
-      </div>
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -286,21 +281,21 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
                 {university} alumni are working at companies that hire{targetDesc ? ` ${targetDesc.split(',')[0]}` : ''}.
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 20px' }}>
-                You can't see who they are yet. FastIQ can show you.
+                You can't see who they are yet.
               </p>
               <button onClick={() => onUpgrade?.()}
                 style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto' }}>
-                🔒 Unlock FastIQ — See Who They Are →
+                ⚡ Unlock FastIQ — See Who They Are →
               </button>
             </div>
 
-            {/* FIX 5: Explore chips */}
+            {/* Explore chips — FIX 4: horizontal scroll, no wrap */}
             {exploreChips.length > 0 && (
               <div style={{ marginBottom: 24 }}>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 10px' }}>
                   ⚡ EXPLORE COMPANIES IN YOUR FIELD
                 </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: 8, overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   {exploreChips.map((chip, i) => {
                     const hasData = warmLeads.some(w => w.company === chip);
                     const isSelected = selectedChip === chip;
@@ -313,27 +308,18 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
                           borderRadius: 100, padding: '8px 16px',
                           fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500,
                           color: isSelected ? '#E85D20' : '#333',
-                          cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+                          cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0,
                           transition: 'all 0.2s ease',
-                          opacity: hasData ? 1 : 0.5,
+                          opacity: hasData ? 1 : 0.6,
                         }}>
                         {chip}
                       </button>
                     );
                   })}
                 </div>
-
-                {/* Animated reveal for selected chip */}
                 {selectedChip && selectedCardData && (
                   <div style={{ marginTop: 16, animation: 'slideDown 0.3s ease' }}>
-                    <WarmCompanyCard
-                      lead={selectedCardData}
-                      maxAlumni={maxAlumni}
-                      university={university}
-                      onUnlock={(lead) => setUpgradeModal(lead)}
-                      onSave={onSaveLead}
-                      isSaved={isSaved(`alumni_${selectedCardData.company}`)}
-                    />
+                    <WarmCompanyCard lead={selectedCardData} maxAlumni={maxAlumni} university={university} onUnlock={(lead) => setUpgradeModal(lead)} onSave={onSaveLead} isSaved={isSaved(`alumni_${selectedCardData.company}`)} />
                   </div>
                 )}
               </div>

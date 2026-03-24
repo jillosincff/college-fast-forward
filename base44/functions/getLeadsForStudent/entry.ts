@@ -54,6 +54,8 @@ function getDisplayTitle(member) {
   return raw;
 }
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -66,6 +68,7 @@ Deno.serve(async (req) => {
     const student = await base44.asServiceRole.entities.User.get(student_id);
     if (!student) return Response.json({ redHot: [], redHotTotal: 0, error: 'Student not found' });
 
+    const studentEmail = student.email?.toLowerCase() || '';
     const studentSchool = normalizeSchool(student.school || student.university || '');
     const studentSchools = Array.isArray(student.schools) && student.schools.length > 0
       ? student.schools.map(s => normalizeSchool(s)).filter(Boolean) : [];
@@ -76,6 +79,7 @@ Deno.serve(async (req) => {
     const careerGoals = student.career_goals || {};
     const industries = [...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean)), ...(Array.isArray(student.target_industries) ? student.target_industries : [])].filter(Boolean);
     const roles = [...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean)), ...(Array.isArray(student.target_roles) ? student.target_roles : [])].filter(Boolean);
+    const targetDesc = [...roles, ...industries].join(', ');
 
     const clusterKeywords = getClusterKeywords(industries, roles);
 
@@ -86,9 +90,10 @@ Deno.serve(async (req) => {
       return studentSchools.filter(ss => memberSchools.includes(ss) || ss === ms);
     };
 
-    // FIX 8: Exclude student by both id and email
+    // FIX 1: Exclude student by both id AND email (case-insensitive)
     const sameSchoolMembers = allUsers.filter(u => {
-      if (u.id === student_id || u.email === student.email) return false;
+      if (u.id === student_id) return false;
+      if (u.email?.toLowerCase() === studentEmail) return false;
       if (u.show_in_directory === false) return false;
       const ms = normalizeSchool(u.school || u.university || '');
       if (!studentSchools.includes(ms) || ms === '') return false;
@@ -96,7 +101,6 @@ Deno.serve(async (req) => {
         (u.persona === 'alumni' && (u.alumni_intent === 'giving_help' || u.help_types?.includes('career') || u.intro_availability === 'happy_to_help'));
     });
 
-    // Only show score > 0
     const relevantMembers = sameSchoolMembers
       .filter(u => scoreMatch(u, clusterKeywords) > 0)
       .sort((a, b) => {
@@ -106,19 +110,18 @@ Deno.serve(async (req) => {
       })
       .slice(0, 20);
 
-    // Generate briefings for top 10
+    // FIX 7: Briefings with strict data-only prompt
     let briefings = {};
-    if (relevantMembers.length > 0 && (industries.length > 0 || roles.length > 0)) {
+    if (relevantMembers.length > 0 && targetDesc) {
       try {
-        const targetDesc = [...roles, ...industries].join(', ') || 'their target field';
         const memberList = relevantMembers.slice(0, 10).map((m, i) => {
           const title = getDisplayTitle(m);
           const company = m.company || m.current_company || '';
-          return `${i}: ${m.full_name || 'Member'} — ${title}${company ? ' at ' + company : ''} — industry: ${m.industry || 'not listed'}`;
-        }).join('\n');
+          return `${i}:\n- Name: ${m.full_name || 'Member'}\n- Title: ${title || 'not provided'}\n- Company: ${company || 'not provided'}\n- Industry: ${m.industry || 'not provided'}\n- Bio: ${m.bio || 'not provided'}\n- Expertise: ${Array.isArray(m.expertise_areas) ? m.expertise_areas.join(', ') : (m.expertise_areas || 'not provided')}`;
+        }).join('\n\n');
 
         const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `For a student targeting "${targetDesc}", generate a 10-word-max briefing for why each person is a valuable connection. Return JSON object where keys are index numbers as strings, values are plain text (no markdown, no quotes around the value itself).\n\nMembers:\n${memberList}`,
+          prompt: `For each person below, generate a 1-sentence briefing (max 15 words) explaining why they are a relevant lead for a student targeting "${targetDesc}".\n\nONLY use information explicitly present in their profile data. DO NOT invent, infer, or embellish. If there is insufficient data to write a meaningful briefing, return null for that index.\n\nReturn JSON object where keys are index numbers as strings and values are plain text strings or null.\n\n${memberList}`,
           response_json_schema: { type: 'object', properties: {}, additionalProperties: { type: 'string' } }
         });
         briefings = result || {};
@@ -127,6 +130,7 @@ Deno.serve(async (req) => {
 
     const redHot = relevantMembers.map((member, i) => {
       const shared = getSharedSchools(member);
+      const briefing = briefings[String(i)];
       return {
         id: member.id,
         full_name: member.full_name || member.name || '',
@@ -138,25 +142,30 @@ Deno.serve(async (req) => {
         persona: member.persona,
         email: member.email,
         linkedin_url: member.linkedin_url || '',
-        briefing: briefings[String(i)] || '',
+        briefing: (briefing && briefing !== 'null') ? briefing : '',
         match_score: scoreMatch(member, clusterKeywords) + (shared.length > 1 ? 2 : 0),
       };
     });
 
-    // Generate warm leads target companies + teaser roles
-    let targetCompanies = (careerGoals.target_companies || []);
-    if (careerGoals.dream_company && careerGoals.dream_company !== 'Not specified') {
-      targetCompanies = [careerGoals.dream_company, ...targetCompanies];
-    }
+    // FIX 2: Check warm leads cache before regenerating
+    const cachedAt = student.warm_leads_cached_at;
+    const cacheAge = cachedAt ? Date.now() - new Date(cachedAt).getTime() : Infinity;
+    const cacheValid = cacheAge < ONE_DAY_MS && student.warm_leads_cache?.length > 0;
 
     let warmLeadsData = [];
     let exploreChips = [];
 
-    if (industries.length > 0 || roles.length > 0) {
-      const targetDesc = [...roles, ...industries].join(', ');
+    if (cacheValid) {
+      warmLeadsData = student.warm_leads_cache;
+      exploreChips = warmLeadsData.map(w => w.company);
+      console.log('Using cached warm leads:', warmLeadsData.length);
+    } else if (industries.length > 0 || roles.length > 0) {
       const location = careerGoals.location_preference || 'the US';
+      let targetCompanies = (careerGoals.target_companies || []);
+      if (careerGoals.dream_company && careerGoals.dream_company !== 'Not specified') {
+        targetCompanies = [careerGoals.dream_company, ...targetCompanies];
+      }
 
-      // Auto-generate companies if needed
       if (targetCompanies.length === 0) {
         try {
           const llm = await base44.asServiceRole.integrations.Core.InvokeLLM({
@@ -164,13 +173,11 @@ Deno.serve(async (req) => {
             response_json_schema: { type: 'object', properties: { companies: { type: 'array', items: { type: 'string' } } } },
           });
           targetCompanies = llm?.companies || [];
-          exploreChips = targetCompanies;
         } catch (e) { console.warn('Company gen failed:', e.message); }
-      } else {
-        exploreChips = targetCompanies;
       }
 
-      // Fetch alumni counts + teaser roles in parallel
+      exploreChips = targetCompanies;
+
       const warmResults = await Promise.all(
         targetCompanies.slice(0, 10).map(async (company) => {
           try {
@@ -193,23 +200,31 @@ Deno.serve(async (req) => {
       );
 
       warmLeadsData = warmResults.filter(r => r && r.alumni_count > 0).sort((a, b) => b.alumni_count - a.alumni_count);
+
+      // Save to cache
+      await base44.asServiceRole.entities.User.update(student_id, {
+        warm_leads_cache: warmLeadsData,
+        warm_leads_cached_at: new Date().toISOString(),
+      });
+      console.log('Saved fresh warm leads to cache:', warmLeadsData.length);
     }
 
     return Response.json({
       redHot,
       redHotTotal: redHot.length,
       warmLeads: warmLeadsData,
-      exploreChips,
+      exploreChips: exploreChips.length > 0 ? exploreChips : warmLeadsData.map(w => w.company),
       studentSchool,
       studentSchools,
       hasGoals: industries.length > 0 || roles.length > 0,
-      targetDesc: [...roles, ...industries].join(', '),
+      targetDesc,
       debug: {
         totalUsersInDB: allUsers.length,
         sameSchoolTotal: sameSchoolMembers.length,
         relevantTotal: relevantMembers.length,
         studentIndustries: industries,
         studentRoles: roles,
+        warmLeadsCached: cacheValid,
       }
     });
   } catch (error) {
