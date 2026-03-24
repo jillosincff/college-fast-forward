@@ -205,12 +205,14 @@ export default function CareerProfileCard({
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {suggestedPrompts.map((p, i) => (
             <button key={i} onClick={() => onPromptSelect(p)}
-              style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 20, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto' }}>
+              className="profile-chip"
+              style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
               {p}
             </button>
           ))}
         </div>
       )}
+      <style>{`.profile-chip:hover { background: #E85D20 !important; color: #fff !important; }`}</style>
     </div>
   );
 }
