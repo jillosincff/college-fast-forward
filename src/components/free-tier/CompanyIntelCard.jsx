@@ -156,7 +156,7 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
               ) : 'No CFF parents yet'}
             </span>
             {company.cff_parent_count > 0 && (
-              <button onClick={() => navigate('GatorDirectory')} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, fontWeight: 500 }}>View →</button>
+              <button onClick={() => navigate('FreeTierDashboard', { tab: 'directory' })} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, fontWeight: 500 }}>View →</button>
             )}
             {(company.alumni_count > 0 || company.alumni_signal) && (
               <>
