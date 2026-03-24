@@ -194,17 +194,19 @@ Deno.serve(async (req) => {
           try {
             const [alumniResult, teaserResult] = await Promise.all([
               base44.asServiceRole.integrations.Core.InvokeLLM({
-                prompt: `Search for how many ${studentSchool || 'University of Florida'} alumni work at ${company}.
+                prompt: `Search LinkedIn and the web for the number of ${studentSchool || 'University of Florida'} alumni currently working at ${company}.
 
-ACCURACY RULES:
-- Only return numbers you can find evidence for from LinkedIn, company websites, or credible sources
-- If LinkedIn shows "X UF alumni" use that exact number as alumni_count with confidence "high"
-- If you cannot find a reliable number, return null for alumni_count — never guess
-- Conservative estimates only — better to under-report than over-report
-- Do NOT multiply or extrapolate
-- Numbers above 500 for any single university are almost certainly wrong — if you see this, return confidence "low"
+STRICT ACCURACY RULES:
+1. Only return a number if you find an explicit source stating that number
+2. LinkedIn alumni search results that say "X alumni" are acceptable sources
+3. Do NOT calculate or estimate based on company size or alumni percentages
+4. Do NOT multiply or extrapolate
+5. If you cannot find a verified number, return null for alumni_count
+6. Numbers over 500 require explicit sourcing — if you cannot cite a clear source for a number over 500, return null
+7. Be conservative — underreporting is better than overreporting
+8. If confidence is "estimated", set alumni_count to null — only return numbers with confidence "verified"
 
-Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence": "high|medium|low", "source": "linkedin|estimate|unknown", "hiring_signal": "active|selective|freeze|unknown", "industry": "string", "location": "string" }`,
+Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence": "verified|estimated|null", "source": "linkedin|news|company|null", "hiring_signal": "active|selective|freeze|unknown", "industry": "string", "location": "string" }`,
                 add_context_from_internet: true,
                 model: 'gemini_3_flash',
                 response_json_schema: { type: 'object', properties: { company: { type: 'string' }, alumni_count: { type: 'number' }, confidence: { type: 'string' }, source: { type: 'string' }, hiring_signal: { type: 'string' }, industry: { type: 'string' }, location: { type: 'string' } } },
@@ -215,18 +217,24 @@ Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence
               }),
             ]);
             if (!alumniResult) return null;
-            // Sanity cap — counts >500 with non-high confidence are almost certainly wrong
-            if (alumniResult.alumni_count > 500 && alumniResult.confidence !== 'high') {
+            // Only keep verified counts — null out anything estimated
+            if (alumniResult.confidence !== 'verified') {
               alumniResult.alumni_count = null;
-              alumniResult.confidence = 'low';
             }
-            if (alumniResult.alumni_count === null) return null;
-            return { ...alumniResult, teaser_roles: teaserResult?.roles || [] };
+            // Always store the result (even with null count) so we can show "alumni work here"
+            return { ...alumniResult, teaser_roles: teaserResult?.roles || [], alumni_signal: true };
           } catch { return null; }
         })
       );
 
-      warmLeadsData = warmResults.filter(r => r && r.alumni_count > 0).sort((a, b) => b.alumni_count - a.alumni_count);
+      // Keep all results (including null counts) — they still show the company; sort verified counts first
+      warmLeadsData = warmResults
+        .filter(r => r != null)
+        .sort((a, b) => {
+          if (a.alumni_count && !b.alumni_count) return -1;
+          if (!a.alumni_count && b.alumni_count) return 1;
+          return (b.alumni_count || 0) - (a.alumni_count || 0);
+        });
 
       // Save to cache
       await base44.asServiceRole.entities.User.update(student_id, {

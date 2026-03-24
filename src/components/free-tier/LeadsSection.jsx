@@ -92,10 +92,10 @@ function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSav
 // ─── Warm Company Card ────────────────────────────────────────────────────────
 
 function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSaved, style }) {
-  const countLabel = lead.confidence === 'high' ? lead.alumni_count?.toLocaleString() : `~${lead.alumni_count?.toLocaleString()}`;
-  const barWidth = maxAlumni > 0 ? Math.round((lead.alumni_count / maxAlumni) * 100) : 50;
+  const countLabel = (lead.alumni_count && lead.confidence === 'verified') ? lead.alumni_count.toLocaleString() : null;
+  const barWidth = countLabel && maxAlumni > 0 ? Math.round((lead.alumni_count / maxAlumni) * 100) : 0;
   const hiringColor = lead.hiring_signal === 'active' ? '#15803D' : lead.hiring_signal === 'selective' ? '#D97706' : '#94A3B8';
-  const hiringLabel = { active: '🟢 Hiring', selective: '🟡 Selective', freeze: '🔴 Freeze' }[lead.hiring_signal] || null;
+  const hiringLabel = { active: '🟢 Actively Hiring', selective: '🟡 Selective', freeze: '🔴 Freeze' }[lead.hiring_signal] || null;
 
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14, ...style }}>
@@ -113,12 +113,20 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSave
       {/* Alumni count + bar */}
       <div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#0d1117', lineHeight: 1 }}>{countLabel}</span>
-          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>{university} alumni work here</span>
+          {lead.alumni_count && lead.confidence === 'verified' ? (
+            <>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#0d1117', lineHeight: 1 }}>{lead.alumni_count.toLocaleString()}</span>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>{university} alumni work here</span>
+            </>
+          ) : (
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#555', fontWeight: 500 }}>🎓 {university} alumni work here</span>
+          )}
         </div>
-        <div style={{ height: 6, background: '#f0f0f0', borderRadius: 100, overflow: 'hidden', marginBottom: 4 }}>
-          <div style={{ height: '100%', width: `${barWidth}%`, background: 'linear-gradient(90deg, #E85D20, #ff8c5a)', borderRadius: 100, transition: 'width 0.8s ease' }} />
-        </div>
+        {lead.alumni_count && lead.confidence === 'verified' && (
+          <div style={{ height: 6, background: '#f0f0f0', borderRadius: 100, overflow: 'hidden', marginBottom: 4 }}>
+            <div style={{ height: '100%', width: `${barWidth}%`, background: 'linear-gradient(90deg, #E85D20, #ff8c5a)', borderRadius: 100, transition: 'width 0.8s ease' }} />
+          </div>
+        )}
       </div>
 
       {/* Blurred teaser names */}
@@ -221,9 +229,8 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   );
 
   const isSaved = (id) => savedLeads.some(l => l.id === String(id));
-  // FIX 5: Only count high+medium confidence for hero number; use company count if totals are suspect
-  const verifiedWarmLeads = warmLeads.filter(r => r.alumni_count && (r.confidence === 'high' || r.confidence === 'medium'));
-  const highConfidenceTotal = verifiedWarmLeads.filter(r => r.confidence === 'high').reduce((s, r) => s + (r.alumni_count || 0), 0);
+  const verifiedWarmLeads = warmLeads.filter(r => r.alumni_count && r.confidence === 'verified');
+  const verifiedTotal = verifiedWarmLeads.reduce((s, r) => s + (r.alumni_count || 0), 0);
   const maxAlumni = Math.max(...warmLeads.map(c => c.alumni_count || 0), 1);
   const memberLabel = safeRedHotLeads.length === 1 ? 'member' : 'members';
   const selectedCardData = selectedChip ? warmLeads.find(w => w.company === selectedChip) : null;
@@ -277,19 +284,13 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
           <>
             {/* Hero stat block */}
             <div style={{ marginBottom: 28, padding: '28px 32px', background: '#FAFAFA', border: '1px solid #F0F0F0', borderRadius: 16 }}>
-              {highConfidenceTotal > 0 ? (
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 72, fontWeight: 700, color: '#0d1117', lineHeight: 1, margin: '0 0 8px' }}>
-                  {highConfidenceTotal.toLocaleString()}
-                </p>
-              ) : (
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 48, fontWeight: 700, color: '#0d1117', lineHeight: 1.1, margin: '0 0 8px' }}>
-                  {verifiedWarmLeads.length > 0 ? `${verifiedWarmLeads.length} companies` : 'UF alumni'}
-                </p>
-              )}
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: verifiedTotal > 0 ? 72 : 48, fontWeight: 700, color: '#0d1117', lineHeight: 1, margin: '0 0 8px' }}>
+                {verifiedTotal > 0 ? verifiedTotal.toLocaleString() : warmLeads.length.toString()}
+              </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#555', margin: '0 0 4px' }}>
-                {highConfidenceTotal > 0
-                  ? `${university} alumni verified working at companies that hire${targetDesc ? ` ${targetDesc.split(',')[0]}` : ''}.`
-                  : `in your field are actively hiring${targetDesc ? ` ${targetDesc.split(',')[0]}` : ''} roles — and ${university} alumni work at all of them.`
+                {verifiedTotal > 0
+                  ? `verified ${university} alumni at your target companies.`
+                  : `companies in your field where ${university} alumni work.`
                 }
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 20px' }}>
