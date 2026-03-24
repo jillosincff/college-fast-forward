@@ -1064,9 +1064,26 @@ Deno.serve(async (req) => {
       await base44.entities.FastTrackProProfile.update(profile.id, { active_flow: null, flow_step: null });
     }
 
-    // Load upcoming UF career events + build context string
+    // Load upcoming career events for this student's school (school-agnostic)
     let upcomingEvents = [], eventsContext = '';
-    try { const now=new Date(),allE=await base44.entities.SchoolCareerEvent.filter({school_code:'UF',is_active:true},'start_date',20),ago7=new Date(now.getTime()-7*864e5); upcomingEvents=(allE||[]).filter(e=>{const s=new Date(e.start_date),d=e.deadline?new Date(e.deadline):null;return s>now||(d&&d>ago7)}).slice(0,5); console.log(`[Events] ${upcomingEvents.length} upcoming`); if(upcomingEvents.length>0){const el=upcomingEvents.map(e=>{const s=new Date(e.start_date),dl=e.deadline?new Date(e.deadline):null,dd=dl?Math.ceil((dl-now)/864e5):null;return`• ${e.title} — ${s.toLocaleDateString('en-US',{month:'short',day:'numeric'})}${dd!==null&&dd>=0&&dd<=7?' ⚠️ DEADLINE '+dd+'d':''}`;}).join('\n');eventsContext=`\n\nUF CAREER EVENTS (surface 1-2 as brief addendum when relevant to job search/timelines, skip if not):\n${el}`;} } catch(e){}
+    try {
+      const studentSchoolCode = (user.school || user.university || 'UF').toUpperCase().substring(0, 10);
+      const now = new Date(), ago7 = new Date(now.getTime() - 7*864e5);
+      const allE = await base44.entities.SchoolCareerEvent.filter({ school_code: studentSchoolCode, is_active: true }, 'start_date', 20);
+      upcomingEvents = (allE||[]).filter(e => {
+        const s = new Date(e.start_date), d = e.deadline ? new Date(e.deadline) : null;
+        return s > now || (d && d > ago7);
+      }).slice(0, 5);
+      console.log(`[Events] ${upcomingEvents.length} upcoming for school=${studentSchoolCode}`);
+      if (upcomingEvents.length > 0) {
+        const el = upcomingEvents.map(e => {
+          const s = new Date(e.start_date), dl = e.deadline ? new Date(e.deadline) : null;
+          const dd = dl ? Math.ceil((dl - now) / 864e5) : null;
+          return `\u2022 ${e.title} \u2014 ${s.toLocaleDateString('en-US',{month:'short',day:'numeric'})}${dd !== null && dd >= 0 && dd <= 7 ? ' \u26a0\ufe0f DEADLINE ' + dd + 'd' : ''}`;
+        }).join('\n');
+        eventsContext = `\n\n${studentSchoolCode} CAREER EVENTS (surface 1-2 as brief addendum when relevant to job search/timelines, skip if not):\n${el}`;
+      }
+    } catch(e) {}
 
     // Load pipeline for memory context
     let pipelineData = [];
