@@ -216,7 +216,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                 onSave={handleSave}
                 onUnsave={handleUnsave}
               />
-            )}
+            ))}
 
             {!showAll && filteredCompanies.length > 6 && (
               <button onClick={() => setShowAll(true)}
