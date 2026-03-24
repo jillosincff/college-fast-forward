@@ -1,124 +1,132 @@
 /**
  * firecrawlService.js
- * Reusable Firecrawl.dev helper for the FASTIQ backend.
+ * Reusable Firecrawl.dev scraping service for the FASTIQ backend.
  *
- * Firecrawl turns any URL into clean markdown/JSON — no fragile HTML parsing needed.
- * All scraping goes through this service so we have one place to manage the API key,
- * rate-limiting, error handling, and school-specific URL mappings.
+ * Called from other functions via:
+ *   const result = await base44.asServiceRole.functions.invoke('firecrawlService', {
+ *     action: 'scrapeUrl',           url: 'https://...'
+ *   });
+ *   const result = await base44.asServiceRole.functions.invoke('firecrawlService', {
+ *     action: 'scrapeCareerEvents',  school_code: 'UF'
+ *   });
+ *   const result = await base44.asServiceRole.functions.invoke('firecrawlService', {
+ *     action: 'scrapeCompanySite',   url: 'https://careers.google.com'
+ *   });
  *
- * To add a new school, just add its career URL to SCHOOL_CAREER_URLS below.
+ * Returns: { success: bool, pages: [{url, content}] } for multi-page actions,
+ *          { success: bool, content: string } for single-page scrape.
  *
- * Usage (from any other function):
- *   import { scrapeUrl, scrapeCareerEvents } from './firecrawlService.js';
- *
- *   const markdown = await scrapeUrl('https://careers.google.com');
- *   const eventsMarkdown = await scrapeCareerEvents('UF');
+ * To add a new school, add it to SCHOOL_CAREER_URLS + SCHOOL_EXTRA_URLS below.
  */
 
-import FirecrawlApp from 'npm:@mendable/firecrawl-js@1.13.5';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// ── School → Career Hub URL map (school-agnostic, easy to extend) ─────────────
+const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev/v1';
+
+// ── School → Career Hub URL map (school-agnostic) ──────────────────────────────
 const SCHOOL_CAREER_URLS = {
   UF:  'https://careerhub.ufl.edu/events/',
-  FSU: 'https://career.fsu.edu/events',   // example — add real URL when needed
-  UCF: 'https://careerservices.ucf.edu',   // example
-  // Add more schools here: SCHOOL_CODE: 'https://...'
+  FSU: 'https://career.fsu.edu/events',
+  UCF: 'https://careerservices.ucf.edu',
+  // Add more: 'SCHOOL_CODE': 'https://...'
 };
 
-// Additional UF-specific pages to scrape alongside the main career hub
-const UF_EXTRA_URLS = [
-  'https://careerhub.ufl.edu/events/2026/04/',
-  'https://careerhub.ufl.edu/events/2026/05/',
-  'https://career.ufl.edu/events-and-programs/career-fairs',
-];
+// Additional per-school pages scraped alongside the main career hub
+const SCHOOL_EXTRA_URLS = {
+  UF: [
+    'https://careerhub.ufl.edu/events/2026/04/',
+    'https://careerhub.ufl.edu/events/2026/05/',
+    'https://career.ufl.edu/events-and-programs/career-fairs',
+  ],
+};
 
-let _client = null;
+async function firecrawlScrape(url, apiKey, formats = ['markdown']) {
+  const resp = await fetch(`${FIRECRAWL_API_BASE}/scrape`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url, formats }),
+  });
 
-/**
- * Get (or lazily initialize) the Firecrawl client.
- * Logs a clear warning if the API key is missing so it's easy to diagnose.
- */
-function getClient() {
-  if (_client) return _client;
-  const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
-  if (!apiKey) {
-    console.warn('[FirecrawlService] FIRECRAWL_API_KEY is not set — scraping will fail. Add it in Base44 Secrets.');
-  }
-  _client = new FirecrawlApp({ apiKey: apiKey || '' });
-  return _client;
-}
-
-/**
- * Scrape a single URL and return clean markdown (or raw result for other formats).
- *
- * @param {string} url - The URL to scrape
- * @param {string[]} formats - Firecrawl formats, default ['markdown']
- * @returns {Promise<string|null>} - Markdown string, or null on failure
- */
-export async function scrapeUrl(url, formats = ['markdown']) {
-  const client = getClient();
-  try {
-    console.log(`[FirecrawlService] Scraping: ${url}`);
-    const result = await client.scrapeUrl(url, { formats });
-    const content = result?.markdown || result?.html || null;
-    if (content) {
-      console.log(`[FirecrawlService] ✓ Got ${content.length} chars from ${url}`);
-    } else {
-      console.warn(`[FirecrawlService] Empty response from ${url}`);
-    }
-    return content;
-  } catch (e) {
-    console.error(`[FirecrawlService] ✗ Scrape failed for ${url}: ${e.message}`);
+  if (!resp.ok) {
+    const errText = await resp.text();
+    console.error(`[FirecrawlService] HTTP ${resp.status} for ${url}: ${errText}`);
     return null;
   }
-}
 
-/**
- * Scrape a company website or job posting page.
- * Returns clean markdown suitable for passing directly to an LLM.
- *
- * @param {string} companyUrl - e.g. 'https://careers.google.com'
- * @returns {Promise<string|null>}
- */
-export async function scrapeCompanySite(companyUrl) {
-  return scrapeUrl(companyUrl);
-}
-
-/**
- * Scrape the career events hub for a given school.
- * Returns an array of { url, markdown } objects — one per page scraped.
- * Automatically handles school-specific extra pages (e.g. UF career fairs).
- *
- * @param {string} schoolCode - e.g. 'UF', 'FSU'
- * @returns {Promise<Array<{url: string, content: string}>>} - Array of scraped pages
- */
-export async function scrapeCareerEvents(schoolCode) {
-  const code = (schoolCode || '').toUpperCase();
-  const primaryUrl = SCHOOL_CAREER_URLS[code];
-
-  if (!primaryUrl) {
-    console.warn(`[FirecrawlService] No career URL configured for school "${code}". Add it to SCHOOL_CAREER_URLS.`);
-    return [];
+  const data = await resp.json();
+  const content = data?.data?.markdown || data?.data?.html || null;
+  if (content) {
+    console.log(`[FirecrawlService] ✓ ${url} → ${content.length} chars`);
+  } else {
+    console.warn(`[FirecrawlService] Empty response from ${url}`);
   }
-
-  // Build list of URLs to scrape for this school
-  const urlsToScrape = [primaryUrl];
-  if (code === 'UF') {
-    urlsToScrape.push(...UF_EXTRA_URLS);
-  }
-  // Future: add per-school extra URL arrays here
-
-  console.log(`[FirecrawlService] Scraping ${urlsToScrape.length} pages for school "${code}"`);
-
-  // Scrape all pages in parallel
-  const results = await Promise.all(
-    urlsToScrape.map(async (url) => {
-      const content = await scrapeUrl(url);
-      return content ? { url, content } : null;
-    })
-  );
-
-  const pages = results.filter(Boolean);
-  console.log(`[FirecrawlService] Successfully scraped ${pages.length}/${urlsToScrape.length} pages for "${code}"`);
-  return pages;
+  return content;
 }
+
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+
+    // Allow admin or service-role calls
+    let isAuthorized = false;
+    try {
+      const user = await base44.auth.me();
+      isAuthorized = !!user;
+    } catch {
+      // service-role invoke has no user — allow it
+      isAuthorized = true;
+    }
+    if (!isAuthorized) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!apiKey) {
+      console.error('[FirecrawlService] FIRECRAWL_API_KEY not set in Base44 Secrets.');
+      return Response.json({ success: false, error: 'FIRECRAWL_API_KEY not configured' }, { status: 500 });
+    }
+
+    const { action, url, school_code, formats } = await req.json();
+
+    // ── Action: scrapeUrl / scrapeCompanySite ────────────────────────────────
+    if (action === 'scrapeUrl' || action === 'scrapeCompanySite') {
+      if (!url) return Response.json({ success: false, error: 'url is required' }, { status: 400 });
+      const content = await firecrawlScrape(url, apiKey, formats || ['markdown']);
+      return Response.json({ success: !!content, content });
+    }
+
+    // ── Action: scrapeCareerEvents ───────────────────────────────────────────
+    if (action === 'scrapeCareerEvents') {
+      const code = (school_code || '').toUpperCase();
+      const primaryUrl = SCHOOL_CAREER_URLS[code];
+
+      if (!primaryUrl) {
+        console.warn(`[FirecrawlService] No career URL for school "${code}". Add it to SCHOOL_CAREER_URLS.`);
+        return Response.json({ success: false, error: `No career URL configured for school "${code}"`, pages: [] });
+      }
+
+      const urlsToScrape = [primaryUrl, ...(SCHOOL_EXTRA_URLS[code] || [])];
+      console.log(`[FirecrawlService] Scraping ${urlsToScrape.length} pages for "${code}"...`);
+
+      const results = await Promise.all(
+        urlsToScrape.map(async (u) => {
+          const content = await firecrawlScrape(u, apiKey, ['markdown']);
+          return content ? { url: u, content } : null;
+        })
+      );
+
+      const pages = results.filter(Boolean);
+      console.log(`[FirecrawlService] ✓ ${pages.length}/${urlsToScrape.length} pages scraped for "${code}"`);
+      return Response.json({ success: true, school_code: code, pages });
+    }
+
+    return Response.json({ error: `Unknown action "${action}". Use: scrapeUrl, scrapeCompanySite, scrapeCareerEvents` }, { status: 400 });
+
+  } catch (error) {
+    console.error('[FirecrawlService] Error:', error.message);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
+  }
+});

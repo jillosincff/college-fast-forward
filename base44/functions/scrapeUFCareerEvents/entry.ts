@@ -1,12 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-
-const URLS_TO_SCRAPE = [
-  'https://careerhub.ufl.edu/events/',
-  'https://careerhub.ufl.edu/events/2026/04/',
-  'https://careerhub.ufl.edu/events/2026/05/',
-];
-
-const CAREER_FAIRS_URL = 'https://career.ufl.edu/events-and-programs/career-fairs';
+// URL configuration is managed in firecrawlService.js (SCHOOL_CAREER_URLS + SCHOOL_EXTRA_URLS)
 
 function makeHash(title, startDate) {
   return `${(title || '').toLowerCase().replace(/\s+/g, '_').substring(0, 60)}_${(startDate || '').substring(0, 10)}`;
@@ -20,51 +13,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    console.log('[UF Scraper] Starting career event scrape...');
+    console.log('[UF Scraper] Starting career event scrape via Firecrawl...');
 
-    // Step 1: Fetch all event pages
-    const pageContents = [];
-
-    for (const url of URLS_TO_SCRAPE) {
-      try {
-        const resp = await fetch(url);
-        if (resp.ok) {
-          const html = await resp.text();
-          // Strip HTML to text-ish content for LLM
-          const text = html
-            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-            .replace(/<[^>]+>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .substring(0, 8000);
-          pageContents.push({ url, content: text });
-          console.log(`[UF Scraper] Fetched ${url} (${text.length} chars)`);
-        }
-      } catch (e) {
-        console.log(`[UF Scraper] Failed to fetch ${url}: ${e.message}`);
-      }
-    }
-
-    // Also fetch career fairs page
-    try {
-      const resp = await fetch(CAREER_FAIRS_URL);
-      if (resp.ok) {
-        const html = await resp.text();
-        const text = html
-          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .substring(0, 8000);
-        pageContents.push({ url: CAREER_FAIRS_URL, content: text });
-        console.log(`[UF Scraper] Fetched career fairs page (${text.length} chars)`);
-      }
-    } catch (e) {
-      console.log(`[UF Scraper] Failed to fetch career fairs: ${e.message}`);
-    }
+    // Step 1: Call firecrawlService to get clean markdown from all UF career pages
+    const firecrawlResult = await base44.asServiceRole.functions.invoke('firecrawlService', {
+      action: 'scrapeCareerEvents',
+      school_code: 'UF',
+    });
+    const pageContents = firecrawlResult?.pages || [];
 
     if (pageContents.length === 0) {
-      return Response.json({ success: false, error: 'Could not fetch any event pages' });
+      return Response.json({ success: false, error: 'Firecrawl could not fetch any event pages. Check FIRECRAWL_API_KEY.' });
     }
 
     // Step 2: Use LLM to extract structured events from all page content
