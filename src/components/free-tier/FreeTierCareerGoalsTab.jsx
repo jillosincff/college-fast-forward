@@ -54,6 +54,19 @@ Rules:
 - PRELIMINARY ARCHETYPE: Always infer preliminary_archetype from conversation, even mid-conversation.
 - CRITICAL: NEVER put chip options inside the message text. Do not write 'Chips: [...]' or list options in the message. The message field must read like natural speech. Options belong ONLY in suggested_prompts.
 
+CRITICAL FORMATTING RULES:
+- Never use markdown in your responses
+- Never use **bold**, *italic*, or # headers
+- Never use bullet points with - or •
+- Never use numbered lists with 1. 2. 3.
+- Write in plain conversational prose only
+- Use line breaks for separation if needed
+
+FINAL MESSAGE RULE (when is_final = true):
+Your "message" field must contain exactly ONE sentence — a warm bridge to the profile card. Nothing else.
+Examples: "Based on everything you shared — here's your personalized career profile." / "Perfect. Here's what we found for you."
+Do NOT include role recommendations, goals summaries, skills advice, or questions in the message. The profile card contains all the detail.
+
 CHIP RULES (HARD LIMITS):
 - Maximum 4 chips per question — NEVER more than 4
 - Each chip label maximum 4 words
@@ -161,13 +174,19 @@ function hasExistingGoals(user) {
 
 // ─── Small UI components ──────────────────────────────────────────────────────
 
-// Safety: strip any leaked chip instructions from LLM messages
+// Strip markdown and leaked chip instructions from LLM messages
 const cleanMessage = (text) => {
-  if (!text) return text;
+  if (!text) return '';
   return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/#{1,6}\s/g, '')
+    .replace(/^[-•]\s/gm, '')
+    .replace(/^\d+\.\s/gm, '')
     .replace(/Chips:\s*\[.*?\]/gs, '')
     .replace(/Options:\s*\[.*?\]/gs, '')
     .replace(/suggested_prompts:\s*\[.*?\]/gs, '')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 };
 
