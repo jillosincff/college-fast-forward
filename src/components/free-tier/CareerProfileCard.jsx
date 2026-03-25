@@ -191,26 +191,7 @@ export default function CareerProfileCard({
           )}
         </div>
 
-        {/* FastIQ upsell — hidden for existing subscribers */}
-        {!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq') && (
-          <div style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <span style={{ color: '#E85D20', fontSize: 14 }}>⚡</span>
-                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 600, color: '#0d1117' }}>Want to go deeper?</span>
-              </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: 0, lineHeight: 1.5, maxWidth: 480 }}>
-                You've got your career profile. FastIQ takes it further — deeper company intelligence, alumni discovery, AI-drafted outreach, and a full pipeline to track every connection.
-              </p>
-            </div>
-            <button
-              onClick={() => onTabChange?.('assessment')}
-              style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}
-            >
-              Unlock FastIQ →
-            </button>
-          </div>
-        )}
+
 
       </div>
 
