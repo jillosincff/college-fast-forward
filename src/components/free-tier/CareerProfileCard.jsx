@@ -7,7 +7,7 @@ const cffIntroLabel = { high: '🤝 CFF intro: highly valuable', medium: '🤝 C
 export default function CareerProfileCard({
   careerProfile, roleRecommendations, aboutYou, topStrengths,
   workEnvironment, honestChallenge, cffNetwork, preliminaryArchetype,
-  onTabChange, onFindLeads, onRestart, onPromptSelect, userEmail,
+  onTabChange, onFindLeads, onRestart, onPromptSelect, userEmail, user,
 }) {
   useEffect(() => {
     if (!roleRecommendations?.length || !userEmail) return;
@@ -168,52 +168,49 @@ export default function CareerProfileCard({
       {/* Divider */}
       <hr style={{ border: 'none', borderTop: '1px solid #e5e5e5', margin: '0 0 24px 0' }} />
 
-      {/* CTAs */}
-      <div className="button-group" style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button onClick={onFindLeads || (() => onTabChange?.('company_intel'))}
-          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-          Find My Leads →
-        </button>
-        <button onClick={() => onTabChange?.('career_path')}
-          style={{ background: '#fff', color: '#E85D20', border: '2px solid #E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-          Dig Into Career Paths →
-        </button>
-        {onRestart && (
-          <button onClick={onRestart}
-            style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: 0, fontFamily: "'DM Sans', sans-serif" }}>
-            Update my goals
+      {/* Bottom section */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        {/* Primary actions */}
+        <div className="button-group" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <button onClick={onFindLeads || (() => onTabChange?.('company_intel'))}
+            style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+            Find My Leads →
           </button>
-        )}
-      </div>
-
-      {/* Assessment upsell */}
-      <div style={{ border: '1px solid rgba(232,93,32,0.25)', borderRadius: 12, padding: '16px 20px', marginBottom: 16, background: 'rgba(232,93,32,0.04)' }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#E85D20', margin: '0 0 6px' }}>
-          ⚡ Want to go deeper?
-        </p>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '0 0 12px', lineHeight: 1.6 }}>
-          The full FastIQ Career Assessment takes 10 minutes and gives you a scientifically validated Career Archetype that powers your entire CFF experience — company matches, parent connections, outreach templates, all of it.
-        </p>
-        <button
-          onClick={() => onTabChange?.('assessment')}
-          style={{ background: 'none', border: `1.5px solid ${accentColor}`, color: accentColor, borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
-        >
-          Take the Full Assessment →
-        </button>
-      </div>
-
-      {/* Follow-up chips */}
-      {onPromptSelect && suggestedPrompts.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {suggestedPrompts.map((p, i) => (
-            <button key={i} onClick={() => onPromptSelect(p)}
-              className="profile-chip"
-              style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
-              {p}
+          <button onClick={() => onTabChange?.('career_path')}
+            style={{ background: '#fff', color: '#E85D20', border: '2px solid #E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+            Dig Into Career Paths →
+          </button>
+          {onRestart && (
+            <button onClick={onRestart}
+              style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: 0, fontFamily: "'DM Sans', sans-serif" }}>
+              Update my goals
             </button>
-          ))}
+          )}
         </div>
-      )}
+
+        {/* FastIQ upsell — hidden for existing subscribers */}
+        {!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq') && (
+          <div style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <span style={{ color: '#E85D20', fontSize: 14 }}>⚡</span>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 600, color: '#0d1117' }}>Want to go deeper?</span>
+              </div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: 0, lineHeight: 1.5, maxWidth: 480 }}>
+                You've got your career profile. FastIQ takes it further — deeper company intelligence, alumni discovery, AI-drafted outreach, and a full pipeline to track every connection.
+              </p>
+            </div>
+            <button
+              onClick={() => onTabChange?.('assessment')}
+              style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}
+            >
+              Unlock FastIQ →
+            </button>
+          </div>
+        )}
+
+      </div>
 
       <style>{`
         .profile-chip:hover { background: #E85D20 !important; color: #fff !important; }

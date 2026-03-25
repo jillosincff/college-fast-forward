@@ -873,6 +873,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
             cffNetwork={cffNetwork}
             preliminaryArchetype={prelimArchetype}
             userEmail={user?.email}
+            user={user}
             onTabChange={onTabChange}
             onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
             onRestart={startChat}
