@@ -131,6 +131,9 @@ export default function V3Hero({ onCTA }) {
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888888', marginTop: 14, marginBottom: 0 }}>
             Free to join. FastIQ from $29/mo. 7-day trial included.
           </p>
+          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#ffffff', marginTop: 20, marginBottom: 0, textAlign: 'center', lineHeight: 1.55 }}>
+            Your student gets real alumni matches and ready-to-send messages — so they finally have momentum.
+          </p>
         </div>
 
         {/* ALUMNI DEMO — moved above the fold */}
