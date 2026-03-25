@@ -14,7 +14,7 @@ import FastIQAssessment from '@/pages/FastIQAssessment';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : null;
+const MainPage = mainPageKey ? Pages[mainPageKey] : Pages[Object.keys(Pages)[0]];
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
@@ -48,7 +48,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
-          {MainPage ? <MainPage /> : null}
+          <MainPage />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
