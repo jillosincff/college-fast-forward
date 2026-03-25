@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
@@ -6,7 +6,6 @@ const playfair = '"Playfair Display", Georgia, serif';
 const TYPING_SPEED = 70;
 const ORANGE = '#E85D20';
 
-/* ── School data ───────────────────────────────────── */
 const SCHOOLS = [
   {
     abbr: 'UF',
@@ -23,10 +22,7 @@ const SCHOOLS = [
       { name: 'Jake Williams', company: 'Spotify', role: 'Marketing Associate' },
       { name: 'Lauren Brooks', company: 'Ogilvy', role: 'Account Coordinator' },
     ],
-    outreach: {
-      to: 'Sarah', toFull: 'Sarah Chen', company: 'Nike', from: 'Olivia',
-      field: 'brand marketing',
-    },
+    outreach: { to: 'Sarah', toFull: 'Sarah Chen', company: 'Nike', from: 'Olivia', field: 'brand marketing' },
   },
   {
     abbr: 'FSU',
@@ -43,10 +39,7 @@ const SCHOOLS = [
       { name: 'Hannah Lee', company: 'Wasserman', role: 'Client Services Associate' },
       { name: 'Chris Walker', company: 'ESPN', role: 'Content Marketing Specialist' },
     ],
-    outreach: {
-      to: 'Marcus', toFull: 'Marcus Rivera', company: 'IMG Academy', from: 'Olivia',
-      field: 'sports marketing',
-    },
+    outreach: { to: 'Marcus', toFull: 'Marcus Rivera', company: 'IMG Academy', from: 'Olivia', field: 'sports marketing' },
   },
   {
     abbr: 'Wake Forest',
@@ -63,10 +56,7 @@ const SCHOOLS = [
       { name: 'Emily Carter', company: 'Merrill Lynch', role: 'Financial Advisor Associate' },
       { name: 'Kevin Shah', company: 'Raymond James', role: 'Client Associate' },
     ],
-    outreach: {
-      to: 'Daniel', toFull: 'Daniel Green', company: 'Morgan Stanley', from: 'Olivia',
-      field: 'wealth management',
-    },
+    outreach: { to: 'Daniel', toFull: 'Daniel Green', company: 'Morgan Stanley', from: 'Olivia', field: 'wealth management' },
   },
   {
     abbr: 'U of M',
@@ -83,10 +73,7 @@ const SCHOOLS = [
       { name: 'Nicole Tran', company: 'JP Morgan', role: 'Associate Analyst' },
       { name: 'Alex Martinez', company: 'Lazard', role: 'M&A Analyst' },
     ],
-    outreach: {
-      to: 'Ryan', toFull: 'Ryan Goldberg', company: 'Goldman Sachs', from: 'Olivia',
-      field: 'investment banking',
-    },
+    outreach: { to: 'Ryan', toFull: 'Ryan Goldberg', company: 'Goldman Sachs', from: 'Olivia', field: 'investment banking' },
   },
   {
     abbr: 'USC',
@@ -103,19 +90,11 @@ const SCHOOLS = [
       { name: 'Mia Gonzalez', company: 'CAA', role: 'Marketing Coordinator' },
       { name: 'Tyler Moreno', company: 'Disney', role: 'Entertainment Marketing Associate' },
     ],
-    outreach: {
-      to: 'Jordan', toFull: 'Jordan Blake', company: 'WME', from: 'Olivia',
-      field: 'entertainment marketing',
-    },
+    outreach: { to: 'Jordan', toFull: 'Jordan Blake', company: 'WME', from: 'Olivia', field: 'entertainment marketing' },
   },
 ];
 
 const DEFAULT_MESSAGE = "Hey Sarah, I'm a UF '27 CS major and noticed you're a Software Engineer at Google. Your path from UF to Mountain View is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — Alex, UF '27";
-
-function buildOutreachMsg(school, alumni) {
-  const yr = `'${String(new Date().getFullYear() + 1).slice(2)}`;
-  return `Hey ${alumni.name.split(' ')[0]}, I'm a ${school.abbr} ${yr} student and noticed you're a ${alumni.role} at ${alumni.company}. Your path from ${school.abbr} is exactly what I'm aiming for — would love 15 minutes to hear how you got there. No pressure at all. — Alex, ${school.abbr} ${yr}`;
-}
 
 function buildDemoData(school) {
   const yr = school.abbr;
@@ -133,10 +112,9 @@ function buildDemoData(school) {
   };
 }
 
-/* ── Main component ────────────────────────────────── */
 export default function V3HeroTypingBox() {
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [playKey, setPlayKey] = useState(0); // increments to force replay
+  const [playKey, setPlayKey] = useState(0);
 
   const school = SCHOOLS[selectedIdx];
   const demoData = buildDemoData(school);
@@ -149,7 +127,6 @@ export default function V3HeroTypingBox() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* ── Framing lines ──────────────────────────── */}
       <div className="text-center mb-6">
         <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 4 }}>
           Watch how FastIQ works for your student.
@@ -159,7 +136,6 @@ export default function V3HeroTypingBox() {
         </p>
       </div>
 
-      {/* ── School chips ───────────────────────────── */}
       <div className="flex flex-wrap justify-center gap-2 mb-6">
         {SCHOOLS.map((s, i) => {
           const active = i === selectedIdx;
@@ -184,13 +160,11 @@ export default function V3HeroTypingBox() {
         })}
       </div>
 
-      {/* ── Animated demo (keyed for replay) ────── */}
       <DemoPlayer key={playKey} school={school} demoData={demoData} />
     </div>
   );
 }
 
-/* ── Isolated demo player (unmounts/remounts on key change) ── */
 function DemoPlayer({ school, demoData }) {
   const [displayedText, setDisplayedText] = useState('');
   const [showCompanies, setShowCompanies] = useState(false);
@@ -215,7 +189,6 @@ function DemoPlayer({ school, demoData }) {
   }, []);
 
   const startTyping = useCallback((text) => {
-    // Cancel all pending timers
     timersRef.current.forEach(id => clearTimeout(id));
     timersRef.current.clear();
     typingRef.current = true;
@@ -242,7 +215,6 @@ function DemoPlayer({ school, demoData }) {
     startTyping(msg);
   }, [school, startTyping]);
 
-  // Auto-play on mount
   useEffect(() => {
     setHasStarted(true);
     startTyping(DEFAULT_MESSAGE);
@@ -265,13 +237,12 @@ function DemoPlayer({ school, demoData }) {
       timersRef.current.forEach(id => clearTimeout(id));
       timersRef.current.clear();
     };
-  }, []); // runs once per mount
+  }, []);
 
   const isDone = showProof;
 
   return (
     <div style={{ opacity: hasStarted ? 1 : 0, transition: 'opacity 0.3s ease-out' }}>
-      {/* ── White input box ───────────────────── */}
       <div
         style={{
           background: '#FFFFFF',
@@ -301,20 +272,17 @@ function DemoPlayer({ school, demoData }) {
         </p>
       </div>
 
-      {/* ── Disclaimer (static) ────────────── */}
       <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, fontStyle: 'italic', lineHeight: 1.5, margin: '0 0 16px' }}>
         <span style={{ color: 'rgba(255,255,255,0.35)' }}>This is a sample scenario.</span>{' '}
         <span style={{ color: '#E85D20' }}>FastIQ works for any student at any school.</span>
       </p>
 
-      {/* ── Result cards ─────────────────── */}
       <div className="flex flex-col gap-3">
         <CompaniesCard companies={demoData.companies} visible={showCompanies} accent={accent} hasAsterisk={demoData.hasAsterisk} />
         <AlumniCard alumni={demoData.alumni} visible={showAlumni} accent={accent} onAlumniHover={handleAlumniHover} />
         <OutreachCard outreach={demoData.outreach} visible={showOutreach} accent={accent} />
       </div>
 
-      {/* ── Proof line ───────────────────── */}
       <div className="mt-6" style={{ textAlign: 'left', opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
         <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, margin: 0 }}>
           FastIQ doesn't just give advice — it shows your student{' '}
