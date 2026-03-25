@@ -214,6 +214,7 @@ const RESPONSE_SCHEMA = {
         work_environment: { type: 'string' },
         preliminary_archetype: { type: 'string' },
         career_profile_summary: { type: 'string' },
+        seeking: { type: 'string' },
       },
     },
   },
@@ -913,37 +914,13 @@ Return only the message text, nothing else.`,
           onRestart={startChat}
         />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, margin: '8px 0 16px' }}>
-          {(() => {
-            const g = savedGoals || user?.career_goals;
-            const missing = [];
-            if (!g?.graduation_year) missing.push({ key: 'grad', label: '+ Graduation year' });
-            if (!g?.dream_company) missing.push({ key: 'dream', label: '+ Dream company' });
-            if (!g?.company_size_preference?.length) missing.push({ key: 'size', label: '+ Company size preference' });
-            if (missing.length === 0) return null;
-            return (
-              <div style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 12, padding: '14px 18px' }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#E85D20', margin: '0 0 4px' }}>⚡ Add {missing.length} more detail{missing.length > 1 ? 's' : ''} for better lead matches</p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '0 0 10px' }}>These fields help FastIQ find more relevant parents and alumni for you.</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {missing.map(m => (
-                    <button key={m.key} onClick={startChat}
-                      style={{ background: '#fff', border: '1px solid #FDDBC8', color: '#E85D20', borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-          {showLeads && (
-            <button
-              onClick={() => { setShowLeads(false); setTimeout(() => setShowLeads(true), 100); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, minHeight: 'auto', marginLeft: 'auto' }}>
-              ⟳ Refresh My Leads
-            </button>
-          )}
-        </div>
+        {showLeads && (
+          <button
+            onClick={() => { setShowLeads(false); setTimeout(() => setShowLeads(true), 100); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, minHeight: 'auto', marginBottom: 16 }}>
+            ⟳ Refresh My Leads
+          </button>
+        )}
 
         {showLeads && (
           <>

@@ -11,7 +11,9 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
   const functions = goals?.target_functions?.length
     ? goals.target_functions.join(', ')
     : '—';
-  const seeking = goals?.seeking || '—';
+  const seeking = goals?.seeking
+    ? goals.seeking.charAt(0).toUpperCase() + goals.seeking.slice(1).toLowerCase()
+    : '—';
   const gradYear = goals?.graduation_year?.toString() || '—';
   const location = goals?.location_preference || goals?.locations?.[0] || '—';
   const dreamCo = goals?.dream_company || '—';
