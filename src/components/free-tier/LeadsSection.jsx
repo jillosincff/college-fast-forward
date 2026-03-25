@@ -338,13 +338,15 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         ...(Array.isArray(user?.target_roles) ? user.target_roles : [])
       ].filter(Boolean);
 
+      const hasGoals = industries.length > 0 || roles.length > 0;
+
       const scoreMatch = (member) => {
         const text = [member.industry, member.job_title, member.current_role, member.company, member.bio].filter(Boolean).join(' ').toLowerCase();
         let score = 0;
         industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 5; });
         roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 3; });
-        // Soft deprioritize unrelated industries
-        if (DEPRIORITIZE_INDUSTRIES.some(d => text.includes(d)) && score === 0) score -= 2;
+        // Hard penalize unrelated industries when student has goals
+        if (DEPRIORITIZE_INDUSTRIES.some(d => text.includes(d))) score -= 5;
         // Bonus for complete profile
         if (member.job_title) score += 1;
         if (member.company) score += 1;
@@ -355,7 +357,16 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         return score;
       };
 
-      const sorted = [...qualified].sort((a, b) => scoreMatch(b) - scoreMatch(a)).slice(0, 20);
+      // When student has set goals, exclude negative-scored members (clearly off-field)
+      const scoredLeads = qualified.map(m => ({ m, score: scoreMatch(m) }));
+      scoredLeads.forEach(({ m, score }) => {
+        if (score < 0) console.log('[RedHot] Filtered out (score < 0):', m.full_name, m.job_title, m.industry, 'score:', score);
+      });
+      const filtered = hasGoals
+        ? scoredLeads.filter(({ score }) => score >= 0).map(({ m }) => m)
+        : scoredLeads.map(({ m }) => m);
+
+      const sorted = [...filtered].sort((a, b) => scoreMatch(b) - scoreMatch(a)).slice(0, 20);
 
       // Proxycurl enrichment for members with LinkedIn but missing job/company
       const needsEnrichment = sorted.filter(m =>
