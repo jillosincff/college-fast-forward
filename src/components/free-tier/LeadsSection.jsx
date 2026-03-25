@@ -245,11 +245,26 @@ function RedHotEmptyState({ university, targetDesc }) {
   );
 }
 
+// ─── School name normalization ───────────────────────────────────────────────
+
+const SCHOOL_NAMES = {
+  'uf': 'University of Florida', 'usc': 'University of Southern California',
+  'osu': 'Ohio State University', 'ucf': 'University of Central Florida',
+  'umich': 'University of Michigan', 'udel': 'University of Delaware',
+  'uga': 'University of Georgia', 'psu': 'Penn State University',
+  'tulane': 'Tulane University', 'umd': 'University of Maryland',
+  'fau': 'Florida Atlantic University', 'fsu': 'Florida State University',
+  'jmu': 'James Madison University', 'miami': 'University of Miami',
+  'utexas': 'University of Texas', 'uky': 'University of Kentucky'
+};
+const normalizeSchool = (s) => SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.trim?.() || '';
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, onUnsaveLead, onUpgrade, leadsRef }) {
-  const [loading, setLoading] = useState(true);
+  const [redHotLoading, setRedHotLoading] = useState(true);
   const [redHotLeads, setRedHotLeads] = useState([]);
+  const [redHotTotal, setRedHotTotal] = useState(0);
   const [warmLeads, setWarmLeads] = useState([]);
   const [warmLoading, setWarmLoading] = useState(false);
   const [exploreChips, setExploreChips] = useState([]);
@@ -259,38 +274,88 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const [studentSchool, setStudentSchool] = useState('');
   const [warmSearchType, setWarmSearchType] = useState('company_based');
 
-  const university = studentSchool || user?.school || user?.university || 'UF';
+  const university = studentSchool || normalizeSchool(user?.school || user?.university || '') || 'UF';
 
-  useEffect(() => { fetchLeads(); }, [user?.email]);
+  // ── Red Hot: use getDirectoryUsers (proven to work) ──
+  const fetchRedHotLeads = async () => {
+    setRedHotLoading(true);
+    try {
+      const directoryUsers = await base44.functions.invoke('getDirectoryUsers', {});
+      console.log('[RedHot] Directory users returned:', directoryUsers?.length);
 
-  const fetchLeads = async () => {
-    setLoading(true);
+      if (!directoryUsers || directoryUsers.length === 0) {
+        console.error('[RedHot] getDirectoryUsers returned empty');
+        setRedHotLeads([]);
+        return;
+      }
+
+      const studentSchoolNorm = normalizeSchool(user?.school || user?.university || '');
+      setStudentSchool(studentSchoolNorm);
+      console.log('[RedHot] Student school:', studentSchoolNorm);
+
+      const sameSchool = directoryUsers.filter(u =>
+        u.id !== user?.id &&
+        u.email?.toLowerCase() !== user?.email?.toLowerCase() &&
+        normalizeSchool(u.school || u.university || '') === studentSchoolNorm
+      );
+      console.log('[RedHot] Same school members:', sameSchool.length);
+
+      const careerGoals = user?.career_goals || {};
+      const industries = [
+        ...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean)),
+        ...(Array.isArray(user?.target_industries) ? user.target_industries : [])
+      ].filter(Boolean);
+      const roles = [
+        ...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean)),
+        ...(Array.isArray(user?.target_roles) ? user.target_roles : [])
+      ].filter(Boolean);
+
+      const scoreMatch = (member) => {
+        const text = [member.industry, member.industries, member.job_title, member.current_role, member.company, member.bio].filter(Boolean).join(' ').toLowerCase();
+        let score = 0;
+        industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 3; });
+        roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 2; });
+        if (member.job_title || member.current_role) score += 1;
+        return score;
+      };
+
+      const sorted = [...sameSchool].sort((a, b) => scoreMatch(b) - scoreMatch(a)).slice(0, 20);
+      console.log('[RedHot] Final count:', sorted.length);
+      setRedHotLeads(sorted);
+      setRedHotTotal(sameSchool.length);
+      if (industries.length || roles.length) setTargetDesc([...roles, ...industries].join(', '));
+    } catch (err) {
+      console.error('[RedHot] Error:', err);
+      setRedHotLeads([]);
+    } finally {
+      setRedHotLoading(false);
+    }
+  };
+
+  // ── Warm Leads: still use getLeadsForStudent ──
+  const fetchWarmLeads = async () => {
     setWarmLoading(true);
     try {
       const response = await base44.functions.invoke('getLeadsForStudent', { student_id: user?.id });
       const result = response?.data || response;
-      if (result?.error) { console.error('Leads error:', result.error); setLoading(false); setWarmLoading(false); return; }
-
-      setRedHotLeads(result?.redHot || []);
+      if (result?.error) { console.error('Warm leads error:', result.error); return; }
       setWarmLeads(result?.warmLeads || []);
       setExploreChips(result?.exploreChips || []);
-      setTargetDesc(result?.targetDesc || '');
-      setStudentSchool(result?.studentSchool || '');
       setWarmSearchType(result?.warmSearchType || 'company_based');
+      if (result?.targetDesc) setTargetDesc(result.targetDesc);
     } catch (e) {
-      console.error('Leads fetch failed:', e);
+      console.error('Warm leads fetch failed:', e);
+    } finally {
+      setWarmLoading(false);
     }
-    setLoading(false);
-    setWarmLoading(false);
   };
 
-  // FIX 1: Frontend self-exclusion safety net
-  const safeRedHotLeads = (redHotLeads || []).filter(
-    lead => lead.id !== user?.id && lead.email?.toLowerCase() !== user?.email?.toLowerCase()
-  );
+  useEffect(() => {
+    fetchRedHotLeads();
+    fetchWarmLeads();
+  }, [user?.id]);
 
   const isSaved = (id) => savedLeads.some(l => l.id === String(id));
-  // Handle both company-based (alumni_count) and role-based (total_count)
   const isRoleBased = warmSearchType === 'role_based' || warmLeads.some(w => w.type === 'role_based');
   const verifiedWarmLeads = isRoleBased
     ? warmLeads.filter(r => r.total_count > 0 && r.confidence === 'verified')
@@ -299,13 +364,13 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
     ? verifiedWarmLeads.reduce((s, r) => s + (r.total_count || 0), 0)
     : verifiedWarmLeads.reduce((s, r) => s + (r.alumni_count || 0), 0);
   const maxAlumni = Math.max(...warmLeads.map(c => c.alumni_count || c.total_count || 0), 1);
-  const memberLabel = safeRedHotLeads.length === 1 ? 'member' : 'members';
+  const memberLabel = redHotLeads.length === 1 ? 'member' : 'members';
   const selectedCardData = selectedChip ? warmLeads.find(w => w.company === selectedChip) : null;
 
   const INVALID_CHIP_VALUES = ['no dream company yet','not specified','not specified yet','not sure yet','not sure','unsure','tbd','n/a','none','none yet',''];
   const validExploreChips = (exploreChips || []).filter(c => c && !INVALID_CHIP_VALUES.includes(c.toLowerCase().trim()));
 
-  if (loading) {
+  if (redHotLoading && warmLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '32px 0' }}>
         <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
@@ -328,9 +393,14 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
           {redHotLeads.length > 0 ? 'Same school. Same field. Free to contact now.' : ''}
         </p>
-        {safeRedHotLeads.length > 0 ? (
+        {redHotLoading ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 0' }}>
+            <div style={{ width: 20, height: 20, border: '2px solid #DC2626', borderTopColor: 'transparent', borderRadius: '50%', animation: 'lsSpin 0.8s linear infinite' }} />
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, margin: 0, color: '#888' }}>Scanning {university} CFF members...</p>
+          </div>
+        ) : redHotLeads.length > 0 ? (
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-            {safeRedHotLeads.map(m => (
+            {redHotLeads.map(m => (
               <CFFMemberCard key={m.id} member={m} accentColor="#DC2626" onContact={onContact} onSave={onSaveLead} onUnsave={onUnsaveLead} isSaved={isSaved(m.id)} />
             ))}
           </div>
