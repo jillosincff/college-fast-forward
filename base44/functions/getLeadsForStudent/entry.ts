@@ -316,6 +316,30 @@ Return as JSON: { "companies": ["Company1", ...] }`;
             ]);
 
             if (!alumniResult) return null;
+
+            // Fetch one real teaser profile from the verified company
+            let teaserProfile = null;
+            if (alumniResult.confidence === 'verified' && linkedInUrl) {
+              try {
+                const profilesRes = await base44.asServiceRole.functions.invoke('proxycurlService', {
+                  action: 'getAlumniProfiles',
+                  params: { companyLinkedInUrl: linkedInUrl, universityName: studentSchool || 'University of Florida', companyName: company, maxResults: 1 },
+                });
+                const p = profilesRes?.profiles?.[0] || null;
+                if (p) {
+                  teaserProfile = {
+                    display_name: p.full_name ? p.full_name.split(' ').map(n => n[0]).join('.') + '.' : null,
+                    title: p.current_title || p.headline || '',
+                    grad_year: p.education?.find(e => e.school?.toLowerCase?.()?.includes('florida'))?.ends_at?.year || null,
+                    linkedin_url: p.linkedin_url || null,
+                  };
+                }
+              } catch (e) {
+                // Fail silently, fallback to placeholder rows
+                teaserProfile = null;
+              }
+            }
+
             return {
               company,
               alumni_count: alumniResult.alumni_count || null,
@@ -323,6 +347,7 @@ Return as JSON: { "companies": ["Company1", ...] }`;
               source: alumniResult.source || 'unknown',
               hiring_signal: alumniResult.hiring_signal || 'unknown',
               teaser_roles: teaserResult?.roles || [],
+              teaser_profile: teaserProfile,
               alumni_signal: true,
             };
           } catch (err) { return null; }
