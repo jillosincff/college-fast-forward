@@ -80,7 +80,7 @@ export default function V3Hero({ onCTA }) {
         {/* BRIDGING SENTENCE */}
         <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 28 }}>
           <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.6, margin: 0, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto' }}>
-            Your student gets real alumni matches from your school and ready-to-send messages — so they finally have momentum and you can stop worrying.
+            Your student gets real alumni matches from their school and ready-to-send messages — so they finally have momentum and you can stop worrying. — so they finally have momentum and you can stop worrying.
           </p>
         </div>
 
@@ -141,49 +141,25 @@ export default function V3Hero({ onCTA }) {
           <V3HeroTypingBox />
         </div>
 
-        {/* TWO-FORCE CARDS */}
-        <div className="hero-cards" style={{ display: 'flex', flexDirection: 'row', gap: 24, marginBottom: 48 }}>
+        {/* BODY TEXT */}
+        <div className="hf" style={{ animationDelay: '2200ms', marginBottom: 64, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto', textAlign: 'left' }}>
           {[
-            {
-              Icon: Users,
-              label: 'You Provide',
-              title: 'The network.',
-              body: 'Your professional background becomes searchable by students in the network. A student targeting your industry or a company you\'ve worked at can find your profile and reach out directly for guidance. You decide how much you engage — but showing up here could change someone\'s life.',
-              delay: '2000ms',
-            },
-            {
-              Icon: Zap,
-              label: 'FastIQ Provides',
-              title: 'The intelligence.',
-              body: [
-                'FastIQ is your student\'s 24/7 AI-powered career center — and it never closes.',
-                'It proactively scouts opportunities, researches company intelligence, and finds alumni connections across the entire web. And its most powerful feature: for every job your student targets, FastIQ creates an ATS-optimized resume tailored to that specific role in 60 seconds — a service that typically costs hundreds of dollars.',
-              ],
-              delay: '2000ms',
-            },
-          ].map((card, i) => (
-            <div key={i} className="hf" style={{
-              animationDelay: card.delay,
-              flex: 1,
-              background: '#1A1A1A',
-              border: '1px solid #2A2A2A',
-              borderRadius: 12,
-              padding: 24,
-              textAlign: 'left',
+            'People get jobs because of who they know — not what they know.',
+            'So we invited your biggest supporters into the process: your parents.',
+            'They\'ve spent 20 years building a network. They know everybody.\nNow that network works for you.',
+            'Every time a parent helps a student, your visibility goes up.\nMore eyes. More alumni. More doors.',
+          ].map((text, i) => (
+            <p key={i} style={{
+              fontFamily: dmSans,
+              fontSize: 'clamp(18px, 2.2vw, 20px)',
+              fontWeight: 500,
+              color: '#FFFFFF',
+              lineHeight: 1.65,
+              margin: i === 0 ? '0 0 24px' : '0 0 24px',
+              whiteSpace: 'pre-line',
             }}>
-              <card.Icon style={{ width: 24, height: 24, color: '#E85D20', marginBottom: 14 }} />
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 8px' }}>
-                {card.label}
-              </p>
-              <p style={{ fontFamily: playfair, fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 10px' }}>
-                {card.title}
-              </p>
-              {Array.isArray(card.body) ? card.body.map((para, pi) => (
-                <p key={pi} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#AAAAAA', lineHeight: '22px', margin: pi === 0 ? '0 0 12px' : 0 }}>{para}</p>
-              )) : (
-                <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#888888', lineHeight: 1.6, margin: 0 }}>{card.body}</p>
-              )}
-            </div>
+              {text}
+            </p>
           ))}
         </div>
 
