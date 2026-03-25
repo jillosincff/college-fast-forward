@@ -35,16 +35,26 @@ Q8: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my
 After Q8 on Path B: synthesize all answers into role recommendations.
 
 STUDENT MAJOR: The student's major is provided in the conversation context. ALWAYS use it to:
-1. Personalize acknowledgments ("Finance — great foundation for analyst roles." / "English — more flexible than people think. Consulting, marketing, media, law, and tech all hire English majors.")
+1. Personalize acknowledgments ("Finance — solid foundation for analyst roles." / "English — more flexible than people think. Consulting, marketing, media, law, and tech all hire English majors.")
 2. Only suggest roles realistic for their major — never suggest software engineering to a Communications major unless they explicitly want it
 3. Flag honest gaps: if their target doesn't match major, acknowledge directly
 4. Suggest major-specific clubs, certifications, or experiences
 
 Rules:
-- Always acknowledge the previous answer warmly before the next question (1 sentence max)
+- Always acknowledge the previous answer in ONE short sentence before asking the next question.
+  Tone: confident and direct, like a sharp recruiter — NOT cheerful or enthusiastic.
+  NO exclamation points. NO adjectives like "fantastic", "exciting", "vibrant", "great", "solid".
+  Good: "Social Media Marketing — strong direction for a Marketing major."
+  Good: "Media & Entertainment — good fit given your role target."
+  Good: "Miami — focusing your leads there."
+  Good: "Mid-size — noted, that'll shape your company list."
+  Bad: "Social Media Marketing is an exciting field!"
+  Bad: "Media & Entertainment is a vibrant industry!"
+  Bad: "Mid-size companies often offer great growth opportunities!"
 - One question at a time — never list multiple questions
 - After key answers, remind student their data is being used: "Finance — already narrowing your company list." / "NYC — focusing your leads there."
-- Keep responses SHORT — one acknowledgment + the next question
+  These reminders replace the acknowledgment — don't do both. One sentence total.
+- Keep responses SHORT — one acknowledgment/reminder + the next question
 - For Path A: set is_final=true after Q8 with goals_summary populated
 - For Path B: set is_final=true after Q8 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
 - NEVER add guilt or pressure to skipped questions. If student skips, say "No problem — moving on." and ask the next question.
@@ -113,7 +123,7 @@ If a student's answer is ambiguous, pick the closest match — never leave as fr
 "Business" → infer from context; default to "Operations & Strategy"
 
 WRONG message field: "Fashion is great! What industry? Chips: ['Tech', 'Fashion', 'Healthcare']"
-CORRECT message field: "Fashion is great! What industry are you targeting for this role?"
+CORRECT message field: "Fashion — what industry are you targeting for this role?"
 CORRECT suggested_prompts: ["Tech", "Fashion", "Healthcare", "Something else"]
 
 Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips, NO skip option), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)
@@ -394,10 +404,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const freshStartRef = useRef(false);
   const [isFreshStart, setIsFreshStart] = useState(false);
 
-
-
-  // Removed frontend diagnostic block — now using backend getLeadsForStudent
-
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
     if (mode !== 'chat' || messages.length > 0) return;
@@ -416,7 +422,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     const firstName = user?.full_name?.split(' ')[0] || 'there';
     const existingMajor = user?.major || user?.career_goals?.major;
     if (existingMajor) {
-      // Skip major Q1 — go straight to opener
       setMajorSaved(true);
       setMessages([{
         role: 'assistant',
@@ -425,7 +430,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setSuggestedPrompts(["Let's go →", "I'll do it later"]);
       setQuestionCount(1);
     } else {
-      // Ask major first
       setAwaitingMajor(true);
       setMessages([{
         role: 'assistant',
@@ -488,15 +492,14 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     const userMsg = { role: 'user', content: major.trim() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    // Save major immediately
     base44.auth.updateMe({ major: major.trim() }).catch(() => {});
     setLoading(true);
     try {
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `${SYSTEM_PROMPT_BRANCHING}\n\nStudent major: ${major.trim()}\n\nConversation so far:\n${newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n')}\n\nThe student just told you their major. Acknowledge it with a brief personalized comment (1 sentence) that shows you understood the relevance of their major, then ask Q2: do they have a clear direction or are they still figuring it out?`,
+        prompt: `${SYSTEM_PROMPT_BRANCHING}\n\nStudent major: ${major.trim()}\n\nConversation so far:\n${newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n')}\n\nThe student just told you their major. Acknowledge it in one direct sentence, then ask Q2: do they have a clear direction or are they still figuring it out?`,
         response_json_schema: RESPONSE_SCHEMA,
       });
-      const reply = result?.message || "Got it! Do you have a sense of what you want to do, or are you still figuring it out?";
+      const reply = result?.message || "Got it. Do you have a sense of what you want to do, or are you still figuring it out?";
       const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : ["I have a pretty good idea →", "Still figuring it out"];
       const allMessages = [...newMessages, { role: 'assistant', content: reply, suggested_prompts: prompts }];
       setMessages(allMessages);
@@ -504,7 +507,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setQuestionCount(2);
       base44.auth.updateMe({ career_goals_conversation: allMessages, career_goals_conversation_updated_at: new Date().toISOString() }).catch(() => {});
     } catch (e) {
-      const fallback = [...newMessages, { role: 'assistant', content: "Got it! Do you have a sense of what you want to do, or are you still figuring it out?", suggested_prompts: ["I have a pretty good idea →", "Still figuring it out"] }];
+      const fallback = [...newMessages, { role: 'assistant', content: "Got it. Do you have a sense of what you want to do, or are you still figuring it out?", suggested_prompts: ["I have a pretty good idea →", "Still figuring it out"] }];
       setMessages(fallback);
       setSuggestedPrompts(["I have a pretty good idea →", "Still figuring it out"]);
       setQuestionCount(2);
@@ -515,7 +518,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const sendMessage = async (text) => {
     const trimmed = (text || input).trim();
     if (!trimmed || loading) return;
-    // Handle "I'll do it later" on opener
     if (trimmed === "I'll do it later") {
       setMode('summary');
       return;
@@ -545,7 +547,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       const allMessages = [...newMessages, { role: 'assistant', content: reply, timestamp: new Date().toISOString(), suggested_prompts: isFinal ? [] : prompts }];
       setMessages(allMessages);
       setSuggestedPrompts(isFinal ? [] : prompts);
-      // Persist conversation to DB
       base44.auth.updateMe({
         career_goals_conversation: allMessages,
         career_goals_conversation_updated_at: new Date().toISOString(),
@@ -605,7 +606,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     const updated = [...savedLeads.filter(l => l.id !== lead.id), { ...lead, saved_at: new Date().toISOString(), contacted: false, contacted_at: null, follow_up_sent: false }];
     setSavedLeads(updated);
     await base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
-    // toast
     const el = document.createElement('div');
     el.textContent = '🔖 Saved to your leads list';
     el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
@@ -622,7 +622,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const handleMarkContacted = async (leadId) => {
     const updated = savedLeads.map(l => l.id === String(leadId || activeComposer?.id)
       ? { ...l, contacted: true, contacted_at: new Date().toISOString() } : l);
-    // If lead wasn't saved yet, add it as contacted
     if (activeComposer && !updated.find(l => l.id === String(activeComposer.id))) {
       updated.push({ ...activeComposer, saved_at: new Date().toISOString(), contacted: true, contacted_at: new Date().toISOString(), follow_up_sent: false });
     }
@@ -644,18 +643,32 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     sendMessage(p);
   };
 
+  const startChat = () => {
+    setMessages([]);
+    setSuggestedPrompts([]);
+    setConversationDone(false);
+    setRoleRecs(null);
+    setCareerProfile(null);
+    setQuestionCount(0);
+    setRestoredBanner(false);
+    setConfirmClear(false);
+    setMajorSaved(!!(user?.major || user?.career_goals?.major));
+    setAwaitingMajor(false);
+    setIsFreshStart(true);
+    setMode('chat');
+    base44.auth.updateMe({ career_goals_conversation: null, career_goals_conversation_updated_at: null }).catch(() => {});
+  };
+
   // ── Summary view (returning user) ──────────────────────────────────────────
   if (mode === 'summary') {
     return (
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
-        {/* Page header */}
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.02em', transition: 'opacity 0.3s' }}>
           {showLeads ? 'Your Goals & Leads.' : 'Your Career Goals.'}
         </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 28px', lineHeight: 1.5 }}>The more we know about you, the better we can help you.</p>
 
-        {/* Goals card */}
         <GoalsSummaryCard
           goals={savedGoals || user?.career_goals}
           user={user}
@@ -663,7 +676,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           onFindLeads={handleFindLeads}
           onGoalsUpdated={(updated) => {
             setSavedGoals({ ...(savedGoals || user?.career_goals), ...updated });
-            // Toast
             const el = document.createElement('div');
             el.textContent = '✓ Goals updated — refreshing your leads...';
             el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
@@ -671,11 +683,10 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
             setTimeout(() => el.remove(), 2500);
           }}
           showLeadsArrow={showLeadsArrow}
+          onRestart={startChat}
         />
 
-        {/* Refresh link + missing goals prompt */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, margin: '8px 0 16px' }}>
-          {/* Missing goals nudge card */}
           {(() => {
             const g = savedGoals || user?.career_goals;
             const missing = [];
@@ -698,7 +709,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               </div>
             );
           })()}
-          {/* Refresh leads */}
           {showLeads && (
             <button
               onClick={() => { setShowLeads(false); setTimeout(() => setShowLeads(true), 100); }}
@@ -708,7 +718,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           )}
         </div>
 
-        {/* Leads section */}
         {showLeads && (
           <>
             <LeadsSection
@@ -729,7 +738,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           </>
         )}
 
-        {/* Inline message composer */}
         {activeComposer && (
           <InlineMessageComposer
             lead={activeComposer}
@@ -756,20 +764,18 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   // ── Chat view ──────────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '70vh' }}>
-      {/* Header */}
       <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>
           CAREER GOALS
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', transition: 'opacity 0.3s' }}>
-          {conversationDone ? 'Your Career Goals.' : 'Tell FastIQ what you’re looking for.'}
+          {conversationDone ? 'Your Career Goals.' : 'Tell FastIQ what you\'re looking for.'}
         </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>
           The more we know about you, the better we can help you.
         </p>
       </div>
 
-      {/* Progress bar */}
       {questionCount >= 1 && !conversationDone && (
         <div style={{ padding: '12px 24px', background: '#FAFAFA', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -786,10 +792,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         </div>
       )}
 
-      {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 24px' }}>
-
-        {/* Restored conversation banner */}
         {restoredBanner && !conversationDone && (() => {
           const daysDiff = restoredAt ? Math.floor((Date.now() - restoredAt.getTime()) / (1000 * 60 * 60 * 24)) : 0;
           const isStale = daysDiff >= 7;
@@ -821,8 +824,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           );
         })()}
 
-
-
         {messages.map((msg, i) => {
           const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading && !conversationDone;
           const showSkip = isLastAssistant && !awaitingMajor && suggestedPrompts.length > 0 && questionCount > 1;
@@ -835,7 +836,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                   <SaveToNotebookButton content={msg.content} sourcePage="career_goals" userEmail={user?.email} />
                 </div>
               )}
-              {/* Major chips — shown directly below the first assistant message */}
               {isLastAssistant && awaitingMajor && !loading && (
                 <div style={{ marginLeft: 42, marginBottom: 16 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -862,7 +862,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
         {loading && <TypingIndicator />}
 
-        {/* Path B reveal card */}
         {conversationDone && roleRecs?.length > 0 && (
           <CareerProfileCard
             careerProfile={careerProfile}
@@ -881,7 +880,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           />
         )}
 
-        {/* Path A summary card */}
         {conversationDone && !roleRecs?.length && savedGoals && (
           <GoalsSummaryCard
             goals={savedGoals}
@@ -891,7 +889,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           />
         )}
 
-        {/* Error states */}
         {error === 'llm' && (
           <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <p style={{ fontSize: 13, color: '#E85D20', margin: 0 }}>FastIQ hit a snag. Tap to retry.</p>
@@ -915,7 +912,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         <div ref={bottomRef} />
       </div>
 
-      {/* Input bar — hidden when done */}
       {!conversationDone && (
         <div className="chat-input-bar" style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff', position: 'sticky', bottom: 0, zIndex: 100 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 16, padding: '8px 12px' }}>
