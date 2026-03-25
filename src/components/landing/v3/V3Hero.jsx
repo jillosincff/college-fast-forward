@@ -142,7 +142,7 @@ export default function V3Hero({ onCTA }) {
         </div>
 
         {/* BODY TEXT */}
-        <div className="hf" style={{ animationDelay: '2200ms', marginBottom: 64, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto', textAlign: 'left' }}>
+        <div className="hf" style={{ animationDelay: '2200ms', marginBottom: 64, maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', textAlign: 'left' }}>
           {[
             'People get jobs because of who they know — not what they know.',
             'So we invited your biggest supporters into the process: your parents.',
