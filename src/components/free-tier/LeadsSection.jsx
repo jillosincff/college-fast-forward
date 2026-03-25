@@ -4,30 +4,36 @@ import { base44 } from '@/api/base44Client';
 
 // ─── Upgrade Modal ────────────────────────────────────────────────────────────
 
-function UpgradeModal({ company, alumniCount, confidence, university, onClose, onUpgrade }) {
-  const countLabel = confidence === 'high' ? alumniCount?.toLocaleString() : `~${alumniCount?.toLocaleString()}`;
+function UpgradeModal({ modalData, university, onClose, onUpgrade }) {
+  const isRole = modalData?.isRole || modalData?.type === 'role_based';
+  const countLabel = isRole
+    ? (modalData?.total_count || 0).toLocaleString()
+    : modalData?.confidence === 'verified' ? (modalData?.alumni_count || 0).toLocaleString() : `~${(modalData?.alumni_count || 0).toLocaleString()}`;
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
       <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.4)', borderRadius: 20, padding: 32, maxWidth: 420, width: '100%', position: 'relative' }} onClick={e => e.stopPropagation()}>
         <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: '#666', minHeight: 'auto', fontSize: 20, padding: 4 }}>✕</button>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 8px' }}>⚡ FASTIQ UNLOCK</p>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#fff', margin: '0 0 12px', lineHeight: 1.2 }}>
-          See Who Works at {company}
-        </h2>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: '0 0 20px', lineHeight: 1.6 }}>
-          FastIQ found <strong style={{ color: '#E85D20' }}>{countLabel} {university} alumni</strong> at {company}. Upgrade to see exactly who they are.
-        </p>
+        {isRole ? (
+          <>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#fff', margin: '0 0 12px', lineHeight: 1.2 }}>Meet {university} Alumni Working as {modalData.job_title}</h2>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: '0 0 4px', lineHeight: 1.6 }}><strong style={{ color: '#E85D20' }}>{countLabel} {university} alumni</strong> currently hold this role.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', margin: '0 0 16px' }}>✓ Source: LinkedIn</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 20px', lineHeight: 1.6 }}>These people went to your school, landed exactly the role you want, and can tell you how they got there.</p>
+          </>
+        ) : (
+          <>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#fff', margin: '0 0 12px', lineHeight: 1.2 }}>See Who Works at {modalData?.company}</h2>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: '0 0 20px', lineHeight: 1.6 }}>FastIQ found <strong style={{ color: '#E85D20' }}>{countLabel} {university} alumni</strong> at {modalData?.company}. Upgrade to see exactly who they are.</p>
+          </>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
-          {['Full names and current roles', 'Who\'s in your exact target function', 'AI-drafted personalized outreach for each', 'Follow-up reminders', 'Alumni at ALL your target companies'].map((f, i) => (
+          {['Full names and current roles', "Who's in your exact target function", 'AI-drafted personalized outreach for each', 'Follow-up reminders', 'Alumni at ALL your target companies'].map((f, i) => (
             <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.8)', margin: 0 }}>✓ {f}</p>
           ))}
         </div>
-        <button onClick={onUpgrade} style={{ width: '100%', background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '14px 0', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto', marginBottom: 10 }}>
-          🔒 Unlock FastIQ — $29/month →
-        </button>
-        <button onClick={onUpgrade} style={{ width: '100%', background: 'none', border: '1px solid rgba(232,93,32,0.4)', color: '#E85D20', borderRadius: 100, padding: '12px 0', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
-          ⭐ Founding member rate — $187/year →
-        </button>
+        <button onClick={onUpgrade} style={{ width: '100%', background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '14px 0', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto', marginBottom: 10 }}>🔒 Unlock FastIQ — $29/month →</button>
+        <button onClick={onUpgrade} style={{ width: '100%', background: 'none', border: '1px solid rgba(232,93,32,0.4)', color: '#E85D20', borderRadius: 100, padding: '12px 0', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>⭐ Founding member rate — $187/year →</button>
       </div>
     </div>
   );
@@ -112,11 +118,14 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSave
 
       {/* Alumni count + bar */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
           {lead.alumni_count && lead.confidence === 'verified' ? (
             <>
               <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#0d1117', lineHeight: 1 }}>{lead.alumni_count.toLocaleString()}</span>
               <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>{university} alumni work here</span>
+              {lead.source === 'linkedin_proxycurl' && (
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#15803D', background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 100, padding: '2px 8px', marginLeft: 4 }}>✓ LinkedIn verified</span>
+              )}
             </>
           ) : (
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#555', fontWeight: 500 }}>🎓 {university} alumni work here</span>
@@ -164,6 +173,54 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSave
   );
 }
 
+// ─── Role-Based Warm Lead Card ──────────────────────────────────────────────
+
+function RoleBasedWarmLeadCard({ roleData, university, onUnlock }) {
+  const { job_title, total_count, profiles, confidence } = roleData;
+  const barWidth = Math.min(((total_count || 0) / 100) * 100, 100);
+  const WIDTHS = ['88px', '104px', '76px'];
+  return (
+    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderLeft: '3px solid #E85D20', borderRadius: 14, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+        <div>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 17, color: '#0d1117', margin: '0 0 2px' }}>💼 {job_title}</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>{university} alumni doing this role right now</p>
+        </div>
+        {confidence === 'verified' && (
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#15803D', background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 100, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}>✓ LinkedIn verified</span>
+        )}
+      </div>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#0d1117', lineHeight: 1 }}>{(total_count || 0).toLocaleString()}</span>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>{university} alumni have this role</span>
+        </div>
+        <div style={{ height: 6, background: '#f0f0f0', borderRadius: 100, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${barWidth}%`, background: 'linear-gradient(90deg, #E85D20, #ff8c5a)', borderRadius: 100, transition: 'width 0.8s ease' }} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {(profiles || []).slice(0, 3).map((profile, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#e5e5e5', flexShrink: 0 }} />
+            <div style={{ height: 12, background: '#ddd', borderRadius: 4, flexShrink: 0, width: WIDTHS[i % 3] }} />
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}>· {profile.current_company || 'Company hidden'}</span>
+          </div>
+        ))}
+        {total_count > 3 && (
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '2px 0 0', paddingLeft: 32 }}>+ {(total_count - 3).toLocaleString()} more</p>
+        )}
+      </div>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 8, padding: '8px 12px', margin: 0, lineHeight: 1.5 }}>
+        💡 These alumni can tell you exactly what it takes to land a {job_title} role and what the day-to-day really looks like.
+      </p>
+      <button onClick={onUnlock} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+        🔒 See Who They Are →
+      </button>
+    </div>
+  );
+}
+
 // ─── Red Hot Empty State ──────────────────────────────────────────────────────
 
 function RedHotEmptyState({ university, targetDesc }) {
@@ -198,6 +255,7 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const [upgradeModal, setUpgradeModal] = useState(null);
   const [targetDesc, setTargetDesc] = useState('');
   const [studentSchool, setStudentSchool] = useState('');
+  const [warmSearchType, setWarmSearchType] = useState('company_based');
 
   const university = studentSchool || user?.school || user?.university || 'UF';
 
@@ -216,6 +274,7 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       setExploreChips(result?.exploreChips || []);
       setTargetDesc(result?.targetDesc || '');
       setStudentSchool(result?.studentSchool || '');
+      setWarmSearchType(result?.warmSearchType || 'company_based');
     } catch (e) {
       console.error('Leads fetch failed:', e);
     }
@@ -229,9 +288,15 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   );
 
   const isSaved = (id) => savedLeads.some(l => l.id === String(id));
-  const verifiedWarmLeads = warmLeads.filter(r => r.alumni_count && r.confidence === 'verified');
-  const verifiedTotal = verifiedWarmLeads.reduce((s, r) => s + (r.alumni_count || 0), 0);
-  const maxAlumni = Math.max(...warmLeads.map(c => c.alumni_count || 0), 1);
+  // Handle both company-based (alumni_count) and role-based (total_count)
+  const isRoleBased = warmSearchType === 'role_based' || warmLeads.some(w => w.type === 'role_based');
+  const verifiedWarmLeads = isRoleBased
+    ? warmLeads.filter(r => r.total_count > 0 && r.confidence === 'verified')
+    : warmLeads.filter(r => r.alumni_count && r.confidence === 'verified');
+  const verifiedTotal = isRoleBased
+    ? verifiedWarmLeads.reduce((s, r) => s + (r.total_count || 0), 0)
+    : verifiedWarmLeads.reduce((s, r) => s + (r.alumni_count || 0), 0);
+  const maxAlumni = Math.max(...warmLeads.map(c => c.alumni_count || c.total_count || 0), 1);
   const memberLabel = safeRedHotLeads.length === 1 ? 'member' : 'members';
   const selectedCardData = selectedChip ? warmLeads.find(w => w.company === selectedChip) : null;
 
@@ -273,7 +338,12 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
       {/* ── WARM LEADS HERO ── */}
       <section style={{ marginBottom: 40 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 16px' }}>🌡️ WARM LEADS</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>🌡️ WARM LEADS</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
+          {isRoleBased
+            ? `${university} alumni doing your target role`
+            : `${university} alumni at your target companies`}
+        </p>
 
         {warmLoading ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '24px 0' }}>
@@ -289,10 +359,17 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#555', margin: '0 0 4px' }}>
                 {verifiedTotal > 0
-                  ? `verified ${university} alumni at your target companies.`
-                  : `companies in your field where ${university} alumni work.`
+                  ? isRoleBased
+                    ? `verified ${university} alumni currently working in your target role.`
+                    : `verified ${university} alumni at your target companies.`
+                  : isRoleBased
+                    ? `${university} alumni doing your target role.`
+                    : `companies in your field where ${university} alumni work.`
                 }
               </p>
+              {verifiedTotal > 0 && (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#15803D', margin: '0 0 4px' }}>✓ Source: LinkedIn · Updated weekly</p>
+              )}
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 20px' }}>
                 You can't see who they are yet.
               </p>
@@ -326,11 +403,13 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
               </div>
             )}
 
-            {/* All company cards */}
+            {/* All company or role cards */}
             <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-              {warmLeads.map((lead, i) => (
-                <WarmCompanyCard key={lead.company || i} lead={lead} maxAlumni={maxAlumni} university={university} onUnlock={(lead) => setUpgradeModal(lead)} onSave={onSaveLead} isSaved={isSaved(`alumni_${lead.company}`)} />
-              ))}
+              {warmLeads.map((lead, i) =>
+                lead.type === 'role_based'
+                  ? <RoleBasedWarmLeadCard key={lead.job_title || i} roleData={lead} university={university} onUnlock={() => setUpgradeModal({ ...lead, isRole: true })} onUpgrade={onUpgrade} />
+                  : <WarmCompanyCard key={lead.company || i} lead={lead} maxAlumni={maxAlumni} university={university} onUnlock={(lead) => setUpgradeModal(lead)} onSave={onSaveLead} isSaved={isSaved(`alumni_${lead.company}`)} />
+              )}
             </div>
           </>
         ) : (
@@ -344,9 +423,7 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
       {upgradeModal && (
         <UpgradeModal
-          company={upgradeModal.company}
-          alumniCount={upgradeModal.alumni_count}
-          confidence={upgradeModal.confidence}
+          modalData={upgradeModal}
           university={university}
           onClose={() => setUpgradeModal(null)}
           onUpgrade={() => { setUpgradeModal(null); onUpgrade?.(); }}

@@ -53,13 +53,73 @@ Deno.serve(async (req) => {
 
     const school = student.school || student.university || 'University of Florida';
     const careerGoals = student.career_goals || {};
-    let targetCompanies = careerGoals.target_companies || [];
-    if (careerGoals.dream_company && careerGoals.dream_company !== 'Not specified') {
+    const INVALID_COMPANY_VALUES = ['not sure yet', 'not specified', 'not specified yet', 'unsure', 'tbd', 'n/a', 'none', ''];
+
+    let targetCompanies = (careerGoals.target_companies || []).filter(
+      c => c && !INVALID_COMPANY_VALUES.includes(c.toLowerCase().trim())
+    );
+    if (careerGoals.dream_company && !INVALID_COMPANY_VALUES.includes((careerGoals.dream_company || '').toLowerCase().trim())) {
       targetCompanies = [careerGoals.dream_company, ...targetCompanies];
     }
 
+    const targetRoles = (careerGoals.target_roles || student.target_roles || []).filter(r => r?.trim().length > 0);
+    const hasTargetCompanies = targetCompanies.length > 0;
+    const hasTargetRoles = targetRoles.length > 0;
+
+    if (!hasTargetCompanies && !hasTargetRoles) {
+      return Response.json({ warmLeads: [], searchType: 'none', message: 'No target companies or roles set' });
+    }
+
+    // ── ROLE-BASED path: student has no target companies but has target roles
+    if (!hasTargetCompanies && hasTargetRoles) {
+      const location = careerGoals.location_preference || null;
+      const roleResults = await Promise.all(
+        targetRoles.slice(0, 3).map(async (role) => {
+          const cacheKey = `role_${role.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')}_${school.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')}`;
+          const existing = await base44.asServiceRole.entities.AlumniCountCache.filter({ cache_key: cacheKey });
+          const cached = existing?.[0] || null;
+          const cacheAge = cached ? Date.now() - new Date(cached.scraped_at || cached.created_date).getTime() : Infinity;
+          if (cached && cacheAge < ONE_WEEK_MS) {
+            console.log(`[Cache HIT role] ${role}`);
+            return cached.data;
+          }
+          try {
+            const result = await base44.asServiceRole.functions.invoke('proxycurlService', {
+              action: 'getAlumniByRole',
+              params: { jobTitle: role, universityName: school, location, maxResults: 10 },
+            });
+            const cacheData = {
+              type: 'role_based',
+              job_title: role,
+              total_count: result?.total_count || 0,
+              profiles: result?.profiles || [],
+              confidence: 'verified',
+              source: 'linkedin_proxycurl',
+            };
+            if (cached) {
+              await base44.asServiceRole.entities.AlumniCountCache.update(cached.id, { data: cacheData, scraped_at: new Date().toISOString() });
+            } else {
+              await base44.asServiceRole.entities.AlumniCountCache.create({ cache_key: cacheKey, data: cacheData, scraped_at: new Date().toISOString() });
+            }
+            console.log(`[Proxycurl role] ${role}: ${cacheData.total_count} alumni`);
+            return cacheData;
+          } catch (err) {
+            console.error(`[Proxycurl role ERROR] ${role}:`, err.message);
+            return null;
+          }
+        })
+      );
+      return Response.json({
+        warmLeads: roleResults.filter(r => r !== null),
+        searchType: 'role_based',
+        school,
+        targetRoles,
+      });
+    }
+
+    // ── COMPANY-BASED path continues below
     if (targetCompanies.length === 0) {
-      return Response.json({ warmLeads: [], message: 'No target companies set' });
+      return Response.json({ warmLeads: [], searchType: 'company_based', message: 'No target companies set' });
     }
 
     const warmLeads = await Promise.all(
@@ -122,7 +182,7 @@ Deno.serve(async (req) => {
       .filter(r => r !== null)
       .sort((a, b) => (b.alumni_count || 0) - (a.alumni_count || 0));
 
-    return Response.json({ warmLeads: sorted, school, targetCompanies });
+    return Response.json({ warmLeads: sorted, searchType: 'company_based', school, targetCompanies });
   } catch (error) {
     console.error('[getWarmLeadsWithProxycurl] Error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });

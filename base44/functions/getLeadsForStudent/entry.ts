@@ -207,8 +207,11 @@ Deno.serve(async (req) => {
       console.log('Using cached warm leads:', warmLeadsData.length);
     } else if (industries.length > 0 || roles.length > 0) {
       const location = careerGoals.location_preference || 'the US';
-      let targetCompanies = (careerGoals.target_companies || []);
-      if (careerGoals.dream_company && careerGoals.dream_company !== 'Not specified') {
+      const INVALID_COMPANY_VALUES = ['not sure yet', 'not specified', 'not specified yet', 'unsure', 'tbd', 'n/a', 'none', ''];
+      let targetCompanies = (careerGoals.target_companies || []).filter(
+        c => c && !INVALID_COMPANY_VALUES.includes(c.toLowerCase().trim())
+      );
+      if (careerGoals.dream_company && !INVALID_COMPANY_VALUES.includes((careerGoals.dream_company || '').toLowerCase().trim())) {
         targetCompanies = [careerGoals.dream_company, ...targetCompanies];
       }
 
@@ -224,36 +227,69 @@ Deno.serve(async (req) => {
 
       exploreChips = targetCompanies;
 
+      const COMPANY_LINKEDIN_URLS = {
+        'NBCUniversal': 'https://www.linkedin.com/company/nbcuniversal',
+        'The Walt Disney Company': 'https://www.linkedin.com/company/the-walt-disney-company',
+        'ViacomCBS': 'https://www.linkedin.com/company/paramount',
+        'Warner Bros. Entertainment': 'https://www.linkedin.com/company/warner-bros-entertainment',
+        'Sony Music Entertainment': 'https://www.linkedin.com/company/sony-music',
+        'Live Nation Entertainment': 'https://www.linkedin.com/company/live-nation-entertainment',
+        'Goldman Sachs': 'https://www.linkedin.com/company/goldman-sachs',
+        'JPMorgan Chase': 'https://www.linkedin.com/company/jpmorgan-chase',
+        'Deloitte': 'https://www.linkedin.com/company/deloitte',
+        'Google': 'https://www.linkedin.com/company/google',
+        'Apple': 'https://www.linkedin.com/company/apple',
+        'Microsoft': 'https://www.linkedin.com/company/microsoft',
+        'Amazon': 'https://www.linkedin.com/company/amazon',
+        'Meta': 'https://www.linkedin.com/company/meta',
+        'CBRE': 'https://www.linkedin.com/company/cbre',
+        'JLL': 'https://www.linkedin.com/company/jll',
+        'Blackstone': 'https://www.linkedin.com/company/blackstone',
+        'McKinsey': 'https://www.linkedin.com/company/mckinsey',
+        'BCG': 'https://www.linkedin.com/company/boston-consulting-group',
+        'Roc Nation': 'https://www.linkedin.com/company/roc-nation',
+        'A24': 'https://www.linkedin.com/company/a24',
+        'Spotify': 'https://www.linkedin.com/company/spotify',
+        'Nike': 'https://www.linkedin.com/company/nike',
+        'PwC': 'https://www.linkedin.com/company/pwc',
+        'EY': 'https://www.linkedin.com/company/ernstandyoung',
+        'Morgan Stanley': 'https://www.linkedin.com/company/morgan-stanley',
+        'Bank of America': 'https://www.linkedin.com/company/bank-of-america',
+        'Citi': 'https://www.linkedin.com/company/citi',
+        'Salesforce': 'https://www.linkedin.com/company/salesforce',
+        'Netflix': 'https://www.linkedin.com/company/netflix',
+        'Adobe': 'https://www.linkedin.com/company/adobe',
+      };
+
       const warmResults = await Promise.all(
         targetCompanies.slice(0, 10).map(async (company) => {
           try {
+            const linkedInUrl = COMPANY_LINKEDIN_URLS[company];
+
             const [alumniResult, teaserResult] = await Promise.all([
-              base44.asServiceRole.integrations.Core.InvokeLLM({
-                prompt: `Search LinkedIn and the web for the number of ${studentSchool || 'University of Florida'} alumni currently working at ${company}.
-
-STRICT ACCURACY RULES:
-1. Only return a number if you find an explicit source stating that number
-2. LinkedIn alumni search results that say "X alumni" are acceptable sources
-3. Do NOT calculate or estimate based on company size or alumni percentages
-4. Do NOT multiply or extrapolate
-5. If you cannot find a verified number, return null for alumni_count
-6. Numbers over 500 require explicit sourcing — if you cannot cite a clear source for a number over 500, return null
-7. Be conservative — underreporting is better than overreporting
-8. If confidence is "estimated", set alumni_count to null — only return numbers with confidence "verified"
-
-Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence": "verified|estimated|null", "source": "linkedin|news|company|null", "hiring_signal": "active|selective|freeze|unknown", "industry": "string", "location": "string" }`,
-                add_context_from_internet: true,
-                model: 'gemini_3_flash',
-                response_json_schema: { type: 'object', properties: { company: { type: 'string' }, alumni_count: { type: 'number' }, confidence: { type: 'string' }, source: { type: 'string' }, hiring_signal: { type: 'string' }, industry: { type: 'string' }, location: { type: 'string' } } },
-              }),
+              // Use Proxycurl for mapped companies, fall back for unmapped
+              linkedInUrl
+                ? base44.asServiceRole.functions.invoke('proxycurlService', {
+                    action: 'getAlumniCount',
+                    params: { companyName: company, companyLinkedInUrl: linkedInUrl, universityName: studentSchool || 'University of Florida' },
+                  }).catch(() => ({ company, alumni_count: null, confidence: 'unknown', source: 'proxycurl_error', hiring_signal: 'unknown' }))
+                : Promise.resolve({ company, alumni_count: null, confidence: 'unknown', source: 'not_mapped', hiring_signal: 'unknown' }),
               base44.asServiceRole.integrations.Core.InvokeLLM({
                 prompt: `Generate 3 realistic job titles that ${studentSchool || 'University of Florida'} alumni working at ${company} in the field of "${targetDesc}" might hold. Real titles only. Return JSON: { "roles": ["Title1", "Title2", "Title3"] }`,
                 response_json_schema: { type: 'object', properties: { roles: { type: 'array', items: { type: 'string' } } } },
               }),
             ]);
+
             if (!alumniResult) return null;
-            if (alumniResult.confidence !== 'verified') alumniResult.alumni_count = null;
-            return { ...alumniResult, teaser_roles: teaserResult?.roles || [], alumni_signal: true };
+            return {
+              company,
+              alumni_count: alumniResult.alumni_count || null,
+              confidence: alumniResult.confidence || 'unknown',
+              source: alumniResult.source || 'unknown',
+              hiring_signal: alumniResult.hiring_signal || 'unknown',
+              teaser_roles: teaserResult?.roles || [],
+              alumni_signal: true,
+            };
           } catch (err) { return null; }
         })
       );

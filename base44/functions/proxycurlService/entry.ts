@@ -94,6 +94,38 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── Get alumni with a specific job title/role from a university
+    if (action === 'getAlumniByRole') {
+      const { jobTitle, universityName, location, maxResults = 10 } = params;
+      const qs = new URLSearchParams({
+        headline: jobTitle,
+        education_school_name: universityName,
+        enrich_profiles: 'enrich',
+        page_size: String(maxResults),
+      });
+      if (location && location.toLowerCase() !== 'open to anything') {
+        qs.append('city', location);
+      }
+      const data = await proxycurlFetch(`/v2/search/person?${qs}`, PROXYCURL_KEY);
+      const profiles = (data.results || []).map(p => ({
+        full_name: p.profile?.full_name || '',
+        current_title: p.profile?.experiences?.[0]?.title || '',
+        current_company: p.profile?.experiences?.[0]?.company || '',
+        graduation_year: p.profile?.education
+          ?.find(e => e.school?.name?.toLowerCase().includes(universityName.toLowerCase()))
+          ?.ends_at?.year || null,
+        linkedin_url: p.linkedin_profile_url || '',
+        location: p.profile?.city || '',
+      }));
+      return Response.json({
+        job_title: jobTitle,
+        profiles,
+        total_count: data.total_result_count || 0,
+        confidence: 'verified',
+        source: 'linkedin_proxycurl',
+      });
+    }
+
     return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (error) {
     console.error('[proxycurlService] Error:', error.message);
