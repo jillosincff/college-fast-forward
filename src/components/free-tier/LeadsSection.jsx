@@ -277,33 +277,39 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
   const university = studentSchool || normalizeSchool(user?.school || user?.university || '') || 'UF';
 
-  // ── Red Hot: use getDirectoryUsers with robust response-shape handling ──
+  // ── Minimum viable lead: needs at least one piece of professional context ──
+  const hasUsefulProfile = (u) => {
+    if (u.persona === 'student' || u.persona === 'seeker' || u.persona === 'gator') return false;
+    const hasJobInfo = u.job_title || u.current_role || u.current_position || u.company || u.current_company || u.employer || u.industry || u.linkedin_url || u.bio;
+    if (!hasJobInfo) return false;
+    const name = u.full_name || u.name || '';
+    if (!name || name.includes('@')) return false;
+    // Filter out usernames: no space, all lowercase, short
+    if (!name.includes(' ') && name === name.toLowerCase() && name.length < 20) return false;
+    return true;
+  };
+
+  // ── Red Hot: load, filter, enrich ──
   const fetchRedHotLeads = async () => {
     setRedHotLoading(true);
     try {
-      // Use direct import — same pattern as FreeTierDirectoryTab (confirmed working)
       const res = await getDirectoryUsers({});
       const directoryUsers = res?.data?.data || [];
-      console.log('[RedHot] Directory users resolved:', directoryUsers.length);
 
-      console.log('[RedHot] Resolved users count:', directoryUsers.length);
       if (directoryUsers.length === 0) { setRedHotLeads([]); setRedHotTotal(0); return; }
 
       const studentSchoolNorm = normalizeSchool(user?.school || user?.university || '');
       setStudentSchool(studentSchoolNorm);
 
-      // Log school distribution to diagnose
-      const schoolDist = {};
-      directoryUsers.forEach(u => { const s = u.school || u.university || 'unknown'; schoolDist[s] = (schoolDist[s] || 0) + 1; });
-      console.log('[RedHot] School distribution:', schoolDist);
-      console.log('[RedHot] Filtering for school:', studentSchoolNorm);
-
+      // Self-exclusion by both id and email
       const sameSchool = directoryUsers.filter(u =>
         u.id !== user?.id &&
-        u.email?.toLowerCase() !== user?.email?.toLowerCase() &&
+        u.email?.toLowerCase()?.trim() !== user?.email?.toLowerCase()?.trim() &&
         normalizeSchool(u.school || u.university || '') === studentSchoolNorm
       );
-      console.log('[RedHot] Same school count:', sameSchool.length);
+
+      // Apply quality filter
+      const qualified = sameSchool.filter(hasUsefulProfile);
 
       const careerGoals = user?.career_goals || {};
       const industries = [
@@ -316,24 +322,52 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       ].filter(Boolean);
 
       const scoreMatch = (member) => {
-        const text = [member.industry, member.industries, member.job_title, member.current_role, member.company, member.bio, member.expertise_areas].filter(Boolean).join(' ').toLowerCase();
+        const text = [member.industry, member.job_title, member.current_role, member.company, member.bio].filter(Boolean).join(' ').toLowerCase();
         let score = 0;
         industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 3; });
         roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 2; });
         if (member.job_title || member.current_role) score += 1;
-        if (member.persona === 'parent' || member.roles?.includes('parent')) score += 1;
         return score;
       };
 
-      const sorted = [...sameSchool].sort((a, b) => scoreMatch(b) - scoreMatch(a)).slice(0, 20);
-      console.log('[RedHot] Final count:', sorted.length);
-      console.log('[RedHot] Top 3:', sorted.slice(0, 3).map(u => ({ name: u.full_name, school: u.school, title: u.job_title })));
+      const sorted = [...qualified].sort((a, b) => scoreMatch(b) - scoreMatch(a)).slice(0, 20);
 
-      setRedHotLeads(sorted);
+      // Proxycurl enrichment for members with LinkedIn but missing job/company
+      const needsEnrichment = sorted.filter(m =>
+        m.linkedin_url && !m.job_title && !m.current_role && !m.company && !m.current_company
+      ).slice(0, 5);
+
+      let enrichedMap = {};
+      if (needsEnrichment.length > 0) {
+        const enrichResults = await Promise.all(
+          needsEnrichment.map(async (member) => {
+            try {
+              const profile = await base44.functions.invoke('proxycurlService', {
+                action: 'enrichParentProfile',
+                params: { linkedinUrl: member.linkedin_url }
+              });
+              const data = profile?.data || profile;
+              if (data && !data.error) {
+                // Cache enriched data back to DB (fire and forget)
+                base44.functions.invoke('saveEnrichedProfile', {
+                  userId: member.id,
+                  profileData: data
+                }).catch(() => {});
+                return { ...member, job_title: data.current_title || member.job_title, company: data.current_company || member.company, industry: data.industry || member.industry, bio: data.summary || member.bio, enriched: true };
+              }
+            } catch (e) { /* skip */ }
+            return member;
+          })
+        );
+        enrichResults.forEach(m => { enrichedMap[m.id] = m; });
+      }
+
+      const finalLeads = sorted.map(m => enrichedMap[m.id] || m);
+      setRedHotLeads(finalLeads);
       setRedHotTotal(sameSchool.length);
       if (industries.length || roles.length) setTargetDesc([...roles, ...industries].join(', '));
     } catch (err) {
-      console.error('[RedHot] Fatal error:', err.message, err.stack);
+      console.error('[RedHot] Fatal error:', err.message);
       setRedHotLeads([]);
       setRedHotTotal(0);
     } finally {
