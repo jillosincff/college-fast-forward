@@ -745,34 +745,16 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           );
         })()}
 
-        {/* Major input — shown before first AI exchange if no major saved */}
+        {/* Major chips — shown before first AI exchange if no major saved */}
         {awaitingMajor && !loading && (
           <div style={{ marginLeft: 42, marginBottom: 16 }}>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <input
-                type="text"
-                placeholder="e.g. Finance, Marketing, Engineering..."
-                value={majorFilter}
-                onChange={e => setMajorFilter(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && majorFilter.trim()) handleMajorSubmit(majorFilter); }}
-                style={{ flex: 1, padding: '8px 14px', border: '1px solid #E0E0E0', borderRadius: 10, fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
-                autoFocus
-              />
-              <button onClick={() => handleMajorSubmit(majorFilter)} disabled={!majorFilter.trim()}
-                style={{ background: majorFilter.trim() ? '#E85D20' : '#E0E0E0', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: majorFilter.trim() ? 'pointer' : 'default', minHeight: 'auto' }}>
-                →
-              </button>
-            </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {MAJOR_SUGGESTIONS
-                .filter(m => !majorFilter || m.toLowerCase().includes(majorFilter.toLowerCase()))
-                .slice(0, 8)
-                .map(m => (
-                  <button key={m} onClick={() => handleMajorSubmit(m)}
-                    style={{ background: '#F5F5F5', border: '1px solid #E0E0E0', color: '#444', borderRadius: 20, padding: '5px 12px', fontSize: 12, cursor: 'pointer', minHeight: 'auto' }}>
-                    {m}
-                  </button>
-                ))}
+              {MAJOR_SUGGESTIONS.map(m => (
+                <button key={m} onClick={() => handleMajorSubmit(m)}
+                  style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
+                  {m}
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -884,6 +866,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           40% { transform: translateY(-6px); opacity: 1; }
         }
         button:focus { outline: none; box-shadow: 0 0 0 2px #E85D20; }
+        input:focus, textarea:focus { outline: none; box-shadow: 0 0 0 2px #E85D20; }
         .chat-chip:hover { background: #E85D20 !important; color: #fff !important; }
         @media (max-width: 768px) {
           .chat-bubble-ai { max-width: 88% !important; }
