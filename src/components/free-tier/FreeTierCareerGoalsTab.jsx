@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Send, RefreshCw, Loader2 } from 'lucide-react';
+import { getAlumniByRole } from './alumniExplorerUtils';
 import GoalsSummaryCard from './GoalsSummaryCard';
 import CareerProfileCard from './CareerProfileCard';
 import SaveToNotebookButton from './SaveToNotebookButton';
@@ -405,29 +406,46 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [isFreshStart, setIsFreshStart] = useState(false);
   const [alumniClusters, setAlumniClusters] = useState([]);
   const [loadingAlumni, setLoadingAlumni] = useState(false);
+  const [alumniLoading, setAlumniLoading] = useState(false);
   const [outreachDraft, setOutreachDraft] = useState(null);
 
-  // Load alumni clusters when switching to summary view
+  // Block 1: Read cache on load (FastIQ users)
   useEffect(() => {
-    if (mode !== 'summary' || !savedGoals) return;
-    const loadAlumni = async () => {
-      setLoadingAlumni(true);
-      try {
-        const result = await base44.functions.invoke('getAlumniByRole', {
-          targetFunctions: savedGoals.target_functions || [],
-          targetRoles: savedGoals.target_roles || [],
-          location: savedGoals.location_preference || null,
-          schoolName: user?.school || user?.university || 'University of Florida',
-        });
-        setAlumniClusters(result?.clusters || []);
-      } catch (e) {
-        console.error('Alumni load failed:', e);
-      } finally {
-        setLoadingAlumni(false);
-      }
-    };
-    loadAlumni();
-  }, [mode, savedGoals]);
+    if (!user?.id || mode !== 'summary') return;
+    if (!user.is_fastiq && !user.fastiq_setup_complete && user.subscription_status !== 'active' && user.membership_tier !== 'fastiq') return;
+    if (!savedGoals?.target_functions?.length) return;
+
+    const cached = user.alumni_explorer_cache;
+    const cachedAt = user.alumni_explorer_cached_at;
+    const isStale = !cachedAt || (Date.now() - new Date(cachedAt).getTime()) > 24 * 60 * 60 * 1000;
+
+    if (cached?.length && !isStale) {
+      setAlumniClusters(cached);
+    } else {
+      setAlumniLoading(true);
+      fetchAlumniClusters();
+    }
+  }, [user?.id, savedGoals?.target_functions, mode]);
+
+  // Block 2: Fetch function
+  const fetchAlumniClusters = async () => {
+    try {
+      const clusters = await getAlumniByRole(
+        savedGoals.target_functions || [],
+        savedGoals.target_roles || [],
+        savedGoals.location_preference || ''
+      );
+      setAlumniClusters(clusters);
+      await base44.auth.updateMe({
+        alumni_explorer_cache: clusters,
+        alumni_explorer_cached_at: new Date().toISOString(),
+      }).catch(() => {});
+    } catch (e) {
+      console.error('Alumni fetch failed:', e);
+    } finally {
+      setAlumniLoading(false);
+    }
+  };
 
   const handleConnect = async (alum) => {
     const targetRole = (savedGoals?.target_roles || [])[0] || 'this role';
@@ -633,6 +651,29 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       });
       setSavedGoals(goalsData);
       setConversationDone(true);
+
+      // Block 3: Prefetch alumni after save (FastIQ users)
+      const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+      if (isFastIQ) {
+        setAlumniLoading(true);
+        setTimeout(() => {
+          getAlumniByRole(
+            goalsData.target_functions || [],
+            goalsData.target_roles || [],
+            goalsData.location_preference || ''
+          ).then(clusters => {
+            setAlumniClusters(clusters);
+            base44.auth.updateMe({
+              alumni_explorer_cache: clusters,
+              alumni_explorer_cached_at: new Date().toISOString(),
+            }).catch(() => {});
+            setAlumniLoading(false);
+          }).catch(e => {
+            console.error('Alumni prefetch failed:', e);
+            setAlumniLoading(false);
+          });
+        }, 100);
+      }
     } catch (e) {
       console.error('Goals save failed:', e);
       setError('save');
@@ -936,8 +977,13 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               onRestart={startChat}
             />
 
-            {/* Alumni Explorer — gated by FastIQ */}
-            {!isFastIQ ? (
+            {/* Alumni Explorer — gated by FastIQ, cache-aware */}
+            {user.is_fastiq || user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq' ? (
+              alumniLoading ? (
+                <div style={{ marginTop: '32px', fontSize: '13px', color: '#888' }}>
+                  Finding alumni in your target roles...
+                </div>
+              ) : alumniClusters.length > 0 ? (
               <div style={{
                 marginTop: '32px',
                 background: '#FAFAFA',
