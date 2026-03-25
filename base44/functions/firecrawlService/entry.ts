@@ -32,12 +32,13 @@ const SCHOOL_CAREER_URLS = {
 };
 
 // Additional per-school pages scraped alongside the main career hub
+// Keep only stable, fast-loading pages. Monthly sub-pages time out and aren't needed
+// since the main hub already includes upcoming events inline.
 const SCHOOL_EXTRA_URLS = {
   UF: [
-    'https://careerhub.ufl.edu/events/2026/04/',
-    'https://careerhub.ufl.edu/events/2026/05/',
     'https://career.ufl.edu/events-and-programs/career-fairs',
   ],
+  // Add new schools here alongside SCHOOL_CAREER_URLS above
 };
 
 async function firecrawlScrape(url, apiKey, formats = ['markdown']) {
@@ -70,24 +71,9 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Allow admin or service-role calls
-    let isAuthorized = false;
-    try {
-      const user = await base44.auth.me();
-      isAuthorized = !!user;
-    } catch {
-      // service-role invoke has no user — allow it
-      isAuthorized = true;
-    }
-    if (!isAuthorized) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    // Internal utility — called only by other backend functions (e.g. scrapeUFCareerEvents)
+    // No user auth needed; FIRECRAWL_API_KEY is the real secret gate
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
-    if (!apiKey) {
-      console.error('[FirecrawlService] FIRECRAWL_API_KEY not set in Base44 Secrets.');
-      return Response.json({ success: false, error: 'FIRECRAWL_API_KEY not configured' }, { status: 500 });
-    }
 
     const { action, url, school_code, formats } = await req.json();
 
