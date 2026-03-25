@@ -408,6 +408,13 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [loadingAlumni, setLoadingAlumni] = useState(false);
   const [alumniLoading, setAlumniLoading] = useState(false);
   const [outreachDraft, setOutreachDraft] = useState(null);
+  // Outreach composer state
+  const [connectLoading, setConnectLoading] = useState(null);
+  const [outreachModal, setOutreachModal] = useState(null);
+  const [editedDraft, setEditedDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sentTo, setSentTo] = useState([]);
+  const [copyToast, setCopyToast] = useState(false);
 
   // Block 1: Read cache on load (FastIQ users)
   useEffect(() => {
@@ -467,6 +474,139 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
   const isUndecided = !savedGoals?.target_roles?.length || savedGoals.target_roles[0]?.toLowerCase().includes('undecided');
   const primaryRole = (savedGoals?.target_roles || [])[0] || 'your target role';
+
+  // Sync draft into editable state when modal opens
+  useEffect(() => {
+    if (outreachModal?.draft) {
+      setEditedDraft(outreachModal.draft);
+    }
+  }, [outreachModal?.draft]);
+
+  // Generate AI outreach draft
+  const generateOutreachDraft = async (alum) => {
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: `You are helping a college student write a short, genuine outreach message to a UF alumni.
+
+Student profile:
+- Name: ${user.full_name}
+- Major: ${user.career_goals?.major || 'undeclared'}
+- Target role: ${user.career_goals?.target_roles?.[0] || alum.title}
+- Graduation year: ${user.career_goals?.graduation_year || 'upcoming'}
+- Location preference: ${user.career_goals?.location_preference || 'open'}
+
+Alumni:
+- Name: ${alum.name}
+- Current title: ${alum.title}
+- Company: ${alum.company}
+
+Write a short outreach message. Rules:
+- 3 sentences maximum
+- No flattery or "I came across your profile"
+- Lead with the shared UF connection
+- Be specific about why this role or company interests the student
+- End with one low-ask question (e.g. "Would you be open to a 15-minute call?")
+- Sound like a real student, not a cover letter
+- No subject line — body only
+
+Return only the message text, nothing else.`,
+          }]
+        })
+      });
+      const data = await res.json();
+      return data.content?.[0]?.text || '';
+    } catch (e) {
+      return '';
+    }
+  };
+
+  // Handle Connect button click
+  const handleConnectClick = async (alum) => {
+    if (sentTo.includes(alum.linkedin_url)) return;
+    setConnectLoading(alum.linkedin_url);
+    try {
+      const draft = await generateOutreachDraft(alum);
+      const isCFFMember = !!alum.cff_user_id;
+      setOutreachModal({
+        open: true,
+        alum,
+        draft,
+        mode: isCFFMember ? 'cff' : 'linkedin',
+      });
+    } catch (e) {
+      setOutreachModal({
+        open: true,
+        alum,
+        draft: '',
+        mode: alum.cff_user_id ? 'cff' : 'linkedin',
+      });
+    } finally {
+      setConnectLoading(null);
+    }
+  };
+
+  // Send message via CFF (to alumni email)
+  const handleSendCFF = async () => {
+    if (!outreachModal || !editedDraft.trim()) return;
+    setSending(true);
+    try {
+      const conversation = await base44.entities.Conversation.create({
+        participant_emails: [user.email, outreachModal.alum.email],
+        participant_names: {
+          [user.email]: user.full_name,
+          [outreachModal.alum.email]: outreachModal.alum.name,
+        },
+        subject: `${user.full_name} → ${outreachModal.alum.name}`,
+      });
+      await base44.entities.Message.create({
+        conversation_id: conversation.id,
+        sender_email: user.email,
+        sender_name: user.full_name,
+        recipient_email: outreachModal.alum.email,
+        subject: 'Reaching out from CFF',
+        body: editedDraft,
+        message_type: 'intro_offer',
+        is_read: false,
+      });
+      await base44.functions.invoke('sendMessageNotification', {
+        recipient_email: outreachModal.alum.email,
+        sender_name: user.full_name,
+        message_preview: editedDraft.slice(0, 100),
+      });
+      await base44.functions.invoke('trackMessage', {
+        type: 'alumni_outreach',
+        student_id: user.id,
+        recipient_name: outreachModal.alum.name,
+        recipient_title: outreachModal.alum.title,
+        recipient_company: outreachModal.alum.company,
+      });
+      setSentTo(prev => [...prev, outreachModal.alum.linkedin_url]);
+      setOutreachModal(null);
+    } catch (e) {
+      console.error('Send failed:', e);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Send message via LinkedIn (copy to clipboard)
+  const handleSendLinkedIn = () => {
+    if (!outreachModal) return;
+    navigator.clipboard.writeText(editedDraft).then(() => {
+      setCopyToast(true);
+      setTimeout(() => setCopyToast(false), 3000);
+    });
+    window.open(outreachModal.alum.linkedin_url, '_blank');
+    setSentTo(prev => [...prev, outreachModal.alum.linkedin_url]);
+    setOutreachModal(null);
+  };
 
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
@@ -1095,7 +1235,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                             {alum.company}
                           </span>
                           <button
-                            onClick={() => handleConnect(alum)}
+                            onClick={() => handleConnectClick(alum)}
+                            disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
                             style={{
                               marginTop: '8px',
                               background: 'none',
@@ -1104,17 +1245,32 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                               padding: '5px 10px',
                               fontSize: '12px',
                               color: '#E85D20',
-                              cursor: 'pointer',
+                              cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer',
                               fontFamily: "'DM Sans', sans-serif",
                               fontWeight: 500,
                               minHeight: 'auto',
                               transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={(e) => { e.target.style.background = '#E85D20'; e.target.style.color = '#fff'; }}
-                            onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.color = '#E85D20'; }}
-                          >
-                            Connect →
-                          </button>
+                              opacity: connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url) ? 0.7 : 1,
+                              }}
+                              onMouseEnter={(e) => {
+                              if (!sentTo.includes(alum.linkedin_url)) {
+                                e.target.style.background = '#E85D20';
+                                e.target.style.color = '#fff';
+                              }
+                              }}
+                              onMouseLeave={(e) => {
+                              if (!sentTo.includes(alum.linkedin_url)) {
+                                e.target.style.background = 'none';
+                                e.target.style.color = '#E85D20';
+                              }
+                              }}
+                              >
+                              {connectLoading === alum.linkedin_url
+                              ? 'Drafting...'
+                              : sentTo.includes(alum.linkedin_url)
+                              ? 'Message sent ✓'
+                              : 'Connect →'}
+                              </button>
                         </div>
                       ))}
                     </div>
@@ -1154,6 +1310,174 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
         <div ref={bottomRef} />
       </div>
+
+      {/* Outreach Modal */}
+      {outreachModal?.open && (
+        <div style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 50, padding: '20px',
+        }}>
+          <div style={{
+            background: '#fff',
+            borderRadius: '16px',
+            padding: '28px',
+            width: '100%',
+            maxWidth: '520px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+          }}>
+            {/* Header */}
+            <div>
+              <p style={{
+                fontSize: '11px',
+                color: '#888',
+                margin: '0 0 4px 0',
+                textTransform: 'uppercase',
+                letterSpacing: '.06em',
+                fontWeight: 600,
+              }}>
+                {outreachModal.mode === 'linkedin' ? 'Reaching out via LinkedIn' : 'Sending via CFF'}
+              </p>
+              <p style={{ fontSize: '15px', fontWeight: '500', color: '#1A1A1A', margin: 0 }}>
+                {outreachModal.alum.name}
+              </p>
+              <p style={{ fontSize: '13px', color: '#666', margin: '2px 0 0 0' }}>
+                {outreachModal.alum.title} · {outreachModal.alum.company}
+              </p>
+            </div>
+
+            {/* Mode-specific instruction */}
+            {outreachModal.mode === 'linkedin' ? (
+              <div style={{
+                background: '#F0F7FF',
+                border: '1px solid #B3D9FF',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                fontSize: '12px',
+                color: '#0057B8',
+                lineHeight: '1.5',
+              }}>
+                Edit your message below, then click "Copy & Open LinkedIn" — paste it into your connection request.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '12px', color: '#E85D20' }}>⚡</span>
+                <span style={{ fontSize: '12px', color: '#888' }}>
+                  FastIQ drafted this for you — edit freely before sending
+                </span>
+              </div>
+            )}
+
+            {/* Editable draft */}
+            <textarea
+              value={editedDraft}
+              onChange={e => setEditedDraft(e.target.value)}
+              rows={6}
+              style={{
+                width: '100%',
+                fontSize: '13px',
+                lineHeight: '1.6',
+                color: '#1A1A1A',
+                background: '#F9F9F9',
+                border: '1px solid #E0E0E0',
+                borderRadius: '8px',
+                padding: '12px',
+                resize: 'vertical',
+                fontFamily: "'DM Sans', sans-serif",
+                boxSizing: 'border-box',
+              }}
+            />
+
+            {/* Character count */}
+            <p style={{
+              fontSize: '11px',
+              color: editedDraft.length > 300 && outreachModal.mode === 'linkedin'
+                ? '#EF4444'
+                : '#888',
+              margin: '-8px 0 0 0',
+              textAlign: 'right',
+            }}>
+              {editedDraft.length} characters
+              {outreachModal.mode === 'linkedin' && editedDraft.length > 300 && (
+                <span> — LinkedIn limit is 300</span>
+              )}
+            </p>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setOutreachModal(null)}
+                style={{
+                  background: 'none',
+                  border: '1px solid #E0E0E0',
+                  borderRadius: '8px', padding: '8px 16px',
+                  fontSize: '13px', color: '#666', cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  minHeight: 'auto',
+                }}
+              >
+                Cancel
+              </button>
+
+              {outreachModal.mode === 'linkedin' ? (
+                <button
+                  onClick={handleSendLinkedIn}
+                  disabled={!editedDraft.trim()}
+                  style={{
+                    background: '#0077B5',
+                    border: 'none', borderRadius: '8px',
+                    padding: '8px 20px', fontSize: '13px',
+                    fontWeight: '500', color: '#fff',
+                    cursor: !editedDraft.trim() ? 'not-allowed' : 'pointer',
+                    opacity: !editedDraft.trim() ? 0.7 : 1,
+                    fontFamily: "'DM Sans', sans-serif",
+                    minHeight: 'auto',
+                  }}
+                >
+                  Copy & Open LinkedIn →
+                </button>
+              ) : (
+                <button
+                  onClick={handleSendCFF}
+                  disabled={sending || !editedDraft.trim()}
+                  style={{
+                    background: '#E85D20',
+                    border: 'none', borderRadius: '8px',
+                    padding: '8px 20px', fontSize: '13px',
+                    fontWeight: '500', color: '#fff',
+                    cursor: sending || !editedDraft.trim() ? 'not-allowed' : 'pointer',
+                    opacity: sending || !editedDraft.trim() ? 0.7 : 1,
+                    fontFamily: "'DM Sans', sans-serif",
+                    minHeight: 'auto',
+                  }}
+                >
+                  {sending ? 'Sending...' : 'Send message →'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Copy toast */}
+      {copyToast && (
+        <div style={{
+          position: 'fixed', bottom: '24px', left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#fff',
+          border: '1px solid #E0E0E0',
+          borderRadius: '8px', padding: '10px 18px',
+          fontSize: '13px', color: '#1A1A1A',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 100,
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          ✓ Message copied — paste it into your LinkedIn connection request
+        </div>
+      )}
 
       {!conversationDone && (
         <div className="chat-input-bar" style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff', position: 'sticky', bottom: 0, zIndex: 100 }}>
