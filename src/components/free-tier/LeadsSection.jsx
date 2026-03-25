@@ -276,29 +276,57 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
   const university = studentSchool || normalizeSchool(user?.school || user?.university || '') || 'UF';
 
-  // ── Red Hot: use getDirectoryUsers (proven to work) ──
+  // ── Red Hot: use getDirectoryUsers with robust response-shape handling ──
   const fetchRedHotLeads = async () => {
     setRedHotLoading(true);
     try {
-      const directoryUsers = await base44.functions.invoke('getDirectoryUsers', {});
-      console.log('[RedHot] Directory users returned:', directoryUsers?.length);
+      const response = await base44.functions.invoke('getDirectoryUsers', {});
+      console.log('[RedHot] Raw response:', JSON.stringify(response)?.slice(0, 500));
+      console.log('[RedHot] Response type:', typeof response, '| Is array:', Array.isArray(response));
 
-      if (!directoryUsers || directoryUsers.length === 0) {
-        console.error('[RedHot] getDirectoryUsers returned empty');
-        setRedHotLeads([]);
-        return;
+      // Handle all possible return shapes
+      let directoryUsers = [];
+      if (Array.isArray(response)) {
+        directoryUsers = response;
+      } else if (response?.users && Array.isArray(response.users)) {
+        directoryUsers = response.users;
+      } else if (response?.data && Array.isArray(response.data)) {
+        directoryUsers = response.data;
+      } else if (response?.members && Array.isArray(response.members)) {
+        directoryUsers = response.members;
+      } else if (response?.results && Array.isArray(response.results)) {
+        directoryUsers = response.results;
+      } else {
+        console.error('[RedHot] Unknown response shape, trying getCFFNetworkMatchesFn fallback:', response);
+        try {
+          const networkResp = await base44.functions.invoke('getCFFNetworkMatchesFn', { school: user?.school, userId: user?.id });
+          console.log('[RedHot] Network fallback raw:', JSON.stringify(networkResp)?.slice(0, 200));
+          if (Array.isArray(networkResp)) directoryUsers = networkResp;
+          else if (networkResp?.users) directoryUsers = networkResp.users;
+          else if (networkResp?.data) directoryUsers = networkResp.data;
+        } catch (fallbackErr) {
+          console.error('[RedHot] Fallback also failed:', fallbackErr);
+        }
       }
+
+      console.log('[RedHot] Resolved users count:', directoryUsers.length);
+      if (directoryUsers.length === 0) { setRedHotLeads([]); setRedHotTotal(0); return; }
 
       const studentSchoolNorm = normalizeSchool(user?.school || user?.university || '');
       setStudentSchool(studentSchoolNorm);
-      console.log('[RedHot] Student school:', studentSchoolNorm);
+
+      // Log school distribution to diagnose
+      const schoolDist = {};
+      directoryUsers.forEach(u => { const s = u.school || u.university || 'unknown'; schoolDist[s] = (schoolDist[s] || 0) + 1; });
+      console.log('[RedHot] School distribution:', schoolDist);
+      console.log('[RedHot] Filtering for school:', studentSchoolNorm);
 
       const sameSchool = directoryUsers.filter(u =>
         u.id !== user?.id &&
         u.email?.toLowerCase() !== user?.email?.toLowerCase() &&
         normalizeSchool(u.school || u.university || '') === studentSchoolNorm
       );
-      console.log('[RedHot] Same school members:', sameSchool.length);
+      console.log('[RedHot] Same school count:', sameSchool.length);
 
       const careerGoals = user?.career_goals || {};
       const industries = [
@@ -311,22 +339,26 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       ].filter(Boolean);
 
       const scoreMatch = (member) => {
-        const text = [member.industry, member.industries, member.job_title, member.current_role, member.company, member.bio].filter(Boolean).join(' ').toLowerCase();
+        const text = [member.industry, member.industries, member.job_title, member.current_role, member.company, member.bio, member.expertise_areas].filter(Boolean).join(' ').toLowerCase();
         let score = 0;
         industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 3; });
         roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 2; });
         if (member.job_title || member.current_role) score += 1;
+        if (member.persona === 'parent' || member.roles?.includes('parent')) score += 1;
         return score;
       };
 
       const sorted = [...sameSchool].sort((a, b) => scoreMatch(b) - scoreMatch(a)).slice(0, 20);
       console.log('[RedHot] Final count:', sorted.length);
+      console.log('[RedHot] Top 3:', sorted.slice(0, 3).map(u => ({ name: u.full_name, school: u.school, title: u.job_title })));
+
       setRedHotLeads(sorted);
       setRedHotTotal(sameSchool.length);
       if (industries.length || roles.length) setTargetDesc([...roles, ...industries].join(', '));
     } catch (err) {
-      console.error('[RedHot] Error:', err);
+      console.error('[RedHot] Fatal error:', err.message, err.stack);
       setRedHotLeads([]);
+      setRedHotTotal(0);
     } finally {
       setRedHotLoading(false);
     }
