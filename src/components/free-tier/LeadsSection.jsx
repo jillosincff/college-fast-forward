@@ -285,28 +285,25 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       console.log('[RedHot] Response type:', typeof response, '| Is array:', Array.isArray(response));
 
       // Handle all possible return shapes
+      // base44.functions.invoke returns axios-style: response.data = parsed body
+      // getDirectoryUsers body = { success, data: [...], count }
+      // so the array lives at response.data.data
       let directoryUsers = [];
       if (Array.isArray(response)) {
         directoryUsers = response;
-      } else if (response?.users && Array.isArray(response.users)) {
-        directoryUsers = response.users;
+      } else if (response?.data?.data && Array.isArray(response.data.data)) {
+        // axios wrapper: response.data = body, body.data = array
+        directoryUsers = response.data.data;
       } else if (response?.data && Array.isArray(response.data)) {
         directoryUsers = response.data;
+      } else if (response?.users && Array.isArray(response.users)) {
+        directoryUsers = response.users;
       } else if (response?.members && Array.isArray(response.members)) {
         directoryUsers = response.members;
       } else if (response?.results && Array.isArray(response.results)) {
         directoryUsers = response.results;
       } else {
-        console.error('[RedHot] Unknown response shape, trying getCFFNetworkMatchesFn fallback:', response);
-        try {
-          const networkResp = await base44.functions.invoke('getCFFNetworkMatchesFn', { school: user?.school, userId: user?.id });
-          console.log('[RedHot] Network fallback raw:', JSON.stringify(networkResp)?.slice(0, 200));
-          if (Array.isArray(networkResp)) directoryUsers = networkResp;
-          else if (networkResp?.users) directoryUsers = networkResp.users;
-          else if (networkResp?.data) directoryUsers = networkResp.data;
-        } catch (fallbackErr) {
-          console.error('[RedHot] Fallback also failed:', fallbackErr);
-        }
+        console.error('[RedHot] Unknown response shape:', JSON.stringify(response)?.slice(0, 300));
       }
 
       console.log('[RedHot] Resolved users count:', directoryUsers.length);
