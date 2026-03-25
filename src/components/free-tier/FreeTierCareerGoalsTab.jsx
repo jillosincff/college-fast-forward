@@ -159,12 +159,15 @@ const RESPONSE_SCHEMA = {
   required: ['message', 'is_final', 'suggested_prompts'],
 };
 
-const MAJOR_SUGGESTIONS = [
-  'Finance', 'Accounting', 'Marketing', 'Management', 'Economics',
-  'Computer Science', 'Communications', 'Psychology', 'Biology',
-  'Political Science', 'English', 'History', 'Nursing', 'Engineering',
-  'Pre-Law', 'Real Estate', 'Business Administration', 'Journalism',
-  'Sociology', 'Criminal Justice', 'Undecided',
+const MAJOR_CHIPS = [
+  'Finance',
+  'Marketing',
+  'Computer Science',
+  'Business Administration',
+  'Communications',
+  'Engineering',
+  'Psychology',
+  'Other / Type mine →',
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -296,6 +299,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [majorFilter, setMajorFilter] = useState('');
   const [awaitingMajor, setAwaitingMajor] = useState(false);
   const bottomRef = useRef(null);
+  const inputRef = useRef(null);
   const freshStartRef = useRef(false);
 
   // Removed frontend diagnostic block — now using backend getLeadsForStudent
@@ -711,7 +715,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       )}
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 8px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 24px' }}>
 
         {/* Restored conversation banner */}
         {restoredBanner && !conversationDone && (() => {
@@ -745,32 +749,39 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           );
         })()}
 
-        {/* Major chips — shown before first AI exchange if no major saved */}
-        {awaitingMajor && !loading && (
-          <div style={{ marginLeft: 42, marginBottom: 16 }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {MAJOR_SUGGESTIONS.map(m => (
-                <button key={m} onClick={() => handleMajorSubmit(m)}
-                  style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
-                  {m}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {messages.map((msg, i) => {
           const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading && !conversationDone;
           const showSkip = isLastAssistant && !awaitingMajor && suggestedPrompts.length > 0 && questionCount > 1;
+          const showSaveIcon = i >= 2;
           return (
             <React.Fragment key={i}>
               <MessageBubble message={msg} />
-              {msg.role === 'assistant' && (
+              {msg.role === 'assistant' && showSaveIcon && (
                 <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: 42, marginTop: -6, marginBottom: 8 }}>
                   <SaveToNotebookButton content={msg.content} sourcePage="career_goals" userEmail={user?.email} />
                 </div>
               )}
-              {isLastAssistant && suggestedPrompts.length > 0 && (
+              {/* Major chips — shown directly below the first assistant message */}
+              {isLastAssistant && awaitingMajor && !loading && (
+                <div style={{ marginLeft: 42, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {MAJOR_CHIPS.map(m => (
+                      <button key={m}
+                        onClick={() => {
+                          if (m === 'Other / Type mine →') { inputRef.current?.focus(); return; }
+                          handleMajorSubmit(m);
+                        }}
+                        className="major-chip"
+                        style={{ background: '#fff', border: '1.5px solid #e0e0e0', color: '#555', borderRadius: 100, padding: '8px 16px', fontSize: 14, fontWeight: 400, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {isLastAssistant && !awaitingMajor && suggestedPrompts.length > 0 && (
                 <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} onSkip={showSkip ? handleSkip : null} />
               )}
             </React.Fragment>
@@ -837,10 +848,11 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         <div className="chat-input-bar" style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff', position: 'sticky', bottom: 0, zIndex: 100 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 16, padding: '8px 12px' }}>
             <textarea
+              ref={inputRef}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your answer..."
+              placeholder={awaitingMajor ? "Or type your major here..." : "Type your answer..."}
               rows={1}
               style={{ flex: 1, background: 'none', border: 'none', outline: 'none', resize: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', lineHeight: 1.5, maxHeight: 120, overflowY: 'auto' }}
             />
@@ -867,6 +879,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         }
         button:focus { outline: none; box-shadow: 0 0 0 2px #E85D20; }
         input:focus, textarea:focus { outline: none; box-shadow: 0 0 0 2px #E85D20; }
+        .major-chip:hover { border-color: #E85D20 !important; color: #E85D20 !important; }
         .chat-chip:hover { background: #E85D20 !important; color: #fff !important; }
         @media (max-width: 768px) {
           .chat-bubble-ai { max-width: 88% !important; }
