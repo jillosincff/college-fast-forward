@@ -75,11 +75,61 @@ CHIP RULES (HARD LIMITS):
 - BAD chips: ["Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027", "Full-time — graduating 2028"]
 - Graduation year chips must always be exactly: ["2025", "2026", "2027", "2028+"] — never more
 
+INDUSTRY & FUNCTION TAXONOMY (CRITICAL):
+When populating goals_summary.target_industries, you MUST map the student's answer to values from this exact list only. Never store free-form text as an industry.
+
+VALID target_industries values:
+- "Technology & Software"
+- "Financial Services & Banking"
+- "Consulting"
+- "Healthcare & Life Sciences"
+- "Consumer Goods & Retail"
+- "Media & Entertainment"
+- "Real Estate"
+- "Energy & Utilities"
+- "Government & Nonprofit"
+- "Logistics & Supply Chain"
+- "Sports & Athletics"
+- "Education"
+
+When populating goals_summary.target_functions, map the student's target role to values from this list only:
+- "Software Engineering"
+- "Product Management"
+- "Sales & Business Development"
+- "Marketing & Brand"
+- "Finance & Accounting"
+- "Operations & Strategy"
+- "Data & Analytics"
+- "Human Resources"
+- "Consulting / Advisory"
+- "Supply Chain & Logistics"
+- "Healthcare / Clinical"
+- "Legal & Compliance"
+
+If a student's answer maps to multiple values, include all that apply (max 3).
+If a student's answer is ambiguous, pick the closest match — never leave as free text.
+"Corporate" → "Consulting" or "Operations & Strategy" depending on context
+"Marketing" → target_functions: "Marketing & Brand" (NOT an industry)
+"Business" → infer from context; default to "Operations & Strategy"
+
 WRONG message field: "Fashion is great! What industry? Chips: ['Tech', 'Fashion', 'Healthcare']"
 CORRECT message field: "Fashion is great! What industry are you targeting for this role?"
 CORRECT suggested_prompts: ["Tech", "Fashion", "Healthcare", "Something else"]
 
-Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips, NO skip option), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)`;
+Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips, NO skip option), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)
+
+goals_summary shape when final:
+{
+  target_industries: string[],   // FROM VALID INDUSTRIES LIST ONLY
+  target_functions: string[],    // FROM VALID FUNCTIONS LIST ONLY — NEW FIELD
+  target_roles: string[],        // Specific job titles e.g. "Account Executive"
+  target_companies: string[],    // Named companies if mentioned
+  dream_company: string,
+  graduation_year: number,
+  company_size_preference: string[],
+  location_preference: string,
+  major: string
+}`;
 
 const SYNTHESIS_SUFFIX = `
 
@@ -175,6 +225,47 @@ const MAJOR_CHIPS = [
 function hasExistingGoals(user) {
   const g = user?.career_goals;
   return !!(g?.target_roles?.length || g?.target_industries?.length || g?.role || g?.industries?.length);
+}
+
+const VALID_INDUSTRIES = [
+  "Technology & Software",
+  "Financial Services & Banking",
+  "Consulting",
+  "Healthcare & Life Sciences",
+  "Consumer Goods & Retail",
+  "Media & Entertainment",
+  "Real Estate",
+  "Energy & Utilities",
+  "Government & Nonprofit",
+  "Logistics & Supply Chain",
+  "Sports & Athletics",
+  "Education"
+];
+
+const VALID_FUNCTIONS = [
+  "Software Engineering",
+  "Product Management",
+  "Sales & Business Development",
+  "Marketing & Brand",
+  "Finance & Accounting",
+  "Operations & Strategy",
+  "Data & Analytics",
+  "Human Resources",
+  "Consulting / Advisory",
+  "Supply Chain & Logistics",
+  "Healthcare / Clinical",
+  "Legal & Compliance"
+];
+
+function normalizeGoals(goals) {
+  if (!goals) return goals;
+  return {
+    ...goals,
+    target_industries: (goals.target_industries || [])
+      .filter((v) => VALID_INDUSTRIES.includes(v)),
+    target_functions: (goals.target_functions || [])
+      .filter((v) => VALID_FUNCTIONS.includes(v)),
+  };
 }
 
 // ─── Small UI components ──────────────────────────────────────────────────────
@@ -487,8 +578,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const saveGoals = async (goalsSummary, prelimArch) => {
     try {
       const goalsData = { ...goalsSummary, saved_at: new Date().toISOString() };
+      const normalizedGoals = normalizeGoals(goalsData);
       await base44.auth.updateMe({
-        career_goals: goalsData,
+        career_goals: normalizedGoals,
         ...(prelimArch?.name ? { preliminary_archetype: prelimArch.name } : {}),
         ...(goalsSummary?.graduation_year ? { graduation_year: goalsSummary.graduation_year } : {}),
       });
@@ -498,32 +590,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       console.error('Goals save failed:', e);
       setError('save');
     }
-  };
-
-  const startChat = () => {
-    freshStartRef.current = true;
-    // Clear saved conversation from DB
-    base44.auth.updateMe({ career_goals_conversation: null, career_goals_conversation_updated_at: null }).catch(() => {});
-    setMode('chat');
-    setMessages([]);
-    setSuggestedPrompts([]);
-    setConversationDone(false);
-    setCareerProfile(null);
-    setRoleRecs(null);
-    setError(null);
-    setQuestionCount(0);
-    setAboutYou(null);
-    setTopStrengths(null);
-    setWorkEnvironment(null);
-    setHonestChallenge(null);
-    setCffNetwork(null);
-    setPrelimArchetype(null);
-    setRestoredBanner(false);
-    setConfirmClear(false);
-    setRestoredAt(null);
-    setAwaitingMajor(false);
-    setMajorSaved(false); // Trigger re-init of opener message
-    setIsFreshStart(true);
   };
 
   const handleFindLeads = () => {
