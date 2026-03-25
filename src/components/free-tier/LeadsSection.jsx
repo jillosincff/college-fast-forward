@@ -315,11 +315,15 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       // Self-exclusion — email first (catches all accounts), then id
       const currentEmail = user?.email?.toLowerCase()?.trim();
       const currentId = user?.id;
-      const sameSchool = directoryUsers.filter(u =>
-        u.email?.toLowerCase()?.trim() !== currentEmail &&
-        u.id !== currentId &&
-        normalizeSchool(u.school || u.university || '') === studentSchoolNorm
-      );
+      console.log('[RedHot] currentEmail:', currentEmail, '| currentId:', currentId);
+      console.log('[RedHot] Sample emails in directory:', directoryUsers.slice(0, 5).map(u => u.email));
+      const sameSchool = directoryUsers.filter(u => {
+        const uEmail = u.email?.toLowerCase()?.trim();
+        const uSchool = normalizeSchool(u.school || u.university || '');
+        const excluded = uEmail === currentEmail || u.id === currentId;
+        if (excluded) console.log('[RedHot] Excluded self:', u.full_name, uEmail);
+        return !excluded && uSchool === studentSchoolNorm;
+      });
 
       // Apply quality filter
       const qualified = sameSchool.filter(hasUsefulProfile);

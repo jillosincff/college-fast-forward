@@ -302,19 +302,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const inputRef = useRef(null);
   const freshStartRef = useRef(false);
 
-  // ── DIAGNOSTIC ──
-  useEffect(() => {
-    const diagnose = async () => {
-      try { const r1 = await base44.functions.invoke('getDirectoryUsers', {}); console.log('getDirectoryUsers result:', r1); } catch(e) { console.log('getDirectoryUsers failed:', e.message); }
-      try { const r2 = await base44.functions.invoke('getDirectoryUsers', { school: user?.school, schoolCode: user?.school }); console.log('getDirectoryUsers w/school:', r2); } catch(e) { console.log('getDirectoryUsers w/school failed:', e.message); }
-      try { const r3 = await base44.functions.invoke('getCFFNetworkMatchesFn', {}); console.log('getCFFNetworkMatchesFn result:', r3); } catch(e) { console.log('getCFFNetworkMatchesFn failed:', e.message); }
-      try { const r4 = await base44.functions.invoke('getNetworkMembers', {}); console.log('getNetworkMembers result:', r4); } catch(e) { console.log('getNetworkMembers failed:', e.message); }
-      try { const r5 = await base44.functions.invoke('getParents', {}); console.log('getParents result:', r5); } catch(e) { console.log('getParents failed:', e.message); }
-      console.log('currentUser fields:', { id: user?.id, school: user?.school, university: user?.university, persona: user?.persona, target_industries: user?.target_industries, target_roles: user?.target_roles });
-    };
-    diagnose();
-  }, []);
-  // ── END DIAGNOSTIC ──
+
 
   // Removed frontend diagnostic block — now using backend getLeadsForStudent
 
