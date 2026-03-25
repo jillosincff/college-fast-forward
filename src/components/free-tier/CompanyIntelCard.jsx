@@ -54,7 +54,7 @@ ${user?.full_name || firstName}`;
 
 function CFFParentsModal({ company, user, onClose }) {
   const parents = company.cff_parents || [];
-  const [view, setView] = useState('list'); // 'list' | 'contact'
+  const [view, setView] = useState('list');
   const [selectedParent, setSelectedParent] = useState(null);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -81,7 +81,6 @@ function CFFParentsModal({ company, user, onClose }) {
         is_read: false,
       });
       setSent(true);
-      // toast
       const el = document.createElement('div');
       el.textContent = `Message sent to ${selectedParent.full_name?.split(' ')[0]} ⚡`;
       el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:999999;pointer-events:none;';
@@ -103,7 +102,6 @@ function CFFParentsModal({ company, user, onClose }) {
   return ReactDOM.createPortal(
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, maxWidth: 440, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
-        {/* Header */}
         <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 4px' }}>CFF NETWORK</p>
@@ -111,8 +109,6 @@ function CFFParentsModal({ company, user, onClose }) {
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#aaa', minHeight: 'auto', padding: 4, lineHeight: 1 }}>✕</button>
         </div>
-
-        {/* Body */}
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {view === 'list' ? (
             <div style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -131,20 +127,14 @@ function CFFParentsModal({ company, user, onClose }) {
                     </div>
                   </div>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', fontWeight: 500, margin: 0 }}>✓ Open to intro requests</p>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
-                      onClick={() => handleContact(p)}
-                      style={{ flex: 1, background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '9px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
-                    >
-                      Contact Now →
-                    </button>
-                  </div>
+                  <button onClick={() => handleContact(p)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '9px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+                    Contact Now →
+                  </button>
                 </div>
               ))}
             </div>
           ) : (
             <div style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {/* Selected parent mini card */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#fafafa', borderRadius: 10, border: '1px solid #f0f0f0' }}>
                 <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
                   {(selectedParent?.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
@@ -154,34 +144,21 @@ function CFFParentsModal({ company, user, onClose }) {
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: 0 }}>{parentTitle(selectedParent)}</p>
                 </div>
               </div>
-
-              {/* Draft */}
               <div>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: 4 }}>⚡ FastIQ drafted this for you:</p>
-                <textarea
-                  value={draft}
-                  onChange={e => setDraft(e.target.value)}
-                  rows={10}
-                  style={{ width: '100%', border: '1px solid #e5e5e5', borderRadius: 10, padding: '12px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#333', lineHeight: 1.6, resize: 'vertical', outline: 'none', boxSizing: 'border-box', background: '#fafafa' }}
-                />
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px' }}>⚡ FastIQ drafted this for you:</p>
+                <textarea value={draft} onChange={e => setDraft(e.target.value)} rows={10}
+                  style={{ width: '100%', border: '1px solid #e5e5e5', borderRadius: 10, padding: '12px 14px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#333', lineHeight: 1.6, resize: 'vertical', outline: 'none', boxSizing: 'border-box', background: '#fafafa' }} />
               </div>
-
               {sent ? (
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#22C55E', fontWeight: 600, textAlign: 'center', margin: 0 }}>✓ Message sent!</p>
               ) : (
-                <button
-                  onClick={handleSend}
-                  disabled={sending}
-                  style={{ background: sending ? '#ccc' : '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: sending ? 'default' : 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
-                >
+                <button onClick={handleSend} disabled={sending}
+                  style={{ background: sending ? '#ccc' : '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: sending ? 'default' : 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
                   {sending ? 'Sending...' : 'Send Message →'}
                 </button>
               )}
-
-              <button
-                onClick={() => setView('list')}
-                style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', minHeight: 'auto', padding: 0, fontFamily: "'DM Sans', sans-serif", textAlign: 'left' }}
-              >
+              <button onClick={() => setView('list')}
+                style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', minHeight: 'auto', padding: 0, fontFamily: "'DM Sans', sans-serif", textAlign: 'left' }}>
                 ← Back to profile
               </button>
             </div>
@@ -226,6 +203,7 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
           </div>
         )}
 
+        {/* Header row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginTop: isBest ? 8 : 0 }}>
           <div>
             <p style={{ fontFamily: "'Playfair Display', serif", fontSize: isBest ? 20 : 17, fontWeight: 600, color: '#0d1117', margin: '0 0 2px' }}>{company.name}</p>
@@ -233,6 +211,39 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
           </div>
           <HiringSignal signal={signal} />
         </div>
+
+        {/* Real Signals from Firecrawl enrichment */}
+        {!isCollapsed && company.signals && (
+          <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {company.signals.open_roles?.count > 0 && (
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, background: '#F0FDF4', color: '#22C55E', border: '1px solid #86EFAC', borderRadius: 100, padding: '4px 10px', fontWeight: 500 }}>
+                {company.signals.open_roles.count} open role{company.signals.open_roles.count !== 1 ? 's' : ''}
+              </span>
+            )}
+            {company.signals.growth_signal?.detected && (
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, background: '#EFF6FF', color: '#3B82F6', border: '1px solid #93C5FD', borderRadius: 100, padding: '4px 10px', fontWeight: 500 }}>
+                💰 {company.signals.growth_signal.summary}
+              </span>
+            )}
+            {company.signals.layoff_alert?.detected && (
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, background: '#FEF2F2', color: '#EF4444', border: '1px solid #FECACA', borderRadius: 100, padding: '4px 10px', fontWeight: 500 }}>
+                ⚠ {company.signals.layoff_alert.summary}
+              </span>
+            )}
+            {company.signals.hiring_timeline_note && (
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, background: '#FFFBEB', color: '#D97706', border: '1px solid #FCD34D', borderRadius: 100, padding: '4px 10px', fontWeight: 500 }}>
+                📋 {company.signals.hiring_timeline_note}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Matched roles for this student */}
+        {!isCollapsed && company.signals?.open_roles?.matched_roles?.length > 0 && (
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', margin: '8px 0 0', fontWeight: 500 }}>
+            Roles matching your profile: <strong>{company.signals.open_roles.matched_roles.join(' · ')}</strong>
+          </p>
+        )}
 
         {isCollapsed ? (
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -251,7 +262,8 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
             {knownFor && (
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#444', margin: '12px 0 0', lineHeight: 1.5 }}>{knownFor}</p>
             )}
-            {timeline && (
+            {/* Use Firecrawl timeline if available, otherwise fall back to LLM */}
+            {(company.signals?.hiring_timeline_note || timeline) && !company.signals?.hiring_timeline_note && (
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '4px 0 0', fontStyle: 'italic' }}>📅 {timeline}</p>
             )}
             {whatTheyLookFor.length > 0 && (

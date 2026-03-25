@@ -2,6 +2,187 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
+// ──────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ──────────────────────────────────────────────────────────────────────────
+
+function safeParseJSON(content) {
+  try {
+    const text = Array.isArray(content)
+      ? content.map(c => c.text || '').join('')
+      : String(content);
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch {
+    return null;
+  }
+}
+
+async function enrichWithFirecrawlSignals(companies, targetFunctions, targetIndustries, base44) {
+  const enriched = await Promise.allSettled(
+    companies.map(async (company) => {
+      const signals = {
+        open_roles: null,
+        layoff_alert: null,
+        growth_signal: null,
+        hiring_timeline_note: null,
+      };
+
+      // 1. SCRAPE CAREERS PAGE for open roles
+      try {
+        const careersUrl = `https://careers.${company.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '')}.com`;
+        const careersRes = await base44.asServiceRole.functions.invoke('firecrawlService', {
+          action: 'scrapeCompanySite',
+          url: careersUrl,
+        });
+        if (careersRes?.success && careersRes?.content) {
+          const extractRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
+            model: 'gemini_3_flash',
+            prompt: `You are analyzing a company careers page for a college student.
+
+Student is targeting these job functions: ${targetFunctions.join(', ') || 'Not specified'}
+Student is targeting these industries: ${targetIndustries.join(', ') || 'Not specified'}
+
+Careers page content:
+${careersRes.content.slice(0, 6000)}
+
+Return JSON only, no markdown:
+{
+  "open_role_count": number | null,
+  "matched_roles": string[],
+  "hiring_timeline_note": string | null,
+  "is_actively_hiring": boolean
+}`,
+            response_json_schema: {
+              type: 'object',
+              properties: {
+                open_role_count: { type: 'number' },
+                matched_roles: { type: 'array', items: { type: 'string' } },
+                hiring_timeline_note: { type: 'string' },
+                is_actively_hiring: { type: 'boolean' },
+              },
+            },
+          });
+          const parsed = safeParseJSON(extractRes);
+          if (parsed) {
+            signals.open_roles = {
+              count: parsed.open_role_count ?? 0,
+              matched_roles: parsed.matched_roles ?? [],
+            };
+            signals.hiring_timeline_note = parsed.hiring_timeline_note;
+          }
+        }
+      } catch (e) {
+        console.warn(`Careers page scrape failed for ${company.name}:`, e.message);
+      }
+
+      // 2. SCRAPE NEWS for layoff signals
+      try {
+        const layoffRes = await base44.asServiceRole.functions.invoke('firecrawlService', {
+          action: 'scrapeUrl',
+          url: `https://www.google.com/search?q=${encodeURIComponent(
+            `${company.name} layoffs OR "hiring freeze" OR "headcount reduction" 2024 OR 2025`
+          )}&num=3`,
+        });
+        if (layoffRes?.success && layoffRes?.content) {
+          const newsExtract = await base44.asServiceRole.integrations.Core.InvokeLLM({
+            model: 'gemini_3_flash',
+            prompt: `Analyze this news content about ${company.name}.
+
+Content:
+${layoffRes.content.slice(0, 3000)}
+
+Return JSON only:
+{ "layoff_detected": boolean, "layoff_summary": string | null }`,
+            response_json_schema: {
+              type: 'object',
+              properties: {
+                layoff_detected: { type: 'boolean' },
+                layoff_summary: { type: 'string' },
+              },
+            },
+          });
+          const parsed = safeParseJSON(newsExtract);
+          if (parsed?.layoff_detected) {
+            signals.layoff_alert = {
+              detected: true,
+              summary: parsed.layoff_summary,
+            };
+          }
+        }
+      } catch (e) {
+        console.warn(`Layoff news scrape failed for ${company.name}:`, e.message);
+      }
+
+      // 3. SCRAPE NEWS for funding / growth signals
+      try {
+        const fundingRes = await base44.asServiceRole.functions.invoke('firecrawlService', {
+          action: 'scrapeUrl',
+          url: `https://www.google.com/search?q=${encodeURIComponent(
+            `${company.name} funding OR "Series" OR hiring OR expansion 2024 OR 2025`
+          )}&num=3`,
+        });
+        if (fundingRes?.success && fundingRes?.content) {
+          const fundingExtract = await base44.asServiceRole.integrations.Core.InvokeLLM({
+            model: 'gemini_3_flash',
+            prompt: `Analyze this news about ${company.name}.
+
+Content:
+${fundingRes.content.slice(0, 3000)}
+
+Return JSON:
+{ "growth_detected": boolean, "growth_summary": string | null }`,
+            response_json_schema: {
+              type: 'object',
+              properties: {
+                growth_detected: { type: 'boolean' },
+                growth_summary: { type: 'string' },
+              },
+            },
+          });
+          const parsed = safeParseJSON(fundingExtract);
+          if (parsed?.growth_detected) {
+            signals.growth_signal = {
+              detected: true,
+              summary: parsed.growth_summary,
+            };
+          }
+        }
+      } catch (e) {
+        console.warn(`Funding news scrape failed for ${company.name}:`, e.message);
+      }
+
+      // 4. DERIVE hiring_signal from real data (overwrite LLM guess)
+      let real_hiring_signal = 'unknown';
+      if (signals.layoff_alert?.detected) {
+        real_hiring_signal = 'freeze';
+      } else if (signals.open_roles && signals.open_roles.count > 5) {
+        real_hiring_signal = 'active';
+      } else if (signals.open_roles && signals.open_roles.count > 0) {
+        real_hiring_signal = 'selective';
+      } else if (signals.growth_signal?.detected) {
+        real_hiring_signal = 'active';
+      }
+
+      return {
+        ...company,
+        hiring_signal: real_hiring_signal,
+        signals,
+      };
+    })
+  );
+
+  return enriched.map((result, i) =>
+    result.status === 'fulfilled' ? result.value : companies[i]
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// MAIN
+// ──────────────────────────────────────────────────────────────────────────
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -86,6 +267,14 @@ Real companies only. Honest hiring signals. Specific to this role and industry. 
 
       companies = generated?.companies || [];
 
+      // Enrich with Firecrawl signals
+      companies = await enrichWithFirecrawlSignals(
+        companies,
+        careerGoals.target_functions || [],
+        careerGoals.target_industries || [],
+        base44
+      );
+
       // Save to cache
       await base44.asServiceRole.entities.User.update(student_id, {
         company_intel_cache: companies,
@@ -144,6 +333,7 @@ Real companies only. Honest hiring signals. Specific to this role and industry. 
       companies: enriched,
       targetRoles: roles,
       targetIndustries: industries,
+      targetFunctions: careerGoals.target_functions || [],
       cached: cacheAge < ONE_DAY_MS,
     });
   } catch (error) {
