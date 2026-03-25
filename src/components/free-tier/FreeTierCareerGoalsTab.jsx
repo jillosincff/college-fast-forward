@@ -497,47 +497,21 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     }
   }, [outreachModal?.draft]);
 
-  // Generate AI outreach draft
+  // Generate AI outreach draft via backend function
   const generateOutreachDraft = async (alum) => {
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: `You are helping a college student write a short, genuine outreach message to a UF alumni.
-
-Student profile:
-- Name: ${user.full_name}
-- Major: ${user.career_goals?.major || 'undeclared'}
-- Target role: ${user.career_goals?.target_roles?.[0] || alum.title}
-- Graduation year: ${user.career_goals?.graduation_year || 'upcoming'}
-- Location preference: ${user.career_goals?.location_preference || 'open'}
-
-Alumni:
-- Name: ${alum.name}
-- Current title: ${alum.title}
-- Company: ${alum.company}
-
-Write a short outreach message. Rules:
-- 3 sentences maximum
-- No flattery or "I came across your profile"
-- Lead with the shared UF connection
-- Be specific about why this role or company interests the student
-- End with one low-ask question (e.g. "Would you be open to a 15-minute call?")
-- Sound like a real student, not a cover letter
-- No subject line — body only
-
-Return only the message text, nothing else.`,
-          }]
-        })
+      const res = await base44.functions.invoke('generateOutreachDraft', {
+        studentName: user?.full_name || 'Student',
+        major: user?.major || savedGoals?.major || '',
+        targetRole: (savedGoals?.target_roles || [])[0] || alum.title || '',
+        graduationYear: savedGoals?.graduation_year || '',
+        alumniName: alum.name,
+        alumniTitle: alum.title,
+        alumniCompany: alum.company,
       });
-      const data = await res.json();
-      return data.content?.[0]?.text || '';
+      return res?.data?.message || res?.message || '';
     } catch (e) {
+      console.error('Draft generation failed:', e);
       return '';
     }
   };
