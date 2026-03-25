@@ -1,5 +1,6 @@
 import React from 'react';
 import { Users, Zap } from 'lucide-react';
+import V3HeroTypingBox from './V3HeroTypingBox';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 const playfair = '"Playfair Display", Georgia, serif';
@@ -65,7 +66,7 @@ export default function V3Hero({ onCTA }) {
         </div>
 
         {/* HEADLINE */}
-        <div className="hf" style={{ animationDelay: '1100ms', marginBottom: 32 }}>
+        <div className="hf" style={{ animationDelay: '1100ms', marginBottom: 20 }}>
           <h1 style={{
             fontFamily: playfair, fontWeight: 700,
             fontSize: 'clamp(28px, 5vw, 42px)',
@@ -76,11 +77,68 @@ export default function V3Hero({ onCTA }) {
           </h1>
         </div>
 
+        {/* BRIDGING SENTENCE */}
+        <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 28 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.6, margin: 0, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto' }}>
+            Your student gets real alumni matches from your school and ready-to-send messages — so they finally have momentum and you can stop worrying.
+          </p>
+        </div>
+
         {/* SUBHEAD */}
-        <div className="hf" style={{ animationDelay: '1500ms', marginBottom: 40 }}>
+        <div className="hf" style={{ animationDelay: '1500ms', marginBottom: 36 }}>
           <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 18px)', fontWeight: 400, color: '#4F8CFF', lineHeight: 1.6, margin: 0 }}>
             We combine parent connections with an AI career engine to help your student access opportunities beyond cold applications.
           </p>
+        </div>
+
+        {/* DUAL-PATH CTAs */}
+        <div className="hf" style={{ animationDelay: '1800ms', marginBottom: 52 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
+            {/* Parent CTA — orange */}
+            <button
+              onClick={onCTA}
+              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              style={{
+                fontFamily: dmSans, fontSize: 15, fontWeight: 700,
+                background: '#E85D20', color: '#fff',
+                padding: '15px 28px', borderRadius: 100, border: 'none',
+                cursor: 'pointer', transition: 'all 0.25s ease',
+                minHeight: 'auto', minWidth: 'auto', width: 'auto',
+                lineHeight: 1.3,
+              }}
+            >
+              Activate FASTIQ for My Student – 7-Day Free Trial
+            </button>
+            {/* Student CTA — teal */}
+            <button
+              onClick={onCTA}
+              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              style={{
+                fontFamily: dmSans, fontSize: 15, fontWeight: 700,
+                background: 'transparent', color: '#2DD4BF',
+                padding: '15px 28px', borderRadius: 100,
+                border: '2px solid #2DD4BF',
+                cursor: 'pointer', transition: 'all 0.25s ease',
+                minHeight: 'auto', minWidth: 'auto', width: 'auto',
+                lineHeight: 1.3,
+              }}
+            >
+              I'm the Student – Start Free Trial
+            </button>
+          </div>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888888', marginTop: 14, marginBottom: 0 }}>
+            Free to join. FastIQ from $29/mo. 7-day trial included.
+          </p>
+        </div>
+
+        {/* ALUMNI DEMO — moved above the fold */}
+        <div className="hf" style={{ animationDelay: '2000ms', marginBottom: 64 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#E85D20', textAlign: 'center', marginBottom: 24, letterSpacing: '0.02em' }}>
+            See how FASTIQ works for your student right now →
+          </p>
+          <V3HeroTypingBox />
         </div>
 
         {/* TWO-FORCE CARDS */}
