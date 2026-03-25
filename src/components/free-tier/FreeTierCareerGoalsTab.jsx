@@ -301,6 +301,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const freshStartRef = useRef(false);
+  const [isFreshStart, setIsFreshStart] = useState(false);
 
 
 
@@ -309,8 +310,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
     if (mode !== 'chat' || messages.length > 0) return;
-    const savedConv = user?.career_goals_conversation;
-    const savedAt = user?.career_goals_conversation_updated_at;
+    const savedConv = isFreshStart ? null : user?.career_goals_conversation;
+    const savedAt = isFreshStart ? null : user?.career_goals_conversation_updated_at;
     if (savedConv?.length > 0) {
       setMessages(savedConv);
       const lastAssistant = [...savedConv].reverse().find(m => m.role === 'assistant');
@@ -342,7 +343,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setSuggestedPrompts([]);
       setQuestionCount(1);
     }
-  }, [mode, messages.length, user]);
+    setIsFreshStart(false);
+  }, [mode, messages.length, user, majorSaved, isFreshStart]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -520,6 +522,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     setConfirmClear(false);
     setRestoredAt(null);
     setAwaitingMajor(false);
+    setMajorSaved(false); // Trigger re-init of opener message
+    setIsFreshStart(true);
   };
 
   const handleFindLeads = () => {
