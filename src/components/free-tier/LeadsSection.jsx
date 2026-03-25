@@ -46,45 +46,7 @@ function initials(name) {
   return (name || '?').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
 }
 
-const WAYS_TO_HELP_LABELS = {
-  'career_advice': '💬 Career Advice',
-  'introductions': '🤝 Introductions',
-  'resume_interviews': '📄 Resume Review',
-  'resume_review': '📄 Resume Review',
-  'mock_interviews': '🎤 Mock Interviews',
-  'industry_insights': '💡 Industry Insights',
-  'mentorship': '⭐ Mentorship',
-  'jobs_referrals': '✉️ Job Referrals',
-  'networking': '🌐 Networking',
-  'career_guidance': '🧭 Career Guidance',
-  'grad_school': '🎓 Grad School Advice',
-  'salary_negotiation': '💰 Salary Negotiation',
-  'interview_prep': '🎯 Interview Prep',
-};
 
-const getIntroSignal = (member) => {
-  const w = (member.intro_willingness || member.intro_availability || '').toLowerCase();
-  if (w === 'happy_to_help' || w === 'yes') return { label: '✓ Open to intros', color: '#15803D', bg: '#F0FDF4' };
-  if (w === 'occasionally' || w === 'sometimes') return { label: '◎ Available occasionally', color: '#D97706', bg: '#FFFBEB' };
-  return { label: '✓ In the CFF network', color: '#888', bg: '#F5F5F5' };
-};
-
-const getPersonaLabel = (member) => {
-  if (member.persona === 'parent' || member.roles?.includes('parent')) return '👨‍👩‍👧 CFF Parent';
-  if (member.persona === 'alumni' || member.roles?.includes('alumni')) return '🎓 Alumni';
-  return '✓ CFF Member';
-};
-
-const getOutreachSuggestion = (member) => {
-  const helps = member.ways_to_help || [];
-  if (helps.includes('jobs_referrals')) return 'Ask about open roles at their company';
-  if (helps.includes('mock_interviews')) return 'Ask for a mock interview';
-  if (helps.includes('introductions')) return 'Ask for an intro to someone in your field';
-  if (helps.includes('industry_insights')) return 'Ask about breaking into their industry';
-  if (helps.includes('resume_interviews') || helps.includes('resume_review')) return 'Ask for a resume review';
-  if (helps.includes('career_advice') || helps.includes('career_guidance')) return 'Ask for 15 minutes of career advice';
-  return null;
-};
 
 function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSaved }) {
   const company = member.company || '';
