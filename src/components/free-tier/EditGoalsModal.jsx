@@ -294,11 +294,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
             <button onClick={() => { setCompanyInput(''); onClose(); }} style={{ flex: 1, background: 'none', border: '1px solid #E0E0E0', color: '#666', borderRadius: 100, padding: '12px 0', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
           </div>
 
-          {/* Secondary option */}
-          <div style={{ textAlign: 'center', fontSize: 12, color: '#999' }}>
-            <p style={{ margin: '0 0 8px' }}>Want to redo the full conversation instead?</p>
-            <button onClick={onStartFresh} style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Start fresh with FastIQ →</button>
-          </div>
+
         </div>
       </div>
     </div>

@@ -53,7 +53,7 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
       {!hasEnoughTargetCompanies && (
         <div style={{
           background: '#FAFAFA',
-          border: '1px solid #E5E5E5',
+          border: '1px solid #E85D20',
           borderRadius: '12px',
           padding: '16px 20px',
           marginTop: '16px',
@@ -123,6 +123,10 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
           Update my goals
         </button>
       </div>
+      <button onClick={onRestart}
+        style={{ background: 'none', border: 'none', padding: '8px 0', fontSize: '12px', color: '#999', cursor: 'pointer', textAlign: 'left', width: 'fit-content', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', marginTop: 8 }}>
+        Start over →
+      </button>
       {showEditModal && (
         <EditGoalsModal
           goals={goals}
