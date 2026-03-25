@@ -403,6 +403,52 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const inputRef = useRef(null);
   const freshStartRef = useRef(false);
   const [isFreshStart, setIsFreshStart] = useState(false);
+  const [alumniClusters, setAlumniClusters] = useState([]);
+  const [loadingAlumni, setLoadingAlumni] = useState(false);
+  const [outreachDraft, setOutreachDraft] = useState(null);
+
+  // Load alumni clusters when switching to summary view
+  useEffect(() => {
+    if (mode !== 'summary' || !savedGoals) return;
+    const loadAlumni = async () => {
+      setLoadingAlumni(true);
+      try {
+        const result = await base44.functions.invoke('getAlumniByRole', {
+          targetFunctions: savedGoals.target_functions || [],
+          targetRoles: savedGoals.target_roles || [],
+          location: savedGoals.location_preference || null,
+          schoolName: user?.school || user?.university || 'University of Florida',
+        });
+        setAlumniClusters(result?.clusters || []);
+      } catch (e) {
+        console.error('Alumni load failed:', e);
+      } finally {
+        setLoadingAlumni(false);
+      }
+    };
+    loadAlumni();
+  }, [mode, savedGoals]);
+
+  const handleConnect = async (alum) => {
+    const targetRole = (savedGoals?.target_roles || [])[0] || 'this role';
+    try {
+      const draft = await base44.functions.invoke('generateOutreachDraft', {
+        studentName: user?.full_name || 'Student',
+        major: user?.major || savedGoals?.major || '',
+        targetRole,
+        graduationYear: savedGoals?.graduation_year || '',
+        alumniName: alum.name,
+        alumniTitle: alum.title,
+        alumniCompany: alum.company,
+      });
+      setOutreachDraft({ alum, message: draft?.message || '' });
+    } catch (e) {
+      console.error('Draft generation failed:', e);
+    }
+  };
+
+  const isUndecided = !savedGoals?.target_roles?.length || savedGoals.target_roles[0]?.toLowerCase().includes('undecided');
+  const primaryRole = (savedGoals?.target_roles || [])[0] || 'your target role';
 
   // Seed opener on chat start — restore saved conversation if exists
   useEffect(() => {
@@ -882,12 +928,100 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         )}
 
         {conversationDone && !roleRecs?.length && savedGoals && (
-          <GoalsSummaryCard
-            goals={savedGoals}
-            onTabChange={onTabChange}
-            onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
-            onRestart={startChat}
-          />
+          <>
+            <GoalsSummaryCard
+              goals={savedGoals}
+              onTabChange={onTabChange}
+              onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
+              onRestart={startChat}
+            />
+
+            {/* Alumni by role section */}
+            {alumniClusters?.length > 0 && (
+              <div style={{ marginTop: '32px' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  {isUndecided ? (
+                    <>
+                      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
+                        Not sure which direction to go?
+                      </h3>
+                      <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
+                        Talk to someone who's been there. Connect with UF alumni who have roles you're exploring.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
+                        Want to know what a {primaryRole} is really like?
+                      </h3>
+                      <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
+                        Connect with UF alumni who have the exact role you're targeting.
+                      </p>
+                    </>
+                  )}
+                </div>
+
+                {alumniClusters.map(cluster => (
+                  <div key={cluster.cluster} style={{ marginBottom: '24px' }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '10px',
+                    }}>
+                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
+                        {cluster.cluster}
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                      {cluster.alumni.map(alum => (
+                        <div key={alum.linkedin_url} style={{
+                          background: '#FAFAFA',
+                          border: '1px solid #E5E5E5',
+                          borderRadius: '10px',
+                          padding: '14px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                        }}>
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
+                            {alum.name}
+                          </span>
+                          <span style={{ fontSize: '12px', color: '#555', fontFamily: "'DM Sans', sans-serif" }}>
+                            {alum.title}
+                          </span>
+                          <span style={{ fontSize: '12px', color: '#888', fontFamily: "'DM Sans', sans-serif" }}>
+                            {alum.company}
+                          </span>
+                          <button
+                            onClick={() => handleConnect(alum)}
+                            style={{
+                              marginTop: '8px',
+                              background: 'none',
+                              border: '1px solid #E85D20',
+                              borderRadius: '6px',
+                              padding: '5px 10px',
+                              fontSize: '12px',
+                              color: '#E85D20',
+                              cursor: 'pointer',
+                              fontFamily: "'DM Sans', sans-serif",
+                              fontWeight: 500,
+                              minHeight: 'auto',
+                              transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => { e.target.style.background = '#E85D20'; e.target.style.color = '#fff'; }}
+                            onMouseLeave={(e) => { e.target.style.background = 'none'; e.target.style.color = '#E85D20'; }}
+                          >
+                            Connect →
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {error === 'llm' && (
