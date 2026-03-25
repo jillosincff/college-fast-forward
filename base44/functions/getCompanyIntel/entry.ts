@@ -19,6 +19,21 @@ function safeParseJSON(content) {
 }
 
 async function enrichWithFirecrawlSignals(companies, targetFunctions, targetIndustries, base44) {
+  const FUNCTION_TO_KEYWORDS = {
+    'Software Engineering': ['engineer', 'developer', 'swe', 'backend', 'frontend', 'fullstack', 'mobile'],
+    'Product Management': ['product manager', 'pm', 'product lead', 'roadmap'],
+    'Sales & Business Development': ['sales', 'business development', 'bdr', 'sdr', 'account executive', 'ae', 'revenue'],
+    'Marketing & Brand': ['marketing', 'brand', 'growth', 'demand gen', 'content', 'seo', 'campaigns'],
+    'Finance & Accounting': ['finance', 'accounting', 'cpa', 'controller', 'fp&a', 'analyst', 'audit'],
+    'Operations & Strategy': ['operations', 'strategy', 'chief of staff', 'biz ops', 'program manager'],
+    'Data & Analytics': ['data', 'analytics', 'bi', 'sql', 'tableau', 'data science', 'machine learning'],
+    'Human Resources': ['hr', 'human resources', 'recruiting', 'talent', 'people ops'],
+    'Consulting / Advisory': ['consultant', 'advisor', 'strategy', 'associate', 'engagement manager'],
+    'Supply Chain & Logistics': ['supply chain', 'procurement', 'logistics', 'sourcing', 'inventory'],
+    'Healthcare / Clinical': ['clinical', 'nursing', 'physician', 'patient', 'care', 'medical'],
+    'Legal & Compliance': ['legal', 'compliance', 'counsel', 'attorney', 'paralegal', 'regulatory'],
+  };
+  const roleKeywords = targetFunctions.flatMap(fn => FUNCTION_TO_KEYWORDS[fn] || []).join(', ');
   const enriched = await Promise.allSettled(
     companies.map(async (company) => {
       const signals = {
@@ -42,8 +57,12 @@ async function enrichWithFirecrawlSignals(companies, targetFunctions, targetIndu
             model: 'gemini_3_flash',
             prompt: `You are analyzing a company careers page for a college student.
 
-Student is targeting these job functions: ${targetFunctions.join(', ') || 'Not specified'}
+Student is targeting roles matching these keywords: ${roleKeywords || 'Not specified'}
+(Derived from job functions: ${targetFunctions.join(', ') || 'Not specified'})
 Student is targeting these industries: ${targetIndustries.join(', ') || 'Not specified'}
+
+Look for open roles whose titles or descriptions contain any of these keywords.
+Prioritize entry-level titles: associate, coordinator, analyst, representative, assistant, junior.
 
 Careers page content:
 ${careersRes.content.slice(0, 6000)}
