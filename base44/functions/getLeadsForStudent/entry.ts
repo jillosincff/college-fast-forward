@@ -66,16 +66,34 @@ function scoreMatch(member, clusterKeywords, targetClusterKeys) {
   return clusterKeywords.filter(k => coreText.includes(k)).length;
 }
 
-const GENERIC_TITLES = ['professional', 'member', 'user', 'n/a', 'na', ''];
+const GENERIC_TITLES = ['professional', 'member', 'user', 'n/a', 'na', '', 'cff member', 'cff parent', 'parent'];
 
 function getDisplayTitle(member) {
   const raw = (member.job_title || member.current_role || member.current_position || '').trim();
   if (GENERIC_TITLES.includes(raw.toLowerCase())) {
     if (member.industry) return `${member.industry} Professional`;
-    if (member.persona === 'parent') return 'CFF Parent';
-    return 'CFF Member';
+    if (member.company || member.current_company) return `Works at ${member.company || member.current_company}`;
+    if (member.persona === 'parent') return null;
+    return null;
   }
   return raw;
+}
+
+// Minimum profile quality gate
+function hasMinimumProfile(u) {
+  const hasRealName = u.full_name &&
+    u.full_name.includes(' ') &&
+    !u.full_name.includes('@') &&
+    u.full_name.toLowerCase() !== (u.email?.split('@')[0] || '').toLowerCase();
+  const hasJobContext = u.job_title || u.current_role || u.current_position || u.industry || u.company || u.current_company || u.bio;
+  return !!(hasRealName || hasJobContext);
+}
+
+// Exclude clearly off-field clinical titles from fallback
+const EXCLUDE_TITLES = ['speech language pathologist','speech pathologist','physical therapist','occupational therapist','dentist','physician','doctor','nurse','veterinarian','pharmacist'];
+function isRelevantFallback(u) {
+  const title = (u.job_title || u.current_role || u.current_position || '').toLowerCase();
+  return !EXCLUDE_TITLES.some(ex => title.includes(ex));
 }
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -145,19 +163,24 @@ Deno.serve(async (req) => {
 
     console.log('Same-school members (pre-score):', sameSchoolMembers.length);
 
-    // Score >= 1 to match; fallback to all same-school members if too few results
-    const scored = sameSchoolMembers
-      .filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) >= 1)
-      .sort((a, b) => {
-        const sB = scoreMatch(b, clusterKeywords, targetClusterKeys) + (getSharedSchools(b).length > 1 ? 2 : 0);
-        const sA = scoreMatch(a, clusterKeywords, targetClusterKeys) + (getSharedSchools(a).length > 1 ? 2 : 0);
-        return sB - sA;
-      });
+    // Quality-filtered base pool
+    const qualityPool = sameSchoolMembers.filter(u => hasMinimumProfile(u));
 
-    // If scoring yields too few, fall back to all same-school members sorted by recency
-    const relevantMembers = (scored.length >= 3 ? scored : sameSchoolMembers
-      .sort((a, b) => new Date(b.updated_date || 0) - new Date(a.updated_date || 0)))
-      .slice(0, 20);
+    // Tier 1: strong match (score >= 2)
+    const strongMatch = qualityPool.filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) >= 2);
+    // Tier 2: weak match (score === 1)
+    const weakMatchIds = new Set(strongMatch.map(u => u.id));
+    const weakMatch = qualityPool.filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) === 1 && !weakMatchIds.has(u.id));
+    // Tier 3: fallback — profile complete, relevant field, score 0
+    const usedIds = new Set([...strongMatch, ...weakMatch].map(u => u.id));
+    const fallback = qualityPool
+      .filter(u => !usedIds.has(u.id) && isRelevantFallback(u))
+      .sort((a, b) => new Date(b.updated_date || 0) - new Date(a.updated_date || 0));
+
+    const relevantMembers = [...strongMatch, ...weakMatch, ...fallback].slice(0, 20);
+
+    console.log('Same-school members (pre-score):', sameSchoolMembers.length);
+    console.log('Relevant members after strict scoring:', relevantMembers.length);
 
     console.log('Relevant members after strict scoring:', relevantMembers.length);
 
@@ -212,7 +235,7 @@ Deno.serve(async (req) => {
       console.log('Using cached warm leads:', warmLeadsData.length);
     } else if (industries.length > 0 || roles.length > 0) {
       const location = careerGoals.location_preference || 'the US';
-      const INVALID_COMPANY_VALUES = ['not sure yet', 'not specified', 'not specified yet', 'unsure', 'tbd', 'n/a', 'none', ''];
+      const INVALID_COMPANY_VALUES = ['not sure yet', 'not specified', 'not specified yet', 'unsure', 'tbd', 'n/a', 'none', 'no dream company yet', 'no dream company', 'not sure', 'none yet', ''];
       let targetCompanies = (careerGoals.target_companies || []).filter(
         c => c && !INVALID_COMPANY_VALUES.includes(c.toLowerCase().trim())
       );

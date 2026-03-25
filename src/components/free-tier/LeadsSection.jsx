@@ -62,9 +62,11 @@ function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSav
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: '#1A1A1A', margin: 0 }}>{member.full_name}</p>
             <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, whiteSpace: 'nowrap' }}>✓ CFF</span>
           </div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '2px 0 0' }}>
-            {member.job_title}{company ? ` · ${company}` : ''}
-          </p>
+          {(member.job_title || member.industry) && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '2px 0 0' }}>
+              {member.job_title}{company ? ` · ${company}` : ''}
+            </p>
+          )}
           {member.briefing && (
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '4px 0 0', fontStyle: 'italic', lineHeight: 1.4 }}>
               "{member.briefing}"
@@ -300,6 +302,9 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const memberLabel = safeRedHotLeads.length === 1 ? 'member' : 'members';
   const selectedCardData = selectedChip ? warmLeads.find(w => w.company === selectedChip) : null;
 
+  const INVALID_CHIP_VALUES = ['no dream company yet','not specified','not specified yet','not sure yet','not sure','unsure','tbd','n/a','none','none yet',''];
+  const validExploreChips = (exploreChips || []).filter(c => c && !INVALID_CHIP_VALUES.includes(c.toLowerCase().trim()));
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '32px 0' }}>
@@ -380,11 +385,11 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
             </div>
 
             {/* Explore chips — horizontal scroll */}
-            {exploreChips.length > 0 && (
+            {validExploreChips.length > 0 && (
               <div style={{ marginBottom: 24 }}>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 10px' }}>⚡ EXPLORE COMPANIES IN YOUR FIELD</p>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: 8, overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                  {exploreChips.map((chip, i) => {
+                  {validExploreChips.map((chip, i) => {
                     const hasData = warmLeads.some(w => w.company === chip);
                     const isSelected = selectedChip === chip;
                     return (
