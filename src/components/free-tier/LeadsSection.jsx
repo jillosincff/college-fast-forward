@@ -300,33 +300,21 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
     return !!hasProfessionalContext;
   };
 
-  // ── Red Hot: load, filter, enrich ──
+  // ── Red Hot: load and filter ──
   const fetchRedHotLeads = async () => {
     setRedHotLoading(true);
     try {
       const res = await getDirectoryUsers({});
-      const directoryUsers = res?.data?.data || [];
+      const directoryUsers = res?.data?.data || res?.data || [];
 
       if (directoryUsers.length === 0) { setRedHotLeads([]); setRedHotTotal(0); return; }
 
       const studentSchoolNorm = normalizeSchool(user?.school || user?.university || '');
       setStudentSchool(studentSchoolNorm);
 
-      // Self-exclusion — email first (catches all accounts), then id
       const currentEmail = user?.email?.toLowerCase()?.trim();
       const currentId = user?.id;
       console.log('[RedHot] currentEmail:', currentEmail, '| currentId:', currentId);
-      console.log('[RedHot] Sample emails in directory:', directoryUsers.slice(0, 5).map(u => u.email));
-      const sameSchool = directoryUsers.filter(u => {
-        const uEmail = u.email?.toLowerCase()?.trim();
-        const uSchool = normalizeSchool(u.school || u.university || '');
-        const excluded = uEmail === currentEmail || u.id === currentId;
-        if (excluded) console.log('[RedHot] Excluded self:', u.full_name, uEmail);
-        return !excluded && uSchool === studentSchoolNorm;
-      });
-
-      // Apply quality filter
-      const qualified = sameSchool.filter(hasUsefulProfile);
 
       const careerGoals = user?.career_goals || {};
       const industries = [
@@ -338,69 +326,40 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         ...(Array.isArray(user?.target_roles) ? user.target_roles : [])
       ].filter(Boolean);
 
-      const hasGoals = industries.length > 0 || roles.length > 0;
+      const filtered = directoryUsers.filter(u => {
+        // Exclude self
+        if (u.id === currentId || u.email?.toLowerCase()?.trim() === currentEmail) return false;
+        // Same school only
+        if (normalizeSchool(u.school || u.university || '') !== studentSchoolNorm) return false;
+        // Exclude current students (future grad year)
+        if (u.graduation_year && parseInt(u.graduation_year) > new Date().getFullYear()) return false;
+        // Exclude student personas without parent/alumni role
+        if ((u.persona === 'gator' || u.persona === 'student') && !u.roles?.includes('parent') && !u.roles?.includes('alumni')) return false;
+        // Must have at least one piece of professional info
+        return !!(u.job_title || u.current_role || u.company || u.current_company || u.industry || u.linkedin_url || (u.bio && u.bio.length > 10));
+      });
 
-      const scoreMatch = (member) => {
-        const text = [member.industry, member.job_title, member.current_role, member.company, member.bio].filter(Boolean).join(' ').toLowerCase();
+      console.log('[RedHot] filtered count:', filtered.length);
+
+      // Score by relevance
+      const scored = filtered.map(u => {
+        const text = [u.job_title, u.current_role, u.company, u.current_company, u.industry, u.bio, u.expertise_areas].filter(Boolean).join(' ').toLowerCase();
         let score = 0;
         industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 5; });
         roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 3; });
-        // Hard penalize unrelated industries when student has goals
-        if (DEPRIORITIZE_INDUSTRIES.some(d => text.includes(d))) score -= 5;
-        // Bonus for complete profile
-        if (member.job_title) score += 1;
-        if (member.company) score += 1;
-        if (member.linkedin_url) score += 1;
-        if (member.bio) score += 1;
-        // Parent bonus
-        if (member.persona === 'parent' || member.roles?.includes('parent')) score += 2;
-        return score;
-      };
-
-      // When student has set goals, exclude negative-scored members (clearly off-field)
-      const scoredLeads = qualified.map(m => ({ m, score: scoreMatch(m) }));
-      scoredLeads.forEach(({ m, score }) => {
-        if (score < 0) console.log('[RedHot] Filtered out (score < 0):', m.full_name, m.job_title, m.industry, 'score:', score);
+        if (u.persona === 'parent' || u.roles?.includes('parent')) score += 2;
+        if (u.job_title) score += 1;
+        if (u.company || u.current_company) score += 1;
+        if (u.linkedin_url) score += 1;
+        return { ...u, _score: score };
       });
-      const filtered = hasGoals
-        ? scoredLeads.filter(({ score }) => score >= 0).map(({ m }) => m)
-        : scoredLeads.map(({ m }) => m);
 
-      const sorted = [...filtered].sort((a, b) => scoreMatch(b) - scoreMatch(a)).slice(0, 20);
+      scored.sort((a, b) => b._score - a._score);
+      const top20 = scored.slice(0, 20);
 
-      // Proxycurl enrichment for members with LinkedIn but missing job/company
-      const needsEnrichment = sorted.filter(m =>
-        m.linkedin_url && !m.job_title && !m.current_role && !m.company && !m.current_company
-      ).slice(0, 5);
-
-      let enrichedMap = {};
-      if (needsEnrichment.length > 0) {
-        const enrichResults = await Promise.all(
-          needsEnrichment.map(async (member) => {
-            try {
-              const profile = await base44.functions.invoke('proxycurlService', {
-                action: 'enrichParentProfile',
-                params: { linkedinUrl: member.linkedin_url }
-              });
-              const data = profile?.data || profile;
-              if (data && !data.error) {
-                // Cache enriched data back to DB (fire and forget)
-                base44.functions.invoke('saveEnrichedProfile', {
-                  userId: member.id,
-                  profileData: data
-                }).catch(() => {});
-                return { ...member, job_title: data.current_title || member.job_title, company: data.current_company || member.company, industry: data.industry || member.industry, bio: data.summary || member.bio, enriched: true };
-              }
-            } catch (e) { /* skip */ }
-            return member;
-          })
-        );
-        enrichResults.forEach(m => { enrichedMap[m.id] = m; });
-      }
-
-      const finalLeads = sorted.map(m => enrichedMap[m.id] || m);
-      setRedHotLeads(finalLeads);
-      setRedHotTotal(sameSchool.length);
+      console.log('[RedHot] top20 count:', top20.length, '| scores:', top20.map(u => u._score));
+      setRedHotLeads(top20);
+      setRedHotTotal(filtered.length);
       if (industries.length || roles.length) setTargetDesc([...roles, ...industries].join(', '));
     } catch (err) {
       console.error('[RedHot] Fatal error:', err.message);
