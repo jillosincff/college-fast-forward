@@ -1038,7 +1038,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                 </button>
               </div>
             ) : (
-              alumniClusters?.length > 0 && (
+              alumniClusters?.length > 0 ? (
                 <div style={{ marginTop: '32px' }}>
                   <div style={{ marginBottom: '16px' }}>
                     {isUndecided ? (
@@ -1120,16 +1120,15 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                       </div>
                     </div>
                   ))}
-                  </div>
-                  ) : (
-                  <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 16, padding: '24px', marginTop: '32px', textAlign: 'center' }}>
+                </div>
+              ) : (
+                <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 16, padding: '24px', marginTop: '32px', textAlign: 'center' }}>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px' }}>🔒 FASTIQ FEATURE</p>
                   <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Connect with UF Alumni</p>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>See real alumni in your target roles and reach out directly. Available with FastIQ.</p>
-                  </div>
-                  )}
-                  </>
-                  )}
+                </div>
+              )
+            )}
 
         {error === 'llm' && (
           <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
