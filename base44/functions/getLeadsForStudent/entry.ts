@@ -19,7 +19,7 @@ const INDUSTRY_TO_KEYWORDS = {
   'Consulting': ['consulting', 'strategy', 'advisory', 'management consulting', 'mckinsey', 'deloitte', 'pwc'],
   'Healthcare & Life Sciences': ['healthcare', 'medical', 'pharma', 'clinical', 'biotech', 'hospital', 'life sciences'],
   'Consumer Goods & Retail': ['retail', 'cpg', 'consumer goods', 'brand', 'merchandising', 'ecommerce'],
-  'Media & Entertainment': ['media', 'entertainment', 'film', 'music', 'publishing', 'content', 'streaming'],
+  'Media & Entertainment': ['media', 'entertainment', 'film', 'music', 'publishing', 'content', 'streaming', 'advertising', 'social media', 'social', 'pr', 'public relations', 'communications', 'creative', 'digital marketing', 'media buyer'],
   'Real Estate': ['real estate', 'property', 'cre', 'development', 'leasing', 'realty'],
   'Energy & Utilities': ['energy', 'oil', 'gas', 'utilities', 'renewable', 'sustainability', 'climate'],
   'Government & Nonprofit': ['government', 'nonprofit', 'ngo', 'policy', 'public sector', 'advocacy'],
@@ -55,6 +55,15 @@ function scoreMatch(member, studentGoals) {
   functions.forEach(fn => {
     (FUNCTION_TO_KEYWORDS[fn] || []).forEach(k => keywords.add(k));
   });
+  
+  // Fallback: if no keywords at all, parse target_roles as raw keywords
+  if (keywords.size === 0 && studentGoals?.target_roles?.length) {
+    studentGoals.target_roles.forEach(role => {
+      role.toLowerCase().split(' ').forEach(word => {
+        if (word.length > 3) keywords.add(word);
+      });
+    });
+  }
   
   if (keywords.size === 0) return 0;
   
