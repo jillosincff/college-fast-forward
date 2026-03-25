@@ -17,13 +17,28 @@ async function firecrawlScrape(url) {
   return data?.data?.markdown || '';
 }
 
+const FUNCTION_TO_KEYWORDS = {
+  'Software Engineering': ['engineer', 'developer', 'swe', 'backend', 'frontend'],
+  'Product Management': ['product manager', 'pm', 'product lead'],
+  'Sales & Business Development': ['sales', 'business development', 'bdr', 'sdr', 'account executive'],
+  'Marketing & Brand': ['marketing', 'brand', 'growth', 'content', 'social media'],
+  'Finance & Accounting': ['finance', 'accounting', 'analyst', 'audit', 'fp&a'],
+  'Operations & Strategy': ['operations', 'strategy', 'chief of staff', 'biz ops'],
+  'Data & Analytics': ['data', 'analytics', 'bi', 'sql', 'data science'],
+  'Human Resources': ['hr', 'recruiting', 'talent', 'people ops'],
+  'Consulting / Advisory': ['consultant', 'advisor', 'associate', 'engagement'],
+  'Supply Chain & Logistics': ['supply chain', 'logistics', 'procurement', 'sourcing'],
+  'Healthcare / Clinical': ['clinical', 'nursing', 'physician', 'medical'],
+  'Legal & Compliance': ['legal', 'compliance', 'counsel', 'attorney'],
+};
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { companyName, targetRole, targetIndustry } = await req.json();
+    const { companyName, targetRole, targetIndustry, targetFunctions = [] } = await req.json();
     if (!companyName) return Response.json({ error: 'companyName is required' }, { status: 400 });
 
     const results = {
@@ -58,7 +73,19 @@ Deno.serve(async (req) => {
           .filter(t => t.length > 3 && t.length < 80 && !t.toLowerCase().includes('indeed'))
           .slice(0, 3);
 
-        console.log(`[Indeed] ${companyName}: jobCount=${jobCount}, signal=${results.hiring_signal}`);
+        // Filter open roles to match student's target functions
+        const functionKeywords = new Set();
+        targetFunctions.forEach(fn => {
+          (FUNCTION_TO_KEYWORDS[fn] || []).forEach(k => functionKeywords.add(k));
+        });
+        const matched_roles = functionKeywords.size > 0
+          ? results.open_roles.filter(role =>
+              [...functionKeywords].some(kw => role.toLowerCase().includes(kw))
+            )
+          : results.open_roles;
+        results.matched_roles = matched_roles;
+
+        console.log(`[Indeed] ${companyName}: jobCount=${jobCount}, signal=${results.hiring_signal}, matched=${matched_roles.length}/${results.open_roles.length}`);
       }
     } catch (err) {
       console.error('[Indeed] scrape failed:', err.message);
