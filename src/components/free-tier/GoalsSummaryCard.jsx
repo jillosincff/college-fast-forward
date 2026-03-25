@@ -5,7 +5,12 @@ import EditGoalsModal from './EditGoalsModal';
 export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRestart, showLeadsArrow, user, onGoalsUpdated }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const roles = goals?.target_roles?.join(', ') || goals?.role || '—';
-  const industries = goals?.target_industries?.join(', ') || goals?.industries?.join(', ') || '—';
+  const industries = goals?.target_industries?.length
+    ? goals.target_industries.join(', ')
+    : (goals?.industries?.length ? goals.industries.join(', ') : '—');
+  const functions = goals?.target_functions?.length
+    ? goals.target_functions.join(', ')
+    : '—';
   const seeking = goals?.seeking || '—';
   const gradYear = goals?.graduation_year?.toString() || '—';
   const location = goals?.location_preference || goals?.locations?.[0] || '—';
@@ -16,6 +21,7 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
   const rows = [
     ['Target Roles', roles],
     ['Industries', industries],
+    ['Job Functions', functions],
     ['Looking for', `${seeking}${gradYear !== '—' ? ` · Graduating ${gradYear}` : ''}`],
     ['Location', location],
     ['Major', major],

@@ -13,57 +13,66 @@ const SCHOOL_NAMES = {
 
 const normalizeSchool = (s) => SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.trim?.() || '';
 
-const INDUSTRY_CLUSTERS = {
-  marketing: ['marketing', 'advertising', 'media', 'entertainment', 'communications', 'pr', 'public relations', 'brand', 'digital', 'content', 'creative', 'fashion', 'retail', 'consumer', 'music', 'film', 'tv', 'publishing', 'social media', 'agency', 'influencer', 'sports marketing'],
-  finance: ['finance', 'banking', 'investment', 'accounting', 'insurance', 'real estate', 'private equity', 'hedge fund', 'wealth', 'asset management', 'fintech', 'cpa', 'audit'],
-  technology: ['tech', 'technology', 'software', 'engineering', 'product', 'data', 'ai', 'startup', 'saas', 'cyber', 'it', 'information technology', 'developer', 'cloud'],
-  consulting: ['consulting', 'strategy', 'advisory', 'management', 'operations', 'analyst', 'mckinsey', 'bain', 'deloitte', 'accenture'],
-  healthcare: ['healthcare', 'medical', 'hospital', 'pharma', 'biotech', 'clinical', 'nursing', 'health system', 'dentistry', 'physician', 'speech', 'pathologist', 'therapist', 'rehabilitation'],
-  legal: ['legal', 'law', 'attorney', 'lawyer', 'paralegal', 'compliance', 'regulatory', 'litigation'],
-  nonprofit: ['nonprofit', 'ngo', 'foundation', 'social impact', 'advocacy', 'education', 'government', 'policy', 'public sector'],
-  realestate: ['real estate', 'property', 'construction', 'reit', 'mortgage', 'broker', 'developer'],
-  sales: ['sales', 'business development', 'account executive', 'revenue', 'bdr', 'sdr'],
+const INDUSTRY_TO_KEYWORDS = {
+  'Technology & Software': ['software', 'engineer', 'developer', 'product', 'data', 'saas', 'tech', 'cloud', 'ai'],
+  'Financial Services & Banking': ['finance', 'banking', 'investment', 'accounting', 'analyst', 'wealth', 'equity', 'capital'],
+  'Consulting': ['consulting', 'strategy', 'advisory', 'management consulting', 'mckinsey', 'deloitte', 'pwc'],
+  'Healthcare & Life Sciences': ['healthcare', 'medical', 'pharma', 'clinical', 'biotech', 'hospital', 'life sciences'],
+  'Consumer Goods & Retail': ['retail', 'cpg', 'consumer goods', 'brand', 'merchandising', 'ecommerce'],
+  'Media & Entertainment': ['media', 'entertainment', 'film', 'music', 'publishing', 'content', 'streaming'],
+  'Real Estate': ['real estate', 'property', 'cre', 'development', 'leasing', 'realty'],
+  'Energy & Utilities': ['energy', 'oil', 'gas', 'utilities', 'renewable', 'sustainability', 'climate'],
+  'Government & Nonprofit': ['government', 'nonprofit', 'ngo', 'policy', 'public sector', 'advocacy'],
+  'Logistics & Supply Chain': ['logistics', 'supply chain', 'operations', 'distribution', 'freight', 'warehouse'],
+  'Sports & Athletics': ['sports', 'athletics', 'agency', 'sponsorship', 'esports', 'fitness'],
+  'Education': ['education', 'edtech', 'university', 'k12', 'tutoring', 'curriculum'],
 };
 
-function getClusterKeywords(industries, roles) {
+const FUNCTION_TO_KEYWORDS = {
+  'Software Engineering': ['engineer', 'developer', 'swe', 'backend', 'frontend', 'fullstack', 'mobile'],
+  'Product Management': ['product manager', 'pm', 'product lead', 'roadmap'],
+  'Sales & Business Development': ['sales', 'business development', 'bdr', 'sdr', 'account executive', 'ae', 'revenue'],
+  'Marketing & Brand': ['marketing', 'brand', 'growth', 'demand gen', 'content', 'seo', 'campaigns'],
+  'Finance & Accounting': ['finance', 'accounting', 'cpa', 'controller', 'fp&a', 'analyst', 'audit'],
+  'Operations & Strategy': ['operations', 'strategy', 'chief of staff', 'biz ops', 'program manager'],
+  'Data & Analytics': ['data', 'analytics', 'bi', 'sql', 'tableau', 'data science', 'machine learning'],
+  'Human Resources': ['hr', 'human resources', 'recruiting', 'talent', 'people ops'],
+  'Consulting / Advisory': ['consultant', 'advisor', 'strategy', 'associate', 'engagement manager'],
+  'Supply Chain & Logistics': ['supply chain', 'procurement', 'logistics', 'sourcing', 'inventory'],
+  'Healthcare / Clinical': ['clinical', 'nursing', 'physician', 'patient', 'care', 'medical'],
+  'Legal & Compliance': ['legal', 'compliance', 'counsel', 'attorney', 'paralegal', 'regulatory'],
+};
+
+function scoreMatch(member, studentGoals) {
+  const industries = studentGoals?.target_industries || [];
+  const functions = studentGoals?.target_functions || [];
+  
+  // Build keyword set from taxonomy maps
   const keywords = new Set();
-  const allTargets = [...industries.map(i => i.toLowerCase()), ...roles.map(r => r.toLowerCase())];
-  allTargets.forEach(t => keywords.add(t));
-  Object.entries(INDUSTRY_CLUSTERS).forEach(([, words]) => {
-    if (allTargets.some(t => words.some(w => t.includes(w) || w.includes(t)))) {
-      words.forEach(w => keywords.add(w));
-    }
+  industries.forEach(ind => {
+    (INDUSTRY_TO_KEYWORDS[ind] || []).forEach(k => keywords.add(k));
   });
-  return Array.from(keywords);
-}
-
-// Returns which cluster a text blob most strongly belongs to
-function getClusterKey(text) {
-  const t = (text || '').toLowerCase();
-  let best = null; let bestScore = 0;
-  for (const [key, words] of Object.entries(INDUSTRY_CLUSTERS)) {
-    const score = words.filter(w => t.includes(w)).length;
-    if (score > bestScore) { bestScore = score; best = key; }
-  }
-  return bestScore > 0 ? best : null;
-}
-
-function scoreMatch(member, clusterKeywords, targetClusterKeys) {
-  // Hard exclude: if member's explicit industry clearly belongs to a DIFFERENT cluster
-  const memberIndustryText = (member.industry || member.industries || '').toLowerCase();
-  if (memberIndustryText) {
-    const memberCluster = getClusterKey(memberIndustryText);
-    if (memberCluster && targetClusterKeys.length > 0 && !targetClusterKeys.includes(memberCluster)) {
-      return 0;
-    }
-  }
-  // Score only against structured fields — not bio (too noisy)
-  const coreText = [
-    member.industry, member.industries, member.job_title,
-    member.current_role, member.current_position,
-    member.company, member.current_company, member.expertise_areas
-  ].filter(Boolean).join(' ').toLowerCase();
-  return clusterKeywords.filter(k => coreText.includes(k)).length;
+  functions.forEach(fn => {
+    (FUNCTION_TO_KEYWORDS[fn] || []).forEach(k => keywords.add(k));
+  });
+  
+  if (keywords.size === 0) return 0;
+  
+  // Score against structured fields only
+  const haystack = [
+    member.industry, member.job_title, member.company,
+    ...(Array.isArray(member.expertise_areas) ? member.expertise_areas : [])
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  
+  let score = 0;
+  keywords.forEach(kw => {
+    if (haystack.includes(kw)) score++;
+  });
+  
+  return score;
 }
 
 const GENERIC_TITLES = ['professional', 'member', 'user', 'n/a', 'na', '', 'cff member', 'cff parent', 'parent'];
@@ -129,17 +138,7 @@ Deno.serve(async (req) => {
     ].filter(Boolean);
     const targetDesc = [...roles, ...industries].join(', ');
 
-    const clusterKeywords = getClusterKeywords(industries, roles);
-
-    // Determine which industry clusters the student's goals map to
-    const targetClusterKeys = Object.entries(INDUSTRY_CLUSTERS)
-      .filter(([, words]) => [...industries, ...roles].some(t =>
-        words.some(w => t.toLowerCase().includes(w) || w.includes(t.toLowerCase()))
-      ))
-      .map(([key]) => key);
-
-    console.log('Target cluster keys:', targetClusterKeys);
-    console.log('Student industries:', industries, '| roles:', roles);
+    console.log('Student industries:', industries, '| roles:', roles, '| functions:', careerGoals.target_functions || []);
 
     const getSharedSchools = (member) => {
       const ms = normalizeSchool(member.school || member.university || '');
@@ -167,10 +166,10 @@ Deno.serve(async (req) => {
     const qualityPool = sameSchoolMembers.filter(u => hasMinimumProfile(u));
 
     // Tier 1: strong match (score >= 2)
-    const strongMatch = qualityPool.filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) >= 2);
+    const strongMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) >= 2);
     // Tier 2: weak match (score === 1)
     const weakMatchIds = new Set(strongMatch.map(u => u.id));
-    const weakMatch = qualityPool.filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) === 1 && !weakMatchIds.has(u.id));
+    const weakMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) === 1 && !weakMatchIds.has(u.id));
     // Tier 3: fallback — profile complete, relevant field, score 0
     const usedIds = new Set([...strongMatch, ...weakMatch].map(u => u.id));
     const fallback = qualityPool
@@ -178,9 +177,6 @@ Deno.serve(async (req) => {
       .sort((a, b) => new Date(b.updated_date || 0) - new Date(a.updated_date || 0));
 
     const relevantMembers = [...strongMatch, ...weakMatch, ...fallback].slice(0, 20);
-
-    console.log('Same-school members (pre-score):', sameSchoolMembers.length);
-    console.log('Relevant members after strict scoring:', relevantMembers.length);
 
     console.log('Relevant members after strict scoring:', relevantMembers.length);
 
@@ -217,7 +213,7 @@ Deno.serve(async (req) => {
         email: member.email,
         linkedin_url: member.linkedin_url || '',
         briefing: (briefing && briefing !== 'null') ? briefing : '',
-        match_score: scoreMatch(member, clusterKeywords, targetClusterKeys) + (shared.length > 1 ? 2 : 0),
+        match_score: scoreMatch(member, careerGoals) + (shared.length > 1 ? 2 : 0),
       };
     });
 
@@ -245,8 +241,19 @@ Deno.serve(async (req) => {
 
       if (targetCompanies.length === 0) {
         try {
+          const companyPrompt = `
+Student career profile:
+- Target Industries: ${industries.join(', ') || 'Not specified'}
+- Target Job Functions: ${careerGoals.target_functions?.join(', ') || 'Not specified'}
+- Target Roles (specific titles): ${roles.join(', ') || 'Not specified'}
+- Location Preference: ${location || 'Open'}
+- Company Size: ${careerGoals.company_size_preference?.join(', ') || 'No preference'}
+- Graduation Year: ${careerGoals.graduation_year || 'Not specified'}
+
+Generate exactly 12 real, well-known companies that are strong matches for this student. Prioritize companies actively hiring entry-level candidates in their target functions.
+Return as JSON: { "companies": ["Company1", ...] }`;
           const llm = await base44.asServiceRole.integrations.Core.InvokeLLM({
-            prompt: `Generate 12 real, well-known companies a student targeting "${targetDesc}" in ${location} should target. Mix large and mid-size. Return JSON: { "companies": ["Company1", ...] }`,
+            prompt: companyPrompt,
             response_json_schema: { type: 'object', properties: { companies: { type: 'array', items: { type: 'string' } } } },
           });
           targetCompanies = llm?.companies || [];
@@ -350,7 +357,6 @@ Deno.serve(async (req) => {
         totalUsersInDB: allUsers.length,
         sameSchoolTotal: sameSchoolMembers.length,
         relevantTotal: relevantMembers.length,
-        targetClusterKeys,
         studentIndustries: industries,
         studentRoles: roles,
         warmLeadsCached: cacheValid,
