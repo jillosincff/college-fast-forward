@@ -304,79 +304,38 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const fetchRedHotLeads = async () => {
     setRedHotLoading(true);
     try {
+      console.log('[RedHot] Step 1: calling getDirectoryUsers');
       const res = await getDirectoryUsers({});
-      const directoryUsers = res?.data?.data || res?.data || [];
+      console.log('[RedHot] Step 2: res received', typeof res, res);
 
-      if (directoryUsers.length === 0) { setRedHotLeads([]); setRedHotTotal(0); return; }
+      const allUsers = res?.data?.data || res?.data || res || [];
+      console.log('[RedHot] Step 3: allUsers count', allUsers.length);
 
       const studentSchoolNorm = normalizeSchool(user?.school || user?.university || '');
       setStudentSchool(studentSchoolNorm);
+      const studentEmail = user?.email?.toLowerCase()?.trim();
+      const studentId = user?.id;
+      console.log('[RedHot] Step 4: studentSchool', studentSchoolNorm, '| studentEmail', studentEmail);
 
-      const currentEmail = user?.email?.toLowerCase()?.trim();
-      const currentId = user?.id;
-      console.log('[RedHot] currentEmail:', currentEmail, '| currentId:', currentId);
+      console.log('[RedHot] Step 5: first 3 raw members', JSON.stringify(allUsers.slice(0, 3)));
+
+      const sameSchool = allUsers.filter(u =>
+        u.id !== studentId &&
+        u.email?.toLowerCase()?.trim() !== studentEmail &&
+        normalizeSchool(u.school || u.university || '') === studentSchoolNorm
+      );
+      console.log('[RedHot] Step 6: sameSchool count', sameSchool.length);
+
+      // NO OTHER FILTERS — just set directly
+      setRedHotLeads(sameSchool.slice(0, 20));
+      setRedHotTotal(sameSchool.length);
 
       const careerGoals = user?.career_goals || {};
-      const industries = [
-        ...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean)),
-        ...(Array.isArray(user?.target_industries) ? user.target_industries : [])
-      ].filter(Boolean);
-      const roles = [
-        ...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean)),
-        ...(Array.isArray(user?.target_roles) ? user.target_roles : [])
-      ].filter(Boolean);
-
-      const sameSchool = directoryUsers.filter(u => {
-        if (u.id === currentId || u.email?.toLowerCase()?.trim() === currentEmail) return false;
-        return normalizeSchool(u.school || u.university || '') === studentSchoolNorm;
-      });
-
-      console.log('[RedHot] same-school count:', sameSchool.length);
-      console.log('[RedHot] Sample UF member fields:', sameSchool.slice(0, 5).map(u => ({
-        id: u.id,
-        full_name: u.full_name,
-        name: u.name,
-        persona: u.persona,
-        roles: u.roles,
-        job_title: u.job_title,
-        current_role: u.current_role,
-        current_position: u.current_position,
-        company: u.company,
-        current_company: u.current_company,
-        employer: u.employer,
-        industry: u.industry,
-        industries: u.industries,
-        linkedin_url: u.linkedin_url,
-        bio: u.bio,
-        graduation_year: u.graduation_year,
-        allKeys: Object.keys(u)
-      })));
-
-      // No quality filtering for now — just self + school exclusion
-      const filtered = sameSchool;
-
-      // Score by relevance
-      const scored = filtered.map(u => {
-        const text = [u.job_title, u.current_role, u.company, u.current_company, u.industry, u.bio, u.expertise_areas].filter(Boolean).join(' ').toLowerCase();
-        let score = 0;
-        industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 5; });
-        roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 3; });
-        if (u.persona === 'parent' || u.roles?.includes('parent')) score += 2;
-        if (u.job_title) score += 1;
-        if (u.company || u.current_company) score += 1;
-        if (u.linkedin_url) score += 1;
-        return { ...u, _score: score };
-      });
-
-      scored.sort((a, b) => b._score - a._score);
-      const top20 = scored.slice(0, 20);
-
-      console.log('[RedHot] top20 count:', top20.length, '| scores:', top20.map(u => u._score));
-      setRedHotLeads(top20);
-      setRedHotTotal(filtered.length);
+      const industries = [...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean))].filter(Boolean);
+      const roles = [...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean))].filter(Boolean);
       if (industries.length || roles.length) setTargetDesc([...roles, ...industries].join(', '));
     } catch (err) {
-      console.error('[RedHot] Fatal error:', err.message);
+      console.error('[RedHot] CAUGHT ERROR:', err.message, err.stack);
       setRedHotLeads([]);
       setRedHotTotal(0);
     } finally {
