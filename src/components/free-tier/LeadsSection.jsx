@@ -311,6 +311,23 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       const allUsers = res?.data?.data || res?.data || res || [];
       console.log('[RedHot] Step 3: allUsers count', allUsers.length);
 
+      // Persona distribution
+      const personaCounts = {};
+      allUsers.forEach(u => { const p = u.persona || 'undefined'; personaCounts[p] = (personaCounts[p] || 0) + 1; });
+      console.log('[RedHot] Persona distribution:', personaCounts);
+
+      // Parents specifically
+      const parents = allUsers.filter(u => u.persona === 'parent' || u.roles?.includes('parent'));
+      console.log('[RedHot] Total parents:', parents.length);
+
+      // Parent school distribution
+      const parentSchools = {};
+      parents.forEach(u => { const s = u.school || u.university || 'no_school'; parentSchools[s] = (parentSchools[s] || 0) + 1; });
+      console.log('[RedHot] Parent school distribution:', parentSchools);
+
+      // Sample 3 parents
+      console.log('[RedHot] Sample parents:', parents.slice(0, 3).map(u => ({ name: u.full_name, school: u.school, university: u.university, persona: u.persona, roles: u.roles, job_title: u.job_title, company: u.company })));
+
       const studentSchoolNorm = normalizeSchool(user?.school || user?.university || '');
       setStudentSchool(studentSchoolNorm);
       const studentEmail = user?.email?.toLowerCase()?.trim();
