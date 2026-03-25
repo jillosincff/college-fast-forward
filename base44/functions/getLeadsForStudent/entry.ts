@@ -138,20 +138,25 @@ Deno.serve(async (req) => {
       if (u.roles?.includes('admin') || u.role === 'admin') return false;
       const ms = normalizeSchool(u.school || u.university || '');
       if (!studentSchools.includes(ms) || ms === '') return false;
+      // Include parents and any alumni (not just those explicitly offering help)
       return u.persona === 'parent' || u.roles?.includes('parent') ||
-        (u.persona === 'alumni' && (u.alumni_intent === 'giving_help' || u.help_types?.includes('career') || u.intro_availability === 'happy_to_help'));
+        u.persona === 'alumni' || u.roles?.includes('alumni');
     });
 
     console.log('Same-school members (pre-score):', sameSchoolMembers.length);
 
-    // Require score >= 2 for a match (stricter than before)
-    const relevantMembers = sameSchoolMembers
-      .filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) >= 2)
+    // Score >= 1 to match; fallback to all same-school members if too few results
+    const scored = sameSchoolMembers
+      .filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) >= 1)
       .sort((a, b) => {
         const sB = scoreMatch(b, clusterKeywords, targetClusterKeys) + (getSharedSchools(b).length > 1 ? 2 : 0);
         const sA = scoreMatch(a, clusterKeywords, targetClusterKeys) + (getSharedSchools(a).length > 1 ? 2 : 0);
         return sB - sA;
-      })
+      });
+
+    // If scoring yields too few, fall back to all same-school members sorted by recency
+    const relevantMembers = (scored.length >= 3 ? scored : sameSchoolMembers
+      .sort((a, b) => new Date(b.updated_date || 0) - new Date(a.updated_date || 0)))
       .slice(0, 20);
 
     console.log('Relevant members after strict scoring:', relevantMembers.length);
