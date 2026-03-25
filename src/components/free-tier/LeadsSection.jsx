@@ -51,39 +51,64 @@ function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSav
   const inits = initials(member.full_name);
   const school = member.school || '';
   const shortSchool = school.replace('University of ', '').replace('University', '').replace(' State University', ' State').trim();
+  const isEnriched = !!(member.enriched_at || member.enriched);
+  const titleLine = [member.job_title, company].filter(Boolean).join(' · ');
+  const locationLine = [member.location_city, member.location_state].filter(Boolean).join(', ');
+  const displaySkills = member.skills?.slice(0, 3) || [];
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderLeft: `3px solid ${accentColor}`, borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ background: '#fff', border: `1px solid ${isEnriched ? accentColor : '#E5E5E5'}`, borderLeft: `3px solid ${accentColor}`, borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', background: accentColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+        {member.profile_image_url ? (
+          <img src={member.profile_image_url} alt={member.full_name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+            onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+        ) : null}
+        <div style={{ width: 44, height: 44, borderRadius: '50%', background: accentColor, color: '#fff', display: member.profile_image_url ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
           {inits}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: '#1A1A1A', margin: 0 }}>{member.full_name}</p>
-            <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, whiteSpace: 'nowrap' }}>✓ CFF</span>
+            <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>✓ CFF</span>
+            {isEnriched && <span style={{ fontSize: 12, color: accentColor }}>⚡</span>}
           </div>
-          {(member.job_title || member.industry) && (
+          {(member.headline || titleLine) && (
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '2px 0 0' }}>
-              {member.job_title}{company ? ` · ${company}` : ''}
+              {titleLine || member.headline}
             </p>
           )}
-          {member.briefing && (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '4px 0 0', fontStyle: 'italic', lineHeight: 1.4 }}>
-              "{member.briefing}"
-            </p>
+          {locationLine && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: '2px 0 0' }}>📍 {locationLine}</p>
           )}
         </div>
       </div>
 
+      {member.bio && isEnriched && (
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', fontStyle: 'italic', lineHeight: 1.5, margin: 0, padding: '8px 12px', background: '#FAFAFA', borderRadius: 8, borderLeft: `3px solid ${accentColor}` }}>
+          "{member.bio.slice(0, 120)}{member.bio.length > 120 ? '...' : ''}"
+        </p>
+      )}
+
+      {(member.briefing && !member.bio) && (
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, fontStyle: 'italic', lineHeight: 1.4 }}>
+          "{member.briefing}"
+        </p>
+      )}
+
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        <span style={{ background: '#F5F5F5', color: '#555', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100 }}>📍 {shortSchool || school}</span>
-        {member.industry && (
-          <span style={{ background: '#FFF5F0', color: '#E85D20', border: '1px solid #FDDBC8', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100 }}>{member.industry}</span>
-        )}
+        {(shortSchool || school) && <span style={{ background: '#F5F5F5', color: '#555', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100 }}>📍 {shortSchool || school}</span>}
+        {member.industry && <span style={{ background: '#FFF5F0', color: accentColor, border: `1px solid rgba(232,93,32,0.3)`, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100 }}>{member.industry}</span>}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      {displaySkills.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {displaySkills.map((skill, i) => (
+            <span key={i} style={{ background: '#F0F0F0', color: '#555', fontSize: 11, padding: '3px 8px', borderRadius: 100 }}>{skill}</span>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={() => onContact({ id: member.id, source: 'cff_database', name: member.full_name, title: member.job_title, company, email: member.email, school })}
           style={{ background: accentColor, color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
           Contact Now →
@@ -93,6 +118,12 @@ function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSav
           <Bookmark style={{ width: 13, height: 13, fill: isSaved ? accentColor : 'none' }} />
           {isSaved ? 'Saved' : 'Save'}
         </button>
+        {member.linkedin_url && (
+          <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer"
+            style={{ width: 32, height: 32, background: '#0077B5', color: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, textDecoration: 'none', flexShrink: 0 }}>
+            in
+          </a>
+        )}
       </div>
     </div>
   );
@@ -382,9 +413,31 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         .filter(hasUsefulProfile)
         .sort((a, b) => scoreMatch(b) - scoreMatch(a));
 
+      const top20 = qualified.slice(0, 20);
       console.log('[RedHot] After quality filter:', qualified.length);
-      setRedHotLeads(qualified.slice(0, 20));
+      setRedHotLeads(top20);
       setRedHotTotal(qualified.length);
+
+      // Background enrichment — don't block UI
+      const enrichInBackground = async (leads) => {
+        const toEnrich = leads.filter(l => l.linkedin_url?.trim() && !l.enriched_at).slice(0, 10);
+        if (toEnrich.length === 0) return;
+        console.log(`[Enrichment] Enriching ${toEnrich.length} leads in background`);
+        for (const lead of toEnrich) {
+          try {
+            const result = await base44.functions.invoke('enrichRedHotLead', { userId: lead.id, linkedinUrl: lead.linkedin_url });
+            if (result?.data?.success || result?.success) {
+              const data = result?.data?.data || result?.data;
+              setRedHotLeads(prev => prev.map(l => l.id === lead.id ? { ...l, ...data, enriched: true } : l));
+            }
+            await new Promise(r => setTimeout(r, 600));
+          } catch (err) {
+            console.error(`[Enrichment] Failed for ${lead.id}:`, err);
+          }
+        }
+        console.log('[Enrichment] Background enrichment complete');
+      };
+      enrichInBackground(top20);
 
     } catch (err) {
       console.error('[RedHot] CAUGHT ERROR:', err.message, err.stack);
