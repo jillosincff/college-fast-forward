@@ -573,9 +573,114 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
           </div>
         ) : redHotLeads.length > 0 ? (
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-            {redHotLeads.map(m => (
-              <CFFMemberCard key={m.id} member={m} accentColor="#DC2626" onContact={onContact} onSave={onSaveLead} onUnsave={onUnsaveLead} isSaved={isSaved(m.id)} />
-            ))}
+            {redHotLeads.map(member => {
+              const WAYS_TO_HELP_LABELS = {
+                'career_advice': '💬 Career Advice',
+                'introductions': '🤝 Introductions',
+                'resume_interviews': '📄 Resume & Interviews',
+                'resume_review': '📄 Resume Review',
+                'mock_interviews': '🎤 Mock Interviews',
+                'industry_insights': '💡 Industry Insights',
+                'mentorship': '⭐ Mentorship',
+                'jobs_referrals': '✉️ Can Refer You',
+                'networking': '🌐 Networking',
+                'career_guidance': '🧭 Career Guidance',
+                'grad_school': '🎓 Grad School Advice',
+                'salary_negotiation': '💰 Salary Negotiation',
+                'interview_prep': '🎯 Interview Prep',
+              };
+
+              const getIntroSignal = (m) => {
+                const w = (m.intro_willingness || m.intro_availability || '').toLowerCase();
+                if (w === 'happy_to_help' || w === 'yes') return { label: '✓ Open to intro requests', color: '#22C55E', bg: '#F0FDF4', border: '#86EFAC' };
+                if (w === 'occasionally') return { label: '◎ Available occasionally', color: '#F59E0B', bg: '#FFFBEB', border: '#FCD34D' };
+                return { label: '✓ In the CFF network', color: '#22C55E', bg: '#F0FDF4', border: '#86EFAC' };
+              };
+
+              const getPersonaLabel = (m) => {
+                if (m.persona === 'parent' || m.roles?.includes('parent')) return '👨‍👩‍👧 CFF Parent';
+                if (m.persona === 'alumni' || m.roles?.includes('alumni')) return '🎓 CFF Alumni';
+                return '✓ CFF Member';
+              };
+
+              const getOutreachSuggestion = (m) => {
+                const helps = m.ways_to_help || [];
+                if (helps.includes('jobs_referrals')) return 'Ask about open roles at their company';
+                if (helps.includes('mock_interviews')) return 'Ask if they\'d do a mock interview';
+                if (helps.includes('introductions')) return 'Ask for an intro to someone in your field';
+                if (helps.includes('salary_negotiation')) return 'Ask about salary expectations in their field';
+                if (helps.includes('industry_insights')) return 'Ask about breaking into their industry';
+                if (helps.includes('resume_interviews') || helps.includes('resume_review')) return 'Ask them to review your resume';
+                if (helps.includes('mentorship')) return 'Ask if they\'d be open to a mentorship conversation';
+                if (helps.includes('career_advice') || helps.includes('career_guidance')) return 'Ask for 15 minutes of career advice';
+                return 'Introduce yourself and ask for advice';
+              };
+
+              const displayName = (() => {
+                const name = member.full_name || member.name || '';
+                if (!name) return 'CFF Member';
+                if (!name.includes(' ') && name === name.toLowerCase()) return 'CFF Member';
+                if (name.includes('@')) return 'CFF Member';
+                return name;
+              })();
+
+              const initials = displayName.split(' ').filter(n => n.length > 0).map(n => n[0]).join('').slice(0, 2).toUpperCase();
+              const displayCompany = member.company || member.current_company || null;
+              const displayIndustry = member.industry || null;
+              const displayLocation = [member.location_city, member.location_state || member.state].filter(Boolean).join(', ') || 'Florida';
+              const helpTags = (member.ways_to_help || []).filter(w => WAYS_TO_HELP_LABELS[w]).slice(0, 3).map(w => WAYS_TO_HELP_LABELS[w]);
+              const introSignal = getIntroSignal(member);
+              const personaLabel = getPersonaLabel(member);
+              const outreachTip = getOutreachSuggestion(member);
+              const isHighMatch = (member._score || 0) > 5;
+              const canRefer = member.can_provide_referrals === true;
+
+              return (
+                <div key={member.id} style={{ background: 'white', border: isHighMatch ? '1.5px solid #E85D20' : '1px solid #f0f0f0', borderRadius: '12px', padding: '16px', boxShadow: isHighMatch ? '0 4px 16px rgba(232,93,32,0.08)' : '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+                  {/* Header row */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#E85D20', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '16px', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>{initials}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: '600', fontSize: '15px', color: '#0d1117' }}>{displayName}</span>
+                        <span style={{ background: '#F0FDF4', color: '#22C55E', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '100px', fontFamily: "'DM Sans', sans-serif", border: '1px solid #86EFAC' }}>✓ CFF</span>
+                        {canRefer && <span style={{ background: '#FFF5F0', color: '#E85D20', fontSize: '10px', fontWeight: '700', padding: '2px 8px', borderRadius: '100px', fontFamily: "'DM Sans', sans-serif", border: '1px solid #fdd5c0' }}>✉️ Can Refer</span>}
+                      </div>
+                      {displayCompany && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', color: '#555', margin: '2px 0 0 0' }}>{displayCompany}</p>}
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '11px', color: '#999', margin: '2px 0 0 0' }}>{personaLabel}</p>
+                    </div>
+                  </div>
+
+                  {/* Intro availability signal */}
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: introSignal.bg, color: introSignal.color, border: `1px solid ${introSignal.border}`, borderRadius: '100px', padding: '4px 10px', fontSize: '11px', fontWeight: '600', fontFamily: "'DM Sans', sans-serif", width: 'fit-content' }}>{introSignal.label}</div>
+
+                  {/* Ways to help chips */}
+                  {helpTags.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {helpTags.map((tag, i) => <span key={i} style={{ background: '#FFF5F0', border: '1px solid #fdd5c0', color: '#E85D20', fontSize: '11px', fontWeight: '500', padding: '4px 10px', borderRadius: '100px', fontFamily: "'DM Sans', sans-serif" }}>{tag}</span>)}
+                    </div>
+                  )}
+
+                  {/* Location + industry */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: '#888' }}>📍 {displayLocation}</span>
+                    {displayIndustry && <span style={{ background: '#f5f5f5', color: '#555', fontSize: '11px', padding: '3px 10px', borderRadius: '100px', fontFamily: "'DM Sans', sans-serif" }}>{displayIndustry}</span>}
+                  </div>
+
+                  {/* Outreach suggestion */}
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', color: '#888', fontStyle: 'italic', margin: '0', paddingTop: '8px', borderTop: '1px solid #f5f5f5' }}>💡 What to ask: {outreachTip}</p>
+
+                  {/* Action buttons */}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                    <button onClick={() => onContact({ id: member.id, source: 'cff_database', name: member.full_name, title: member.job_title, company: displayCompany, email: member.email })} style={{ background: '#E85D20', color: 'white', border: 'none', borderRadius: '100px', padding: '9px 18px', fontFamily: "'DM Sans', sans-serif", fontWeight: '600', fontSize: '13px', cursor: 'pointer', flex: 1, minHeight: 'auto' }}>Contact Now →</button>
+                    <button onClick={() => onSaveLead({ id: member.id, source: 'cff_database', name: member.full_name, title: member.job_title, company: displayCompany, email: member.email })} style={{ background: 'white', color: '#555', border: '1px solid #e0e0e0', borderRadius: '100px', padding: '9px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: '13px', cursor: 'pointer', minHeight: 'auto' }}>🔖 Save</button>
+                    {member.linkedin_url && member.linkedin_url.trim() !== '' && <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ width: '36px', height: '36px', background: '#0077B5', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '14px', textDecoration: 'none', flexShrink: 0 }}>in</a>}
+                  </div>
+
+                </div>
+              );
+            })}
           </div>
         ) : (
           <RedHotEmptyState university={university} targetDesc={targetDesc} />
