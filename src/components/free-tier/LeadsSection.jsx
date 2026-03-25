@@ -46,70 +46,127 @@ function initials(name) {
   return (name || '?').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
 }
 
+const WAYS_TO_HELP_LABELS = {
+  'career_advice': '💬 Career Advice',
+  'introductions': '🤝 Introductions',
+  'resume_interviews': '📄 Resume Review',
+  'resume_review': '📄 Resume Review',
+  'mock_interviews': '🎤 Mock Interviews',
+  'industry_insights': '💡 Industry Insights',
+  'mentorship': '⭐ Mentorship',
+  'jobs_referrals': '✉️ Job Referrals',
+  'networking': '🌐 Networking',
+  'career_guidance': '🧭 Career Guidance',
+  'grad_school': '🎓 Grad School Advice',
+  'salary_negotiation': '💰 Salary Negotiation',
+  'interview_prep': '🎯 Interview Prep',
+};
+
+const getIntroSignal = (member) => {
+  const w = (member.intro_willingness || member.intro_availability || '').toLowerCase();
+  if (w === 'happy_to_help' || w === 'yes') return { label: '✓ Open to intros', color: '#15803D', bg: '#F0FDF4' };
+  if (w === 'occasionally' || w === 'sometimes') return { label: '◎ Available occasionally', color: '#D97706', bg: '#FFFBEB' };
+  return { label: '✓ In the CFF network', color: '#888', bg: '#F5F5F5' };
+};
+
+const getPersonaLabel = (member) => {
+  if (member.persona === 'parent' || member.roles?.includes('parent')) return '👨‍👩‍👧 CFF Parent';
+  if (member.persona === 'alumni' || member.roles?.includes('alumni')) return '🎓 Alumni';
+  return '✓ CFF Member';
+};
+
+const getOutreachSuggestion = (member) => {
+  const helps = member.ways_to_help || [];
+  if (helps.includes('jobs_referrals')) return 'Ask about open roles at their company';
+  if (helps.includes('mock_interviews')) return 'Ask for a mock interview';
+  if (helps.includes('introductions')) return 'Ask for an intro to someone in your field';
+  if (helps.includes('industry_insights')) return 'Ask about breaking into their industry';
+  if (helps.includes('resume_interviews') || helps.includes('resume_review')) return 'Ask for a resume review';
+  if (helps.includes('career_advice') || helps.includes('career_guidance')) return 'Ask for 15 minutes of career advice';
+  return null;
+};
+
 function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSaved }) {
   const company = member.company || '';
   const inits = initials(member.full_name);
-  const school = member.school || '';
-  const shortSchool = school.replace('University of ', '').replace('University', '').replace(' State University', ' State').trim();
   const isEnriched = !!(member.enriched_at || member.enriched);
-  const titleLine = [member.job_title, company].filter(Boolean).join(' · ');
-  const locationLine = [member.location_city, member.location_state].filter(Boolean).join(', ');
+  const locationLine = [member.location_city, member.location_state].filter(Boolean).join(', ') || 'Florida';
+  const helpTags = (member.ways_to_help || []).slice(0, 3).map(w => WAYS_TO_HELP_LABELS[w]).filter(Boolean);
+  const introSignal = getIntroSignal(member);
+  const personaLabel = getPersonaLabel(member);
+  const outreachSuggestion = getOutreachSuggestion(member);
   const displaySkills = member.skills?.slice(0, 3) || [];
 
   return (
-    <div style={{ background: '#fff', border: `1px solid ${isEnriched ? accentColor : '#E5E5E5'}`, borderLeft: `3px solid ${accentColor}`, borderRadius: 12, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ background: '#fff', border: `1.5px solid ${isEnriched || (member._score > 5) ? accentColor : '#E5E5E5'}`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 10, boxShadow: member._score > 5 ? '0 4px 16px rgba(220,38,38,0.07)' : '0 1px 4px rgba(0,0,0,0.04)' }}>
+
+      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
         {member.profile_image_url ? (
           <img src={member.profile_image_url} alt={member.full_name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
             onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
         ) : null}
-        <div style={{ width: 44, height: 44, borderRadius: '50%', background: accentColor, color: '#fff', display: member.profile_image_url ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+        <div style={{ width: 44, height: 44, borderRadius: '50%', background: accentColor, color: '#fff', display: member.profile_image_url ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
           {inits}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, color: '#1A1A1A', margin: 0 }}>{member.full_name}</p>
-            <span style={{ background: '#DCFCE7', color: '#15803D', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100 }}>✓ CFF</span>
-            {isEnriched && <span style={{ fontSize: 12, color: accentColor }}>⚡</span>}
+            {member.can_provide_referrals && (
+              <span style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, whiteSpace: 'nowrap' }}>✉️ Can refer</span>
+            )}
           </div>
-          {(member.headline || titleLine) && (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '2px 0 0' }}>
-              {titleLine || member.headline}
-            </p>
-          )}
-          {locationLine && (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: '2px 0 0' }}>📍 {locationLine}</p>
-          )}
+          {company && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '2px 0 0' }}>{company}</p>}
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999', margin: '2px 0 0' }}>{personaLabel}</p>
         </div>
       </div>
 
+      {/* Intro availability signal */}
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: introSignal.bg, color: introSignal.color, fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 100, alignSelf: 'flex-start', fontFamily: "'DM Sans', sans-serif" }}>
+        {introSignal.label}
+      </div>
+
+      {/* Ways to help chips */}
+      {helpTags.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {helpTags.map((tag, i) => (
+            <span key={i} style={{ background: '#FFF5F0', border: '1px solid #fdd5c0', color: '#E85D20', fontSize: 11, fontWeight: 500, padding: '4px 10px', borderRadius: 100, fontFamily: "'DM Sans', sans-serif" }}>{tag}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Skills (only if enriched) */}
+      {displaySkills.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {displaySkills.map((skill, i) => (
+            <span key={i} style={{ background: '#F0F0F0', color: '#555', fontSize: 11, padding: '3px 8px', borderRadius: 100, fontFamily: "'DM Sans', sans-serif" }}>{skill}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Meta: location + industry */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}>📍 {locationLine}</span>
+        {member.industry && <span style={{ background: '#F5F5F5', color: '#555', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100, fontFamily: "'DM Sans', sans-serif" }}>{member.industry}</span>}
+      </div>
+
+      {/* Bio (if enriched) */}
       {member.bio && isEnriched && (
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', fontStyle: 'italic', lineHeight: 1.5, margin: 0, padding: '8px 12px', background: '#FAFAFA', borderRadius: 8, borderLeft: `3px solid ${accentColor}` }}>
           "{member.bio.slice(0, 120)}{member.bio.length > 120 ? '...' : ''}"
         </p>
       )}
 
-      {(member.briefing && !member.bio) && (
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, fontStyle: 'italic', lineHeight: 1.4 }}>
-          "{member.briefing}"
+      {/* Outreach suggestion */}
+      {outreachSuggestion && (
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', fontStyle: 'italic', margin: 0, paddingTop: 8, borderTop: '1px solid #F5F5F5' }}>
+          💡 {outreachSuggestion}
         </p>
       )}
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        {(shortSchool || school) && <span style={{ background: '#F5F5F5', color: '#555', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100 }}>📍 {shortSchool || school}</span>}
-        {member.industry && <span style={{ background: '#FFF5F0', color: accentColor, border: `1px solid rgba(232,93,32,0.3)`, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100 }}>{member.industry}</span>}
-      </div>
-
-      {displaySkills.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {displaySkills.map((skill, i) => (
-            <span key={i} style={{ background: '#F0F0F0', color: '#555', fontSize: 11, padding: '3px 8px', borderRadius: 100 }}>{skill}</span>
-          ))}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <button onClick={() => onContact({ id: member.id, source: 'cff_database', name: member.full_name, title: member.job_title, company, email: member.email, school })}
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 2 }}>
+        <button onClick={() => onContact({ id: member.id, source: 'cff_database', name: member.full_name, title: member.job_title, company, email: member.email })}
           style={{ background: accentColor, color: '#fff', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
           Contact Now →
         </button>
