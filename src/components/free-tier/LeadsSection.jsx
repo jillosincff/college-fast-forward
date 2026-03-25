@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bookmark, Lock, UserPlus } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 
 // ─── Upgrade Modal ────────────────────────────────────────────────────────────
 
@@ -280,31 +281,10 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const fetchRedHotLeads = async () => {
     setRedHotLoading(true);
     try {
-      const response = await base44.functions.invoke('getDirectoryUsers', {});
-      console.log('[RedHot] Raw response:', JSON.stringify(response)?.slice(0, 500));
-      console.log('[RedHot] Response type:', typeof response, '| Is array:', Array.isArray(response));
-
-      // Handle all possible return shapes
-      // base44.functions.invoke returns axios-style: response.data = parsed body
-      // getDirectoryUsers body = { success, data: [...], count }
-      // so the array lives at response.data.data
-      let directoryUsers = [];
-      if (Array.isArray(response)) {
-        directoryUsers = response;
-      } else if (response?.data?.data && Array.isArray(response.data.data)) {
-        // axios wrapper: response.data = body, body.data = array
-        directoryUsers = response.data.data;
-      } else if (response?.data && Array.isArray(response.data)) {
-        directoryUsers = response.data;
-      } else if (response?.users && Array.isArray(response.users)) {
-        directoryUsers = response.users;
-      } else if (response?.members && Array.isArray(response.members)) {
-        directoryUsers = response.members;
-      } else if (response?.results && Array.isArray(response.results)) {
-        directoryUsers = response.results;
-      } else {
-        console.error('[RedHot] Unknown response shape:', JSON.stringify(response)?.slice(0, 300));
-      }
+      // Use direct import — same pattern as FreeTierDirectoryTab (confirmed working)
+      const res = await getDirectoryUsers({});
+      const directoryUsers = res?.data?.data || [];
+      console.log('[RedHot] Directory users resolved:', directoryUsers.length);
 
       console.log('[RedHot] Resolved users count:', directoryUsers.length);
       if (directoryUsers.length === 0) { setRedHotLeads([]); setRedHotTotal(0); return; }
