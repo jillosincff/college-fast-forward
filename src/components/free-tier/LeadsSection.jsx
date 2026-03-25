@@ -336,21 +336,56 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
       console.log('[RedHot] Step 5: first 3 raw members', JSON.stringify(allUsers.slice(0, 3)));
 
-      const sameSchool = allUsers.filter(u =>
-        u.id !== studentId &&
-        u.email?.toLowerCase()?.trim() !== studentEmail &&
-        normalizeSchool(u.school || u.university || '') === studentSchoolNorm
-      );
-      console.log('[RedHot] Step 6: sameSchool count', sameSchool.length);
+      const sameSchool = allUsers.filter(u => {
+        if (u.id === studentId) return false;
+        if (u.email?.toLowerCase()?.trim() === studentEmail) return false;
+        const memberSchool = normalizeSchool(u.school || u.university || '');
+        // Parents often have no school set — include them (they're platform parents)
+        if (u.persona === 'parent' || u.roles?.includes('parent')) {
+          return memberSchool === studentSchoolNorm || memberSchool === '';
+        }
+        return memberSchool === studentSchoolNorm;
+      });
+      console.log('[RedHot] Step 6: sameSchool with parents:', sameSchool.length);
 
-      // NO OTHER FILTERS — just set directly
-      setRedHotLeads(sameSchool.slice(0, 20));
-      setRedHotTotal(sameSchool.length);
+      // Quality filter using correct field names
+      const hasUsefulProfile = (u) => {
+        if (u.graduation_year && parseInt(u.graduation_year) > new Date().getFullYear()) return false;
+        if (u.persona === 'student' && !u.roles?.includes('parent') && !u.roles?.includes('alumni')) return false;
+        return !!(u.company || u.industry || u.job_title || u.bio || u.linkedin_url || u.ways_to_help?.length > 0);
+      };
 
       const careerGoals = user?.career_goals || {};
       const industries = [...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean))].filter(Boolean);
       const roles = [...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean))].filter(Boolean);
       if (industries.length || roles.length) setTargetDesc([...roles, ...industries].join(', '));
+
+      const scoreMatch = (member) => {
+        let score = 0;
+        const text = [member.industry, member.company, member.job_title, member.bio, member.ways_to_help?.join(' '), member.expertise_areas?.join(' '), member.mentorship_topics?.join(' ')].filter(Boolean).join(' ').toLowerCase();
+        industries.forEach(ind => { if (ind && text.includes(ind.toLowerCase())) score += 5; });
+        roles.forEach(role => { if (role && text.includes(role.toLowerCase())) score += 3; });
+        if (member.persona === 'parent' || member.roles?.includes('parent')) score += 3;
+        if (member.company) score += 1;
+        if (member.industry) score += 1;
+        if (member.job_title) score += 1;
+        if (member.linkedin_url) score += 1;
+        if (member.ways_to_help?.length > 0) score += 1;
+        if (member.updated_date) {
+          const daysSince = (Date.now() - new Date(member.updated_date).getTime()) / (1000 * 60 * 60 * 24);
+          if (daysSince < 30) score += 2;
+        }
+        return score;
+      };
+
+      const qualified = sameSchool
+        .filter(hasUsefulProfile)
+        .sort((a, b) => scoreMatch(b) - scoreMatch(a));
+
+      console.log('[RedHot] After quality filter:', qualified.length);
+      setRedHotLeads(qualified.slice(0, 20));
+      setRedHotTotal(qualified.length);
+
     } catch (err) {
       console.error('[RedHot] CAUGHT ERROR:', err.message, err.stack);
       setRedHotLeads([]);
