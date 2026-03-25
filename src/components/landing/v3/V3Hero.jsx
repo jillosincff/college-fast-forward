@@ -79,8 +79,8 @@ export default function V3Hero({ onCTA }) {
 
         {/* BRIDGING SENTENCE */}
         <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 28 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#fff', lineHeight: 1.6, margin: 0, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto' }}>
-            Your student gets real alumni matches from their school and ready-to-send messages — so they finally have momentum and you can stop worrying. — so they finally have momentum and you can stop worrying.
+          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.65, margin: 0, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto', textAlign: 'center' }}>
+            Your student gets real alumni matches from their school and ready-to-send messages — so they finally have momentum and you can stop worrying.
           </p>
         </div>
 
