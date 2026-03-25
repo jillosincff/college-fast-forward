@@ -23,7 +23,7 @@ Q5: Internship or full-time? Chips: ["Internship", "Full-time", "Both"]
 Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "2026", "2027", "2028+"]
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
-Q8: Do you have a dream company in mind? And what's your biggest gap right now? Free text + chips: ["No dream company yet", "Still building skills"]
+Q8: Any companies you'd love to work at — or types of companies that appeal to you? And what's your biggest gap right now? Free text + chips: ["Not sure yet", "Still building skills"]
 
 PATH B (figuring it out — answered Q2 with undecided):
 Q3: Work environment — what sounds most like you? Chips based on major.

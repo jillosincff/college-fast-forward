@@ -29,6 +29,8 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
     ['Experience', experience],
   ];
 
+  const hasEnoughTargetCompanies = goals?.target_companies?.length >= 2;
+
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: 24, marginBottom: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
@@ -43,6 +45,66 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
           </div>
         ))}
       </div>
+
+      {/* Target Companies Nudge — show if fewer than 2 companies */}
+      {!hasEnoughTargetCompanies && (
+        <div style={{
+          background: '#FAFAFA',
+          border: '1px solid #E5E5E5',
+          borderRadius: '12px',
+          padding: '16px 20px',
+          marginTop: '16px',
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '8px',
+            marginBottom: '10px',
+          }}>
+            <span style={{ color: '#E85D20', fontSize: '14px', marginTop: '1px', flexShrink: 0 }}>⚡</span>
+            <div style={{ flex: 1 }}>
+              <p style={{
+                fontSize: '13px',
+                fontWeight: '500',
+                color: '#1A1A1A',
+                margin: '0 0 4px 0',
+              }}>
+                Add a few target companies to sharpen your matches
+              </p>
+              <p style={{
+                fontSize: '12px',
+                color: '#666',
+                margin: 0,
+                lineHeight: '1.5',
+              }}>
+                No dream company yet? That's fine — even 2 or 3 examples help FastIQ understand the type of company you're looking for.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowEditModal(true)}
+            style={{
+              background: 'none',
+              border: '1px solid #E0E0E0',
+              borderRadius: '8px',
+              padding: '7px 14px',
+              fontSize: '12px',
+              color: '#333',
+              cursor: 'pointer',
+              width: '100%',
+              textAlign: 'left',
+              fontFamily: "'DM Sans', sans-serif",
+              minHeight: 'auto',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => { e.target.style.borderColor = '#E85D20'; e.target.style.color = '#E85D20'; }}
+            onMouseLeave={(e) => { e.target.style.borderColor = '#E0E0E0'; e.target.style.color = '#333'; }}
+          >
+            + Add target companies
+          </button>
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 10, marginTop: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <button onClick={onFindLeads || (() => onTabChange?.('company_intel'))}
           style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -70,7 +132,9 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
           onStartFresh={onRestart}
         />
       )}
-      <style>{`@keyframes bounceDown { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }`}</style>
+      <style>{`
+        @keyframes bounceDown { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
+      `}</style>
     </div>
   );
 }
