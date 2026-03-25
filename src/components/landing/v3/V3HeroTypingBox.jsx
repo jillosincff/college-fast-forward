@@ -3,7 +3,7 @@ import { CompaniesCard, AlumniCard, OutreachCard } from './V3HeroDemoCards';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
 const playfair = '"Playfair Display", Georgia, serif';
-const TYPING_SPEED = 30;
+const TYPING_SPEED = 70;
 const ORANGE = '#E85D20';
 
 /* ── School data ───────────────────────────────────── */
@@ -110,6 +110,13 @@ const SCHOOLS = [
   },
 ];
 
+const DEFAULT_MESSAGE = "Hey Sarah, I'm a UF '27 CS major and noticed you're a Software Engineer at Google. Your path from UF to Mountain View is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — Alex, UF '27";
+
+function buildOutreachMsg(school, alumni) {
+  const yr = `'${String(new Date().getFullYear() + 1).slice(2)}`;
+  return `Hey ${alumni.name.split(' ')[0]}, I'm a ${school.abbr} ${yr} student and noticed you're a ${alumni.role} at ${alumni.company}. Your path from ${school.abbr} is exactly what I'm aiming for — would love 15 minutes to hear how you got there. No pressure at all. — Alex, ${school.abbr} ${yr}`;
+}
+
 function buildDemoData(school) {
   const yr = school.abbr;
   return {
@@ -194,6 +201,7 @@ function DemoPlayer({ school, demoData }) {
   const [hasStarted, setHasStarted] = useState(false);
 
   const timersRef = useRef(new Set());
+  const typingRef = useRef(false);
 
   const accent = { primary: '#4F8CFF', soft: 'rgba(79,140,255,0.12)', border: 'rgba(79,140,255,0.30)', glow: 'rgba(79,140,255,0.25)' };
 
@@ -206,38 +214,54 @@ function DemoPlayer({ school, demoData }) {
     return id;
   }, []);
 
-  // Auto-play on mount
-  useEffect(() => {
-    setHasStarted(true);
+  const startTyping = useCallback((text) => {
+    // Cancel all pending timers
+    timersRef.current.forEach(id => clearTimeout(id));
+    timersRef.current.clear();
+    typingRef.current = true;
     setIsTyping(true);
-
-    const promptText = school.prompt;
+    setDisplayedText('');
     let charIdx = 0;
-
     const typeChar = () => {
-      if (charIdx <= promptText.length) {
-        setDisplayedText(promptText.slice(0, charIdx));
+      if (!typingRef.current) return;
+      if (charIdx <= text.length) {
+        setDisplayedText(text.slice(0, charIdx));
         charIdx++;
-        schedule(typeChar, TYPING_SPEED);
+        const id = setTimeout(typeChar, TYPING_SPEED);
+        timersRef.current.add(id);
       } else {
         setIsTyping(false);
-        schedule(() => {
-          setShowCompanies(true);
-          schedule(() => {
-            setShowAlumni(true);
-            schedule(() => {
-              setShowOutreach(true);
-              schedule(() => {
-                setShowProof(true);
-              }, 800);
-            }, 950);
-          }, 400);
-        }, 500);
       }
     };
     typeChar();
+  }, []);
+
+  const handleAlumniHover = useCallback((alumni) => {
+    const yr = `'${String(new Date().getFullYear() + 1).slice(2)}`;
+    const msg = `Hey ${alumni.name.split(' ')[0]}, I'm a ${school.abbr} ${yr} student and noticed you're a ${alumni.role} at ${alumni.company}. Your path from ${school.abbr} is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — Alex, ${school.abbr} ${yr}`;
+    startTyping(msg);
+  }, [school, startTyping]);
+
+  // Auto-play on mount
+  useEffect(() => {
+    setHasStarted(true);
+    startTyping(DEFAULT_MESSAGE);
+
+    schedule(() => {
+      setShowCompanies(true);
+      schedule(() => {
+        setShowAlumni(true);
+        schedule(() => {
+          setShowOutreach(true);
+          schedule(() => {
+            setShowProof(true);
+          }, 800);
+        }, 950);
+      }, 400);
+    }, 500);
 
     return () => {
+      typingRef.current = false;
       timersRef.current.forEach(id => clearTimeout(id));
       timersRef.current.clear();
     };
@@ -247,7 +271,7 @@ function DemoPlayer({ school, demoData }) {
 
   return (
     <div style={{ opacity: hasStarted ? 1 : 0, transition: 'opacity 0.3s ease-out' }}>
-      {/* ── White input box ─────────────────────────── */}
+      {/* ── White input box ───────────────────── */}
       <div
         style={{
           background: '#FFFFFF',
@@ -267,30 +291,30 @@ function DemoPlayer({ school, demoData }) {
             <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: accent.primary, letterSpacing: '0.04em' }}>FASTIQ</span>
           </div>
           <div className="flex-1" />
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.3)' }}>Guided demo</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(0,0,0,0.3)' }}>Hover an alumni card to see their message</span>
         </div>
-        <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#111111', lineHeight: 1.6, margin: 0 }}>
+        <p className="min-h-[52px]" style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#111111', lineHeight: 1.6, margin: 0 }}>
           {displayedText || <span style={{ color: 'rgba(0,0,0,0.25)' }}>Describe your goal...</span>}
-          {isTyping && displayedText && (
+          {isTyping && (
             <span className="inline-block w-[2px] h-[18px] ml-0.5 align-text-bottom" style={{ background: 'rgba(0,0,0,0.45)', animation: 'blink 0.9s infinite' }} />
           )}
         </p>
       </div>
 
-      {/* ── Disclaimer (static) ────────────────────── */}
+      {/* ── Disclaimer (static) ────────────── */}
       <p className="text-center" style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, fontStyle: 'italic', lineHeight: 1.5, margin: '0 0 16px' }}>
         <span style={{ color: 'rgba(255,255,255,0.35)' }}>This is a sample scenario.</span>{' '}
         <span style={{ color: '#E85D20' }}>FastIQ works for any student at any school.</span>
       </p>
 
-      {/* ── Result cards ───────────────────────────── */}
+      {/* ── Result cards ─────────────────── */}
       <div className="flex flex-col gap-3">
         <CompaniesCard companies={demoData.companies} visible={showCompanies} accent={accent} hasAsterisk={demoData.hasAsterisk} />
-        <AlumniCard alumni={demoData.alumni} visible={showAlumni} accent={accent} />
+        <AlumniCard alumni={demoData.alumni} visible={showAlumni} accent={accent} onAlumniHover={handleAlumniHover} />
         <OutreachCard outreach={demoData.outreach} visible={showOutreach} accent={accent} />
       </div>
 
-      {/* ── Proof line ─────────────────────────────── */}
+      {/* ── Proof line ───────────────────── */}
       <div className="mt-6" style={{ textAlign: 'left', opacity: isDone ? 1 : 0, transform: isDone ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 0.5s 0.2s, transform 0.5s 0.2s' }}>
         <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.55, margin: 0 }}>
           FastIQ doesn't just give advice — it shows your student{' '}

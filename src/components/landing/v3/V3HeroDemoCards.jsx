@@ -69,7 +69,7 @@ export function CompaniesCard({ companies, visible, accent, hasAsterisk }) {
 }
 
 /* ── 2. Alumni Matches ───────────────────────────────── */
-export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false }) {
+export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false, onAlumniHover }) {
   const a = accent || DEFAULT_ACCENT;
 
   return (
@@ -79,7 +79,8 @@ export function AlumniCard({ alumni, visible, accent, showSchoolBadge = false })
           <div
             key={al.name}
             className="flex items-center gap-3"
-            style={{
+            onMouseEnter={() => onAlumniHover && onAlumniHover(al)}
+            style={{ cursor: onAlumniHover ? 'pointer' : 'default',
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.06)',
               borderRadius: 12, padding: '12px 16px',
