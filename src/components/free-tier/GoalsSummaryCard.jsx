@@ -4,6 +4,7 @@ import EditGoalsModal from './EditGoalsModal';
 
 export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRestart, showLeadsArrow, user, onGoalsUpdated }) {
   const [showEditModal, setShowEditModal] = useState(false);
+  const [openedFromNudge, setOpenedFromNudge] = useState(false);
   const roles = goals?.target_roles?.join(', ') || goals?.role || '—';
   const industries = goals?.target_industries?.length
     ? goals.target_industries.join(', ')
@@ -85,7 +86,7 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
             </div>
           </div>
           <button
-            onClick={() => setShowEditModal(true)}
+            onClick={() => { setOpenedFromNudge(true); setShowEditModal(true); }}
             style={{
               background: 'none',
               border: '1px solid #E0E0E0',
@@ -118,7 +119,7 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
           style={{ background: '#fff', color: '#E85D20', border: '2px solid #E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
           Dig Into Career Paths →
         </button>
-        <button onClick={() => setShowEditModal(true)}
+        <button onClick={() => { setOpenedFromNudge(false); setShowEditModal(true); }}
           style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', padding: 0, fontFamily: "'DM Sans', sans-serif" }}>
           Update my goals
         </button>
@@ -127,10 +128,12 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
         <EditGoalsModal
           goals={goals}
           user={user}
-          onClose={() => setShowEditModal(false)}
+          openedFromNudge={openedFromNudge}
+          onClose={() => { setShowEditModal(false); setOpenedFromNudge(false); }}
           onSave={(updated) => {
             onGoalsUpdated?.(updated);
             setShowEditModal(false);
+            setOpenedFromNudge(false);
           }}
           onStartFresh={onRestart}
         />

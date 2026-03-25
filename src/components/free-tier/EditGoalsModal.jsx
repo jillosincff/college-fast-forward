@@ -23,13 +23,14 @@ const LOCATION_SUGGESTIONS = [
   'Seattle', 'Denver', 'Atlanta', 'Remote only', 'Open to anything'
 ];
 
-export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFresh }) {
+export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFresh, openedFromNudge = false }) {
   const [roles, setRoles] = useState(goals?.target_roles || []);
   const [industries, setIndustries] = useState(goals?.target_industries || []);
   const [lookingFor, setLookingFor] = useState(goals?.seeking || 'Full-time');
   const [gradYear, setGradYear] = useState(goals?.graduation_year || '');
   const [location, setLocation] = useState(goals?.location_preference || '');
-  const [dreamCompany, setDreamCompany] = useState(goals?.dream_company || '');
+  const [targetCompanies, setTargetCompanies] = useState(goals?.target_companies || []);
+  const [companyInput, setCompanyInput] = useState('');
   const [experience, setExperience] = useState(goals?.experience_level || 'Entry-level');
   const [major, setMajor] = useState(goals?.major || '');
   const [roleInput, setRoleInput] = useState('');
@@ -51,6 +52,13 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
     }
   };
 
+  const handleAddCompany = (company) => {
+    if (company.trim() && !targetCompanies.includes(company.trim())) {
+      setTargetCompanies([...targetCompanies, company.trim()]);
+      setCompanyInput('');
+    }
+  };
+
   const handleSave = async () => {
     if (roles.length === 0 && industries.length === 0) {
       setError('Please add at least one role or industry.');
@@ -66,13 +74,13 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           seeking: lookingFor,
           graduation_year: gradYear,
           location_preference: location,
-          dream_company: dreamCompany,
+          target_companies: targetCompanies,
           experience_level: experience,
           major: major,
           saved_at: new Date().toISOString()
         }
       });
-      onSave({ target_roles: roles, target_industries: industries, seeking: lookingFor, graduation_year: gradYear, location_preference: location, dream_company: dreamCompany, experience_level: experience, major });
+      onSave({ target_roles: roles, target_industries: industries, seeking: lookingFor, graduation_year: gradYear, location_preference: location, target_companies: targetCompanies, experience_level: experience, major });
       onClose();
     } catch (e) {
       console.error('Save failed:', e);
@@ -170,16 +178,87 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
             />
           </div>
 
-          {/* Dream Company */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>DREAM COMPANY</label>
-            <input
-              type="text"
-              value={dreamCompany}
-              onChange={e => setDreamCompany(e.target.value)}
-              placeholder="Company name..."
-              style={{ width: '100%', padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, fontSize: 14, fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
-            />
+          {/* Target Companies */}
+          <div style={{
+            marginBottom: 20,
+            border: openedFromNudge ? '2px solid #E85D20' : '1px solid #E0E0E0',
+            borderRadius: '10px',
+            padding: '14px',
+            background: openedFromNudge ? 'rgba(232, 93, 32, 0.04)' : 'transparent',
+          }}>
+            <label style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: '11px',
+              fontWeight: '600',
+              letterSpacing: '.06em',
+              color: openedFromNudge ? '#E85D20' : '#1A1A1A',
+              textTransform: 'uppercase',
+              display: 'block',
+              marginBottom: '8px',
+            }}>
+              Target Companies {openedFromNudge && '← Add 2–3 to sharpen your matches'}
+            </label>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+              {targetCompanies.map((company, i) => (
+                <span key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: '4px',
+                  background: '#FFF5F0',
+                  border: '1px solid #E85D20',
+                  borderRadius: '20px',
+                  padding: '4px 10px',
+                  fontSize: '12px',
+                  color: '#E85D20',
+                }}>
+                  {company}
+                  <button
+                    onClick={() => setTargetCompanies(targetCompanies.filter((_, idx) => idx !== i))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', fontSize: '14px', lineHeight: 1, padding: 0, minHeight: 'auto', minWidth: 'auto' }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                placeholder="e.g. BuzzFeed, Spotify, Nike..."
+                value={companyInput}
+                onChange={e => setCompanyInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddCompany(companyInput);
+                  }
+                }}
+                style={{
+                  flex: 1,
+                  fontSize: '13px',
+                  padding: '8px 12px',
+                  border: '1px solid #E0E0E0',
+                  borderRadius: '8px',
+                  background: '#fff',
+                  color: '#1A1A1A',
+                  fontFamily: "'DM Sans', sans-serif",
+                  boxSizing: 'border-box',
+                }}
+              />
+              <button
+                onClick={() => handleAddCompany(companyInput)}
+                style={{
+                  background: '#E85D20', border: 'none',
+                  borderRadius: '8px', padding: '8px 14px',
+                  fontSize: '12px', color: '#fff', cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontWeight: 600,
+                  minHeight: 'auto',
+                }}
+              >
+                Add
+              </button>
+            </div>
           </div>
 
           {/* Experience Level */}
@@ -212,7 +291,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
             <button onClick={handleSave} disabled={saving} style={{ flex: 1, background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 0', fontSize: 14, fontWeight: 600, cursor: saving ? 'default' : 'pointer', minHeight: 'auto', opacity: saving ? 0.7 : 1 }}>
               {saving ? 'Saving...' : 'Save Changes →'}
             </button>
-            <button onClick={onClose} style={{ flex: 1, background: 'none', border: '1px solid #E0E0E0', color: '#666', borderRadius: 100, padding: '12px 0', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
+            <button onClick={() => { setCompanyInput(''); onClose(); }} style={{ flex: 1, background: 'none', border: '1px solid #E0E0E0', color: '#666', borderRadius: 100, padding: '12px 0', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
           </div>
 
           {/* Secondary option */}
