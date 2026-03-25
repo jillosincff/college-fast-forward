@@ -204,6 +204,8 @@ const RESPONSE_SCHEMA = {
       properties: {
         target_roles: { type: 'array', items: { type: 'string' } },
         target_industries: { type: 'array', items: { type: 'string' } },
+        target_functions: { type: 'array', items: { type: 'string' } },
+        target_companies: { type: 'array', items: { type: 'string' } },
         seeking: { type: 'string' },
         graduation_year: { type: 'string' },
         location_preference: { type: 'string' },
@@ -214,7 +216,7 @@ const RESPONSE_SCHEMA = {
         work_environment: { type: 'string' },
         preliminary_archetype: { type: 'string' },
         career_profile_summary: { type: 'string' },
-        seeking: { type: 'string' },
+        major: { type: 'string' },
       },
     },
   },
@@ -271,12 +273,24 @@ const VALID_FUNCTIONS = [
 
 function normalizeGoals(goals) {
   if (!goals) return goals;
+
+  // Rescue: if a function-type value landed in target_industries, move it
+  const rawIndustries = goals.target_industries || [];
+  const rescuedFunctions = rawIndustries.filter(v => VALID_FUNCTIONS.includes(v));
+  const cleanedIndustries = rawIndustries.filter(v => VALID_INDUSTRIES.includes(v));
+
+  // Rescue: if an industry-type value landed in target_functions, move it
+  const rawFunctions = [...(goals.target_functions || []), ...rescuedFunctions];
+  const rescuedIndustries = rawFunctions.filter(v => VALID_INDUSTRIES.includes(v));
+  const cleanedFunctions = rawFunctions.filter(v => VALID_FUNCTIONS.includes(v));
+
+  const finalIndustries = [...new Set([...cleanedIndustries, ...rescuedIndustries])];
+  const finalFunctions = [...new Set(cleanedFunctions)];
+
   return {
     ...goals,
-    target_industries: (goals.target_industries || [])
-      .filter((v) => VALID_INDUSTRIES.includes(v)),
-    target_functions: (goals.target_functions || [])
-      .filter((v) => VALID_FUNCTIONS.includes(v)),
+    target_industries: finalIndustries,
+    target_functions: finalFunctions,
   };
 }
 
