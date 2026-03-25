@@ -195,21 +195,19 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSave
       {lead.teaser_profile ? (
         <div style={{ marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: '1px solid #E5E5E5' }}>
-            <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#e5e5e5', filter: 'blur(4px)', flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: '#1A1A1A', filter: 'blur(5px)', userSelect: 'none', marginBottom: 2 }}>
-                {lead.teaser_profile.display_name || 'S. K.'}
-              </div>
-              <div style={{ fontSize: 12, color: '#666' }}>
-                {lead.teaser_profile.title}
-                {lead.teaser_profile.grad_year && <span style={{ color: '#999', marginLeft: 6 }}>· UF {lead.teaser_profile.grad_year}</span>}
-              </div>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e5e5e5', filter: 'blur(4px)', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#555', lineHeight: 1.4 }}>
+              <span style={{ fontWeight: 600, color: '#1A1A1A', filter: 'blur(5px)', userSelect: 'none' }}>
+                {lead.teaser_profile.display_name || 'S.K.'}
+              </span>
+              {lead.teaser_profile.title && <span style={{ color: '#666' }}> · {lead.teaser_profile.title}</span>}
+              {lead.teaser_profile.grad_year && <span style={{ color: '#999' }}> · UF {lead.teaser_profile.grad_year}</span>}
             </div>
-            <span style={{ fontSize: 14, color: '#999' }}>🔒</span>
+            <span style={{ fontSize: 14, color: '#999', flexShrink: 0 }}>🔒</span>
           </div>
           {[...Array(Math.max(0, Math.min(2, (lead.alumni_count || 3) - 1)))].map((_, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: i < 1 ? '1px solid #E5E5E5' : 'none', opacity: 0.5 }}>
-              <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#e5e5e5', flexShrink: 0 }} />
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: i < 1 ? '1px solid #E5E5E5' : 'none', opacity: 0.4 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e5e5e5', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ height: 10, width: 60, background: '#e5e5e5', borderRadius: 4, marginBottom: 4 }} />
                 <div style={{ height: 8, width: 90, background: '#f0f0f0', borderRadius: 4 }} />
@@ -240,11 +238,6 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSave
         <button onClick={() => onUnlock(lead)}
           style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           {lead.teaser_profile ? `🔒 See ${lead.teaser_profile.display_name} and ${Math.max(0, (lead.alumni_count || 1) - 1).toLocaleString()} more →` : '🔒 Unlock to See Who →'}
-        </button>
-        <button onClick={() => onSave({ id: `alumni_${lead.company}`, source: 'web_search', company: lead.company })}
-          style={{ background: isSaved ? '#FFF5F0' : 'none', border: `1px solid ${isSaved ? '#E85D20' : '#E0E0E0'}`, color: isSaved ? '#E85D20' : '#666', borderRadius: 100, padding: '10px 14px', fontSize: 13, cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Bookmark style={{ width: 13, height: 13, fill: isSaved ? '#E85D20' : 'none' }} />
-          {isSaved ? 'Saved' : 'Save'}
         </button>
       </div>
     </div>
