@@ -1121,7 +1121,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                     </div>
                   ))}
                   </div>
-                  ) : null
                   ) : (
                   <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 16, padding: '24px', marginTop: '32px', textAlign: 'center' }}>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px' }}>🔒 FASTIQ FEATURE</p>
