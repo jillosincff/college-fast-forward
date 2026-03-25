@@ -18,7 +18,7 @@ const INDUSTRY_CLUSTERS = {
   finance: ['finance', 'banking', 'investment', 'accounting', 'insurance', 'real estate', 'private equity', 'hedge fund', 'wealth', 'asset management', 'fintech', 'cpa', 'audit'],
   technology: ['tech', 'technology', 'software', 'engineering', 'product', 'data', 'ai', 'startup', 'saas', 'cyber', 'it', 'information technology', 'developer', 'cloud'],
   consulting: ['consulting', 'strategy', 'advisory', 'management', 'operations', 'analyst', 'mckinsey', 'bain', 'deloitte', 'accenture'],
-  healthcare: ['healthcare', 'medical', 'hospital', 'pharma', 'biotech', 'clinical', 'nursing', 'health system', 'dentistry', 'physician'],
+  healthcare: ['healthcare', 'medical', 'hospital', 'pharma', 'biotech', 'clinical', 'nursing', 'health system', 'dentistry', 'physician', 'speech', 'pathologist', 'therapist', 'rehabilitation'],
   legal: ['legal', 'law', 'attorney', 'lawyer', 'paralegal', 'compliance', 'regulatory', 'litigation'],
   nonprofit: ['nonprofit', 'ngo', 'foundation', 'social impact', 'advocacy', 'education', 'government', 'policy', 'public sector'],
   realestate: ['real estate', 'property', 'construction', 'reit', 'mortgage', 'broker', 'developer'],
@@ -37,9 +37,33 @@ function getClusterKeywords(industries, roles) {
   return Array.from(keywords);
 }
 
-function scoreMatch(member, clusterKeywords) {
-  const text = [member.industry, member.industries, member.job_title, member.current_role, member.current_position, member.company, member.current_company, member.expertise_areas, member.bio].filter(Boolean).join(' ').toLowerCase();
-  return clusterKeywords.filter(k => text.includes(k)).length;
+// Returns which cluster a text blob most strongly belongs to
+function getClusterKey(text) {
+  const t = (text || '').toLowerCase();
+  let best = null; let bestScore = 0;
+  for (const [key, words] of Object.entries(INDUSTRY_CLUSTERS)) {
+    const score = words.filter(w => t.includes(w)).length;
+    if (score > bestScore) { bestScore = score; best = key; }
+  }
+  return bestScore > 0 ? best : null;
+}
+
+function scoreMatch(member, clusterKeywords, targetClusterKeys) {
+  // Hard exclude: if member's explicit industry clearly belongs to a DIFFERENT cluster
+  const memberIndustryText = (member.industry || member.industries || '').toLowerCase();
+  if (memberIndustryText) {
+    const memberCluster = getClusterKey(memberIndustryText);
+    if (memberCluster && targetClusterKeys.length > 0 && !targetClusterKeys.includes(memberCluster)) {
+      return 0;
+    }
+  }
+  // Score only against structured fields — not bio (too noisy)
+  const coreText = [
+    member.industry, member.industries, member.job_title,
+    member.current_role, member.current_position,
+    member.company, member.current_company, member.expertise_areas
+  ].filter(Boolean).join(' ').toLowerCase();
+  return clusterKeywords.filter(k => coreText.includes(k)).length;
 }
 
 const GENERIC_TITLES = ['professional', 'member', 'user', 'n/a', 'na', ''];
@@ -77,11 +101,27 @@ Deno.serve(async (req) => {
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
 
     const careerGoals = student.career_goals || {};
-    const industries = [...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean)), ...(Array.isArray(student.target_industries) ? student.target_industries : [])].filter(Boolean);
-    const roles = [...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean)), ...(Array.isArray(student.target_roles) ? student.target_roles : [])].filter(Boolean);
+    const industries = [
+      ...(Array.isArray(careerGoals.target_industries) ? careerGoals.target_industries : [careerGoals.target_industries].filter(Boolean)),
+      ...(Array.isArray(student.target_industries) ? student.target_industries : [])
+    ].filter(Boolean);
+    const roles = [
+      ...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean)),
+      ...(Array.isArray(student.target_roles) ? student.target_roles : [])
+    ].filter(Boolean);
     const targetDesc = [...roles, ...industries].join(', ');
 
     const clusterKeywords = getClusterKeywords(industries, roles);
+
+    // Determine which industry clusters the student's goals map to
+    const targetClusterKeys = Object.entries(INDUSTRY_CLUSTERS)
+      .filter(([, words]) => [...industries, ...roles].some(t =>
+        words.some(w => t.toLowerCase().includes(w) || w.includes(t.toLowerCase()))
+      ))
+      .map(([key]) => key);
+
+    console.log('Target cluster keys:', targetClusterKeys);
+    console.log('Student industries:', industries, '| roles:', roles);
 
     const getSharedSchools = (member) => {
       const ms = normalizeSchool(member.school || member.university || '');
@@ -90,38 +130,33 @@ Deno.serve(async (req) => {
       return studentSchools.filter(ss => memberSchools.includes(ss) || ss === ms);
     };
 
-    // FIX 1: Exclude student by both id AND email (case-insensitive)
+    // Exclude: student themselves, admins, hidden profiles, wrong school
     const sameSchoolMembers = allUsers.filter(u => {
       if (u.id === student_id) return false;
       if (u.email?.toLowerCase() === studentEmail) return false;
       if (u.show_in_directory === false) return false;
+      if (u.roles?.includes('admin') || u.role === 'admin') return false;
       const ms = normalizeSchool(u.school || u.university || '');
       if (!studentSchools.includes(ms) || ms === '') return false;
       return u.persona === 'parent' || u.roles?.includes('parent') ||
         (u.persona === 'alumni' && (u.alumni_intent === 'giving_help' || u.help_types?.includes('career') || u.intro_availability === 'happy_to_help'));
     });
 
-    // FIX 6: Debug — log marketing-relevant members
-    const debugKeywords = ['marketing', 'advertising', 'brand', 'content', 'media', 'entertainment', 'communications', 'pr', 'creative'];
-    const debugMarketing = sameSchoolMembers.filter(u => {
-      const text = [u.industry, u.job_title, u.current_role, u.bio].filter(Boolean).join(' ').toLowerCase();
-      return debugKeywords.some(k => text.includes(k));
-    });
-    console.log('Marketing-relevant same-school members:', debugMarketing.length);
-    console.log('Sample:', JSON.stringify(debugMarketing.slice(0, 5).map(u => ({ name: u.full_name, title: u.job_title, industry: u.industry, school: u.school }))));
-    console.log('All same-school members count:', sameSchoolMembers.length);
-    console.log('Cluster keywords:', clusterKeywords.join(', '));
+    console.log('Same-school members (pre-score):', sameSchoolMembers.length);
 
+    // Require score >= 2 for a match (stricter than before)
     const relevantMembers = sameSchoolMembers
-      .filter(u => scoreMatch(u, clusterKeywords) > 0)
+      .filter(u => scoreMatch(u, clusterKeywords, targetClusterKeys) >= 2)
       .sort((a, b) => {
-        const sB = scoreMatch(b, clusterKeywords) + (getSharedSchools(b).length > 1 ? 2 : 0);
-        const sA = scoreMatch(a, clusterKeywords) + (getSharedSchools(a).length > 1 ? 2 : 0);
+        const sB = scoreMatch(b, clusterKeywords, targetClusterKeys) + (getSharedSchools(b).length > 1 ? 2 : 0);
+        const sA = scoreMatch(a, clusterKeywords, targetClusterKeys) + (getSharedSchools(a).length > 1 ? 2 : 0);
         return sB - sA;
       })
       .slice(0, 20);
 
-    // FIX 7: Briefings with strict data-only prompt
+    console.log('Relevant members after strict scoring:', relevantMembers.length);
+
+    // Generate briefings
     let briefings = {};
     if (relevantMembers.length > 0 && targetDesc) {
       try {
@@ -154,11 +189,11 @@ Deno.serve(async (req) => {
         email: member.email,
         linkedin_url: member.linkedin_url || '',
         briefing: (briefing && briefing !== 'null') ? briefing : '',
-        match_score: scoreMatch(member, clusterKeywords) + (shared.length > 1 ? 2 : 0),
+        match_score: scoreMatch(member, clusterKeywords, targetClusterKeys) + (shared.length > 1 ? 2 : 0),
       };
     });
 
-    // FIX 2: Check warm leads cache before regenerating
+    // Warm leads cache check
     const cachedAt = student.warm_leads_cached_at;
     const cacheAge = cachedAt ? Date.now() - new Date(cachedAt).getTime() : Infinity;
     const cacheValid = cacheAge < ONE_DAY_MS && student.warm_leads_cache?.length > 0;
@@ -217,17 +252,12 @@ Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence
               }),
             ]);
             if (!alumniResult) return null;
-            // Only keep verified counts — null out anything estimated
-            if (alumniResult.confidence !== 'verified') {
-              alumniResult.alumni_count = null;
-            }
-            // Always store the result (even with null count) so we can show "alumni work here"
+            if (alumniResult.confidence !== 'verified') alumniResult.alumni_count = null;
             return { ...alumniResult, teaser_roles: teaserResult?.roles || [], alumni_signal: true };
-          } catch { return null; }
+          } catch (err) { return null; }
         })
       );
 
-      // Keep all results (including null counts) — they still show the company; sort verified counts first
       warmLeadsData = warmResults
         .filter(r => r != null)
         .sort((a, b) => {
@@ -236,7 +266,6 @@ Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence
           return (b.alumni_count || 0) - (a.alumni_count || 0);
         });
 
-      // Save to cache
       await base44.asServiceRole.entities.User.update(student_id, {
         warm_leads_cache: warmLeadsData,
         warm_leads_cached_at: new Date().toISOString(),
@@ -257,6 +286,7 @@ Return JSON: { "company": "${company}", "alumni_count": number|null, "confidence
         totalUsersInDB: allUsers.length,
         sameSchoolTotal: sameSchoolMembers.length,
         relevantTotal: relevantMembers.length,
+        targetClusterKeys,
         studentIndustries: industries,
         studentRoles: roles,
         warmLeadsCached: cacheValid,
