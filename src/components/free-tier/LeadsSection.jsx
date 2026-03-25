@@ -277,16 +277,27 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
   const university = studentSchool || normalizeSchool(user?.school || user?.university || '') || 'UF';
 
-  // ── Minimum viable lead: needs at least one piece of professional context ──
+  const DEPRIORITIZE_INDUSTRIES = ['healthcare', 'medical', 'nursing', 'dental', 'veterinary', 'pharmacy'];
+
+  // ── Minimum viable lead ──
   const hasUsefulProfile = (u) => {
+    // Exclude current students
     if (u.persona === 'student' || u.persona === 'seeker' || u.persona === 'gator') return false;
-    const hasJobInfo = u.job_title || u.current_role || u.current_position || u.company || u.current_company || u.employer || u.industry || u.linkedin_url || u.bio;
-    if (!hasJobInfo) return false;
-    const name = u.full_name || u.name || '';
-    if (!name || name.includes('@')) return false;
-    // Filter out usernames: no space, all lowercase, short
-    if (!name.includes(' ') && name === name.toLowerCase() && name.length < 20) return false;
-    return true;
+    if (u.roles?.includes('student')) return false;
+    if (u.roles?.includes('gator') && !u.roles?.includes('parent') && !u.roles?.includes('alumni')) return false;
+    // Exclude future grads (still in school)
+    if (u.graduation_year) {
+      const gradYear = parseInt(u.graduation_year);
+      if (gradYear > new Date().getFullYear()) return false;
+    }
+    // Must have job title, company, OR LinkedIn
+    const hasProfessionalContext =
+      (u.job_title?.trim()) ||
+      (u.current_role?.trim()) ||
+      (u.company?.trim()) ||
+      (u.current_company?.trim()) ||
+      (u.linkedin_url?.trim());
+    return !!hasProfessionalContext;
   };
 
   // ── Red Hot: load, filter, enrich ──
@@ -301,10 +312,12 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       const studentSchoolNorm = normalizeSchool(user?.school || user?.university || '');
       setStudentSchool(studentSchoolNorm);
 
-      // Self-exclusion by both id and email
+      // Self-exclusion — email first (catches all accounts), then id
+      const currentEmail = user?.email?.toLowerCase()?.trim();
+      const currentId = user?.id;
       const sameSchool = directoryUsers.filter(u =>
-        u.id !== user?.id &&
-        u.email?.toLowerCase()?.trim() !== user?.email?.toLowerCase()?.trim() &&
+        u.email?.toLowerCase()?.trim() !== currentEmail &&
+        u.id !== currentId &&
         normalizeSchool(u.school || u.university || '') === studentSchoolNorm
       );
 
@@ -324,9 +337,17 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       const scoreMatch = (member) => {
         const text = [member.industry, member.job_title, member.current_role, member.company, member.bio].filter(Boolean).join(' ').toLowerCase();
         let score = 0;
-        industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 3; });
-        roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 2; });
-        if (member.job_title || member.current_role) score += 1;
+        industries.forEach(i => { if (i && text.includes(i.toLowerCase())) score += 5; });
+        roles.forEach(r => { if (r && text.includes(r.toLowerCase())) score += 3; });
+        // Soft deprioritize unrelated industries
+        if (DEPRIORITIZE_INDUSTRIES.some(d => text.includes(d)) && score === 0) score -= 2;
+        // Bonus for complete profile
+        if (member.job_title) score += 1;
+        if (member.company) score += 1;
+        if (member.linkedin_url) score += 1;
+        if (member.bio) score += 1;
+        // Parent bonus
+        if (member.persona === 'parent' || member.roles?.includes('parent')) score += 2;
         return score;
       };
 
