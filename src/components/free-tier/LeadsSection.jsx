@@ -326,20 +326,34 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         ...(Array.isArray(user?.target_roles) ? user.target_roles : [])
       ].filter(Boolean);
 
-      const filtered = directoryUsers.filter(u => {
-        // Exclude self
+      const sameSchool = directoryUsers.filter(u => {
         if (u.id === currentId || u.email?.toLowerCase()?.trim() === currentEmail) return false;
-        // Same school only
-        if (normalizeSchool(u.school || u.university || '') !== studentSchoolNorm) return false;
-        // Exclude current students (future grad year)
-        if (u.graduation_year && parseInt(u.graduation_year) > new Date().getFullYear()) return false;
-        // Exclude student personas without parent/alumni role
-        if ((u.persona === 'gator' || u.persona === 'student') && !u.roles?.includes('parent') && !u.roles?.includes('alumni')) return false;
-        // Must have at least one piece of professional info
-        return !!(u.job_title || u.current_role || u.company || u.current_company || u.industry || u.linkedin_url || (u.bio && u.bio.length > 10));
+        return normalizeSchool(u.school || u.university || '') === studentSchoolNorm;
       });
 
-      console.log('[RedHot] filtered count:', filtered.length);
+      console.log('[RedHot] same-school count:', sameSchool.length);
+      console.log('[RedHot] Sample UF member fields:', sameSchool.slice(0, 5).map(u => ({
+        id: u.id,
+        full_name: u.full_name,
+        name: u.name,
+        persona: u.persona,
+        roles: u.roles,
+        job_title: u.job_title,
+        current_role: u.current_role,
+        current_position: u.current_position,
+        company: u.company,
+        current_company: u.current_company,
+        employer: u.employer,
+        industry: u.industry,
+        industries: u.industries,
+        linkedin_url: u.linkedin_url,
+        bio: u.bio,
+        graduation_year: u.graduation_year,
+        allKeys: Object.keys(u)
+      })));
+
+      // No quality filtering for now — just self + school exclusion
+      const filtered = sameSchool;
 
       // Score by relevance
       const scored = filtered.map(u => {
