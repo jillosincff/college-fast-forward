@@ -1129,6 +1129,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               </div>
             )
             }
+          </>
+        )}
 
         {error === 'llm' && (
           <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
