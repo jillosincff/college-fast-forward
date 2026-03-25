@@ -94,7 +94,11 @@ const SCHOOLS = [
   },
 ];
 
-const DEFAULT_MESSAGE = "Hey Sarah, I'm a UF '27 CS major and noticed you're a Software Engineer at Google. Your path from UF to Mountain View is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — Alex, UF '27";
+function buildDefaultMessage(school) {
+  const yr = `'${String(new Date().getFullYear() + 1).slice(2)}`;
+  const alumni = school.alumni[0];
+  return `Hey ${alumni.name.split(' ')[0]}, I'm a ${school.abbr} ${yr} student and noticed you're a ${alumni.role} at ${alumni.company}. Your path from ${school.abbr} is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — Alex, ${school.abbr} ${yr}`;
+}
 
 function buildDemoData(school) {
   const yr = school.abbr;
@@ -217,7 +221,7 @@ function DemoPlayer({ school, demoData }) {
 
   useEffect(() => {
     setHasStarted(true);
-    startTyping(DEFAULT_MESSAGE);
+    startTyping(buildDefaultMessage(school));
 
     schedule(() => {
       setShowCompanies(true);
