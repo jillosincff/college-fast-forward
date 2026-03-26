@@ -943,6 +943,16 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
           {/* Already used gate — show before search runs */}
           {showAlumniGate && (
+            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '20px 24px', textAlign: 'center', marginBottom: 16 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#1A1A1A', margin: '0 0 8px' }}>You've used your free search.</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 16px', lineHeight: 1.5 }}>Unlock FastIQ to search unlimited {studentSchool || 'UF'} alumni by role, company, or industry.</p>
+              <button onClick={() => onUnlockFastIQ?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
+                Unlock FastIQ →
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
 
       {copyToast && (
         <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 18px', fontSize: 13, color: '#1A1A1A', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 100, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif" }}>
