@@ -109,27 +109,23 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   useEffect(() => {
     if (!user?.id) return;
     const goals = user?.career_goals || {};
-    // Broad check — if they have any career goals saved at all, consider goals present
-    const hasAnySavedGoals = !!(goals.saved_at || goals.target_roles?.length || goals.target_industries?.length || goals.target_functions?.length || goals.role || goals.industries?.length);
-    const industries = [
-      ...(goals.target_industries || []),
-      ...(goals.industries || []),
-      ...(user?.target_industries || []),
-    ].filter(Boolean);
-    const roles = [
-      ...(goals.target_roles || []),
-      ...(user?.target_roles || []),
-      ...(goals.role ? [goals.role] : []),
-    ].filter(Boolean);
 
-    if (!hasAnySavedGoals && !industries.length && !roles.length) {
+    const hasGoals =
+      (goals.target_industries?.length > 0) ||
+      (goals.target_roles?.length > 0) ||
+      (goals.target_functions?.length > 0);
+
+    if (!hasGoals) {
       setHasGoals(false);
       return;
     }
+
+    const industries = [...(goals.target_industries || []), ...(user?.target_industries || [])].filter(Boolean);
+    const roles = [...(goals.target_roles || []), ...(user?.target_roles || [])].filter(Boolean);
+
     setTargetRoles(roles);
     setTargetIndustries(industries);
     setHasGoals(true);
-    // Never auto-load — always require user to click Search Now
   }, [user?.id]);
 
   const loadCompanies = async () => {
@@ -175,7 +171,9 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
   const visibleCompanies = showAll ? filteredCompanies : filteredCompanies.slice(0, 6);
 
+  if (!user) return null;
   if (!hasGoals) return <NoGoalsGate onSetGoals={() => onTabChange?.('career_goals')} />;
+
 
   if (!hasStarted) return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
