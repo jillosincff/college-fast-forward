@@ -668,6 +668,23 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, margin: 0, color: '#888' }}>Scanning {university} CFF members...</p>
           </div>
         ) : redHotLeads.length > 0 ? (
+          <>
+            {(() => {
+              const careerGoals = user?.career_goals || {};
+              const targetIndustries = careerGoals.target_industries || [];
+              const targetRoles = careerGoals.target_roles || [];
+              const hasGoals = targetIndustries.length > 0 || targetRoles.length > 0;
+              const hasOnlyLowQualityLeads = hasGoals && redHotLeads.every(m => {
+                const text = [m.industry, m.job_title, m.company, m.bio].filter(Boolean).join(' ').toLowerCase();
+                return !targetIndustries.some(i => text.includes(i.toLowerCase())) &&
+                       !targetRoles.some(r => text.includes(r.toLowerCase()));
+              });
+              return hasOnlyLowQualityLeads ? (
+                <div style={{ fontSize: 12, color: '#888', padding: '8px 12px', background: '#FAFAFA', borderRadius: 8, marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>
+                  These members haven't listed their industry yet — matches will improve as profiles are completed.
+                </div>
+              ) : null;
+            })()}
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
             {redHotLeads.map(member => {
               const WAYS_TO_HELP_LABELS = {
@@ -778,18 +795,76 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
               );
             })}
           </div>
+          </>  
         ) : (
-          <div style={{ background: '#FFF8F0', border: '1px dashed #FDDBC8', borderRadius: 12, padding: '32px 24px', textAlign: 'center', marginBottom: '16px' }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(232,93,32,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 20 }}>👥</div>
-            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 600, color: '#1A1A1A', margin: '0 0 8px' }}>
-              No {user?.career_goals?.target_industries?.[0] || 'matching'} professionals in CFF yet
+          <div style={{
+            background: '#fff',
+            border: '1px solid #E5E5E5',
+            borderRadius: '16px',
+            padding: '32px 24px',
+            textAlign: 'center',
+            marginBottom: '24px',
+          }}>
+            <p style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: '17px',
+              fontWeight: '600',
+              color: '#1A1A1A',
+              margin: '0 0 10px 0',
+            }}>
+              No exact matches yet
             </p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', lineHeight: 1.6, maxWidth: 360, margin: '0 auto 20px' }}>
-              The network grows every week. Check your Warm Leads below for {university} alumni at your target companies in the meantime.
+            <p style={{
+              fontSize: '13px',
+              color: '#666',
+              lineHeight: '1.6',
+              maxWidth: '360px',
+              margin: '0 auto 8px',
+            }}>
+              CFF is growing — as more {user?.career_goals?.target_industries?.[0] || 'professionals'} join the network, they'll appear here matched to your goals.
             </p>
-            <button onClick={handleInviteParent} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '10px 24px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
-              {copySuccess ? 'Link copied! ✓' : 'Invite a parent to join →'}
-            </button>
+            <p style={{
+              fontSize: '12px',
+              color: '#888',
+              margin: '0 auto 20px',
+              maxWidth: '320px',
+              lineHeight: '1.5',
+            }}>
+              In the meantime, your Warm Leads tab has UF alumni at companies hiring in your field right now.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setShowLeads(true)}
+                style={{
+                  background: '#E85D20',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  minHeight: 'auto',
+                }}
+              >
+                See Warm Leads →
+              </button>
+              <button
+                onClick={handleInviteParent}
+                style={{
+                  background: 'none',
+                  border: '1px solid #E0E0E0',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontSize: '13px',
+                  color: '#666',
+                  cursor: 'pointer',
+                  minHeight: 'auto',
+                }}
+              >
+                {copySuccess ? 'Link copied! ✓' : 'Invite a parent →'}
+              </button>
+            </div>
           </div>
         )}
         {/* Always-visible invite strip */}
