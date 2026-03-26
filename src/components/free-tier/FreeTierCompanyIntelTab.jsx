@@ -91,7 +91,8 @@ function FilterBar({ active, onChange }) {
 
 export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChange }) {
   const [companies, setCompanies] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [targetRoles, setTargetRoles] = useState([]);
   const [targetIndustries, setTargetIndustries] = useState([]);
   const [hasGoals, setHasGoals] = useState(true);
@@ -110,11 +111,19 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     const goals = user?.career_goals || {};
     const industries = [...(goals.target_industries || []), ...(user?.target_industries || [])].filter(Boolean);
     const roles = [...(goals.target_roles || []), ...(user?.target_roles || [])].filter(Boolean);
-    if (!industries.length && !roles.length) { setHasGoals(false); setLoading(false); return; }
+    if (!industries.length && !roles.length) { setHasGoals(false); return; }
     setTargetRoles(roles);
     setTargetIndustries(industries);
     setHasGoals(true);
-    loadCompanies();
+
+    // Auto-load if cache is fresh (under 24h)
+    const cached = user?.company_intel_cache;
+    const cachedAt = user?.company_intel_cached_at;
+    const isStale = !cachedAt || (Date.now() - new Date(cachedAt).getTime()) > 24 * 60 * 60 * 1000;
+    if (cached?.length && !isStale) {
+      setHasStarted(true);
+      loadCompanies();
+    }
   }, [user?.id]);
 
   const loadCompanies = async () => {
@@ -130,6 +139,11 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       console.error('Company intel error:', e);
     }
     setLoading(false);
+  };
+
+  const handleStartSearch = () => {
+    setHasStarted(true);
+    loadCompanies();
   };
 
   const handleSave = async (name) => {
@@ -156,6 +170,24 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const visibleCompanies = showAll ? filteredCompanies : filteredCompanies.slice(0, 6);
 
   if (!hasGoals) return <NoGoalsGate onSetGoals={() => onTabChange?.('career_goals')} />;
+
+  if (!hasStarted) return (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
+      <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
+      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>Your Target Companies.</h1>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 24px', textAlign: 'center', gap: '16px' }}>
+        <div style={{ fontSize: '13px', color: '#666', maxWidth: '400px', lineHeight: '1.6' }}>
+          FastIQ will scan careers pages and hiring signals across companies matching your goals. Takes about 30 seconds.
+        </div>
+        <button onClick={handleStartSearch} style={{ background: '#E85D20', border: 'none', borderRadius: '10px', padding: '12px 28px', fontSize: '14px', fontWeight: '500', color: '#fff', cursor: 'pointer', marginTop: '8px', minHeight: 'auto' }}>
+          Search Now →
+        </button>
+        <p style={{ fontSize: '11px', color: '#aaa', margin: 0 }}>
+          Results are cached for 24 hours — you won't wait again today
+        </p>
+      </div>
+    </div>
+  );
 
   const role = targetRoles[0] || '';
   const industry = targetIndustries[0] || '';
