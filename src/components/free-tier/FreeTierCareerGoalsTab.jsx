@@ -400,7 +400,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [careerProfile, setCareerProfile] = useState(null);
   const [roleRecs, setRoleRecs] = useState(null);
   const [conversationDone, setConversationDone] = useState(false);
-  const [isSynthesizing, setIsSynthesizing] = useState(false);
+
   const [questionCount, setQuestionCount] = useState(0);
   const [restoredBanner, setRestoredBanner] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -412,18 +412,14 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [cffNetwork, setCffNetwork] = useState(null);
   const [prelimArchetype, setPrelimArchetype] = useState(null);
   // Major-first flow
-  const [majorInput, setMajorInput] = useState('');
   const [majorSaved, setMajorSaved] = useState(!!(user?.major || user?.career_goals?.major));
-  const [majorFilter, setMajorFilter] = useState('');
   const [awaitingMajor, setAwaitingMajor] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
-  const freshStartRef = useRef(false);
+
   const [isFreshStart, setIsFreshStart] = useState(false);
   const [alumniClusters, setAlumniClusters] = useState([]);
-  const [loadingAlumni, setLoadingAlumni] = useState(false);
   const [alumniLoading, setAlumniLoading] = useState(false);
-  const [outreachDraft, setOutreachDraft] = useState(null);
   // Outreach composer state
   const [connectLoading, setConnectLoading] = useState(null);
   const [outreachModal, setOutreachModal] = useState(null);
@@ -467,24 +463,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       console.error('Alumni fetch failed:', e);
     } finally {
       setAlumniLoading(false);
-    }
-  };
-
-  const handleConnect = async (alum) => {
-    const targetRole = (savedGoals?.target_roles || [])[0] || 'this role';
-    try {
-      const draft = await base44.functions.invoke('generateOutreachDraft', {
-        studentName: user?.full_name || 'Student',
-        major: user?.major || savedGoals?.major || '',
-        targetRole,
-        graduationYear: savedGoals?.graduation_year || '',
-        alumniName: alum.name,
-        alumniTitle: alum.title,
-        alumniCompany: alum.company,
-      });
-      setOutreachDraft({ alum, message: draft?.message || '' });
-    } catch (e) {
-      console.error('Draft generation failed:', e);
     }
   };
 
@@ -720,7 +698,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     setError(null);
     setSuggestedPrompts([]);
     const major = user?.major || user?.career_goals?.major || '';
-    const isLikelyB9 = questionCount >= 10;
+    const isLikelyB9 = questionCount >= 7;
     const newMessages = [...messages, { role: 'user', content: trimmed }];
     setMessages(newMessages);
     setLoading(true);
@@ -767,7 +745,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setInput(trimmed);
     }
     setLoading(false);
-    setIsSynthesizing(false);
   };
 
   const saveGoals = async (goalsSummary, prelimArch) => {
@@ -980,7 +957,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount, 8) / 8) * 100))}%`, background: '#E85D20', borderRadius: 100, transition: 'width 0.4s ease' }} />
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
-              {Math.min(questionCount, 8)} of 8
+              {Math.min(questionCount, 8)} of 8+
             </p>
           </div>
         </div>
@@ -1088,67 +1065,11 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
             />
 
             {/* Alumni Explorer — gated by FastIQ, cache-aware */}
-            {user.is_fastiq || user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq' ? (
-              alumniLoading ? (
-                <div style={{ marginTop: '32px', fontSize: '13px', color: '#888' }}>
-                  Finding alumni in your target roles...
-                </div>
-              ) : alumniClusters.length > 0 ? (
-                <div style={{
-                  marginTop: '32px',
-                  background: '#FAFAFA',
-                  border: '1px solid #E5E5E5',
-                  borderRadius: '12px',
-                  padding: '20px 24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '24px',
-                }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '16px' }}>🔒</span>
-                      <span style={{
-                        fontFamily: "'Playfair Display', serif",
-                        fontSize: '15px',
-                        fontWeight: '600',
-                        color: '#1A1A1A',
-                      }}>
-                        Connect with alumni in your target role
-                      </span>
-                    </div>
-                    <p style={{
-                      fontSize: '13px',
-                      color: '#666',
-                      margin: 0,
-                      lineHeight: '1.5',
-                      maxWidth: '420px',
-                    }}>
-                      See which UF alumni have the exact job you're targeting — 
-                      and reach out with an AI-drafted message in one click.
-                    </p>
-                  </div>
-                  <button
-                    onClick={onOpenUpgrade}
-                    style={{
-                      background: '#E85D20',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '10px 18px',
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      color: '#fff',
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      minHeight: 'auto',
-                    }}
-                  >
-                    Unlock FastIQ →
-                  </button>
-                </div>
-              ) : null
-            ) : alumniClusters?.length > 0 ? (
+            {(user.is_fastiq || user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq') ? null : alumniLoading ? (
+              <div style={{ marginTop: '32px', fontSize: '13px', color: '#888' }}>
+                Finding alumni in your target roles...
+              </div>
+            ) : alumniClusters.length > 0 ? (
               <div style={{ marginTop: '32px' }}>
                 <div style={{ marginBottom: '16px' }}>
                   {isUndecided ? (
@@ -1171,76 +1092,26 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                     </>
                   )}
                 </div>
-
                 {alumniClusters.map(cluster => (
                   <div key={cluster.cluster} style={{ marginBottom: '24px' }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '10px',
-                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
                         {cluster.cluster}
                       </span>
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
                       {cluster.alumni.map(alum => (
-                        <div key={alum.linkedin_url} style={{
-                          background: '#FAFAFA',
-                          border: '1px solid #E5E5E5',
-                          borderRadius: '10px',
-                          padding: '14px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '4px',
-                        }}>
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
-                            {alum.name}
-                          </span>
-                          <span style={{ fontSize: '12px', color: '#555', fontFamily: "'DM Sans', sans-serif" }}>
-                            {alum.title}
-                          </span>
-                          <span style={{ fontSize: '12px', color: '#888', fontFamily: "'DM Sans', sans-serif" }}>
-                            {alum.company}
-                          </span>
+                        <div key={alum.linkedin_url} style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>{alum.name}</span>
+                          <span style={{ fontSize: '12px', color: '#555', fontFamily: "'DM Sans', sans-serif" }}>{alum.title}</span>
+                          <span style={{ fontSize: '12px', color: '#888', fontFamily: "'DM Sans', sans-serif" }}>{alum.company}</span>
                           <button
                             onClick={() => handleConnectClick(alum)}
                             disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
-                            style={{
-                              marginTop: '8px',
-                              background: 'none',
-                              border: '1px solid #E85D20',
-                              borderRadius: '6px',
-                              padding: '5px 10px',
-                              fontSize: '12px',
-                              color: '#E85D20',
-                              cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer',
-                              fontFamily: "'DM Sans', sans-serif",
-                              fontWeight: 500,
-                              minHeight: 'auto',
-                              transition: 'all 0.2s ease',
-                              opacity: connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url) ? 0.7 : 1,
-                              }}
-                              onMouseEnter={(e) => {
-                              if (!sentTo.includes(alum.linkedin_url)) {
-                                e.target.style.background = '#E85D20';
-                                e.target.style.color = '#fff';
-                              }
-                              }}
-                              onMouseLeave={(e) => {
-                              if (!sentTo.includes(alum.linkedin_url)) {
-                                e.target.style.background = 'none';
-                                e.target.style.color = '#E85D20';
-                              }
-                              }}
-                              >
-                              {connectLoading === alum.linkedin_url
-                              ? 'Drafting...'
-                              : sentTo.includes(alum.linkedin_url)
-                              ? 'Message sent ✓'
-                              : 'Connect →'}
-                              </button>
+                            style={{ marginTop: '8px', background: 'none', border: '1px solid #E85D20', borderRadius: '6px', padding: '5px 10px', fontSize: '12px', color: '#E85D20', cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, minHeight: 'auto', opacity: connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url) ? 0.7 : 1 }}
+                          >
+                            {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Message sent ✓' : 'Connect →'}
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -1253,8 +1124,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                 <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Connect with UF Alumni</p>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>See real alumni in your target roles and reach out directly. Available with FastIQ.</p>
               </div>
-            )
-            }
+            )}
           </>
         )}
 

@@ -340,7 +340,7 @@ Real companies only. Honest hiring signals. Specific to this role and industry. 
           const longer = Math.max(memberNorm.length, targetNorm.length);
           const shorter = Math.min(memberNorm.length, targetNorm.length);
           const overlapRatio = shorter / longer;
-          if (overlapRatio < 0.8) return false;
+          if (overlapRatio < 0.5) return false;
           return memberNorm.includes(targetNorm) || targetNorm.includes(memberNorm);
         });
       });
