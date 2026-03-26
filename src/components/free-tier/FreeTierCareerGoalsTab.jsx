@@ -138,7 +138,9 @@ goals_summary shape when final:
   graduation_year: number,
   company_size_preference: string[],
   location_preference: string,
-  major: string
+  major: string,
+  seeking: string,               // REQUIRED — map Q5 answer exactly: "Internship", "Full-time", or "Both"
+  experience_level: string,      // REQUIRED — infer from Q8/conversation: "None" (no experience), "Entry-level" (1 internship/coursework), "Some" (multiple internships), "Experienced" (full-time work history)
 }`;
 
 const SYNTHESIS_SUFFIX = `
@@ -216,6 +218,16 @@ const RESPONSE_SCHEMA = {
         preliminary_archetype: { type: 'string' },
         career_profile_summary: { type: 'string' },
         major: { type: 'string' },
+        seeking: {
+          type: 'string',
+          enum: ['Internship', 'Full-time', 'Both'],
+          description: "Employment type from Q5 — exactly as student selected: Internship, Full-time, or Both",
+        },
+        experience_level: {
+          type: 'string',
+          enum: ['None', 'Entry-level', 'Some', 'Experienced'],
+          description: "Student experience level — None if no internship/experience yet, Entry-level if 1 internship or coursework, Some if multiple internships, Experienced if full-time work history",
+        },
       },
     },
   },
