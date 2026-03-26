@@ -331,6 +331,7 @@ const normalizeSchool = (s) => SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, onUnsaveLead, onUpgrade, leadsRef }) {
+  const [copySuccess, setCopySuccess] = useState(false);
   const [redHotLoading, setRedHotLoading] = useState(true);
   const [redHotLeads, setRedHotLeads] = useState([]);
   const [redHotTotal, setRedHotTotal] = useState(0);
@@ -344,6 +345,24 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const [warmSearchType, setWarmSearchType] = useState('company_based');
 
   const university = studentSchool || normalizeSchool(user?.school || user?.university || '') || 'UF';
+
+  const handleInviteParent = async () => {
+    const school = user?.school_code || user?.school || '';
+    const referralLink = `https://app.collegefastforward.com/join?school=${school}&role=parent`;
+    try {
+      await navigator.clipboard.writeText(referralLink);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 3000);
+    } catch (e) {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Join College Fast Forward',
+          text: `I'm using CFF to connect with professionals for my job search — would love for you to join so I can tap your network. Takes 2 minutes to set up.`,
+          url: referralLink,
+        });
+      }
+    }
+  };
 
   const DEPRIORITIZE_INDUSTRIES = ['healthcare', 'medical', 'nursing', 'dental', 'veterinary', 'pharmacy'];
 
@@ -663,9 +682,40 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
             })}
           </div>
         ) : (
-          <RedHotEmptyState university={university} targetDesc={targetDesc} />
+          <div style={{ background: '#FFF8F0', border: '1px dashed #FDDBC8', borderRadius: 12, padding: '32px 24px', textAlign: 'center', marginBottom: '16px' }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(232,93,32,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 20 }}>👥</div>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 600, color: '#1A1A1A', margin: '0 0 8px' }}>
+              No {user?.career_goals?.target_industries?.[0] || 'matching'} professionals in CFF yet
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', lineHeight: 1.6, maxWidth: 360, margin: '0 auto 20px' }}>
+              The network grows every week. Check your Warm Leads below for {university} alumni at your target companies in the meantime.
+            </p>
+            <button onClick={handleInviteParent} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '10px 24px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
+              {copySuccess ? 'Link copied! ✓' : 'Invite a parent to join →'}
+            </button>
+          </div>
         )}
+        {/* Always-visible invite strip */}
+        <div style={{ marginTop: redHotLeads.length > 0 ? 32 : 0, padding: '20px 24px', background: '#FAFAFA', border: '1px solid #F0F0F0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: '0 0 4px' }}>
+              Know a parent who works in {user?.career_goals?.target_industries?.[0] || 'your field'}?
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, lineHeight: 1.5 }}>
+              Invite them to CFF — when they join, they'll show up in your leads.
+            </p>
+          </div>
+          <button onClick={handleInviteParent} style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 500, color: '#E85D20', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}>
+            {copySuccess ? 'Link copied! ✓' : 'Share invite link →'}
+          </button>
+        </div>
       </section>
+
+      {copySuccess && (
+        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 18px', fontSize: 13, color: '#1A1A1A', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 100, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif" }}>
+          ✓ Invite link copied — send it to your parent via text or email
+        </div>
+      )}
 
       <hr style={{ border: 'none', borderTop: '1px solid #f0f0f0', margin: '0 0 40px' }} />
 
