@@ -99,6 +99,8 @@ Deno.serve(async (req) => {
         .toLowerCase()
         .trim();
 
+      console.log(`[${companyName}] Cleaned slug: ${cleaned}`);
+
       const urlsToTry = [
         `https://careers.${cleaned}.com`,
         `https://jobs.${cleaned}.com`,
@@ -107,10 +109,13 @@ Deno.serve(async (req) => {
       ];
 
       let careersContent = null;
+      let urlUsed = null;
       for (const url of urlsToTry) {
         const content = await firecrawlScrape(url);
+        console.log(`[${companyName}] Tried URL: ${url} — length: ${content?.length || 0}`);
         if (content && content.length > 500) {
           careersContent = content;
+          urlUsed = url;
           console.log(`[Careers] ${companyName}: hit on ${url}`);
           break;
         }
@@ -120,13 +125,20 @@ Deno.serve(async (req) => {
       if (!careersContent) {
         const indeedFallbackUrl = `https://www.indeed.com/cmp/${encodeURIComponent(companyName.replace(/\s+/g, '-'))}/jobs`;
         const fallbackContent = await firecrawlScrape(indeedFallbackUrl);
+        console.log(`[${companyName}] Indeed fallback length: ${fallbackContent?.length || 0}`);
         if (fallbackContent && fallbackContent.length > 200) {
           careersContent = fallbackContent;
+          urlUsed = indeedFallbackUrl;
           console.log(`[Careers] ${companyName}: using Indeed fallback`);
         }
       }
 
+      console.log(`[${companyName}] URL used: ${urlUsed || 'NONE'}`);
+      console.log(`[${companyName}] Content length: ${careersContent?.length || 0}`);
+      console.log(`[${companyName}] Content preview: ${careersContent?.slice(0, 500) || '(empty)'}`);
+
       if (careersContent && careersContent.length > 100) {
+        console.log(`[${companyName}] Sending to LLM for extraction...`);
         const requirementsResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `From this company careers page content, extract exactly 3 specific requirements or qualities they look for in ${targetRole || 'entry-level'} candidates.\n\nBe specific and honest. Max 8 words each. No marketing fluff. Plain text only.\n\nContent:\n${careersContent.slice(0, 3000)}\n\nReturn JSON array of 3 strings only.`,
           response_json_schema: {
@@ -135,7 +147,9 @@ Deno.serve(async (req) => {
           },
         });
         results.what_they_look_for = requirementsResult?.items || [];
+        console.log(`[${companyName}] open_roles extracted: ${JSON.stringify(requirementsResult)}`);
         console.log(`[Careers] ${companyName}: ${results.what_they_look_for.length} requirements extracted`);
+        console.log(`[${companyName}] hiring_signal derived: ${results.hiring_signal}`);
       }
     } catch (err) {
       console.error('[Careers] scrape failed:', err.message);
