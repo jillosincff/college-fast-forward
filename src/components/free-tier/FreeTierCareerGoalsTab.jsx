@@ -24,16 +24,15 @@ Q5: Internship or full-time? Chips: ["Internship", "Full-time", "Both"]
 Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "2026", "2027", "2028+"]
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
-Q8: Any companies you'd love to work at — or types of companies that appeal to you? And what's your biggest gap right now? Free text + chips: ["Not sure yet", "Still building skills"]
+Q8: Any companies you'd love to work at — or types of companies that appeal to you? And what's your biggest gap right now? Free text + chips: ["No internship experience yet", "Not sure what I want to do", "Don't know how to network", "Not sure my major is right"]
 
 PATH B (figuring it out — answered Q2 with undecided):
 Q3: Work environment — what sounds most like you? Chips based on major.
 Q4: What's your natural strength? Chips: ["Talking to people / relationships", "Analyzing data / solving problems", "Creating things / design / writing", "Leading / organizing / making things happen"]
 Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Building something of my own", "Stability and work-life balance"]
-Q6: Are you interested in entrepreneurship or starting something? Chips: ["Definitely", "Maybe someday", "Not really"]
-Q7: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
-Q8: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Something else"]
-After Q8 on Path B: synthesize all answers into role recommendations.
+Q6: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
+Q7: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Something else"]
+After Q7 on Path B: synthesize all answers into role recommendations.
 
 STUDENT MAJOR: The student's major is provided in the conversation context. ALWAYS use it to:
 1. Personalize acknowledgments ("Finance — solid foundation for analyst roles." / "English — more flexible than people think. Consulting, marketing, media, law, and tech all hire English majors.")
@@ -1046,7 +1045,10 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                 </div>
               )}
               {isLastAssistant && !awaitingMajor && suggestedPrompts.length > 0 && (
-                <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} onSkip={showSkip ? handleSkip : null} />
+                <>
+                  <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} onSkip={showSkip ? handleSkip : null} />
+                  <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)', margin: '2px 0 0 42px', fontFamily: "'DM Sans', sans-serif" }}>Or type your own answer below</p>
+                </>
               )}
             </React.Fragment>
           );
