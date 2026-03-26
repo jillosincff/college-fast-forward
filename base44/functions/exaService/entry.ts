@@ -40,7 +40,16 @@ Deno.serve(async (req) => {
           query,
           type: 'auto',
           numResults: 5,
-          category: 'company',
+          includeDomains: [
+            'greenhouse.io',
+            'lever.co',
+            'linkedin.com/jobs',
+            'jobs.lever.co',
+            'boards.greenhouse.io',
+            'myworkdayjobs.com',
+            'careers.smartrecruiters.com',
+            'indeed.com',
+          ],
           contents: { highlights: { maxCharacters: 4000 } },
         }),
         exaFetch('search', {
@@ -61,21 +70,29 @@ Deno.serve(async (req) => {
 
       const hiringResults = hiringData.results || [];
       const openRoles = hiringResults
-        .flatMap(r => r.highlights || [])
-        .filter(h => !h.toLowerCase().includes('layoff') && !h.toLowerCase().includes('no longer') && h.length > 20)
+        .filter(r => {
+          const url = r.url?.toLowerCase() || '';
+          return url.includes('greenhouse') || url.includes('lever') ||
+                 url.includes('linkedin') || url.includes('workday') ||
+                 url.includes('smartrecruiters') || url.includes('indeed');
+        })
+        .map(r => r.title?.split('|')?.[0]?.trim() || r.title)
+        .filter(Boolean)
         .slice(0, 5);
 
-      // Filter by target functions
+      const jobCount = openRoles.length;
+
+      // Filter by target functions using highlights from valid results
       const functionKeywords = new Set();
       targetFunctions.forEach(fn => (FUNCTION_TO_KEYWORDS[fn] || []).forEach(k => functionKeywords.add(k)));
       const matchedRoles = functionKeywords.size > 0
-        ? openRoles.filter(h => [...functionKeywords].some(kw => h.toLowerCase().includes(kw)))
+        ? openRoles.filter(t => [...functionKeywords].some(kw => t.toLowerCase().includes(kw)))
         : openRoles;
 
       let hiring_signal = 'unknown';
       if (layoffDetected) hiring_signal = 'freeze';
-      else if (openRoles.length > 3) hiring_signal = 'active';
-      else if (openRoles.length > 0) hiring_signal = 'selective';
+      else if (jobCount >= 3) hiring_signal = 'active';
+      else if (jobCount >= 1) hiring_signal = 'selective';
 
       const growthData = await exaFetch('search', {
         query: `${companyName} funding OR "Series" OR expansion OR growth 2024 2025`,
