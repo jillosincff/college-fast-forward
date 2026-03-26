@@ -108,12 +108,12 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           </div>
 
           <div className="bg-[#0A0A0A] rounded-lg p-4 mb-6">
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-              $29/month or $187/year
-            </p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
-              7-day free trial included. Save $62 with annual — founding member rate, locks in permanently.
-            </p>
+           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
+             $29/month or $249/year
+           </p>
+           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
+             7-day free trial included. Save $99 with annual. Cancel anytime.
+           </p>
           </div>
 
           <div className="space-y-3">

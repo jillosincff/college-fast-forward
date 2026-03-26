@@ -1,13 +1,37 @@
 import React, { useState } from 'react';
-import { Zap, ArrowRight, Clock } from 'lucide-react';
-import PlanSelectionModal from './PlanSelectionModal';
+import { Zap, ArrowRight, Clock, Loader2 } from 'lucide-react';
 
 /**
  * Banner shown to CFF-only subscribers or non-subscribers when they visit FASTIQ.
  * Not shown to founding members (they have full access).
  */
 export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
-  const [showPlans, setShowPlans] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setUpgrading(true);
+    try {
+      const res = await fetch('/functions/createCheckoutSession', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: 'fastiq_monthly',
+          successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
+          cancelUrl: window.location.href,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Checkout failed:', data.error);
+        setUpgrading(false);
+      }
+    } catch (e) {
+      console.error('Checkout error:', e);
+      setUpgrading(false);
+    }
+  };
 
   // Canceled but still in billing period
   if (reason === 'canceled_active_period' && periodEnd) {
@@ -25,16 +49,17 @@ export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
           <p style={{ fontSize: 11, color: '#92400E', margin: '2px 0 0' }}>Resubscribe to keep your AI career center active.</p>
         </div>
         <button
-          onClick={() => setShowPlans(true)}
+          onClick={handleUpgrade}
+          disabled={upgrading}
           style={{
             background: '#FA4616', color: '#fff', border: 'none', borderRadius: 8,
-            padding: '8px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+            padding: '8px 16px', fontSize: 12, fontWeight: 700, cursor: upgrading ? 'not-allowed' : 'pointer',
             minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap',
+            opacity: upgrading ? 0.7 : 1,
           }}
         >
-          Resubscribe <ArrowRight style={{ width: 12, height: 12 }} />
+          {upgrading ? <><Loader2 style={{ width: 12, height: 12 }} className="animate-spin" /> Processing...</> : <>Resubscribe <ArrowRight style={{ width: 12, height: 12 }} /></>}
         </button>
-        <PlanSelectionModal isOpen={showPlans} onClose={() => setShowPlans(false)} user={user} />
       </div>
     );
   }
@@ -57,18 +82,19 @@ export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
       </p>
       <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
         <button
-          onClick={() => setShowPlans(true)}
+          onClick={handleUpgrade}
+          disabled={upgrading}
           style={{
             background: '#FA4616', color: '#fff', border: 'none', borderRadius: 10,
-            padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: upgrading ? 'not-allowed' : 'pointer',
             minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6,
+            opacity: upgrading ? 0.7 : 1,
           }}
         >
-          <Zap style={{ width: 14, height: 14 }} /> Start 7-Day Free Trial
+          {upgrading ? <><Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> Processing...</> : <><Zap style={{ width: 14, height: 14 }} /> Start 7-Day Free Trial</>}
         </button>
       </div>
       <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>$29/month or $249/year • Cancel anytime</p>
-      <PlanSelectionModal isOpen={showPlans} onClose={() => setShowPlans(false)} user={user} />
     </div>
   );
 }
