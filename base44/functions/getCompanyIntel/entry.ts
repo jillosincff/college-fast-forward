@@ -174,7 +174,8 @@ Return JSON:
       }
 
       // 4. DERIVE hiring_signal from real data (overwrite LLM guess)
-      let real_hiring_signal = 'unknown';
+      // Fall back to LLM-generated signal if Firecrawl can't determine one
+      let real_hiring_signal = company.hiring_signal || 'unknown';
       if (signals.layoff_alert?.detected) {
         real_hiring_signal = 'freeze';
       } else if (signals.open_roles && signals.open_roles.count > 5) {
