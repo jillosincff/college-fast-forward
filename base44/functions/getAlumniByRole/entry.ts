@@ -26,26 +26,24 @@ Deno.serve(async (req) => {
       if (!titles.length) continue;
 
       try {
-        const proxycurlRes = await base44.asServiceRole.functions.invoke('proxycurlService', {
-          action: 'getAlumniByRole',
-          params: {
-            jobTitle: titles[0],
-            universityName: schoolName,
-            location: location || null,
-            maxResults: 3,
-          },
+        const exaRes = await base44.asServiceRole.functions.invoke('exaService', {
+          action: 'searchAlumni',
+          jobTitle: titles[0],
+          universityName: schoolName,
+          companyName: '',
+          maxResults: 3,
         });
 
-        if (proxycurlRes?.profiles?.length > 0) {
+        if (exaRes?.profiles?.length > 0) {
           results.push({
             cluster: fn,
-            alumni: proxycurlRes.profiles.map(p => ({
+            alumni: exaRes.profiles.map(p => ({
               name: p.full_name,
-              title: p.current_title,
-              company: p.current_company,
+              title: p.headline,
+              company: '',
               linkedin_url: p.linkedin_url,
-              location: p.location,
-              graduation_year: p.graduation_year,
+              location: '',
+              source: 'exa',
             })),
           });
         }
