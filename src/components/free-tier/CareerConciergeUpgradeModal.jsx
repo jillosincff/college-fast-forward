@@ -90,10 +90,10 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
           {/* Pricing */}
           <div className="bg-[#FFF8F5] rounded-xl p-4">
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px' }}>
-              $29/month <span style={{ fontWeight: 400, color: '#888' }}>or</span> $187/year
+              $29/month <span style={{ fontWeight: 400, color: '#888' }}>or</span> $249/year
             </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0 }}>
-              7-day free trial included · Save $62 with annual — founding member rate, locks in permanently.
+              7-day free trial included. Save $99 with annual. Cancel anytime.
             </p>
           </div>
 

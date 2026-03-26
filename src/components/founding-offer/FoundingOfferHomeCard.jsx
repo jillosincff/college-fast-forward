@@ -51,8 +51,8 @@ export default function FoundingOfferHomeCard({ display, studentName }) {
           fontFamily: dmSans, fontSize: 13, color: '#888',
           lineHeight: 1.6, marginBottom: 20, textAlign: 'center',
         }}>
-          Activate the annual plan before it expires and pay just $187 — save $62.
-          <br />This rate locks in permanently. This offer won't appear again.
+          Activate the annual plan before it expires and pay just $249 — save $99.
+          <br />This offer won't appear again.
         </p>
 
         {error && (
@@ -76,7 +76,7 @@ export default function FoundingOfferHomeCard({ display, studentName }) {
           fontFamily: dmSans, fontSize: 11, color: '#555',
           textAlign: 'center', lineHeight: 1.6, marginTop: 14,
         }}>
-          Both plans include a 7-day free trial. Annual plan locks in at $187/year forever. Cancel anytime.
+          Both plans include a 7-day free trial. Cancel anytime.
         </p>
       </div>
     </div>

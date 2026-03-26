@@ -30,14 +30,17 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
     setLoading(planId);
     const baseUrl = window.location.origin;
     try {
-      // family_id is auto-resolved by createCheckoutSession if not provided
-      const { data } = await createCheckoutSession({
-        plan: planId,
-        successUrl: `${baseUrl}/#Dashboard?payment=success`,
-        cancelUrl: `${baseUrl}/#FastIQ?payment=cancelled`,
-        metadata: { family_id: familyId || '' },
+      const res = await fetch('/functions/createCheckoutSession', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: planId,
+          successUrl: `${baseUrl}/#Dashboard?payment=success`,
+          cancelUrl: `${baseUrl}/#FastIQ?payment=cancelled`,
+        }),
       });
-      if (data?.url) {
+      const data = await res.json();
+      if (data.url) {
         window.location.href = data.url;
       }
     } catch (err) {
