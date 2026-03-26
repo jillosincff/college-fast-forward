@@ -74,10 +74,9 @@ function getDashboardForUser(user) {
 
   const persona = user.persona;
   
-  // Students/Gators — route based on FastIQ status
+  // Students/Gators — always use FreeTierDashboard; FastIQ features unlock via isFastIQ flag
   if (persona === 'gator' || persona === 'student') {
-    const hasFastIQ = user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq';
-    return hasFastIQ ? 'FastIQ' : 'FreeTierDashboard';
+    return 'FreeTierDashboard';
   }
   
   if (persona === 'parent') return 'ParentHome';
@@ -89,8 +88,7 @@ function getDashboardForUser(user) {
   // Fallback: check roles array
   if (user.roles?.includes('parent')) return 'ParentHome';
   if (user.roles?.includes('gator')) {
-    const hasFastIQ = user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq';
-    return hasFastIQ ? 'FastIQ' : 'FreeTierDashboard';
+    return 'FreeTierDashboard';
   }
   if (user.roles?.includes('alumni')) return 'AlumniDashboard';
   return 'FreeTierDashboard';
