@@ -921,10 +921,18 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
               ✓ You have 1 free alumni search — make it count
             </p>
           )}
+          {!isFastIQ && user?.alumni_search_used && !alumniSearched && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '0 0 12px' }}>
+              You've used your free search.{' '}
+              <span onClick={() => onUnlockFastIQ?.()} style={{ color: '#E85D20', cursor: 'pointer', fontWeight: 500 }}>
+                Unlock FastIQ for unlimited searches →
+              </span>
+            </p>
+          )}
 
           {!alumniSearched && !showAlumniGate && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-              {['investment banker at Goldman', 'marketing manager at Nike', 'software engineer at Google', 'consultant at McKinsey', 'product manager in NYC'].map(ex => (
+              {['VP of Marketing at Fortune 500', 'investment banking at bulge bracket firms', 'started their own company in tech', 'sports management or athletics', 'consulting at McKinsey, Bain, or BCG', 'hospitals or health systems in Miami'].map(ex => (
                 <button key={ex} onClick={() => { setAlumniQuery(ex); setTimeout(handleAlumniSearch, 100); }}
                   style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: '#666', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
                   {ex}
@@ -935,146 +943,6 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
           {/* Already used gate — show before search runs */}
           {showAlumniGate && (
-            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '20px 24px', textAlign: 'center', marginBottom: 16 }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#1A1A1A', margin: '0 0 8px' }}>You've used your free search.</p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 16px', lineHeight: 1.5 }}>Unlock FastIQ to search unlimited {studentSchool || 'UF'} alumni by role, company, or industry.</p>
-              <button onClick={() => onUnlockFastIQ?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
-                Unlock FastIQ →
-              </button>
-            </div>
-          )}
-
-          {alumniSearched && alumniResults.length === 0 && (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#aaa', textAlign: 'center', padding: '24px 0' }}>No {studentSchool || 'UF'} alumni found — try different keywords.</p>
-          )}
-
-          {alumniResults.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
-              {/* First result — always fully visible */}
-              {(() => {
-                const alum = alumniResults[0];
-                return (
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{alum.full_name}</p>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>{alum.headline}</p>
-                      {alum.summary && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: 0, lineHeight: 1.4 }}>{alum.summary.slice(0, 120)}</p>}
-                    </div>
-                    <button
-                      onClick={() => handleConnect(alum)}
-                      disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
-                      style={{ background: 'none', border: `1px solid ${sentTo.includes(alum.linkedin_url) ? '#22C55E' : '#E85D20'}`, borderRadius: 6, padding: '7px 14px', fontSize: 12, color: sentTo.includes(alum.linkedin_url) ? '#22C55E' : '#E85D20', cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
-                    >
-                      {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Message sent ✓' : 'Connect →'}
-                    </button>
-                  </div>
-                );
-              })()}
-
-              {/* Results 2–5: blurred for free tier with lock overlay */}
-              {alumniResults.slice(1).map((alum, i) => (
-                <div key={i} style={{ position: 'relative' }}>
-                  <div style={{ filter: !isFastIQ ? 'blur(4px)' : 'none', pointerEvents: !isFastIQ ? 'none' : 'auto', userSelect: !isFastIQ ? 'none' : 'auto' }}>
-                    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{alum.full_name}</p>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>{alum.headline}</p>
-                        {alum.summary && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: 0, lineHeight: 1.4 }}>{alum.summary.slice(0, 120)}</p>}
-                      </div>
-                      <button style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: '7px 14px', fontSize: 12, color: '#E85D20', minHeight: 'auto' }}>Connect →</button>
-                    </div>
-                  </div>
-
-                  {/* Lock overlay on first blurred card */}
-                  {!isFastIQ && i === 0 && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '16px 24px', textAlign: 'center' }}>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0, lineHeight: 1.5, maxWidth: 280 }}>
-                        You've used your free search. Unlock FastIQ to see all {alumniResults.length} results and search unlimited {studentSchool || 'UF'} alumni.
-                      </p>
-                      <button onClick={() => onUnlockFastIQ?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
-                        Unlock FastIQ →
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── WARM LEADS ── */}
-      {(warmLoading || warmLeads.length > 0) && (
-        <section style={{ marginBottom: 40 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>🌍 WARM LEADS</p>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
-            {university} alumni at your target companies
-          </h3>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
-            CFF members = free to contact. Other alumni need FastIQ.
-          </p>
-          {warmLoading ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 0' }}>
-              <div style={{ width: 20, height: 20, border: '2px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'lsSpin 0.8s linear infinite' }} />
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, margin: 0, color: '#888' }}>Finding alumni at your target companies...</p>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-              {warmLeads.map((lead, i) => (
-                <WarmCompanyCard
-                  key={lead.company || i}
-                  lead={lead}
-                  maxAlumni={maxAlumni}
-                  university={university}
-                  isFastIQ={isFastIQ}
-                  onUnlock={() => setUpgradeModal(lead)}
-                  onContact={onContact}
-                  style={{}}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      <hr style={{ border: 'none', borderTop: '1px solid #f0f0f0', margin: '0 0 40px' }} />
-
-      {upgradeModal && (
-        <UpgradeModal
-          modalData={upgradeModal}
-          university={university}
-          onClose={() => setUpgradeModal(null)}
-          onUpgrade={() => { setUpgradeModal(null); onUpgrade?.(); }}
-        />
-      )}
-
-      {/* Outreach modal */}
-      {outreachModal?.open && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div>
-              <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>Reaching out via LinkedIn</p>
-              <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{outreachModal.alum.full_name}</p>
-              <p style={{ fontSize: 13, color: '#666', margin: '2px 0 0' }}>{outreachModal.alum.headline}</p>
-            </div>
-            <div style={{ background: '#F0F7FF', border: '1px solid #B3D9FF', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#0057B8', lineHeight: 1.5 }}>
-              Edit your message, then click "Copy & Open LinkedIn" — paste it into your connection request.
-            </div>
-            <textarea
-              value={editedDraft}
-              onChange={e => setEditedDraft(e.target.value)}
-              rows={6}
-              style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
-            />
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setOutreachModal(null)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
-              <button onClick={handleSendLinkedIn} disabled={!editedDraft.trim()} style={{ background: '#0077B5', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: !editedDraft.trim() ? 'not-allowed' : 'pointer', opacity: !editedDraft.trim() ? 0.7 : 1, minHeight: 'auto' }}>
-                Copy & Open LinkedIn →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {copyToast && (
         <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 18px', fontSize: 13, color: '#1A1A1A', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 100, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif" }}>

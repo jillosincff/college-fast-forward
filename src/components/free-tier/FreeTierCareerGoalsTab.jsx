@@ -218,16 +218,6 @@ const RESPONSE_SCHEMA = {
         preliminary_archetype: { type: 'string' },
         career_profile_summary: { type: 'string' },
         major: { type: 'string' },
-        seeking: {
-          type: 'string',
-          enum: ['Internship', 'Full-time', 'Both'],
-          description: "Employment type from Q5 — exactly as student selected: Internship, Full-time, or Both",
-        },
-        experience_level: {
-          type: 'string',
-          enum: ['None', 'Entry-level', 'Some', 'Experienced'],
-          description: "Student experience level — None if no internship/experience yet, Entry-level if 1 internship or coursework, Some if multiple internships, Experienced if full-time work history",
-        },
       },
     },
   },

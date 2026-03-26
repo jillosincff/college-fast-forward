@@ -1,10 +1,10 @@
 import React from 'react';
-import { Home, Building2, Users, Target, MessageSquare } from 'lucide-react';
+import { Home, Building2, Users, Target, MessageSquare, Search } from 'lucide-react';
 
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', Icon: Home },
   { id: 'company_intel', label: 'Companies', Icon: Building2 },
-  { id: 'directory', label: 'Directory', Icon: Users },
+  { id: 'alumni_search', label: 'Alumni', Icon: Search },
   { id: 'career_goals', label: 'Goals', Icon: Target },
   { id: 'messages', label: 'Messages', Icon: MessageSquare },
 ];

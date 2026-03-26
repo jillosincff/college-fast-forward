@@ -17,6 +17,7 @@ import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
 import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeUpgradeModal';
 import NotebookPage from '@/components/free-tier/NotebookPage';
+import AlumniSearch from '@/pages/AlumniSearch';
 
 const AVAILABILITY_CONFIG = {
   yes: { dot: '#22C55E', label: 'Happy to help' },
@@ -217,6 +218,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={setActiveTab} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
         {activeTab === 'notebook' && <NotebookPage user={user} />}
