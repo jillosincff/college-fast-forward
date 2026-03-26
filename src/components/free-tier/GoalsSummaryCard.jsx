@@ -16,9 +16,15 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
   const seeking = goals?.seeking ? (SEEKING_LABELS[goals.seeking] || goals.seeking) : '—';
   const gradYear = goals?.graduation_year?.toString() || '—';
   const location = goals?.location_preference || goals?.locations?.[0] || '—';
-  const dreamCo = goals?.dream_company || '—';
+  const dreamCo = goals?.dream_company || '';
+  const targetCompanies = goals?.target_companies || [];
   const experience = goals?.experience_level || '—';
   const major = goals?.major || '—';
+
+  // Show target_companies if available, fall back to dream_company
+  const companiesDisplay = targetCompanies.length
+    ? targetCompanies.join(', ')
+    : dreamCo || '—';
 
   const rows = [
     ['Target Roles', roles],
@@ -28,7 +34,7 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
     ['Graduating', gradYear],
     ['Location', location],
     ['Major', major],
-    ['Dream Company', dreamCo],
+    ['Target Companies', companiesDisplay],
     ['Experience', experience],
   ];
 

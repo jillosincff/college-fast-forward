@@ -81,7 +81,6 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
         }
       });
       onSave({ target_roles: roles, target_industries: industries, seeking: lookingFor, graduation_year: gradYear, location_preference: location, target_companies: targetCompanies, experience_level: experience, major });
-      onClose();
     } catch (e) {
       console.error('Save failed:', e);
       setError('Failed to save. Try again.');
