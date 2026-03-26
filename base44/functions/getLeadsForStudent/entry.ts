@@ -33,7 +33,7 @@ const FUNCTION_TO_KEYWORDS = {
   'Product Management': ['product manager', 'pm', 'product lead', 'roadmap'],
   'Sales & Business Development': ['sales', 'business development', 'bdr', 'sdr', 'account executive', 'ae', 'revenue'],
   'Marketing & Brand': ['marketing', 'brand', 'growth', 'demand gen', 'content', 'seo', 'campaigns'],
-  'Finance & Accounting': ['finance', 'accounting', 'cpa', 'controller', 'fp&a', 'analyst', 'audit'],
+  'Finance & Accounting': ['finance', 'accounting', 'cpa', 'controller', 'fp&a', 'analyst', 'audit', 'investment banking', 'investment bank', 'ib', 'm&a', 'mergers', 'acquisitions', 'private equity', 'pe', 'hedge fund', 'asset management', 'wealth management', 'capital markets', 'equity research', 'financial analyst', 'corporate finance', 'goldman', 'jpmorgan', 'morgan stanley', 'bank of america', 'citi', 'wells fargo'],
   'Operations & Strategy': ['operations', 'strategy', 'chief of staff', 'biz ops', 'program manager'],
   'Data & Analytics': ['data', 'analytics', 'bi', 'sql', 'tableau', 'data science', 'machine learning'],
   'Human Resources': ['hr', 'human resources', 'recruiting', 'talent', 'people ops'],
@@ -174,16 +174,24 @@ Deno.serve(async (req) => {
     // Quality-filtered base pool
     const qualityPool = sameSchoolMembers.filter(u => hasMinimumProfile(u));
 
-    // Tier 1: strong match (score >= 2)
-    const strongMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) >= 2);
-    // Tier 2: weak match (score === 1)
+    // Tier 1: strong match (score >= 3)
+    const strongMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) >= 3);
+    // Tier 2: meaningful match (score === 2)
     const weakMatchIds = new Set(strongMatch.map(u => u.id));
-    const weakMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) === 1 && !weakMatchIds.has(u.id));
-    // Tier 3: fallback — profile complete, relevant field, score 0
+    const weakMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) === 2 && !weakMatchIds.has(u.id));
+    // Tier 3: fallback — must have explicit industry keyword match, max 3
     const usedIds = new Set([...strongMatch, ...weakMatch].map(u => u.id));
+    const studentIndustries = industries;
     const fallback = qualityPool
-      .filter(u => !usedIds.has(u.id) && isRelevantFallback(u))
-      .sort((a, b) => new Date(b.updated_date || 0) - new Date(a.updated_date || 0));
+      .filter(u => {
+        if (usedIds.has(u.id)) return false;
+        if (!u.industry) return false;
+        const memberIndustry = u.industry.toLowerCase();
+        return studentIndustries.some(ind =>
+          (INDUSTRY_TO_KEYWORDS[ind] || []).some(kw => memberIndustry.includes(kw))
+        );
+      })
+      .slice(0, 3);
 
     const relevantMembers = [...strongMatch, ...weakMatch, ...fallback].slice(0, 20);
 
