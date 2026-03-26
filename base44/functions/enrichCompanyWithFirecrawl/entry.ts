@@ -73,7 +73,6 @@ Deno.serve(async (req) => {
           .filter(t => t.length > 3 && t.length < 80 && !t.toLowerCase().includes('indeed'))
           .slice(0, 3);
 
-        // Filter open roles to match student's target functions
         const functionKeywords = new Set();
         targetFunctions.forEach(fn => {
           (FUNCTION_TO_KEYWORDS[fn] || []).forEach(k => functionKeywords.add(k));
@@ -91,13 +90,43 @@ Deno.serve(async (req) => {
       console.error('[Indeed] scrape failed:', err.message);
     }
 
-    // SCRAPE 2 — Company careers page for what they look for
+    // SCRAPE 2 — Company careers page (multi-URL + Indeed fallback)
     try {
-      const slug = companyName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
-      const careersUrl = `https://${slug}.com/careers`;
-      const careersContent = await firecrawlScrape(careersUrl);
+      const cleaned = companyName
+        .replace(/\(.*?\)/g, '')
+        .replace(/\b(inc|llc|ltd|corp|group|enterprises|entertainment|latin|america|americas|us|usa)\b/gi, '')
+        .replace(/[^a-z0-9]/gi, '')
+        .toLowerCase()
+        .trim();
 
-      if (careersContent.length > 100) {
+      const urlsToTry = [
+        `https://careers.${cleaned}.com`,
+        `https://jobs.${cleaned}.com`,
+        `https://www.${cleaned}.com/careers`,
+        `https://www.${cleaned}.com/jobs`,
+      ];
+
+      let careersContent = null;
+      for (const url of urlsToTry) {
+        const content = await firecrawlScrape(url);
+        if (content && content.length > 500) {
+          careersContent = content;
+          console.log(`[Careers] ${companyName}: hit on ${url}`);
+          break;
+        }
+      }
+
+      // Indeed company page fallback if all careers URLs failed
+      if (!careersContent) {
+        const indeedFallbackUrl = `https://www.indeed.com/cmp/${encodeURIComponent(companyName.replace(/\s+/g, '-'))}/jobs`;
+        const fallbackContent = await firecrawlScrape(indeedFallbackUrl);
+        if (fallbackContent && fallbackContent.length > 200) {
+          careersContent = fallbackContent;
+          console.log(`[Careers] ${companyName}: using Indeed fallback`);
+        }
+      }
+
+      if (careersContent && careersContent.length > 100) {
         const requirementsResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `From this company careers page content, extract exactly 3 specific requirements or qualities they look for in ${targetRole || 'entry-level'} candidates.\n\nBe specific and honest. Max 8 words each. No marketing fluff. Plain text only.\n\nContent:\n${careersContent.slice(0, 3000)}\n\nReturn JSON array of 3 strings only.`,
           response_json_schema: {
