@@ -9,6 +9,18 @@ const SIGNAL_CONFIG = {
   unknown:   { label: 'Status Unknown',  color: '#9CA3AF', bg: '#F9FAFB' },
 };
 
+const isRealName = (name) => {
+  if (!name) return false;
+  if (name.includes('@')) return false;
+  if (!name.includes(' ')) return false; // single word — likely username
+  return true;
+};
+
+const displayName = (p) => {
+  if (isRealName(p.full_name)) return p.full_name;
+  return 'CFF Member';
+};
+
 const cleanText = (text) => {
   if (!text) return '';
   return text
@@ -121,7 +133,7 @@ function CFFParentsModal({ company, user, onClose }) {
                       {(p.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{p.full_name}</p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{displayName(p)}</p>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{parentTitle(p)}</p>
                       {p.school && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', margin: '1px 0 0' }}>CFF Parent · {p.school}</p>}
                     </div>
@@ -140,7 +152,7 @@ function CFFParentsModal({ company, user, onClose }) {
                   {(selectedParent?.full_name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{selectedParent?.full_name}</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{displayName(selectedParent || {})}</p>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#888', margin: 0 }}>{parentTitle(selectedParent)}</p>
                 </div>
               </div>

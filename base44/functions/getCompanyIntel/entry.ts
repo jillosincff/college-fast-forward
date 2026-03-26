@@ -309,6 +309,14 @@ Real companies only. Honest hiring signals. Specific to this role and industry. 
     const enriched = companies.map(company => {
       const nameLower = company.name.toLowerCase();
 
+      const normalizeCompany = (s) => s
+        .toLowerCase()
+        .replace(/\b(inc|llc|ltd|corp|group|the|co)\b/g, '')
+        .replace(/[^a-z0-9]/g, '')
+        .trim();
+
+      const targetNorm = normalizeCompany(company.name);
+
       const cffParents = allUsers.filter(u => {
         if (u.id === student_id) return false;
         if (u.email?.toLowerCase() === studentEmail) return false;
@@ -316,7 +324,11 @@ Real companies only. Honest hiring signals. Specific to this role and industry. 
         const isParent = u.persona === 'parent' || u.roles?.includes('parent');
         if (!isParent) return false;
         const co = [u.company, u.current_company, u.employer].filter(Boolean);
-        return co.some(c => c.toLowerCase().includes(nameLower) || nameLower.includes(c.toLowerCase().split(' ')[0]));
+        return co.some(c => {
+          const memberNorm = normalizeCompany(c);
+          if (!memberNorm || memberNorm.length < 3) return false;
+          return memberNorm.includes(targetNorm) || targetNorm.includes(memberNorm);
+        });
       });
 
       const warmLeadEntry = student.warm_leads_cache?.find(w =>
