@@ -141,7 +141,7 @@ function CFFParentsModal({ company, user, onClose }) {
                       )}
                       {p.school && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', margin: '1px 0 0' }}>CFF Parent · {p.school}</p>}
                       {p.linkedin_url && (
-                        <a href={p.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#0077B5', margin: '2px 0 0', display: 'inline-block', textDecoration: 'none' }}>View LinkedIn →</a>
+                        <a href={p.linkedin_url.startsWith('http') ? p.linkedin_url : `https://${p.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#0077B5', margin: '2px 0 0', display: 'inline-block', textDecoration: 'none' }}>View LinkedIn →</a>
                       )}
                     </div>
                   </div>
