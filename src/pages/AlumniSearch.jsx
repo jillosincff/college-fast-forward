@@ -22,7 +22,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [copyToast, setCopyToast] = useState(false);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-  const schoolName = user?.school_name || user?.school || 'University of Florida';
+  const schoolName = user?.school_name || user?.school || user?.university || user?.school_code?.toUpperCase() || 'your school';
   const examples = EXAMPLE_SEARCHES(schoolName);
 
   const handleSearch = async (searchQuery) => {
