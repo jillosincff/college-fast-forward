@@ -337,6 +337,7 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
   const [alumniResults, setAlumniResults] = useState([]);
   const [alumniSearching, setAlumniSearching] = useState(false);
   const [alumniSearched, setAlumniSearched] = useState(false);
+  const [showAlumniGate, setShowAlumniGate] = useState(false);
   const [sentTo, setSentTo] = useState([]);
   const [connectLoading, setConnectLoading] = useState(null);
   const [outreachModal, setOutreachModal] = useState(null);
@@ -541,8 +542,16 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
 
   const handleAlumniSearch = async () => {
     if (!alumniQuery.trim()) return;
+
+    // If free user already used their search, show gate immediately
+    if (!isFastIQ && user?.alumni_search_used) {
+      setShowAlumniGate(true);
+      return;
+    }
+
     setAlumniSearching(true);
     setAlumniSearched(false);
+    setShowAlumniGate(false);
     try {
       const res = await base44.functions.invoke('exaService', {
         action: 'searchAlumni',
@@ -551,6 +560,11 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         maxResults: 5,
       });
       setAlumniResults(res?.profiles || []);
+
+      // Mark free search as used after first successful search
+      if (!isFastIQ && !user?.alumni_search_used) {
+        base44.auth.updateMe({ alumni_search_used: true }).catch(() => {});
+      }
     } catch (e) {
       setAlumniResults([]);
     } finally {
@@ -790,58 +804,66 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>Search by role, company, or industry</h3>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>Natural language · {studentSchool || 'UF'} alumni only · Powered by Exa</p>
 
-        {!isFastIQ ? (
-          <div style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 14 }}>🔒</span>
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#1A1A1A' }}>Search any {studentSchool || 'UF'} alumni by role or company</span>
-              </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: 0, lineHeight: 1.5 }}>Try: "investment banker at Goldman" or "marketing manager at Nike in Miami"</p>
-            </div>
-            <button onClick={() => onUnlockFastIQ?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}>
-              Unlock FastIQ →
+        {/* Always show search bar — free users get 1 free search */}
+        <div>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <input
+              type="text"
+              value={alumniQuery}
+              onChange={e => setAlumniQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAlumniSearch()}
+              placeholder='Try: "investment banker at Goldman" or "UF grad in marketing at Nike"'
+              style={{ flex: 1, fontSize: 13, padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
+            />
+            <button
+              onClick={handleAlumniSearch}
+              disabled={alumniSearching || !alumniQuery.trim()}
+              style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: alumniSearching || !alumniQuery.trim() ? 'not-allowed' : 'pointer', opacity: alumniSearching || !alumniQuery.trim() ? 0.7 : 1, whiteSpace: 'nowrap', minHeight: 'auto' }}
+            >
+              {alumniSearching ? 'Searching...' : 'Search →'}
             </button>
           </div>
-        ) : (
-          <div>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-              <input
-                type="text"
-                value={alumniQuery}
-                onChange={e => setAlumniQuery(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleAlumniSearch()}
-                placeholder='Try: "investment banker at Goldman" or "pre-med UF grad in healthcare"'
-                style={{ flex: 1, fontSize: 13, padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
-              />
-              <button
-                onClick={handleAlumniSearch}
-                disabled={alumniSearching || !alumniQuery.trim()}
-                style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: alumniSearching || !alumniQuery.trim() ? 'not-allowed' : 'pointer', opacity: alumniSearching || !alumniQuery.trim() ? 0.7 : 1, whiteSpace: 'nowrap', minHeight: 'auto' }}
-              >
-                {alumniSearching ? 'Searching...' : 'Search →'}
+
+          {/* Free search entitlement label */}
+          {!isFastIQ && !user?.alumni_search_used && !alumniSearched && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', fontWeight: 500, margin: '0 0 12px' }}>
+              ✓ You have 1 free alumni search — make it count
+            </p>
+          )}
+
+          {!alumniSearched && !showAlumniGate && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+              {['investment banker at Goldman', 'marketing manager at Nike', 'software engineer at Google', 'consultant at McKinsey', 'product manager in NYC'].map(ex => (
+                <button key={ex} onClick={() => { setAlumniQuery(ex); setTimeout(handleAlumniSearch, 100); }}
+                  style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: '#666', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Already used gate — show before search runs */}
+          {showAlumniGate && (
+            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '20px 24px', textAlign: 'center', marginBottom: 16 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#1A1A1A', margin: '0 0 8px' }}>You've used your free search.</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 16px', lineHeight: 1.5 }}>Unlock FastIQ to search unlimited {studentSchool || 'UF'} alumni by role, company, or industry.</p>
+              <button onClick={() => onUnlockFastIQ?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
+                Unlock FastIQ →
               </button>
             </div>
+          )}
 
-            {!alumniSearched && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                {['investment banker at a top firm', 'finance analyst in New York', 'pre-med turned pharma consultant', 'engineer at Google or Meta', 'marketing at a sports brand'].map(ex => (
-                  <button key={ex} onClick={() => { setAlumniQuery(ex); setTimeout(handleAlumniSearch, 100); }}
-                    style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: '#666', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-                    {ex}
-                  </button>
-                ))}
-              </div>
-            )}
+          {alumniSearched && alumniResults.length === 0 && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#aaa', textAlign: 'center', padding: '24px 0' }}>No {studentSchool || 'UF'} alumni found — try different keywords.</p>
+          )}
 
-            {alumniSearched && alumniResults.length === 0 && (
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#aaa', textAlign: 'center', padding: '24px 0' }}>No {studentSchool || 'UF'} alumni found — try different keywords.</p>
-            )}
-
-            {alumniResults.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {alumniResults.map((alum, i) => (
-                  <div key={i} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          {alumniResults.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
+              {/* First result — always fully visible */}
+              {(() => {
+                const alum = alumniResults[0];
+                return (
+                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{alum.full_name}</p>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>{alum.headline}</p>
@@ -855,11 +877,39 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
                       {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Message sent ✓' : 'Connect →'}
                     </button>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                );
+              })()}
+
+              {/* Results 2–5: blurred for free tier with lock overlay */}
+              {alumniResults.slice(1).map((alum, i) => (
+                <div key={i} style={{ position: 'relative' }}>
+                  <div style={{ filter: !isFastIQ ? 'blur(4px)' : 'none', pointerEvents: !isFastIQ ? 'none' : 'auto', userSelect: !isFastIQ ? 'none' : 'auto' }}>
+                    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{alum.full_name}</p>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>{alum.headline}</p>
+                        {alum.summary && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: 0, lineHeight: 1.4 }}>{alum.summary.slice(0, 120)}</p>}
+                      </div>
+                      <button style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: '7px 14px', fontSize: 12, color: '#E85D20', minHeight: 'auto' }}>Connect →</button>
+                    </div>
+                  </div>
+
+                  {/* Lock overlay on first blurred card */}
+                  {!isFastIQ && i === 0 && (
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '16px 24px', textAlign: 'center' }}>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0, lineHeight: 1.5, maxWidth: 280 }}>
+                        You've used your free search. Unlock FastIQ to see all {alumniResults.length} results and search unlimited {studentSchool || 'UF'} alumni.
+                      </p>
+                      <button onClick={() => onUnlockFastIQ?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
+                        Unlock FastIQ →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       <hr style={{ border: 'none', borderTop: '1px solid #f0f0f0', margin: '0 0 40px' }} />
