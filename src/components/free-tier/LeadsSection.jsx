@@ -150,11 +150,12 @@ function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSav
 
 // ─── Warm Company Card ────────────────────────────────────────────────────────
 
-function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSaved, style }) {
-  const countLabel = (lead.alumni_count && lead.confidence === 'verified') ? lead.alumni_count.toLocaleString() : null;
-  const barWidth = countLabel && maxAlumni > 0 ? Math.round((lead.alumni_count / maxAlumni) * 100) : 0;
+function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onContact, isFastIQ, style }) {
+  const barWidth = (lead.alumni_count && maxAlumni > 0) ? Math.round((lead.alumni_count / maxAlumni) * 100) : 0;
   const hiringColor = lead.hiring_signal === 'active' ? '#15803D' : lead.hiring_signal === 'selective' ? '#D97706' : '#94A3B8';
   const hiringLabel = { active: '🟢 Actively Hiring', selective: '🟡 Selective', freeze: '🔴 Freeze' }[lead.hiring_signal] || null;
+  const cffMembers = lead.cff_parents || [];
+  const hasAlumniCount = lead.alumni_count > 0;
 
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14, ...style }}>
@@ -170,76 +171,91 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onSave, isSave
       </div>
 
       {/* Alumni count + bar */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-          {lead.alumni_count && lead.confidence === 'verified' ? (
-            <>
-              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#0d1117', lineHeight: 1 }}>{lead.alumni_count.toLocaleString()}</span>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>{university} alumni work here</span>
-              {lead.source === 'linkedin_proxycurl' && (
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#15803D', background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 100, padding: '2px 8px', marginLeft: 4 }}>✓ LinkedIn verified</span>
-              )}
-            </>
-          ) : (
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#555', fontWeight: 500 }}>🎓 {university} alumni work here</span>
-          )}
-        </div>
-        {lead.alumni_count && lead.confidence === 'verified' && (
-          <div style={{ height: 6, background: '#f0f0f0', borderRadius: 100, overflow: 'hidden', marginBottom: 4 }}>
+      {hasAlumniCount && lead.confidence === 'verified' && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#0d1117', lineHeight: 1 }}>{lead.alumni_count.toLocaleString()}</span>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>{university} alumni work here</span>
+            {lead.source === 'linkedin_proxycurl' && (
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#15803D', background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 100, padding: '2px 8px', marginLeft: 4 }}>✓ LinkedIn verified</span>
+            )}
+          </div>
+          <div style={{ height: 6, background: '#f0f0f0', borderRadius: 100, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${barWidth}%`, background: 'linear-gradient(90deg, #E85D20, #ff8c5a)', borderRadius: 100, transition: 'width 0.8s ease' }} />
           </div>
-        )}
-      </div>
-
-      {/* Teaser profiles — real or placeholder */}
-      {lead.teaser_profile ? (
-        <div style={{ marginBottom: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: '1px solid #E5E5E5' }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e5e5e5', filter: 'blur(4px)', flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#555', lineHeight: 1.4 }}>
-              <span style={{ fontWeight: 600, color: '#1A1A1A', filter: 'blur(5px)', userSelect: 'none' }}>
-                {lead.teaser_profile.display_name || 'S.K.'}
-              </span>
-              {lead.teaser_profile.title && <span style={{ color: '#666' }}> · {lead.teaser_profile.title}</span>}
-              {lead.teaser_profile.grad_year && <span style={{ color: '#999' }}> · UF {lead.teaser_profile.grad_year}</span>}
-            </div>
-            <span style={{ fontSize: 14, color: '#999', flexShrink: 0 }}>🔒</span>
-          </div>
-          {[...Array(Math.max(0, Math.min(2, (lead.alumni_count || 3) - 1)))].map((_, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: i < 1 ? '1px solid #E5E5E5' : 'none', opacity: 0.4 }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e5e5e5', flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ height: 10, width: 60, background: '#e5e5e5', borderRadius: 4, marginBottom: 4 }} />
-                <div style={{ height: 8, width: 90, background: '#f0f0f0', borderRadius: 4 }} />
-              </div>
-            </div>
-          ))}
         </div>
-      ) : lead.teaser_roles?.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 0 }}>
-          {lead.teaser_roles.slice(0, 3).map((role, i) => {
-            const WIDTHS = ['88px', '104px', '76px', '112px'];
+      )}
+
+      {/* CFF Members — always visible, free to contact */}
+      {cffMembers.length > 0 && (
+        <div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa', margin: '0 0 8px' }}>CFF members here</p>
+          {cffMembers.map((parent, i) => {
+            const inits = (parent.full_name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
             return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#e5e5e5', flexShrink: 0 }} />
-                <div style={{ height: 12, background: '#ddd', borderRadius: 4, flexShrink: 0, width: WIDTHS[i % 4] }} />
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}>· {role}</span>
+              <div key={parent.id || i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < cffMembers.length - 1 ? '1px solid #F0F0F0' : 'none' }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#fff', flexShrink: 0 }}>{inits}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{parent.full_name}</p>
+                  {parent.job_title && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: 0 }}>{parent.job_title}</p>}
+                </div>
+                <button
+                  onClick={() => onContact?.({ id: parent.id, source: 'cff_database', name: parent.full_name, title: parent.job_title, company: lead.company, email: parent.email })}
+                  style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: '5px 10px', fontSize: 12, color: '#E85D20', cursor: 'pointer', minHeight: 'auto', flexShrink: 0 }}
+                >
+                  Connect →
+                </button>
               </div>
             );
           })}
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', margin: '2px 0 0', paddingLeft: 32 }}>
-            + {Math.max(0, lead.alumni_count - 3).toLocaleString()} more
-          </p>
         </div>
-      ) : null}
+      )}
 
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button onClick={() => onUnlock(lead)}
-          style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-          {lead.teaser_profile ? `🔒 See ${lead.teaser_profile.display_name} and ${Math.max(0, (lead.alumni_count || 1) - 1).toLocaleString()} more →` : '🔒 Unlock to See Who →'}
-        </button>
-      </div>
+      {/* UF Alumni (non-CFF) — count visible, profiles gated */}
+      {hasAlumniCount && (
+        <div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa', margin: '0 0 8px' }}>UF alumni here</p>
+
+          {/* Teaser blurred profile */}
+          {lead.teaser_profile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F0F0F0' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e5e5e5', filter: 'blur(4px)', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0, filter: 'blur(5px)', userSelect: 'none' }}>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>{lead.teaser_profile.display_name || 'S.K.'}</span>
+                {lead.teaser_profile.title && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666' }}> · {lead.teaser_profile.title}</span>}
+                {lead.teaser_profile.grad_year && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}> · UF {lead.teaser_profile.grad_year}</span>}
+              </div>
+              <span style={{ fontSize: 14 }}>🔒</span>
+            </div>
+          )}
+
+          {/* Unlock CTA */}
+          <button
+            onClick={() => onUnlock(lead)}
+            style={{ marginTop: 10, background: 'none', border: '1px solid #E5E5E5', borderRadius: 8, padding: '7px 14px', fontSize: 12, color: '#666', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
+          >
+            {lead.teaser_profile
+              ? `🔒 See ${lead.teaser_profile.display_name} and ${Math.max(0, (lead.alumni_count || 1) - 1)} more UF alumni →`
+              : `🔒 See ${lead.alumni_count} UF alumni at ${lead.company} →`}
+          </button>
+        </div>
+      )}
+
+      {/* Fallback if no CFF members and no alumni count — teaser roles */}
+      {!cffMembers.length && !hasAlumniCount && lead.teaser_roles?.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {lead.teaser_roles.slice(0, 3).map((role, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#e5e5e5', flexShrink: 0 }} />
+              <div style={{ height: 12, background: '#ddd', borderRadius: 4, flexShrink: 0, width: ['88px','104px','76px'][i % 3] }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}>· {role}</span>
+            </div>
+          ))}
+          <button onClick={() => onUnlock(lead)} style={{ marginTop: 6, background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>
+            🔒 Unlock to See Who →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -911,6 +927,40 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
           )}
         </div>
       </section>
+
+      {/* ── WARM LEADS ── */}
+      {(warmLoading || warmLeads.length > 0) && (
+        <section style={{ marginBottom: 40 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>🌍 WARM LEADS</p>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
+            {university} alumni at your target companies
+          </h3>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
+            CFF members = free to contact. Other alumni need FastIQ.
+          </p>
+          {warmLoading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 0' }}>
+              <div style={{ width: 20, height: 20, border: '2px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'lsSpin 0.8s linear infinite' }} />
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, margin: 0, color: '#888' }}>Finding alumni at your target companies...</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+              {warmLeads.map((lead, i) => (
+                <WarmCompanyCard
+                  key={lead.company || i}
+                  lead={lead}
+                  maxAlumni={maxAlumni}
+                  university={university}
+                  isFastIQ={isFastIQ}
+                  onUnlock={() => setUpgradeModal(lead)}
+                  onContact={onContact}
+                  style={{}}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       <hr style={{ border: 'none', borderTop: '1px solid #f0f0f0', margin: '0 0 40px' }} />
 
