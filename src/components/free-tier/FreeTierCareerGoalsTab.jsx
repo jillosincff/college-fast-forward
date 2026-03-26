@@ -660,7 +660,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     if (!major.trim()) return;
     setAwaitingMajor(false);
     setMajorSaved(true);
-    setMajorFilter('');
     const userMsg = { role: 'user', content: major.trim() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
@@ -1064,65 +1063,73 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               onRestart={startChat}
             />
 
-            {/* Alumni Explorer — gated by FastIQ, cache-aware */}
-            {(user.is_fastiq || user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq') ? null : alumniLoading ? (
-              <div style={{ marginTop: '32px', fontSize: '13px', color: '#888' }}>
-                Finding alumni in your target roles...
-              </div>
-            ) : alumniClusters.length > 0 ? (
-              <div style={{ marginTop: '32px' }}>
-                <div style={{ marginBottom: '16px' }}>
-                  {isUndecided ? (
-                    <>
-                      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
-                        Not sure which direction to go?
-                      </h3>
-                      <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
-                        Talk to someone who's been there. Connect with UF alumni who have roles you're exploring.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
-                        Want to know what a {primaryRole} is really like?
-                      </h3>
-                      <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
-                        Connect with UF alumni who have the exact role you're targeting.
-                      </p>
-                    </>
-                  )}
+            {/* Alumni Explorer — FastIQ users see real alumni; free users see locked teaser */}
+            {(user.is_fastiq || user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq') ? (
+              alumniLoading ? (
+                <div style={{ marginTop: '32px', fontSize: '13px', color: '#888' }}>
+                  Finding alumni in your target roles...
                 </div>
-                {alumniClusters.map(cluster => (
-                  <div key={cluster.cluster} style={{ marginBottom: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
-                        {cluster.cluster}
-                      </span>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-                      {cluster.alumni.map(alum => (
-                        <div key={alum.linkedin_url} style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>{alum.name}</span>
-                          <span style={{ fontSize: '12px', color: '#555', fontFamily: "'DM Sans', sans-serif" }}>{alum.title}</span>
-                          <span style={{ fontSize: '12px', color: '#888', fontFamily: "'DM Sans', sans-serif" }}>{alum.company}</span>
-                          <button
-                            onClick={() => handleConnectClick(alum)}
-                            disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
-                            style={{ marginTop: '8px', background: 'none', border: '1px solid #E85D20', borderRadius: '6px', padding: '5px 10px', fontSize: '12px', color: '#E85D20', cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, minHeight: 'auto', opacity: connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url) ? 0.7 : 1 }}
-                          >
-                            {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Message sent ✓' : 'Connect →'}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+              ) : alumniClusters.length > 0 ? (
+                <div style={{ marginTop: '32px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    {isUndecided ? (
+                      <>
+                        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
+                          Not sure which direction to go?
+                        </h3>
+                        <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
+                          Talk to someone who's been there. Connect with UF alumni who have roles you're exploring.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
+                          Want to know what a {primaryRole} is really like?
+                        </h3>
+                        <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
+                          Connect with UF alumni who have the exact role you're targeting.
+                        </p>
+                      </>
+                    )}
                   </div>
-                ))}
-              </div>
+                  {alumniClusters.map(cluster => (
+                    <div key={cluster.cluster} style={{ marginBottom: '24px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
+                          {cluster.cluster}
+                        </span>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                        {cluster.alumni.map(alum => (
+                          <div key={alum.linkedin_url} style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>{alum.name}</span>
+                            <span style={{ fontSize: '12px', color: '#555', fontFamily: "'DM Sans', sans-serif" }}>{alum.title}</span>
+                            <span style={{ fontSize: '12px', color: '#888', fontFamily: "'DM Sans', sans-serif" }}>{alum.company}</span>
+                            <button
+                              onClick={() => handleConnectClick(alum)}
+                              disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
+                              style={{ marginTop: '8px', background: 'none', border: '1px solid #E85D20', borderRadius: '6px', padding: '5px 10px', fontSize: '12px', color: '#E85D20', cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, minHeight: 'auto', opacity: connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url) ? 0.7 : 1 }}
+                            >
+                              {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Message sent ✓' : 'Connect →'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null
             ) : (
               <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 16, padding: '24px', marginTop: '32px', textAlign: 'center' }}>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px' }}>🔒 FASTIQ FEATURE</p>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Connect with UF Alumni</p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>See real alumni in your target roles and reach out directly. Available with FastIQ.</p>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Connect with alumni in your target role</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: '0 0 16px', lineHeight: 1.6 }}>See real alumni doing exactly what you want to do, and reach out directly. Available with FastIQ.</p>
+                <button
+                  onClick={() => onOpenUpgrade?.()}
+                  style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  Unlock FastIQ →
+                </button>
               </div>
             )}
           </>
