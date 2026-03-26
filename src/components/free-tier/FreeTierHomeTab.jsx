@@ -130,7 +130,6 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
               <div className="flex flex-col gap-3">
                 <button
                     onClick={() => {
-                      // Direct checkout instead of opening modal
                       const handleDirectCheckout = async () => {
                         try {
                           const res = await fetch('/functions/createCheckoutSession', {
@@ -142,13 +141,19 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                               cancelUrl: window.location.href,
                             }),
                           });
+                          if (!res.ok) {
+                            throw new Error(`HTTP ${res.status}`);
+                          }
                           const data = await res.json();
                           if (data.url) {
                             window.location.href = data.url;
+                          } else if (data.error) {
+                            console.error('Checkout error:', data.error);
+                            onOpenUpgrade();
                           }
                         } catch (e) {
-                          console.error('Checkout error:', e);
-                          onOpenUpgrade(); // fallback to modal if direct checkout fails
+                          console.error('Checkout failed:', e.message);
+                          onOpenUpgrade();
                         }
                       };
                       handleDirectCheckout();
