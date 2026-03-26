@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     const stripePriceId = PRICE_MAP[plan];
     if (!stripePriceId) {
       return Response.json({
-        error: `Invalid plan: ${resolvedPlan}. Must be one of: ${Object.keys(PRICE_MAP).join(', ')}`,
+        error: `Invalid plan: ${plan}. Must be one of: ${Object.keys(PRICE_MAP).join(', ')}`,
       }, { status: 400 });
     }
 
@@ -45,8 +45,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing successUrl or cancelUrl' }, { status: 400 });
     }
 
-    const subscriptionTier = TIER_MAP[resolvedPlan];
-    console.log('Checkout request:', { originalPlan: plan, resolvedPlan, subscriptionTier, userId: user.id, email: user.email, isFoundingRedemption });
+    const subscriptionTier = TIER_MAP[plan];
+    const isFoundingRedemption = false;
+    console.log('Checkout request:', { plan, subscriptionTier, userId: user.id, email: user.email });
 
     // ── Resolve the user's Family entity ──
     let familyId = metadata?.family_id || '';
@@ -125,7 +126,7 @@ Deno.serve(async (req) => {
       customerMeta.founding_offer_eligible = 'true';
       customerMeta.founding_offer_start = user.founding_offer_started_at;
       customerMeta.founding_offer_expiry = new Date(expiresAt).toISOString();
-      customerMeta.founding_offer_redeemed = isFoundingRedemption ? 'true' : 'false';
+      customerMeta.founding_offer_redeemed = 'false';
       if (user.student_emails?.length > 0) {
         customerMeta.linked_student_email = user.student_emails[0];
       }
@@ -152,9 +153,6 @@ Deno.serve(async (req) => {
           console.log('Could not update family with customer ID:', e.message);
         }
       }
-    } else if (isFoundingRedemption) {
-      // Update existing customer metadata with founding redemption
-      await stripe.customers.update(customerId, { metadata: customerMeta });
     }
 
     // ── Compute checkout session expiry ──
@@ -179,7 +177,7 @@ Deno.serve(async (req) => {
         trial_period_days: TRIAL_DAYS,
         metadata: {
           subscription_tier: subscriptionTier,
-          plan: resolvedPlan,
+          plan: plan,
           family_id: familyId,
           is_founding_member: isFoundingRedemption ? 'true' : 'false',
         },
@@ -190,7 +188,7 @@ Deno.serve(async (req) => {
         user_id: user.id,
         user_email: user.email,
         subscription_tier: subscriptionTier,
-        plan: resolvedPlan,
+        plan: plan,
         family_id: familyId,
         is_founding_member: isFoundingRedemption ? 'true' : 'false',
       },
@@ -202,13 +200,12 @@ Deno.serve(async (req) => {
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
-    console.log('Checkout session created:', session.id, 'plan:', resolvedPlan, 'family:', familyId, 'founding:', isFoundingRedemption);
+    console.log('Checkout session created:', session.id, 'plan:', plan, 'family:', familyId);
 
     return Response.json({
       sessionId: session.id,
       url: session.url,
-      resolvedPlan,
-      isFoundingRedemption,
+      success: true,
     });
 
   } catch (error) {
