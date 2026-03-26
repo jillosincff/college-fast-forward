@@ -330,9 +330,19 @@ const normalizeSchool = (s) => SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, onUnsaveLead, onUpgrade, leadsRef }) {
+export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, onUnsaveLead, onUpgrade, leadsRef, onUnlockFastIQ }) {
   const [copySuccess, setCopySuccess] = useState(false);
   const [redHotLoading, setRedHotLoading] = useState(true);
+  const [alumniQuery, setAlumniQuery] = useState('');
+  const [alumniResults, setAlumniResults] = useState([]);
+  const [alumniSearching, setAlumniSearching] = useState(false);
+  const [alumniSearched, setAlumniSearched] = useState(false);
+  const [sentTo, setSentTo] = useState([]);
+  const [connectLoading, setConnectLoading] = useState(null);
+  const [outreachModal, setOutreachModal] = useState(null);
+  const [editedDraft, setEditedDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [copyToast, setCopyToast] = useState(false);
   const [redHotLeads, setRedHotLeads] = useState([]);
   const [redHotTotal, setRedHotTotal] = useState(0);
   const [warmLeads, setWarmLeads] = useState([]);
@@ -527,6 +537,63 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
     fetchWarmLeads();
   }, [user?.id]);
 
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+
+  const handleAlumniSearch = async () => {
+    if (!alumniQuery.trim()) return;
+    setAlumniSearching(true);
+    setAlumniSearched(false);
+    try {
+      const res = await base44.functions.invoke('exaService', {
+        action: 'searchAlumni',
+        query: alumniQuery,
+        universityName: studentSchool || 'University of Florida',
+        maxResults: 5,
+      });
+      setAlumniResults(res?.profiles || []);
+    } catch (e) {
+      setAlumniResults([]);
+    } finally {
+      setAlumniSearching(false);
+      setAlumniSearched(true);
+    }
+  };
+
+  const generateOutreachDraft = async (alum) => {
+    try {
+      const res = await base44.functions.invoke('generateOutreachDraft', {
+        studentName: user?.full_name || 'Student',
+        major: user?.major || user?.career_goals?.major || '',
+        targetRole: (user?.career_goals?.target_roles || [])[0] || alum.headline || '',
+        graduationYear: user?.career_goals?.graduation_year || '',
+        alumniName: alum.full_name,
+        alumniTitle: alum.headline,
+        alumniCompany: alum.company || '',
+      });
+      return res?.data?.message || res?.message || '';
+    } catch { return ''; }
+  };
+
+  const handleConnect = async (alum) => {
+    if (sentTo.includes(alum.linkedin_url)) return;
+    setConnectLoading(alum.linkedin_url);
+    try {
+      const draft = await generateOutreachDraft(alum);
+      setOutreachModal({ open: true, alum, draft, mode: 'linkedin' });
+      setEditedDraft(draft);
+    } finally {
+      setConnectLoading(null);
+    }
+  };
+
+  const handleSendLinkedIn = () => {
+    if (!outreachModal) return;
+    navigator.clipboard.writeText(editedDraft).then(() => { setCopyToast(true); setTimeout(() => setCopyToast(false), 3000); });
+    window.open(outreachModal.alum.linkedin_url, '_blank');
+    setSentTo(prev => [...prev, outreachModal.alum.linkedin_url]);
+    setOutreachModal(null);
+  };
+
   const isSaved = (id) => savedLeads.some(l => l.id === String(id));
   const isRoleBased = warmSearchType === 'role_based' || warmLeads.some(w => w.type === 'role_based');
   const verifiedWarmLeads = isRoleBased
@@ -717,92 +784,85 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
         </div>
       )}
 
-      <hr style={{ border: 'none', borderTop: '1px solid #f0f0f0', margin: '0 0 40px' }} />
+      {/* ── Find a Specific Alumni ── */}
+      <section style={{ marginTop: 40, marginBottom: 40 }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>🔍 FIND A SPECIFIC ALUMNI</p>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>Search by role, company, or industry</h3>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>Natural language · {studentSchool || 'UF'} alumni only · Powered by Exa</p>
 
-      {/* ── WARM LEADS HERO ── */}
-      <section style={{ marginBottom: 40 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>🌡️ WARM LEADS</p>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 16px' }}>
-          {isRoleBased
-            ? `${university} alumni doing your target role`
-            : `${university} alumni at your target companies`}
-        </p>
-
-        {warmLoading ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '24px 0' }}>
-            <div style={{ width: 20, height: 20, border: '2px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'lsSpin 0.8s linear infinite' }} />
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, margin: 0, color: '#888' }}>Searching for {university} alumni at your target companies...</p>
+        {!isFastIQ ? (
+          <div style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 14 }}>🔒</span>
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#1A1A1A' }}>Search any {studentSchool || 'UF'} alumni by role or company</span>
+              </div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: 0, lineHeight: 1.5 }}>Try: "investment banker at Goldman" or "marketing manager at Nike in Miami"</p>
+            </div>
+            <button onClick={() => onUnlockFastIQ?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}>
+              Unlock FastIQ →
+            </button>
           </div>
-        ) : warmLeads.length > 0 ? (
-          <>
-            {/* Hero stat block */}
-            <div style={{ marginBottom: 28, padding: '28px 32px', background: '#FAFAFA', border: '1px solid #F0F0F0', borderRadius: 16 }}>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: verifiedTotal > 0 ? 72 : 48, fontWeight: 700, color: '#0d1117', lineHeight: 1, margin: '0 0 8px' }}>
-                {verifiedTotal > 0 ? verifiedTotal.toLocaleString() : warmLeads.length.toString()}
-              </p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#555', margin: '0 0 4px' }}>
-                {verifiedTotal > 0
-                  ? isRoleBased
-                    ? `verified ${university} alumni currently working in your target role.`
-                    : `verified ${university} alumni at your target companies.`
-                  : isRoleBased
-                    ? `${university} alumni doing your target role.`
-                    : `companies in your field where ${university} alumni work.`
-                }
-              </p>
-              {verifiedTotal > 0 && (
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#15803D', margin: '0 0 4px' }}>✓ Source: LinkedIn · Updated weekly</p>
-              )}
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 20px' }}>
-                You can't see who they are yet.
-              </p>
-              <button onClick={() => onUpgrade?.()}
-                style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto' }}>
-                ⚡ Unlock FastIQ — See Who They Are →
+        ) : (
+          <div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <input
+                type="text"
+                value={alumniQuery}
+                onChange={e => setAlumniQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAlumniSearch()}
+                placeholder='Try: "investment banker at Goldman" or "pre-med UF grad in healthcare"'
+                style={{ flex: 1, fontSize: 13, padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
+              />
+              <button
+                onClick={handleAlumniSearch}
+                disabled={alumniSearching || !alumniQuery.trim()}
+                style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: alumniSearching || !alumniQuery.trim() ? 'not-allowed' : 'pointer', opacity: alumniSearching || !alumniQuery.trim() ? 0.7 : 1, whiteSpace: 'nowrap', minHeight: 'auto' }}
+              >
+                {alumniSearching ? 'Searching...' : 'Search →'}
               </button>
             </div>
 
-            {/* Explore chips — horizontal scroll */}
-            {validExploreChips.length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 10px' }}>⚡ EXPLORE COMPANIES IN YOUR FIELD</p>
-                <div style={{ display: 'flex', flexDirection: 'row', gap: 8, overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                  {validExploreChips.map((chip, i) => {
-                    const hasData = warmLeads.some(w => w.company === chip);
-                    const isSelected = selectedChip === chip;
-                    return (
-                      <button key={i} onClick={() => setSelectedChip(isSelected ? null : chip)}
-                        style={{ background: isSelected ? '#FFF5F0' : '#fff', border: `1.5px solid ${isSelected ? '#E85D20' : '#e5e5e5'}`, borderRadius: 100, padding: '8px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: isSelected ? '#E85D20' : '#333', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.2s ease', opacity: hasData ? 1 : 0.6 }}>
-                        {chip}
-                      </button>
-                    );
-                  })}
-                </div>
-                {selectedChip && selectedCardData && (
-                  <div style={{ marginTop: 16, animation: 'slideDown 0.3s ease' }}>
-                    <WarmCompanyCard lead={selectedCardData} maxAlumni={maxAlumni} university={university} onUnlock={(lead) => setUpgradeModal(lead)} onSave={onSaveLead} isSaved={isSaved(`alumni_${selectedCardData.company}`)} />
-                  </div>
-                )}
+            {!alumniSearched && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                {['investment banker at a top firm', 'finance analyst in New York', 'pre-med turned pharma consultant', 'engineer at Google or Meta', 'marketing at a sports brand'].map(ex => (
+                  <button key={ex} onClick={() => { setAlumniQuery(ex); setTimeout(handleAlumniSearch, 100); }}
+                    style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: '#666', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+                    {ex}
+                  </button>
+                ))}
               </div>
             )}
 
-            {/* All company or role cards */}
-            <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-              {warmLeads.map((lead, i) =>
-                lead.type === 'role_based'
-                  ? <RoleBasedWarmLeadCard key={lead.job_title || i} roleData={lead} university={university} onUnlock={() => setUpgradeModal({ ...lead, isRole: true })} onUpgrade={onUpgrade} />
-                  : <WarmCompanyCard key={lead.company || i} lead={lead} maxAlumni={maxAlumni} university={university} onUnlock={(lead) => setUpgradeModal(lead)} onSave={onSaveLead} isSaved={isSaved(`alumni_${lead.company}`)} />
-              )}
-            </div>
-          </>
-        ) : (
-          <div style={{ background: '#FFF8F0', border: '1px dashed #FDDBC8', borderRadius: 10, padding: '20px 24px' }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: 0, lineHeight: 1.6 }}>
-              Searching for {university} alumni at companies in your target field. This may take a moment on first load.
-            </p>
+            {alumniSearched && alumniResults.length === 0 && (
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#aaa', textAlign: 'center', padding: '24px 0' }}>No {studentSchool || 'UF'} alumni found — try different keywords.</p>
+            )}
+
+            {alumniResults.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {alumniResults.map((alum, i) => (
+                  <div key={i} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{alum.full_name}</p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>{alum.headline}</p>
+                      {alum.summary && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: 0, lineHeight: 1.4 }}>{alum.summary.slice(0, 120)}</p>}
+                    </div>
+                    <button
+                      onClick={() => handleConnect(alum)}
+                      disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
+                      style={{ background: 'none', border: `1px solid ${sentTo.includes(alum.linkedin_url) ? '#22C55E' : '#E85D20'}`, borderRadius: 6, padding: '7px 14px', fontSize: 12, color: sentTo.includes(alum.linkedin_url) ? '#22C55E' : '#E85D20', cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer', whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
+                    >
+                      {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Message sent ✓' : 'Connect →'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </section>
+
+      <hr style={{ border: 'none', borderTop: '1px solid #f0f0f0', margin: '0 0 40px' }} />
 
       {upgradeModal && (
         <UpgradeModal
@@ -811,6 +871,40 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
           onClose={() => setUpgradeModal(null)}
           onUpgrade={() => { setUpgradeModal(null); onUpgrade?.(); }}
         />
+      )}
+
+      {/* Outreach modal */}
+      {outreachModal?.open && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>Reaching out via LinkedIn</p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{outreachModal.alum.full_name}</p>
+              <p style={{ fontSize: 13, color: '#666', margin: '2px 0 0' }}>{outreachModal.alum.headline}</p>
+            </div>
+            <div style={{ background: '#F0F7FF', border: '1px solid #B3D9FF', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#0057B8', lineHeight: 1.5 }}>
+              Edit your message, then click "Copy & Open LinkedIn" — paste it into your connection request.
+            </div>
+            <textarea
+              value={editedDraft}
+              onChange={e => setEditedDraft(e.target.value)}
+              rows={6}
+              style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button onClick={() => setOutreachModal(null)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
+              <button onClick={handleSendLinkedIn} disabled={!editedDraft.trim()} style={{ background: '#0077B5', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: !editedDraft.trim() ? 'not-allowed' : 'pointer', opacity: !editedDraft.trim() ? 0.7 : 1, minHeight: 'auto' }}>
+                Copy & Open LinkedIn →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {copyToast && (
+        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 18px', fontSize: 13, color: '#1A1A1A', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 100, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif" }}>
+          ✓ Message copied — paste it into your LinkedIn connection request
+        </div>
       )}
 
       <style>{`

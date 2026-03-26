@@ -931,6 +931,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               onUnsaveLead={handleUnsaveLead}
               onUpgrade={() => onOpenUpgrade?.()}
               onOpenUpgrade={() => onOpenUpgrade?.()}
+              onUnlockFastIQ={() => onOpenUpgrade?.()}
               leadsRef={leadsRef}
             />
             <SavedLeads

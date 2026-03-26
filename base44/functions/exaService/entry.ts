@@ -125,9 +125,11 @@ Deno.serve(async (req) => {
 
     // ── ACTION 2: Alumni people search ───────────────────────────────
     if (action === 'searchAlumni') {
-      const { jobTitle, universityName = 'University of Florida', companyName = '', maxResults = 3 } = params;
+      const { query: freeTextQuery, jobTitle, universityName = 'University of Florida', companyName = '', maxResults = 3 } = params;
       const companyClause = companyName ? `at ${companyName}` : '';
-      const query = `${jobTitle} ${companyClause} who studied at ${universityName}`;
+      const query = freeTextQuery
+        ? `${freeTextQuery} who studied at ${universityName}`
+        : `${jobTitle} ${companyClause} who studied at ${universityName}`;
 
       const data = await exaFetch('search', {
         query,
@@ -143,6 +145,8 @@ Deno.serve(async (req) => {
         headline: r.title,
         summary: (r.highlights || []).join(' ').slice(0, 200),
         source: 'exa',
+        cff_user_id: null,
+        email: null,
       }));
 
       return Response.json({
