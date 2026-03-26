@@ -226,7 +226,11 @@ Deno.serve(async (req) => {
     ].filter(Boolean);
     const location = careerGoals.location_preference || 'the US';
 
-    if (!industries.length && !roles.length) {
+    const targetFunctions = [
+      ...(Array.isArray(careerGoals.target_functions) ? careerGoals.target_functions : []),
+    ].filter(Boolean);
+
+    if (!industries.length && !roles.length && !targetFunctions.length) {
       return Response.json({ companies: [], noGoals: true });
     }
 
@@ -332,6 +336,11 @@ Real companies only. Honest hiring signals. Specific to this role and industry. 
         return co.some(c => {
           const memberNorm = normalizeCompany(c);
           if (!memberNorm || memberNorm.length < 3) return false;
+          // Require at least 80% character overlap to avoid partial word matches
+          const longer = Math.max(memberNorm.length, targetNorm.length);
+          const shorter = Math.min(memberNorm.length, targetNorm.length);
+          const overlapRatio = shorter / longer;
+          if (overlapRatio < 0.8) return false;
           return memberNorm.includes(targetNorm) || targetNorm.includes(memberNorm);
         });
       });

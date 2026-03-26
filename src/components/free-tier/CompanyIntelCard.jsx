@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { base44 } from '@/api/base44Client';
+import { formatDisplayName } from '@/lib/formatDisplayName';
 
 const SIGNAL_CONFIG = {
   active:    { label: 'Actively Hiring', color: '#22C55E', bg: '#F0FDF4' },
@@ -9,16 +10,12 @@ const SIGNAL_CONFIG = {
   unknown:   { label: 'Status Unknown',  color: '#9CA3AF', bg: '#F9FAFB' },
 };
 
-const isRealName = (name) => {
-  if (!name) return false;
-  if (name.includes('@')) return false;
-  if (!name.includes(' ')) return false; // single word — likely username
-  return true;
-};
-
 const displayName = (p) => {
-  if (isRealName(p.full_name)) return p.full_name;
-  return 'CFF Member';
+  if (!p?.full_name) return 'CFF Member';
+  const name = formatDisplayName(p.full_name, { fallback: 'CFF Member' });
+  // Guard against username-style values (e.g. 'gosinoff')
+  if (!name.includes(' ') && name === name.toLowerCase() && name.length < 20 && !name.includes('.')) return 'CFF Member';
+  return name;
 };
 
 const cleanText = (text) => {
