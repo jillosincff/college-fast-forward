@@ -235,7 +235,7 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onContact, isF
             style={{ marginTop: 10, background: 'none', border: '1px solid #E5E5E5', borderRadius: 8, padding: '7px 14px', fontSize: 12, color: '#666', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
           >
             {lead.teaser_profile
-              ? `🔒 See ${lead.teaser_profile.display_name} and ${Math.max(0, (lead.alumni_count || 1) - 1)} more UF alumni →`
+              ? `🔒 See ${lead.teaser_profile.display_name} and ${Math.max(0, (lead.alumni_count || 1) - 1)} more →`
               : `🔒 See ${lead.alumni_count} UF alumni at ${lead.company} →`}
           </button>
         </div>
