@@ -116,14 +116,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     setTargetIndustries(industries);
     setHasGoals(true);
 
-    // Auto-load if cache is fresh (under 24h)
-    const cached = user?.company_intel_cache;
-    const cachedAt = user?.company_intel_cached_at;
-    const isStale = !cachedAt || (Date.now() - new Date(cachedAt).getTime()) > 24 * 60 * 60 * 1000;
-    if (cached?.length && !isStale) {
-      setHasStarted(true);
-      loadCompanies();
-    }
+    // Never auto-load — always require user to click Search Now
   }, [user?.id]);
 
   const loadCompanies = async () => {
