@@ -1,7 +1,34 @@
-import React from 'react';
-import { X, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Check, Loader2 } from 'lucide-react';
 
-export default function CareerConciergeUpgradeModal({ onClose, onAskParent }) {
+export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgrade = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/functions/createCheckoutSession', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: 'fastiq_monthly',
+          successUrl: `${window.location.origin}/#ParentHome?upgrade=success`,
+          cancelUrl: window.location.href,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Checkout failed:', data.error);
+        setLoading(false);
+      }
+    } catch (e) {
+      console.error('Checkout error:', e);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div
@@ -73,10 +100,12 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent }) {
           {/* CTAs */}
           <div className="space-y-2">
             <button
-              className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
-              style={{ minHeight: 'auto' }}
+              onClick={handleUpgrade}
+              disabled={loading}
+              className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
+              style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              Unlock FastIQ + Career Concierge →
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Unlock FastIQ + Career Concierge →'}
             </button>
             <button
               onClick={onAskParent}

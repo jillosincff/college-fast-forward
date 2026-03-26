@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X, Sparkles, Loader2 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 
 const FEATURES = [
   'Full alumni names and direct contacts',
@@ -18,26 +17,48 @@ export default function FastIQUpgradeModal({ user, onClose }) {
   const [parentEmail, setParentEmail] = useState('');
   const [inviteSent, setInviteSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const hasLinkedParent = user?.parent_emails?.length > 0;
+
+  const handleUpgrade = async () => {
+    setUpgrading(true);
+    try {
+      const res = await fetch('/functions/createCheckoutSession', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: 'fastiq_monthly',
+          successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
+          cancelUrl: window.location.href,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('Checkout failed:', data.error);
+        setUpgrading(false);
+      }
+    } catch (e) {
+      console.error('Checkout error:', e);
+      setUpgrading(false);
+    }
+  };
 
   const handleSendInvite = async () => {
     if (!parentEmail.trim()) return;
     setSending(true);
     try {
-      await base44.integrations.Core.SendEmail({
-        to: parentEmail.trim(),
-        subject: `${firstName} needs your help to activate FastIQ`,
-        body: `Hi,
-
-${user.full_name || firstName} is ready to activate FastIQ on College Fast Forward.
-
-FastIQ is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.
-
-Activate FastIQ for your family: ${window.location.origin}/#ParentHome
-
-— The College Fast Forward Team`,
+      await fetch('/functions/sendEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: parentEmail.trim(),
+          subject: `${firstName} needs your help to activate FastIQ`,
+          body: `Hi,\n\n${user.full_name || firstName} is ready to activate FastIQ on College Fast Forward.\n\nFastIQ is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.\n\nActivate FastIQ for your family: ${window.location.origin}/#ParentHome\n\n— The College Fast Forward Team`,
+        }),
       });
       setInviteSent(true);
     } catch (err) {
@@ -97,11 +118,12 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
           <div className="space-y-3">
             <button
-              onClick={() => window.location.href = '/#ParentHome'}
-              className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
-              style={{ minHeight: 'auto' }}
+              onClick={handleUpgrade}
+              disabled={upgrading}
+              className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
+              style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              Start My Free Trial →
+              {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start My Free Trial →'}
             </button>
             
             {!hasLinkedParent && !inviteSent && !showParentInvite && (

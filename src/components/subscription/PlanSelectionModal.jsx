@@ -4,38 +4,6 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 const PLANS = [
   {
-    id: 'cff_monthly',
-    name: 'CFF Membership',
-    price: '$9',
-    period: '/month',
-    tier: 'cff',
-    features: [
-      'Parent & alumni directory',
-      'Community board & matching',
-      'Messaging & networking',
-      'Karma system & badges',
-    ],
-    missingFeatures: ['FASTIQ AI career center'],
-  },
-  {
-    id: 'fastiq_monthly',
-    name: 'CFF + FASTIQ',
-    price: '$29',
-    period: '/month',
-    tier: 'fastiq',
-    popular: true,
-    features: [
-      'Everything in CFF Membership',
-      'FASTIQ AI career center',
-      'Company research & alumni finder',
-      'Personalized outreach drafts',
-      'Resume tailoring & interview prep',
-      'Weekly opportunity scouting',
-    ],
-    missingFeatures: [],
-  },
-  {
-    id: 'fastiq_annual',
     name: 'CFF + FASTIQ',
     price: '$249',
     period: '/year',
@@ -160,25 +128,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
 
               <button
                 onClick={() => handleSelectPlan(plan.id)}
-                disabled={loading !== null}
-                style={{
-                  width: '100%', padding: '12px', borderRadius: 10, border: 'none',
-                  background: plan.popular ? '#FA4616' : '#0021A5', color: '#fff',
-                  fontSize: 13, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading && loading !== plan.id ? 0.5 : 1,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  minHeight: 'auto', transition: 'all 0.15s',
-                }}
-              >
-                {loading === plan.id ? (
-                  <><Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> Redirecting...</>
-                ) : (
-                  <>
-                    {plan.tier === 'fastiq' && <Zap style={{ width: 14, height: 14 }} />}
-                    Start 7-Day Free Trial
-                  </>
-                )}
-              </button>
+                disabled={loading === plan.id}
             </div>
           ))}
         </div>

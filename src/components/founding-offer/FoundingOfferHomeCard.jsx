@@ -61,8 +61,7 @@ export default function FoundingOfferHomeCard({ display, studentName }) {
           </p>
         )}
 
-        {/* Primary CTA */}
-        <button onClick={() => startCheckout('fastiq_founding_annual')} disabled={loading} style={{
+        <button onClick={() => startCheckout('fastiq_monthly')} disabled={loading} style={{
           width: '100%', padding: '14px 24px', borderRadius: 100,
           background: ORANGE, border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
           fontFamily: dmSans, fontSize: 15, fontWeight: 700,
@@ -70,17 +69,7 @@ export default function FoundingOfferHomeCard({ display, studentName }) {
           opacity: loading ? 0.7 : 1,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}>
-          {loading ? <><Loader2 size={16} className="animate-spin" /> Processing...</> : 'Activate Annual Plan — $187 →'}
-        </button>
-
-        {/* Secondary CTA */}
-        <button onClick={() => startCheckout('fastiq_monthly')} disabled={loading} style={{
-          width: '100%', padding: '13px 24px', borderRadius: 100,
-          background: 'transparent', border: `1.5px solid ${ORANGE}`,
-          cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, fontSize: 14, fontWeight: 500,
-          color: ORANGE, minHeight: 'auto',
-        }}>
-          Continue with monthly — $29/mo
+          {loading ? <><Loader2 size={16} className="animate-spin" /> Processing...</> : 'Activate Now — $29/month →'}
         </button>
 
         <p style={{
