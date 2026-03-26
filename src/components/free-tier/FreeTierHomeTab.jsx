@@ -16,13 +16,25 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
+    
+    // Don't show banner for users less than 24h old
+    const accountAgeDays = user.created_date ? (Date.now() - new Date(user.created_date).getTime()) / (1000 * 60 * 60 * 24) : 0;
+    if (accountAgeDays < 1) {
+      setShowUpgradeBanner(false);
+      return;
+    }
+    
+    // Show if career goals completed OR user has visited 2+ pages/features
     const hasGoals = !!(user?.career_goals?.saved_at);
-    const isReturnVisit = user?.firstVisitComplete === true;
-    if (isReturnVisit || hasGoals) {
+    const visitCount = (user?.platform_visit_count || 0);
+    const hasExploredFeatures = visitCount >= 2;
+    
+    if (hasGoals || hasExploredFeatures) {
       setShowUpgradeBanner(true);
     } else {
       setShowUpgradeBanner(false);
-      base44.auth.updateMe({ firstVisitComplete: true }).catch(() => {});
+      base44.auth.updateMe({ platform_visit_count: (user?.platform_visit_count || 0) + 1 }).catch(() => {});
     }
   }, [user]);
 
@@ -117,12 +129,35 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
               </p>
               <div className="flex flex-col gap-3">
                 <button
-                  onClick={onOpenUpgrade}
-                  className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
-                  style={{ minHeight: 'auto' }}
-                >
-                  Unlock FastIQ →
-                </button>
+                    onClick={() => {
+                      // Direct checkout instead of opening modal
+                      const handleDirectCheckout = async () => {
+                        try {
+                          const res = await fetch('/functions/createCheckoutSession', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              plan: 'fastiq_monthly',
+                              successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,
+                              cancelUrl: window.location.href,
+                            }),
+                          });
+                          const data = await res.json();
+                          if (data.url) {
+                            window.location.href = data.url;
+                          }
+                        } catch (e) {
+                          console.error('Checkout error:', e);
+                          onOpenUpgrade(); // fallback to modal if direct checkout fails
+                        }
+                      };
+                      handleDirectCheckout();
+                    }}
+                    className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
+                    style={{ minHeight: 'auto' }}
+                  >
+                    Unlock FastIQ →
+                  </button>
                 {nudgeSent ? (
                   <div className="text-green-400 text-sm font-medium text-center py-2">
                     ✓ Nudge sent to {user?.parent_emails?.[0] || parentEmail}
