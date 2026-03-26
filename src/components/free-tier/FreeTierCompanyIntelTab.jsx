@@ -109,13 +109,26 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   useEffect(() => {
     if (!user?.id) return;
     const goals = user?.career_goals || {};
-    const industries = [...(goals.target_industries || []), ...(user?.target_industries || [])].filter(Boolean);
-    const roles = [...(goals.target_roles || []), ...(user?.target_roles || [])].filter(Boolean);
-    if (!industries.length && !roles.length) { setHasGoals(false); return; }
+    // Broad check — if they have any career goals saved at all, consider goals present
+    const hasAnySavedGoals = !!(goals.saved_at || goals.target_roles?.length || goals.target_industries?.length || goals.target_functions?.length || goals.role || goals.industries?.length);
+    const industries = [
+      ...(goals.target_industries || []),
+      ...(goals.industries || []),
+      ...(user?.target_industries || []),
+    ].filter(Boolean);
+    const roles = [
+      ...(goals.target_roles || []),
+      ...(user?.target_roles || []),
+      ...(goals.role ? [goals.role] : []),
+    ].filter(Boolean);
+
+    if (!hasAnySavedGoals && !industries.length && !roles.length) {
+      setHasGoals(false);
+      return;
+    }
     setTargetRoles(roles);
     setTargetIndustries(industries);
     setHasGoals(true);
-
     // Never auto-load — always require user to click Search Now
   }, [user?.id]);
 
