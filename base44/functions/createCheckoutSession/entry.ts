@@ -13,17 +13,13 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
 // ═══════════════════════════════════════════════════════════════
 
 const PRICE_MAP = {
-  cff_monthly:            'price_1SUJ2g873TV7WMcTBYvmzGYU',  // $9/month
-  fastiq_monthly:         'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
-  fastiq_annual:          'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
-  fastiq_founding_annual: 'price_FOUNDING_187',               // $187/year — REPLACE with real Stripe price ID
+  fastiq_monthly:   'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
+  fastiq_annual:    'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
 };
 
 const TIER_MAP = {
-  cff_monthly:            'cff',
-  fastiq_monthly:         'fastiq',
-  fastiq_annual:          'fastiq',
-  fastiq_founding_annual: 'fastiq',
+  fastiq_monthly:   'fastiq',
+  fastiq_annual:    'fastiq',
 };
 
 const TRIAL_DAYS = 7;
@@ -38,37 +34,7 @@ Deno.serve(async (req) => {
 
     const { plan, successUrl, cancelUrl, metadata } = await req.json();
 
-    // ── Founding member server-side validation ──
-    let resolvedPlan = plan;
-    let isFoundingRedemption = false;
-
-    if (plan === 'fastiq_founding_annual') {
-      // Validate that founding offer is still active
-      const startedAt = user.founding_offer_started_at;
-      const expired = user.founding_offer_expired === true;
-      const dismissed = user.founding_offer_dismissed === true;
-      const alreadyRedeemed = user.founding_offer_redeemed === true;
-
-      if (!startedAt || expired || dismissed || alreadyRedeemed) {
-        console.log('Founding offer not valid, falling back to standard annual:', {
-          startedAt, expired, dismissed, alreadyRedeemed
-        });
-        resolvedPlan = 'fastiq_annual';
-      } else {
-        const expiresAt = new Date(startedAt).getTime() + 24 * 60 * 60 * 1000;
-        if (Date.now() > expiresAt) {
-          console.log('Founding offer expired (server-side), falling back to standard annual');
-          // Mark as expired in DB
-          await base44.asServiceRole.entities.User.update(user.id, { founding_offer_expired: true });
-          resolvedPlan = 'fastiq_annual';
-        } else {
-          isFoundingRedemption = true;
-          console.log('Founding offer VALID, using $187 price. Expires at:', new Date(expiresAt).toISOString());
-        }
-      }
-    }
-
-    const stripePriceId = PRICE_MAP[resolvedPlan];
+    const stripePriceId = PRICE_MAP[plan];
     if (!stripePriceId) {
       return Response.json({
         error: `Invalid plan: ${resolvedPlan}. Must be one of: ${Object.keys(PRICE_MAP).join(', ')}`,
