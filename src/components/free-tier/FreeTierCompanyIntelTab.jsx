@@ -247,6 +247,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                 user={user}
                 isFastIQ={isFastIQ}
                 onUpgrade={() => setUpgradeModal(company)}
+                onUnlockFastIQ={() => onOpenUpgrade?.()}
+                onViewAlumni={() => setUpgradeModal(company)}
                 onResearch={() => setResearchCompany(company)}
                 savedCompanies={savedCompanies}
                 onSave={handleSave}

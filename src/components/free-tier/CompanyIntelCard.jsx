@@ -194,7 +194,7 @@ function CFFParentsModal({ company, user, onClose }) {
   );
 }
 
-export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResearch, savedCompanies, onSave, onUnsave, user }) {
+export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResearch, savedCompanies, onSave, onUnsave, user, onUnlockFastIQ, onViewAlumni }) {
   const [expanded, setExpanded] = useState(false);
   const [showParentsModal, setShowParentsModal] = useState(false);
   const isSaved = savedCompanies?.includes(company.name);
@@ -301,38 +301,7 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
               </div>
             )}
 
-            {/* CFF Network */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555' }}>
-                👥 {company.cff_parent_count > 0 ? (
-                  <>
-                    <strong>{company.cff_parent_count}</strong> CFF parent{company.cff_parent_count !== 1 ? 's' : ''}
-                    <span style={{ fontSize: 10, background: '#E8F5E9', color: '#2E7D32', padding: '1px 6px', borderRadius: 100, fontWeight: 700, marginLeft: 6 }}>FREE</span>
-                  </>
-                ) : 'No CFF parents yet'}
-              </span>
-              {company.cff_parent_count > 0 && (
-                <button onClick={(e) => { e.stopPropagation(); setShowParentsModal(true); }} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, fontWeight: 500 }}>View →</button>
-              )}
-              {(company.alumni_count > 0 || company.alumni_signal) && (
-                <>
-                  <span style={{ color: '#ddd' }}>·</span>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555' }}>
-                    🎓 {(company.alumni_count && company.alumni_confidence === 'verified')
-                      ? <><strong>{company.alumni_count.toLocaleString()}</strong> UF alumni</>
-                      : 'UF alumni work here'
-                    }
-                  </span>
-                  {isFastIQ ? (
-                    <button onClick={() => {}} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, fontWeight: 500 }}>See who →</button>
-                  ) : (
-                    <button onClick={() => onUpgrade?.(company)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>🔒 See who →</button>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Actions */}
+            {/* Alumni unlock prompt */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f5f5f5' }}>
               <button
                 onClick={() => onResearch?.(company)}
