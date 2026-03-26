@@ -121,16 +121,10 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Indeed company page fallback if all careers URLs failed
+      // Fix 3: Skip Indeed fallback — noisy results produce bad signals
+      // "Status Unknown" is honest; false "Selective" erodes trust
       if (!careersContent) {
-        const indeedFallbackUrl = `https://www.indeed.com/cmp/${encodeURIComponent(companyName.replace(/\s+/g, '-'))}/jobs`;
-        const fallbackContent = await firecrawlScrape(indeedFallbackUrl);
-        console.log(`[${companyName}] Indeed fallback length: ${fallbackContent?.length || 0}`);
-        if (fallbackContent && fallbackContent.length > 200) {
-          careersContent = fallbackContent;
-          urlUsed = indeedFallbackUrl;
-          console.log(`[Careers] ${companyName}: using Indeed fallback`);
-        }
+        console.log(`[${companyName}] All careers URLs failed — leaving as unknown`);
       }
 
       console.log(`[${companyName}] URL used: ${urlUsed || 'NONE'}`);
@@ -139,6 +133,84 @@ Deno.serve(async (req) => {
 
       if (careersContent && careersContent.length > 100) {
         console.log(`[${companyName}] Sending to LLM for extraction...`);
+
+        // Fix 1: Stricter extraction prompt with page_type + confidence gating
+        const extractData = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: `You are analyzing a company careers page or job listing page.
+
+Your job is to count REAL open job postings only.
+
+Rules for what counts as a real job posting:
+- Must be a specific job title (e.g. "Account Executive", "Software Engineer II", "Marketing Manager")
+- Must appear to be an actual open position, not a category, filter, or navigation link
+- Ignore: page titles, search bars, category headers, navigation items, footer text
+- Ignore: generic phrases like "Explore jobs", "Find opportunities", "Join our team"
+- Ignore: any text that contains the company name + "jobs" (these are search artifacts)
+
+Company: ${companyName}
+
+Page content:
+${careersContent.slice(0, 8000)}
+
+Return JSON only, no markdown:
+{
+  "open_role_count": 0,
+  "job_titles": [],
+  "page_type": "careers_page",
+  "confidence": "high"
+}
+
+page_type options: "careers_page" | "job_board" | "homepage" | "error_page" | "unknown"
+confidence: "high" = clear job listings found, "low" = uncertain
+If page_type is "homepage" or "error_page", set open_role_count to 0 and job_titles to [].`,
+          model: 'gemini_3_flash',
+          response_json_schema: {
+            type: 'object',
+            properties: {
+              open_role_count: { type: 'number' },
+              job_titles: { type: 'array', items: { type: 'string' } },
+              page_type: { type: 'string' },
+              confidence: { type: 'string' },
+            },
+          },
+        });
+
+        // Fix 2: Gate signal on confidence + page_type
+        const parsed = extractData;
+        console.log(`[${companyName}] open_roles extracted: ${JSON.stringify(parsed)}`);
+
+        const trustCount = parsed?.confidence === 'high' && parsed?.page_type === 'careers_page';
+        const roleCount = trustCount ? (parsed.open_role_count ?? 0) : 0;
+        const jobTitles = trustCount ? (parsed.job_titles ?? []) : [];
+
+        // Filter job titles by target functions
+        const functionKeywords = new Set();
+        (targetFunctions || []).forEach(fn => {
+          (FUNCTION_TO_KEYWORDS[fn] || []).forEach(k => functionKeywords.add(k));
+        });
+        const matchedRoles = functionKeywords.size > 0
+          ? jobTitles.filter(t => [...functionKeywords].some(kw => t.toLowerCase().includes(kw)))
+          : jobTitles;
+
+        results.open_roles = { count: roleCount, matched_roles: matchedRoles };
+
+        if (trustCount) {
+          if (signals.layoff_alert?.detected) {
+            results.hiring_signal = 'freeze';
+          } else if (roleCount > 5) {
+            results.hiring_signal = 'active';
+          } else if (roleCount > 0) {
+            results.hiring_signal = 'selective';
+          } else {
+            results.hiring_signal = 'unknown';
+          }
+        }
+        // If low confidence, leave hiring_signal as 'unknown' — don't guess
+
+        console.log(`[Careers] ${companyName}: roleCount=${roleCount}, trustCount=${trustCount}, page_type=${parsed?.page_type}`);
+        console.log(`[${companyName}] hiring_signal derived: ${results.hiring_signal}`);
+
+        // Also extract what_they_look_for from the same content
         const requirementsResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `From this company careers page content, extract exactly 3 specific requirements or qualities they look for in ${targetRole || 'entry-level'} candidates.\n\nBe specific and honest. Max 8 words each. No marketing fluff. Plain text only.\n\nContent:\n${careersContent.slice(0, 3000)}\n\nReturn JSON array of 3 strings only.`,
           response_json_schema: {
@@ -147,9 +219,7 @@ Deno.serve(async (req) => {
           },
         });
         results.what_they_look_for = requirementsResult?.items || [];
-        console.log(`[${companyName}] open_roles extracted: ${JSON.stringify(requirementsResult)}`);
         console.log(`[Careers] ${companyName}: ${results.what_they_look_for.length} requirements extracted`);
-        console.log(`[${companyName}] hiring_signal derived: ${results.hiring_signal}`);
       }
     } catch (err) {
       console.error('[Careers] scrape failed:', err.message);
