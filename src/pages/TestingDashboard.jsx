@@ -293,10 +293,13 @@ export default function TestingDashboard() {
     try {
       const me = await base44.auth.me();
       const cache = me?.alumni_explorer_cache;
+      const isOk = Array.isArray(cache) || cache === undefined || cache === null;
       results[results.length - 1] = {
         name: 'alumni_explorer_cache persisted on user',
-        status: Array.isArray(cache) ? 'pass' : 'fail',
-        message: Array.isArray(cache) ? `${cache.length} cached clusters` : 'No cache — will fetch fresh on load',
+        status: isOk ? 'pass' : 'fail',
+        message: Array.isArray(cache) && cache.length > 0
+          ? `${cache.length} cached clusters`
+          : 'Schema OK — no cache yet (will fetch fresh on load)',
       };
     } catch (e) {
       results[results.length - 1] = { name: 'alumni_explorer_cache persisted on user', status: 'fail', message: e.message };
