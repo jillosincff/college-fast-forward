@@ -239,7 +239,11 @@ Deno.serve(async (req) => {
 
     if (cacheAge < ONE_DAY_MS && Array.isArray(cachedCompanies) && cachedCompanies.length > 0) {
       console.log('Using cached company intel:', cachedCompanies.length);
-      companies = cachedCompanies;
+      // Fix stale 'unknown' signals — replace with 'selective' as a safe fallback
+      companies = cachedCompanies.map(c => ({
+        ...c,
+        hiring_signal: c.hiring_signal === 'unknown' ? 'selective' : c.hiring_signal,
+      }));
     } else {
       // Generate personalized company list
       const generated = await base44.asServiceRole.integrations.Core.InvokeLLM({
@@ -342,8 +346,12 @@ Real companies only. Honest hiring signals. Specific to this role and industry. 
         cff_parents: cffParents.slice(0, 5).map(p => ({
           id: p.id,
           full_name: p.full_name || '',
-          job_title: p.job_title || p.current_role || '',
+          job_title: p.job_title || p.current_role || p.role_title || '',
+          company: p.company || p.current_company || p.employer || '',
           school: p.school || '',
+          linkedin_url: p.linkedin_url || '',
+          intro_availability: p.intro_availability || p.intro_willingness || '',
+          email: p.email || '',
         })),
         cff_parent_count: cffParents.length,
         alumni_count: alumniCount,

@@ -134,11 +134,20 @@ function CFFParentsModal({ company, user, onClose }) {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>{displayName(p)}</p>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{parentTitle(p)}</p>
+                      {(p.job_title || p.company) && (
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '2px 0 0' }}>
+                          {p.job_title}{p.job_title && p.company ? ' · ' : ''}{p.company}
+                        </p>
+                      )}
                       {p.school && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', margin: '1px 0 0' }}>CFF Parent · {p.school}</p>}
+                      {p.linkedin_url && (
+                        <a href={p.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#0077B5', margin: '2px 0 0', display: 'inline-block', textDecoration: 'none' }}>View LinkedIn →</a>
+                      )}
                     </div>
                   </div>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', fontWeight: 500, margin: 0 }}>✓ Open to intro requests</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', fontWeight: 500, margin: 0 }}>
+                    {['happy_to_help','yes','open','actively_helping'].includes(p.intro_availability) ? '✓ Open to intro requests' : '✓ CFF Member'}
+                  </p>
                   <button onClick={() => handleContact(p)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '9px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
                     Contact Now →
                   </button>
