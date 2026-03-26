@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Check, Zap, Loader2, Shield } from 'lucide-react';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 const PLANS = [
   {
@@ -30,18 +29,14 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
     setLoading(planId);
     const baseUrl = window.location.origin;
     try {
-      const res = await fetch('/functions/createCheckoutSession', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan: planId,
-          successUrl: `${baseUrl}/#Dashboard?payment=success`,
-          cancelUrl: `${baseUrl}/#FastIQ?payment=cancelled`,
-        }),
+      const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
+      const response = await createCheckoutSession({
+        plan: planId,
+        successUrl: `${baseUrl}/#Dashboard?payment=success`,
+        cancelUrl: `${baseUrl}/#FastIQ?payment=cancelled`,
       });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      if (response?.data?.url) {
+        window.location.href = response.data.url;
       }
     } catch (err) {
       console.error('Checkout error:', err);
