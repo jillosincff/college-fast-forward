@@ -148,9 +148,9 @@ Deno.serve(async (req) => {
 
       const data = await exaFetch('search', {
         query,
-        type: 'neural',
+        type: 'auto',
         numResults: maxResults,
-        category: 'linkedin profile',
+        includeDomains: ['linkedin.com'],
         contents: { highlights: { maxCharacters: 2000 } },
       });
 
