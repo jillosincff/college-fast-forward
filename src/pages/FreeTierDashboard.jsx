@@ -22,8 +22,7 @@ import FreeTierDirectoryTab from '@/components/free-tier/FreeTierDirectoryTab';
 
 export default function FreeTierDashboard() {
   try {
-    const auth = useAuth();
-    const { user, isLoading: isLoadingAuth, refreshUser } = auth;
+    const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
     const [activeTab, setActiveTab] = useState('home');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [showConciergeModal, setShowConciergeModal] = useState(false);
