@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
 import FastIQAssessment from '@/pages/FastIQAssessment';
+import StudentOnboarding from '@/pages/StudentOnboarding';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -64,6 +65,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
       <Route path="/FastIQAssessment" element={<FastIQAssessment />} />
+      <Route path="/StudentOnboarding" element={<StudentOnboarding />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

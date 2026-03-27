@@ -65,7 +65,7 @@ export default function StudentOnboarding() {
     setLoading(true);
     setError(null);
     try {
-      localStorage.setItem('pending_invite_role', 'gator');
+      localStorage.setItem('pending_invite_role', 'student');
     } catch (e) { /* private browsing */ }
 
     const callbackUrl = window.location.origin + '/#StudentOnboarding';
@@ -81,8 +81,8 @@ export default function StudentOnboarding() {
     try { referralCode = sessionStorage.getItem('pending_referral_code'); } catch (e) { /* ok */ }
 
     const updateData = {
-      persona: 'gator',
-      roles: ['gator'],
+      persona: 'student',
+      roles: ['student'],
       onboarding_completed: true,
       onboarding_completed_at: new Date().toISOString(),
       is_new_signup: true,
@@ -115,7 +115,7 @@ export default function StudentOnboarding() {
     // Welcome email (non-blocking)
     base44.functions.invoke('sendWelcomeEmail', {
       userId: user.id, userEmail: user.email,
-      userName: firstName.trim(), persona: 'gator',
+      userName: firstName.trim(), persona: 'student',
     }).catch(() => {});
 
     // Credit ambassador referral (non-blocking)
