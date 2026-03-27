@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Zap, ArrowRight, Clock, Loader2 } from 'lucide-react';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 /**
  * Banner shown to CFF-only subscribers or non-subscribers when they visit FASTIQ.
@@ -11,7 +12,6 @@ export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
   const handleUpgrade = async () => {
     setUpgrading(true);
     try {
-      const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
       const response = await createCheckoutSession({
         plan: 'fastiq_monthly',
         successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, Loader2 } from 'lucide-react';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user }) {
   const [loading, setLoading] = useState(false);
@@ -13,7 +14,6 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
     setLoading(true);
     setError(null);
     try {
-      const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
       const response = await createCheckoutSession({
         plan: 'fastiq_monthly',
         successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,

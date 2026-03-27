@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2, X } from 'lucide-react';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { useCompanyRecs } from '@/components/free-tier/useCompanyRecs';
 import AICompanyCards from '@/components/free-tier/AICompanyCards';
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
@@ -131,7 +132,6 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                 <button
                     onClick={async () => {
                       try {
-                        const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
                         const response = await createCheckoutSession({
                           plan: 'fastiq_monthly',
                           successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,

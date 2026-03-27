@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X, Sparkles, Loader2 } from 'lucide-react';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 const FEATURES = [
   'Full alumni names and direct contacts',
@@ -25,7 +26,6 @@ export default function FastIQUpgradeModal({ user, onClose }) {
   const handleUpgrade = async () => {
     setUpgrading(true);
     try {
-      const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
       const response = await createCheckoutSession({
         plan: 'fastiq_monthly',
         successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
