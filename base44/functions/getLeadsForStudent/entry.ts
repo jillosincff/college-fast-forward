@@ -26,6 +26,7 @@ const INDUSTRY_MAP = {
   "Logistics & Supply Chain":      ["logistics", "supply chain", "operations", "distribution", "freight", "warehouse"],
   "Sports & Athletics":            ["sports", "athletics", "agency", "sponsorship", "esports", "fitness"],
   "Legal & Compliance":            ["legal", "law", "attorney", "counsel", "compliance", "paralegal"],
+  "Marketing & Brand":             ["marketing", "brand", "growth", "demand gen", "content", "seo", "campaigns", "advertising", "social media", "social", "pr", "public relations", "communications", "creative", "digital marketing", "media buyer", "cmo", "vp marketing", "brand manager", "marketing manager", "marketing director"],
 };
 
 function scoreMatch(member, studentGoals) {

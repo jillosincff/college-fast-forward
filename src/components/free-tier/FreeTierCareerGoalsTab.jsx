@@ -89,6 +89,12 @@ CHIP RULES (HARD LIMITS):
 - BAD chips: ["Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027", "Full-time — graduating 2028"]
 - Graduation year chips must always be exactly: ["2025", "2026", "2027", "2028+"] — never more
 
+INDUSTRY CLASSIFICATION NOTE:
+"Marketing" is both an industry AND a job function.
+- If student targets "Marketing" as an industry → store in target_industries as "Marketing & Brand"
+- If student targets a marketing ROLE (e.g. "Brand Manager") → store in target_functions as "Marketing & Brand"
+- It is valid to have "Marketing & Brand" in BOTH target_industries AND target_functions
+
 INDUSTRY & FUNCTION TAXONOMY (CRITICAL):
 When populating goals_summary.target_industries, you MUST map the student's answer to values from this exact list only. Never store free-form text as an industry.
 
