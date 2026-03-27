@@ -98,9 +98,9 @@ export default function V3Hero({ onCTA }) {
               onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; e.currentTarget.style.transform = 'scale(1)'; }}
               style={{
                 fontFamily: dmSans, fontSize: 15, fontWeight: 700,
-                background: 'transparent', color: '#2DD4BF',
+                background: 'transparent', color: 'rgba(255,255,255,0.85)',
                 padding: '15px 28px', borderRadius: 100,
-                border: '2px solid #2DD4BF',
+                border: '2px solid rgba(255,255,255,0.4)',
                 cursor: 'pointer', transition: 'all 0.25s ease',
                 minHeight: 'auto', minWidth: 'auto', width: 'auto',
                 lineHeight: 1.3,
