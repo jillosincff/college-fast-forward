@@ -146,13 +146,11 @@ Deno.serve(async (req) => {
       }
 
       const data = await exaFetch('search', {
-        query: `${freeTextQuery} ${universityName} alumni`,
-        type: 'auto',
-        category: 'person',
+        query: `site:linkedin.com/in/ "${universityName}" alumni ${freeTextQuery}`,
+        type: 'keyword',
         numResults: maxResults * 2,
         contents: { highlights: { maxCharacters: 2000 } },
       });
-      console.log('RAW EXA RESPONSE:', JSON.stringify(data));
 
       const profiles = (data.results || []).map(r => {
         const parts = (r.title || '').split(/[|\-]/).map(s => s.trim()).filter(Boolean);
