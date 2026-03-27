@@ -27,12 +27,14 @@ const TRIAL_DAYS = 7;
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { plan, successUrl, cancelUrl, metadata, user: clientUser } = await req.json();
+
+    if (!clientUser?.id || !clientUser?.email) {
+      return Response.json({ error: 'User context required' }, { status: 400 });
     }
 
-    const { plan, successUrl, cancelUrl, metadata } = await req.json();
+    const user = clientUser;
 
     const stripePriceId = PRICE_MAP[plan];
     if (!stripePriceId) {

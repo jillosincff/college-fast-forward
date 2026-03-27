@@ -34,6 +34,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
         plan: planId,
         successUrl: `${baseUrl}/#Dashboard?payment=success`,
         cancelUrl: `${baseUrl}/#FastIQ?payment=cancelled`,
+        user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
       });
       if (response?.data?.url) {
         window.location.href = response.data.url;

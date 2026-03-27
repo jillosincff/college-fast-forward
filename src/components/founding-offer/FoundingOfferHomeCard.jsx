@@ -9,9 +9,9 @@ const mono = "'DM Mono', 'Courier New', monospace";
  * Founding member offer card for ParentHome (first return visit only).
  * Shows between intro requests and FastIQ nudge.
  */
-export default function FoundingOfferHomeCard({ display, studentName }) {
+export default function FoundingOfferHomeCard({ display, studentName, user }) {
   const name = studentName || 'Your student';
-  const { startCheckout, loading, error } = useCheckout();
+  const { startCheckout, loading, error } = useCheckout(user);
 
   return (
     <div style={{ marginBottom: 24 }}>
