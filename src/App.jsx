@@ -12,6 +12,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
 import FastIQAssessment from '@/pages/FastIQAssessment';
 import StudentOnboarding from '@/pages/StudentOnboarding';
+import GatorAuth from '@/pages/GatorAuth';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
