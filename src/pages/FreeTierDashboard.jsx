@@ -188,10 +188,6 @@ export default function FreeTierDashboard() {
       navigate('LandingPage');
       return;
     }
-    if (user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq') {
-      navigate('FastIQ');
-      return;
-    }
     setLoading(false);
   }, [user, isLoadingAuth]);
 
