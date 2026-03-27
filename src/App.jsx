@@ -48,6 +48,7 @@ const AuthenticatedApp = () => {
       return (
         <Routes>
           {/* Explicit routes first for higher priority */}
+          <Route path="/GetStarted" element={<GatorAuth />} />
           <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
           <Route path="/FastIQAssessment" element={<FastIQAssessment />} />
           <Route path="/StudentOnboarding" element={<StudentOnboarding />} />
