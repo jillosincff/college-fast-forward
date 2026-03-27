@@ -166,6 +166,10 @@ export default function GatorAuth() {
   useEffect(() => {
     const loadUser = async () => {
       try {
+        // Handle OAuth callback from Google redirect
+        if (typeof base44.auth.handleRedirectCallback === 'function') {
+          await base44.auth.handleRedirectCallback();
+        }
         const me = await base44.auth.me();
         setUser(me || null);
       } catch (e) {
