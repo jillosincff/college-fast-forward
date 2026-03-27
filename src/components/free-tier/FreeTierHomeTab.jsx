@@ -6,7 +6,7 @@ import { useCompanyRecs } from '@/components/free-tier/useCompanyRecs';
 import AICompanyCards from '@/components/free-tier/AICompanyCards';
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
-const FOUNDING_DEADLINE = new Date('2025-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const { companies, members: recsMembers, loading: recsLoading, searching: recsSearching, error: recsError, noIndustry: recsNoIndustry, weeklyNewCount, refetch } = useCompanyRecs(user);

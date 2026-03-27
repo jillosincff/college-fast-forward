@@ -8,7 +8,7 @@ const PRICES = {
   career_archetype:        'price_1TFKl2873TV7WMcTTHDGZHk6',  // $49 one-time
 };
 
-const FOUNDING_OFFER_DEADLINE = new Date('2025-04-15T23:59:59');
+const FOUNDING_OFFER_DEADLINE = new Date('2026-04-15T23:59:59');
 
 Deno.serve(async (req) => {
   try {

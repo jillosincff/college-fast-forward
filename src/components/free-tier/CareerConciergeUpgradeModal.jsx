@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Check, Loader2 } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
-const FOUNDING_DEADLINE = new Date('2025-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59'); = new Date('2025-04-15T23:59:59');
 
 export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user }) {
   const [loading, setLoading] = useState(false);

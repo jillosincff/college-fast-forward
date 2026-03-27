@@ -13,7 +13,7 @@ const FEATURES = [
   'Job search tracking and follow-up alerts',
 ];
 
-const FOUNDING_DEADLINE = new Date('2025-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59'); = new Date('2025-04-15T23:59:59');
 
 export default function FastIQUpgradeModal({ user, onClose }) {
   const [showParentInvite, setShowParentInvite] = useState(false);
