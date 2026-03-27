@@ -191,12 +191,17 @@ export default function FreeTierDashboard() {
       }
     }, [user, isLoadingAuth]);
 
-    if (isLoadingAuth || !user) {
+    if (isLoadingAuth) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
           <Loader2 className="w-8 h-8 text-[#E85D20] animate-spin" />
         </div>
       );
+    }
+
+    if (!user) {
+      navigate('LandingPage');
+      return null;
     }
 
     const handleOpenUpgrade = () => setShowUpgradeModal(true);
