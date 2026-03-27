@@ -180,18 +180,15 @@ export default function FreeTierDashboard() {
   };
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showConciergeModal, setShowConciergeModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (isLoadingAuth) return;
     if (!user) {
       navigate('LandingPage');
       return;
     }
-    setLoading(false);
   }, [user, isLoadingAuth]);
 
-  if (loading || !user) {
+  if (isLoadingAuth || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
         <Loader2 className="w-8 h-8 text-[#E85D20] animate-spin" />
