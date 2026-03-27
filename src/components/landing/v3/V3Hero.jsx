@@ -68,7 +68,7 @@ export default function V3Hero({ onCTA }) {
         {/* BODY LINE */}
         <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 36 }}>
           <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.65, margin: 0, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto', textAlign: 'center' }}>
-            Real alumni matches. Ready-to-send messages.<br />One warm intro beats 100 cold applications.
+            The tech they want with the connections they need.
           </p>
         </div>
 
