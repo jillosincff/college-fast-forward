@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
     // ── ACTION 2: Alumni people search ───────────────────────────────
     if (action === 'searchAlumni') {
       const { query: freeTextQuery, jobTitle, universityName = 'University of Florida', companyName = '', maxResults = 3 } = params;
-      const query = `University of Florida Gator alumni ${freeTextQuery}`;
+      const query = `${universityName} alumni ${freeTextQuery}`;
       console.log('[EXA] QUERY SENT TO EXA:', query);
       console.log('[EXA] SCHOOL NAME:', universityName);
 
@@ -153,10 +153,11 @@ Deno.serve(async (req) => {
         const headline = parts.slice(1).join(' · ') || '';
         const summary = (r.highlights || [])
           .join(' ')
+          .replace(/^#+\s*/gm, '')
           .replace(/Skip to main content.*?#/gi, '')
           .replace(/Close jump menu/gi, '')
           .trim()
-          .slice(0, 300);
+          .slice(0, 150);
         return {
           full_name,
           linkedin_url: r.url,

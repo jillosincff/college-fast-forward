@@ -240,7 +240,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       {results.length > 0 && (
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '0 0 16px' }}>
-            {results.length} {schoolName} alumni found
+            {results.length} {schoolName === 'your school' ? 'UF' : schoolName} alumni found
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {results.map((alum, i) => {
