@@ -170,36 +170,39 @@ function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
 }
 
 export default function FreeTierDashboard() {
-  const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('home');
-  const [savedGoals, setSavedGoals] = useState(null);
+  try {
+    const auth = useAuth();
+    const { user, isLoading: isLoadingAuth, refreshUser } = auth;
+    const [activeTab, setActiveTab] = useState('home');
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [showConciergeModal, setShowConciergeModal] = useState(false);
+    const [savedGoals, setSavedGoals] = useState(null);
 
-  const handleGoalsSaved = async () => {
-    if (refreshUser) await refreshUser();
-    setSavedGoals(Date.now());
-  };
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showConciergeModal, setShowConciergeModal] = useState(false);
-  useEffect(() => {
-    if (isLoadingAuth) return;
-    if (!user) {
-      navigate('LandingPage');
-      return;
+    const handleGoalsSaved = async () => {
+      if (refreshUser) await refreshUser();
+      setSavedGoals(Date.now());
+    };
+
+    useEffect(() => {
+      if (isLoadingAuth) return;
+      if (!user) {
+        navigate('LandingPage');
+        return;
+      }
+    }, [user, isLoadingAuth]);
+
+    if (isLoadingAuth || !user) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+          <Loader2 className="w-8 h-8 text-[#E85D20] animate-spin" />
+        </div>
+      );
     }
-  }, [user, isLoadingAuth]);
 
-  if (isLoadingAuth || !user) {
+    const handleOpenUpgrade = () => setShowUpgradeModal(true);
+    const handleOpenConcierge = () => setShowConciergeModal(true);
+
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <Loader2 className="w-8 h-8 text-[#E85D20] animate-spin" />
-      </div>
-    );
-  }
-
-  const handleOpenUpgrade = () => setShowUpgradeModal(true);
-  const handleOpenConcierge = () => setShowConciergeModal(true);
-
-  return (
     <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
       <div className="hidden md:block">
         <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
@@ -222,5 +225,15 @@ export default function FreeTierDashboard() {
       {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
       {showConciergeModal && <CareerConciergeUpgradeModal user={user} onClose={() => setShowConciergeModal(false)} onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }} />}
     </div>
-  );
+    );
+  } catch (e) {
+    console.error('[FreeTierDashboard] Auth context error:', e);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+        <div className="text-center">
+          <p className="text-red-500 text-sm">Auth context not available</p>
+        </div>
+      </div>
+    );
+  }
 }
