@@ -156,9 +156,14 @@ Deno.serve(async (req) => {
 
       const profiles = (data.results || []).map(r => {
         const parts = (r.title || '').split(/[|\-]/).map(s => s.trim()).filter(Boolean);
-        const full_name = parts[0] || 'Unknown';
+        const full_name = parts[0]?.replace(/\s+Bio$/i, '').trim() || 'Unknown';
         const headline = parts.slice(1).join(' · ') || '';
-        const summary = (r.highlights || []).join(' ').slice(0, 300);
+        const summary = (r.highlights || [])
+          .join(' ')
+          .replace(/Skip to main content.*?#/gi, '')
+          .replace(/Close jump menu/gi, '')
+          .trim()
+          .slice(0, 300);
         return {
           full_name,
           linkedin_url: r.url,
