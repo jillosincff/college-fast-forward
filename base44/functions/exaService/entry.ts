@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
     // ── ACTION 2: Alumni people search ───────────────────────────────
     if (action === 'searchAlumni') {
       const { query: freeTextQuery, jobTitle, universityName = 'University of Florida', companyName = '', maxResults = 3 } = params;
-      const query = `${universityName} alumni ${freeTextQuery}`;
+      const query = `University of Florida Gator alumni ${freeTextQuery}`;
       console.log('[EXA] QUERY SENT TO EXA:', query);
       console.log('[EXA] SCHOOL NAME:', universityName);
 
