@@ -139,8 +139,9 @@ Deno.serve(async (req) => {
       const fullQuery = freeTextQuery ? `${baseQuery} ${freeTextQuery}` : baseQuery;
 
       const data = await exaFetch('search', {
-        query: fullQuery,
-        type: 'keyword',
+        query: `${universityName} alumni ${freeTextQuery}`,
+        type: 'auto',
+        category: 'people',
         numResults: maxResults * 2,
         contents: { highlights: { maxCharacters: 2000 } },
       });
