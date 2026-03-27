@@ -474,32 +474,94 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
       const roles = [...(Array.isArray(careerGoals.target_roles) ? careerGoals.target_roles : [careerGoals.target_roles].filter(Boolean))].filter(Boolean);
       if (industries.length || roles.length) setTargetDesc([...roles, ...industries].join(', '));
 
+      const INDUSTRY_TO_KEYWORDS = {
+        'Marketing & Brand': ['marketing', 'brand', 'advertising', 'social media', 'social', 'pr', 'public relations', 'communications', 'creative', 'digital marketing', 'media buyer', 'content', 'growth'],
+        'Financial Services & Banking': ['finance', 'banking', 'investment banking', 'investment bank', 'ib', 'm&a', 'mergers', 'acquisitions', 'private equity', 'pe', 'hedge fund', 'asset management', 'capital markets', 'equity research', 'corporate finance', 'goldman', 'jpmorgan', 'morgan stanley', 'bank of america', 'citi', 'financial', 'wealth management'],
+        'Technology & Software': ['tech', 'software', 'engineering', 'developer', 'product', 'saas', 'startup', 'cloud', 'data', 'ai', 'machine learning'],
+        'Consulting': ['consulting', 'consultant', 'advisory', 'strategy', 'management consulting', 'mckinsey', 'bain', 'bcg', 'deloitte', 'accenture'],
+        'Healthcare & Life Sciences': ['healthcare', 'health', 'medical', 'pharma', 'biotech', 'clinical', 'hospital', 'life sciences'],
+        'Media & Entertainment': ['media', 'entertainment', 'film', 'music', 'publishing', 'journalism', 'broadcasting', 'streaming', 'content creation'],
+        'Real Estate': ['real estate', 'realty', 'property', 'cre', 'reit', 'construction', 'development'],
+        'Consulting / Advisory': ['consulting', 'consultant', 'advisory', 'strategy'],
+        'Consumer Goods & Retail': ['retail', 'consumer goods', 'cpg', 'ecommerce', 'merchandise', 'fashion'],
+        'Government & Nonprofit': ['government', 'nonprofit', 'ngo', 'public sector', 'policy', 'advocacy'],
+        'Sports & Athletics': ['sports', 'athletics', 'nfl', 'nba', 'mlb', 'nhl', 'mlb', 'league'],
+        'Logistics & Supply Chain': ['logistics', 'supply chain', 'operations', 'procurement', 'fulfillment'],
+        'Energy & Utilities': ['energy', 'oil', 'gas', 'utilities', 'renewable', 'solar', 'wind'],
+        'Education': ['education', 'edtech', 'teaching', 'university', 'school', 'curriculum'],
+      };
+
+      const FUNCTION_TO_KEYWORDS = {
+        'Marketing & Brand': ['marketing', 'brand', 'advertising', 'social media', 'social', 'pr', 'public relations', 'digital marketing', 'media buyer', 'growth', 'content', 'creative', 'communications'],
+        'Finance & Accounting': ['finance', 'accounting', 'cfo', 'controller', 'audit', 'tax', 'investment banking', 'investment bank', 'ib', 'm&a', 'mergers', 'acquisitions', 'private equity', 'pe', 'hedge fund', 'asset management', 'capital markets', 'equity research', 'corporate finance', 'goldman', 'jpmorgan', 'morgan stanley', 'bank of america', 'citi', 'financial analyst', 'treasurer'],
+        'Software Engineering': ['software engineer', 'developer', 'engineering', 'programmer', 'backend', 'frontend', 'fullstack', 'devops', 'swe'],
+        'Product Management': ['product manager', 'product management', 'pm', 'product lead'],
+        'Sales & Business Development': ['sales', 'business development', 'bdr', 'sdr', 'account executive', 'ae', 'revenue'],
+        'Operations & Strategy': ['operations', 'strategy', 'ops', 'chief of staff', 'biz ops', 'strategic'],
+        'Data & Analytics': ['data', 'analytics', 'analyst', 'bi', 'business intelligence', 'data science', 'sql'],
+        'Human Resources': ['hr', 'human resources', 'recruiting', 'talent', 'people ops'],
+        'Consulting / Advisory': ['consulting', 'consultant', 'advisory', 'management consulting', 'strategy consulting'],
+        'Supply Chain & Logistics': ['supply chain', 'logistics', 'procurement', 'operations', 'fulfillment'],
+        'Healthcare / Clinical': ['healthcare', 'clinical', 'medical', 'nursing', 'physician', 'pharma'],
+        'Legal & Compliance': ['legal', 'compliance', 'attorney', 'counsel', 'law', 'regulatory'],
+      };
+
       const scoreMatch = (member) => {
         let score = 0;
+        let industryScore = 0;
         const text = [member.industry, member.company, member.job_title, member.bio, member.ways_to_help?.join(' '), member.expertise_areas?.join(' '), member.mentorship_topics?.join(' ')].filter(Boolean).join(' ').toLowerCase();
-        industries.forEach(ind => { if (ind && text.includes(ind.toLowerCase())) score += 5; });
-        roles.forEach(role => { if (role && text.includes(role.toLowerCase())) score += 3; });
-        if (member.persona === 'parent' || member.roles?.includes('parent')) score += 3;
+
+        // Industry keyword matching (Tier 1 signal)
+        industries.forEach(ind => {
+          const keywords = INDUSTRY_TO_KEYWORDS[ind] || [ind.toLowerCase()];
+          const matched = keywords.some(kw => text.includes(kw));
+          if (matched) { score += 4; industryScore += 4; }
+          else if (ind && text.includes(ind.toLowerCase())) { score += 4; industryScore += 4; }
+        });
+
+        // Target function keyword matching
+        const targetFunctions = user?.career_goals?.target_functions || [];
+        targetFunctions.forEach(fn => {
+          const keywords = FUNCTION_TO_KEYWORDS[fn] || [fn.toLowerCase()];
+          if (keywords.some(kw => text.includes(kw))) score += 3;
+        });
+
+        // Target role keyword matching
+        roles.forEach(role => { if (role && text.includes(role.toLowerCase())) score += 2; });
+
+        if (member.persona === 'parent' || member.roles?.includes('parent')) score += 1;
         if (member.company) score += 1;
         if (member.industry) score += 1;
-        if (member.job_title) score += 1;
-        if (member.linkedin_url) score += 1;
         if (member.ways_to_help?.length > 0) score += 1;
         if (member.updated_date) {
           const daysSince = (Date.now() - new Date(member.updated_date).getTime()) / (1000 * 60 * 60 * 24);
-          if (daysSince < 30) score += 2;
+          if (daysSince < 30) score += 1;
         }
+        member._industryScore = industryScore;
         return score;
       };
 
-      const qualified = sameSchool
+      // Score all qualified members
+      const scoredMembers = sameSchool
         .filter(hasUsefulProfile)
-        .sort((a, b) => scoreMatch(b) - scoreMatch(a));
+        .map(m => { m._score = scoreMatch(m); return m; })
+        .filter(m => m._score > 0); // remove score 0
 
-      const top20 = qualified.slice(0, 20);
-      console.log('[RedHot] After quality filter:', qualified.length);
+      // Tier 1 (score >= 3) + Tier 2 (score === 2)
+      let tier12 = scoredMembers.filter(m => m._score >= 2).sort((a, b) => b._score - a._score);
+
+      // Tier 3 fallback: only members with explicit industry keyword match
+      let finalLeads = tier12;
+      if (tier12.length === 0) {
+        finalLeads = scoredMembers
+          .filter(m => (m._industryScore || 0) > 0)
+          .sort((a, b) => b._score - a._score);
+      }
+
+      const top20 = finalLeads.slice(0, 20);
+      console.log('[RedHot] After quality filter — tier12:', tier12.length, 'final:', finalLeads.length);
       setRedHotLeads(top20);
-      setRedHotTotal(qualified.length);
+      setRedHotTotal(finalLeads.length);
 
       // Background enrichment — don't block UI
       const enrichInBackground = async (leads) => {
@@ -797,71 +859,19 @@ export default function LeadsSection({ user, onContact, savedLeads, onSaveLead, 
           </div>
           </>  
         ) : (
-          <div style={{
-            background: '#fff',
-            border: '1px solid #E5E5E5',
-            borderRadius: '16px',
-            padding: '32px 24px',
-            textAlign: 'center',
-            marginBottom: '24px',
-          }}>
-            <p style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: '17px',
-              fontWeight: '600',
-              color: '#1A1A1A',
-              margin: '0 0 10px 0',
-            }}>
-              No exact matches yet
+          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '32px 24px', textAlign: 'center', marginBottom: 16 }}>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
+              No {user?.career_goals?.target_industries?.[0] || 'relevant'} professionals in CFF yet
             </p>
-            <p style={{
-              fontSize: '13px',
-              color: '#666',
-              lineHeight: '1.6',
-              maxWidth: '360px',
-              margin: '0 auto 8px',
-            }}>
-              CFF is growing — as more {user?.career_goals?.target_industries?.[0] || 'professionals'} join the network, they'll appear here matched to your goals.
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 8px', lineHeight: 1.6, maxWidth: 380, marginLeft: 'auto', marginRight: 'auto' }}>
+              The network is growing. When a {user?.career_goals?.target_industries?.[0] || 'parent'} professional joins from your school, they'll appear here automatically.
             </p>
-            <p style={{
-              fontSize: '12px',
-              color: '#888',
-              margin: '0 auto 20px',
-              maxWidth: '320px',
-              lineHeight: '1.5',
-            }}>
-              In the meantime, your Warm Leads tab has UF alumni at companies hiring in your field right now.
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 20px', lineHeight: 1.5, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
+              In the meantime, check your Warm Leads — they have {university} alumni at companies hiring in your field right now.
             </p>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setShowLeads(true)}
-                style={{
-                  background: '#E85D20',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  minHeight: 'auto',
-                }}
-              >
-                See Warm Leads →
-              </button>
-              <button
-                onClick={handleInviteParent}
-                style={{
-                  background: 'none',
-                  border: '1px solid #E0E0E0',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontSize: '13px',
-                  color: '#666',
-                  cursor: 'pointer',
-                  minHeight: 'auto',
-                }}
-              >
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <a href="#warm-leads" style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>See Warm Leads →</a>
+              <button onClick={handleInviteParent} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 20px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>
                 {copySuccess ? 'Link copied! ✓' : 'Invite a parent →'}
               </button>
             </div>
