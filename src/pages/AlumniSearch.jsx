@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 
 const EXAMPLE_SEARCHES = (schoolName) => [
   `${schoolName} alumni who are VPs of Marketing at Fortune 500 companies`,
@@ -20,6 +21,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [outreachModal, setOutreachModal] = useState(null);
   const [editedDraft, setEditedDraft] = useState('');
   const [copyToast, setCopyToast] = useState(false);
+  const [cffComposer, setCffComposer] = useState(null);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const schoolName = user?.school_name || user?.school || user?.university || user?.school_code?.toUpperCase() || 'your school';
@@ -75,12 +77,18 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   };
 
   const handleConnect = async (alum) => {
-    if (sentTo.includes(alum.linkedin_url)) return;
-    setConnectLoading(alum.linkedin_url);
+    const key = alum.cff_user_id || alum.linkedin_url;
+    if (sentTo.includes(key)) return;
+    setConnectLoading(key);
     try {
-      const draft = await generateDraft(alum);
-      setOutreachModal({ alum, draft });
-      setEditedDraft(draft);
+      if (alum.cff_user_id) {
+        // Open CFF in-platform message composer
+        setCffComposer({ id: alum.cff_user_id, full_name: alum.full_name, job_title: alum.headline, company: alum.company || '', email: alum.email || null });
+      } else {
+        const draft = await generateDraft(alum);
+        setOutreachModal({ alum, draft });
+        setEditedDraft(draft);
+      }
     } finally {
       setConnectLoading(null);
     }
@@ -113,40 +121,41 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         </p>
       </div>
 
-      {/* Search bar */}
+      {/* Search bar — hidden when free tier search used */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-          <input
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder={`Try: "VP of Marketing at a Fortune 500" or "investment banker in NYC"`}
-            style={{ flex: 1, fontSize: 14, padding: '12px 16px', border: '1px solid #E0E0E0', borderRadius: 10, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
-          />
-          <button
-            onClick={() => handleSearch()}
-            disabled={searching || !query.trim()}
-            style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 500, color: '#fff', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', opacity: searching || !query.trim() ? 0.7 : 1, whiteSpace: 'nowrap', minHeight: 'auto' }}
-          >
-            {searching ? 'Searching...' : 'Search →'}
-          </button>
-        </div>
-
+        {!isFastIQ && user?.alumni_search_used ? (
+          <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 10, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>You've used your 1 free search.</p>
+            <button onClick={() => onOpenUpgrade?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}>
+              Unlock FastIQ for unlimited searches →
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+            <input
+              type="text"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              placeholder={`Try: "VP of Marketing at a Fortune 500" or "investment banker in NYC"`}
+              style={{ flex: 1, fontSize: 14, padding: '12px 16px', border: '1px solid #E0E0E0', borderRadius: 10, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
+            />
+            <button
+              onClick={() => handleSearch()}
+              disabled={searching || !query.trim()}
+              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 500, color: '#fff', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', opacity: searching || !query.trim() ? 0.7 : 1, whiteSpace: 'nowrap', minHeight: 'auto' }}
+            >
+              {searching ? 'Searching...' : 'Search →'}
+            </button>
+          </div>
+        )}
         {/* Free search indicator */}
         {!isFastIQ && !user?.alumni_search_used && (
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#22C55E', margin: 0, fontWeight: 500 }}>
             ✓ You have 1 free alumni search — make it count
           </p>
         )}
-        {!isFastIQ && user?.alumni_search_used && (
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>
-            You've used your free search.{' '}
-            <span onClick={() => onOpenUpgrade?.()} style={{ color: '#E85D20', cursor: 'pointer', fontWeight: 500 }}>
-              Unlock FastIQ for unlimited searches →
-            </span>
-          </p>
-        )}
+        {/* used message now shown in replaced bar above */}
         {isFastIQ && (
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>
             Unlimited searches · results in ~2 seconds
@@ -212,17 +221,22 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                     </div>
                     <button
                       onClick={() => handleConnect(alum)}
-                      disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
+                      disabled={connectLoading === (alum.cff_user_id || alum.linkedin_url) || sentTo.includes(alum.cff_user_id || alum.linkedin_url)}
                       style={{
                         background: 'none',
-                        border: `1px solid ${sentTo.includes(alum.linkedin_url) ? '#22C55E' : '#E85D20'}`,
+                        border: `1px solid ${sentTo.includes(alum.cff_user_id || alum.linkedin_url) ? '#22C55E' : '#E85D20'}`,
                         borderRadius: 6, padding: '7px 14px', fontSize: 12,
-                        color: sentTo.includes(alum.linkedin_url) ? '#22C55E' : '#E85D20',
-                        cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer',
+                        color: sentTo.includes(alum.cff_user_id || alum.linkedin_url) ? '#22C55E' : '#E85D20',
+                        cursor: sentTo.includes(alum.cff_user_id || alum.linkedin_url) ? 'default' : 'pointer',
                         whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto',
                       }}
                     >
-                      {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Sent ✓' : 'Connect →'}
+                      {(() => {
+                        const key = alum.cff_user_id || alum.linkedin_url;
+                        if (connectLoading === key) return 'Drafting...';
+                        if (sentTo.includes(key)) return alum.cff_user_id ? 'Message sent ✓' : 'Sent ✓';
+                        return 'Connect →';
+                      })()}
                     </button>
                   </div>
 
@@ -276,6 +290,19 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 18px', fontSize: 13, color: '#1A1A1A', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 100, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif" }}>
           ✓ Message copied — paste it into your LinkedIn connection request
         </div>
+      )}
+
+      {/* CFF in-platform message composer */}
+      {cffComposer && (
+        <ParentMessageComposer
+          user={user}
+          parent={cffComposer}
+          onClose={() => setCffComposer(null)}
+          onSent={() => {
+            setSentTo(prev => [...prev, cffComposer.id]);
+            setCffComposer(null);
+          }}
+        />
       )}
     </div>
   );
