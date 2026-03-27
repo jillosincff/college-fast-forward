@@ -13,74 +13,36 @@ const SCHOOL_NAMES = {
 
 const normalizeSchool = (s) => SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.trim?.() || '';
 
-const INDUSTRY_TO_KEYWORDS = {
-  'Technology & Software': ['software', 'engineer', 'developer', 'product', 'data', 'saas', 'tech', 'cloud', 'ai'],
-  'Financial Services & Banking': ['finance', 'banking', 'investment', 'accounting', 'analyst', 'wealth', 'equity', 'capital'],
-  'Consulting': ['consulting', 'strategy', 'advisory', 'management consulting', 'mckinsey', 'deloitte', 'pwc'],
-  'Healthcare & Life Sciences': ['healthcare', 'medical', 'pharma', 'clinical', 'biotech', 'hospital', 'life sciences'],
-  'Consumer Goods & Retail': ['retail', 'cpg', 'consumer goods', 'brand', 'merchandising', 'ecommerce'],
-  'Media & Entertainment': ['media', 'entertainment', 'film', 'music', 'publishing', 'content', 'streaming', 'advertising', 'social media', 'social', 'pr', 'public relations', 'communications', 'creative', 'digital marketing', 'media buyer'],
-  'Real Estate': ['real estate', 'property', 'cre', 'development', 'leasing', 'realty'],
-  'Energy & Utilities': ['energy', 'oil', 'gas', 'utilities', 'renewable', 'sustainability', 'climate'],
-  'Government & Nonprofit': ['government', 'nonprofit', 'ngo', 'policy', 'public sector', 'advocacy'],
-  'Logistics & Supply Chain': ['logistics', 'supply chain', 'operations', 'distribution', 'freight', 'warehouse'],
-  'Sports & Athletics': ['sports', 'athletics', 'agency', 'sponsorship', 'esports', 'fitness'],
-  'Education': ['education', 'edtech', 'university', 'k12', 'tutoring', 'curriculum'],
-};
-
-const FUNCTION_TO_KEYWORDS = {
-  'Software Engineering': ['engineer', 'developer', 'swe', 'backend', 'frontend', 'fullstack', 'mobile'],
-  'Product Management': ['product manager', 'pm', 'product lead', 'roadmap'],
-  'Sales & Business Development': ['sales', 'business development', 'bdr', 'sdr', 'account executive', 'ae', 'revenue'],
-  'Marketing & Brand': ['marketing', 'brand', 'growth', 'demand gen', 'content', 'seo', 'campaigns'],
-  'Finance & Accounting': ['finance', 'accounting', 'cpa', 'controller', 'fp&a', 'analyst', 'audit', 'investment banking', 'investment bank', 'ib', 'm&a', 'mergers', 'acquisitions', 'private equity', 'pe', 'hedge fund', 'asset management', 'wealth management', 'capital markets', 'equity research', 'financial analyst', 'corporate finance', 'goldman', 'jpmorgan', 'morgan stanley', 'bank of america', 'citi', 'wells fargo'],
-  'Operations & Strategy': ['operations', 'strategy', 'chief of staff', 'biz ops', 'program manager'],
-  'Data & Analytics': ['data', 'analytics', 'bi', 'sql', 'tableau', 'data science', 'machine learning'],
-  'Human Resources': ['hr', 'human resources', 'recruiting', 'talent', 'people ops'],
-  'Consulting / Advisory': ['consultant', 'advisor', 'strategy', 'associate', 'engagement manager'],
-  'Supply Chain & Logistics': ['supply chain', 'procurement', 'logistics', 'sourcing', 'inventory'],
-  'Healthcare / Clinical': ['clinical', 'nursing', 'physician', 'patient', 'care', 'medical'],
-  'Legal & Compliance': ['legal', 'compliance', 'counsel', 'attorney', 'paralegal', 'regulatory'],
+const INDUSTRY_MAP = {
+  "Financial Services & Banking":  ["finance", "banking", "investment", "capital", "wealth", "equity", "accounting", "cpa", "analyst", "audit", "jp morgan", "goldman", "morgan stanley", "citi", "bank of america", "wells fargo", "private equity", "hedge fund", "m&a", "mergers"],
+  "Consulting":                    ["consulting", "consultant", "advisory", "mckinsey", "bain", "bcg", "deloitte", "pwc", "kpmg", "ey", "ernst", "strategy", "accenture"],
+  "Technology & Software":         ["software", "tech", "engineering", "developer", "product", "saas", "cloud", "data", "ai", "machine learning"],
+  "Healthcare & Life Sciences":    ["healthcare", "medical", "pharma", "clinical", "hospital", "biotech", "life sciences", "nursing", "physician"],
+  "Media & Entertainment":         ["media", "entertainment", "film", "music", "publishing", "content", "streaming", "advertising", "pr", "marketing", "brand"],
+  "Consumer Goods & Retail":       ["retail", "cpg", "consumer goods", "brand", "merchandising", "ecommerce", "fashion", "beauty"],
+  "Real Estate":                   ["real estate", "property", "cre", "development", "leasing", "realty", "mortgage"],
+  "Energy & Utilities":            ["energy", "oil", "gas", "utilities", "renewable", "sustainability", "climate"],
+  "Government & Nonprofit":        ["government", "nonprofit", "ngo", "policy", "public sector", "advocacy", "education"],
+  "Logistics & Supply Chain":      ["logistics", "supply chain", "operations", "distribution", "freight", "warehouse"],
+  "Sports & Athletics":            ["sports", "athletics", "agency", "sponsorship", "esports", "fitness"],
+  "Legal & Compliance":            ["legal", "law", "attorney", "counsel", "compliance", "paralegal"],
 };
 
 function scoreMatch(member, studentGoals) {
-  const industries = studentGoals?.target_industries || [];
-  const functions = studentGoals?.target_functions || [];
-  
-  // Build keyword set from taxonomy maps
+  const studentIndustries = studentGoals?.target_industries || [];
+  if (studentIndustries.length === 0) return 0;
+
   const keywords = new Set();
-  industries.forEach(ind => {
-    (INDUSTRY_TO_KEYWORDS[ind] || []).forEach(k => keywords.add(k));
+  studentIndustries.forEach(ind => {
+    (INDUSTRY_MAP[ind] || []).forEach(k => keywords.add(k));
   });
-  functions.forEach(fn => {
-    (FUNCTION_TO_KEYWORDS[fn] || []).forEach(k => keywords.add(k));
-  });
-  
-  // Fallback: if no keywords at all, parse target_roles as raw keywords
-  if (keywords.size === 0 && studentGoals?.target_roles?.length) {
-    studentGoals.target_roles.forEach(role => {
-      role.toLowerCase().split(' ').forEach(word => {
-        if (word.length > 3) keywords.add(word);
-      });
-    });
-  }
-  
   if (keywords.size === 0) return 0;
-  
-  // Score against structured fields only
-  const haystack = [
-    member.industry, member.job_title, member.company,
-    ...(Array.isArray(member.expertise_areas) ? member.expertise_areas : [])
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-  
+
+  const haystack = [member.industry, member.job_title, member.company]
+    .filter(Boolean).join(' ').toLowerCase();
+
   let score = 0;
-  keywords.forEach(kw => {
-    if (haystack.includes(kw)) score++;
-  });
-  
+  keywords.forEach(kw => { if (haystack.includes(kw)) score++; });
   return score;
 }
 
@@ -174,26 +136,12 @@ Deno.serve(async (req) => {
     // Quality-filtered base pool
     const qualityPool = sameSchoolMembers.filter(u => hasMinimumProfile(u));
 
-    // Tier 1: strong match (score >= 3)
-    const strongMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) >= 3);
-    // Tier 2: meaningful match (score === 2)
-    const weakMatchIds = new Set(strongMatch.map(u => u.id));
-    const weakMatch = qualityPool.filter(u => scoreMatch(u, careerGoals) === 2 && !weakMatchIds.has(u.id));
-    // Tier 3: fallback — must have explicit industry keyword match, max 3
-    const usedIds = new Set([...strongMatch, ...weakMatch].map(u => u.id));
-    const studentIndustries = industries;
-    const fallback = qualityPool
-      .filter(u => {
-        if (usedIds.has(u.id)) return false;
-        if (!u.industry) return false;
-        const memberIndustry = u.industry.toLowerCase();
-        return studentIndustries.some(ind =>
-          (INDUSTRY_TO_KEYWORDS[ind] || []).some(kw => memberIndustry.includes(kw))
-        );
-      })
-      .slice(0, 3);
+    const scored = qualityPool.map(u => ({ u, score: scoreMatch(u, careerGoals) }));
+    const tier1 = scored.filter(m => m.score >= 2).map(m => m.u);
+    const tier1Ids = new Set(tier1.map(u => u.id));
+    const tier2 = scored.filter(m => m.score === 1 && !tier1Ids.has(m.u.id)).map(m => m.u);
 
-    const relevantMembers = [...strongMatch, ...weakMatch, ...fallback].slice(0, 20);
+    const relevantMembers = [...tier1, ...tier2].slice(0, 20);
 
     console.log('Relevant members after strict scoring:', relevantMembers.length);
 
