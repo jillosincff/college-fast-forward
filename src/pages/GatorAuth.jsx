@@ -196,6 +196,7 @@ export default function GatorAuth() {
       return;
     }
     
+    console.log('🔴 [GatorAuth] Routing to role-select. user:', user);
     setStep('role-select');
   }, [user, isLoading]);
 
