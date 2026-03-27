@@ -52,7 +52,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       });
 
       console.log('Search response:', res);
-      setResults(res?.profiles || []);
+      setResults(res?.data?.profiles || []);
 
       if (!isFastIQ && !user?.alumni_search_used) {
         base44.auth.updateMe({ alumni_search_used: true }).catch(() => {});
