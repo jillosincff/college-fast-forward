@@ -49,6 +49,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         query: q,
         universityName: schoolName || user?.school || user?.university || 'University of Florida',
         maxResults: isFastIQ ? 8 : 5,
+        isFastIQ: isFastIQ,
       });
 
       console.log('Search response:', res);
@@ -260,7 +261,12 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{alum.full_name}</p>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>{alum.headline}</p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>
+                        {alum.headline}{alum.company ? ` · ${alum.company}` : ''}
+                      </p>
+                      {alum.location && (
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: '0 0 2px' }}>📍 {alum.location}</p>
+                      )}
                       {alum.summary && (
                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: 0, lineHeight: 1.4 }}>{alum.summary.slice(0, 100)}...</p>
                       )}

@@ -134,46 +134,96 @@ Deno.serve(async (req) => {
 
     // ── ACTION 2: Alumni people search ───────────────────────────────
     if (action === 'searchAlumni') {
-      const { query: freeTextQuery, jobTitle, universityName = 'University of Florida', companyName = '', maxResults = 3 } = params;
+      const { 
+        query: freeTextQuery, 
+        universityName = 'University of Florida', 
+        maxResults = 5,
+        isFastIQ = false 
+      } = params;
+
       const query = `${universityName} alumni ${freeTextQuery}`;
-      console.log('[EXA] QUERY SENT TO EXA:', query);
-      console.log('[EXA] SCHOOL NAME:', universityName);
+      
+      console.log('QUERY SENT TO EXA:', query);
 
       const data = await exaFetch('search', {
         query,
         type: 'auto',
         category: 'people',
         numResults: maxResults * 2,
-        contents: { highlights: { maxCharacters: 2000 } },
+        contents: {
+          highlights: { maxCharacters: 500 }
+        },
       });
 
-      const profiles = (data.results || []).map(r => {
-        const parts = (r.title || '').split(/[|\-]/).map(s => s.trim()).filter(Boolean);
-        const full_name = parts[0]?.replace(/\s+Bio$/i, '').trim() || 'Unknown';
-        const headline = parts.slice(1).join(' · ') || '';
-        const summary = (r.highlights || [])
-          .join(' ')
-          .replace(/^#+\s*/gm, '')
-          .replace(/Skip to main content.*?#/gi, '')
-          .replace(/Close jump menu/gi, '')
-          .trim()
-          .slice(0, 150);
-        return {
-          full_name,
-          linkedin_url: r.url,
-          headline,
-          summary,
-          source: 'exa',
-          cff_user_id: null,
-          email: null,
-        };
-      }).filter(p => p.full_name !== 'Unknown' && p.linkedin_url?.includes('linkedin.com/in/')).slice(0, maxResults);
+      console.log('RAW EXA RESPONSE:', JSON.stringify(data));
 
-      return Response.json({
-        success: true,
-        profiles,
-        total_count: profiles.length,
-        source: 'exa_people_search',
+      const profiles = (data.results || [])
+        .map(r => {
+          const parts = (r.title || '').split(/[|\-·]/).map(s => s.trim()).filter(Boolean);
+          const full_name = parts[0]?.replace(/\s+Bio$/i, '').trim() || 'Unknown';
+          const headline = parts.slice(1).join(' · ') || '';
+          const summary = (r.highlights || [])
+            .join(' ')
+            .replace(/^#+\s*/gm, '')
+            .trim()
+            .slice(0, 200);
+          return {
+            full_name,
+            linkedin_url: r.url,
+            headline,
+            summary,
+            source: 'exa',
+            cff_user_id: null,
+            email: null,
+          };
+        })
+        .filter(p => p.full_name !== 'Unknown' && p.full_name.length < 50)
+        .slice(0, maxResults);
+
+      // FastIQ only — enrich with Proxycurl
+      if (isFastIQ && profiles.length > 0) {
+        const enriched = await Promise.all(
+          profiles.map(async (profile) => {
+            try {
+              const px = await base44.asServiceRole.functions.invoke('proxycurlService', {
+                action: 'enrichParentProfile',
+                params: { linkedinUrl: profile.linkedin_url }
+              });
+              const px_data = px?.data || px || {};
+              return {
+                ...profile,
+                full_name: px_data.full_name || profile.full_name,
+                headline: px_data.current_title || px_data.headline || profile.headline,
+                company: px_data.current_company || '',
+                location: px_data.location || '',
+                photo_url: px_data.profile_pic || '',
+                industry: px_data.industry || '',
+                skills: px_data.skills || [],
+                verified_uf: (px_data.summary || '').toLowerCase().includes('florida') ||
+                             profile.headline.toLowerCase().includes('florida'),
+                source: 'exa_proxycurl',
+              };
+            } catch (e) {
+              console.error('Proxycurl enrichment failed for', profile.linkedin_url, e.message);
+              return profile; // graceful fallback to Exa data
+            }
+          })
+        );
+
+        return Response.json({ 
+          success: true, 
+          profiles: enriched, 
+          total_count: enriched.length, 
+          source: 'exa_proxycurl' 
+        });
+      }
+
+      // Free tier — Exa only
+      return Response.json({ 
+        success: true, 
+        profiles, 
+        total_count: profiles.length, 
+        source: 'exa_people_search' 
       });
     }
 
