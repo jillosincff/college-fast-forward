@@ -101,6 +101,11 @@ Map student answers to the correct taxonomy fields:
 - "Teaching", "Education", "School" → target_industries: "Education"
 - "HR", "Human Resources", "People Ops", "Recruiting" → target_industries: "Human Resources"
 - "HR Manager", "Recruiter" as a role → target_functions: "Human Resources" (both can coexist)
+- "Nonprofit" or "NGO" or "Social Impact" → target_industries: "Nonprofit & Social Impact"
+- "Architecture" or "Architect" or "Interior Design" → target_industries: "Architecture & Design"
+- "Graphic Design" or "UX/UI" → can be either "Architecture & Design" OR "Marketing & Brand" depending on context
+- "Biotech" or "Biotechnology" or "Pharma" → target_industries: "Biotech & Life Sciences"
+- "Pre-Med & Healthcare" is for clinical/patient-facing roles; "Biotech & Life Sciences" is for research/lab/industry roles
 - "Corporate" → "Consulting" or "Operations & Strategy" depending on context
 - "Business" → infer from context; default to "Operations & Strategy"
 - A Mechanical Engineering student targeting engineering roles should NOT be matched to Software Engineers unless they specifically say so.
@@ -126,6 +131,10 @@ VALID target_industries values:
 - "Pre-Med & Healthcare"
 - "Hospitality & Tourism"
 - "Legal & Compliance"
+- "Human Resources"
+- "Nonprofit & Social Impact"
+- "Architecture & Design"
+- "Biotech & Life Sciences"
 - "Human Resources"
 
 If a student's answer maps to multiple values, include all that apply (max 3).
@@ -268,7 +277,11 @@ const VALID_INDUSTRIES = [
   "Engineering",
   "Pre-Med & Healthcare",
   "Hospitality & Tourism",
-  "Legal & Compliance"
+  "Legal & Compliance",
+  "Human Resources",
+  "Nonprofit & Social Impact",
+  "Architecture & Design",
+  "Biotech & Life Sciences"
 ];
 
 const VALID_FUNCTIONS = [
