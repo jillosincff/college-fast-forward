@@ -92,6 +92,24 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
+      
+      // Fix stale 'gator' persona — map to valid 'student' value
+      if (currentUser?.persona === 'gator') {
+        try {
+          await base44.auth.updateMe({ persona: 'student', roles: ['student'] });
+          currentUser.persona = 'student';
+          if (!currentUser.roles?.includes('student')) currentUser.roles = ['student'];
+        } catch (e) { console.warn('Failed to migrate gator persona:', e); }
+      }
+      
+      // Fix onboarding_completed: false for users who clearly have an account
+      if (currentUser?.onboarding_completed === false && currentUser?.career_goals?.saved_at) {
+        try {
+          await base44.auth.updateMe({ onboarding_completed: true });
+          currentUser.onboarding_completed = true;
+        } catch (e) { console.warn('Failed to fix onboarding_completed:', e); }
+      }
+      
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);

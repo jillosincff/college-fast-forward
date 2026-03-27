@@ -330,8 +330,8 @@ export default function GatorAuth() {
             // Students with gator role - apply directly (any email allowed)
             if (pendingRole === 'gator') {
               await base44.auth.updateMe({
-                persona: 'gator',
-                roles: ['gator'],
+                persona: 'student',
+                roles: ['student'],
                 onboarding_completed: false,
                 is_new_signup: true,
                 invite_code_used: isUFLStudent ? 'ufl_direct' : 'direct'
@@ -351,10 +351,12 @@ export default function GatorAuth() {
             }
             
             // CRITICAL: Use the pendingRole directly - don't default to 'parent'
-            console.log('🔄 [GatorAuth] Applying role:', pendingRole, 'with code:', pendingCode);
+            // Map 'gator' → 'student' for valid persona value
+            const normalizedRole = pendingRole === 'gator' ? 'student' : pendingRole;
+            console.log('🔄 [GatorAuth] Applying role:', normalizedRole, 'with code:', pendingCode);
             await base44.auth.updateMe({
-              persona: pendingRole,
-              roles: [pendingRole],
+              persona: normalizedRole,
+              roles: [normalizedRole],
               onboarding_completed: false,
               is_new_signup: true,
               invite_code_used: pendingCode || 'direct'
@@ -364,14 +366,14 @@ export default function GatorAuth() {
             await new Promise(r => setTimeout(r, 300));
             const updatedUser = await base44.auth.me();
             
-            if (updatedUser?.persona === pendingRole) {
+            if (updatedUser?.persona === normalizedRole || updatedUser?.persona === pendingRole) {
               console.log('✅ [GatorAuth] Pending role applied successfully');
               localStorage.removeItem('pending_invite_role');
               localStorage.removeItem('pending_invite_code');
               if (refreshUser) await refreshUser();
               
               // Route to correct onboarding
-              if (pendingRole === 'gator') {
+              if (pendingRole === 'gator' || normalizedRole === 'student') {
                 navigate('StudentOnboarding');
               } else if (pendingRole === 'parent') {
                 navigate('ParentOnboarding');
@@ -381,8 +383,8 @@ export default function GatorAuth() {
             } else {
               console.warn('⚠️ [GatorAuth] Role update not reflected, retrying...');
               await base44.auth.updateMe({
-                persona: pendingRole,
-                roles: [pendingRole],
+                persona: normalizedRole,
+                roles: [normalizedRole],
                 onboarding_completed: false,
                 is_new_signup: true
               });
@@ -391,7 +393,7 @@ export default function GatorAuth() {
               localStorage.removeItem('pending_invite_code');
               if (refreshUser) await refreshUser();
               
-              if (pendingRole === 'gator') {
+              if (pendingRole === 'gator' || normalizedRole === 'student') {
                 navigate('StudentOnboarding');
               } else if (pendingRole === 'parent') {
                 navigate('ParentOnboarding');
@@ -510,7 +512,7 @@ export default function GatorAuth() {
     const hasInviteCode = localStorage.getItem('pending_invite_code');
     
     // Students go to StudentOnboarding which handles everything
-    if (selectedRole === 'gator') {
+    if (selectedRole === 'gator' || selectedRole === 'student') {
       navigate('StudentOnboarding');
       return;
     }
@@ -526,11 +528,12 @@ export default function GatorAuth() {
     
     // Has invite code - apply role and continue
     try {
-      // CRITICAL: Use selectedRole which is the ACTUAL role the user picked (alumni vs parent)
-      console.log('🔄 [GatorAuth] Applying selected role:', selectedRole, 'with code:', hasInviteCode);
+      // Map 'gator' → 'student' for valid persona value
+      const normalizedSelectedRole = selectedRole === 'gator' ? 'student' : selectedRole;
+      console.log('🔄 [GatorAuth] Applying selected role:', normalizedSelectedRole, 'with code:', hasInviteCode);
       await base44.auth.updateMe({
-        persona: selectedRole,
-        roles: [selectedRole],
+        persona: normalizedSelectedRole,
+        roles: [normalizedSelectedRole],
         onboarding_completed: false,
         is_new_signup: true,
         invite_code_used: hasInviteCode || 'direct'
@@ -539,9 +542,9 @@ export default function GatorAuth() {
       localStorage.removeItem('pending_invite_code');
       if (refreshUser) await refreshUser();
       
-      if (selectedRole === 'gator') {
+      if (normalizedSelectedRole === 'student') {
         navigate('StudentOnboarding');
-      } else if (selectedRole === 'parent') {
+      } else if (normalizedSelectedRole === 'parent') {
         navigate('ParentOnboarding');
       } else {
         navigate('Onboarding');
