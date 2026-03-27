@@ -152,6 +152,7 @@ Deno.serve(async (req) => {
         numResults: maxResults * 2,
         contents: { highlights: { maxCharacters: 2000 } },
       });
+      console.log('RAW EXA RESPONSE:', JSON.stringify(data));
 
       const profiles = (data.results || []).map(r => {
         const parts = (r.title || '').split(/[|\-]/).map(s => s.trim()).filter(Boolean);
