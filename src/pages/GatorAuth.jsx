@@ -167,10 +167,15 @@ export default function GatorAuth() {
     const loadUser = async () => {
       try {
         // Handle OAuth callback from Google redirect
+        console.log('🔵 [GatorAuth] handleRedirectCallback exists?', typeof base44.auth.handleRedirectCallback);
         if (typeof base44.auth.handleRedirectCallback === 'function') {
+          console.log('🔵 [GatorAuth] Calling handleRedirectCallback...');
           await base44.auth.handleRedirectCallback();
+          console.log('🔵 [GatorAuth] Callback handled');
         }
+        console.log('🔵 [GatorAuth] Calling base44.auth.me()...');
         const me = await base44.auth.me();
+        console.log('🔵 [GatorAuth] me() returned:', me);
         setUser(me || null);
       } catch (e) {
         console.warn('No user authenticated yet');
