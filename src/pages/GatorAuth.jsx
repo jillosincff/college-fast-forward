@@ -166,29 +166,8 @@ export default function GatorAuth() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // Extract token from URL hash fragment: "/#GetStarted?access_token=eyJ..."
-        const hash = window.location.hash;
-        const queryString = hash.includes('?') ? hash.split('?')[1] : '';
-        const params = new URLSearchParams(queryString);
-        const token = params.get('access_token');
-        
-        console.log('🔵 [GatorAuth] Token from URL:', token ? 'found' : 'not found');
-        
-        if (token) {
-          // Try to establish session with token
-          if (typeof base44.auth.setSession === 'function') {
-            console.log('🔵 [GatorAuth] Setting session with token...');
-            await base44.auth.setSession(token);
-          } else if (typeof base44.auth.setToken === 'function') {
-            console.log('🔵 [GatorAuth] Setting token...');
-            await base44.auth.setToken(token);
-          }
-          // Clean up URL
-          window.history.replaceState(null, '', window.location.pathname + '#GetStarted');
-        }
-        
+        // app-params.js now handles OAuth token extraction from hash fragment
         const me = await base44.auth.me();
-        console.log('🔵 [GatorAuth] me() returned:', me);
         setUser(me || null);
       } catch (e) {
         console.warn('No user authenticated yet');
