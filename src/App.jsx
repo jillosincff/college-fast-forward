@@ -34,15 +34,13 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
+  // GetStarted/GatorAuth route - accessible before full auth
+  if (window.location.hash === '#GetStarted' || window.location.hash === '#/GetStarted') {
+    return (
+      <Routes>
+        <Route path="*" element={<GatorAuth />} />
+      </Routes>
+    );
   }
 
   // Render the main app
