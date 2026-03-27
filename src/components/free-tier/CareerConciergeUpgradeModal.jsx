@@ -3,25 +3,32 @@ import { X, Check, Loader2 } from 'lucide-react';
 
 export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleUpgrade = async () => {
+    if (!user?.id || !user?.email) {
+      setError('Please sign in to continue.');
+      return;
+    }
     setLoading(true);
+    setError(null);
     try {
       const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
       const response = await createCheckoutSession({
         plan: 'fastiq_monthly',
-        successUrl: `${window.location.origin}/#ParentHome?upgrade=success`,
+        successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,
         cancelUrl: window.location.href,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
       });
       if (response?.data?.url) {
         window.location.href = response.data.url;
       } else {
-        console.error('Checkout failed:', response?.data?.error);
+        setError(response?.data?.error || 'Checkout failed. Please try again.');
         setLoading(false);
       }
     } catch (e) {
       console.error('Checkout error:', e);
+      setError(e?.message || 'Something went wrong. Please try again.');
       setLoading(false);
     }
   };
@@ -93,6 +100,13 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
               7-day free trial included. Save $99 with annual. Cancel anytime.
             </p>
           </div>
+
+          {/* Error */}
+          {error && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#EF4444', textAlign: 'center', margin: 0 }}>
+              {error}
+            </p>
+          )}
 
           {/* CTAs */}
           <div className="space-y-2">

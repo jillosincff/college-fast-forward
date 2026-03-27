@@ -227,7 +227,7 @@ export default function FreeTierDashboard() {
         <FreeTierMobileNav activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
       </div>
       {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
-      {showConciergeModal && <CareerConciergeUpgradeModal onClose={() => setShowConciergeModal(false)} onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }} />}
+      {showConciergeModal && <CareerConciergeUpgradeModal user={user} onClose={() => setShowConciergeModal(false)} onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }} />}
     </div>
   );
 }
