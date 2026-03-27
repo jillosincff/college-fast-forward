@@ -6,12 +6,12 @@ import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
 import V3Hero from '@/components/landing/v3/V3Hero';
 import V3Problem from '@/components/landing/v3/V3Problem';
-import V3ComparisonTable from '@/components/landing/v3/V3ComparisonTable';
+
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
-import V3Numbers from '@/components/landing/v3/V3Numbers';
+
 import V3ParentStory from '@/components/landing/v3/V3ParentStory';
 import V3Pricing from '@/components/landing/v3/V3Pricing';
-import V3FAQ from '@/components/landing/v3/V3FAQ';
+
 import V3FinalCTA from '@/components/landing/v3/V3FinalCTA';
 
 
@@ -61,14 +61,12 @@ export default function LandingPage() {
         {/* 3 — The Reality */}
         <V3Problem />
 
-        {/* 4 — Comparison Table */}
-        <V3ComparisonTable />
+
 
         {/* 5 — How It Actually Works */}
         <V3ParentPeace onCTA={handleCTA} />
 
-        {/* 6 — The Stats */}
-        <V3Numbers />
+
 
         {/* 6.5 — Parent Story */}
         <V3ParentStory />
@@ -76,8 +74,7 @@ export default function LandingPage() {
         {/* 7 — Pricing */}
         <V3Pricing onCTA={handleCTA} />
 
-        {/* 8 — FAQ */}
-        <V3FAQ />
+
 
         {/* 9 — Final CTA + Footer */}
         <V3FinalCTA onCTA={handleCTA} />
