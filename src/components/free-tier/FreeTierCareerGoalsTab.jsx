@@ -461,7 +461,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   // Block 1: Read cache on load (FastIQ users)
   useEffect(() => {
     if (!user?.id || mode !== 'summary') return;
-    if (!user.is_fastiq && !user.fastiq_setup_complete && user.subscription_status !== 'active' && user.membership_tier !== 'fastiq') return;
+    // Skip alumni fetch for non-FastIQ users
+    const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+    if (!isFastIQ) return;
     if (!savedGoals?.target_functions?.length) return;
 
     const cached = user.alumni_explorer_cache;

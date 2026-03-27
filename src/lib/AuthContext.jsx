@@ -93,13 +93,13 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
       
-      // Fix stale 'gator' persona — map to valid 'student' value
-      if (currentUser?.persona === 'gator') {
+      // Fix stale 'gator' persona OR missing persona — map to valid 'student' value
+      if (!currentUser?.persona || currentUser?.persona === 'gator') {
         try {
           await base44.auth.updateMe({ persona: 'student', roles: ['student'] });
           currentUser.persona = 'student';
           if (!currentUser.roles?.includes('student')) currentUser.roles = ['student'];
-        } catch (e) { console.warn('Failed to migrate gator persona:', e); }
+        } catch (e) { console.warn('Failed to migrate persona:', e); }
       }
       
       // Fix onboarding_completed: false for users who clearly have an account
