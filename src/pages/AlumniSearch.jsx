@@ -47,7 +47,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       const res = await base44.functions.invoke('exaService', {
         action: 'searchAlumni',
         query: q,
-        universityName: schoolName,
+        universityName: schoolName || user?.school || user?.university || 'University of Florida',
         maxResults: isFastIQ ? 8 : 5,
       });
 
