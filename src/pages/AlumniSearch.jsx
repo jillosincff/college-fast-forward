@@ -50,12 +50,15 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         universityName: schoolName,
         maxResults: isFastIQ ? 8 : 5,
       });
-      setResults(res?.profiles || []);
+
+      console.log('Search response:', res);
+      setResults(res?.data?.profiles || res?.profiles || []);
 
       if (!isFastIQ && !user?.alumni_search_used) {
         base44.auth.updateMe({ alumni_search_used: true }).catch(() => {});
       }
-    } catch {
+    } catch (e) {
+      console.error('Search error:', e);
       setResults([]);
     } finally {
       setSearching(false);
