@@ -146,10 +146,10 @@ Deno.serve(async (req) => {
       }
 
       const data = await exaFetch('search', {
-        query,
-        type: 'neural',
-        numResults: maxResults * 3,
-        includeText: ['linkedin.com/in'],
+        query: `${freeTextQuery} ${universityName} alumni`,
+        type: 'auto',
+        category: 'person',
+        numResults: maxResults * 2,
         contents: { highlights: { maxCharacters: 2000 } },
       });
 
@@ -172,14 +172,7 @@ Deno.serve(async (req) => {
           cff_user_id: null,
           email: null,
         };
-      }).filter(p => {
-        if (!p.linkedin_url?.includes('linkedin.com/in/')) return false;
-        if (!p.full_name || p.full_name.length > 40) return false;
-        if (p.full_name.includes('Spotlight')) return false;
-        if (p.full_name.includes('Post')) return false;
-        if (p.full_name.includes('School')) return false;
-        return true;
-      }).slice(0, maxResults);
+      }).filter(p => p.full_name !== 'Unknown' && p.linkedin_url?.includes('linkedin.com/in/')).slice(0, maxResults);
 
       return Response.json({
         success: true,
