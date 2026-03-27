@@ -225,6 +225,15 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         </div>
       )}
 
+      {/* No results */}
+      {searched && results.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>
+            No results found — try different keywords or a broader search.
+          </p>
+        </div>
+      )}
+
       {/* Results */}
       {results.length > 0 && (
         <div>
