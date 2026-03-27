@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
@@ -161,7 +161,6 @@ export default function GatorAuth() {
   const [step, setStep] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   // Load user on mount
   useEffect(() => {
@@ -270,7 +269,6 @@ export default function GatorAuth() {
       <AuthPageShell>
         <AuthCard delay={0}>
           <LogoBlock delay={0.05} />
-          {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, textAlign: 'center' }}><p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#f87171', lineHeight: 1.5 }}>{error}</p></div>}
           <div style={{ textAlign: 'center', marginBottom: 8, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.1s' }}>
             <h1 style={S.headline}>Welcome to College Fast Forward</h1>
             <p style={S.subhead}>Tell us who you are so we can personalize your experience.</p>
