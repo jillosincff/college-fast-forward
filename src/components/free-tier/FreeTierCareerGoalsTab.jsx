@@ -99,6 +99,8 @@ Map student answers to the correct taxonomy fields:
 - "Real Estate", "Realtor", "Property" → target_industries: "Real Estate"
 - "Hospitality", "Hotel", "Tourism", "Restaurant" → target_industries: "Hospitality & Tourism"
 - "Teaching", "Education", "School" → target_industries: "Education"
+- "HR", "Human Resources", "People Ops", "Recruiting" → target_industries: "Human Resources"
+- "HR Manager", "Recruiter" as a role → target_functions: "Human Resources" (both can coexist)
 - "Corporate" → "Consulting" or "Operations & Strategy" depending on context
 - "Business" → infer from context; default to "Operations & Strategy"
 - A Mechanical Engineering student targeting engineering roles should NOT be matched to Software Engineers unless they specifically say so.
@@ -124,6 +126,7 @@ VALID target_industries values:
 - "Pre-Med & Healthcare"
 - "Hospitality & Tourism"
 - "Legal & Compliance"
+- "Human Resources"
 
 If a student's answer maps to multiple values, include all that apply (max 3).
 If a student's answer is ambiguous, pick the closest match — never leave as free text.
