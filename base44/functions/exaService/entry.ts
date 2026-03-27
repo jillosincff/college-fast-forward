@@ -135,18 +135,11 @@ Deno.serve(async (req) => {
     // ── ACTION 2: Alumni people search ───────────────────────────────
     if (action === 'searchAlumni') {
       const { query: freeTextQuery, jobTitle, universityName = 'University of Florida', companyName = '', maxResults = 3 } = params;
-      const companyClause = companyName ? `at ${companyName}` : '';
-      let query;
-      if (freeTextQuery) {
-        query = freeTextQuery.toLowerCase().includes(universityName.toLowerCase())
-          ? `${freeTextQuery}`
-          : `${freeTextQuery} ${universityName} alumni`;
-      } else {
-        query = `${jobTitle} ${companyClause} ${universityName} alumni`;
-      }
+      const baseQuery = `site:linkedin.com/in/ ${universityName} alumni`;
+      const fullQuery = freeTextQuery ? `${baseQuery} ${freeTextQuery}` : baseQuery;
 
       const data = await exaFetch('search', {
-        query: `site:linkedin.com/in/ "${universityName}" alumni ${freeTextQuery}`,
+        query: fullQuery,
         type: 'keyword',
         numResults: maxResults * 2,
         contents: { highlights: { maxCharacters: 2000 } },
