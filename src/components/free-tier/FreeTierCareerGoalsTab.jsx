@@ -11,9 +11,9 @@ import InlineMessageComposer from './InlineMessageComposer';
 
 // ─── System prompts ───────────────────────────────────────────────────────────
 
-const SYSTEM_PROMPT_BRANCHING = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are running a structured 8-question intake conversation to understand a college student's career goals.
+const SYSTEM_PROMPT_BRANCHING = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are running a structured intake conversation to understand a college student's career goals.
 
-QUESTION SEQUENCE (exactly 8 questions):
+QUESTION SEQUENCE:
 Q1 (already answered — major) — saved, skip to Q2.
 Q2: Do you have a clear direction or are you still figuring it out? Chips: ["I have a pretty good idea →", "Still figuring it out"]
 
@@ -24,7 +24,8 @@ Q5: Internship or full-time? Chips: ["Internship", "Full-time", "Both"]
 Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "2026", "2027", "2028+"]
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
-Q8: Any companies you'd love to work at — or types of companies that appeal to you? And what's your biggest gap right now? Free text + chips: ["No internship experience yet", "Not sure what I want to do", "Don't know how to network", "Not sure my major is right"]
+Q8: Any companies you'd love to work at, or types of companies that appeal to you? Chips: ["No idea yet", "Yes, I'll add them below"]
+Q9: What are you struggling with most right now? Chips: ["Not sure what I want to do", "Getting no responses", "Not sure where to start"]
 
 PATH B question count is now 7 (entrepreneurship question removed):
 
@@ -58,8 +59,8 @@ Rules:
 - After key answers, remind student their data is being used: "Finance — already narrowing your company list." / "NYC — focusing your leads there."
   These reminders replace the acknowledgment — don't do both. One sentence total.
 - Keep responses SHORT — one acknowledgment/reminder + the next question
-- For Path A: set is_final=true after Q8 with goals_summary populated
-- For Path B: set is_final=true after Q8 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
+- For Path A: set is_final=true after Q9 with goals_summary populated. Q9 answer should influence the profile: "Not sure what I want to do" → emphasize role exploration; "Getting no responses" → flag resume/outreach gap; "Not sure where to start" → emphasize 6-step roadmap
+- For Path B: set is_final=true after Q7 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
 - NEVER add guilt or pressure to skipped questions. If student skips, say "No problem — moving on." and ask the next question.
 - GRADUATION YEAR: If not captured by Q5b/Q7, ask explicitly. NEVER assume. When asking graduation year, ALWAYS use exactly these 4 chips: ["2025", "2026", "2027", "2028+"]. NEVER use any other chips for this question.
 - NO EXPERIENCE: When student says no experience, say exactly: "Starting from zero is totally fine — and honestly, a lot of CFF parents specifically remember what it felt like and are the most generous with their time. We'll build your path with that in mind."
@@ -405,6 +406,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [conversationDone, setConversationDone] = useState(false);
 
   const [questionCount, setQuestionCount] = useState(0);
+  const [awaitingCompanyInput, setAwaitingCompanyInput] = useState(false);
+  const [companyTags, setCompanyTags] = useState([]);
+  const [companyTagInput, setCompanyTagInput] = useState('');
   const [restoredBanner, setRestoredBanner] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [restoredAt, setRestoredAt] = useState(null);
@@ -600,7 +604,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setMajorSaved(true);
       setMessages([{
         role: 'assistant',
-        content: `Hey ${firstName}! I have 8 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything. Let's figure out what you're looking for. Ready?`,
+        content: `Hey ${firstName}! I have 9 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything. Let's figure out what you're looking for. Ready?`,
       }]);
       setSuggestedPrompts(["Let's go →", "I'll do it later"]);
       setQuestionCount(1);
@@ -608,7 +612,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setAwaitingMajor(true);
       setMessages([{
         role: 'assistant',
-        content: `Hey ${firstName}! I have 8 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything.\n\nFirst: what's your major? This helps me point you toward roles that actually make sense for your degree.`,
+        content: `Hey ${firstName}! I have 9 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything.\n\nFirst: what's your major? This helps me point you toward roles that actually make sense for your degree.`,
       }]);
       setSuggestedPrompts([]);
       setQuestionCount(1);
@@ -836,7 +840,37 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
   const handleChipSelect = (p) => {
     if (p === "This doesn't feel right — let's try again") { startChat(); return; }
+    if (p === "Yes, I'll add them below") {
+      setAwaitingCompanyInput(true);
+      setSuggestedPrompts([]);
+      return;
+    }
+    if (p === "No idea yet") {
+      setAwaitingCompanyInput(false);
+      setCompanyTags([]);
+      sendMessage(p);
+      return;
+    }
     sendMessage(p);
+  };
+
+  const handleCompanyTagAdd = () => {
+    const val = companyTagInput.trim();
+    if (!val) return;
+    setCompanyTags(prev => [...prev, val]);
+    setCompanyTagInput('');
+  };
+
+  const handleCompanyTagRemove = (idx) => {
+    setCompanyTags(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleCompanyContinue = () => {
+    const msg = companyTags.length > 0 ? companyTags.join(', ') : 'No specific companies yet';
+    setAwaitingCompanyInput(false);
+    setCompanyTags([]);
+    setCompanyTagInput('');
+    sendMessage(msg);
   };
 
   const startChat = () => {
@@ -957,10 +991,10 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               The more you share...
             </p>
             <div style={{ flex: 1, height: 3, background: '#EEEEEE', borderRadius: 100, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount, 8) / 8) * 100))}%`, background: '#E85D20', borderRadius: 100, transition: 'width 0.4s ease' }} />
+              <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount, 9) / 9) * 100))}%`, background: '#E85D20', borderRadius: 100, transition: 'width 0.4s ease' }} />
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
-              {Math.min(questionCount, 8)} of 8+
+              {Math.min(questionCount, 9)} of 9
             </p>
           </div>
         </div>
@@ -1032,6 +1066,32 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                   <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} onSkip={showSkip ? handleSkip : null} />
                   <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)', margin: '2px 0 0 42px', fontFamily: "'DM Sans', sans-serif" }}>Or type your own answer below</p>
                 </>
+              )}
+              {isLastAssistant && awaitingCompanyInput && !loading && (
+                <div style={{ marginLeft: 42, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                    {companyTags.map((tag, idx) => (
+                      <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 100, padding: '4px 12px', fontSize: 12, color: '#E85D20', fontFamily: "'DM Sans', sans-serif" }}>
+                        {tag}
+                        <button onClick={() => handleCompanyTagRemove(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', minHeight: 'auto', padding: 0, lineHeight: 1 }}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                    <input
+                      type="text"
+                      value={companyTagInput}
+                      onChange={e => setCompanyTagInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCompanyTagAdd(); } }}
+                      placeholder="Type a company name and press Enter"
+                      style={{ flex: 1, border: '1.5px solid #E0E0E0', borderRadius: 8, padding: '8px 12px', fontSize: 13, fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
+                    />
+                    <button onClick={handleCompanyTagAdd} style={{ background: '#E0E0E0', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Add</button>
+                  </div>
+                  {companyTags.length > 0 && (
+                    <button onClick={handleCompanyContinue} style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '9px 22px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Continue →</button>
+                  )}
+                </div>
               )}
             </React.Fragment>
           );
