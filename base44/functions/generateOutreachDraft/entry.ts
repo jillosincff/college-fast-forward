@@ -6,45 +6,30 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { studentName, major, targetRole, graduationYear, alumniName, alumniTitle, alumniCompany } = await req.json();
+    const { studentName, major, targetRole, graduationYear, school, alumniName, alumniTitle, alumniCompany } = await req.json();
 
-    const outreachPrompt = `
-You are helping a college student write a short, genuine LinkedIn message to an alumni.
+    const schoolLabel = school || 'University of Florida';
 
-Student profile:
-- Name: ${studentName}
-- Major: ${major}
-- Target role: ${targetRole}
-- School: University of Florida
-- Graduation year: ${graduationYear}
+    const prompt = `Write a LinkedIn connection request message from a ${schoolLabel} student to a ${schoolLabel} alumni.
 
-Alumni:
-- Name: ${alumniName}
-- Current title: ${alumniTitle}
-- Company: ${alumniCompany}
+Student: ${studentName}${major ? `, studying ${major}` : ''}${targetRole ? `, interested in ${targetRole}` : ''}${graduationYear ? `, graduating ${graduationYear}` : ''}.
+Alumni: ${alumniName}${alumniTitle ? `, ${alumniTitle}` : ''}${alumniCompany ? ` at ${alumniCompany}` : ''}.
 
-Write a LinkedIn connection message. Rules:
-- 3 sentences maximum
-- No flattery or "I came across your profile"
-- Lead with the shared UF connection
-- Be specific about why this role/company interests them
-- End with a single low-ask question
-- Sound like a real student, not a cover letter
-
-Return only the message text, nothing else.
-`;
+Rules (follow exactly):
+- Maximum 3 sentences. No exceptions.
+- No flattery. Do not say "I came across your profile" or "I admire your work."
+- First sentence: lead with the shared ${schoolLabel} connection.
+- Last sentence: one low-ask question (e.g. would you be open to a 15-min chat?).
+- Sound like a real student, not a cover letter.
+- Return the message body only. No subject line. No greeting label. No sign-off label.`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: outreachPrompt,
+      prompt,
       model: 'gemini_3_flash',
     });
 
-    return Response.json({
-      success: true,
-      message: result || '',
-    });
+    return Response.json({ success: true, message: result || '' });
   } catch (error) {
-    console.error('[generateOutreachDraft] Error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

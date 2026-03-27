@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 
 const EXAMPLE_SEARCHES = (schoolName) => [
   `${schoolName} alumni who are VPs of Marketing at Fortune 500 companies`,
@@ -21,7 +20,10 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [outreachModal, setOutreachModal] = useState(null);
   const [editedDraft, setEditedDraft] = useState('');
   const [copyToast, setCopyToast] = useState(false);
-  const [cffComposer, setCffComposer] = useState(null);
+  const [cffModal, setCffModal] = useState(null);
+  const [cffDraft, setCffDraft] = useState('');
+  const [cffSending, setCffSending] = useState(false);
+  const [cffSent, setCffSent] = useState(false);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const schoolName = user?.school_name || user?.school || user?.university || user?.school_code?.toUpperCase() || 'your school';
@@ -68,6 +70,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         major: user?.major || user?.career_goals?.major || '',
         targetRole: (user?.career_goals?.target_roles || [])[0] || alum.headline || '',
         graduationYear: user?.career_goals?.graduation_year || '',
+        school: schoolName,
         alumniName: alum.full_name,
         alumniTitle: alum.headline,
         alumniCompany: alum.company || '',
@@ -76,16 +79,54 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
     } catch { return ''; }
   };
 
+  const sendCffMessage = async () => {
+    if (!cffModal || !cffDraft.trim() || cffSending) return;
+    setCffSending(true);
+    try {
+      const convo = await base44.entities.Conversation.create({
+        participant_emails: [user.email, cffModal.email].filter(Boolean),
+        last_message_at: new Date().toISOString(),
+      }).catch(() => null);
+      const conversationId = convo?.id || `alumni-${Date.now()}`;
+      await base44.entities.Message.create({
+        conversation_id: conversationId,
+        sender_email: user.email,
+        sender_name: user.full_name || '',
+        recipient_email: cffModal.email,
+        subject: `Connection request from ${user.full_name || 'a student'}`,
+        body: cffDraft,
+        is_read: false,
+        message_type: 'text',
+      });
+      base44.functions.invoke('sendMessageNotification', {
+        recipient_email: cffModal.email,
+        sender_name: user.full_name || 'A student',
+        message_preview: cffDraft.slice(0, 120),
+      }).catch(() => {});
+      base44.functions.invoke('trackMessage', {
+        sender_email: user.email,
+        recipient_email: cffModal.email,
+      }).catch(() => {});
+      setSentTo(prev => [...prev, cffModal.id]);
+      setCffSent(true);
+      setTimeout(() => { setCffModal(null); setCffSent(false); }, 1500);
+    } catch (e) {
+      console.error('CFF send failed:', e);
+    }
+    setCffSending(false);
+  };
+
   const handleConnect = async (alum) => {
     const key = alum.cff_user_id || alum.linkedin_url;
     if (sentTo.includes(key)) return;
     setConnectLoading(key);
     try {
+      const draft = await generateDraft(alum);
       if (alum.cff_user_id) {
-        // Open CFF in-platform message composer
-        setCffComposer({ id: alum.cff_user_id, full_name: alum.full_name, job_title: alum.headline, company: alum.company || '', email: alum.email || null });
+        setCffModal({ id: alum.cff_user_id, full_name: alum.full_name, headline: alum.headline, email: alum.email || null });
+        setCffDraft(draft);
+        setCffSent(false);
       } else {
-        const draft = await generateDraft(alum);
         setOutreachModal({ alum, draft });
         setEditedDraft(draft);
       }
@@ -258,10 +299,10 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         </div>
       )}
 
-      {/* Outreach modal */}
+      {/* LinkedIn outreach modal */}
       {outreachModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }} onClick={() => setOutreachModal(null)}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }} onClick={e => e.stopPropagation()}>
             <div>
               <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>Reaching out via LinkedIn</p>
               <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{outreachModal.alum.full_name}</p>
@@ -270,39 +311,59 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
             <div style={{ background: '#F0F7FF', border: '1px solid #B3D9FF', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#0057B8', lineHeight: 1.5 }}>
               Edit your message, then click "Copy & Open LinkedIn" — paste it into your connection request.
             </div>
-            <textarea
-              value={editedDraft}
-              onChange={e => setEditedDraft(e.target.value)}
-              rows={6}
-              style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
-            />
+            <div>
+              <textarea
+                value={editedDraft}
+                onChange={e => setEditedDraft(e.target.value)}
+                rows={6}
+                style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: `1px solid ${editedDraft.length > 300 ? '#EF4444' : '#E0E0E0'}`, borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+                <span style={{ fontSize: 12, color: '#EF4444', fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>
+                  {editedDraft.length > 300 ? 'LinkedIn connection requests have a 300 character limit' : ''}
+                </span>
+                <span style={{ fontSize: 12, color: editedDraft.length > 300 ? '#EF4444' : '#AAA', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
+                  {editedDraft.length} / 300
+                </span>
+              </div>
+            </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setOutreachModal(null)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
-              <button onClick={handleSendLinkedIn} disabled={!editedDraft.trim()} style={{ background: '#0077B5', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 500, color: '#fff', cursor: !editedDraft.trim() ? 'not-allowed' : 'pointer', opacity: !editedDraft.trim() ? 0.7 : 1, minHeight: 'auto' }}>
-                Copy & Open LinkedIn →
+              <button onClick={handleSendLinkedIn} disabled={!editedDraft.trim()} style={{ background: '#0077B5', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: !editedDraft.trim() ? 'not-allowed' : 'pointer', opacity: !editedDraft.trim() ? 0.7 : 1, minHeight: 'auto' }}>
+                Copy &amp; Open LinkedIn →
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {copyToast && (
-        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px 18px', fontSize: 13, color: '#1A1A1A', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 100, whiteSpace: 'nowrap', fontFamily: "'DM Sans', sans-serif" }}>
-          ✓ Message copied — paste it into your LinkedIn connection request
+      {/* CFF in-platform modal */}
+      {cffModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }} onClick={() => setCffModal(null)}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }} onClick={e => e.stopPropagation()}>
+            <div>
+              <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>Send a message on CFF</p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{cffModal.full_name}</p>
+              <p style={{ fontSize: 13, color: '#666', margin: '2px 0 0' }}>{cffModal.headline}</p>
+            </div>
+            <div style={{ background: '#F0F7FF', border: '1px solid #B3D9FF', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#0057B8', lineHeight: 1.5 }}>
+              ⚡ FastIQ drafted this for you — edit freely before sending.
+            </div>
+            <textarea
+              value={cffDraft}
+              onChange={e => setCffDraft(e.target.value)}
+              rows={6}
+              style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button onClick={() => setCffModal(null)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
+              <button onClick={sendCffMessage} disabled={!cffDraft.trim() || cffSending || cffSent}
+                style={{ background: cffSent ? '#22C55E' : '#E85D20', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: cffSending || cffSent ? 'default' : 'pointer', minHeight: 'auto' }}>
+                {cffSent ? 'Sent ✓' : cffSending ? 'Sending...' : 'Send Message →'}
+              </button>
+            </div>
+          </div>
         </div>
-      )}
-
-      {/* CFF in-platform message composer */}
-      {cffComposer && (
-        <ParentMessageComposer
-          user={user}
-          parent={cffComposer}
-          onClose={() => setCffComposer(null)}
-          onSent={() => {
-            setSentTo(prev => [...prev, cffComposer.id]);
-            setCffComposer(null);
-          }}
-        />
       )}
     </div>
   );
