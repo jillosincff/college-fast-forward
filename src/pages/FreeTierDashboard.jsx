@@ -21,8 +21,7 @@ import AlumniSearch from '@/pages/AlumniSearch';
 import FreeTierDirectoryTab from '@/components/free-tier/FreeTierDirectoryTab';
 
 export default function FreeTierDashboard() {
-  try {
-    const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
+  const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
     const [activeTab, setActiveTab] = useState('home');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [showConciergeModal, setShowConciergeModal] = useState(false);
@@ -82,14 +81,4 @@ export default function FreeTierDashboard() {
         {showConciergeModal && <CareerConciergeUpgradeModal user={user} onClose={() => setShowConciergeModal(false)} onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }} />}
       </div>
     );
-  } catch (e) {
-    console.error('[FreeTierDashboard] Auth context error:', e);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-        <div className="text-center">
-          <p className="text-red-500 text-sm">Auth context not available</p>
-        </div>
-      </div>
-    );
-  }
 }
