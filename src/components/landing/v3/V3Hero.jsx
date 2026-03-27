@@ -122,27 +122,6 @@ export default function V3Hero({ onCTA }) {
           <V3HeroTypingBox />
         </div>
 
-        {/* BODY TEXT */}
-        <div className="hf" style={{ animationDelay: '2200ms', marginBottom: 64, maxWidth: 720, marginLeft: 'auto', marginRight: 'auto', textAlign: 'left' }}>
-          {[
-            'People get jobs because of who they know — not what they know.',
-            'So we invited your biggest supporters into the process: your parents.',
-            'They\'ve spent 20 years building a network. They know everybody.\nNow that network works for you.',
-            'Every time a parent helps a student, your visibility goes up.\nMore eyes. More alumni. More doors.',
-          ].map((text, i) => (
-            <p key={i} style={{
-              fontFamily: dmSans,
-              fontSize: 'clamp(18px, 2.2vw, 20px)',
-              fontWeight: 500,
-              color: '#FFFFFF',
-              lineHeight: 1.65,
-              margin: i === 0 ? '0 0 24px' : '0 0 24px',
-              whiteSpace: 'pre-line',
-            }}>
-              {text}
-            </p>
-          ))}
-        </div>
 
         {/* THE MAGIC */}
         <div style={{ marginBottom: 48 }}>
