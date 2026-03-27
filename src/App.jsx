@@ -45,9 +45,15 @@ const AuthenticatedApp = () => {
   }
 
   // Render the main app
-  return (
-    <Routes>
-      <Route path="/" element={
+      return (
+        <Routes>
+          {/* Explicit routes first for higher priority */}
+          <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
+          <Route path="/FastIQAssessment" element={<FastIQAssessment />} />
+          <Route path="/StudentOnboarding" element={<StudentOnboarding />} />
+          
+          {/* Main routes */}
+          <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
           <MainPage />
         </LayoutWrapper>
@@ -63,10 +69,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
-      <Route path="/FastIQAssessment" element={<FastIQAssessment />} />
-      <Route path="/StudentOnboarding" element={<StudentOnboarding />} />
-      <Route path="*" element={<PageNotFound />} />
+          <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
