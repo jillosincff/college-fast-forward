@@ -166,14 +166,17 @@ export default function GatorAuth() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // Handle OAuth callback from Google redirect
-        console.log('🔵 [GatorAuth] handleRedirectCallback exists?', typeof base44.auth.handleRedirectCallback);
-        if (typeof base44.auth.handleRedirectCallback === 'function') {
-          console.log('🔵 [GatorAuth] Calling handleRedirectCallback...');
-          await base44.auth.handleRedirectCallback();
-          console.log('🔵 [GatorAuth] Callback handled');
+        // Extract access_token from URL hash (OAuth callback)
+        const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+        const accessToken = hashParams.get('access_token');
+        console.log('🔵 [GatorAuth] Token from URL:', accessToken ? 'found' : 'not found');
+        
+        if (accessToken) {
+          // Store token so base44 can use it
+          sessionStorage.setItem('base44_token', accessToken);
+          console.log('🔵 [GatorAuth] Token stored, calling me()...');
         }
-        console.log('🔵 [GatorAuth] Calling base44.auth.me()...');
+        
         const me = await base44.auth.me();
         console.log('🔵 [GatorAuth] me() returned:', me);
         setUser(me || null);
