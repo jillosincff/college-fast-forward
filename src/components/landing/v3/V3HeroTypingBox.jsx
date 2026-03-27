@@ -132,11 +132,8 @@ export default function V3HeroTypingBox() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-6">
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, marginBottom: 4 }}>
-          Watch how FastIQ works for your student.
-        </p>
-        <p style={{ fontFamily: playfair, fontStyle: 'italic', fontSize: 17, fontWeight: 400, color: ORANGE, lineHeight: 1.5 }}>
-          Select a school to see a real example.
+        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
+          Select a school to see a real example →
         </p>
       </div>
 

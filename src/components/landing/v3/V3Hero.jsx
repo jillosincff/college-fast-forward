@@ -114,11 +114,8 @@ export default function V3Hero({ onCTA }) {
           </p>
         </div>
 
-        {/* ALUMNI DEMO — moved above the fold */}
+        {/* ALUMNI DEMO */}
         <div className="hf" style={{ animationDelay: '2000ms', marginBottom: 64 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#E85D20', textAlign: 'center', marginBottom: 24, letterSpacing: '0.02em' }}>
-            See how FASTIQ works for your student right now →
-          </p>
           <V3HeroTypingBox />
         </div>
 
