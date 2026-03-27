@@ -136,9 +136,15 @@ Deno.serve(async (req) => {
     if (action === 'searchAlumni') {
       const { query: freeTextQuery, jobTitle, universityName = 'University of Florida', companyName = '', maxResults = 3 } = params;
       const companyClause = companyName ? `at ${companyName}` : '';
-      const query = freeTextQuery
-        ? `${freeTextQuery} who studied at ${universityName}`
-        : `${jobTitle} ${companyClause} who studied at ${universityName}`;
+      let query;
+      if (freeTextQuery) {
+        // If university is already mentioned, don't append it again
+        query = freeTextQuery.toLowerCase().includes(universityName.toLowerCase())
+          ? freeTextQuery
+          : `${freeTextQuery} ${universityName} alumni`;
+      } else {
+        query = `${jobTitle} ${companyClause} ${universityName} alumni`;
+      }
 
       const data = await exaFetch('search', {
         query,

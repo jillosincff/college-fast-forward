@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 
-const EXAMPLE_SEARCHES = (schoolName) => [
-  `${schoolName} alumni who are VPs of Marketing at Fortune 500 companies`,
-  `${schoolName} grads working at hospitals or health systems in Miami`,
-  `${schoolName} alumni in investment banking at bulge bracket firms in NYC`,
-  `${schoolName} grads who started their own company in tech`,
-  `${schoolName} alumni working in sports management or athletics`,
-  `${schoolName} grads in consulting at McKinsey, Bain, or BCG`,
+const EXAMPLE_SEARCHES = () => [
+  "VP of Marketing at a Fortune 500 company",
+  "working at hospitals or health systems in Miami",
+  "investment banker at a bulge bracket firm in NYC",
+  "who started their own company in tech",
+  "working in sports management or athletics",
+  "consultant at McKinsey Bain or BCG",
 ];
 
 export default function AlumniSearch({ user, onOpenUpgrade }) {
@@ -27,7 +27,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const schoolName = user?.school_name || user?.school || user?.university || user?.school_code?.toUpperCase() || 'your school';
-  const examples = EXAMPLE_SEARCHES(schoolName);
+  const examples = EXAMPLE_SEARCHES();
 
   const handleSearch = async (searchQuery) => {
     const q = (searchQuery || query).trim();
@@ -215,7 +215,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                 onClick={() => handleSearch(ex)}
                 style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 20, padding: '6px 14px', fontSize: 12, color: '#555', cursor: 'pointer', textAlign: 'left', lineHeight: 1.4, minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
               >
-                {ex.replace(`${schoolName} `, '')}
+                {ex}
               </button>
             ))}
           </div>
