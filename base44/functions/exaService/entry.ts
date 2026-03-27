@@ -138,9 +138,8 @@ Deno.serve(async (req) => {
       const companyClause = companyName ? `at ${companyName}` : '';
       let query;
       if (freeTextQuery) {
-        // If university is already mentioned, don't append it again
         query = freeTextQuery.toLowerCase().includes(universityName.toLowerCase())
-          ? freeTextQuery
+          ? `${freeTextQuery}`
           : `${freeTextQuery} ${universityName} alumni`;
       } else {
         query = `${jobTitle} ${companyClause} ${universityName} alumni`;
@@ -149,8 +148,8 @@ Deno.serve(async (req) => {
       const data = await exaFetch('search', {
         query,
         type: 'neural',
-        numResults: maxResults,
-        includeDomains: ['linkedin.com'],
+        numResults: maxResults * 3,
+        includeText: ['linkedin.com/in'],
         contents: { highlights: { maxCharacters: 2000 } },
       });
 
@@ -173,7 +172,14 @@ Deno.serve(async (req) => {
           cff_user_id: null,
           email: null,
         };
-      }).filter(p => p.full_name !== 'Unknown' && p.linkedin_url?.includes('linkedin.com'));
+      }).filter(p => {
+        if (!p.linkedin_url?.includes('linkedin.com/in/')) return false;
+        if (!p.full_name || p.full_name.length > 40) return false;
+        if (p.full_name.includes('Spotlight')) return false;
+        if (p.full_name.includes('Post')) return false;
+        if (p.full_name.includes('School')) return false;
+        return true;
+      }).slice(0, maxResults);
 
       return Response.json({
         success: true,
