@@ -27,6 +27,7 @@ const INDUSTRY_MAP = {
   "Sports & Athletics":            ["sports", "athletics", "agency", "sponsorship", "esports", "fitness"],
   "Legal & Compliance":            ["legal", "law", "attorney", "counsel", "compliance", "paralegal"],
   "Marketing & Brand":             ["marketing", "brand", "growth", "demand gen", "content", "seo", "campaigns", "advertising", "social media", "social", "pr", "public relations", "communications", "creative", "digital marketing", "media buyer", "cmo", "vp marketing", "brand manager", "marketing manager", "marketing director"],
+  "Engineering":                   ["engineer", "engineering", "mechanical", "civil", "electrical", "chemical", "structural", "aerospace", "biomedical", "environmental", "industrial", "systems", "manufacturing", "construction", "infrastructure", "autocad", "cad", "project engineer", "design engineer", "process engineer", "plant manager", "operations engineer", "field engineer", "petroleum engineer", "materials engineer", "quality engineer", "reliability engineer"],
 };
 
 function scoreMatch(member, studentGoals) {

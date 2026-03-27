@@ -95,6 +95,14 @@ INDUSTRY CLASSIFICATION NOTE:
 - If student targets a marketing ROLE (e.g. "Brand Manager") → store in target_functions as "Marketing & Brand"
 - It is valid to have "Marketing & Brand" in BOTH target_industries AND target_functions
 
+"Engineering" vs "Software Engineering" are separate:
+- "Engineering" as an industry (mechanical, civil, chemical, etc.) → store in target_industries as "Engineering"
+- "Software Engineering" as a role → store in target_functions as "Software Engineering"
+- A Mechanical Engineering student targeting engineering roles should NOT be matched to Software Engineers unless they specifically say so.
+- If student targets "Marketing" as an industry → store in target_industries as "Marketing & Brand"
+- If student targets a marketing ROLE (e.g. "Brand Manager") → store in target_functions as "Marketing & Brand"
+- It is valid to have "Marketing & Brand" in BOTH target_industries AND target_functions
+
 INDUSTRY & FUNCTION TAXONOMY (CRITICAL):
 When populating goals_summary.target_industries, you MUST map the student's answer to values from this exact list only. Never store free-form text as an industry.
 
