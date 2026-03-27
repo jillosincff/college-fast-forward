@@ -216,18 +216,22 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onContact, isF
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa', margin: '0 0 8px' }}>UF alumni here</p>
 
-          {/* Teaser blurred profile */}
-          {lead.teaser_profile && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F0F0F0' }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#e5e5e5', filter: 'blur(4px)', flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0, filter: 'blur(5px)', userSelect: 'none' }}>
-                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>{lead.teaser_profile.display_name || 'S.K.'}</span>
-                {lead.teaser_profile.title && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666' }}> · {lead.teaser_profile.title}</span>}
-                {lead.teaser_profile.grad_year && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}> · UF {lead.teaser_profile.grad_year}</span>}
+          {/* Teaser blurred profile row — initials visible but blurred */}
+          {lead.teaser_profile && (() => {
+            const tp = lead.teaser_profile;
+            const tpInitials = (tp.display_name || 'U A').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F0F0F0', filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#94A3B8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{tpInitials}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>{tp.display_name || 'S.K.'}</span>
+                  {tp.title && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666' }}> · {tp.title}</span>}
+                  {tp.grad_year && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}> · UF {tp.grad_year}</span>}
+                </div>
+                <span style={{ fontSize: 11, color: '#999' }}>🔒</span>
               </div>
-              <span style={{ fontSize: 14 }}>🔒</span>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Unlock CTA */}
           <button
@@ -235,8 +239,8 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onContact, isF
             style={{ marginTop: 10, background: 'none', border: '1px solid #E5E5E5', borderRadius: 8, padding: '7px 14px', fontSize: 12, color: '#666', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
           >
             {lead.teaser_profile
-              ? `🔒 See ${lead.teaser_profile.display_name} and ${Math.max(0, (lead.alumni_count || 1) - 1)} more →`
-              : `🔒 See ${lead.alumni_count} UF alumni at ${lead.company} →`}
+              ? `🔒 See ${lead.teaser_profile.display_name} and ${Math.max(0, (lead.alumni_count || 1) - 1)} more UF alumni →`
+              : `🔒 See UF alumni at ${lead.company} →`}
           </button>
         </div>
       )}
