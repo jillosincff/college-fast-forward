@@ -52,18 +52,6 @@ export default function V3Hero({ onCTA }) {
           </p>
         </div>
 
-        {/* TAGLINE — 3 lines, tight, Playfair throughout */}
-        <div style={{ marginBottom: 24, lineHeight: 1.25 }}>
-          <p className="hf" style={{ animationDelay: '400ms', fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>
-            The power of your network.
-          </p>
-          <p className="hf" style={{ animationDelay: '550ms', fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>
-            The intelligence of AI.
-          </p>
-          <p className="hf8" style={{ animationDelay: '700ms', fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 28px)', fontStyle: 'italic', fontWeight: 400, color: '#E85D20', margin: 0 }}>
-            Your student's competitive advantage.
-          </p>
-        </div>
 
         {/* HEADLINE */}
         <div className="hf" style={{ animationDelay: '1100ms', marginBottom: 20 }}>
@@ -77,17 +65,10 @@ export default function V3Hero({ onCTA }) {
           </h1>
         </div>
 
-        {/* BRIDGING SENTENCE */}
-        <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 28 }}>
+        {/* BODY LINE */}
+        <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 36 }}>
           <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.65, margin: 0, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto', textAlign: 'center' }}>
-            Your student gets real alumni matches from their school and ready-to-send messages — so they finally have momentum and you can stop worrying.
-          </p>
-        </div>
-
-        {/* SUBHEAD */}
-        <div className="hf" style={{ animationDelay: '1500ms', marginBottom: 36 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 18px)', fontWeight: 400, color: '#4F8CFF', lineHeight: 1.6, margin: 0 }}>
-            We combine parent connections with an AI career engine to help your student access opportunities beyond cold applications.
+            Real alumni matches. Ready-to-send messages.<br />One warm intro beats 100 cold applications.
           </p>
         </div>
 
@@ -130,9 +111,6 @@ export default function V3Hero({ onCTA }) {
           </div>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888888', marginTop: 14, marginBottom: 0 }}>
             Free to join. FastIQ from $29/mo. 7-day trial included.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: '#ffffff', marginTop: 20, marginBottom: 0, textAlign: 'center', lineHeight: 1.55 }}>
-            Your student gets real alumni matches and ready-to-send messages — so they finally have momentum.
           </p>
         </div>
 
