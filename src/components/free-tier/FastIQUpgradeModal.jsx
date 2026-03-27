@@ -169,7 +169,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 16, textAlign: 'center' }}>
-            Cancel anytime.
+            Start free for 7 days — then $29/month. Cancel anytime.
           </p>
         </div>
       </DialogContent>

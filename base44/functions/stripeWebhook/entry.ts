@@ -153,6 +153,7 @@ Deno.serve(async (req) => {
             subscription_tier: subscriptionTier,
             subscription_status: 'active',
             fastiq_active: subscriptionTier === 'fastiq',
+            is_fastiq: subscriptionTier === 'fastiq',
             membership_tier: subscriptionTier === 'fastiq' ? 'fastiq' : billingUser.membership_tier,
           };
 
@@ -206,6 +207,7 @@ Deno.serve(async (req) => {
             subscription_status: 'active',
             subscription_tier: subscriptionTier,
             fastiq_active: subscriptionTier === 'fastiq',
+            is_fastiq: subscriptionTier === 'fastiq',
           };
           if (subscriptionTier === 'fastiq') {
             memberUpdates.membership_tier = 'fastiq';

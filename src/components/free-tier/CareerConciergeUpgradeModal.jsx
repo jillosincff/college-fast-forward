@@ -147,7 +147,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', textAlign: 'center', margin: 0 }}>
-            Cancel anytime.
+            Start free for 7 days — then $29/month. Cancel anytime.
           </p>
         </div>
       </div>

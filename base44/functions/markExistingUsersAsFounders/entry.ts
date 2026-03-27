@@ -1,119 +1,75 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 /**
- * One-time migration script to mark all existing users as founding members
- * 
- * Run this ONCE after implementing the tiered pricing system.
- * This ensures all existing users (before pricing was implemented) get:
- * - is_founding_member = true
- * - price_tier = 'founding'
- * - locked_price_monthly = 0
+ * ONE-TIME migration: set membership_tier = 'founding' on the first 1000 users (by created_date).
+ * Does NOT set is_fastiq — founding members must subscribe at the 50% rate.
+ * Guards against re-running via a GlobalCounter flag.
  */
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // Verify admin access
+
     const user = await base44.auth.me();
-    if (!user || !user.roles?.includes('admin')) {
+    if (!user || user.role !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
+    // Guard: check if migration has already run
+    const flags = await base44.asServiceRole.entities.GlobalCounter.filter({ counter_name: 'founding_migration_done' });
+    if (flags.length > 0) {
+      return Response.json({ success: false, error: 'Migration already completed — will not run again.' }, { status: 409 });
+    }
+
     const { dry_run = true } = await req.json().catch(() => ({ dry_run: true }));
+    console.log('Founding migration started. dry_run:', dry_run);
 
-    console.log('🔄 Starting migration to mark existing users as founders...');
-    console.log('Dry run:', dry_run);
-
-    // Get all existing users
-    const allUsers = await base44.asServiceRole.entities.User.list();
-    console.log('Total users found:', allUsers.length);
-
-    // Count existing founding members
-    const alreadyFounders = allUsers.filter(u => u.is_founding_member || u.is_founding_gator);
-    console.log('Already marked as founders:', alreadyFounders.length);
-
-    // Users that need to be updated
-    const needsUpdate = allUsers.filter(u => !u.is_founding_member && !u.is_founding_gator);
-    console.log('Need to mark as founders:', needsUpdate.length);
+    // Fetch first 1000 users ordered by created_date ascending
+    const allUsers = await base44.asServiceRole.entities.User.list('created_date', 1000);
+    console.log('Users fetched:', allUsers.length);
 
     if (dry_run) {
       return Response.json({
         success: true,
         dry_run: true,
-        message: 'Dry run complete - no changes made',
-        stats: {
-          total_users: allUsers.length,
-          already_founders: alreadyFounders.length,
-          will_be_updated: needsUpdate.length,
-          users_to_update: needsUpdate.slice(0, 10).map(u => ({
-            id: u.id,
-            email: u.email,
-            created_date: u.created_date
-          }))
-        }
+        message: 'Dry run — no changes made.',
+        will_update: allUsers.length,
+        sample: allUsers.slice(0, 5).map(u => ({ id: u.id, email: u.email, created_date: u.created_date })),
       });
     }
 
-    // Actually update users
     let updated = 0;
-    let errors = [];
+    const errors = [];
 
-    for (const u of needsUpdate) {
+    for (const u of allUsers) {
       try {
         await base44.asServiceRole.entities.User.update(u.id, {
-          is_founding_member: true,
-          is_founding_gator: true,
-          price_tier: 'founding',
-          locked_price_monthly: 0,
-          // Assign signup_order based on created_date order
-          signup_order: allUsers
-            .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))
-            .findIndex(x => x.id === u.id) + 1
+          membership_tier: 'founding',
         });
         updated++;
       } catch (err) {
-        errors.push({ user_id: u.id, email: u.email, error: err.message });
+        errors.push({ id: u.id, email: u.email, error: err.message });
       }
     }
 
-    // Initialize the family counter
-    const counters = await base44.asServiceRole.entities.GlobalCounter.filter({
-      counter_name: 'family_count'
+    // Mark migration as done so it cannot run again
+    await base44.asServiceRole.entities.GlobalCounter.create({
+      counter_name: 'founding_migration_done',
+      counter_value: updated,
+      last_updated: new Date().toISOString(),
     });
 
-    if (counters.length === 0) {
-      // Estimate family count: ~70% of users in families of 2
-      const estimatedFamilies = Math.ceil(allUsers.length * 0.7);
-      await base44.asServiceRole.entities.GlobalCounter.create({
-        counter_name: 'family_count',
-        counter_value: estimatedFamilies,
-        last_updated: new Date().toISOString()
-      });
-      console.log('Initialized family counter at:', estimatedFamilies);
-    }
-
-    console.log('✅ Migration complete');
-    console.log('Updated:', updated);
-    console.log('Errors:', errors.length);
+    console.log('Migration complete. Updated:', updated, 'Errors:', errors.length);
 
     return Response.json({
       success: true,
-      dry_run: false,
-      message: 'Migration complete!',
-      stats: {
-        total_users: allUsers.length,
-        already_founders: alreadyFounders.length,
-        updated: updated,
-        errors: errors.length,
-        error_details: errors.slice(0, 10)
-      }
+      updated,
+      errors: errors.length,
+      error_details: errors.slice(0, 10),
     });
 
-  } catch (error) {
-    console.error('❌ Migration error:', error);
-    return Response.json({ 
-      error: error.message || 'Migration failed'
-    }, { status: 500 });
+  } catch (err) {
+    console.error('Migration error:', err);
+    return Response.json({ error: err.message }, { status: 500 });
   }
 });
