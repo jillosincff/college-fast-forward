@@ -298,8 +298,35 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
               </div>
             )}
 
-            {/* Alumni unlock prompt */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid #f5f5f5' }}>
+            {/* Alumni teaser */}
+            <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #f5f5f5' }}>
+              {isFastIQ ? (
+                company.alumni_count > 0 ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#22C55E', fontWeight: 500, margin: 0 }}>
+                      🎓 ~{company.alumni_count} {user?.school || 'UF'} alumni work here
+                    </p>
+                    <button onClick={() => setShowParentsModal(true)}
+                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, whiteSpace: 'nowrap' }}>
+                      See who →
+                    </button>
+                  </div>
+                ) : null
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>
+                    🔒 See if any {user?.school || 'UF'} alumni work at {company.name}
+                  </p>
+                  <button onClick={() => onUnlockFastIQ?.()}
+                    style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#fff', fontWeight: 600, background: '#E85D20', border: 'none', borderRadius: 100, padding: '5px 12px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}>
+                    Unlock FastIQ →
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Research + Save buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button
                 onClick={() => onResearch?.(company)}
                 style={{ fontFamily: "'DM Sans', sans-serif", background: 'none', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '7px 14px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s ease' }}

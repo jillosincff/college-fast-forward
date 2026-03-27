@@ -89,10 +89,19 @@ Deno.serve(async (req) => {
         ? openRoles.filter(t => [...functionKeywords].some(kw => t.toLowerCase().includes(kw)))
         : openRoles;
 
+      // Confidence: only 'high' when results come from verified job board domains
+      const JOB_BOARD_DOMAINS = ['greenhouse.io', 'lever.co', 'boards.greenhouse.io', 'myworkdayjobs.com', 'jobs.lever.co', 'smartrecruiters.com', 'indeed.com'];
+      const verifiedJobBoardResults = hiringResults.filter(r => {
+        const url = r.url?.toLowerCase() || '';
+        return JOB_BOARD_DOMAINS.some(d => url.includes(d));
+      });
+      const confidence = verifiedJobBoardResults.length > 0 ? 'high' : 'low';
+
+      // Only set active/selective when confidence is high (real job board hits)
       let hiring_signal = 'unknown';
       if (layoffDetected) hiring_signal = 'freeze';
-      else if (jobCount >= 3) hiring_signal = 'active';
-      else if (jobCount >= 1) hiring_signal = 'selective';
+      else if (confidence === 'high' && jobCount >= 3) hiring_signal = 'active';
+      else if (confidence === 'high' && jobCount >= 1) hiring_signal = 'selective';
 
       const growthData = await exaFetch('search', {
         query: `${companyName} funding OR "Series" OR expansion OR growth 2024 2025`,

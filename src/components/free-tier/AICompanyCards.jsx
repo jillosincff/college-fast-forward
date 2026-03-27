@@ -118,11 +118,32 @@ function CompanyContactsModal({ company, user, onClose, onOpenComposer, onTabCha
       setLoading(true);
       try {
         const allUsers = await base44.entities.User.list('-created_date', 300);
-        const companyLower = company.name.toLowerCase();
         const schoolWord = (user?.school || user?.university || '').toLowerCase().split(' ')[0];
+
+        // Require substantial name match: all significant words (3+ chars) must appear in the member's company field
+        const significantWords = company.name
+          .toLowerCase()
+          .replace(/[^a-z0-9 ]/g, ' ')
+          .split(/\s+/)
+          .filter(w => w.length >= 3 && !['the','and','for','inc','llc','ltd','corp','group','company','co'].includes(w));
+
+        const companyMatch = (uCompany) => {
+          if (!uCompany || significantWords.length === 0) return false;
+          const uc = uCompany.toLowerCase();
+          // All significant words must be present as whole-word-ish matches
+          return significantWords.every(w => {
+            const idx = uc.indexOf(w);
+            if (idx === -1) return false;
+            // Ensure it's not a substring of a longer word (check surrounding chars)
+            const before = idx === 0 ? ' ' : uc[idx - 1];
+            const after = idx + w.length >= uc.length ? ' ' : uc[idx + w.length];
+            return /[^a-z0-9]/.test(before) || /[^a-z0-9]/.test(after);
+          });
+        };
+
         const filtered = allUsers.filter(u => {
           const uCompany = (u.company || u.current_company || u.employer || '').toLowerCase();
-          if (!uCompany.includes(companyLower)) return false;
+          if (!companyMatch(uCompany)) return false;
           const firstName = (u.first_name || u.full_name?.split(' ')[0] || '').toLowerCase();
           if (['test', 'movie', 'demo', 'sample', 'fake'].includes(firstName)) return false;
           return true;
