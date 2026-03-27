@@ -208,7 +208,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       </div>
 
       {/* Example chips */}
-      {!searched && (
+      {!searched && query === '' && (
         <div style={{ marginBottom: 32 }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '0 0 10px' }}>Try one of these:</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -222,15 +222,6 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
               </button>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* No results */}
-      {searched && results.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>
-            No results found — try different keywords or a broader search.
-          </p>
         </div>
       )}
 
