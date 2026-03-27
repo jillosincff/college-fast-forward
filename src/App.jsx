@@ -48,9 +48,9 @@ const AuthenticatedApp = () => {
       return (
         <Routes>
           {/* Explicit routes first for higher priority */}
-          <Route path="/FreeTierDashboard" element={<LayoutWrapper currentPageName="FreeTierDashboard"><FreeTierDashboard /></LayoutWrapper>} />
-          <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
-          <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
+          <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
+          <Route path="/FastIQAssessment" element={<FastIQAssessment />} />
+          <Route path="/StudentOnboarding" element={<StudentOnboarding />} />
 
           {/* Main routes */}
           <Route path="/" element={
