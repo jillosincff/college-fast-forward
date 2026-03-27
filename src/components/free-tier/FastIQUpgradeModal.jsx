@@ -13,6 +13,8 @@ const FEATURES = [
   'Job search tracking and follow-up alerts',
 ];
 
+const FOUNDING_DEADLINE = new Date('2025-04-15T23:59:59');
+
 export default function FastIQUpgradeModal({ user, onClose }) {
   const [showParentInvite, setShowParentInvite] = useState(false);
   const [parentEmail, setParentEmail] = useState('');
@@ -20,22 +22,26 @@ export default function FastIQUpgradeModal({ user, onClose }) {
   const [sending, setSending] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
 
+  const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
+  const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
+
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const hasLinkedParent = user?.parent_emails?.length > 0;
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (plan = 'fastiq_monthly') => {
     setUpgrading(true);
     try {
       const response = await createCheckoutSession({
-        plan: 'fastiq_monthly',
+        plan,
         successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
         cancelUrl: window.location.href,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
       });
-      if (response?.data?.url) {
-        window.location.href = response.data.url;
+      const result = response?.data || response;
+      if (result?.url) {
+        window.location.href = result.url;
       } else {
-        console.error('Checkout failed:', response?.data?.error);
+        console.error('Checkout failed:', result?.error);
         setUpgrading(false);
       }
     } catch (e) {
@@ -113,46 +119,48 @@ export default function FastIQUpgradeModal({ user, onClose }) {
            </p>
           </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={handleUpgrade}
-              disabled={upgrading}
-              className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
-              style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-            >
-              {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start Free Trial →'}
-            </button>
-            
+          {foundingOfferActive ? (
+            <div>
+              <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 10, padding: '14px 18px', marginBottom: 16 }}>
+                <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 6px' }}>⚡ Founding Member Rate</p>
+                <p style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>$14.50/month or $124.50/year</p>
+                <p style={{ fontSize: 12, color: '#CCCCCC', margin: '0 0 8px' }}>50% off forever — locked in as long as you stay subscribed.</p>
+                <p style={{ fontSize: 11, color: '#fa8a6a', fontWeight: 500, margin: 0 }}>⏱ Expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''} — April 15th</p>
+              </div>
+              <div className="space-y-2">
+                <button onClick={() => handleUpgrade('fastiq_founding_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start Free Trial — $14.50/month →'}
+                </button>
+                <button onClick={() => handleUpgrade('fastiq_founding_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
+                  Annual — $124.50/year (save $50)
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <button onClick={() => handleUpgrade('fastiq_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start Free Trial →'}
+              </button>
+              <button onClick={() => handleUpgrade('fastiq_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
+                Annual — $249/year (save $99)
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-2">
             {!hasLinkedParent && !inviteSent && !showParentInvite && (
-              <button
-                onClick={() => setShowParentInvite(true)}
-                className="w-full text-[#888888] text-sm hover:text-white transition-colors underline"
-                style={{ minHeight: 'auto' }}
-              >
+              <button onClick={() => setShowParentInvite(true)} className="w-full text-[#888888] text-sm hover:text-white transition-colors underline" style={{ minHeight: 'auto' }}>
                 Don't have a parent in the network yet? Invite My Parent →
               </button>
             )}
-
             {showParentInvite && !inviteSent && (
               <div className="space-y-2">
-                <input
-                  type="email"
-                  placeholder="Parent's email"
-                  value={parentEmail}
-                  onChange={(e) => setParentEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-full border border-[#2A2A2A] bg-[#0A0A0A] text-white"
-                />
-                <button
-                  onClick={handleSendInvite}
-                  disabled={!parentEmail.trim() || sending}
-                  className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
-                  style={{ minHeight: 'auto' }}
-                >
+                <input type="email" placeholder="Parent's email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} className="w-full px-4 py-3 rounded-full border border-[#2A2A2A] bg-[#0A0A0A] text-white" />
+                <button onClick={handleSendInvite} disabled={!parentEmail.trim() || sending} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
                   {sending ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Send Invitation →'}
                 </button>
               </div>
             )}
-
             {inviteSent && (
               <div className="text-center text-green-400 text-sm">
                 ✓ Invitation sent — we'll notify you when they activate FastIQ for you.
