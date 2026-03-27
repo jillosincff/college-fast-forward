@@ -6,14 +6,19 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
  * Banner shown to CFF-only subscribers or non-subscribers when they visit FASTIQ.
  * Not shown to founding members (they have full access).
  */
+const FOUNDING_DEADLINE = new Date('2025-04-15T23:59:59');
+
 export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
   const [upgrading, setUpgrading] = useState(false);
+
+  const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
+  const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const handleUpgrade = async () => {
     setUpgrading(true);
     try {
       const response = await createCheckoutSession({
-        plan: 'fastiq_monthly',
+        plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
         successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
         cancelUrl: window.location.href,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
@@ -89,10 +94,10 @@ export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
             opacity: upgrading ? 0.7 : 1,
           }}
         >
-          {upgrading ? <><Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> Processing...</> : <><Zap style={{ width: 14, height: 14 }} /> Start Free Trial</>}
+          {upgrading ? <><Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> Processing...</> : <><Zap style={{ width: 14, height: 14 }} /> {foundingOfferActive ? `Start Free Trial — $14.50/month (${daysLeft}d left)` : 'Start Free Trial'}</>}
         </button>
       </div>
-      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>Start free for 7 days — then $29/month. Cancel anytime.</p>
+      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>{foundingOfferActive ? `Founding rate: $14.50/month forever — expires April 15th` : 'Start free for 7 days — then $29/month. Cancel anytime.'}</p>
     </div>
   );
 }

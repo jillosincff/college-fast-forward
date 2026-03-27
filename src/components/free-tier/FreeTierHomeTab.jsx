@@ -6,8 +6,13 @@ import { useCompanyRecs } from '@/components/free-tier/useCompanyRecs';
 import AICompanyCards from '@/components/free-tier/AICompanyCards';
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
+const FOUNDING_DEADLINE = new Date('2025-04-15T23:59:59');
+
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const { companies, members: recsMembers, loading: recsLoading, searching: recsSearching, error: recsError, noIndustry: recsNoIndustry, weeklyNewCount, refetch } = useCompanyRecs(user);
+
+  const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
+  const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const [parentEmail, setParentEmail] = useState('');
   const [nudgeSent, setNudgeSent] = useState(false);
@@ -133,7 +138,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                     onClick={async () => {
                       try {
                         const response = await createCheckoutSession({
-                          plan: 'fastiq_monthly',
+                          plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
                           successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,
                           cancelUrl: window.location.href,
                           user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
@@ -151,8 +156,13 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                     className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
                     style={{ minHeight: 'auto' }}
                   >
-                    Unlock FastIQ →
+                    {foundingOfferActive ? 'Claim Founding Rate →' : 'Unlock FastIQ →'}
                   </button>
+                  {foundingOfferActive && (
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#E85D20', margin: '4px 0 0', textAlign: 'center' }}>
+                      $14.50/month forever — expires April 15th ({daysLeft}d left)
+                    </p>
+                  )}
                 {nudgeSent ? (
                   <div className="text-green-400 text-sm font-medium text-center py-2">
                     ✓ Nudge sent to {user?.parent_emails?.[0] || parentEmail}
