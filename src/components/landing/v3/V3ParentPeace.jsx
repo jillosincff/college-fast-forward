@@ -107,7 +107,7 @@ export default function V3ParentPeace({ onCTA }) {
         <div style={{ width: 40, height: 2, background: ORANGE, borderRadius: 1, margin: '0 auto 20px', ...fadeStyle(vis, 0.04) }} />
 
         <p className="text-center" style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 500, color: BODY_COLOR, lineHeight: 1.55, maxWidth: 640, margin: '0 auto 52px', ...fadeStyle(vis, 0.06) }}>
-          AI builds the strategy. Your community opens the doors. Together, they change everything.
+          Three steps. Your student goes from stuck to connected.
         </p>
 
         <div className="v3-pp-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 48, ...fadeStyle(vis, 0.10) }}>

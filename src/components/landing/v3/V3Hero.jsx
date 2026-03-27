@@ -123,59 +123,6 @@ export default function V3Hero({ onCTA }) {
         </div>
 
 
-        {/* THE MAGIC */}
-        <div style={{ marginBottom: 48 }}>
-          <p className="hf" style={{ animationDelay: '2500ms', fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#fff', margin: '0 0 6px' }}>
-            One parent has a network.
-          </p>
-          <p className="hfu" style={{ animationDelay: '2650ms', fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#fff', margin: '0 0 14px', lineHeight: 1.4 }}>
-            A community has{' '}
-            <span style={{ fontFamily: playfair, fontStyle: 'italic', fontSize: 'clamp(26px, 4vw, 36px)', color: '#E85D20' }}>
-              infinite possibilities.
-            </span>
-          </p>
-          <p className="hf" style={{ animationDelay: '2800ms', fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#888888', lineHeight: 1.6, margin: 0 }}>
-            Every parent who joins expands the pool for every student inside it.
-          </p>
-        </div>
-
-        {/* CLOSING MANIFESTO */}
-        <div style={{ marginBottom: 48 }}>
-          <p className="hf" style={{ animationDelay: '3200ms', fontFamily: dmSans, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>
-            This isn't just a job search. It's a strategic advantage.
-          </p>
-          <p className="hf" style={{ animationDelay: '3350ms', fontFamily: dmSans, fontSize: 16, fontWeight: 400, color: '#fff', lineHeight: 1.65, maxWidth: 660, margin: '16px auto 0' }}>
-            We take the nagging out of parenting and replace it with a high-tech pipeline that moves your student from the bottom of the pile to the top of the list.
-          </p>
-          <p className="hf8" style={{ animationDelay: '3500ms', fontFamily: playfair, fontStyle: 'italic', fontSize: 'clamp(22px, 3vw, 32px)', color: '#E85D20', margin: '32px 0 0' }}>
-            College Fast Forward provides the engine that syncs them.
-          </p>
-        </div>
-
-        {/* CTA */}
-        <div className="hf" style={{ animationDelay: '3900ms' }}>
-          <button
-            onClick={onCTA}
-            onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
-            onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; e.currentTarget.style.transform = 'scale(1)'; }}
-            style={{
-              fontFamily: dmSans, fontSize: 16, fontWeight: 700,
-              background: '#E85D20', color: '#fff',
-              padding: '16px 48px', borderRadius: 100, border: 'none',
-              cursor: 'pointer', transition: 'all 0.25s ease',
-              minHeight: 'auto', minWidth: 'auto', width: 'auto',
-              display: 'inline-block',
-            }}
-          >
-            Give Your Student the Edge →
-          </button>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888888', marginTop: 16, marginBottom: 0 }}>
-            Free to join. FastIQ from $29/mo. 7-day trial included.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontStyle: 'italic', fontWeight: 400, color: '#888888', marginTop: 8, marginBottom: 0 }}>
-            The first and only platform of its kind.
-          </p>
-        </div>
 
       </div>
     </section>

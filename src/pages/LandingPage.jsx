@@ -12,7 +12,7 @@ import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
 
 import V3Pricing from '@/components/landing/v3/V3Pricing';
 
-import V3FinalCTA from '@/components/landing/v3/V3FinalCTA';
+
 
 
 export default function LandingPage() {
@@ -75,8 +75,7 @@ export default function LandingPage() {
 
 
 
-        {/* 9 — Final CTA + Footer */}
-        <V3FinalCTA onCTA={handleCTA} />
+
       </div>
     </>
   );
