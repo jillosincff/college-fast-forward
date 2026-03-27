@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Loader2, Linkedin } from 'lucide-react';
-import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import { base44 } from '@/api/base44Client';
 import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 
@@ -104,7 +103,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await getDirectoryUsers({});
+        const res = await base44.functions.invoke('getDirectoryUsers', {});
         const all = res?.data?.data || [];
         setParents(all.filter(p => p.full_name));
       } catch (e) {
