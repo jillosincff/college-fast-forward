@@ -142,21 +142,27 @@ Deno.serve(async (req) => {
 
       const data = await exaFetch('search', {
         query,
-        type: 'auto',
+        type: 'neural',
         numResults: maxResults,
-        category: 'people',
+        category: 'linkedin profile',
         contents: { highlights: { maxCharacters: 2000 } },
       });
 
-      const profiles = (data.results || []).map(r => ({
-        full_name: r.title?.split('|')?.[0]?.trim() || r.title,
-        linkedin_url: r.url,
-        headline: r.title,
-        summary: (r.highlights || []).join(' ').slice(0, 200),
-        source: 'exa',
-        cff_user_id: null,
-        email: null,
-      }));
+      const profiles = (data.results || []).map(r => {
+        const parts = (r.title || '').split(/[|\-]/).map(s => s.trim()).filter(Boolean);
+        const full_name = parts[0] || 'Unknown';
+        const headline = parts.slice(1).join(' · ') || '';
+        const summary = (r.highlights || []).join(' ').slice(0, 300);
+        return {
+          full_name,
+          linkedin_url: r.url,
+          headline,
+          summary,
+          source: 'exa',
+          cff_user_id: null,
+          email: null,
+        };
+      }).filter(p => p.full_name !== 'Unknown' && p.linkedin_url?.includes('linkedin.com'));
 
       return Response.json({
         success: true,
