@@ -169,7 +169,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                 )}
               </div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 12, textAlign: 'center' }}>
-                Free 7-day trial included. Cancel anytime.
+                Start free for 7 days — then $29/month. Cancel anytime.
               </p>
             </div>
           ) : (

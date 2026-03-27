@@ -109,7 +109,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
              $29/month or $249/year
            </p>
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
-             7-day free trial included. Save $99 with annual. Cancel anytime.
+             Start free for 7 days — then $29/month. Cancel anytime.
            </p>
           </div>
 
@@ -120,7 +120,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
               className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
               style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start My Free Trial →'}
+              {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start Free Trial →'}
             </button>
             
             {!hasLinkedParent && !inviteSent && !showParentInvite && (
@@ -161,7 +161,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 16, textAlign: 'center' }}>
-            Cancel anytime. No long-term commitment.
+            Cancel anytime.
           </p>
         </div>
       </DialogContent>

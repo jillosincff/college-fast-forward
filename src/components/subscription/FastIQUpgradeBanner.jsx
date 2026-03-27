@@ -88,10 +88,10 @@ export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
             opacity: upgrading ? 0.7 : 1,
           }}
         >
-          {upgrading ? <><Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> Processing...</> : <><Zap style={{ width: 14, height: 14 }} /> Start 7-Day Free Trial</>}
+          {upgrading ? <><Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> Processing...</> : <><Zap style={{ width: 14, height: 14 }} /> Start Free Trial</>}
         </button>
       </div>
-      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>$29/month or $249/year • Cancel anytime</p>
+      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>Start free for 7 days — then $29/month. Cancel anytime.</p>
     </div>
   );
 }

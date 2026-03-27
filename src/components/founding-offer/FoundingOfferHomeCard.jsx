@@ -76,7 +76,7 @@ export default function FoundingOfferHomeCard({ display, studentName, user }) {
           fontFamily: dmSans, fontSize: 11, color: '#555',
           textAlign: 'center', lineHeight: 1.6, marginTop: 14,
         }}>
-          Both plans include a 7-day free trial. Cancel anytime.
+          Start free for 7 days — then $29/month. Cancel anytime.
         </p>
       </div>
     </div>

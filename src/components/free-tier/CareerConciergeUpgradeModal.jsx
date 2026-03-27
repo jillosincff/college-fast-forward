@@ -97,7 +97,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
               $29/month <span style={{ fontWeight: 400, color: '#888' }}>or</span> $249/year
             </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0 }}>
-              7-day free trial included. Save $99 with annual. Cancel anytime.
+              Start free for 7 days — then $29/month. Cancel anytime.
             </p>
           </div>
 
@@ -116,7 +116,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
               className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50"
               style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
             >
-              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Unlock FastIQ + Career Concierge →'}
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start Free Trial →'}
             </button>
             <button
               onClick={onAskParent}
@@ -128,7 +128,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', textAlign: 'center', margin: 0 }}>
-            Cancel anytime. No long-term commitment.
+            Cancel anytime.
           </p>
         </div>
       </div>
