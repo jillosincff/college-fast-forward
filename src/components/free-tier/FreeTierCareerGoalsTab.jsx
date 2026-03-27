@@ -19,7 +19,7 @@ Q2: Do you have a clear direction or are you still figuring it out? Chips: ["I h
 
 PATH A (has direction — answered Q2 with direction):
 Q3: What role or type of work are you targeting?
-Q4: What industry? (3 chips relevant to their major + "Something else")
+Q4: What industry? (3-4 chips relevant to their major + "Something else"). MUST generate chips ONLY from the VALID target_industries list. Never generate industry chips outside this taxonomy.
 Q5: Internship or full-time? Chips: ["Internship", "Full-time", "Both"]
 Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "2026", "2027", "2028+"]
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
@@ -89,19 +89,19 @@ CHIP RULES (HARD LIMITS):
 - BAD chips: ["Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027", "Full-time — graduating 2028"]
 - Graduation year chips must always be exactly: ["2025", "2026", "2027", "2028+"] — never more
 
-INDUSTRY CLASSIFICATION NOTE:
-"Marketing" is both an industry AND a job function.
-- If student targets "Marketing" as an industry → store in target_industries as "Marketing & Brand"
-- If student targets a marketing ROLE (e.g. "Brand Manager") → store in target_functions as "Marketing & Brand"
-- It is valid to have "Marketing & Brand" in BOTH target_industries AND target_functions
-
-"Engineering" vs "Software Engineering" are separate:
-- "Engineering" as an industry (mechanical, civil, chemical, etc.) → store in target_industries as "Engineering"
-- "Software Engineering" as a role → store in target_functions as "Software Engineering"
+INDUSTRY CLASSIFICATION RULES (CRITICAL):
+Map student answers to the correct taxonomy fields:
+- "Marketing" as industry → target_industries: "Marketing & Brand"
+- "Marketing Manager" / brand role → target_functions: "Marketing & Brand" (both can coexist)
+- "Engineering" (non-software: mechanical, civil, electrical, etc.) → target_industries: "Engineering"
+- "Software Engineering" / developer role → target_functions: "Software Engineering" (NOT Engineering industry)
+- "Pre-Med", "Healthcare", "Medical" → target_industries: "Pre-Med & Healthcare"
+- "Real Estate", "Realtor", "Property" → target_industries: "Real Estate"
+- "Hospitality", "Hotel", "Tourism", "Restaurant" → target_industries: "Hospitality & Tourism"
+- "Teaching", "Education", "School" → target_industries: "Education"
+- "Corporate" → "Consulting" or "Operations & Strategy" depending on context
+- "Business" → infer from context; default to "Operations & Strategy"
 - A Mechanical Engineering student targeting engineering roles should NOT be matched to Software Engineers unless they specifically say so.
-- If student targets "Marketing" as an industry → store in target_industries as "Marketing & Brand"
-- If student targets a marketing ROLE (e.g. "Brand Manager") → store in target_functions as "Marketing & Brand"
-- It is valid to have "Marketing & Brand" in BOTH target_industries AND target_functions
 
 INDUSTRY & FUNCTION TAXONOMY (CRITICAL):
 When populating goals_summary.target_industries, you MUST map the student's answer to values from this exact list only. Never store free-form text as an industry.
@@ -119,26 +119,14 @@ VALID target_industries values:
 - "Logistics & Supply Chain"
 - "Sports & Athletics"
 - "Education"
-
-When populating goals_summary.target_functions, map the student's target role to values from this list only:
-- "Software Engineering"
-- "Product Management"
-- "Sales & Business Development"
 - "Marketing & Brand"
-- "Finance & Accounting"
-- "Operations & Strategy"
-- "Data & Analytics"
-- "Human Resources"
-- "Consulting / Advisory"
-- "Supply Chain & Logistics"
-- "Healthcare / Clinical"
+- "Engineering"
+- "Pre-Med & Healthcare"
+- "Hospitality & Tourism"
 - "Legal & Compliance"
 
 If a student's answer maps to multiple values, include all that apply (max 3).
 If a student's answer is ambiguous, pick the closest match — never leave as free text.
-"Corporate" → "Consulting" or "Operations & Strategy" depending on context
-"Marketing" → target_functions: "Marketing & Brand" (NOT an industry)
-"Business" → infer from context; default to "Operations & Strategy"
 
 WRONG message field: "Fashion is great! What industry? Chips: ['Tech', 'Fashion', 'Healthcare']"
 CORRECT message field: "Fashion — what industry are you targeting for this role?"
@@ -272,7 +260,12 @@ const VALID_INDUSTRIES = [
   "Government & Nonprofit",
   "Logistics & Supply Chain",
   "Sports & Athletics",
-  "Education"
+  "Education",
+  "Marketing & Brand",
+  "Engineering",
+  "Pre-Med & Healthcare",
+  "Hospitality & Tourism",
+  "Legal & Compliance"
 ];
 
 const VALID_FUNCTIONS = [

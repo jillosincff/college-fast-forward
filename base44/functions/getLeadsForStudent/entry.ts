@@ -140,8 +140,7 @@ Deno.serve(async (req) => {
 
     const scored = qualityPool.map(u => ({ u, score: scoreMatch(u, careerGoals) }));
     const tier1 = scored.filter(m => m.score >= 2).map(m => m.u);
-    const tier1Ids = new Set(tier1.map(u => u.id));
-    const tier2 = scored.filter(m => m.score === 1 && !tier1Ids.has(m.u.id)).map(m => m.u);
+    const tier2 = scored.filter(m => m.score === 1).map(m => m.u);
 
     const relevantMembers = [...tier1, ...tier2].slice(0, 20);
 
