@@ -1,19 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
-/**
- * UNIFIED AUTH FLOW - Single page handles:
- * 1. Welcome screen with Google sign-in (unauthenticated users)
- * 2. Role selection (authenticated users without persona)
- * 3. Auto-routing (authenticated users with persona)
- */
-
-/* ── design tokens ──────────────────────────────────── */
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const ACCENT = '#4F8CFF';
@@ -53,7 +44,6 @@ function ensureKeyframes() {
   document.head.appendChild(style);
 }
 
-/* ── shared shell ───────────────────────────────────── */
 function AuthPageShell({ children }) {
   React.useEffect(() => { ensureFonts(); ensureKeyframes(); }, []);
   return (
@@ -94,7 +84,6 @@ function FinePrint() {
   );
 }
 
-/* ── role card ──────────────────────────────────────── */
 function RoleCard({ role, index, onClick }) {
   const [hovered, setHovered] = React.useState(false);
   const delay = 0.15 + index * 0.06;
@@ -115,23 +104,19 @@ function RoleCard({ role, index, onClick }) {
         position: 'relative',
       }}
     >
-      {/* icon */}
       <div style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: role.iconBg, border: `1px solid ${role.iconBorder}` }}>
         {role.icon}
       </div>
-      {/* text */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff' }}>{role.name}</span>
         <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>{role.desc}</span>
         {role.micro && <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, marginTop: 2, ...(role.microStyle || { color: 'rgba(255,255,255,0.35)' }) }}>{role.micro}</span>}
       </div>
-      {/* arrow */}
       <ArrowSVG color={hovered ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)'} />
     </button>
   );
 }
 
-/* ── SVG icons ──────────────────────────────────────── */
 function ArrowSVG({ color = 'rgba(244,240,232,0.25)' }) {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, transition: 'stroke 0.2s' }}>
@@ -158,15 +143,6 @@ function HeartSVG() {
   );
 }
 
-function AwardSVG() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(244,240,232,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="8" r="6" />
-      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
-    </svg>
-  );
-}
-
 function GoogleIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24">
@@ -180,429 +156,79 @@ function GoogleIcon() {
 
 export default function GatorAuth() {
   console.log('🔵 [GatorAuth] Component rendering');
-  
-  let authContext;
-  try {
-    authContext = useAuth();
-    console.log('🔵 [GatorAuth] useAuth succeeded:', !!authContext);
-  } catch (e) {
-    console.error('❌ [GatorAuth] useAuth failed:', e);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-red-50 p-4">
-        <div className="text-center">
-          <p className="text-red-600 font-bold">Auth Error</p>
-          <p className="text-red-500 text-sm">{e.message}</p>
-        </div>
-      </div>
-    );
-  }
-  
-  const { user, isLoading, refreshUser } = authContext;
-  
-  // NEW FLOW: Role selection FIRST, then OAuth
-  // Steps: null (determining) → 'role-select' (pick role) → 'oauth' (sign in) → 'processing' (applying role)
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [step, setStep] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const processingRef = useRef(false);
-  
-  // Auto-redirect timer for welcome-back screen
-  useEffect(() => {
-    if (step === 'welcome-back' && user) {
-      const timer = setTimeout(() => {
-        const isParentOrAlumni = user.persona === 'parent' || user.persona === 'alumni' || 
-                                  user.roles?.includes('parent') || user.roles?.includes('alumni');
-        navigate(user.persona === 'parent' || user.roles?.includes('parent') ? 'ParentHome' : (isParentOrAlumni ? 'AlumniDashboard' : 'Dashboard'));
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [step, user]);
 
-  // Main routing logic
+  // Load user on mount
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const me = await base44.auth.me();
+        setUser(me || null);
+      } catch (e) {
+        console.warn('No user authenticated yet');
+        setUser(null);
+      }
+      setIsLoading(false);
+    };
+    loadUser();
+  }, []);
+
+  // Route based on user state
   useEffect(() => {
     if (isLoading) return;
-
-    // CRITICAL: Detect if we somehow ended up on wrong domain (mobile OAuth bug)
-    const currentHost = window.location.hostname;
-    console.log('🔍 [GatorAuth] Current hostname:', currentHost);
     
-    if (currentHost.includes('ufl.edu') || currentHost.includes('google.com') || currentHost.includes('accounts.google')) {
-      console.error('❌ [GatorAuth] WRONG DOMAIN DETECTED! This should not happen.');
-      // Can't redirect from wrong domain - just log the error
+    if (user?.persona && user.onboarding_completed) {
+      navigate('Dashboard');
       return;
     }
-
-    // Handle OAuth callback token extraction
-    const hashFragment = window.location.hash.substring(1);
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasAccessToken = hashFragment.includes('access_token=') || urlParams.has('access_token');
-    const isNewUser = urlParams.has('is_new_user');
-
-    if (hasAccessToken && !user) {
-      const tokenMatch = hashFragment.match(/access_token=([^&]+)/);
-      const urlToken = urlParams.get('access_token');
-      const extractedToken = tokenMatch?.[1] || urlToken;
-      
-      if (extractedToken && base44.auth.setToken) {
-        console.log('🔑 Setting token from OAuth callback');
-        try {
-          base44.auth.setToken(extractedToken);
-        } catch (e) {
-          console.error('Failed to set token:', e);
-        }
-        window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
-        // Add small delay before refresh for Edge/slower browsers
-        setTimeout(() => {
-          if (refreshUser) refreshUser();
-        }, 100);
-        return;
-      }
+    
+    if (user?.persona && !user.onboarding_completed) {
+      navigate('StudentOnboarding');
+      return;
     }
-
-    // Clean URL
-    if (isNewUser || hasAccessToken) {
-      window.history.replaceState(null, '', window.location.origin + '/#GatorAuth');
-    }
-
-    // ROUTING LOGIC
-    if (user) {
-      console.log('🔍 User:', user.email, 'persona:', user.persona, 'onboarding_completed:', user.onboarding_completed);
-      
-      // Get pending role from localStorage OR database (fallback for Safari/in-app browsers)
-      const pendingRole = localStorage.getItem('pending_invite_role') || user.pending_role;
-      const pendingCode = localStorage.getItem('pending_invite_code') || user.pending_code;
-
-      // Already onboarded → Dashboard (returning user - prevent duplicate registration)
-      if (user.persona && user.onboarding_completed === true) {
-        console.log('✅ [GatorAuth] Returning user detected (already registered), redirecting to dashboard');
-        // Clear any stale pending data
-        localStorage.removeItem('pending_invite_role');
-        localStorage.removeItem('pending_invite_code');
-        // Show welcome back message before redirecting
-        setStep('welcome-back');
-        return;
-      }
-      
-      // Legacy user (onboarding_completed field doesn't exist) → treat as complete
-      if (user.persona && user.onboarding_completed === undefined) {
-        console.log('✅ [GatorAuth] Legacy user detected (no onboarding_completed field), redirecting to dashboard');
-        localStorage.removeItem('pending_invite_role');
-        localStorage.removeItem('pending_invite_code');
-        // Show welcome back message before redirecting
-        setStep('welcome-back');
-        return;
-      }
-      
-      // Handle null onboarding_completed (bad data) - treat as complete
-      if (user.persona && user.onboarding_completed === null) {
-        console.log('⚠️ [GatorAuth] User with null onboarding_completed, treating as complete');
-        localStorage.removeItem('pending_invite_role');
-        localStorage.removeItem('pending_invite_code');
-        setStep('welcome-back');
-        return;
-      }
-      
-      // Mid-onboarding (explicitly false)
-      if (user.persona && user.onboarding_completed === false) {
-        console.log('🔄 [GatorAuth] Returning user mid-onboarding, continuing...');
-        if (user.persona === 'gator' || user.persona === 'student') {
-          navigate('StudentOnboarding');
-        } else if (user.persona === 'parent') {
-          navigate('ParentOnboarding');
-        } else {
-          navigate('Onboarding');
-        }
-        return;
-      }
-
-      // Has pending role from BEFORE OAuth → Apply it and continue
-      if (pendingRole && !user.persona) {
-        const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
-        if (processingRef.current) return;
-        processingRef.current = true;
-        setStep('processing');
-        
-        (async () => {
-          try {
-            console.log('🔄 [GatorAuth] Applying pending role:', pendingRole);
-            
-            // Students with gator role - apply directly (any email allowed)
-            if (pendingRole === 'gator') {
-              await base44.auth.updateMe({
-                persona: 'student',
-                roles: ['student'],
-                onboarding_completed: false,
-                is_new_signup: true,
-                invite_code_used: isUFLStudent ? 'ufl_direct' : 'direct'
-              });
-              localStorage.removeItem('pending_invite_role');
-              if (refreshUser) await refreshUser();
-              navigate('StudentOnboarding');
-              return;
-            }
-            
-            // For parent/alumni, check for invite code
-            if (!pendingCode && (pendingRole === 'parent' || pendingRole === 'alumni')) {
-              console.log('🚫 [GatorAuth] No invite code for parent/alumni, redirecting to invite code page');
-              navigate('GatorInviteCode');
-              processingRef.current = false;
-              return;
-            }
-            
-            // CRITICAL: Use the pendingRole directly - don't default to 'parent'
-            // Map 'gator' → 'student' for valid persona value
-            const normalizedRole = pendingRole === 'gator' ? 'student' : pendingRole;
-            console.log('🔄 [GatorAuth] Applying role:', normalizedRole, 'with code:', pendingCode);
-            await base44.auth.updateMe({
-              persona: normalizedRole,
-              roles: [normalizedRole],
-              onboarding_completed: false,
-              is_new_signup: true,
-              invite_code_used: pendingCode || 'direct'
-            });
-            
-            // Verify update succeeded before navigating
-            await new Promise(r => setTimeout(r, 300));
-            const updatedUser = await base44.auth.me();
-            
-            if (updatedUser?.persona === normalizedRole || updatedUser?.persona === pendingRole) {
-              console.log('✅ [GatorAuth] Pending role applied successfully');
-              localStorage.removeItem('pending_invite_role');
-              localStorage.removeItem('pending_invite_code');
-              if (refreshUser) await refreshUser();
-              
-              // Route to correct onboarding
-              if (pendingRole === 'gator' || normalizedRole === 'student') {
-                navigate('StudentOnboarding');
-              } else if (pendingRole === 'parent') {
-                navigate('ParentOnboarding');
-              } else {
-                navigate('Onboarding');
-              }
-            } else {
-              console.warn('⚠️ [GatorAuth] Role update not reflected, retrying...');
-              await base44.auth.updateMe({
-                persona: normalizedRole,
-                roles: [normalizedRole],
-                onboarding_completed: false,
-                is_new_signup: true
-              });
-              await new Promise(r => setTimeout(r, 500));
-              localStorage.removeItem('pending_invite_role');
-              localStorage.removeItem('pending_invite_code');
-              if (refreshUser) await refreshUser();
-              
-              if (pendingRole === 'gator' || normalizedRole === 'student') {
-                navigate('StudentOnboarding');
-              } else if (pendingRole === 'parent') {
-                navigate('ParentOnboarding');
-              } else {
-                navigate('Onboarding');
-              }
-            }
-          } catch (err) {
-            console.error('Failed to apply pending role:', err);
-            localStorage.removeItem('pending_invite_role');
-            localStorage.removeItem('pending_invite_code');
-            setError('Something went wrong. Please try again.');
-            setStep('role-select');
-          } finally {
-            processingRef.current = false;
-          }
-        })();
-        return;
-      }
-
-      // No persona AND no pending role → Show role selection
-      console.log('🎯 [GatorAuth] No role found, showing role selection');
+    
+    if (user && !user.persona) {
       setStep('role-select');
       return;
-    } else {
-      // Not authenticated → Check if role was already selected (e.g., from GatorParentInvite)
-      const pendingRole = localStorage.getItem('pending_invite_role');
-      const pendingCode = localStorage.getItem('pending_invite_code');
-      
-      if (pendingRole && pendingCode) {
-        // Role AND code already set (from GatorParentInvite) → Go straight to OAuth
-        console.log('🔐 [GatorAuth] Found pending role+code, skipping role selection:', pendingRole);
-        setSelectedRole(pendingRole);
-        setStep('oauth');
-      } else if (pendingRole) {
-        // Role set but no code → Pre-select role and show selection (they might need a code)
-        console.log('🔐 [GatorAuth] Found pending role without code:', pendingRole);
-        setSelectedRole(pendingRole);
-        setStep('role-select');
-      } else {
-        // No role selected → Show role selection FIRST (before OAuth)
-        setStep('role-select');
-      }
     }
-  }, [user, isLoading, refreshUser]);
+    
+    setStep('role-select');
+  }, [user, isLoading]);
 
-  const handleGoogleSignIn = (isReturningUser = false) => {
-    // For new users, role must be selected BEFORE OAuth
-    // For returning users (sign in flow), skip role requirement
-    if (!selectedRole && !isReturningUser) {
-      console.error('❌ [GatorAuth] No role selected before OAuth!');
-      return;
-    }
-    
-    setLoading(true);
-    
-    // Save role to localStorage BEFORE OAuth redirect (only if role selected)
-    // This survives the OAuth redirect (mobile browsers may clear sessionStorage)
-    try {
-      if (selectedRole) {
+  const handleGoogleSignIn = () => {
+    if (selectedRole) {
+      try {
         localStorage.setItem('pending_invite_role', selectedRole);
-        localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-        console.log('💾 [GatorAuth] Saved pending role to localStorage:', selectedRole);
-      } else {
-        // Returning user - clear any stale pending role
-        localStorage.removeItem('pending_invite_role');
-        console.log('🔐 [GatorAuth] Returning user sign-in (no role pre-selected)');
-      }
-    } catch (e) {
-      console.warn('localStorage unavailable in handleGoogleSignIn:', e);
+      } catch (e) { /* private browsing */ }
     }
-    
-    // CRITICAL: Ensure we use the app's actual origin, not any redirect URL
-    const appOrigin = window.location.origin;
-    const callbackUrl = appOrigin + '/#GatorAuth';
-    
-    console.log('🔐 [GatorAuth] Starting Google sign-in');
-    console.log('🔐 [GatorAuth] App origin:', appOrigin);
-    console.log('🔐 [GatorAuth] Callback URL:', callbackUrl);
-    console.log('🔐 [GatorAuth] Selected role:', selectedRole || '(returning user)');
-    
-    // Validate that the origin is our app, not an external site
-    if (appOrigin.includes('ufl.edu') || appOrigin.includes('google.com')) {
-      console.error('❌ [GatorAuth] Invalid origin detected:', appOrigin);
-      setLoading(false);
-      return;
-    }
-    
+    const callbackUrl = window.location.origin + '/#GetStarted';
     base44.auth.redirectToLogin(callbackUrl);
   };
 
   const handleRoleSelect = async () => {
     if (!selectedRole) return;
-    
-    // Save role FIRST (before anything else)
-    // CRITICAL: selectedRole should be exactly 'alumni', 'parent', or 'gator'
-    console.log('💾 [GatorAuth] handleRoleSelect called with selectedRole:', selectedRole, 'type:', typeof selectedRole);
     try {
       localStorage.setItem('pending_invite_role', selectedRole);
-      localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-      console.log('💾 [GatorAuth] Verified localStorage pending_invite_role:', localStorage.getItem('pending_invite_role'));
-    } catch (e) {
-      console.warn('localStorage unavailable in handleRoleSelect:', e);
-    }
+    } catch (e) { /* private browsing */ }
     
-    // If user is NOT authenticated yet, show OAuth button
     if (!user) {
-      console.log('🔐 [GatorAuth] User not authenticated, showing OAuth');
       setStep('oauth');
       return;
     }
     
-    // User IS authenticated - check if they need invite code
-    setLoading(true);
-    const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
-    const hasInviteCode = localStorage.getItem('pending_invite_code');
-    
-    // Students go to StudentOnboarding which handles everything
-    if (selectedRole === 'gator' || selectedRole === 'student') {
+    if (selectedRole === 'gator') {
       navigate('StudentOnboarding');
       return;
     }
     
-    // Parents and Alumni need invite code
-    if ((selectedRole === 'parent' || selectedRole === 'alumni') && !hasInviteCode) {
-      console.log('📝 [GatorAuth] Parent/Alumni needs invite code, selectedRole:', selectedRole);
-      // Ensure role is saved before navigating
-      localStorage.setItem('pending_invite_role', selectedRole);
-      navigate('GatorInviteCode');
-      return;
-    }
-    
-    // Has invite code - apply role and continue
-    try {
-      // Map 'gator' → 'student' for valid persona value
-      const normalizedSelectedRole = selectedRole === 'gator' ? 'student' : selectedRole;
-      console.log('🔄 [GatorAuth] Applying selected role:', normalizedSelectedRole, 'with code:', hasInviteCode);
-      await base44.auth.updateMe({
-        persona: normalizedSelectedRole,
-        roles: [normalizedSelectedRole],
-        onboarding_completed: false,
-        is_new_signup: true,
-        invite_code_used: hasInviteCode || 'direct'
-      });
-      localStorage.removeItem('pending_invite_role');
-      localStorage.removeItem('pending_invite_code');
-      if (refreshUser) await refreshUser();
-      
-      if (normalizedSelectedRole === 'student') {
-        navigate('StudentOnboarding');
-      } else if (normalizedSelectedRole === 'parent') {
-        navigate('ParentOnboarding');
-      } else {
-        navigate('Onboarding');
-      }
-    } catch (err) {
-      console.error('Failed to set role:', err);
-      setLoading(false);
-    }
+    navigate('GatorInviteCode');
   };
 
-  // ═══════════════════════════════════════════════════════════
-  // WELCOME BACK (returning user trying to register again)
-  // ═══════════════════════════════════════════════════════════
-  
-  if (step === 'welcome-back') {
-    const isParentOrAlumni = user?.persona === 'parent' || user?.persona === 'alumni' || 
-                              user?.roles?.includes('parent') || user?.roles?.includes('alumni');
-    const dashboardUrl = (user?.persona === 'parent' || user?.roles?.includes('parent')) ? 'ParentHome' : (isParentOrAlumni ? 'AlumniDashboard' : 'Dashboard');
-    const firstName = user?.first_name || (user?.full_name && user.full_name.includes(' ') ? user.full_name.split(' ')[0] : null) || 'there';
-    
-    return (
-      <AuthPageShell>
-        <AuthCard>
-          <LogoBlock />
-          <h1 style={S.headline}>Welcome back, {firstName}.</h1>
-          <p style={S.subhead}>Taking you to your dashboard...</p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, margin: '24px 0' }}>
-            <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'rgba(255,255,255,0.35)' }} />
-            <span style={{ ...S.finePrint, fontSize: 14 }}>Redirecting...</span>
-          </div>
-          <button onClick={() => navigate(dashboardUrl)} style={S.primaryBtn}>
-            Go to Dashboard
-            <ArrowSVG color="#fff" />
-          </button>
-        </AuthCard>
-      </AuthPageShell>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // LOADING / PROCESSING STATE
-  // ═══════════════════════════════════════════════════════════
-  
-  if (step === null || step === 'processing' || isLoading) {
-    return (
-      <AuthPageShell>
-        <div style={{ textAlign: 'center' }}>
-          <Loader2 className="w-10 h-10 animate-spin" style={{ color: ACCENT, margin: '0 auto 16px' }} />
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>Setting up your account...</p>
-        </div>
-      </AuthPageShell>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // OAUTH SCREEN (role selected, need to sign in)
-  // ═══════════════════════════════════════════════════════════
-  
   if (step === 'oauth') {
     const roleLabel = selectedRole === 'gator' ? 'a Student' : selectedRole === 'parent' ? 'a Parent' : 'an Alum';
     return (
@@ -611,32 +237,11 @@ export default function GatorAuth() {
           <LogoBlock delay={0.05} />
           <h1 style={S.headline}>Almost there.</h1>
           <p style={{ ...S.subhead, marginBottom: 32 }}>Sign in to continue as {roleLabel}</p>
-
-          <button
-            onClick={() => handleGoogleSignIn(false)}
-            disabled={loading}
-            style={{ ...S.googleBtn, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
-            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-          >
-            {loading ? (
-              <><Loader2 className="w-5 h-5 animate-spin" style={{ color: '#fff', marginRight: 10 }} />Connecting...</>
-            ) : (
-              <><GoogleIcon /><span>Continue with Google</span></>
-            )}
+          <button onClick={() => handleGoogleSignIn()} disabled={loading} style={{ ...S.googleBtn, opacity: loading ? 0.7 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+            {loading ? <><Loader2 className="w-5 h-5 animate-spin" />Connecting...</> : <><GoogleIcon /><span>Continue with Google</span></>}
           </button>
-
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: 12, marginBottom: 24 }}>
-            Works with any email — Gmail, school, Outlook, etc.
-          </p>
-
-          <button
-            onClick={() => setStep('role-select')}
-            style={{ display: 'block', margin: '0 auto 24px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline', minHeight: 'auto', width: 'auto' }}
-          >
-            ← Choose a different role
-          </button>
-
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: 12, marginBottom: 24 }}>Works with any email — Gmail, school, Outlook, etc.</p>
+          <button onClick={() => setStep('role-select')} style={{ display: 'block', margin: '0 auto 24px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textDecoration: 'underline', minHeight: 'auto', width: 'auto' }}>← Choose a different role</button>
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
           <FinePrint />
         </AuthCard>
@@ -644,58 +249,20 @@ export default function GatorAuth() {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // ROLE SELECTION (FIRST STEP - before OAuth)
-  // ═══════════════════════════════════════════════════════════
-  
   if (step === 'role-select') {
     const roles = [
-      {
-        id: 'gator',
-        name: "I'm a Job Seeker",
-        desc: 'Looking for internships or my first job. I want a plan and real connections.',
-        micro: 'Students and recent grads welcome.',
-        microStyle: { color: 'rgba(255,255,255,0.35)' },
-        iconBg: 'rgba(255,255,255,0.04)',
-        iconBorder: 'rgba(255,255,255,0.08)',
-        icon: <GradCapSVG />,
-      },
-      {
-        id: 'parent',
-        name: "I'm a Parent",
-        desc: "Supporting my student's career journey and joining a network that opens real doors.",
-        iconBg: 'rgba(255,255,255,0.04)',
-        iconBorder: 'rgba(255,255,255,0.08)',
-        icon: <HeartSVG />,
-      },
+      { id: 'gator', name: "I'm a Job Seeker", desc: 'Looking for internships or my first job. I want a plan and real connections.', micro: 'Students and recent grads welcome.', microStyle: { color: 'rgba(255,255,255,0.35)' }, iconBg: 'rgba(255,255,255,0.04)', iconBorder: 'rgba(255,255,255,0.08)', icon: <GradCapSVG /> },
+      { id: 'parent', name: "I'm a Parent", desc: "Supporting my student's career journey and joining a network that opens real doors.", iconBg: 'rgba(255,255,255,0.04)', iconBorder: 'rgba(255,255,255,0.08)', icon: <HeartSVG /> },
     ];
 
     const handleCardClick = (roleId) => {
-      console.log('🔵 [GatorAuth]', roleId, 'button clicked');
       setSelectedRole(roleId);
-      try {
-        localStorage.setItem('pending_invite_role', roleId);
-        localStorage.setItem('pending_invite_timestamp', Date.now().toString());
-      } catch (e) { console.warn('localStorage unavailable:', e); }
-
       if (!user) {
         setStep('oauth');
-        return;
-      }
-
-      if (roleId === 'gator') {
-        // Navigate directly to StudentOnboarding — it handles its own OAuth
+      } else if (roleId === 'gator') {
         navigate('StudentOnboarding');
-        return;
-      }
-
-      // Parent / Alumni
-      let hasInviteCode = null;
-      try { hasInviteCode = localStorage.getItem('pending_invite_code'); } catch (e) { /* private browsing */ }
-      if (!hasInviteCode) {
-        navigate('GatorInviteCode');
       } else {
-        handleRoleSelect();
+        navigate('GatorInviteCode');
       }
     };
 
@@ -703,64 +270,27 @@ export default function GatorAuth() {
       <AuthPageShell>
         <AuthCard delay={0}>
           <LogoBlock delay={0.05} />
-
-          {error && (
-            <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, textAlign: 'center' }}>
-              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#f87171', lineHeight: 1.5 }}>{error}</p>
-            </div>
-          )}
-
+          {error && <div style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, textAlign: 'center' }}><p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#f87171', lineHeight: 1.5 }}>{error}</p></div>}
           <div style={{ textAlign: 'center', marginBottom: 8, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.1s' }}>
             <h1 style={S.headline}>Welcome to College Fast Forward</h1>
             <p style={S.subhead}>Tell us who you are so we can personalize your experience.</p>
-            <p style={S.supportLine}>
-              Two different roles. One shared goal. Getting your student hired.
-            </p>
+            <p style={S.supportLine}>Two different roles. One shared goal. Getting your student hired.</p>
           </div>
-
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
-            {roles.map((r, i) => (
-              <RoleCard key={r.id} role={r} index={i} onClick={() => handleCardClick(r.id)} />
-            ))}
+            {roles.map((r, i) => <RoleCard key={r.id} role={r} index={i} onClick={() => handleCardClick(r.id)} />)}
           </div>
-
-          {/* Reassurance line */}
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>
-            Free to join. FastIQ unlocks the full AI career engine — try it free for 7 days.
-          </p>
-
-          {loading && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '8px 0 16px' }}>
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: ACCENT }} />
-              <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>Setting up...</span>
-            </div>
-          )}
-
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>Free to join. FastIQ unlocks the full AI career engine — try it free for 7 days.</p>
+          {loading && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '8px 0 16px' }}><Loader2 className="w-5 h-5 animate-spin" style={{ color: ACCENT }} /><span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>Setting up...</span></div>}
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
           <FinePrint />
-
           <div style={{ textAlign: 'center', marginTop: 16, animation: 'authFadeUp 0.4s ease both', animationDelay: '0.3s' }}>
-            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)' }}>
-              Already have an account?{' '}
-              <button
-                onClick={() => {
-                  try { localStorage.removeItem('pending_invite_role'); } catch (e) { /* private browsing */ }
-                  handleGoogleSignIn(true);
-                }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: ACCENT, minHeight: 'auto', width: 'auto', padding: 0 }}
-                onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'underline'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'none'; }}
-              >
-                Sign in
-              </button>
-            </p>
+            <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)' }}>Already have an account? <button onClick={() => handleGoogleSignIn()} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: ACCENT, minHeight: 'auto', width: 'auto', padding: 0 }}>Sign in</button></p>
           </div>
         </AuthCard>
       </AuthPageShell>
     );
   }
 
-  // Fallback
   return (
     <AuthPageShell>
       <div style={{ textAlign: 'center' }}>
