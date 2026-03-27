@@ -25,20 +25,16 @@ export default function FastIQUpgradeModal({ user, onClose }) {
   const handleUpgrade = async () => {
     setUpgrading(true);
     try {
-      const res = await fetch('/functions/createCheckoutSession', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan: 'fastiq_monthly',
-          successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
-          cancelUrl: window.location.href,
-        }),
+      const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
+      const response = await createCheckoutSession({
+        plan: 'fastiq_monthly',
+        successUrl: `${window.location.origin}/#Dashboard?upgrade=success`,
+        cancelUrl: window.location.href,
       });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+      if (response?.data?.url) {
+        window.location.href = response.data.url;
       } else {
-        console.error('Checkout failed:', data.error);
+        console.error('Checkout failed:', response?.data?.error);
         setUpgrading(false);
       }
     } catch (e) {

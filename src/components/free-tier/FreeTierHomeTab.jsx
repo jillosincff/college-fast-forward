@@ -129,34 +129,23 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
               </p>
               <div className="flex flex-col gap-3">
                 <button
-                    onClick={() => {
-                      const handleDirectCheckout = async () => {
-                        try {
-                          const res = await fetch('/functions/createCheckoutSession', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              plan: 'fastiq_monthly',
-                              successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,
-                              cancelUrl: window.location.href,
-                            }),
-                          });
-                          if (!res.ok) {
-                            throw new Error(`HTTP ${res.status}`);
-                          }
-                          const data = await res.json();
-                          if (data.url) {
-                            window.location.href = data.url;
-                          } else if (data.error) {
-                            console.error('Checkout error:', data.error);
-                            onOpenUpgrade();
-                          }
-                        } catch (e) {
-                          console.error('Checkout failed:', e.message);
+                    onClick={async () => {
+                      try {
+                        const { createCheckoutSession } = await import('@/functions/createCheckoutSession');
+                        const response = await createCheckoutSession({
+                          plan: 'fastiq_monthly',
+                          successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,
+                          cancelUrl: window.location.href,
+                        });
+                        if (response?.data?.url) {
+                          window.location.href = response.data.url;
+                        } else {
                           onOpenUpgrade();
                         }
-                      };
-                      handleDirectCheckout();
+                      } catch (e) {
+                        console.error('Checkout failed:', e.message);
+                        onOpenUpgrade();
+                      }
                     }}
                     className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
                     style={{ minHeight: 'auto' }}
