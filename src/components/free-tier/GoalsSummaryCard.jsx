@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Target, ChevronDown } from 'lucide-react';
 import EditGoalsModal from './EditGoalsModal';
 
-export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRestart, showLeadsArrow, user, onGoalsUpdated }) {
+export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRestart, showLeadsArrow, user, onGoalsUpdated, onOpenUpgrade }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [openedFromNudge, setOpenedFromNudge] = useState(false);
   const roles = goals?.target_roles?.join(', ') || goals?.role || '—';
@@ -34,7 +34,7 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
     ['Graduating', gradYear],
     ['Location', location],
     ['Major', major],
-    ['Target Companies', companiesDisplay],
+    ['Dream Company', dreamCo || '—'],
     ['Experience', experience],
   ];
 
@@ -133,6 +133,19 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
         style={{ background: 'none', border: 'none', padding: '8px 0', fontSize: '12px', color: '#999', cursor: 'pointer', textAlign: 'left', width: 'fit-content', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', marginTop: 8 }}>
         Start over →
       </button>
+
+      {/* Free-tier locked alumni teaser */}
+      {!user?.is_fastiq && user?.subscription_status !== 'active' && user?.membership_tier !== 'fastiq' && (
+        <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: 0 }}>🔒 Connect with alumni in your target role</p>
+          <button
+            onClick={() => onOpenUpgrade?.()}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '8px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}
+          >
+            Unlock FastIQ →
+          </button>
+        </div>
+      )}
       {showEditModal && (
         <EditGoalsModal
           goals={goals}

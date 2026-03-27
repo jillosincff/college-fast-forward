@@ -26,13 +26,15 @@ Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anythin
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
 Q8: Any companies you'd love to work at — or types of companies that appeal to you? And what's your biggest gap right now? Free text + chips: ["No internship experience yet", "Not sure what I want to do", "Don't know how to network", "Not sure my major is right"]
 
+PATH B question count is now 7 (entrepreneurship question removed):
+
 PATH B (figuring it out — answered Q2 with undecided):
 Q3: Work environment — what sounds most like you? Chips based on major.
 Q4: What's your natural strength? Chips: ["Talking to people / relationships", "Analyzing data / solving problems", "Creating things / design / writing", "Leading / organizing / making things happen"]
-Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Building something of my own", "Stability and work-life balance"]
+Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Helping others / mission-driven", "Stability and work-life balance"]
 Q6: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
-Q7: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Something else"]
-After Q7 on Path B: synthesize all answers into role recommendations.
+Q7: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Not sure what I want to do"]
+After Q7 on Path B: synthesize all answers into role recommendations. Set is_final=true.
 
 STUDENT MAJOR: The student's major is provided in the conversation context. ALWAYS use it to:
 1. Personalize acknowledgments ("Finance — solid foundation for analyst roles." / "English — more flexible than people think. Consulting, marketing, media, law, and tech all hire English majors.")
@@ -43,7 +45,8 @@ STUDENT MAJOR: The student's major is provided in the conversation context. ALWA
 Rules:
 - Always acknowledge the previous answer in ONE short sentence before asking the next question.
   Tone: confident and direct, like a sharp recruiter — NOT cheerful or enthusiastic.
-  NO exclamation points. NO adjectives like "fantastic", "exciting", "vibrant", "great", "solid".
+  NO exclamation points. NO hollow adjectives like "fantastic", "exciting", "vibrant", "great".
+  Good: "Marketing — solid foundation for brand roles."
   Good: "Social Media Marketing — strong direction for a Marketing major."
   Good: "Media & Entertainment — good fit given your role target."
   Good: "Miami — focusing your leads there."
@@ -164,7 +167,7 @@ Be honest. Be specific. Students trust advisors who tell them the truth.
 
 Return 4-6 role recommendations ranked by fit. Set is_final=true and populate ALL fields including about_you, top_strengths, work_environment, honest_challenge, cff_network_recommendation, and preliminary_archetype.
 
-FINAL suggested_prompts rule: when is_final is true, suggested_prompts must be exactly 3 items, maximum 4 words each. Use: ["Tell me more →", "Show companies →", "Start over →"]`;
+FINAL suggested_prompts rule: when is_final is true, suggested_prompts must be an empty array [].`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -196,7 +199,7 @@ const RESPONSE_SCHEMA = {
           honest_challenge: { type: 'string' },
           no_experience_first_step: { type: 'string' },
           cff_intro_value: { type: 'string' },
-          entrepreneurship_path: { type: 'boolean' },
+
         },
       },
     },
@@ -867,6 +870,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
           user={user}
           onTabChange={onTabChange}
           onFindLeads={handleFindLeads}
+          onOpenUpgrade={onOpenUpgrade}
           onGoalsUpdated={(updated) => {
             setSavedGoals({ ...(savedGoals || user?.career_goals), ...updated });
             const el = document.createElement('div');
