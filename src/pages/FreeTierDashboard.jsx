@@ -22,63 +22,63 @@ import FreeTierDirectoryTab from '@/components/free-tier/FreeTierDirectoryTab';
 
 export default function FreeTierDashboard() {
   const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
-    const [activeTab, setActiveTab] = useState('home');
-    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-    const [showConciergeModal, setShowConciergeModal] = useState(false);
-    const [savedGoals, setSavedGoals] = useState(null);
+  const [activeTab, setActiveTab] = useState('home');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showConciergeModal, setShowConciergeModal] = useState(false);
+  const [savedGoals, setSavedGoals] = useState(null);
 
-    const handleGoalsSaved = async () => {
-      if (refreshUser) await refreshUser();
-      setSavedGoals(Date.now());
-    };
+  const handleGoalsSaved = async () => {
+    if (refreshUser) await refreshUser();
+    setSavedGoals(Date.now());
+  };
 
-    useEffect(() => {
-      if (isLoadingAuth) return;
-      if (!user) {
-        navigate('LandingPage');
-        return;
-      }
-    }, [user, isLoadingAuth]);
-
-    // Block rendering until auth is complete
-    if (isLoadingAuth) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
-          <Loader2 className="w-8 h-8 text-[#E85D20] animate-spin" />
-        </div>
-      );
-    }
-
+  useEffect(() => {
+    if (isLoadingAuth) return;
     if (!user) {
       navigate('LandingPage');
-      return null;
+      return;
     }
+  }, [user, isLoadingAuth]);
 
-    const handleOpenUpgrade = () => setShowUpgradeModal(true);
-    const handleOpenConcierge = () => setShowConciergeModal(true);
-
+  // Block rendering until auth is complete
+  if (isLoadingAuth) {
     return (
-      <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
-        <div className="hidden md:block">
-          <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
-        </div>
-        <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
-          {activeTab === 'home' && <FreeTierHomeTab key={savedGoals || 'home'} user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
-          {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
-          {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-          {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-          {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={setActiveTab} />}
-          {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-          {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} />}
-          {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-          {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
-          {activeTab === 'notebook' && <NotebookPage user={user} />}
-        </div>
-        <div className="md:hidden">
-          <FreeTierMobileNav activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
-        </div>
-        {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
-        {showConciergeModal && <CareerConciergeUpgradeModal user={user} onClose={() => setShowConciergeModal(false)} onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }} />}
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
+        <Loader2 className="w-8 h-8 text-[#E85D20] animate-spin" />
       </div>
     );
+  }
+
+  if (!user) {
+    navigate('LandingPage');
+    return null;
+  }
+
+  const handleOpenUpgrade = () => setShowUpgradeModal(true);
+  const handleOpenConcierge = () => setShowConciergeModal(true);
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
+      <div className="hidden md:block">
+        <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
+      </div>
+      <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        {activeTab === 'home' && <FreeTierHomeTab key={savedGoals || 'home'} user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
+        {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
+        {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={setActiveTab} />}
+        {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
+        {activeTab === 'notebook' && <NotebookPage user={user} />}
+      </div>
+      <div className="md:hidden">
+        <FreeTierMobileNav activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
+      </div>
+      {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
+      {showConciergeModal && <CareerConciergeUpgradeModal user={user} onClose={() => setShowConciergeModal(false)} onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }} />}
+    </div>
+  );
 }
