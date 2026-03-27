@@ -34,20 +34,13 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // GetStarted/GatorAuth route - accessible before full auth
-  if (window.location.hash === '#GetStarted' || window.location.hash === '#/GetStarted') {
-    return (
-      <Routes>
-        <Route path="*" element={<GatorAuth />} />
-      </Routes>
-    );
-  }
-
   // Render the main app
       return (
         <Routes>
-          {/* Explicit routes first for higher priority */}
+          {/* Public/Auth routes - no layout wrapper */}
           <Route path="/GetStarted" element={<GatorAuth />} />
+
+          {/* Explicit routes first for higher priority */}
           <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
           <Route path="/FastIQAssessment" element={<FastIQAssessment />} />
           <Route path="/StudentOnboarding" element={<StudentOnboarding />} />
@@ -72,7 +65,7 @@ const AuthenticatedApp = () => {
           <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
-};
+  };
 
 
 function App() {
