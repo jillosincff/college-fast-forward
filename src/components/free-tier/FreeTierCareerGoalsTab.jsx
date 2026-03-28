@@ -16,7 +16,7 @@ function hasExistingGoals(user) {
   return !!(g?.target_roles?.length || g?.target_industries?.length);
 }
 
-// ── Question definitions ───────────────────────────────────────────────────────
+// ── Question definitions (v2) ────────────────────────────────────────────────
 
 const QUESTIONS = {
   q1_major: {
