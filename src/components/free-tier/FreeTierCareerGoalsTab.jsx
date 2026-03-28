@@ -1123,22 +1123,34 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         {loading && <TypingIndicator />}
 
         {conversationDone && roleRecs?.length > 0 && (
-          <CareerProfileCard
-            careerProfile={careerProfile}
-            roleRecommendations={roleRecs}
-            aboutYou={aboutYou}
-            topStrengths={topStrengths}
-            workEnvironment={workEnvironment}
-            honestChallenge={honestChallenge}
-            cffNetwork={cffNetwork}
-            preliminaryArchetype={prelimArchetype}
-            userEmail={user?.email}
-            user={user}
-            onTabChange={onTabChange}
-            onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
-            onRestart={startChat}
-            onPromptSelect={handleChipSelect}
-          />
+          <>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 16 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0d1117', border: '1px solid rgba(232,93,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ color: '#E85D20', fontSize: 14 }}>⚡</span>
+              </div>
+              <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '18px 18px 18px 4px', padding: '14px 18px', maxWidth: 480 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>
+                  Hang tight. We're coming up with a plan for you.
+                </p>
+              </div>
+            </div>
+            <CareerProfileCard
+              careerProfile={careerProfile}
+              roleRecommendations={roleRecs}
+              aboutYou={aboutYou}
+              topStrengths={topStrengths}
+              workEnvironment={workEnvironment}
+              honestChallenge={honestChallenge}
+              cffNetwork={cffNetwork}
+              preliminaryArchetype={prelimArchetype}
+              userEmail={user?.email}
+              user={user}
+              onTabChange={onTabChange}
+              onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
+              onRestart={startChat}
+              onPromptSelect={handleChipSelect}
+            />
+          </>
         )}
 
         {conversationDone && !roleRecs?.length && savedGoals && (
