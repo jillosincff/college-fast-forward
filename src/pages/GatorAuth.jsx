@@ -188,7 +188,13 @@ export default function GatorAuth() {
     }
     
     if (user?.persona && !user.onboarding_completed) {
-      navigate('StudentOnboarding');
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        navigate('ParentOnboarding');
+      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+        navigate('AlumniOnboarding');
+      } else {
+        navigate('StudentOnboarding');
+      }
       return;
     }
     
