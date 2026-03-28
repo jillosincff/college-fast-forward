@@ -38,6 +38,8 @@ const inputStyle = {
   boxSizing: 'border-box', outline: 'none',
 };
 
+const PRESET_LOCATIONS = ['New York', 'Miami', 'Los Angeles', 'Chicago', 'Remote', 'Open to anything'];
+
 export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange, onOpenUpgrade }) {
   const [form, setForm] = useState({
     major: user?.major || user?.career_goals?.major || '',
@@ -110,7 +112,6 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
     setSaving(false);
   };
 
-  const PRESET_LOCATIONS = ['New York', 'Miami', 'Los Angeles', 'Chicago', 'Remote', 'Open to anything'];
   const isPresetLocation = PRESET_LOCATIONS.includes(form.location);
 
   return (
