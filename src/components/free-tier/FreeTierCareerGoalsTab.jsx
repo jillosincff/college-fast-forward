@@ -25,7 +25,7 @@ Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "202
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
 Q8: Any companies you'd love to work at, or types of companies that appeal to you? Chips: ["No idea yet", "Yes, I'll add them below"]
-Q9: What are you struggling with most right now? Chips: ["Not sure what I want to do", "Getting no responses", "Not sure where to start"]
+Q9: What are you struggling with the most right now? Chips: ["Not sure what I want to do", "Applied but haven't heard back", "Don't know how to network"]
 
 PATH B question count is now 7 (entrepreneurship question removed):
 
@@ -116,7 +116,6 @@ When populating goals_summary.target_industries, you MUST map the student's answ
 VALID target_industries values:
 - "Technology & Software"
 - "Financial Services & Banking"
-- "Consulting"
 - "Healthcare & Life Sciences"
 - "Consumer Goods & Retail"
 - "Media & Entertainment"
@@ -263,7 +262,6 @@ function hasExistingGoals(user) {
 const VALID_INDUSTRIES = [
   "Technology & Software",
   "Financial Services & Banking",
-  "Consulting",
   "Healthcare & Life Sciences",
   "Consumer Goods & Retail",
   "Media & Entertainment",
