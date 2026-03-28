@@ -1,394 +1,181 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, RefreshCw, Loader2 } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
-import { getAlumniByRole } from './alumniExplorerUtils';
+import { getIndustryChipsForMajor } from '@/constants/majorToIndustries';
 import GoalsSummaryCard from './GoalsSummaryCard';
-import CareerProfileCard from './CareerProfileCard';
-import SaveToNotebookButton from './SaveToNotebookButton';
 import LeadsSection from './LeadsSection';
 import SavedLeads from './SavedLeads';
 import InlineMessageComposer from './InlineMessageComposer';
+import CareerProfileCard from './CareerProfileCard';
 
-// ─── System prompts ───────────────────────────────────────────────────────────
-
-const SYSTEM_PROMPT_BRANCHING = `You are FastIQ, the AI career advisor inside College Fast Forward (CFF). You are running a structured intake conversation to understand a college student's career goals.
-
-QUESTION SEQUENCE:
-Q1 (already answered — major) — saved, skip to Q2.
-Q2: Do you have a clear direction or are you still figuring it out? Chips: ["I have a pretty good idea →", "Still figuring it out"]
-
-PATH A (has direction — answered Q2 with direction):
-Q3: What role or type of work are you targeting?
-Q4: What industry? (3-4 chips relevant to their major + "Something else"). MUST generate chips ONLY from the VALID target_industries list. Never generate industry chips outside this taxonomy.
-Q5: Internship or full-time? Chips: ["Internship", "Full-time", "Both"]
-Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "2026", "2027", "2028+"]
-Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
-Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
-Q8: Any companies you'd love to work at, or types of companies that appeal to you? Chips: ["No idea yet", "Yes, I'll add them below"]
-Q9: What are you struggling with the most right now? Chips: ["Don't know where to begin", "Applied but no answers", "Not sure how to network"]
-
-PATH B question count is now 7 (entrepreneurship question removed):
-
-PATH B (figuring it out — answered Q2 with undecided):
-Q3: Work environment — what sounds most like you? Chips based on major.
-Q4: What's your natural strength? Chips: ["Talking to people / relationships", "Analyzing data / solving problems", "Creating things / design / writing", "Leading / organizing / making things happen"]
-Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Helping others / mission-driven", "Stability and work-life balance"]
-Q6: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
-Q7: Biggest gap or concern? Chips: ["Don't know where to begin", "Applied but no answers", "Not sure how to network"]
-After Q7 on Path B: synthesize all answers into role recommendations. Set is_final=true.
-
-STUDENT MAJOR: The student's major is provided in the conversation context. ALWAYS use it to:
-1. Personalize acknowledgments ("Finance — solid foundation for analyst roles." / "English — more flexible than people think. Consulting, marketing, media, law, and tech all hire English majors.")
-2. Only suggest roles realistic for their major — never suggest software engineering to a Communications major unless they explicitly want it
-3. Flag honest gaps: if their target doesn't match major, acknowledge directly
-4. Suggest major-specific clubs, certifications, or experiences
-
-Rules:
-- Always acknowledge the previous answer in ONE short sentence before asking the next question.
-  Tone: confident and direct, like a sharp recruiter — NOT cheerful or enthusiastic.
-  NO exclamation points. NO hollow adjectives like "fantastic", "exciting", "vibrant", "great".
-  Good: "Marketing — solid foundation for brand roles."
-  Good: "Social Media Marketing — strong direction for a Marketing major."
-  Good: "Media & Entertainment — good fit given your role target."
-  Good: "Miami — focusing your leads there."
-  Good: "Mid-size — noted, that'll shape your company list."
-  Bad: "Social Media Marketing is an exciting field!"
-  Bad: "Media & Entertainment is a vibrant industry!"
-  Bad: "Mid-size companies often offer great growth opportunities!"
-- One question at a time — never list multiple questions
-- After key answers, remind student their data is being used: "Finance — already narrowing your company list." / "NYC — focusing your leads there."
-  These reminders replace the acknowledgment — don't do both. One sentence total.
-- Keep responses SHORT — one acknowledgment/reminder + the next question
-- For Path A: set is_final=true after Q9 with goals_summary populated. Q9 answer should influence the profile: "Not sure what I want to do" → emphasize role exploration; "Getting no responses" → flag resume/outreach gap; "Not sure where to start" → emphasize 6-step roadmap
-- For Path B: set is_final=true after Q7 WITH full synthesis, role_recommendations, career_profile, AND goals_summary
-- NEVER add guilt or pressure to skipped questions. If student skips, say "No problem — moving on." and ask the next question.
-- GRADUATION YEAR: If not captured by Q5b/Q7, ask explicitly. NEVER assume. When asking graduation year, ALWAYS use exactly these 4 chips: ["2025", "2026", "2027", "2028+"]. NEVER use any other chips for this question.
-- NO EXPERIENCE: When student says no experience, say exactly: "Starting from zero is totally fine — and honestly, a lot of CFF parents specifically remember what it felt like and are the most generous with their time. We'll build your path with that in mind."
-- SKIP CHIPS: Always include suggested_prompts. Do NOT add skip to suggested_prompts — it's handled separately in the UI.
-- PRELIMINARY ARCHETYPE: Always infer preliminary_archetype from conversation, even mid-conversation.
-- CRITICAL: NEVER put chip options inside the message text. Do not write 'Chips: [...]' or list options in the message. The message field must read like natural speech. Options belong ONLY in suggested_prompts.
-
-CRITICAL FORMATTING RULES:
-- Never use markdown in your responses
-- Never use **bold**, *italic*, or # headers
-- Never use bullet points with - or •
-- Never use numbered lists with 1. 2. 3.
-- Write in plain conversational prose only
-- Use line breaks for separation if needed
-
-FINAL MESSAGE RULE (when is_final = true):
-Your "message" field must contain exactly ONE sentence — a warm bridge to the profile card. Nothing else.
-Examples: "Based on everything you shared — here's your personalized career profile." / "Perfect. Here's what we found for you."
-Do NOT include role recommendations, goals summaries, skills advice, or questions in the message. The profile card contains all the detail.
-
-CHIP RULES (HARD LIMITS):
-- Maximum 4 chips per question — NEVER more than 4
-- Each chip label maximum 4 words
-- Always include a catch-all as the last chip ("Something else" or "Not sure yet")
-- GOOD chips: ["Finance", "Tech", "Nonprofit", "Something else"]
-- BAD chips: ["Full-time — graduating 2025", "Full-time — graduating 2026", "Full-time — graduating 2027", "Full-time — graduating 2028"]
-- Graduation year chips must always be exactly: ["2025", "2026", "2027", "2028+"] — never more
-
-INDUSTRY CLASSIFICATION RULES (CRITICAL):
-Map student answers to the correct taxonomy fields:
-- "Marketing" as industry → target_industries: "Marketing & Brand"
-- "Marketing Manager" / brand role → target_functions: "Marketing & Brand" (both can coexist)
-- "Engineering" (non-software: mechanical, civil, electrical, etc.) → target_industries: "Engineering"
-- "Software Engineering" / developer role → target_functions: "Software Engineering" (NOT Engineering industry)
-- "Pre-Med", "Healthcare", "Medical" → target_industries: "Pre-Med & Healthcare"
-- "Real Estate", "Realtor", "Property" → target_industries: "Real Estate"
-- "Hospitality", "Hotel", "Tourism", "Restaurant" → target_industries: "Hospitality & Tourism"
-- "Teaching", "Education", "School" → target_industries: "Education"
-- "HR", "Human Resources", "People Ops", "Recruiting" → target_industries: "Human Resources"
-- "HR Manager", "Recruiter" as a role → target_functions: "Human Resources" (both can coexist)
-- "Nonprofit" or "NGO" or "Social Impact" → target_industries: "Nonprofit & Social Impact"
-- "Architecture" or "Architect" or "Interior Design" → target_industries: "Architecture & Design"
-- "Graphic Design" or "UX/UI" → can be either "Architecture & Design" OR "Marketing & Brand" depending on context
-- "Biotech" or "Biotechnology" or "Pharma" → target_industries: "Biotech & Life Sciences"
-- "Pre-Med & Healthcare" is for clinical/patient-facing roles; "Biotech & Life Sciences" is for research/lab/industry roles
-- "Corporate" → "Consulting" or "Operations & Strategy" depending on context
-- "Business" → infer from context; default to "Operations & Strategy"
-- A Mechanical Engineering student targeting engineering roles should NOT be matched to Software Engineers unless they specifically say so.
-
-INDUSTRY & FUNCTION TAXONOMY (CRITICAL):
-When populating goals_summary.target_industries, you MUST map the student's answer to values from this exact list only. Never store free-form text as an industry.
-
-VALID target_industries values:
-- "Technology & Software"
-- "Financial Services & Banking"
-- "Healthcare & Life Sciences"
-- "Consumer Goods & Retail"
-- "Media & Entertainment"
-- "Real Estate"
-- "Energy & Utilities"
-- "Government & Nonprofit"
-- "Logistics & Supply Chain"
-- "Sports & Athletics"
-- "Education"
-- "Marketing & Brand"
-- "Engineering"
-- "Pre-Med & Healthcare"
-- "Hospitality & Tourism"
-- "Legal & Compliance"
-- "Human Resources"
-- "Nonprofit & Social Impact"
-- "Architecture & Design"
-- "Biotech & Life Sciences"
-- "Human Resources"
-
-If a student's answer maps to multiple values, include all that apply (max 3).
-If a student's answer is ambiguous, pick the closest match — never leave as free text.
-
-WRONG message field: "Fashion is great! What industry? Chips: ['Tech', 'Fashion', 'Healthcare']"
-CORRECT message field: "Fashion — what industry are you targeting for this role?"
-CORRECT suggested_prompts: ["Tech", "Fashion", "Healthcare", "Something else"]
-
-Return JSON with: message, is_final (bool), suggested_prompts (2-3 chips, NO skip option), preliminary_archetype (always), goals_summary (null until final), role_recommendations (null unless final), about_you (null unless final), top_strengths (null unless final), work_environment (null unless final), honest_challenge (null unless final), cff_network_recommendation (null unless final)
-
-goals_summary shape when final:
-{
-  target_industries: string[],   // FROM VALID INDUSTRIES LIST ONLY
-  target_functions: string[],    // FROM VALID FUNCTIONS LIST ONLY — NEW FIELD
-  target_roles: string[],        // Specific job titles e.g. "Account Executive"
-  target_companies: string[],    // Named companies if mentioned
-  dream_company: string,
-  graduation_year: number,
-  company_size_preference: string[],
-  location_preference: string,
-  major: string,
-  seeking: string,               // REQUIRED — map Q5 answer exactly: "Internship", "Full-time", or "Both"
-  experience_level: string,      // REQUIRED — infer from Q8/conversation: "None" (no experience), "Entry-level" (1 internship/coursework), "Some" (multiple internships), "Experienced" (full-time work history)
-}`;
-
-const SYNTHESIS_SUFFIX = `
-
-The student has completed the discovery questions. Now synthesize their responses and generate a personalized career profile and role recommendations.
-
-Be genuinely creative — consider: traditional corporate paths, startups, entrepreneurship/founder paths, field-based roles (sales, consulting, real estate, logistics), creative industries, mission-driven/nonprofit, emerging roles in AI/sustainability/creator economy, roles they may never have heard of but would love.
-
-ROLE QUALITY REQUIREMENTS — for each best-fit role you MUST include:
-- The specific role title (not generic — "Real Estate Financial Analyst" not "Financial Analyst")
-- Which specific company types or named companies hire for this role
-- Exactly why it fits THIS student based on what they told you — every sentence must reference their actual answers
-- A specific, honest challenge relevant to their experience level and situation — NEVER generic advice
-- What the student needs to do first if they have no experience (no_experience_first_step)
-- Whether a CFF parent intro would be particularly valuable for this role
-
-HONEST CHALLENGE REQUIREMENTS:
-BAD: "You might need to learn quickly on the job as this role can be fast-paced."
-GOOD: "Real talk — financial analyst roles at real estate firms almost always require Excel modeling and basic accounting. With no experience yet, your first move should be a free Excel modeling course (CFI has good ones) and one CFF parent coffee chat in the real estate space before you apply anywhere."
-Be honest. Be specific. Students trust advisors who tell them the truth.
-
-Return 4-6 role recommendations ranked by fit. Set is_final=true and populate ALL fields including about_you, top_strengths, work_environment, honest_challenge, cff_network_recommendation, and preliminary_archetype.
-
-FINAL suggested_prompts rule: when is_final is true, suggested_prompts must be an empty array [].`;
-
-const RESPONSE_SCHEMA = {
-  type: 'object',
-  properties: {
-    message: { type: 'string' },
-    is_final: { type: 'boolean' },
-    suggested_prompts: { type: 'array', items: { type: 'string' } },
-    preliminary_archetype: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        confidence: { type: 'string' },
-        label: { type: 'string' },
-      },
-    },
-    about_you: { type: 'string' },
-    top_strengths: { type: 'array', items: { type: 'string' } },
-    work_environment: { type: 'string' },
-    honest_challenge: { type: 'string' },
-    cff_network_recommendation: { type: 'string' },
-    role_recommendations: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          specific_companies: { type: 'array', items: { type: 'string' } },
-          why_it_fits: { type: 'string' },
-          honest_challenge: { type: 'string' },
-          no_experience_first_step: { type: 'string' },
-          cff_intro_value: { type: 'string' },
-
-        },
-      },
-    },
-    goals_summary: {
-      type: 'object',
-      properties: {
-        target_roles: { type: 'array', items: { type: 'string' } },
-        target_industries: { type: 'array', items: { type: 'string' } },
-        target_functions: { type: 'array', items: { type: 'string' } },
-        target_companies: { type: 'array', items: { type: 'string' } },
-        seeking: { type: 'string' },
-        graduation_year: { type: 'string' },
-        location_preference: { type: 'string' },
-        experience_level: { type: 'string' },
-        company_size_preference: { type: 'array', items: { type: 'string' } },
-        dream_company: { type: 'string' },
-        perceived_gap: { type: 'string' },
-        work_environment: { type: 'string' },
-        preliminary_archetype: { type: 'string' },
-        career_profile_summary: { type: 'string' },
-        major: { type: 'string' },
-      },
-    },
-  },
-  required: ['message', 'is_final', 'suggested_prompts'],
-};
-
-const MAJOR_CHIPS = [
-  'Finance',
-  'Marketing',
-  'Computer Science',
-  'Business Administration',
-  'Communications',
-  'Engineering',
-  'Psychology',
-  'Other / Type mine →',
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
 function hasExistingGoals(user) {
   const g = user?.career_goals;
-  return !!(g?.target_roles?.length || g?.target_industries?.length || g?.role || g?.industries?.length);
+  return !!(g?.target_roles?.length || g?.target_industries?.length);
 }
 
-const VALID_INDUSTRIES = [
-  "Technology & Software",
-  "Financial Services & Banking",
-  "Healthcare & Life Sciences",
-  "Consumer Goods & Retail",
-  "Media & Entertainment",
-  "Real Estate",
-  "Energy & Utilities",
-  "Government & Nonprofit",
-  "Logistics & Supply Chain",
-  "Sports & Athletics",
-  "Education",
-  "Marketing & Brand",
-  "Engineering",
-  "Pre-Med & Healthcare",
-  "Hospitality & Tourism",
-  "Legal & Compliance",
-  "Human Resources",
-  "Nonprofit & Social Impact",
-  "Architecture & Design",
-  "Biotech & Life Sciences"
-];
+// ── Question definitions ───────────────────────────────────────────────────────
 
-const VALID_FUNCTIONS = [
-  "Software Engineering",
-  "Product Management",
-  "Sales & Business Development",
-  "Marketing & Brand",
-  "Finance & Accounting",
-  "Operations & Strategy",
-  "Data & Analytics",
-  "Human Resources",
-  "Consulting / Advisory",
-  "Supply Chain & Logistics",
-  "Healthcare / Clinical",
-  "Legal & Compliance"
-];
+const QUESTIONS = {
+  q1_major: {
+    message: (user) => `Let's build your career plan. You're studying ${user?.major || 'your major'} at ${user?.school_name || 'your school'} — is that right?`,
+    chips: (user) => ['Yes, that\'s right', 'Update my major'],
+    freeText: false,
+    next: () => 'q2_direction',
+    save: null,
+  },
+  q2_direction: {
+    message: () => `Do you have a clear direction, or are you still figuring it out?`,
+    chips: () => ["I have a pretty good idea →", "Still figuring it out"],
+    freeText: false,
+    next: (ans) => ans === "I have a pretty good idea →" ? 'pathA_q3_role' : 'pathB_q3_environment',
+    save: (ans) => ({ has_direction: ans === "I have a pretty good idea →" }),
+  },
 
-function normalizeGoals(goals) {
-  if (!goals) return goals;
+  // PATH A
+  pathA_q3_role: {
+    message: () => `What role or type of work are you targeting?`,
+    chips: () => [],
+    freeText: true,
+    placeholder: 'e.g. Marketing Manager, Software Engineer, Investment Banker...',
+    next: () => 'pathA_q4_industry',
+    save: (ans) => ({ target_roles: ans.split(',').map(r => r.trim()).filter(Boolean) }),
+  },
+  pathA_q4_industry: {
+    message: () => `What industry are you targeting?`,
+    chips: (user) => getIndustryChipsForMajor(user?.major),
+    freeText: false,
+    next: () => 'pathA_q5_jobtype',
+    save: (ans) => ({ target_industries: ans === 'Something else' ? [] : [ans] }),
+  },
+  pathA_q5_jobtype: {
+    message: () => `Are you looking for an internship or full-time role?`,
+    chips: () => ['Internship', 'Full-time', 'Both'],
+    freeText: false,
+    next: (ans) => ans === 'Internship' ? 'pathA_q6_location' : 'pathA_q5b_gradyear',
+    save: (ans) => ({ seeking: ans }),
+  },
+  pathA_q5b_gradyear: {
+    message: () => `What year do you graduate?`,
+    chips: () => ['2025', '2026', '2027', '2028+'],
+    freeText: false,
+    next: () => 'pathA_q6_location',
+    save: (ans) => ({ graduation_year: ans }),
+  },
+  pathA_q6_location: {
+    message: () => `What city or region are you targeting?`,
+    chips: () => ['New York', 'Miami', 'Remote', 'Open to anything'],
+    freeText: true,
+    placeholder: 'Or type a city...',
+    next: () => 'pathA_q7_companysize',
+    save: (ans) => ({ location_preference: ans }),
+  },
+  pathA_q7_companysize: {
+    message: () => `Any preference on company size?`,
+    chips: () => ['Big company (Fortune 500)', 'Mid-size', 'Startup', 'No preference'],
+    freeText: false,
+    next: () => 'pathA_q8_companies',
+    save: (ans) => ({ company_size_preference: [ans] }),
+  },
+  pathA_q8_companies: {
+    message: () => `Any companies you'd love to work at?`,
+    chips: () => ["No idea yet"],
+    freeText: true,
+    placeholder: 'Type company names separated by commas...',
+    next: () => 'shared_q9_struggle',
+    save: (ans) => ({ target_companies: ans === 'No idea yet' ? [] : ans.split(',').map(c => c.trim()).filter(Boolean) }),
+  },
 
-  // Rescue: if a function-type value landed in target_industries, move it
-  const rawIndustries = goals.target_industries || [];
-  const rescuedFunctions = rawIndustries.filter(v => VALID_FUNCTIONS.includes(v));
-  const cleanedIndustries = rawIndustries.filter(v => VALID_INDUSTRIES.includes(v));
+  // PATH B
+  pathB_q3_environment: {
+    message: () => `No worries — let's figure it out together. What kind of work environment sounds most like you?`,
+    chips: () => ['Fast-paced and entrepreneurial', 'Structured and corporate', 'Creative and collaborative', 'Mission-driven and purpose-led'],
+    freeText: false,
+    next: () => 'pathB_q4_strength',
+    save: (ans) => ({ work_environment: ans }),
+  },
+  pathB_q4_strength: {
+    message: () => `What's your natural strength?`,
+    chips: () => ['Talking to people / relationships', 'Analyzing data / solving problems', 'Creating things / design / writing', 'Leading / organizing / making things happen'],
+    freeText: false,
+    next: () => 'pathB_q5_motivation',
+    save: (ans) => ({ natural_strength: ans }),
+  },
+  pathB_q5_motivation: {
+    message: () => `What motivates you most?`,
+    chips: () => ['Making a lot of money', 'Making an impact', 'Helping others / mission-driven', 'Stability and work-life balance'],
+    freeText: false,
+    next: () => 'pathB_q6_gradyear',
+    save: (ans) => ({ motivation: ans }),
+  },
+  pathB_q6_gradyear: {
+    message: () => `When do you graduate?`,
+    chips: () => ['2025', '2026', '2027', '2028+'],
+    freeText: false,
+    next: () => 'pathB_q7_struggle',
+    save: (ans) => ({ graduation_year: ans }),
+  },
+  pathB_q7_struggle: {
+    message: () => `What are you struggling with most right now?`,
+    chips: () => ["Don't know where to begin", "Applied but no answers", "Not sure how to network"],
+    freeText: false,
+    next: () => 'pathB_synthesis',
+    save: (ans) => ({ perceived_gap: ans }),
+  },
 
-  // Rescue: if an industry-type value landed in target_functions, move it
-  const rawFunctions = [...(goals.target_functions || []), ...rescuedFunctions];
-  const rescuedIndustries = rawFunctions.filter(v => VALID_INDUSTRIES.includes(v));
-  const cleanedFunctions = rawFunctions.filter(v => VALID_FUNCTIONS.includes(v));
-
-  const finalIndustries = [...new Set([...cleanedIndustries, ...rescuedIndustries])];
-  const finalFunctions = [...new Set(cleanedFunctions)];
-
-  return {
-    ...goals,
-    target_industries: finalIndustries,
-    target_functions: finalFunctions,
-  };
-}
-
-// ─── Small UI components ──────────────────────────────────────────────────────
-
-// Strip markdown and leaked chip instructions from LLM messages
-const cleanMessage = (text) => {
-  if (!text) return '';
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/#{1,6}\s/g, '')
-    .replace(/^[-•]\s/gm, '')
-    .replace(/^\d+\.\s/gm, '')
-    .replace(/Chips:\s*\[.*?\]/gs, '')
-    .replace(/Options:\s*\[.*?\]/gs, '')
-    .replace(/suggested_prompts:\s*\[.*?\]/gs, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  // SHARED
+  shared_q9_struggle: {
+    message: () => `Last one — what are you struggling with most right now?`,
+    chips: () => ["Don't know where to begin", "Applied but no answers", "Not sure how to network"],
+    freeText: false,
+    next: () => 'complete',
+    save: (ans) => ({ perceived_gap: ans }),
+  },
 };
+
+// ── Small UI components ────────────────────────────────────────────────────────
 
 function MessageBubble({ message }) {
   const isUser = message.role === 'user';
   return (
-    <div className="chat-exchange" style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', marginBottom: 24 }}>
+    <div style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', marginBottom: 20 }}>
       {!isUser && (
         <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0d1117', border: '1px solid rgba(232,93,32,0.4)', color: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0, marginRight: 10, marginTop: 2 }}>
           ⚡
         </div>
       )}
-      <div className={isUser ? 'chat-bubble-user' : 'chat-bubble-ai'} style={{
+      <div style={{
         maxWidth: isUser ? '65%' : '75%',
         background: isUser ? '#0d1117' : '#fff',
         color: isUser ? '#fff' : '#1A1A1A',
         border: isUser ? 'none' : '1px solid #E5E5E5',
         borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
         padding: isUser ? '12px 18px' : '14px 18px',
-        fontSize: 14,
-        lineHeight: 1.6,
-        whiteSpace: 'pre-wrap',
+        fontSize: 14, lineHeight: 1.6,
         fontFamily: "'DM Sans', sans-serif",
         boxShadow: isUser ? 'none' : '0 1px 3px rgba(0,0,0,0.08)',
-        marginBottom: 8,
       }}>
-        {isUser ? message.content : cleanMessage(message.content)}
+        {message.content}
       </div>
     </div>
   );
 }
 
-function SuggestedPrompts({ prompts, onSelect, onSkip }) {
-  if (!prompts?.length) return null;
+function ChipRow({ chips, onSelect }) {
+  if (!chips?.length) return null;
   return (
-    <div style={{ marginLeft: 42, marginBottom: 16 }}>
-      <div className="chips-container" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-        {prompts.map((p, i) => (
-          <button key={i} onClick={() => onSelect(p)}
-            className="chat-chip"
-            style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', whiteSpace: 'nowrap', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
-            {p}
-          </button>
-        ))}
-      </div>
-      {onSkip && (
-        <div style={{ textAlign: 'right' }}>
-          <button onClick={onSkip}
-            style={{ background: 'none', border: 'none', color: '#AAAAAA', fontSize: 12, cursor: 'pointer', minHeight: 'auto', padding: '2px 0' }}>
-            Skip this →
-          </button>
-        </div>
-      )}
+    <div style={{ marginLeft: 42, marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      {chips.map((chip, i) => (
+        <button key={i} onClick={() => onSelect(chip)}
+          style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '8px 16px', fontSize: 13, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#E85D20'; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#E85D20'; }}
+        >
+          {chip}
+        </button>
+      ))}
     </div>
   );
 }
@@ -406,418 +193,187 @@ function TypingIndicator() {
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ── Main component ─────────────────────────────────────────────────────────────
 
-export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrade }) {
+export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrade, onGoalsSaved }) {
   const [mode, setMode] = useState(hasExistingGoals(user) ? 'summary' : 'chat');
   const [currentPhase, setCurrentPhase] = useState('chat');
+
+  // Chat state
+  const [messages, setMessages] = useState([]);
+  const [currentQ, setCurrentQ] = useState('q1_major');
+  const [path, setPath] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [isComplete, setIsComplete] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [awaitingFreeText, setAwaitingFreeText] = useState(false);
+  const [activeChips, setActiveChips] = useState([]);
+
+  // Summary state
   const [showLeads, setShowLeads] = useState(false);
-  const [showLeadsArrow, setShowLeadsArrow] = useState(false);
   const [savedLeads, setSavedLeads] = useState(() => user?.saved_leads || []);
   const [activeComposer, setActiveComposer] = useState(null);
+  const [showLeadsArrow, setShowLeadsArrow] = useState(false);
   const leadsRef = useRef(null);
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-  const [messages, setMessages] = useState([]);
-  const [suggestedPrompts, setSuggestedPrompts] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [retryText, setRetryText] = useState('');
-  const [savedGoals, setSavedGoals] = useState(user?.career_goals || null);
-  const [careerProfile, setCareerProfile] = useState(null);
-  const [roleRecs, setRoleRecs] = useState(null);
-  const [conversationDone, setConversationDone] = useState(false);
 
-  const [questionCount, setQuestionCount] = useState(0);
-  const [awaitingCompanyInput, setAwaitingCompanyInput] = useState(false);
-  const [companyTags, setCompanyTags] = useState([]);
-  const [companyTagInput, setCompanyTagInput] = useState('');
-  const [restoredBanner, setRestoredBanner] = useState(false);
-  const [confirmClear, setConfirmClear] = useState(false);
-  const [restoredAt, setRestoredAt] = useState(null);
-  const [aboutYou, setAboutYou] = useState(null);
-  const [topStrengths, setTopStrengths] = useState(null);
-  const [workEnvironment, setWorkEnvironment] = useState(null);
-  const [honestChallenge, setHonestChallenge] = useState(null);
-  const [cffNetwork, setCffNetwork] = useState(null);
-  const [prelimArchetype, setPrelimArchetype] = useState(null);
-  // Major-first flow
-  const [majorSaved, setMajorSaved] = useState(!!(user?.major || user?.career_goals?.major));
-  const [awaitingMajor, setAwaitingMajor] = useState(false);
+  // Synthesis result (Path B)
+  const [synthesisRoles, setSynthesisRoles] = useState([]);
+
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
-  const [isFreshStart, setIsFreshStart] = useState(false);
-  const [alumniClusters, setAlumniClusters] = useState([]);
-  const [alumniLoading, setAlumniLoading] = useState(false);
-  // Outreach composer state
-  const [connectLoading, setConnectLoading] = useState(null);
-  const [outreachModal, setOutreachModal] = useState(null);
-  const [editedDraft, setEditedDraft] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sentTo, setSentTo] = useState([]);
-  const [copyToast, setCopyToast] = useState(false);
-  const [showAssessmentCTA, setShowAssessmentCTA] = useState(false);
-
-  // Block 1: Read cache on load (FastIQ users)
-  useEffect(() => {
-    if (!user?.id || mode !== 'summary') return;
-    // Skip alumni fetch for non-FastIQ users
-    const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-    if (!isFastIQ) return;
-    if (!savedGoals?.target_functions?.length) return;
-
-    const cached = user.alumni_explorer_cache;
-    const cachedAt = user.alumni_explorer_cached_at;
-    const isStale = !cachedAt || (Date.now() - new Date(cachedAt).getTime()) > 24 * 60 * 60 * 1000;
-
-    if (cached?.length && !isStale) {
-      setAlumniClusters(cached);
-    } else {
-      setAlumniLoading(true);
-      fetchAlumniClusters();
-    }
-  }, [user?.id, savedGoals?.target_functions, mode]);
-
-  // Block 2: Fetch function
-  const fetchAlumniClusters = async () => {
-    try {
-      const clusters = await getAlumniByRole(
-        savedGoals.target_functions || [],
-        savedGoals.target_roles || [],
-        savedGoals.location_preference || ''
-      );
-      setAlumniClusters(clusters);
-      await base44.auth.updateMe({
-        alumni_explorer_cache: clusters,
-        alumni_explorer_cached_at: new Date().toISOString(),
-      }).catch(() => {});
-    } catch (e) {
-      console.error('Alumni fetch failed:', e);
-    } finally {
-      setAlumniLoading(false);
-    }
-  };
-
-  const isUndecided = !savedGoals?.target_roles?.length || savedGoals.target_roles[0]?.toLowerCase().includes('undecided');
-  const primaryRole = (savedGoals?.target_roles || [])[0] || 'your target role';
-
-  // Sync draft into editable state when modal opens
-  useEffect(() => {
-    if (outreachModal?.draft) {
-      setEditedDraft(outreachModal.draft);
-    }
-  }, [outreachModal?.draft]);
-
-  // Generate AI outreach draft via backend function
-  const generateOutreachDraft = async (alum) => {
-    try {
-      const res = await base44.functions.invoke('generateOutreachDraft', {
-        studentName: user?.full_name || 'Student',
-        major: user?.major || savedGoals?.major || '',
-        targetRole: (savedGoals?.target_roles || [])[0] || alum.title || '',
-        graduationYear: savedGoals?.graduation_year || '',
-        alumniName: alum.name,
-        alumniTitle: alum.title,
-        alumniCompany: alum.company,
-      });
-      return res?.data?.message || res?.message || '';
-    } catch (e) {
-      console.error('Draft generation failed:', e);
-      return '';
-    }
-  };
-
-  // Handle Connect button click
-  const handleConnectClick = async (alum) => {
-    if (sentTo.includes(alum.linkedin_url)) return;
-    setConnectLoading(alum.linkedin_url);
-    try {
-      const draft = await generateOutreachDraft(alum);
-      const isCFFMember = !!alum.cff_user_id;
-      setOutreachModal({
-        open: true,
-        alum,
-        draft,
-        mode: isCFFMember ? 'cff' : 'linkedin',
-      });
-    } catch (e) {
-      setOutreachModal({
-        open: true,
-        alum,
-        draft: '',
-        mode: alum.cff_user_id ? 'cff' : 'linkedin',
-      });
-    } finally {
-      setConnectLoading(null);
-    }
-  };
-
-  // Send message via CFF (to alumni email)
-  const handleSendCFF = async () => {
-    if (!outreachModal || !editedDraft.trim()) return;
-    setSending(true);
-    try {
-      const conversation = await base44.entities.Conversation.create({
-        participant_emails: [user.email, outreachModal.alum.email],
-        participant_names: {
-          [user.email]: user.full_name,
-          [outreachModal.alum.email]: outreachModal.alum.name,
-        },
-        subject: `${user.full_name} → ${outreachModal.alum.name}`,
-      });
-      await base44.entities.Message.create({
-        conversation_id: conversation.id,
-        sender_email: user.email,
-        sender_name: user.full_name,
-        recipient_email: outreachModal.alum.email,
-        subject: 'Reaching out from CFF',
-        body: editedDraft,
-        message_type: 'intro_offer',
-        is_read: false,
-      });
-      await base44.functions.invoke('sendMessageNotification', {
-        recipient_email: outreachModal.alum.email,
-        sender_name: user.full_name,
-        message_preview: editedDraft.slice(0, 100),
-      });
-      await base44.functions.invoke('trackMessage', {
-        type: 'alumni_outreach',
-        student_id: user.id,
-        recipient_name: outreachModal.alum.name,
-        recipient_title: outreachModal.alum.title,
-        recipient_company: outreachModal.alum.company,
-      });
-      setSentTo(prev => [...prev, outreachModal.alum.linkedin_url]);
-      setOutreachModal(null);
-    } catch (e) {
-      console.error('Send failed:', e);
-    } finally {
-      setSending(false);
-    }
-  };
-
-  // Send message via LinkedIn (copy to clipboard)
-  const handleSendLinkedIn = () => {
-    if (!outreachModal) return;
-    navigator.clipboard.writeText(editedDraft).then(() => {
-      setCopyToast(true);
-      setTimeout(() => setCopyToast(false), 3000);
-    });
-    window.open(outreachModal.alum.linkedin_url, '_blank');
-    setSentTo(prev => [...prev, outreachModal.alum.linkedin_url]);
-    setOutreachModal(null);
-  };
-
-  // Seed opener on chat start — restore saved conversation if exists
+  // Seed first question on chat start
   useEffect(() => {
     if (mode !== 'chat' || messages.length > 0) return;
-    const savedConv = isFreshStart ? null : user?.career_goals_conversation;
-    const savedAt = isFreshStart ? null : user?.career_goals_conversation_updated_at;
-    if (savedConv?.length > 0) {
-      setMessages(savedConv);
-      const lastAssistant = [...savedConv].reverse().find(m => m.role === 'assistant');
-      if (lastAssistant?.suggested_prompts) setSuggestedPrompts(lastAssistant.suggested_prompts);
-      setQuestionCount(savedConv.length);
-      setRestoredBanner(true);
-      setRestoredAt(savedAt ? new Date(savedAt) : null);
-      setMajorSaved(true);
-      return;
-    }
-    const firstName = user?.full_name?.split(' ')[0] || 'there';
-    const existingMajor = user?.major || user?.career_goals?.major;
-    if (existingMajor) {
-      setMajorSaved(true);
-      setMessages([{
-        role: 'assistant',
-        content: `Hey ${firstName}! I have 9 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything. Let's figure out what you're looking for. Ready?`,
-      }]);
-      setSuggestedPrompts(["Let's go →", "I'll do it later"]);
-      setQuestionCount(1);
-    } else {
-      setAwaitingMajor(true);
-      setMessages([{
-        role: 'assistant',
-        content: `Hey ${firstName}! I have 9 quick questions — takes about 3 minutes. No wrong answers, and you can skip anything.\n\nFirst: what's your major? This helps me point you toward roles that actually make sense for your degree.`,
-      }]);
-      setSuggestedPrompts([]);
-      setQuestionCount(1);
-    }
-    setIsFreshStart(false);
-  }, [mode, messages.length, user, majorSaved, isFreshStart]);
+    const q = QUESTIONS['q1_major'];
+    const chips = q.chips(user);
+    setMessages([{ role: 'assistant', content: q.message(user) }]);
+    setActiveChips(chips);
+    setAwaitingFreeText(false);
+    setCurrentQ('q1_major');
+  }, [mode]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, suggestedPrompts, loading, conversationDone]);
+  }, [messages, activeChips, loading]);
 
-  const handleSkip = async () => {
-    if (loading) return;
-    setSuggestedPrompts([]);
-    const skipMsg = { role: 'user', content: 'Skip' };
-    const newMessages = [...messages, skipMsg];
-    setMessages(newMessages);
-    setLoading(true);
-    try {
-      const history = newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n');
-      const major = user?.major || user?.career_goals?.major || '';
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `${SYSTEM_PROMPT_BRANCHING}\n\nStudent major: ${major || 'not provided'}\n\nConversation so far:\n${history}\n\nThe student skipped this question. Acknowledge gracefully in one sentence ("No problem — moving on.") then ask the next question.`,
-        response_json_schema: RESPONSE_SCHEMA,
-      });
-      const reply = result?.message || 'No problem — moving on.';
-      const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : [];
-      const isFinal = result?.is_final === true;
-      const allMessages = [...newMessages, { role: 'assistant', content: reply, suggested_prompts: isFinal ? [] : prompts }];
-      setMessages(allMessages);
-      setSuggestedPrompts(isFinal ? [] : prompts);
-      setQuestionCount(prev => prev + 1);
-      base44.auth.updateMe({ career_goals_conversation: allMessages, career_goals_conversation_updated_at: new Date().toISOString() }).catch(() => {});
-      if (isFinal) {
-        if (result?.role_recommendations?.length) setRoleRecs(result.role_recommendations);
-        if (result?.about_you) setAboutYou(result.about_you);
-        if (result?.top_strengths?.length) setTopStrengths(result.top_strengths);
-        if (result?.work_environment) setWorkEnvironment(result.work_environment);
-        if (result?.honest_challenge) setHonestChallenge(result.honest_challenge);
-        if (result?.cff_network_recommendation) setCffNetwork(result.cff_network_recommendation);
-        if (result?.preliminary_archetype) setPrelimArchetype(result.preliminary_archetype);
-        if (result?.goals_summary) await saveGoals(result.goals_summary, result.preliminary_archetype);
-        else setConversationDone(true);
+  const addMessage = (msg) => {
+    setMessages(prev => [...prev, msg]);
+  };
+
+  const loadQuestion = (key, user) => {
+    const q = QUESTIONS[key];
+    if (!q) return;
+    const chips = q.chips(user);
+    addMessage({ role: 'assistant', content: q.message(user) });
+    setActiveChips(chips);
+    setAwaitingFreeText(!!q.freeText && chips.length === 0);
+    setCurrentQ(key);
+  };
+
+  const saveAnswer = async (update) => {
+    const newAnswers = { ...answers, ...update };
+    setAnswers(newAnswers);
+    await base44.auth.updateMe({
+      career_goals: {
+        ...(user?.career_goals || {}),
+        ...newAnswers,
+        saved_at: new Date().toISOString(),
       }
-    } catch (e) {
-      console.error('Skip failed:', e);
-    }
-    setLoading(false);
+    }).catch(() => {});
+    return newAnswers;
   };
 
-  const handleMajorSubmit = async (major) => {
-    if (!major.trim()) return;
-    setAwaitingMajor(false);
-    setMajorSaved(true);
-    const userMsg = { role: 'user', content: major.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    base44.auth.updateMe({ major: major.trim() }).catch(() => {});
-    setLoading(true);
-    try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `${SYSTEM_PROMPT_BRANCHING}\n\nStudent major: ${major.trim()}\n\nConversation so far:\n${newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n')}\n\nThe student just told you their major. Acknowledge it in one direct sentence, then ask Q2: do they have a clear direction or are they still figuring it out?`,
-        response_json_schema: RESPONSE_SCHEMA,
-      });
-      const reply = result?.message || "Got it. Do you have a sense of what you want to do, or are you still figuring it out?";
-      const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : ["I have a pretty good idea →", "Still figuring it out"];
-      const allMessages = [...newMessages, { role: 'assistant', content: reply, suggested_prompts: prompts }];
-      setMessages(allMessages);
-      setSuggestedPrompts(prompts);
-      setQuestionCount(2);
-      base44.auth.updateMe({ career_goals_conversation: allMessages, career_goals_conversation_updated_at: new Date().toISOString() }).catch(() => {});
-    } catch (e) {
-      const fallback = [...newMessages, { role: 'assistant', content: "Got it. Do you have a sense of what you want to do, or are you still figuring it out?", suggested_prompts: ["I have a pretty good idea →", "Still figuring it out"] }];
-      setMessages(fallback);
-      setSuggestedPrompts(["I have a pretty good idea →", "Still figuring it out"]);
-      setQuestionCount(2);
-    }
-    setLoading(false);
-  };
+  const handleAnswer = async (questionKey, answer) => {
+    const q = QUESTIONS[questionKey];
+    setActiveChips([]);
+    setAwaitingFreeText(false);
+    setInputValue('');
 
-  const sendMessage = async (text) => {
-    const trimmed = (text || input).trim();
-    if (!trimmed || loading) return;
-    if (trimmed === "I'll do it later") {
-      setMode('summary');
+    // Save answer
+    let newAnswers = answers;
+    if (q.save) {
+      const update = q.save(answer);
+      newAnswers = { ...answers, ...update };
+      setAnswers(newAnswers);
+      await base44.auth.updateMe({
+        career_goals: { ...(user?.career_goals || {}), ...newAnswers, saved_at: new Date().toISOString() }
+      }).catch(() => {});
+    }
+
+    addMessage({ role: 'user', content: answer });
+
+    // Handle branching
+    if (answer === "I have a pretty good idea →") setPath('A');
+    if (answer === "Still figuring it out") setPath('B');
+
+    const nextKey = q.next(answer);
+
+    if (nextKey === 'complete') {
+      setIsComplete(true);
+      if (onGoalsSaved) onGoalsSaved();
+      addMessage({ role: 'assistant', content: "That's everything. Here's your career profile." });
       return;
     }
-    setInput('');
-    setError(null);
-    setSuggestedPrompts([]);
-    const major = user?.major || user?.career_goals?.major || '';
-    const isLikelyB9 = questionCount >= 7;
-    const newMessages = [...messages, { role: 'user', content: trimmed }];
-    setMessages(newMessages);
-    setLoading(true);
 
-    try {
-      const history = newMessages.map(m => `${m.role === 'user' ? 'Student' : 'FastIQ'}: ${m.content}`).join('\n\n');
-      const extraSuffix = isLikelyB9 ? SYNTHESIS_SUFFIX : '';
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `${SYSTEM_PROMPT_BRANCHING}${extraSuffix}\n\nStudent major: ${major || 'not provided'}\n\nConversation so far:\n${history}\n\nRespond to the student's latest message.`,
-        response_json_schema: RESPONSE_SCHEMA,
-      });
-
-      const reply = result?.message || 'I had trouble responding. Please try again.';
-      const prompts = Array.isArray(result?.suggested_prompts) ? result.suggested_prompts.slice(0, 3) : [];
-      const isFinal = result?.is_final === true;
-
-      const allMessages = [...newMessages, { role: 'assistant', content: reply, timestamp: new Date().toISOString(), suggested_prompts: isFinal ? [] : prompts }];
-      setMessages(allMessages);
-      setSuggestedPrompts(isFinal ? [] : prompts);
-      if (!isFinal && trimmed === "Not sure what I want to do") setShowAssessmentCTA(true);
-      base44.auth.updateMe({
-        career_goals_conversation: allMessages,
-        career_goals_conversation_updated_at: new Date().toISOString(),
-      }).catch(() => {});
-      setQuestionCount(prev => prev + 1);
-
-      if (isFinal) {
-        if (result?.career_profile) setCareerProfile(result.career_profile);
-        if (result?.role_recommendations?.length) setRoleRecs(result.role_recommendations);
-        if (result?.about_you) setAboutYou(result.about_you);
-        if (result?.top_strengths?.length) setTopStrengths(result.top_strengths);
-        if (result?.work_environment) setWorkEnvironment(result.work_environment);
-        if (result?.honest_challenge) setHonestChallenge(result.honest_challenge);
-        if (result?.cff_network_recommendation) setCffNetwork(result.cff_network_recommendation);
-        if (result?.preliminary_archetype) setPrelimArchetype(result.preliminary_archetype);
-        if (result?.goals_summary) await saveGoals(result.goals_summary, result.preliminary_archetype);
-        else setConversationDone(true);
-      }
-    } catch (e) {
-      console.error('Goals chat failed:', e);
-      setError('llm');
-      setRetryText(trimmed);
-      setMessages(prev => prev.slice(0, -1));
-      setInput(trimmed);
+    if (nextKey === 'pathB_synthesis') {
+      generateSynthesis(newAnswers);
+      return;
     }
-    setLoading(false);
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      loadQuestion(nextKey, user);
+    }, 600);
   };
 
-  const saveGoals = async (goalsSummary, prelimArch) => {
+  const generateSynthesis = async (currentAnswers) => {
+    addMessage({ role: 'assistant', content: "Give me a second — I'm putting together some role ideas based on what you told me..." });
+    setLoading(true);
     try {
-      const goalsData = { ...goalsSummary, saved_at: new Date().toISOString() };
-      const normalizedGoals = normalizeGoals(goalsData);
-      await base44.auth.updateMe({
-        career_goals: normalizedGoals,
-        ...(prelimArch?.name ? { preliminary_archetype: prelimArch.name } : {}),
-        ...(goalsSummary?.graduation_year ? { graduation_year: goalsSummary.graduation_year } : {}),
+      const res = await base44.functions.invoke('generateCareerSynthesis', {
+        major: user?.major,
+        work_environment: currentAnswers.work_environment,
+        natural_strength: currentAnswers.natural_strength,
+        motivation: currentAnswers.motivation,
+        graduation_year: currentAnswers.graduation_year,
+        biggest_struggle: currentAnswers.perceived_gap,
       });
-      setSavedGoals(goalsData);
-      setConversationDone(true);
-
-      // Block 3: Prefetch alumni after save (FastIQ users)
-      const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-      if (isFastIQ) {
-        setAlumniLoading(true);
-        setTimeout(() => {
-          getAlumniByRole(
-            goalsData.target_functions || [],
-            goalsData.target_roles || [],
-            goalsData.location_preference || ''
-          ).then(clusters => {
-            setAlumniClusters(clusters);
-            base44.auth.updateMe({
-              alumni_explorer_cache: clusters,
-              alumni_explorer_cached_at: new Date().toISOString(),
-            }).catch(() => {});
-            setAlumniLoading(false);
-          }).catch(e => {
-            console.error('Alumni prefetch failed:', e);
-            setAlumniLoading(false);
-          });
-        }, 100);
+      const synthesis = res?.data?.synthesis || res?.synthesis || "Based on what you've shared, I have some great role ideas for you.";
+      const roles = res?.data?.suggested_roles || res?.suggested_roles || [];
+      if (roles.length > 0) {
+        await base44.auth.updateMe({
+          career_goals: { ...(user?.career_goals || {}), ...currentAnswers, target_roles: roles, saved_at: new Date().toISOString() }
+        }).catch(() => {});
+        setSynthesisRoles(roles);
       }
-    } catch (e) {
-      console.error('Goals save failed:', e);
-      setError('save');
+      addMessage({ role: 'assistant', content: synthesis });
+      if (roles.length > 0) {
+        addMessage({ role: 'assistant', content: `Based on your answers, here are roles that could be a great fit for you: ${roles.join(', ')}.` });
+      }
+    } catch {
+      addMessage({ role: 'assistant', content: "Based on what you've shared, I have some great role ideas for you. Let's get your profile set up and I'll show you exactly who to talk to." });
     }
+    setLoading(false);
+    setIsComplete(true);
+    if (onGoalsSaved) onGoalsSaved();
+  };
+
+  const handleFreeTextSubmit = () => {
+    const val = inputValue.trim();
+    if (!val) return;
+    handleAnswer(currentQ, val);
+  };
+
+  const handleChipOrText = (chip) => {
+    const q = QUESTIONS[currentQ];
+    if (q?.freeText && chip === null) {
+      handleFreeTextSubmit();
+    } else {
+      handleAnswer(currentQ, chip);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleFreeTextSubmit(); }
+  };
+
+  const startOver = () => {
+    setMessages([]);
+    setCurrentQ('q1_major');
+    setPath(null);
+    setAnswers({});
+    setIsComplete(false);
+    setInputValue('');
+    setActiveChips([]);
+    setAwaitingFreeText(false);
+    setSynthesisRoles([]);
+    setCurrentPhase('chat');
+    setMode('chat');
+    base44.auth.updateMe({ career_goals_conversation: null }).catch(() => {});
   };
 
   const handleFindLeads = () => {
@@ -830,14 +386,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   };
 
   const handleSaveLead = async (lead) => {
-    const updated = [...savedLeads.filter(l => l.id !== lead.id), { ...lead, saved_at: new Date().toISOString(), contacted: false, contacted_at: null, follow_up_sent: false }];
+    const updated = [...savedLeads.filter(l => l.id !== lead.id), { ...lead, saved_at: new Date().toISOString(), contacted: false }];
     setSavedLeads(updated);
     await base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
-    const el = document.createElement('div');
-    el.textContent = '🔖 Saved to your leads list';
-    el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2500);
   };
 
   const handleUnsaveLead = async (id) => {
@@ -846,111 +397,24 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     await base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
   };
 
-  const handleMarkContacted = async (leadId) => {
-    const updated = savedLeads.map(l => l.id === String(leadId || activeComposer?.id)
-      ? { ...l, contacted: true, contacted_at: new Date().toISOString() } : l);
-    if (activeComposer && !updated.find(l => l.id === String(activeComposer.id))) {
-      updated.push({ ...activeComposer, saved_at: new Date().toISOString(), contacted: true, contacted_at: new Date().toISOString(), follow_up_sent: false });
-    }
-    setSavedLeads(updated);
-    await base44.auth.updateMe({ saved_leads: updated }).catch(() => {});
-    const el = document.createElement('div');
-    el.textContent = 'Marked as contacted.';
-    el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2500);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
-  const handleChipSelect = (p) => {
-    if (p === "This doesn't feel right — let's try again") { startChat(); return; }
-    if (p === "Yes, I'll add them below") {
-      setAwaitingCompanyInput(true);
-      setSuggestedPrompts([]);
-      return;
-    }
-    if (p === "No idea yet") {
-      setAwaitingCompanyInput(false);
-      setCompanyTags([]);
-      sendMessage(p);
-      return;
-    }
-    sendMessage(p);
-  };
-
-  const handleCompanyTagAdd = () => {
-    const val = companyTagInput.trim();
-    if (!val) return;
-    setCompanyTags(prev => [...prev, val]);
-    setCompanyTagInput('');
-  };
-
-  const handleCompanyTagRemove = (idx) => {
-    setCompanyTags(prev => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleCompanyContinue = () => {
-    const msg = companyTags.length > 0 ? companyTags.join(', ') : 'No specific companies yet';
-    setAwaitingCompanyInput(false);
-    setCompanyTags([]);
-    setCompanyTagInput('');
-    sendMessage(msg);
-  };
-
-  const startChat = () => {
-    setMessages([]);
-    setSuggestedPrompts([]);
-    setConversationDone(false);
-    setRoleRecs(null);
-    setCareerProfile(null);
-    setQuestionCount(0);
-    setRestoredBanner(false);
-    setConfirmClear(false);
-    setMajorSaved(!!(user?.major || user?.career_goals?.major));
-    setAwaitingMajor(false);
-    setIsFreshStart(true);
-    setMode('chat');
-    base44.auth.updateMe({ career_goals_conversation: null, career_goals_conversation_updated_at: null }).catch(() => {});
-  };
-
-  // ── Summary view (returning user) ──────────────────────────────────────────
+  // ── Summary view ─────────────────────────────────────────────────────────────
   if (mode === 'summary') {
     return (
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.02em', transition: 'opacity 0.3s' }}>
-          {showLeads ? 'Your Goals & Leads.' : 'Your Career Goals.'}
-        </h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Your Career Goals.</h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 28px', lineHeight: 1.5 }}>The more we know about you, the better we can help you.</p>
 
         <GoalsSummaryCard
-          goals={savedGoals || user?.career_goals}
+          goals={user?.career_goals}
           user={user}
           onTabChange={onTabChange}
           onFindLeads={handleFindLeads}
           onOpenUpgrade={onOpenUpgrade}
-          onGoalsUpdated={(updated) => {
-            setSavedGoals({ ...(savedGoals || user?.career_goals), ...updated });
-            const el = document.createElement('div');
-            el.textContent = '✓ Goals updated — refreshing your leads...';
-            el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A1A;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-family:DM Sans,sans-serif;z-index:9999;pointer-events:none;';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 2500);
-          }}
+          onGoalsUpdated={() => {}}
           showLeadsArrow={showLeadsArrow}
-          onRestart={startChat}
+          onRestart={startOver}
         />
-
-        {showLeads && (
-          <button
-            onClick={() => { setShowLeads(false); setTimeout(() => setShowLeads(true), 100); }}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, minHeight: 'auto', marginBottom: 16 }}>
-            ⟳ Refresh My Leads
-          </button>
-        )}
 
         {showLeads && (
           <>
@@ -965,11 +429,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
               onUnlockFastIQ={() => onOpenUpgrade?.()}
               leadsRef={leadsRef}
             />
-            <SavedLeads
-              savedLeads={savedLeads}
-              onContact={setActiveComposer}
-              onRemove={handleUnsaveLead}
-            />
+            <SavedLeads savedLeads={savedLeads} onContact={setActiveComposer} onRemove={handleUnsaveLead} />
           </>
         )}
 
@@ -979,16 +439,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
             user={user}
             isFastIQ={isFastIQ}
             onClose={() => setActiveComposer(null)}
-            onMarkContacted={handleMarkContacted}
+            onMarkContacted={() => setActiveComposer(null)}
             onSaveToNotebook={(msg) => {
-              base44.entities.NotebookEntry.create({
-                user_email: user.email,
-                content: msg,
-                source_page: 'career_goals',
-                source_label: 'Outreach Message',
-                tags: ['outreach'],
-                saved_at: new Date().toISOString(),
-              }).catch(() => {});
+              base44.entities.NotebookEntry.create({ user_email: user.email, content: msg, source_page: 'career_goals', source_label: 'Outreach Message', tags: ['outreach'], saved_at: new Date().toISOString() }).catch(() => {});
             }}
           />
         )}
@@ -996,554 +449,150 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     );
   }
 
-  // ── Chat view ──────────────────────────────────────────────────────────────
+  // ── Chat view ─────────────────────────────────────────────────────────────────
+  const currentQDef = QUESTIONS[currentQ];
+  const showFreeTextInput = !isComplete && currentQDef?.freeText;
+  const showChips = !isComplete && !loading && activeChips.length > 0;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '70vh' }}>
+      {/* Header */}
       <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>
-          CAREER GOALS
-        </p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px', transition: 'opacity 0.3s' }}>
-          {conversationDone ? 'Your Career Goals.' : 'Tell FastIQ what you\'re looking for.'}
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>CAREER GOALS</p>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
+          {isComplete ? 'Your Career Goals.' : "Tell us what you're looking for."}
         </h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>
-          The more we know about you, the better we can help you.
-        </p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>The more we share, the better we can help you.</p>
       </div>
 
-      {questionCount >= 1 && !conversationDone && (
-        <div style={{ padding: '12px 24px', background: '#FAFAFA', borderBottom: '1px solid #F0F0F0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
-              The more you share...
-            </p>
-            <div style={{ flex: 1, height: 3, background: '#EEEEEE', borderRadius: 100, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min(100, Math.round((Math.min(questionCount, 9) / 9) * 100))}%`, background: '#E85D20', borderRadius: 100, transition: 'width 0.4s ease' }} />
-            </div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, flexShrink: 0, whiteSpace: 'nowrap' }}>
-              {Math.min(questionCount, 9)} of 9
-            </p>
-          </div>
-        </div>
-      )}
-
+      {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 24px' }}>
-        {restoredBanner && !conversationDone && (() => {
-          const daysDiff = restoredAt ? Math.floor((Date.now() - restoredAt.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-          const isStale = daysDiff >= 7;
-          return (
-            <div style={{ borderTop: '2px solid #E85D20', background: '#FFF5F0', padding: '10px 14px', borderRadius: 8, marginBottom: 14 }}>
-              {confirmClear ? (
-                <div>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: '0 0 8px' }}>Start a new conversation? Your previous one will be cleared.</p>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={startChat} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '6px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Yes, start fresh</button>
-                    <button onClick={() => setConfirmClear(false)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 100, padding: '6px 16px', fontSize: 12, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Never mind</button>
-                  </div>
-                </div>
-              ) : isStale ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0 }}>⚡ You have a saved conversation from {daysDiff} days ago. Continue or start fresh?</p>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setRestoredBanner(false)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Continue</button>
-                    <button onClick={() => setConfirmClear(true)} style={{ background: 'none', border: '1px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '5px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}>Start Fresh</button>
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0 }}>⚡ Picking up where you left off</p>
-                  <button onClick={() => setConfirmClear(true)} style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>Start fresh →</button>
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-        {messages.map((msg, i) => {
-          const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !loading && !conversationDone;
-          const showSkip = isLastAssistant && !awaitingMajor && suggestedPrompts.length > 0 && questionCount > 1;
-          const showSaveIcon = i >= 2;
-          return (
-            <React.Fragment key={i}>
-              <MessageBubble message={msg} />
-              {msg.role === 'assistant' && showSaveIcon && (
-                <div style={{ display: 'flex', justifyContent: 'flex-start', paddingLeft: 42, marginTop: -6, marginBottom: 8 }}>
-                  <SaveToNotebookButton content={msg.content} sourcePage="career_goals" userEmail={user?.email} />
-                </div>
-              )}
-              {isLastAssistant && awaitingMajor && !loading && (
-                <div style={{ marginLeft: 42, marginBottom: 16 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {MAJOR_CHIPS.map(m => (
-                      <button key={m}
-                        onClick={() => {
-                          if (m === 'Other / Type mine →') { inputRef.current?.focus(); return; }
-                          handleMajorSubmit(m);
-                        }}
-                        className="major-chip"
-                        style={{ background: '#fff', border: '1.5px solid #e0e0e0', color: '#555', borderRadius: 100, padding: '8px 16px', fontSize: 14, fontWeight: 400, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s ease', fontFamily: "'DM Sans', sans-serif" }}>
-                        {m}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {isLastAssistant && !awaitingMajor && showAssessmentCTA && (
-                <div style={{ marginLeft: 42, marginBottom: 16 }}>
-                  <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '20px 24px', maxWidth: 480 }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px', fontFamily: "'DM Sans', sans-serif" }}>RECOMMENDED FOR YOU</p>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 6px', fontFamily: "'DM Sans', sans-serif" }}>Career Archetype Assessment</p>
-                    <p style={{ fontSize: 13, color: '#555', margin: '0 0 16px', lineHeight: 1.5, fontFamily: "'DM Sans', sans-serif" }}>15 minutes. Discover your career archetype, strengths, and the roles you're most likely to thrive in — built specifically for college students.</p>
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <button onClick={() => navigate('FastIQAssessment')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Take the Assessment — $49 →</button>
-                      <button onClick={() => setShowAssessmentCTA(false)} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Skip for now</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {isLastAssistant && !awaitingMajor && !showAssessmentCTA && suggestedPrompts.length > 0 && (
-                <>
-                  <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} onSkip={showSkip ? handleSkip : null} />
-                  <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)', margin: '2px 0 0 42px', fontFamily: "'DM Sans', sans-serif" }}>Or type your own answer below</p>
-                </>
-              )}
-              {isLastAssistant && awaitingCompanyInput && !loading && (
-                <div style={{ marginLeft: 42, marginBottom: 16 }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-                    {companyTags.map((tag, idx) => (
-                      <span key={idx} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 100, padding: '4px 12px', fontSize: 12, color: '#E85D20', fontFamily: "'DM Sans', sans-serif" }}>
-                        {tag}
-                        <button onClick={() => handleCompanyTagRemove(idx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', minHeight: 'auto', padding: 0, lineHeight: 1 }}>×</button>
-                      </span>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                    <input
-                      type="text"
-                      value={companyTagInput}
-                      onChange={e => setCompanyTagInput(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleCompanyTagAdd(); } }}
-                      placeholder="Type a company name and press Enter"
-                      style={{ flex: 1, border: '1.5px solid #E0E0E0', borderRadius: 8, padding: '8px 12px', fontSize: 13, fontFamily: "'DM Sans', sans-serif", outline: 'none' }}
-                    />
-                    <button onClick={handleCompanyTagAdd} style={{ background: '#E0E0E0', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Add</button>
-                  </div>
-                  {companyTags.length > 0 && (
-                    <button onClick={handleCompanyContinue} style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '9px 22px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Continue →</button>
-                  )}
-                </div>
-              )}
-            </React.Fragment>
-          );
-        })}
+        {messages.map((msg, i) => <MessageBubble key={i} message={msg} />)}
 
         {loading && <TypingIndicator />}
 
-        {conversationDone && roleRecs?.length > 0 && (
-          <>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 16 }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#0d1117', border: '1px solid rgba(232,93,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ color: '#E85D20', fontSize: 14 }}>⚡</span>
-              </div>
-              <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: '18px 18px 18px 4px', padding: '14px 18px', maxWidth: 480 }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>
-                  Hang tight. We're coming up with a plan for you.
-                </p>
-              </div>
-            </div>
-            {currentPhase === 'chat' && (
-              <CareerProfileCard
-                careerProfile={careerProfile}
-                roleRecommendations={roleRecs}
-                aboutYou={aboutYou}
-                topStrengths={topStrengths}
-                workEnvironment={workEnvironment}
-                honestChallenge={honestChallenge}
-                cffNetwork={cffNetwork}
-                preliminaryArchetype={prelimArchetype}
-                userEmail={user?.email}
-                user={user}
-                onTabChange={onTabChange}
-                onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
-                onRestart={startChat}
-                onPromptSelect={handleChipSelect}
-                onContinue={() => setCurrentPhase('snapshot')}
-              />
-            )}
+        {/* Chips */}
+        {showChips && <ChipRow chips={activeChips} onSelect={(chip) => handleChipOrText(chip)} />}
 
-            {currentPhase === 'snapshot' && (
-              <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
-                  </div>
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 480 }}>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>
-                      Here's what I've got on you so far. Does this look right?
-                    </p>
-                  </div>
-                </div>
-                <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>YOUR CAREER SNAPSHOT</p>
-                  {[
-                    { icon: '🎯', label: 'Target Roles', value: user?.career_goals?.target_roles?.join(', ') || '—' },
-                    { icon: '🏢', label: 'Industries', value: user?.career_goals?.target_industries?.join(', ') || '—' },
-                    { icon: '📍', label: 'Location', value: user?.career_goals?.location_preference || '—' },
-                    { icon: '🎓', label: 'Graduating', value: user?.career_goals?.graduation_year || '—' },
-                    { icon: '💭', label: 'Biggest struggle', value: user?.career_goals?.perceived_gap || '—' },
-                    { icon: '🏭', label: 'Target companies', value: user?.career_goals?.target_companies?.join(', ') || 'Not set yet' },
-                  ].map(row => (
-                    <div key={row.label} style={{ display: 'flex', gap: 16, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                      <span style={{ fontSize: 16, flexShrink: 0 }}>{row.icon}</span>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{row.label}</p>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#fff', margin: 0, lineHeight: 1.5 }}>{row.value}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-                  <button onClick={() => setCurrentPhase('resume')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', flex: 1, fontFamily: "'DM Sans', sans-serif" }}>Looks good →</button>
-                  <button onClick={() => setCurrentPhase('chat')} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 28px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Edit something</button>
-                </div>
-                <p onClick={() => { startChat(); setCurrentPhase('chat'); }} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: 0 }}>← Start over</p>
-              </div>
-            )}
-
-            {currentPhase === 'resume' && (
-              <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
-                  </div>
-                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 480 }}>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>Now let's get your resume sorted. Do you have one?</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div onClick={() => navigate('ResumeTailoring')} style={{ background: '#fff', border: '2px solid #E85D20', borderRadius: 14, padding: '20px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>📄</div>
-                    <div>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Upload my resume</p>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll analyze it and help you tailor it to any job</p>
-                    </div>
-                    <span style={{ marginLeft: 'auto', color: '#E85D20', fontSize: 18, flexShrink: 0 }}>→</span>
-                  </div>
-                  <div onClick={() => isFastIQ ? navigate('ResumeTailoring') : onOpenUpgrade?.()} style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 14, padding: '20px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>✨</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>Help me create one</p>
-                        <span style={{ background: '#FFF5F0', color: '#E85D20', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>FASTIQ</span>
-                      </div>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Answer a few questions and we'll build one for you</p>
-                    </div>
-                    <span style={{ marginLeft: 'auto', color: '#CCCCCC', fontSize: 18, flexShrink: 0 }}>→</span>
-                  </div>
-                </div>
-                <p onClick={() => navigate('FreeTierDashboard')} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: '24px 0 0' }}>Skip for now — go to my dashboard →</p>
-              </div>
-            )}
-          </>
-        )}
-
-        {conversationDone && !roleRecs?.length && savedGoals && (
-          <>
-            <GoalsSummaryCard
-              goals={savedGoals}
-              onTabChange={onTabChange}
-              onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
-              onRestart={startChat}
-            />
-
-            {/* Alumni Explorer — FastIQ users see real alumni; free users see locked teaser */}
-            {(user.is_fastiq || user.fastiq_setup_complete || user.subscription_status === 'active' || user.membership_tier === 'fastiq') ? (
-              alumniLoading ? (
-                <div style={{ marginTop: '32px', fontSize: '13px', color: '#888' }}>
-                  Finding alumni in your target roles...
-                </div>
-              ) : alumniClusters.length > 0 ? (
-                <div style={{ marginTop: '32px' }}>
-                  <div style={{ marginBottom: '16px' }}>
-                    {isUndecided ? (
-                      <>
-                        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
-                          Not sure which direction to go?
-                        </h3>
-                        <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
-                          Talk to someone who's been there. Connect with UF alumni who have roles you're exploring.
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: '#1A1A1A' }}>
-                          Want to know what a {primaryRole} is really like?
-                        </h3>
-                        <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.5 }}>
-                          Connect with UF alumni who have the exact role you're targeting.
-                        </p>
-                      </>
-                    )}
-                  </div>
-                  {alumniClusters.map(cluster => (
-                    <div key={cluster.cluster} style={{ marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>
-                          {cluster.cluster}
-                        </span>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
-                        {cluster.alumni.map(alum => (
-                          <div key={alum.linkedin_url} style={{ background: '#FAFAFA', border: '1px solid #E5E5E5', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif" }}>{alum.name}</span>
-                            <span style={{ fontSize: '12px', color: '#555', fontFamily: "'DM Sans', sans-serif" }}>{alum.title}</span>
-                            <span style={{ fontSize: '12px', color: '#888', fontFamily: "'DM Sans', sans-serif" }}>{alum.company}</span>
-                            <button
-                              onClick={() => handleConnectClick(alum)}
-                              disabled={connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url)}
-                              style={{ marginTop: '8px', background: 'none', border: '1px solid #E85D20', borderRadius: '6px', padding: '5px 10px', fontSize: '12px', color: '#E85D20', cursor: sentTo.includes(alum.linkedin_url) ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, minHeight: 'auto', opacity: connectLoading === alum.linkedin_url || sentTo.includes(alum.linkedin_url) ? 0.7 : 1 }}
-                            >
-                              {connectLoading === alum.linkedin_url ? 'Drafting...' : sentTo.includes(alum.linkedin_url) ? 'Message sent ✓' : 'Connect →'}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : null
-            ) : (
-              <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 16, padding: '24px', marginTop: '32px', textAlign: 'center' }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px' }}>🔒 FASTIQ FEATURE</p>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Connect with alumni in your target role</p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: '0 0 16px', lineHeight: 1.6 }}>See real alumni doing exactly what you want to do, and reach out directly. Available with FastIQ.</p>
-                <button
-                  onClick={() => onOpenUpgrade?.()}
-                  style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
-                >
-                  Unlock FastIQ →
-                </button>
-              </div>
-            )}
-          </>
-        )}
-
-        {error === 'llm' && (
-          <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-            <p style={{ fontSize: 13, color: '#E85D20', margin: 0 }}>FastIQ hit a snag. Tap to retry.</p>
-            <button onClick={() => { setError(null); sendMessage(retryText); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600 }}>
-              <RefreshCw style={{ width: 14, height: 14 }} /> Retry
+        {/* Complete state — phase progression */}
+        {isComplete && currentPhase === 'chat' && (
+          <div style={{ marginLeft: 42, marginTop: 8 }}>
+            <button
+              onClick={() => setCurrentPhase('snapshot')}
+              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+            >
+              Continue →
             </button>
           </div>
         )}
 
-        {error === 'save' && (
-          <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-            <p style={{ fontSize: 13, color: '#E85D20', margin: 0 }}>Your goals couldn't be saved. Try again.</p>
-            <button onClick={() => { setError(null); saveGoals(savedGoals); }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E85D20', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 600 }}>
-              <RefreshCw style={{ width: 14, height: 14 }} /> Retry
-            </button>
+        {/* Snapshot phase */}
+        {isComplete && currentPhase === 'snapshot' && (
+          <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 0' }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
+              </div>
+              <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 480 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>Here's what I've got on you so far. Does this look right?</p>
+              </div>
+            </div>
+            <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>YOUR CAREER SNAPSHOT</p>
+              {[
+                { icon: '🎯', label: 'Target Roles', value: user?.career_goals?.target_roles?.join(', ') || '—' },
+                { icon: '🏢', label: 'Industries', value: user?.career_goals?.target_industries?.join(', ') || '—' },
+                { icon: '📍', label: 'Location', value: user?.career_goals?.location_preference || '—' },
+                { icon: '🎓', label: 'Graduating', value: user?.career_goals?.graduation_year || '—' },
+                { icon: '💭', label: 'Biggest struggle', value: user?.career_goals?.perceived_gap || '—' },
+                { icon: '🏭', label: 'Target companies', value: user?.career_goals?.target_companies?.join(', ') || 'Not set yet' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', gap: 16, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>{row.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{row.label}</p>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#fff', margin: 0, lineHeight: 1.5 }}>{row.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+              <button onClick={() => setCurrentPhase('resume')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', flex: 1, fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Looks good →</button>
+              <button onClick={() => setCurrentPhase('chat')} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 28px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Edit something</button>
+            </div>
+            <p onClick={startOver} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: 0 }}>← Start over</p>
+          </div>
+        )}
+
+        {/* Resume phase */}
+        {isComplete && currentPhase === 'resume' && (
+          <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 0' }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
+              </div>
+              <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 480 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>Now let's get your resume sorted. Do you have one?</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div onClick={() => navigate('ResumeTailoring')} style={{ background: '#fff', border: '2px solid #E85D20', borderRadius: 14, padding: '20px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>📄</div>
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Upload my resume</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll analyze it and help you tailor it to any job</p>
+                </div>
+                <span style={{ marginLeft: 'auto', color: '#E85D20', fontSize: 18, flexShrink: 0 }}>→</span>
+              </div>
+              <div onClick={() => isFastIQ ? navigate('ResumeTailoring') : onOpenUpgrade?.()} style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 14, padding: '20px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>✨</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>Help me create one</p>
+                    <span style={{ background: '#FFF5F0', color: '#E85D20', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>FASTIQ</span>
+                  </div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Answer a few questions and we'll build one for you</p>
+                </div>
+                <span style={{ marginLeft: 'auto', color: '#CCCCCC', fontSize: 18, flexShrink: 0 }}>→</span>
+              </div>
+            </div>
+            <p onClick={() => { setMode('summary'); }} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: '24px 0 0' }}>Skip for now — go to my profile →</p>
           </div>
         )}
 
         <div ref={bottomRef} />
       </div>
 
-      {/* Outreach Modal */}
-      {outreachModal?.open && (
-        <div style={{
-          position: 'fixed', inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 50, padding: '20px',
-        }}>
-          <div style={{
-            background: '#fff',
-            borderRadius: '16px',
-            padding: '28px',
-            width: '100%',
-            maxWidth: '520px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px',
-          }}>
-            {/* Header */}
-            <div>
-              <p style={{
-                fontSize: '11px',
-                color: '#888',
-                margin: '0 0 4px 0',
-                textTransform: 'uppercase',
-                letterSpacing: '.06em',
-                fontWeight: 600,
-              }}>
-                {outreachModal.mode === 'linkedin' ? 'Reaching out via LinkedIn' : 'Sending via CFF'}
-              </p>
-              <p style={{ fontSize: '15px', fontWeight: '500', color: '#1A1A1A', margin: 0 }}>
-                {outreachModal.alum.name}
-              </p>
-              <p style={{ fontSize: '13px', color: '#666', margin: '2px 0 0 0' }}>
-                {outreachModal.alum.title} · {outreachModal.alum.company}
-              </p>
-            </div>
-
-            {/* Mode-specific instruction */}
-            {outreachModal.mode === 'linkedin' ? (
-              <div style={{
-                background: '#F0F7FF',
-                border: '1px solid #B3D9FF',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                fontSize: '12px',
-                color: '#0057B8',
-                lineHeight: '1.5',
-              }}>
-                Edit your message below, then click "Copy & Open LinkedIn" — paste it into your connection request.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '12px', color: '#E85D20' }}>⚡</span>
-                <span style={{ fontSize: '12px', color: '#888' }}>
-                  FastIQ drafted this for you — edit freely before sending
-                </span>
-              </div>
-            )}
-
-            {/* Editable draft */}
-            <textarea
-              value={editedDraft}
-              onChange={e => setEditedDraft(e.target.value)}
-              rows={6}
-              style={{
-                width: '100%',
-                fontSize: '13px',
-                lineHeight: '1.6',
-                color: '#1A1A1A',
-                background: '#F9F9F9',
-                border: '1px solid #E0E0E0',
-                borderRadius: '8px',
-                padding: '12px',
-                resize: 'vertical',
-                fontFamily: "'DM Sans', sans-serif",
-                boxSizing: 'border-box',
-              }}
-            />
-
-            {/* Character count */}
-            <p style={{
-              fontSize: '11px',
-              color: editedDraft.length > 300 && outreachModal.mode === 'linkedin'
-                ? '#EF4444'
-                : '#888',
-              margin: '-8px 0 0 0',
-              textAlign: 'right',
-            }}>
-              {editedDraft.length} characters
-              {outreachModal.mode === 'linkedin' && editedDraft.length > 300 && (
-                <span> — LinkedIn limit is 300</span>
-              )}
-            </p>
-
-            {/* Actions */}
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setOutreachModal(null)}
-                style={{
-                  background: 'none',
-                  border: '1px solid #E0E0E0',
-                  borderRadius: '8px', padding: '8px 16px',
-                  fontSize: '13px', color: '#666', cursor: 'pointer',
-                  fontFamily: "'DM Sans', sans-serif",
-                  minHeight: 'auto',
-                }}
-              >
-                Cancel
-              </button>
-
-              {outreachModal.mode === 'linkedin' ? (
-                <button
-                  onClick={handleSendLinkedIn}
-                  disabled={!editedDraft.trim()}
-                  style={{
-                    background: '#0077B5',
-                    border: 'none', borderRadius: '8px',
-                    padding: '8px 20px', fontSize: '13px',
-                    fontWeight: '500', color: '#fff',
-                    cursor: !editedDraft.trim() ? 'not-allowed' : 'pointer',
-                    opacity: !editedDraft.trim() ? 0.7 : 1,
-                    fontFamily: "'DM Sans', sans-serif",
-                    minHeight: 'auto',
-                  }}
-                >
-                  Copy & Open LinkedIn →
-                </button>
-              ) : (
-                <button
-                  onClick={handleSendCFF}
-                  disabled={sending || !editedDraft.trim()}
-                  style={{
-                    background: '#E85D20',
-                    border: 'none', borderRadius: '8px',
-                    padding: '8px 20px', fontSize: '13px',
-                    fontWeight: '500', color: '#fff',
-                    cursor: sending || !editedDraft.trim() ? 'not-allowed' : 'pointer',
-                    opacity: sending || !editedDraft.trim() ? 0.7 : 1,
-                    fontFamily: "'DM Sans', sans-serif",
-                    minHeight: 'auto',
-                  }}
-                >
-                  {sending ? 'Sending...' : 'Send message →'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Copy toast */}
-      {copyToast && (
-        <div style={{
-          position: 'fixed', bottom: '24px', left: '50%',
-          transform: 'translateX(-50%)',
-          background: '#fff',
-          border: '1px solid #E0E0E0',
-          borderRadius: '8px', padding: '10px 18px',
-          fontSize: '13px', color: '#1A1A1A',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          zIndex: 100,
-          fontFamily: "'DM Sans', sans-serif",
-        }}>
-          ✓ Message copied — paste it into your LinkedIn connection request
-        </div>
-      )}
-
-      {!conversationDone && (
-        <div className="chat-input-bar" style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff', position: 'sticky', bottom: 0, zIndex: 100 }}>
+      {/* Free text input */}
+      {showFreeTextInput && !loading && (
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #F0F0F0', flexShrink: 0, background: '#fff', position: 'sticky', bottom: 0 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 16, padding: '8px 12px' }}>
-            <textarea
+            <input
               ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={awaitingMajor ? "Or type your major here..." : "Type your answer..."}
-              rows={1}
-              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', resize: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', lineHeight: 1.5, maxHeight: 120, overflowY: 'auto' }}
+              placeholder={currentQDef?.placeholder || 'Type your answer...'}
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A' }}
             />
             <button
-              onClick={() => sendMessage()}
-              disabled={!input.trim() || loading}
-              style={{ background: input.trim() && !loading ? '#E85D20' : '#E0E0E0', border: 'none', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'default', flexShrink: 0, minHeight: 'auto', transition: 'background 0.2s' }}
+              onClick={handleFreeTextSubmit}
+              disabled={!inputValue.trim()}
+              style={{ background: inputValue.trim() ? '#E85D20' : '#E0E0E0', border: 'none', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: inputValue.trim() ? 'pointer' : 'default', flexShrink: 0, minHeight: 'auto', transition: 'background 0.2s' }}
             >
-              {loading
-                ? <Loader2 style={{ width: 16, height: 16, color: '#fff', animation: 'spin 1s linear infinite' }} />
-                : <Send style={{ width: 16, height: 16, color: '#fff' }} />}
+              <Send style={{ width: 16, height: 16, color: '#fff' }} />
             </button>
           </div>
-          <p style={{ fontSize: 11, color: '#BBB', textAlign: 'center', margin: '6px 0 0', fontFamily: "'DM Sans', sans-serif" }}>
-            Press Enter to send · Shift+Enter for new line
-          </p>
+          {activeChips.length > 0 && (
+            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {activeChips.map((chip, i) => (
+                <button key={i} onClick={() => handleChipOrText(chip)}
+                  style={{ background: '#fff', border: '1.5px solid #E85D20', color: '#E85D20', borderRadius: 100, padding: '6px 14px', fontSize: 12, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+                  {chip}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -1551,16 +600,6 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         @keyframes dotBounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
           40% { transform: translateY(-6px); opacity: 1; }
-        }
-        button:focus { outline: none; box-shadow: 0 0 0 2px #E85D20; }
-        input:focus, textarea:focus { outline: none; box-shadow: 0 0 0 2px #E85D20; }
-        .major-chip:hover { border-color: #E85D20 !important; color: #E85D20 !important; }
-        .chat-chip:hover { background: #E85D20 !important; color: #fff !important; }
-        @media (max-width: 768px) {
-          .chat-bubble-ai { max-width: 88% !important; }
-          .chat-bubble-user { max-width: 80% !important; }
-          .chips-container { flex-direction: column !important; width: 100%; }
-          .chips-container .chat-chip { width: 100%; text-align: center; }
         }
       `}</style>
     </div>
