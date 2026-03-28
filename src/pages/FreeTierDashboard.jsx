@@ -27,6 +27,10 @@ export default function FreeTierDashboard() {
   const [showConciergeModal, setShowConciergeModal] = useState(false);
   const [savedGoals, setSavedGoals] = useState(null);
 
+  useEffect(() => {
+    if (refreshUser) refreshUser();
+  }, []);
+
   const handleGoalsSaved = async () => {
     if (refreshUser) await refreshUser();
     setSavedGoals(Date.now());
