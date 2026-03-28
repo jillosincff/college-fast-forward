@@ -133,7 +133,7 @@ function StepCard({ status, number, title, tag, description, children }) {
 }
 
 export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
-  const { step1, step2, step3, step4, step5, step6, completedCount, targetCompanies, pipelineCount, hasOffer } = useRoadmapState(user);
+  const { step1, step2, step3, step4, step5, step6, completedCount, targetCompanies, pipelineCount, hasOffer, fastiq } = useRoadmapState(user);
   const firstName = user?.full_name?.split(' ')[0] || 'You';
   const school = user?.school || user?.university || 'your school';
   const alumniCount = targetCompanies.length > 0 ? targetCompanies.length * 4 : 12;
