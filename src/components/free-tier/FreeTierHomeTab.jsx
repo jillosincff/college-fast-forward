@@ -78,11 +78,47 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const fastiq = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+
+  const hasGoals = !!(user?.career_goals?.target_roles?.length > 0);
+  const hasResume = !!user?.resume_url;
+  const hasSearched = !!user?.alumni_search_used;
+  const hasViewedLeads = !!user?.leads_viewed;
+
+  const completedSteps = {
+    1: hasGoals,
+    2: hasResume,
+    3: true,
+    4: hasSearched,
+    5: hasViewedLeads,
+    6: fastiq,
+  };
+  const allStepsComplete = Object.values(completedSteps).every(Boolean);
+
+  const industries = user?.career_goals?.target_industries || [];
+  const location = user?.career_goals?.location_preference || '';
+
+  // Hero copy based on state
+  const heroTitle = allStepsComplete
+    ? `Hey ${firstName}. You're ready. Now let's get you hired.`
+    : hasGoals
+    ? `Hey ${firstName}. You're on your way.`
+    : `Hey ${firstName}. Let's get you hired.`;
+
+  const heroSub = allStepsComplete
+    ? 'All steps complete. Time to activate your network.'
+    : hasGoals
+    ? `You're working through the plan. Keep going — every step unlocks something.`
+    : `No more applying into the void. We'll help you figure out what you want, get your story straight, and connect with the right people — step by step.`;
 
   return (
     <div>
       {/* Hero Section */}
-      <div style={{ background: '#0A0A0A', padding: '48px 40px', textAlign: 'center' }}>
+      <div style={{
+        background: '#0A0A0A',
+        padding: hasGoals ? '32px 40px' : '48px 40px',
+        textAlign: 'center'
+      }}>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 13, fontWeight: 600,
@@ -93,20 +129,19 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </p>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
-          fontSize: 'clamp(28px, 5vw, 48px)',
+          fontSize: hasGoals ? 'clamp(22px, 4vw, 34px)' : 'clamp(28px, 5vw, 48px)',
           fontWeight: 700, color: '#fff',
-          lineHeight: 1.15, margin: '0 0 16px'
+          lineHeight: 1.15, margin: '0 0 12px'
         }}>
-          Hey {firstName}. Let's get you hired.
+          {heroTitle}
         </h1>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: 16, color: 'rgba(255,255,255,0.6)',
+          fontSize: 15, color: 'rgba(255,255,255,0.6)',
           margin: '0 auto', lineHeight: 1.6,
-          maxWidth: 520
+          maxWidth: 500
         }}>
-          No more applying into the void. We'll help you figure out what you want,
-          get your story straight, and connect with the right people — step by step.
+          {heroSub}
         </p>
       </div>
 
@@ -138,9 +173,119 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </div>
       )}
 
-      {/* Body Sections */}
-      <div className="max-w-3xl mx-auto px-6 py-12">
+      {/* Roadmap — always shown */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
         <CareerRoadmap user={user} onTabChange={onTabChange} onOpenUpgrade={onOpenUpgrade} />
+
+        {/* STATE 2: Snapshot card */}
+        {hasGoals && !allStepsComplete && (
+          <div style={{
+            background: '#fff',
+            border: '1px solid #E5E5E5',
+            borderRadius: 16,
+            padding: '24px 28px',
+            marginTop: 32,
+          }}>
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 11, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.12em',
+              color: '#E85D20', margin: '0 0 12px'
+            }}>
+              YOUR SNAPSHOT
+            </p>
+            <p style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 18, fontWeight: 700,
+              color: '#1A1A1A', margin: '0 0 8px'
+            }}>
+              {industries.length > 0
+                ? `You're targeting ${industries[0]}${location ? ` in ${location}` : ''}.`
+                : `You're building your career plan.`}
+            </p>
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 14, color: '#555',
+              margin: '0 0 20px', lineHeight: 1.6
+            }}>
+              Keep going — the more you complete, the better your matches get.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
+                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>750+</p>
+                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>UF Gators in the network</p>
+              </div>
+              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
+                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>1</p>
+                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>free alumni search waiting</p>
+              </div>
+              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
+                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>{user?.career_goals?.target_roles?.length || 0}</p>
+                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>target roles identified</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STATE 3: All steps complete — activity snapshot + CTA */}
+        {allStepsComplete && (
+          <div style={{
+            background: '#fff',
+            border: '1px solid #E5E5E5',
+            borderRadius: 16,
+            padding: '24px 28px',
+            marginTop: 32,
+          }}>
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 11, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.12em',
+              color: '#E85D20', margin: '0 0 12px'
+            }}>
+              YOUR ACTIVITY
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
+                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>750+</p>
+                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>UF Gators in the network</p>
+              </div>
+              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
+                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>{user?.career_goals?.target_roles?.length || 0}</p>
+                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>target roles identified</p>
+              </div>
+              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
+                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>{industries.length}</p>
+                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>industries targeted</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => onTabChange('career_goals')}
+                style={{
+                  background: '#E85D20', border: 'none',
+                  borderRadius: 10, padding: '13px 28px',
+                  fontSize: 15, fontWeight: 600, color: '#fff',
+                  cursor: 'pointer', minHeight: 'auto',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                Find My Leads →
+              </button>
+              <button
+                onClick={() => onTabChange('company_intel')}
+                style={{
+                  background: 'transparent', border: '1.5px solid #E85D20',
+                  borderRadius: 10, padding: '11px 24px',
+                  fontSize: 14, fontWeight: 600, color: '#E85D20',
+                  cursor: 'pointer', minHeight: 'auto',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >
+                Company Intel →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
