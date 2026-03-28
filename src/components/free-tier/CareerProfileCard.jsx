@@ -8,7 +8,7 @@ const cffIntroLabel = { high: '🤝 CFF intro: highly valuable', medium: '🤝 C
 export default function CareerProfileCard({
   careerProfile, roleRecommendations, aboutYou, topStrengths,
   workEnvironment, honestChallenge, cffNetwork, preliminaryArchetype,
-  onTabChange, onFindLeads, onRestart, onPromptSelect, userEmail, user,
+  onTabChange, onFindLeads, onRestart, onPromptSelect, userEmail, user, onContinue,
 }) {
   useEffect(() => {
     if (!roleRecommendations?.length || !userEmail) return;
@@ -172,36 +172,18 @@ export default function CareerProfileCard({
       {/* Bottom section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-        {/* Primary actions — logic-driven CTAs */}
-        {(() => {
-          const hasResume = !!user?.resume_url;
-          const hasLinkedIn = !!user?.linkedin_url;
-          const primaryCTA = !hasResume
-            ? { label: 'Upload Your Resume →', action: () => onTabChange?.('career_center') }
-            : !hasLinkedIn
-            ? { label: 'Optimize Your LinkedIn →', action: () => onTabChange?.('career_center') }
-            : { label: 'Find My Leads →', action: onFindLeads || (() => onTabChange?.('company_intel')) };
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <button onClick={primaryCTA.action}
-                  style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-                  {primaryCTA.label}
-                </button>
-                <button onClick={() => onTabChange?.('company-intel')}
-                  style={{ background: '#fff', color: '#E85D20', border: '2px solid #E85D20', borderRadius: 100, padding: '10px 20px', fontSize: 14, fontWeight: 500, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-                  Explore Companies →
-                </button>
-              </div>
-              {onRestart && (
-                <button onClick={onRestart}
-                  style={{ background: 'none', border: 'none', padding: 0, fontSize: 12, color: '#999', cursor: 'pointer', textAlign: 'left', width: 'fit-content', fontFamily: "'DM Sans', sans-serif" }}>
-                  Start over →
-                </button>
-              )}
-            </div>
-          );
-        })()}
+        {/* Primary CTA */}
+        <button
+          onClick={onContinue}
+          style={{
+            background: '#E85D20', border: 'none', borderRadius: 10,
+            padding: '14px 32px', fontSize: 15, fontWeight: 600,
+            color: '#fff', cursor: 'pointer',
+            fontFamily: "'DM Sans', sans-serif"
+          }}
+        >
+          Continue →
+        </button>
 
 
 

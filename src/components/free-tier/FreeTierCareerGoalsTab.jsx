@@ -410,6 +410,7 @@ function TypingIndicator() {
 
 export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrade }) {
   const [mode, setMode] = useState(hasExistingGoals(user) ? 'summary' : 'chat');
+  const [currentPhase, setCurrentPhase] = useState('chat');
   const [showLeads, setShowLeads] = useState(false);
   const [showLeadsArrow, setShowLeadsArrow] = useState(false);
   const [savedLeads, setSavedLeads] = useState(() => user?.saved_leads || []);
@@ -1150,22 +1151,99 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                 </p>
               </div>
             </div>
-            <CareerProfileCard
-              careerProfile={careerProfile}
-              roleRecommendations={roleRecs}
-              aboutYou={aboutYou}
-              topStrengths={topStrengths}
-              workEnvironment={workEnvironment}
-              honestChallenge={honestChallenge}
-              cffNetwork={cffNetwork}
-              preliminaryArchetype={prelimArchetype}
-              userEmail={user?.email}
-              user={user}
-              onTabChange={onTabChange}
-              onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
-              onRestart={startChat}
-              onPromptSelect={handleChipSelect}
-            />
+            {currentPhase === 'chat' && (
+              <CareerProfileCard
+                careerProfile={careerProfile}
+                roleRecommendations={roleRecs}
+                aboutYou={aboutYou}
+                topStrengths={topStrengths}
+                workEnvironment={workEnvironment}
+                honestChallenge={honestChallenge}
+                cffNetwork={cffNetwork}
+                preliminaryArchetype={prelimArchetype}
+                userEmail={user?.email}
+                user={user}
+                onTabChange={onTabChange}
+                onFindLeads={() => { setMode('summary'); setTimeout(handleFindLeads, 200); }}
+                onRestart={startChat}
+                onPromptSelect={handleChipSelect}
+                onContinue={() => setCurrentPhase('snapshot')}
+              />
+            )}
+
+            {currentPhase === 'snapshot' && (
+              <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
+                  </div>
+                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 480 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>
+                      Here's what I've got on you so far. Does this look right?
+                    </p>
+                  </div>
+                </div>
+                <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>YOUR CAREER SNAPSHOT</p>
+                  {[
+                    { icon: '🎯', label: 'Target Roles', value: user?.career_goals?.target_roles?.join(', ') || '—' },
+                    { icon: '🏢', label: 'Industries', value: user?.career_goals?.target_industries?.join(', ') || '—' },
+                    { icon: '📍', label: 'Location', value: user?.career_goals?.location_preference || '—' },
+                    { icon: '🎓', label: 'Graduating', value: user?.career_goals?.graduation_year || '—' },
+                    { icon: '💭', label: 'Biggest struggle', value: user?.career_goals?.perceived_gap || '—' },
+                    { icon: '🏭', label: 'Target companies', value: user?.career_goals?.target_companies?.join(', ') || 'Not set yet' },
+                  ].map(row => (
+                    <div key={row.label} style={{ display: 'flex', gap: 16, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                      <span style={{ fontSize: 16, flexShrink: 0 }}>{row.icon}</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{row.label}</p>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#fff', margin: 0, lineHeight: 1.5 }}>{row.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                  <button onClick={() => setCurrentPhase('resume')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', flex: 1, fontFamily: "'DM Sans', sans-serif" }}>Looks good →</button>
+                  <button onClick={() => setCurrentPhase('chat')} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 28px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>Edit something</button>
+                </div>
+                <p onClick={() => { startChat(); setCurrentPhase('chat'); }} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: 0 }}>← Start over</p>
+              </div>
+            )}
+
+            {currentPhase === 'resume' && (
+              <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
+                  </div>
+                  <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 480 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>Now let's get your resume sorted. Do you have one?</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div onClick={() => navigate('ResumeTailoring')} style={{ background: '#fff', border: '2px solid #E85D20', borderRadius: 14, padding: '20px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>📄</div>
+                    <div>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Upload my resume</p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll analyze it and help you tailor it to any job</p>
+                    </div>
+                    <span style={{ marginLeft: 'auto', color: '#E85D20', fontSize: 18, flexShrink: 0 }}>→</span>
+                  </div>
+                  <div onClick={() => isFastIQ ? navigate('ResumeTailoring') : onOpenUpgrade?.()} style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 14, padding: '20px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>✨</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>Help me create one</p>
+                        <span style={{ background: '#FFF5F0', color: '#E85D20', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>FASTIQ</span>
+                      </div>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Answer a few questions and we'll build one for you</p>
+                    </div>
+                    <span style={{ marginLeft: 'auto', color: '#CCCCCC', fontSize: 18, flexShrink: 0 }}>→</span>
+                  </div>
+                </div>
+                <p onClick={() => navigate('FreeTierDashboard')} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: '24px 0 0' }}>Skip for now — go to my dashboard →</p>
+              </div>
+            )}
           </>
         )}
 
