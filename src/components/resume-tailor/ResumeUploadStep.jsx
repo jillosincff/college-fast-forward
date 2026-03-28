@@ -35,6 +35,7 @@ export default function ResumeUploadStep({ existingResume, resumeText, resumeFil
         parsed_text: text.substring(0, 10000),
         is_active: true,
       });
+      await base44.auth.updateMe({ resume_url: file_url }).catch(() => {});
       onResumeReady(text, file.name, resume.id);
     } catch (e) {
       console.error('Resume upload failed:', e);

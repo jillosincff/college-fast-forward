@@ -9,6 +9,7 @@ const FREE_NAV_ITEMS = [
   { id: 'company_intel', icon: Building2, label: 'Company Intel' },
   { id: 'alumni_search', icon: Search, label: 'Alumni Search' },
   { id: 'career_goals', icon: Target, label: 'Career Goals' },
+  { id: 'resume', icon: FileText, label: 'Resume', isPage: true, page: 'ResumeTailoring' },
   { id: 'career_path', icon: Map, label: 'Career Path Research' },
   { id: 'career_center', icon: GraduationCap, label: 'Career Center' },
   { id: 'directory', icon: Users, label: 'Directory' },
@@ -64,7 +65,7 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => item.isPage ? navigate(item.page) : onTabChange(item.id)}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all"
               style={{
                 minHeight: 'auto',

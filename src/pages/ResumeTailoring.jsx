@@ -93,6 +93,8 @@ export default function ResumeTailoring() {
     setCompanyName('');
   };
 
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+
   if (user === undefined) return null;
   if (!user) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
@@ -141,8 +143,15 @@ export default function ResumeTailoring() {
           onResumeReady={handleResumeReady}
         />
 
-        {/* Step 2 — Job Description */}
-        {resumeText && (
+        {/* Step 2 — Job Description (FastIQ gated) */}
+        {resumeText && !isFastIQ && (
+          <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '24px', textAlign: 'center', marginTop: 8 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 8px' }}>Resume tailoring is a FastIQ feature</p>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: '0 0 16px', lineHeight: 1.5 }}>Upload is free. Tailoring to a job description, AI scoring, and downloading the optimized version require FastIQ.</p>
+            <a href="#FreeTierDashboard" style={{ display: 'inline-block', background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none' }}>Unlock FastIQ →</a>
+          </div>
+        )}
+        {resumeText && isFastIQ && (
           <JobDescriptionStep
             companyName={companyName}
             jobTitle={jobTitle}
@@ -155,6 +164,9 @@ export default function ResumeTailoring() {
           />
         )}
       </div>
+    </div>
+  );
+}
     </div>
   );
 }
