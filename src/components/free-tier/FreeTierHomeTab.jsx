@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2, X } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
-import { useCompanyRecs } from '@/components/free-tier/useCompanyRecs';
-import AICompanyCards from '@/components/free-tier/AICompanyCards';
+
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
 const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
-  const { companies, members: recsMembers, loading: recsLoading, searching: recsSearching, error: recsError, noIndustry: recsNoIndustry, weeklyNewCount, refetch } = useCompanyRecs(user);
-
   const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
   const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
@@ -18,7 +15,6 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [nudgeSent, setNudgeSent] = useState(false);
   const [sendingNudge, setSendingNudge] = useState(false);
   const [showParentModal, setShowParentModal] = useState(false);
-  const [alumniCount, setAlumniCount] = useState(null);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
 
   useEffect(() => {
@@ -44,18 +40,6 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
     }
   }, [user]);
 
-  useEffect(() => {
-    // Fetch dynamic alumni count
-    base44.entities.User.filter({}).then(users => {
-      const school = (user?.school || user?.university || '').toLowerCase();
-      const relevant = users.filter(u => {
-        if (u.persona !== 'parent' && u.persona !== 'alumni') return false;
-        const uSchool = (u.school || u.university || '').toLowerCase();
-        return school && uSchool && uSchool.includes(school.split(' ')[0]);
-      });
-      setAlumniCount(relevant.length > 0 ? relevant.length : null);
-    }).catch(() => setAlumniCount(null));
-  }, [user]);
 
   const handleAskParent = async (emailOverride) => {
     const toEmail = emailOverride || parentEmail.trim();
@@ -155,104 +139,8 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
       )}
 
       {/* Body Sections */}
-      <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
-        {/* Career Roadmap */}
+      <div className="max-w-3xl mx-auto px-6 py-12">
         <CareerRoadmap user={user} onTabChange={onTabChange} onOpenUpgrade={onOpenUpgrade} />
-
-        {/* Company Intel Preview */}
-        <section>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-            COMPANY INTEL
-          </p>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
-            What's happening at companies that matter.
-          </h2>
-          <AICompanyCards
-            companies={companies}
-            members={recsMembers}
-            loading={recsLoading}
-            searching={recsSearching}
-            error={recsError}
-            noIndustry={recsNoIndustry}
-            onRefetch={refetch}
-            onTabChange={onTabChange}
-            onOpenUpgrade={onOpenUpgrade}
-            user={user}
-            isFastIQ={false}
-            weeklyNewCount={weeklyNewCount}
-            dark={true}
-          />
-        </section>
-
-        {/* Alumni Network Teaser */}
-        <section>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-            YOUR NETWORK
-          </p>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
-            Your school's alumni are already inside.
-          </h2>
-          <div className="bg-white rounded-xl p-6 border border-[#E0E0E0] mb-4">
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-            {alumniCount
-              ? `${alumniCount}+ alumni from ${user?.school || 'your school'} are in the College Fast Forward network.`
-              : 'Alumni from your school are joining every day.'}
-          </p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666' }}>
-            The more parents who join, the more possibilities you have.
-          </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-4" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: 16 }}>
-            {[1, 2, 3].map(i => (
-              <div key={i} className="relative" style={{ background: '#242424', border: '1px solid #2A2A2A', borderRadius: 8, padding: 16 }}>
-                <div className="filter blur-sm">
-                  <div className="w-12 h-12 bg-gray-600 rounded-full mb-3" />
-                  <p className="font-bold text-gray-400 mb-1">Profile Hidden</p>
-                  <p className="text-xs text-gray-500">Senior Analyst</p>
-                  <p className="text-xs text-gray-500">Goldman Sachs</p>
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    onClick={onOpenUpgrade}
-                    className="bg-[#E85D20] text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-[#d44e14] transition-colors flex items-center gap-2"
-                    style={{ minHeight: 'auto' }}
-                  >
-                    🔒 See who to contact →
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={() => onTabChange('alumni_network')}
-            className="mt-4 text-sm text-[#E85D20] font-medium hover:underline"
-            style={{ minHeight: 'auto' }}
-          >
-            See all alumni →
-          </button>
-        </section>
-
-        {/* Career Center Preview */}
-        <section>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-            CAREER CENTER
-          </p>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 16 }}>
-            What's happening at {user?.school || 'UF'}.
-          </h2>
-          <div className="bg-white rounded-xl p-6 border border-[#E0E0E0] text-center">
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', marginBottom: 16 }}>
-              Check back soon — we update this regularly.
-            </p>
-            <button
-              onClick={() => onTabChange('career_center')}
-              className="text-sm text-[#E85D20] font-medium hover:underline"
-              style={{ minHeight: 'auto' }}
-            >
-              See all events →
-            </button>
-          </div>
-        </section>
       </div>
     </div>
   );

@@ -288,23 +288,17 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
         })}
       </div>
 
-      <div style={{ marginTop: 8, textAlign: 'center' }}>
-        {hasOffer ? (
-          <div>
-            <p style={{ fontSize: 28, marginBottom: 4 }}>🎉</p>
-            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#E85D20', margin: '0 0 4px' }}>
-              You did it, {firstName}.
-            </p>
-            <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 16, color: '#E85D20', margin: '0 0 8px' }}>
-              Now go negotiate that offer.
-            </p>
-          </div>
-        ) : (
-          <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 15, color: '#AAAAAA', margin: 0 }}>
-            Rinse and repeat until you find your role.
+      {hasOffer && (
+        <div style={{ marginTop: 8, textAlign: 'center' }}>
+          <p style={{ fontSize: 28, marginBottom: 4 }}>🎉</p>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#E85D20', margin: '0 0 4px' }}>
+            You did it, {firstName}.
           </p>
-        )}
-      </div>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 16, color: '#E85D20', margin: '0 0 8px' }}>
+            Now go negotiate that offer.
+          </p>
+        </div>
+      )}
     </section>
   );
 }
