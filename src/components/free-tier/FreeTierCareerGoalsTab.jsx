@@ -20,11 +20,12 @@ function hasExistingGoals(user) {
 
 const QUESTIONS = {
   q1_major: {
-    message: (user) => `Let's build your career plan. You're studying ${user?.major || 'your major'} at ${user?.school_name || 'your school'} — is that right?`,
-    chips: (user) => ['Yes, that\'s right', 'Update my major'],
-    freeText: false,
+    message: () => `Hey! Let's build your career plan. What are you studying?`,
+    chips: () => [],
+    freeText: true,
+    placeholder: 'e.g. Finance, Marketing, Computer Science...',
     next: () => 'q2_direction',
-    save: null,
+    save: (ans) => ({ major: ans }),
   },
   q2_direction: {
     message: () => `Do you have a clear direction, or are you still figuring it out?`,
@@ -227,12 +228,19 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   // Seed first question on chat start
   useEffect(() => {
     if (mode !== 'chat' || messages.length > 0) return;
-    const q = QUESTIONS['q1_major'];
-    const chips = q.chips(user);
-    setMessages([{ role: 'assistant', content: q.message(user) }]);
-    setActiveChips(chips);
-    setAwaitingFreeText(false);
-    setCurrentQ('q1_major');
+    const firstName = user?.full_name?.split(' ')[0] || '';
+    if (user?.major) {
+      const q2 = QUESTIONS['q2_direction'];
+      setMessages([{ role: 'assistant', content: `Hey${firstName ? ` ${firstName}` : ''}! Do you have a clear direction, or are you still figuring it out?` }]);
+      setActiveChips(q2.chips(user));
+      setAwaitingFreeText(false);
+      setCurrentQ('q2_direction');
+    } else {
+      setMessages([{ role: 'assistant', content: `Hey! Let's build your career plan. What are you studying?` }]);
+      setActiveChips([]);
+      setAwaitingFreeText(true);
+      setCurrentQ('q1_major');
+    }
   }, [mode]);
 
   useEffect(() => {
@@ -451,7 +459,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
 
   // ── Chat view ─────────────────────────────────────────────────────────────────
   const currentQDef = QUESTIONS[currentQ];
-  const showFreeTextInput = !isComplete && currentQDef?.freeText;
+  const isFreeText = currentQDef ? (typeof currentQDef.freeText === 'function' ? currentQDef.freeText(user) : !!currentQDef.freeText) : false;
+  const showFreeTextInput = !isComplete && isFreeText;
   const showChips = !isComplete && !loading && activeChips.length > 0;
 
   return (
