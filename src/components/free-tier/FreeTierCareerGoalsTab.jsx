@@ -20,7 +20,7 @@ function hasExistingGoals(user) {
 
 const QUESTIONS = {
   q1_major: {
-    message: () => `Hey! Let's build your career plan. What are you studying?`,
+    message: () => `What are you studying?`,
     chips: () => [],
     freeText: true,
     placeholder: 'e.g. Finance, Marketing, Computer Science...',
@@ -236,7 +236,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       setAwaitingFreeText(false);
       setCurrentQ('q2_direction');
     } else {
-      setMessages([{ role: 'assistant', content: `Hey! Let's build your career plan. What are you studying?` }]);
+      setMessages([{ role: 'assistant', content: `What are you studying?` }]);
       setActiveChips([]);
       setAwaitingFreeText(true);
       setCurrentQ('q1_major');
