@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Send, RefreshCw, Loader2 } from 'lucide-react';
+import { navigate } from '@/components/utils/navigation';
 import { getAlumniByRole } from './alumniExplorerUtils';
 import GoalsSummaryCard from './GoalsSummaryCard';
 import CareerProfileCard from './CareerProfileCard';
@@ -455,6 +456,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
   const [sending, setSending] = useState(false);
   const [sentTo, setSentTo] = useState([]);
   const [copyToast, setCopyToast] = useState(false);
+  const [showAssessmentCTA, setShowAssessmentCTA] = useState(false);
 
   // Block 1: Read cache on load (FastIQ users)
   useEffect(() => {
@@ -748,6 +750,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
       const allMessages = [...newMessages, { role: 'assistant', content: reply, timestamp: new Date().toISOString(), suggested_prompts: isFinal ? [] : prompts }];
       setMessages(allMessages);
       setSuggestedPrompts(isFinal ? [] : prompts);
+      if (!isFinal && trimmed === "Not sure what I want to do") setShowAssessmentCTA(true);
       base44.auth.updateMe({
         career_goals_conversation: allMessages,
         career_goals_conversation_updated_at: new Date().toISOString(),
@@ -1084,7 +1087,20 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                   </div>
                 </div>
               )}
-              {isLastAssistant && !awaitingMajor && suggestedPrompts.length > 0 && (
+              {isLastAssistant && !awaitingMajor && showAssessmentCTA && (
+                <div style={{ marginLeft: 42, marginBottom: 16 }}>
+                  <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '20px 24px', maxWidth: 480 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px', fontFamily: "'DM Sans', sans-serif" }}>RECOMMENDED FOR YOU</p>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 6px', fontFamily: "'DM Sans', sans-serif" }}>Career Archetype Assessment</p>
+                    <p style={{ fontSize: 13, color: '#555', margin: '0 0 16px', lineHeight: 1.5, fontFamily: "'DM Sans', sans-serif" }}>15 minutes. Discover your career archetype, strengths, and the roles you're most likely to thrive in — built specifically for college students.</p>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <button onClick={() => navigate('FastIQAssessment')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Take the Assessment →</button>
+                      <button onClick={() => setShowAssessmentCTA(false)} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Skip for now</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isLastAssistant && !awaitingMajor && !showAssessmentCTA && suggestedPrompts.length > 0 && (
                 <>
                   <SuggestedPrompts prompts={suggestedPrompts} onSelect={handleChipSelect} onSkip={showSkip ? handleSkip : null} />
                   <p style={{ fontSize: '11px', color: 'rgba(0,0,0,0.35)', margin: '2px 0 0 42px', fontFamily: "'DM Sans', sans-serif" }}>Or type your own answer below</p>
