@@ -1094,7 +1094,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
                     <p style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 6px', fontFamily: "'DM Sans', sans-serif" }}>Career Archetype Assessment</p>
                     <p style={{ fontSize: 13, color: '#555', margin: '0 0 16px', lineHeight: 1.5, fontFamily: "'DM Sans', sans-serif" }}>15 minutes. Discover your career archetype, strengths, and the roles you're most likely to thrive in — built specifically for college students.</p>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <button onClick={() => navigate('FastIQAssessment')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Take the Assessment →</button>
+                      <button onClick={() => navigate('FastIQAssessment')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Take the Assessment — $49 →</button>
                       <button onClick={() => setShowAssessmentCTA(false)} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Skip for now</button>
                     </div>
                   </div>
