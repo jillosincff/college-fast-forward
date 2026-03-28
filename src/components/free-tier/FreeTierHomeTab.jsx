@@ -88,7 +88,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
   const completedSteps = {
     1: hasGoals,
     2: hasResume,
-    3: true,
+    3: !!user?.company_intel_viewed,
     4: hasSearched,
     5: hasViewedLeads,
     6: fastiq,

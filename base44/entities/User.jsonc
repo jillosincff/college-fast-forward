@@ -1,0 +1,425 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "persona": {
+      "type": "string",
+      "enum": [
+        "student",
+        "parent",
+        "alumni",
+        "gator"
+      ],
+      "description": "User type / role"
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "User roles"
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether onboarding is complete"
+    },
+    "onboarding_completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When onboarding was completed"
+    },
+    "onboarding_question_answered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a question was answered during onboarding"
+    },
+    "onboarding_flow_type": {
+      "type": "string",
+      "description": "Type of onboarding flow used"
+    },
+    "onboarding_referral_submitted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a referral was submitted during onboarding"
+    },
+    "pledge_taken": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the parent took the CFF Pledge"
+    },
+    "pledge_taken_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the parent took the pledge"
+    },
+    "first_question_shown": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the post-pledge first question screen was shown"
+    },
+    "first_question_answered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the parent answered on the post-pledge screen"
+    },
+    "visible_in_directory": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether visible in the Gator Directory"
+    },
+    "current_position": {
+      "type": "string",
+      "description": "Current job title"
+    },
+    "current_company": {
+      "type": "string",
+      "description": "Current company"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company"
+    },
+    "years_experience": {
+      "type": "string",
+      "description": "Years of experience"
+    },
+    "industries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Industries"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Primary industry"
+    },
+    "ways_to_help": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Ways willing to help"
+    },
+    "expertise_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Areas of expertise"
+    },
+    "help_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Types of help offered"
+    },
+    "invite_code_used": {
+      "type": "string",
+      "description": "Invite code used to join"
+    },
+    "profile_image": {
+      "type": "string",
+      "description": "URL of profile image"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL"
+    },
+    "title": {
+      "type": "string",
+      "description": "User's professional title"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio"
+    },
+    "graduation_year": {
+      "type": "string",
+      "description": "Graduation year"
+    },
+    "major": {
+      "type": "string",
+      "description": "Major field of study"
+    },
+    "minor": {
+      "type": "string",
+      "description": "Minor field of study"
+    },
+    "pre_track": {
+      "type": "string",
+      "description": "Pre-professional track"
+    },
+    "location": {
+      "type": "string",
+      "description": "Location"
+    },
+    "school": {
+      "type": "string",
+      "description": "Primary school affiliation"
+    },
+    "university": {
+      "type": "string",
+      "description": "University (legacy field)"
+    },
+    "schools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "All school affiliations"
+    },
+    "grad_school": {
+      "type": "string",
+      "description": "Graduate school name if applicable"
+    },
+    "grad_school_type": {
+      "type": "string",
+      "enum": [
+        "mba",
+        "law",
+        "med",
+        "masters",
+        "phd",
+        "other"
+      ],
+      "description": "Type of graduate program"
+    },
+    "grad_school_status": {
+      "type": "string",
+      "enum": [
+        "enrolled",
+        "completed"
+      ],
+      "description": "Current or completed grad program"
+    },
+    "is_founding_member": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user is a founding member"
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "Unique referral code"
+    },
+    "referred_by": {
+      "type": "string",
+      "description": "Referral code that referred this user"
+    },
+    "ambassador_code": {
+      "type": "string",
+      "description": "Ambassador code used during signup"
+    },
+    "student_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Linked student emails"
+    },
+    "parent_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Linked parent emails"
+    },
+    "family_group_id": {
+      "type": "string",
+      "description": "Family group identifier"
+    },
+    "profile_slug": {
+      "type": "string",
+      "description": "URL-friendly profile slug"
+    },
+    "push_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether push notifications are enabled"
+    },
+    "last_active_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last activity timestamp"
+    },
+    "reengagement_status": {
+      "type": "string",
+      "description": "Re-engagement email status"
+    },
+    "reengagement_unsubscribed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user unsubscribed from re-engagement"
+    },
+    "is_fastiq": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user has FastIQ access"
+    },
+    "fastiq_setup_complete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether FastIQ onboarding is complete"
+    },
+    "subscription_status": {
+      "type": "string",
+      "description": "Stripe subscription status (e.g. active, trialing, canceled)"
+    },
+    "membership_tier": {
+      "type": "string",
+      "description": "Membership tier (e.g. fastiq, free)"
+    },
+    "career_goals": {
+      "type": "object",
+      "description": "Structured career goals saved from FastIQ career goals chat",
+      "default": {}
+    },
+    "career_goals_conversation": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Saved conversation history from the career goals chat"
+    },
+    "career_goals_conversation_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the career goals conversation was last updated"
+    },
+    "preliminary_archetype": {
+      "type": "string",
+      "description": "Career archetype inferred from goals conversation"
+    },
+    "saved_leads": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Leads saved by the student from the Leads section"
+    },
+    "alumni_explorer_cache": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Cached alumni clusters from the alumni explorer"
+    },
+    "alumni_explorer_cached_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the alumni explorer cache was last populated"
+    },
+    "alumni_seniority": {
+      "type": "string",
+      "enum": [
+        "recent_grad",
+        "established"
+      ],
+      "description": "Alumni seniority type for routing"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Professional skills"
+    },
+    "location_city": {
+      "type": "string",
+      "description": "City"
+    },
+    "location_state": {
+      "type": "string",
+      "description": "State"
+    },
+    "can_provide_referrals": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user can provide referrals"
+    },
+    "intro_willingness": {
+      "type": "string",
+      "description": "Willingness to make intros (yes, occasionally, not_now)"
+    },
+    "intro_availability": {
+      "type": "string",
+      "description": "Availability for introductions"
+    },
+    "mentorship_topics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Topics user can mentor on"
+    },
+    "enriched_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the profile was last enriched via LinkedIn/Proxycurl"
+    },
+    "profile_image_url": {
+      "type": "string",
+      "description": "Profile image URL (enriched)"
+    },
+    "resume_url": {
+      "type": "string",
+      "description": "URL of uploaded resume"
+    },
+    "alumni_search_used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has used their free alumni search"
+    },
+    "company_intel_viewed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has visited the Company Intel tab"
+    },
+    "leads_viewed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has viewed their leads"
+    },
+    "platform_visit_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of platform page visits tracked"
+    },
+    "target_companies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Target companies saved on the user profile"
+    },
+    "target_industries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Target industries"
+    }
+  },
+  "required": []
+}

@@ -36,6 +36,17 @@ export default function FreeTierDashboard() {
     setSavedGoals(Date.now());
   };
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    // Track first-visit milestones
+    if (tab === 'company_intel' && !user?.company_intel_viewed) {
+      base44.auth.updateMe({ company_intel_viewed: true }).catch(() => {});
+    }
+    if ((tab === 'directory' || tab === 'career_goals') && !user?.leads_viewed) {
+      base44.auth.updateMe({ leads_viewed: true }).catch(() => {});
+    }
+  };
+
   useEffect(() => {
     if (isLoadingAuth) return;
     if (!user) {
@@ -64,14 +75,14 @@ export default function FreeTierDashboard() {
   return (
     <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
       <div className="hidden md:block">
-        <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
+        <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={handleTabChange} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
       </div>
       <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
-        {activeTab === 'home' && <FreeTierHomeTab key={savedGoals || 'home'} user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
-        {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={setActiveTab} />}
+        {activeTab === 'home' && <FreeTierHomeTab key={savedGoals || 'home'} user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
+        {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-        {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={setActiveTab} />}
+        {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={handleTabChange} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
@@ -79,7 +90,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'notebook' && <NotebookPage user={user} />}
       </div>
       <div className="md:hidden">
-        <FreeTierMobileNav activeTab={activeTab} onTabChange={setActiveTab} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
+        <FreeTierMobileNav activeTab={activeTab} onTabChange={handleTabChange} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
       </div>
       {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
       {showConciergeModal && <CareerConciergeUpgradeModal user={user} onClose={() => setShowConciergeModal(false)} onAskParent={() => { setShowConciergeModal(false); setShowUpgradeModal(true); }} />}

@@ -157,17 +157,29 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
   const completedSteps = {
     1: !!(user?.career_goals?.target_roles?.length > 0),
     2: !!user?.resume_url,
-    3: true,
-    4: true,
-    5: true,
-    6: !!isFastIQ(user),
+    3: !!user?.company_intel_viewed,
+    4: !!user?.alumni_search_used,
+    5: !!user?.leads_viewed,
+    6: fastiq,
   };
+
+  const hasGoals = completedSteps[1];
+
+  const unlockedSteps = {
+    1: true,
+    2: hasGoals,
+    3: hasGoals,
+    4: hasGoals,
+    5: hasGoals,
+    6: fastiq,
+  };
+
   const currentStep = parseInt(Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || '6');
 
   const upNextSteps = [
     { n: 2, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: 'career_center' },
     { n: 3, label: 'Research Companies & Industries', tag: 'Free', tabKey: 'company_intel' },
-    { n: 4, label: 'Find Alumni at Target Companies', tag: 'Free · 1 search', tabKey: 'alumni_network' },
+    { n: 4, label: 'Find Alumni at Target Companies', tag: 'Free · 1 search', tabKey: 'alumni_search' },
     { n: 5, label: 'Get Matched with CFF Connections', tag: 'Free', tabKey: 'directory' },
     { n: 6, label: 'Draft Outreach & Track Replies', tag: 'FastIQ', tabKey: null },
   ];
@@ -246,9 +258,9 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           Up next — unlocks as you go
         </p>
         {upNextSteps.map(step => {
-          const isUnlocked = completedSteps[step.n - 1] || step.n <= currentStep;
-          const isDone = completedSteps[step.n];
-          const isActive = step.n === currentStep;
+          const isCompleted = completedSteps[step.n];
+          const isUnlocked = unlockedSteps[step.n];
+          const isLocked = !isUnlocked;
           return (
             <div
               key={step.n}
@@ -257,29 +269,35 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
                 display: 'flex', alignItems: 'center', gap: 16,
                 padding: '14px 0',
                 borderBottom: '1px solid #F0F0F0',
-                opacity: isUnlocked ? 1 : 0.4,
+                opacity: isLocked ? 0.35 : 1,
                 cursor: isUnlocked && step.tabKey ? 'pointer' : 'default',
               }}
             >
               <div style={{
                 width: 32, height: 32, borderRadius: '50%',
-                background: isDone ? '#E85D20' : isActive ? '#FFF5F0' : '#F5F5F5',
-                border: isActive ? '2px solid #E85D20' : isDone ? 'none' : '2px solid #E0E0E0',
-                color: isDone ? '#fff' : isActive ? '#E85D20' : '#999',
+                background: isCompleted ? '#E85D20' : '#F0F0F0',
+                color: isCompleted ? '#fff' : '#999',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 13, fontWeight: 700, flexShrink: 0,
                 fontFamily: "'DM Sans', sans-serif"
               }}>
-                {isDone ? '✓' : step.n}
+                {isCompleted ? '✓' : step.n}
               </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: isActive ? '#1A1A1A' : '#666', margin: 0, flex: 1, fontWeight: isActive ? 600 : 400 }}>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 14,
+                color: isLocked ? '#AAAAAA' : isCompleted ? '#888' : '#1A1A1A',
+                margin: 0, flex: 1,
+                textDecoration: isCompleted ? 'line-through' : 'none',
+              }}>
                 {step.label}
               </p>
               <span style={{
                 fontSize: 11, fontWeight: 600,
                 color: step.tag === 'FastIQ' ? '#E85D20' : '#22C55E',
                 fontFamily: "'DM Sans', sans-serif",
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                opacity: isLocked ? 0.5 : 1,
               }}>
                 {step.tag}
               </span>
