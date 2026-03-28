@@ -37,9 +37,8 @@ const INDUSTRY_MAP = {
   "Biotech & Life Sciences":        ["biotech", "biotechnology", "life sciences", "pharmaceutical", "pharma", "drug discovery", "clinical trials", "fda", "regulatory affairs", "bioinformatics", "genomics", "proteomics", "molecular biology", "biochemistry", "cell biology", "microbiology", "immunology", "neuroscience", "oncology research", "gene therapy", "crispr", "laboratory", "lab", "research scientist", "research associate", "principal investigator", "pi", "postdoc", "phd", "stem cell", "medical device", "diagnostics", "biomanufacturing", "bioprocess", "quality assurance", "qa", "quality control", "qc", "gmp", "pfizer", "moderna", "johnson and johnson", "merck", "abbvie", "amgen", "genentech", "gilead", "regeneron", "biogen", "medtronic", "abbott", "boston scientific", "stryker", "zimmer"],
 };
 
-function scoreMatch(member, studentGoals) {
-  const studentIndustries = studentGoals?.target_industries || [];
-  if (studentIndustries.length === 0) return 0;
+function scoreMatch(member, studentIndustries) {
+  if (!studentIndustries || studentIndustries.length === 0) return 0;
 
   const keywords = new Set();
   studentIndustries.forEach(ind => {
@@ -47,8 +46,17 @@ function scoreMatch(member, studentGoals) {
   });
   if (keywords.size === 0) return 0;
 
-  const haystack = [member.industry, member.job_title, member.company]
-    .filter(Boolean).join(' ').toLowerCase();
+  // Also check industries array and title/bio for broader matching
+  const haystack = [
+    member.industry,
+    member.job_title,
+    member.current_position,
+    member.company,
+    member.current_company,
+    member.bio,
+    ...(member.industries || []),
+    ...(member.expertise_areas || []),
+  ].filter(Boolean).join(' ').toLowerCase();
 
   let score = 0;
   keywords.forEach(kw => { if (haystack.includes(kw)) score++; });
@@ -145,7 +153,7 @@ Deno.serve(async (req) => {
     // Quality-filtered base pool
     const qualityPool = sameSchoolMembers.filter(u => hasMinimumProfile(u));
 
-    const scored = qualityPool.map(u => ({ u, score: scoreMatch(u, careerGoals) }));
+    const scored = qualityPool.map(u => ({ u, score: scoreMatch(u, industries) }));
     const tier1 = scored.filter(m => m.score >= 2).map(m => m.u);
     const tier2 = scored.filter(m => m.score === 1).map(m => m.u);
 
@@ -186,7 +194,7 @@ Deno.serve(async (req) => {
         email: member.email,
         linkedin_url: member.linkedin_url || '',
         briefing: (briefing && briefing !== 'null') ? briefing : '',
-        match_score: scoreMatch(member, careerGoals) + (shared.length > 1 ? 2 : 0),
+        match_score: scoreMatch(member, industries) + (shared.length > 1 ? 2 : 0),
       };
     });
 
