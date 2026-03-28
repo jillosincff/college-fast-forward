@@ -26,7 +26,7 @@ Q5b: (only if full-time or both) What year do you graduate? Chips: ["2025", "202
 Q6: What city or region? Chips: ["New York", "Miami", "Remote", "Open to anything"]
 Q7: Company size preference? Chips: ["Big company (Fortune 500)", "Mid-size", "Startup", "No preference"]
 Q8: Any companies you'd love to work at, or types of companies that appeal to you? Chips: ["No idea yet", "Yes, I'll add them below"]
-Q9: What are you struggling with the most right now? Chips: ["Not sure what I want to do", "Applied but haven't heard back", "Don't know how to network"]
+Q9: What are you struggling with the most right now? Chips: ["Don't know where to begin", "Applied but no answers", "Not sure how to network"]
 
 PATH B question count is now 7 (entrepreneurship question removed):
 
@@ -35,7 +35,7 @@ Q3: Work environment — what sounds most like you? Chips based on major.
 Q4: What's your natural strength? Chips: ["Talking to people / relationships", "Analyzing data / solving problems", "Creating things / design / writing", "Leading / organizing / making things happen"]
 Q5: What motivates you most? Chips: ["Making a lot of money", "Making an impact", "Helping others / mission-driven", "Stability and work-life balance"]
 Q6: Graduation year? Chips: ["2025", "2026", "2027", "2028+"]
-Q7: Biggest gap or concern? Chips: ["No internship experience yet", "Not sure my major is right", "Don't know how to network", "Not sure what I want to do"]
+Q7: Biggest gap or concern? Chips: ["Don't know where to begin", "Applied but no answers", "Not sure how to network"]
 After Q7 on Path B: synthesize all answers into role recommendations. Set is_final=true.
 
 STUDENT MAJOR: The student's major is provided in the conversation context. ALWAYS use it to:
