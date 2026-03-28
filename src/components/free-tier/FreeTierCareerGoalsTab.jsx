@@ -487,7 +487,9 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
         )}
 
         {/* Snapshot phase */}
-        {isComplete && currentPhase === 'snapshot' && (
+        {isComplete && currentPhase === 'snapshot' && (() => {
+          const snap = { ...(user?.career_goals || {}), ...answers };
+          return (
           <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 0' }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 32 }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -500,12 +502,12 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
             <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>YOUR CAREER SNAPSHOT</p>
               {[
-                { icon: '🎯', label: 'Target Roles', value: user?.career_goals?.target_roles?.join(', ') || '—' },
-                { icon: '🏢', label: 'Industries', value: user?.career_goals?.target_industries?.join(', ') || '—' },
-                { icon: '📍', label: 'Location', value: user?.career_goals?.location_preference || '—' },
-                { icon: '🎓', label: 'Graduating', value: user?.career_goals?.graduation_year || '—' },
-                { icon: '💭', label: 'Biggest struggle', value: user?.career_goals?.perceived_gap || '—' },
-                { icon: '🏭', label: 'Target companies', value: user?.career_goals?.target_companies?.join(', ') || 'Not set yet' },
+                { icon: '🎯', label: 'Target Roles', value: snap.target_roles?.join(', ') || '—' },
+                { icon: '🏢', label: 'Industries', value: snap.target_industries?.join(', ') || '—' },
+                { icon: '📍', label: 'Location', value: snap.location_preference || '—' },
+                { icon: '🎓', label: 'Graduating', value: snap.graduation_year || '—' },
+                { icon: '💭', label: 'Biggest struggle', value: snap.perceived_gap || '—' },
+                { icon: '🏭', label: 'Target companies', value: snap.target_companies?.join(', ') || 'Not set yet' },
               ].map(row => (
                 <div key={row.label} style={{ display: 'flex', gap: 16, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                   <span style={{ fontSize: 16, flexShrink: 0 }}>{row.icon}</span>
@@ -522,7 +524,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
             </div>
             <p onClick={startOver} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: 0 }}>← Start over</p>
           </div>
-        )}
+          );
+        })()}
 
         {/* Resume phase */}
         {isComplete && currentPhase === 'resume' && (
