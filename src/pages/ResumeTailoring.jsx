@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Loader2 } from 'lucide-react';
 import { tailorResume } from '@/functions/tailorResume';
 
 import ResumeUploadStep from '@/components/resume-tailor/ResumeUploadStep';
@@ -14,7 +13,7 @@ const playfair = "'Playfair Display', Georgia, serif";
 
 export default function ResumeTailoring() {
   const { user } = useAuth();
-  const [step, setStep] = useState('input'); // input | loading | results
+  const [step, setStep] = useState('input');
   const [resumeText, setResumeText] = useState('');
   const [resumeFileName, setResumeFileName] = useState('');
   const [resumeId, setResumeId] = useState(null);
@@ -25,14 +24,12 @@ export default function ResumeTailoring() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
-  // Pre-fill from URL params
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
     if (params.get('company')) setCompanyName(params.get('company'));
     if (params.get('role')) setJobTitle(params.get('role'));
   }, []);
 
-  // Load existing resume
   useEffect(() => {
     if (!user?.email) return;
     base44.entities.Resume.filter({ student_email: user.email, is_active: true }, '-created_date', 1)
@@ -44,7 +41,6 @@ export default function ResumeTailoring() {
           setResumeId(resumes[0].id);
         }
       }).catch(() => {});
-    // Also check profile for resume text fallback
     base44.entities.FastTrackProProfile.filter({ user_email: user.email })
       .then(profiles => {
         if (profiles[0]?.resume_text && !resumeText) {
@@ -125,7 +121,7 @@ export default function ResumeTailoring() {
           Resume <em style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', color: '#E85D20' }}>Tailoring</em>
         </h1>
         <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: '#888', marginTop: 4, marginBottom: 28 }}>
-          Paste a job description and FASTIQ will tailor your resume to match it — explaining every change.
+          Paste a job description and FastIQ will tailor your resume to match it — explaining every change.
         </p>
 
         {error && (
@@ -134,7 +130,7 @@ export default function ResumeTailoring() {
           </div>
         )}
 
-        {/* Step 1 — Resume */}
+        {/* Step 1 — Resume upload (free) */}
         <ResumeUploadStep
           existingResume={existingResume}
           resumeText={resumeText}
@@ -143,14 +139,16 @@ export default function ResumeTailoring() {
           onResumeReady={handleResumeReady}
         />
 
-        {/* Step 2 — Job Description (FastIQ gated) */}
+        {/* Step 2 — FastIQ gate */}
         {resumeText && !isFastIQ && (
           <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '24px', textAlign: 'center', marginTop: 8 }}>
             <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 8px' }}>Resume tailoring is a FastIQ feature</p>
             <p style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: '0 0 16px', lineHeight: 1.5 }}>Upload is free. Tailoring to a job description, AI scoring, and downloading the optimized version require FastIQ.</p>
-            <a href="#FreeTierDashboard" style={{ display: 'inline-block', background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 24px', fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none' }}>Unlock FastIQ →</a>
+            <a href="#FreeTierDashboard" style={{ display: 'inline-block', background: '#E85D20', borderRadius: 8, padding: '10px 24px', fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none' }}>Unlock FastIQ →</a>
           </div>
         )}
+
+        {/* Step 2 — Job description (FastIQ users) */}
         {resumeText && isFastIQ && (
           <JobDescriptionStep
             companyName={companyName}
@@ -164,9 +162,6 @@ export default function ResumeTailoring() {
           />
         )}
       </div>
-    </div>
-  );
-}
     </div>
   );
 }
