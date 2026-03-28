@@ -24,7 +24,7 @@ export const LOCKED_TABS = [
 
 export const INDUSTRIES = [
   'Accounting & Finance', 'Advertising & Marketing', 'Architecture & Design',
-  'Consulting', 'Education', 'Engineering & Technology', 'Entertainment & Media',
+  'Education', 'Engineering & Technology', 'Entertainment & Media',
   'Fashion & Retail', 'Government & Public Policy', 'Healthcare & Life Sciences',
   'Hospitality & Tourism', 'Investment Banking & Private Equity', 'Law & Legal Services',
   'Manufacturing & Operations', 'Non-Profit & Social Impact', 'Real Estate',

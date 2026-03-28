@@ -121,7 +121,7 @@ export function getPositionTypeConfig(positionType) {
 }
 
 export const INDUSTRIES = [
-  'Technology & Software', 'Financial Services & Banking', 'Consulting & Professional Services',
+  'Technology & Software', 'Financial Services & Banking',
   'Healthcare & Biotech', 'Media & Entertainment', 'Consumer Products & Retail',
   'Real Estate & Construction', 'Energy & Sustainability', 'Education & EdTech',
   'Government & Public Policy', 'Nonprofit & Social Impact', 'Sports & Athletics',
