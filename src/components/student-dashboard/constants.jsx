@@ -23,12 +23,26 @@ export const LOCKED_TABS = [
 ];
 
 export const INDUSTRIES = [
-  'Accounting & Finance', 'Advertising & Marketing', 'Architecture & Design',
-  'Education', 'Engineering & Technology', 'Entertainment & Media',
-  'Fashion & Retail', 'Government & Public Policy', 'Healthcare & Life Sciences',
-  'Hospitality & Tourism', 'Investment Banking & Private Equity', 'Law & Legal Services',
-  'Manufacturing & Operations', 'Non-Profit & Social Impact', 'Real Estate',
-  'Sales & Business Development', 'Sports & Athletics', 'Supply Chain & Logistics', 'Other',
+  'Architecture & Design',
+  'Biotech & Life Sciences',
+  'Consumer Goods & Retail',
+  'Education',
+  'Energy & Utilities',
+  'Engineering',
+  'Financial Services & Banking',
+  'Government & Nonprofit',
+  'Healthcare & Life Sciences',
+  'Hospitality & Tourism',
+  'Human Resources',
+  'Legal & Compliance',
+  'Logistics & Supply Chain',
+  'Marketing & Brand',
+  'Media & Entertainment',
+  'Nonprofit & Social Impact',
+  'Pre-Med & Healthcare',
+  'Real Estate',
+  'Sports & Athletics',
+  'Technology & Software',
 ];
 
 export const LOCATIONS = [

@@ -15,7 +15,6 @@ const normalizeSchool = (s) => SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.
 
 const INDUSTRY_MAP = {
   "Financial Services & Banking":  ["finance", "banking", "investment", "capital", "wealth", "equity", "accounting", "cpa", "analyst", "audit", "jp morgan", "goldman", "morgan stanley", "citi", "bank of america", "wells fargo", "private equity", "hedge fund", "m&a", "mergers"],
-  "Consulting":                    ["consulting", "consultant", "advisory", "mckinsey", "bain", "bcg", "deloitte", "pwc", "kpmg", "ey", "ernst", "strategy", "accenture"],
   "Technology & Software":         ["software", "tech", "engineering", "developer", "product", "saas", "cloud", "data", "ai", "machine learning"],
   "Healthcare & Life Sciences":    ["healthcare", "medical", "pharma", "clinical", "hospital", "biotech", "life sciences", "nursing", "physician"],
   "Media & Entertainment":         ["media", "entertainment", "film", "music", "publishing", "content", "streaming", "advertising", "pr", "marketing", "brand"],

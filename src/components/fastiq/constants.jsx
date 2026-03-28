@@ -121,12 +121,26 @@ export function getPositionTypeConfig(positionType) {
 }
 
 export const INDUSTRIES = [
-  'Technology & Software', 'Financial Services & Banking',
-  'Healthcare & Biotech', 'Media & Entertainment', 'Consumer Products & Retail',
-  'Real Estate & Construction', 'Energy & Sustainability', 'Education & EdTech',
-  'Government & Public Policy', 'Nonprofit & Social Impact', 'Sports & Athletics',
-  'Advertising & Public Relations', 'Hospitality & Travel', 'Manufacturing & Supply Chain',
-  'Legal Services', 'Aerospace & Defense', 'Telecommunications', 'Automotive', 'Food & Beverage',
+  'Architecture & Design',
+  'Biotech & Life Sciences',
+  'Consumer Goods & Retail',
+  'Education',
+  'Energy & Utilities',
+  'Engineering',
+  'Financial Services & Banking',
+  'Government & Nonprofit',
+  'Healthcare & Life Sciences',
+  'Hospitality & Tourism',
+  'Human Resources',
+  'Legal & Compliance',
+  'Logistics & Supply Chain',
+  'Marketing & Brand',
+  'Media & Entertainment',
+  'Nonprofit & Social Impact',
+  'Pre-Med & Healthcare',
+  'Real Estate',
+  'Sports & Athletics',
+  'Technology & Software',
 ];
 
 export const ROLE_TYPES = [
