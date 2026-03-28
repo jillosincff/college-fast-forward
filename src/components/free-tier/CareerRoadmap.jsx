@@ -226,24 +226,43 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
             </p>
             <span style={{ background: '#E8F5E9', color: '#2E7D32', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>FREE</span>
           </div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 16px', lineHeight: 1.6 }}>
-            Takes 3 minutes. Tell us what you're studying, where you want to work,
-            and what's holding you back. We'll build your plan around it.
-          </p>
-          <button
-            onClick={() => onTabChange('career_goals')}
-            style={{
-              background: completedSteps[1] ? 'transparent' : '#E85D20',
-              border: completedSteps[1] ? '1.5px solid #E85D20' : 'none',
-              borderRadius: 10,
-              padding: '12px 28px', fontSize: 14, fontWeight: 600,
-              color: completedSteps[1] ? '#E85D20' : '#fff',
-              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-              minHeight: 'auto',
-            }}
-          >
-            {completedSteps[1] ? 'Update Goals →' : "Let's do it →"}
-          </button>
+          {completedSteps[1] ? (
+            <>
+              <p style={{ fontSize: 14, color: '#666', margin: '0 0 16px', lineHeight: 1.6, fontFamily: "'DM Sans', sans-serif" }}>
+                Great job! You've already set your career goals.
+              </p>
+              <button
+                onClick={() => onTabChange('career_goals')}
+                style={{
+                  background: 'none', border: '1px solid #E85D20',
+                  borderRadius: 10, padding: '10px 24px',
+                  fontSize: 14, fontWeight: 600,
+                  color: '#E85D20', cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif", minHeight: 'auto',
+                }}
+              >
+                View / Update Goals →
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 16px', lineHeight: 1.6 }}>
+                Takes 3 minutes. Tell us what you're studying, where you want to work,
+                and what's holding you back. We'll build your plan around it.
+              </p>
+              <button
+                onClick={() => onTabChange('career_goals')}
+                style={{
+                  background: '#E85D20', border: 'none',
+                  borderRadius: 10, padding: '12px 28px',
+                  fontSize: 14, fontWeight: 600, color: '#fff',
+                  cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto',
+                }}
+              >
+                Let's do it →
+              </button>
+            </>
+          )}
         </div>
       </div>
 
