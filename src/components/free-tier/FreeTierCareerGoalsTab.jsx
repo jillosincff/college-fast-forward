@@ -28,11 +28,11 @@ const QUESTIONS = {
     save: (ans) => ({ major: ans }),
   },
   q2_direction: {
-    message: () => `Do you have a clear direction, or are you still figuring it out?`,
-    chips: () => ["I have a pretty good idea →", "Still figuring it out"],
+    message: () => `Do you know what job you're looking for?`,
+    chips: () => ["Yes →", "Not exactly sure"],
     freeText: false,
-    next: (ans) => ans === "I have a pretty good idea →" ? 'pathA_q3_role' : 'pathB_q3_environment',
-    save: (ans) => ({ has_direction: ans === "I have a pretty good idea →" }),
+    next: (ans) => ans === "Yes →" ? 'pathA_q3_role' : 'pathB_q3_environment',
+    save: (ans) => ({ has_direction: ans === "Yes →" }),
   },
 
   // PATH A
@@ -231,7 +231,7 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     const firstName = user?.full_name?.split(' ')[0] || '';
     if (user?.major) {
       const q2 = QUESTIONS['q2_direction'];
-      setMessages([{ role: 'assistant', content: `Hey${firstName ? ` ${firstName}` : ''}! Do you have a clear direction, or are you still figuring it out?` }]);
+      setMessages([{ role: 'assistant', content: `Do you know what job you're looking for?` }]);
       setActiveChips(q2.chips(user));
       setAwaitingFreeText(false);
       setCurrentQ('q2_direction');
@@ -294,8 +294,8 @@ export default function FreeTierCareerGoalsTab({ user, onTabChange, onOpenUpgrad
     addMessage({ role: 'user', content: answer });
 
     // Handle branching
-    if (answer === "I have a pretty good idea →") setPath('A');
-    if (answer === "Still figuring it out") setPath('B');
+    if (answer === "Yes →") setPath('A');
+    if (answer === "Not exactly sure") setPath('B');
 
     const nextKey = q.next(answer);
 
