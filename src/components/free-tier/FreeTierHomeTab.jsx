@@ -184,46 +184,42 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             border: '1px solid #E5E5E5',
             borderRadius: 16,
             padding: '24px 28px',
-            marginTop: 32,
+            margin: '24px 0',
           }}>
             <p style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 11, fontWeight: 700,
               textTransform: 'uppercase', letterSpacing: '0.12em',
-              color: '#E85D20', margin: '0 0 12px'
+              color: '#E85D20', margin: '0 0 16px'
             }}>
               YOUR SNAPSHOT
             </p>
-            <p style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 18, fontWeight: 700,
-              color: '#1A1A1A', margin: '0 0 8px'
-            }}>
-              {industries.length > 0
-                ? `You're targeting ${industries[0]}${location ? ` in ${location}` : ''}.`
-                : `You're building your career plan.`}
-            </p>
-            <p style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 14, color: '#555',
-              margin: '0 0 20px', lineHeight: 1.6
-            }}>
-              Keep going — the more you complete, the better your matches get.
-            </p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
-                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>750+</p>
-                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>UF Gators in the network</p>
-              </div>
-              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
-                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>1</p>
-                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>free alumni search waiting</p>
-              </div>
-              <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
-                <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>{user?.career_goals?.target_roles?.length || 0}</p>
-                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>target roles identified</p>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { label: 'Targeting', value: user?.career_goals?.target_industries?.join(', ') || '—' },
+                { label: 'Roles', value: user?.career_goals?.target_roles?.join(', ') || '—' },
+                { label: 'Location', value: user?.career_goals?.location_preference || '—' },
+                { label: 'Job Type', value: user?.career_goals?.seeking || '—' },
+                { label: 'Graduating', value: user?.career_goals?.graduation_year || '—' },
+                { label: 'Target Companies', value: user?.career_goals?.target_companies?.join(', ') || 'Not set yet' },
+                { label: 'Biggest Struggle', value: user?.career_goals?.perceived_gap || '—' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid #F5F5F5' }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#AAAAAA', margin: 0, minWidth: 140, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.06em', paddingTop: 1 }}>
+                    {row.label}
+                  </p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: (row.value === '—' || row.value === 'Not set yet') ? '#CCCCCC' : '#1A1A1A', margin: 0, lineHeight: 1.5, fontStyle: (row.value === '—' || row.value === 'Not set yet') ? 'italic' : 'normal' }}>
+                    {row.value}
+                  </p>
+                </div>
+              ))}
             </div>
+            <button
+              onClick={() => onTabChange('career_goals')}
+              style={{ background: 'none', border: 'none', padding: '12px 0 0', fontSize: 13, color: '#E85D20', cursor: 'pointer', fontWeight: 600, fontFamily: "'DM Sans', sans-serif", textDecoration: 'underline', minHeight: 'auto' }}
+            >
+              Update my goals →
+            </button>
           </div>
         )}
 
