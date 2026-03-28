@@ -93,101 +93,37 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
 
 
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
+
   return (
     <div>
       {/* Hero Section */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%)' }}>
-        <div className="max-w-4xl mx-auto px-6 py-16 text-center">
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 2 }}>
-            COLLEGE FAST FORWARD
-          </p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 400, color: '#888888', marginBottom: 20 }}>
-            powered by <span style={{ color: '#E85D20' }}>FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>™</sup></span>
-          </p>
-          {user?.career_goals?.archetype && (
-            <button
-              onClick={() => onTabChange?.('career_goals')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.35)', borderRadius: 100, padding: '6px 14px', marginBottom: 16, cursor: 'pointer', minHeight: 'auto' }}>
-              <span style={{ fontSize: 14 }}>⚡</span>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#E85D20' }}>{user.career_goals.archetype}</span>
-            </button>
-          )}
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: '#fff', lineHeight: 1.2, marginBottom: 12 }}>
-            Your career doesn't start with a resume.
-          </h1>
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontStyle: 'italic', color: '#E85D20', marginBottom: 16 }}>
-            It starts with a plan.
-          </p>
-          {showUpgradeBanner && (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.6)', maxWidth: 600, margin: '0 auto 32px', lineHeight: 1.6 }}>
-              You have access to powerful career research tools below. Unlock FastIQ to get your full personalized plan.
-            </p>
-          )}
-
-          {/* Upgrade Banner — conditional on visit/engagement state */}
-          {showUpgradeBanner ? (
-            <div className="max-w-2xl mx-auto bg-[#1A1A1A] border border-[#E85D20] rounded-xl p-6">
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
-                🚀 Ready for the full plan?
-              </p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', lineHeight: 1.5, marginBottom: 20 }}>
-                FastIQ is your 24/7 personal career agent — alumni contacts, personalized outreach, and a daily action plan built around your goals.
-              </p>
-              <div className="flex flex-col gap-3">
-                <button
-                    onClick={async () => {
-                      try {
-                        const response = await createCheckoutSession({
-                          plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
-                          successUrl: `${window.location.origin}/#FastIQ?upgrade=success`,
-                          cancelUrl: window.location.href,
-                          user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
-                        });
-                        if (response?.data?.url) {
-                          window.location.href = response.data.url;
-                        } else {
-                          onOpenUpgrade();
-                        }
-                      } catch (e) {
-                        console.error('Checkout failed:', e.message);
-                        onOpenUpgrade();
-                      }
-                    }}
-                    className="w-full bg-[#E85D20] text-white py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors"
-                    style={{ minHeight: 'auto' }}
-                  >
-                    {foundingOfferActive ? 'Claim Founding Rate →' : 'Unlock FastIQ →'}
-                  </button>
-                  {foundingOfferActive && (
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#E85D20', margin: '4px 0 0', textAlign: 'center' }}>
-                      $14.50/month forever — expires April 15th ({daysLeft}d left)
-                    </p>
-                  )}
-                {nudgeSent ? (
-                  <div className="text-green-400 text-sm font-medium text-center py-2">
-                    ✓ Nudge sent to {user?.parent_emails?.[0] || parentEmail}
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleAskParentClick}
-                    disabled={sendingNudge}
-                    className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors"
-                    style={{ minHeight: 'auto' }}
-                  >
-                    {sendingNudge ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Ask My Parent to Activate →'}
-                  </button>
-                )}
-              </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 12, textAlign: 'center' }}>
-                Start free for 7 days — then $29/month. Cancel anytime.
-              </p>
-            </div>
-          ) : (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.5)', textAlign: 'center', marginTop: 8 }}>
-              Let's build yours. Follow the six steps below — in order.
-          </p>
-          )}
-        </div>
+      <div style={{ background: '#0A0A0A', padding: '48px 40px', textAlign: 'center' }}>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 13, fontWeight: 600,
+          color: '#E85D20', letterSpacing: '0.12em',
+          textTransform: 'uppercase', margin: '0 0 16px'
+        }}>
+          College Fast Forward · powered by FastIQ™
+        </p>
+        <h1 style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 'clamp(28px, 5vw, 48px)',
+          fontWeight: 700, color: '#fff',
+          lineHeight: 1.15, margin: '0 0 16px'
+        }}>
+          Hey {firstName}. Let's get you hired.
+        </h1>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 16, color: 'rgba(255,255,255,0.6)',
+          margin: '0 auto', lineHeight: 1.6,
+          maxWidth: 520
+        }}>
+          No more applying into the void. We'll help you figure out what you want,
+          get your story straight, and connect with the right people — step by step.
+        </p>
       </div>
 
       {/* Parent Email Modal */}

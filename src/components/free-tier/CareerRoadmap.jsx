@@ -154,121 +154,141 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
     onTabChange('company_intel');
   };
 
+  const completedSteps = {
+    1: !!(user?.career_goals?.target_roles?.length > 0),
+    2: !!user?.resume_url,
+    3: true,
+    4: true,
+    5: true,
+    6: !!isFastIQ(user),
+  };
+  const currentStep = parseInt(Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || '6');
+
+  const upNextSteps = [
+    { n: 2, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: 'career_center' },
+    { n: 3, label: 'Research Companies & Industries', tag: 'Free', tabKey: 'company_intel' },
+    { n: 4, label: 'Find Alumni at Target Companies', tag: 'Free · 1 search', tabKey: 'alumni_network' },
+    { n: 5, label: 'Get Matched with CFF Connections', tag: 'Free', tabKey: 'directory' },
+    { n: 6, label: 'Draft Outreach & Track Replies', tag: 'FastIQ', tabKey: null },
+  ];
+
   return (
     <section>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#999', marginBottom: 12 }}>
-        {summaryText}
-      </p>
-
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 8 }}>
-        YOUR CAREER ROADMAP
-      </p>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-        Here's exactly what you need to do.
-      </h2>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', marginBottom: 24, lineHeight: 1.5 }}>
-        Most students guess. You have a plan. Follow these six steps — in order — until you land your role.
-      </p>
-
-      <div className="space-y-4">
-
-        <StepCard status={step1} number={1} title="Set Your Career Goals" tag="Free"
-          description="Tell us your major, target industries, company size preference, and where you want to work.">
-          {step1 === 'done'
-            ? <CTAButton label="Update Goals →" variant="muted" onClick={() => onTabChange('career_goals')} />
-            : <CTAButton label="Set My Career Goals →" variant="outline" onClick={() => onTabChange('career_goals')} />}
-        </StepCard>
-
-        <StepCard status={step2} number={2} title="Explore Companies" tag="Free"
-          description="Research who's hiring in your target industries, what roles exist, and what the culture is like.">
-          {step2 === 'done'
-            ? <CTAButton label="View Your Industries →" variant="muted" onClick={trackCompanyView} />
-            : step2 === 'in_progress'
-            ? <CTAButton label="Continue Exploring →" variant="outline" onClick={trackCompanyView} />
-            : <CTAButton label="Explore Company Intel →" variant="outline" onClick={trackCompanyView} />}
-        </StepCard>
-
-        <StepCard status={step3} number={3} title="Choose Your Target Companies" tag="Free"
-          description="Narrow your list to 3–5 companies you're serious about. Quality over quantity — focus wins.">
-          {step3 === 'done' ? (
-            <div>
-              <CTAButton label="Update Targets →" variant="muted" onClick={() => onTabChange('career_goals')} />
-              {targetCompanies.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {targetCompanies.slice(0, 5).map((c, i) => (
-                    <span key={i} style={{ background: '#F5F5F5', color: '#666', fontSize: 11, padding: '2px 8px', borderRadius: 100, border: '1px solid #E0E0E0' }}>{c}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <CTAButton label="Add Target Companies →" variant="outline" onClick={() => onTabChange('career_goals')} />
-          )}
-        </StepCard>
-
-        {/* Step 4 — PRIMARY conversion moment: solid orange CTA */}
-        <StepCard status={step4} number={4} title="Reach Out to Alumni" tag="FastIQ"
-          description={user?.career_goals?.archetype
-            ? `As ${user.career_goals.archetype}, your warmest paths come through direct alumni contact. FastIQ finds the right people and writes the outreach for you.`
-            : 'Find alumni at your target companies and send personalized warm outreach — the warm path that cold applications never create.'}>
-          {step4 === 'locked' ? (
-            <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontStyle: 'italic', color: '#E85D20', textAlign: 'center', margin: '8px 0' }}>
-                {alumniCount}+ alumni from {school} work at companies like yours. One message could change everything.
-              </p>
-              <div className="space-y-2 mt-3">
-                <CTAButton label="Unlock FastIQ →" variant="solid" fullWidth onClick={onOpenUpgrade} />
-                <CTAButton label="Ask My Parent to Activate →" variant="outline" fullWidth onClick={onOpenUpgrade} />
-              </div>
-            </div>
-          ) : step4 === 'in_progress' ? (
-            <CTAButton label={`Continue Outreach → (${pipelineCount} contacted)`} variant="solid" onClick={() => onTabChange('home')} />
-          ) : step4 === 'done' ? (
-            <CTAButton label="View Pipeline →" variant="muted" onClick={() => onTabChange('home')} />
-          ) : (
-            <CTAButton label="Find Alumni + Draft Outreach →" variant="solid" onClick={() => onTabChange('home')} />
-          )}
-        </StepCard>
-
-        {/* Step 5 — secondary: outlined CTA */}
-        <StepCard status={step5} number={5} title="Optimize Your Profile" tag="FastIQ"
-          description="Tailor your resume for each role and get your LinkedIn profile recruiter-ready. First impressions happen before the interview.">
-          {step5 === 'locked' ? (
-            <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '8px 0', lineHeight: 1.5 }}>
-                FastIQ tailors your resume for each specific role — ATS-optimized and matched to the job description.
-              </p>
-              <div className="space-y-2 mt-3">
-                <CTAButton label="Unlock FastIQ →" variant="outline" fullWidth onClick={onOpenUpgrade} />
-                <button onClick={onOpenUpgrade} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#999', textDecoration: 'underline', minHeight: 'auto', padding: '4px 0', width: '100%' }}>Ask My Parent to Activate →</button>
-              </div>
-            </div>
-          ) : (
-            <CTAButton label="Tailor My Resume →" variant="solid" onClick={() => onTabChange('career_center')} />
-          )}
-        </StepCard>
-
-        {/* Step 6 — tertiary: outlined CTA */}
-        <StepCard status={step6} number={6} title="Follow Up & Track Everything" tag="FastIQ"
-          description="Never let a conversation go cold. Track every application, every conversation, and every follow-up in your job search CRM.">
-          {step6 === 'locked' ? (
-            <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '8px 0', lineHeight: 1.5 }}>
-                FastIQ reminds you when to follow up and drafts the message for you — so momentum never stalls.
-              </p>
-              <div className="space-y-2 mt-3">
-                <CTAButton label="Unlock FastIQ →" variant="outline" fullWidth onClick={onOpenUpgrade} />
-                <button onClick={onOpenUpgrade} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#999', textDecoration: 'underline', minHeight: 'auto', padding: '4px 0', width: '100%' }}>Ask My Parent to Activate →</button>
-              </div>
-            </div>
-          ) : (
-            <CTAButton label="Open My Job Search CRM →" variant="solid" onClick={() => onTabChange('home')} />
-          )}
-        </StepCard>
-
+      {/* Soft intro */}
+      <div style={{ marginBottom: 24 }}>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 15, color: '#555',
+          lineHeight: 1.7, margin: 0
+        }}>
+          Most students apply to 50 jobs and hear nothing back. That's not a you problem —
+          it's a strategy problem. Here's your plan. Work through it in order.
+        </p>
       </div>
 
-      <div style={{ marginTop: 24, textAlign: 'center' }}>
+      {/* Step 1 — Active hero card */}
+      <div style={{
+        background: '#fff',
+        border: currentStep === 1 ? '2px solid #E85D20' : '1px solid #E0E0E0',
+        borderRadius: 16,
+        padding: '28px 32px',
+        marginBottom: 24,
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 20,
+      }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: '50%',
+          background: completedSteps[1] ? '#22C55E' : '#E85D20',
+          color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 16, fontWeight: 700, flexShrink: 0,
+          fontFamily: "'DM Sans', sans-serif"
+        }}>
+          {completedSteps[1] ? '✓' : '1'}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+              Set Your Career Goals
+            </p>
+            <span style={{ background: '#E8F5E9', color: '#2E7D32', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>FREE</span>
+          </div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 16px', lineHeight: 1.6 }}>
+            Takes 3 minutes. Tell us what you're studying, where you want to work,
+            and what's holding you back. We'll build your plan around it.
+          </p>
+          <button
+            onClick={() => onTabChange('career_goals')}
+            style={{
+              background: completedSteps[1] ? 'transparent' : '#E85D20',
+              border: completedSteps[1] ? '1.5px solid #E85D20' : 'none',
+              borderRadius: 10,
+              padding: '12px 28px', fontSize: 14, fontWeight: 600,
+              color: completedSteps[1] ? '#E85D20' : '#fff',
+              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+              minHeight: 'auto',
+            }}
+          >
+            {completedSteps[1] ? 'Update Goals →' : "Let's do it →"}
+          </button>
+        </div>
+      </div>
+
+      {/* Up next — dimmed/clickable steps */}
+      <div style={{ marginBottom: 32 }}>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 12, color: '#AAAAAA',
+          textTransform: 'uppercase', letterSpacing: '0.1em',
+          margin: '0 0 12px', fontWeight: 600
+        }}>
+          Up next — unlocks as you go
+        </p>
+        {upNextSteps.map(step => {
+          const isUnlocked = completedSteps[step.n - 1] || step.n <= currentStep;
+          const isDone = completedSteps[step.n];
+          const isActive = step.n === currentStep;
+          return (
+            <div
+              key={step.n}
+              onClick={() => isUnlocked && step.tabKey && onTabChange(step.tabKey)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 16,
+                padding: '14px 0',
+                borderBottom: '1px solid #F0F0F0',
+                opacity: isUnlocked ? 1 : 0.4,
+                cursor: isUnlocked && step.tabKey ? 'pointer' : 'default',
+              }}
+            >
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: isDone ? '#E85D20' : isActive ? '#FFF5F0' : '#F5F5F5',
+                border: isActive ? '2px solid #E85D20' : isDone ? 'none' : '2px solid #E0E0E0',
+                color: isDone ? '#fff' : isActive ? '#E85D20' : '#999',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 13, fontWeight: 700, flexShrink: 0,
+                fontFamily: "'DM Sans', sans-serif"
+              }}>
+                {isDone ? '✓' : step.n}
+              </div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: isActive ? '#1A1A1A' : '#666', margin: 0, flex: 1, fontWeight: isActive ? 600 : 400 }}>
+                {step.label}
+              </p>
+              <span style={{
+                fontSize: 11, fontWeight: 600,
+                color: step.tag === 'FastIQ' ? '#E85D20' : '#22C55E',
+                fontFamily: "'DM Sans', sans-serif",
+                whiteSpace: 'nowrap'
+              }}>
+                {step.tag}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ marginTop: 8, textAlign: 'center' }}>
         {hasOffer ? (
           <div>
             <p style={{ fontSize: 28, marginBottom: 4 }}>🎉</p>
@@ -278,19 +298,11 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
             <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 16, color: '#E85D20', margin: '0 0 8px' }}>
               Now go negotiate that offer.
             </p>
-            <button onClick={() => onTabChange('home')} style={{ fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto', padding: 0 }}>
-              FastIQ can help you negotiate →
-            </button>
           </div>
         ) : (
-          <div>
-            <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 16, color: '#E85D20', margin: '0 0 6px' }}>
-              Rinse and repeat until you find your role.
-            </p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA' }}>
-              Students who work through all six steps report significantly better results than those who apply cold.
-            </p>
-          </div>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 15, color: '#AAAAAA', margin: 0 }}>
+            Rinse and repeat until you find your role.
+          </p>
         )}
       </div>
     </section>
