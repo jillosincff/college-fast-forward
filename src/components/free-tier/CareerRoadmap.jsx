@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 const isFastIQ = (user) =>
   !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
@@ -154,6 +155,14 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
     onTabChange('company_intel');
   };
 
+  const handleStepClick = (step) => {
+    if (step.tabKey) {
+      onTabChange?.(step.tabKey);
+    } else if (step.page) {
+      navigate(step.page);
+    }
+  };
+
   const completedSteps = {
     1: !!(user?.career_goals?.target_roles?.length > 0),
     2: !!user?.resume_url,
@@ -177,7 +186,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
   const currentStep = parseInt(Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || '6');
 
   const upNextSteps = [
-    { n: 2, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: 'career_center' },
+    { n: 2, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: null, page: 'ResumeTailoring' },
     { n: 3, label: 'Research Companies & Industries', tag: 'Free', tabKey: 'company_intel' },
     { n: 4, label: 'Find Your CFF Connections', tag: 'Free', tabKey: 'directory' },
     { n: 5, label: 'Find Alumni at Target Companies', tag: 'Free · 1 search', tabKey: 'alumni_search' },
@@ -280,16 +289,27 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           const isCompleted = completedSteps[step.n];
           const isUnlocked = unlockedSteps[step.n];
           const isLocked = !isUnlocked;
+          const isClickable = isUnlocked && !isCompleted && (step.tabKey || step.page);
           return (
             <div
               key={step.n}
-              onClick={() => isUnlocked && step.tabKey && onTabChange(step.tabKey)}
+              onClick={() => isClickable && handleStepClick(step)}
+              onMouseEnter={e => {
+                if (isClickable) {
+                  e.currentTarget.style.background = '#F5F5F5';
+                }
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+              }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 16,
-                padding: '14px 0',
+                padding: '14px 12px',
                 borderBottom: '1px solid #F0F0F0',
                 opacity: isLocked ? 0.35 : 1,
-                cursor: isUnlocked && step.tabKey ? 'pointer' : 'default',
+                cursor: isClickable ? 'pointer' : 'default',
+                transition: 'background 0.15s',
+                borderRadius: 10,
               }}
             >
               <div style={{
@@ -320,6 +340,9 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
               }}>
                 {step.tag}
               </span>
+              {isClickable && (
+                <span style={{ color: '#CCCCCC', fontSize: 16, flexShrink: 0, marginLeft: 4 }}>→</span>
+              )}
             </div>
           );
         })}
