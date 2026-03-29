@@ -158,7 +158,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
         {/* CTAs */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
           <button
-            onClick={() => onTabChange ? onTabChange('resume') : navigate('ResumeTailoring')}
+            onClick={() => navigate('ResumeTailoring')}
             style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', flex: 1, fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
           >
             Continue →
