@@ -226,7 +226,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
 
       {/* Target Companies */}
       <div style={sectionStyle}>
-        <label style={labelStyle}>Any dream companies? (optional)</label>
+        <label style={labelStyle}>Any dream companies?</label>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
           <input
             value={companyInput}
@@ -251,7 +251,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
 
       {/* Biggest Struggle */}
       <div style={sectionStyle}>
-        <label style={labelStyle}>What are you struggling with most right now?</label>
+        <label style={labelStyle}>What's your biggest challenge right now?</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {["Don't know where to begin", "Applied but no answers", "Not sure how to network"].map(opt => (
             <button key={opt} onClick={() => update('biggest_struggle', opt)} style={chipStyle(form.biggest_struggle === opt)}>{opt}</button>
