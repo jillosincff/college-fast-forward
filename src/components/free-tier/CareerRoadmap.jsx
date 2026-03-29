@@ -179,7 +179,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
   const upNextSteps = [
     { n: 2, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: 'career_center' },
     { n: 3, label: 'Research Companies & Industries', tag: 'Free', tabKey: 'company_intel' },
-    { n: 4, label: 'Get Matched with CFF Connections', tag: 'Free', tabKey: 'directory' },
+    { n: 4, label: 'Find Your CFF Connections', tag: 'Free', tabKey: 'directory' },
     { n: 5, label: 'Find Alumni at Target Companies', tag: 'Free · 1 search', tabKey: 'alumni_search' },
     { n: 6, label: 'Draft Outreach & Track Replies', tag: 'FastIQ', tabKey: null },
   ];
