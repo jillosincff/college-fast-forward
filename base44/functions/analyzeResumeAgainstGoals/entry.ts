@@ -6,9 +6,9 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { resumeText, targetRoles, targetIndustries, jobType, location, careerGoals } = await req.json();
+    const { resumeText, fileUrl, targetRoles, targetIndustries, jobType, location, careerGoals } = await req.json();
 
-    if (!resumeText) return Response.json({ error: 'No resume text provided' }, { status: 400 });
+    if (!resumeText && !fileUrl) return Response.json({ error: 'No resume provided' }, { status: 400 });
 
     const prompt = `You are an expert resume coach and ATS specialist. Analyze this resume against the student's career goals and provide a detailed score.
 
@@ -19,7 +19,7 @@ STUDENT'S CAREER GOALS:
 - Location: ${location || 'Not specified'}
 
 RESUME TEXT:
-${resumeText}
+${resumeText || '(Resume provided as attached file — please analyze the attached PDF/document)'}
 
 Analyze the resume and respond ONLY with this JSON structure (no preamble, no markdown):
 {
@@ -48,6 +48,7 @@ Be specific and personalized to their goals. A resume targeting Financial Servic
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       model: 'claude_sonnet_4_6',
+      ...(fileUrl && !resumeText ? { file_urls: [fileUrl] } : {}),
       response_json_schema: {
         type: 'object',
         properties: {

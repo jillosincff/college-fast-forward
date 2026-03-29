@@ -82,7 +82,8 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
       setAnalyzing(true);
       try {
         const res = await base44.functions.invoke('analyzeResumeAgainstGoals', {
-          resumeText: primaryResume.parsed_text,
+          resumeText: primaryResume.parsed_text || '',
+          fileUrl: !primaryResume.parsed_text ? primaryResume.original_file_url : undefined,
           targetRoles: user?.career_goals?.target_roles,
           targetIndustries: user?.career_goals?.target_industries,
           jobType: user?.career_goals?.job_type,
@@ -95,8 +96,8 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
       }
       setAnalyzing(false);
     };
-    if (resumes.length > 0 && !analysis) runAnalysis();
-  }, [resumes]);
+    if (resumes.length > 0 && !analysis && phase === 'hub') runAnalysis();
+  }, [resumes, phase]);
 
   const uploadResume = async (file) => {
     setFileName(file.name);
