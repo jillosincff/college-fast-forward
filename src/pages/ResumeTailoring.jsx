@@ -104,7 +104,12 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       }
       setAnalyzing(false);
     };
-    if (resumes.length > 0 && !analysis && !analyzing && phase === 'hub') runAnalysis();
+    if (resumes.length > 0 && phase === 'hub') {
+      const primary = resumes.find(r => r.is_active) || resumes[0];
+      if (primary && !localStorage.getItem(`resume_analysis_${primary.id}`)) {
+        runAnalysis();
+      }
+    }
   }, [phase, resumes.length]);
 
   const uploadResume = async (file) => {
