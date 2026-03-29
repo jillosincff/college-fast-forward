@@ -1,0 +1,71 @@
+{
+  "name": "Resume",
+  "type": "object",
+  "properties": {
+    "student_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "name": {
+      "type": "string",
+      "description": "User-facing label for this resume (e.g. 'Marketing Resume', 'My Resume v2')"
+    },
+    "original_file_name": {
+      "type": "string",
+      "description": "Original uploaded file name"
+    },
+    "original_file_url": {
+      "type": "string",
+      "description": "Stored file URL"
+    },
+    "parsed_text": {
+      "type": "string",
+      "description": "Extracted text content from the resume"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this is the student's primary resume"
+    },
+    "last_used_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the resume was last used for tailoring"
+    }
+  },
+  "required": [
+    "student_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
