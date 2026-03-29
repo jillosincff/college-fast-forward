@@ -79,7 +79,7 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
   useEffect(() => {
     const runAnalysis = async () => {
       const primaryResume = resumes.find(r => r.is_active) || resumes[0];
-      if (!primaryResume?.parsed_text) return;
+      if (!primaryResume?.parsed_text && !primaryResume?.original_file_url) return;
       setAnalyzing(true);
       setAnalysisError(false);
       try {
