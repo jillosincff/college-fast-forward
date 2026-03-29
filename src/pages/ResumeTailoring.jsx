@@ -42,6 +42,7 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
   // Analysis state
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState(false);
 
   // Load resumes on mount
   useEffect(() => {
@@ -80,6 +81,7 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
       const primaryResume = resumes.find(r => r.is_active) || resumes[0];
       if (!primaryResume?.parsed_text) return;
       setAnalyzing(true);
+      setAnalysisError(false);
       try {
         const res = await base44.functions.invoke('analyzeResumeAgainstGoals', {
           resumeText: primaryResume.parsed_text || '',
@@ -90,14 +92,19 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
           location: user?.career_goals?.location,
           careerGoals: user?.career_goals,
         });
-        setAnalysis(res?.data?.analysis || null);
+        if (res?.data?.analysis) {
+          setAnalysis(res.data.analysis);
+        } else {
+          setAnalysisError(true);
+        }
       } catch (e) {
         console.error('Analysis failed:', e);
+        setAnalysisError(true);
       }
       setAnalyzing(false);
     };
-    if (resumes.length > 0 && !analysis && phase === 'hub') runAnalysis();
-  }, [resumes, phase]);
+    if (resumes.length > 0 && !analysis && !analyzing && phase === 'hub') runAnalysis();
+  }, [phase]); // trigger when phase changes to 'hub'
 
   const uploadResume = async (file) => {
     setFileName(file.name);
@@ -306,7 +313,7 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
         )}
 
         {/* Analysis section */}
-        {(analyzing || analysis) && (
+        {(analyzing || analysis || analysisError) && (
           <div style={{ marginBottom: 32 }}>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
@@ -317,6 +324,13 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>FastIQ is reviewing your resume...</p>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Scoring against your career goals</p>
                 </div>
+              </div>
+            )}
+
+            {analysisError && !analyzing && (
+              <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Resume analysis couldn't load.</p>
+                <button onClick={() => { setAnalysisError(false); setAnalysis(null); }} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap' }}>Try Again</button>
               </div>
             )}
 

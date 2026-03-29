@@ -47,7 +47,7 @@ Be specific and personalized to their goals. A resume targeting Financial Servic
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
-      model: 'claude_sonnet_4_6',
+      model: 'gemini_3_flash',
       ...(fileUrl && !resumeText ? { file_urls: [fileUrl] } : {}),
       response_json_schema: {
         type: 'object',
