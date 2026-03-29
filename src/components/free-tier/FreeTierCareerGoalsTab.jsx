@@ -161,7 +161,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
             onClick={() => onTabChange ? onTabChange('career_center') : navigate('ResumeTailoring')}
             style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', flex: 1, fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
           >
-            Next: Upload Your Resume →
+            Continue →
           </button>
           <button
             onClick={() => onTabChange ? onTabChange('home') : navigate('FreeTierDashboard')}
