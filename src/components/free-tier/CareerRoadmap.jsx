@@ -184,6 +184,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
   };
 
   const currentStep = parseInt(Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || '6');
+  const activeStepNumber = parseInt(Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || '7');
 
   const upNextSteps = [
     { n: 2, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: null, page: 'ResumeTailoring' },
@@ -289,60 +290,79 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           const isCompleted = completedSteps[step.n];
           const isUnlocked = unlockedSteps[step.n];
           const isLocked = !isUnlocked;
+          const isActive = isUnlocked && !isCompleted && step.n === activeStepNumber;
           const isClickable = isUnlocked && !isCompleted && (step.tabKey || step.page);
+
+          if (isActive) {
+            return (
+              <div
+                key={step.n}
+                onClick={() => handleStepClick(step)}
+                style={{
+                  background: '#fff',
+                  border: '2px solid #E85D20',
+                  borderRadius: 12,
+                  padding: '16px 20px',
+                  display: 'flex', alignItems: 'center', gap: 16,
+                  cursor: 'pointer',
+                  marginBottom: 8,
+                  boxShadow: '0 2px 8px rgba(232,93,32,0.15)',
+                }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: '#E85D20', color: '#fff',
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', fontSize: 14,
+                  fontWeight: 700, flexShrink: 0,
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>
+                  {step.n}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px' }}>
+                    {step.label}
+                  </p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', margin: 0, fontWeight: 600 }}>
+                    {step.tag} · Tap to start →
+                  </p>
+                </div>
+                <span style={{ background: '#E85D20', color: '#fff', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
+                  Start →
+                </span>
+              </div>
+            );
+          }
+
           return (
             <div
               key={step.n}
               onClick={() => isClickable && handleStepClick(step)}
-              onMouseEnter={e => {
-                if (isClickable) {
-                  e.currentTarget.style.background = '#F5F5F5';
-                }
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-              }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 16,
-                padding: '14px 12px',
+                padding: '12px 8px',
                 borderBottom: '1px solid #F0F0F0',
-                opacity: isLocked ? 0.35 : 1,
+                opacity: isLocked ? 0.35 : 0.6,
                 cursor: isClickable ? 'pointer' : 'default',
-                transition: 'background 0.15s',
-                borderRadius: 10,
               }}
             >
               <div style={{
                 width: 32, height: 32, borderRadius: '50%',
                 background: isCompleted ? '#E85D20' : '#F0F0F0',
                 color: isCompleted ? '#fff' : '#999',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 13, fontWeight: 700, flexShrink: 0,
-                fontFamily: "'DM Sans', sans-serif"
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: 13,
+                fontWeight: 700, flexShrink: 0,
+                fontFamily: "'DM Sans', sans-serif",
               }}>
                 {isCompleted ? '✓' : step.n}
               </div>
-              <p style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 14,
-                color: isLocked ? '#AAAAAA' : isCompleted ? '#888' : '#1A1A1A',
-                margin: 0, flex: 1,
-                textDecoration: isCompleted ? 'line-through' : 'none',
-              }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: isCompleted ? '#AAAAAA' : '#666', margin: 0, flex: 1, textDecoration: isCompleted ? 'line-through' : 'none' }}>
                 {step.label}
               </p>
-              <span style={{
-                fontSize: 11, fontWeight: 600,
-                color: step.tag === 'FastIQ' ? '#E85D20' : '#22C55E',
-                fontFamily: "'DM Sans', sans-serif",
-                whiteSpace: 'nowrap',
-                opacity: isLocked ? 0.5 : 1,
-              }}>
+              <span style={{ fontSize: 11, color: step.tag === 'FastIQ' ? '#E85D20' : '#22C55E', fontWeight: 600, fontFamily: "'DM Sans', sans-serif", opacity: isLocked ? 0.5 : 1 }}>
                 {step.tag}
               </span>
-              {isClickable && (
-                <span style={{ color: '#CCCCCC', fontSize: 16, flexShrink: 0, marginLeft: 4 }}>→</span>
-              )}
             </div>
           );
         })}
