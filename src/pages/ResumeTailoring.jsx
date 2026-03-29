@@ -104,7 +104,7 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
       setAnalyzing(false);
     };
     if (resumes.length > 0 && !analysis && !analyzing && phase === 'hub') runAnalysis();
-  }, [phase]); // trigger when phase changes to 'hub'
+  }, [phase, resumes.length]);
 
   const uploadResume = async (file) => {
     setFileName(file.name);
@@ -113,11 +113,25 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       await base44.auth.updateMe({ resume_url: file_url });
 
+      // Extract text from PDF via LLM
+      let parsed_text = '';
+      try {
+        const extracted = await base44.integrations.Core.InvokeLLM({
+          prompt: 'Extract all text content from this resume document. Return only the raw text, preserving structure but no JSON or formatting.',
+          file_urls: [file_url],
+          model: 'gemini_3_flash',
+        });
+        parsed_text = typeof extracted === 'string' ? extracted : '';
+      } catch (e) {
+        console.warn('Text extraction failed:', e);
+      }
+
       // Create Resume entity record
       const newResume = await base44.entities.Resume.create({
         student_email: user.email,
         original_file_name: file.name,
         original_file_url: file_url,
+        parsed_text,
         is_active: resumes.length === 0,
       });
 
