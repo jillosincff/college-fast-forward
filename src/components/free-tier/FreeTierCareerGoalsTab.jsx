@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 const INDUSTRIES = [
   'Architecture & Design', 'Biotech & Life Sciences', 'Consumer Goods & Retail',
@@ -55,6 +56,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [roleInput, setRoleInput] = useState('');
   const [companyInput, setCompanyInput] = useState('');
 
@@ -105,7 +107,8 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
       });
       setSaved(true);
       onGoalsSaved?.();
-      setTimeout(() => setSaved(false), 3000);
+      await new Promise(r => setTimeout(r, 800));
+      setShowConfirmation(true);
     } catch (e) {
       console.error('Save failed:', e);
     }
@@ -113,6 +116,66 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
   };
 
   const isPresetLocation = PRESET_LOCATIONS.includes(form.location);
+
+  if (showConfirmation) {
+    return (
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
+
+        {/* AI bubble */}
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 28 }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
+          </div>
+          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 460 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>
+              Got it. Here's your plan — let's make sure everything looks right.
+            </p>
+          </div>
+        </div>
+
+        {/* Snapshot card */}
+        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px', marginBottom: 24 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>YOUR CAREER SNAPSHOT</p>
+          {[
+            { label: 'Major', value: form.major },
+            { label: 'Target Roles', value: form.target_roles?.join(', ') },
+            { label: 'Industries', value: form.target_industries?.join(', ') },
+            { label: 'Job Type', value: form.job_type },
+            { label: 'Graduating', value: form.graduation_year },
+            { label: 'Location', value: form.location },
+            { label: 'Company Size', value: form.company_size_preference },
+            { label: 'Target Companies', value: form.target_companies?.join(', ') || 'Not set yet' },
+            { label: 'Biggest Challenge', value: form.biggest_struggle },
+          ].filter(r => r.value).map(row => (
+            <div key={row.label} style={{ display: 'flex', gap: 16, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.4)', margin: 0, minWidth: 130, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.06em', paddingTop: 2 }}>{row.label}</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#fff', margin: 0, lineHeight: 1.5 }}>{row.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTAs */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+          <button
+            onClick={() => onTabChange ? onTabChange('career_center') : navigate('ResumeTailoring')}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', flex: 1, fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+          >
+            Next: Upload Your Resume →
+          </button>
+          <button
+            onClick={() => onTabChange ? onTabChange('home') : navigate('FreeTierDashboard')}
+            style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 28px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+          >
+            Go to Dashboard
+          </button>
+        </div>
+
+        <p onClick={() => setShowConfirmation(false)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: 0 }}>
+          ← Edit my goals
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
