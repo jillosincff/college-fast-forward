@@ -11,6 +11,8 @@ const INDUSTRIES = [
   'Pre-Med & Healthcare', 'Real Estate', 'Sports & Athletics', 'Technology & Software',
 ];
 
+const PRESET_LOCATIONS = ['New York', 'Miami', 'Los Angeles', 'Chicago', 'Remote', 'Open to anything'];
+
 const sectionStyle = { marginBottom: 32 };
 
 const labelStyle = {
@@ -38,8 +40,6 @@ const inputStyle = {
   color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif",
   boxSizing: 'border-box', outline: 'none',
 };
-
-const PRESET_LOCATIONS = ['New York', 'Miami', 'Los Angeles', 'Chicago', 'Remote', 'Open to anything'];
 
 export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange, onOpenUpgrade }) {
   const [form, setForm] = useState({
@@ -120,7 +120,6 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
   if (showConfirmation) {
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
-
         {/* AI bubble */}
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 28 }}>
           <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -196,25 +195,14 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
       {/* Major */}
       <div style={sectionStyle}>
         <label style={labelStyle}>What are you studying?</label>
-        <input
-          value={form.major}
-          onChange={e => update('major', e.target.value)}
-          placeholder="e.g. Finance, Marketing, Computer Science..."
-          style={inputStyle}
-        />
+        <input value={form.major} onChange={e => update('major', e.target.value)} placeholder="e.g. Finance, Marketing, Computer Science..." style={inputStyle} />
       </div>
 
       {/* Target Roles */}
       <div style={sectionStyle}>
         <label style={labelStyle}>What roles are you targeting?</label>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <input
-            value={roleInput}
-            onChange={e => setRoleInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addRole()}
-            placeholder="e.g. Marketing Manager, Software Engineer..."
-            style={{ ...inputStyle, flex: 1 }}
-          />
+          <input value={roleInput} onChange={e => setRoleInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addRole()} placeholder="e.g. Marketing Manager, Software Engineer..." style={{ ...inputStyle, flex: 1 }} />
           <button onClick={addRole} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '0 16px', color: '#fff', cursor: 'pointer', fontSize: 22, fontWeight: 300, minHeight: 'auto' }}>+</button>
         </div>
         {form.target_roles.length > 0 && (
@@ -234,9 +222,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
         <label style={labelStyle}>What industries interest you? <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#AAAAAA', fontSize: 11 }}>— select up to 3</span></label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {INDUSTRIES.map(ind => (
-            <button key={ind} onClick={() => toggleChip('target_industries', ind)} style={chipStyle(form.target_industries.includes(ind))}>
-              {ind}
-            </button>
+            <button key={ind} onClick={() => toggleChip('target_industries', ind)} style={chipStyle(form.target_industries.includes(ind))}>{ind}</button>
           ))}
         </div>
       </div>
@@ -269,12 +255,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
             <button key={loc} onClick={() => update('location', loc)} style={chipStyle(form.location === loc)}>{loc}</button>
           ))}
         </div>
-        <input
-          value={isPresetLocation ? '' : form.location}
-          onChange={e => update('location', e.target.value)}
-          placeholder="Or type a city..."
-          style={inputStyle}
-        />
+        <input value={isPresetLocation ? '' : form.location} onChange={e => update('location', e.target.value)} placeholder="Or type a city..." style={inputStyle} />
       </div>
 
       {/* Company Size */}
@@ -291,13 +272,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
       <div style={sectionStyle}>
         <label style={labelStyle}>Any dream companies?</label>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <input
-            value={companyInput}
-            onChange={e => setCompanyInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addCompany()}
-            placeholder="e.g. Google, Goldman Sachs, Nike..."
-            style={{ ...inputStyle, flex: 1 }}
-          />
+          <input value={companyInput} onChange={e => setCompanyInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCompany()} placeholder="e.g. Google, Goldman Sachs, Nike..." style={{ ...inputStyle, flex: 1 }} />
           <button onClick={addCompany} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '0 16px', color: '#fff', cursor: 'pointer', fontSize: 22, fontWeight: 300, minHeight: 'auto' }}>+</button>
         </div>
         {form.target_companies.length > 0 && (
