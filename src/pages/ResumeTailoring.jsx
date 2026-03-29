@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
@@ -7,7 +8,9 @@ import JobDescriptionStep from '@/components/resume-tailor/JobDescriptionStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
 
-export default function ResumeTailoring({ onOpenUpgrade }) {
+export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const onOpenUpgrade = onOpenUpgradeProp || (() => setShowUpgradeModal(true));
   const { user } = useAuth();
   const fileInputRef = useRef(null);
 
