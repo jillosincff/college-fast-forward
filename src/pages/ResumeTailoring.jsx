@@ -78,8 +78,7 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
   useEffect(() => {
     const runAnalysis = async () => {
       const primaryResume = resumes.find(r => r.is_active) || resumes[0];
-      const hasGoals = user?.career_goals?.target_roles?.length > 0;
-      if (!primaryResume?.parsed_text || !hasGoals) return;
+      if (!primaryResume?.parsed_text) return;
       setAnalyzing(true);
       try {
         const res = await base44.functions.invoke('analyzeResumeAgainstGoals', {
