@@ -39,6 +39,10 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
   const hasResumes = resumes.length > 0;
   const canAddMore = isFastIQ || resumes.length === 0;
 
+  // Analysis state
+  const [analysis, setAnalysis] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
   // Load resumes on mount
   useEffect(() => {
     const loadResumes = async () => {
@@ -53,7 +57,6 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
         setTailoredResumes(tailoredList);
 
         if (resList.length > 0) {
-          // Pre-load the active resume's text for tailoring
           const active = resList.find(r => r.is_active) || resList[0];
           setResumeText(active.parsed_text || '');
           setFileName(active.original_file_name || 'Resume on file');
@@ -70,6 +73,31 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
     };
     if (user?.email) loadResumes();
   }, [user?.email]);
+
+  // Auto-analyze resume against career goals
+  useEffect(() => {
+    const runAnalysis = async () => {
+      const primaryResume = resumes.find(r => r.is_active) || resumes[0];
+      const hasGoals = user?.career_goals?.target_roles?.length > 0;
+      if (!primaryResume?.parsed_text || !hasGoals) return;
+      setAnalyzing(true);
+      try {
+        const res = await base44.functions.invoke('analyzeResumeAgainstGoals', {
+          resumeText: primaryResume.parsed_text,
+          targetRoles: user?.career_goals?.target_roles,
+          targetIndustries: user?.career_goals?.target_industries,
+          jobType: user?.career_goals?.job_type,
+          location: user?.career_goals?.location,
+          careerGoals: user?.career_goals,
+        });
+        setAnalysis(res?.data?.analysis || null);
+      } catch (e) {
+        console.error('Analysis failed:', e);
+      }
+      setAnalyzing(false);
+    };
+    if (resumes.length > 0 && !analysis) runAnalysis();
+  }, [resumes]);
 
   const uploadResume = async (file) => {
     setFileName(file.name);
@@ -274,6 +302,82 @@ export default function ResumeTailoring({ onOpenUpgrade }) {
             <button onClick={() => onOpenUpgrade?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>
               Unlock FastIQ →
             </button>
+          </div>
+        )}
+
+        {/* Analysis section */}
+        {(analyzing || analysis) && (
+          <div style={{ marginBottom: 32 }}>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+            {analyzing && (
+              <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '28px 32px', display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #F0F0F0', borderTop: '3px solid #E85D20', animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>FastIQ is reviewing your resume...</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Scoring against your career goals</p>
+                </div>
+              </div>
+            )}
+
+            {analysis && !analyzing && (
+              <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px' }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>RESUME ANALYSIS · MATCHED TO YOUR GOALS</p>
+
+                <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
+                  <div style={{ textAlign: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 90, height: 90, borderRadius: '50%', border: `4px solid ${analysis.overall_score >= 80 ? '#22C55E' : analysis.overall_score >= 60 ? '#F59E0B' : '#EF4444'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 28, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{analysis.overall_score}</span>
+                      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>/100</span>
+                    </div>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: analysis.overall_score >= 80 ? '#22C55E' : analysis.overall_score >= 60 ? '#F59E0B' : '#EF4444', margin: '8px 0 0', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{analysis.score_label}</p>
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#fff', margin: '0 0 16px', lineHeight: 1.6 }}>{analysis.summary}</p>
+                    <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '12px 16px' }}>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>⚡ TOP PRIORITY</p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
+                  <div>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#22C55E', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>✅ Strengths</p>
+                    {analysis.strengths?.map((s, i) => (
+                      <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: '0 0 6px', lineHeight: 1.4, paddingLeft: 8, borderLeft: '2px solid rgba(34,197,94,0.4)' }}>{s}</p>
+                    ))}
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#F59E0B', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>⚠️ Gaps</p>
+                    {analysis.gaps?.map((g, i) => (
+                      <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: '0 0 6px', lineHeight: 1.4, paddingLeft: 8, borderLeft: '2px solid rgba(245,158,11,0.4)' }}>{g}</p>
+                    ))}
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#EF4444', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>❌ Missing</p>
+                    {analysis.missing?.map((m, i) => (
+                      <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: '0 0 6px', lineHeight: 1.4, paddingLeft: 8, borderLeft: '2px solid rgba(239,68,68,0.4)' }}>{m}</p>
+                    ))}
+                  </div>
+                </div>
+
+                {!isFastIQ && (
+                  <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                    <div>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>FastIQ can fix every one of these gaps.</p>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Tailor your resume to any job description in 60 seconds.</p>
+                    </div>
+                    <button onClick={() => onOpenUpgrade?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Unlock FastIQ to Optimize →</button>
+                  </div>
+                )}
+
+                {isFastIQ && (
+                  <button onClick={() => handleTailor(resumes.find(r => r.is_active) || resumes[0])} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}>Optimize My Resume Now →</button>
+                )}
+              </div>
+            )}
           </div>
         )}
 
