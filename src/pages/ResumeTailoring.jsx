@@ -121,6 +121,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       });
       setResumes(prev => [...prev, newResume]);
       setResumeId(newResume.id);
+      setAnalysis(null); // reset so analysis re-runs for the new resume
+      setAnalysisError(false);
       setPhase('hub');
     } catch (e) {
       console.error('Upload failed:', e);
