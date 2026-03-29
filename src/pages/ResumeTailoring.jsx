@@ -52,6 +52,11 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           setResumeText(active.parsed_text || '');
           setFileName(active.original_file_name || 'Resume on file');
           setResumeId(active.id);
+          // Load cached analysis for this resume
+          const cached = localStorage.getItem(`resume_analysis_${active.id}`);
+          if (cached) {
+            try { setAnalysis(JSON.parse(cached)); } catch (e) {}
+          }
           setPhase('hub');
         } else {
           setPhase('entry');
@@ -69,6 +74,12 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     const runAnalysis = async () => {
       const primaryResume = resumes.find(r => r.is_active) || resumes[0];
       if (!primaryResume?.parsed_text && !primaryResume?.original_file_url) return;
+      // Skip if already cached for this resume
+      const cached = localStorage.getItem(`resume_analysis_${primaryResume.id}`);
+      if (cached) {
+        try { setAnalysis(JSON.parse(cached)); } catch (e) {}
+        return;
+      }
       setAnalyzing(true);
       setAnalysisError(false);
       try {
@@ -83,6 +94,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         });
         if (res?.data?.analysis) {
           setAnalysis(res.data.analysis);
+          localStorage.setItem(`resume_analysis_${primaryResume.id}`, JSON.stringify(res.data.analysis));
         } else {
           setAnalysisError(true);
         }
@@ -121,7 +133,9 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       });
       setResumes(prev => [...prev, newResume]);
       setResumeId(newResume.id);
-      setAnalysis(null); // reset so analysis re-runs for the new resume
+      // Clear cache for this new resume so analysis runs fresh
+      localStorage.removeItem(`resume_analysis_${newResume.id}`);
+      setAnalysis(null);
       setAnalysisError(false);
       setPhase('hub');
     } catch (e) {
