@@ -123,7 +123,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
           CAREER GOALS
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
-          Tell us what you're looking for.
+          Let's build your career plan.
         </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
           The more you share, the better we can match you.
@@ -168,7 +168,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
 
       {/* Industries */}
       <div style={sectionStyle}>
-        <label style={labelStyle}>What industries interest you? (pick all that apply)</label>
+        <label style={labelStyle}>What industries interest you? <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#AAAAAA', fontSize: 11 }}>— select up to 3</span></label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {INDUSTRIES.map(ind => (
             <button key={ind} onClick={() => toggleChip('target_industries', ind)} style={chipStyle(form.target_industries.includes(ind))}>
