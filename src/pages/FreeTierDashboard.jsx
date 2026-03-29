@@ -31,8 +31,9 @@ export default function FreeTierDashboard() {
     if (refreshUser) refreshUser();
   }, []);
 
-  const handleGoalsSaved = async () => {
-    if (refreshUser) await refreshUser();
+  const handleGoalsSaved = () => {
+    // Don't await — avoids remounting the tab before confirmation shows
+    if (refreshUser) refreshUser().catch(() => {});
     setSavedGoals(Date.now());
   };
 

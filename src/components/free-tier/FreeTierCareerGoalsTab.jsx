@@ -106,9 +106,11 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
         },
       });
       setSaved(true);
-      onGoalsSaved?.();
-      await new Promise(r => setTimeout(r, 800));
+      setSaving(false);
       setShowConfirmation(true);
+      // refresh parent in background — don't await to avoid unmounting this component
+      onGoalsSaved?.();
+      return;
     } catch (e) {
       console.error('Save failed:', e);
     }
