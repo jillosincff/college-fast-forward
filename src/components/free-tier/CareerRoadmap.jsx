@@ -157,9 +157,9 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
   const completedSteps = {
     1: !!(user?.career_goals?.target_roles?.length > 0),
     2: !!user?.resume_url,
-    3: !!user?.company_intel_viewed,
-    4: !!user?.leads_viewed,
-    5: !!user?.alumni_search_used,
+    3: false,
+    4: false,
+    5: false,
     6: fastiq,
   };
 
