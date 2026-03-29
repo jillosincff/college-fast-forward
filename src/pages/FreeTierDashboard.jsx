@@ -47,7 +47,7 @@ export default function FreeTierDashboard() {
     if (tab === 'company_intel' && !user?.company_intel_viewed) {
       base44.auth.updateMe({ company_intel_viewed: true }).catch(() => {});
     }
-    if ((tab === 'directory' || tab === 'career_goals') && !user?.leads_viewed) {
+    if (tab === 'directory' && !user?.leads_viewed) {
       base44.auth.updateMe({ leads_viewed: true }).catch(() => {});
     }
   };
