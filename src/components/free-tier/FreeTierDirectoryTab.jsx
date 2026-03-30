@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Loader2, Linkedin } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { INDUSTRY_MAP } from '@/constants/industryMap';
+import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 
-const FILTERS = ['All', 'Your Industry', 'Actively Helping', 'Recently Active'];
+const FILTERS = ['All', 'Actively Helping', 'Recently Active'];
 
 const AVAILABILITY_CONFIG = {
   yes: { dot: '#22C55E', label: 'Happy to help' },
@@ -56,7 +56,7 @@ function ParentCard({ parent, onMessage }) {
         </div>
       </div>
 
-      {parent.industry && parent.company && (
+      {parent.industry && (
         <span style={{ display: 'inline-block', background: '#FFF5F0', color: '#E85D20', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100, border: '1px solid #FDDBC8', alignSelf: 'flex-start' }}>
           {parent.industry}
         </span>
@@ -91,41 +91,35 @@ function ParentCard({ parent, onMessage }) {
 }
 
 export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
-  const [parents, setParents] = useState([]);
+  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [selectedParent, setSelectedParent] = useState(null);
   const [monthlyCount, setMonthlyCount] = useState(0);
+
   const isFree = !(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const FREE_LIMIT = 5;
 
+  const topRole = user?.career_goals?.target_roles?.[0];
+  const topIndustry = user?.career_goals?.target_industries?.[0]?.split('&')[0].trim();
+  const searchHint = topRole || topIndustry;
+
+  // Load ALL parents and alumni
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await base44.functions.invoke('getDirectoryUsers', {});
+        const res = await getDirectoryUsers({});
         const all = res?.data?.data || [];
-        const filtered = all.filter(p => p.full_name && (p.persona === 'parent' || p.persona === 'alumni'));
-        setParents(filtered);
+        const filtered = all.filter(u => u.persona === 'parent' || u.persona === 'alumni');
+        setMembers(filtered);
       } catch (e) {
-        console.error('Directory load error:', e);
-        setParents([]);
+        setMembers([]);
       }
       setLoading(false);
     };
     load();
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    const topIndustry = user?.career_goals?.target_industries?.[0];
-    if (topIndustry) {
-      setSearch('');
-      setFilter('Your Industry');
-    } else {
-      setFilter('All');
-    }
   }, [user]);
 
   useEffect(() => {
@@ -140,34 +134,14 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
       }).catch(() => {});
   }, [user?.email]);
 
-  const filtered = parents.filter(p => {
+  const filtered = members.filter(p => {
     const q = search.toLowerCase();
     const matchesSearch = !q || [
-      p.full_name,
-      p.job_title,
-      p.current_position,
-      p.company,
-      p.current_company,
-      p.industry,
-      p.bio,
+      p.full_name, p.job_title, p.current_position,
+      p.company, p.current_company, p.industry, p.bio,
       p.expertise_areas?.join(' '),
     ].some(field => field?.toLowerCase().includes(q));
     if (!matchesSearch) return false;
-    if (filter === 'Your Industry') {
-      // Skip members with no useful industry data or generic 'other'
-      const memberIndustry = (p.industry || '').toLowerCase();
-      if (!memberIndustry || memberIndustry === 'other') return false;
-
-      const targetIndustries = user?.career_goals?.target_industries || user?.target_industries || [];
-      const allKeywords = targetIndustries.flatMap(ind =>
-        INDUSTRY_MAP[ind] || ind.toLowerCase().split(/[\s&,]+/).filter(w => w.length > 3)
-      );
-      const memberText = [
-        p.full_name, p.job_title, p.current_position, p.company,
-        p.current_company, p.industry, p.bio, p.expertise_areas?.join(' '),
-      ].filter(Boolean).join(' ').toLowerCase();
-      return allKeywords.some(kw => memberText.includes(kw));
-    }
     if (filter === 'Actively Helping') return p.intro_willingness === 'yes' || p.intro_willingness === 'happy_to_help';
     if (filter === 'Recently Active') return !!p.updated_date && (Date.now() - new Date(p.updated_date).getTime()) < 7 * 24 * 60 * 60 * 1000;
     return true;
@@ -179,16 +153,10 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         CFF CONNECTIONS
       </p>
       <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', marginBottom: 6 }}>
-        {user?.career_goals?.target_industries?.[0]
-          ? `${user.career_goals.target_industries[0]} professionals in your network.`
-          : user?.career_goals?.target_roles?.[0]
-          ? `${user.career_goals.target_roles[0]} professionals in your network.`
-          : 'Find someone who can open a door.'}
+        Find someone who can open a door.
       </h1>
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 24 }}>
-        {user?.career_goals?.target_industries?.[0]
-          ? `These CFF parents and alumni work in ${user.career_goals.target_industries[0]} — and they want to help.`
-          : 'Browse parents and professionals in the College Fast Forward network.'}
+        Browse {members.length > 0 ? `${members.length}+` : ''} parents and professionals in the CFF network.
       </p>
 
       {isFree && monthlyCount >= FREE_LIMIT && (
@@ -205,12 +173,22 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         </div>
       )}
 
-      {user?.career_goals?.target_industries?.length > 0 && (
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '0 0 8px' }}>
-          Showing results for your target industry — search to explore more
-        </p>
+      {/* Search hint */}
+      {searchHint && (
+        <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '10px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: 0 }}>
+            💡 Try searching <strong>"{searchHint}"</strong> to find relevant connections
+          </p>
+          <button
+            onClick={() => setSearch(searchHint)}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+          >
+            Search "{searchHint}" →
+          </button>
+        </div>
       )}
 
+      {/* Search bar */}
       <div className="relative mb-4">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999]" />
         <input
@@ -231,6 +209,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         </button>
       )}
 
+      {/* Filter tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {FILTERS.map(f => (
           <button key={f} onClick={() => setFilter(f)}
