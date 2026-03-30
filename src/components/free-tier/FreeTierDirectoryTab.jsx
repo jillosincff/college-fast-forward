@@ -93,7 +93,10 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState(() => {
+    const hasIndustries = user?.career_goals?.target_industries?.length > 0;
+    return hasIndustries ? 'Your Industry' : 'All';
+  });
   const [selectedParent, setSelectedParent] = useState(null);
   const [monthlyCount, setMonthlyCount] = useState(0);
   const isFree = !(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
@@ -117,11 +120,11 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   }, []);
 
   useEffect(() => {
-    const topIndustry = user?.career_goals?.target_industries?.[0];
-    const topRole = user?.career_goals?.target_roles?.[0];
-    // Use industry for search — broader match (e.g. "Marketing" hits more profiles than "Marketing Manager")
-    if (topIndustry) setSearch(topIndustry);
-    else if (topRole) setSearch(topRole);
+    const hasIndustries = user?.career_goals?.target_industries?.length > 0;
+    if (hasIndustries) {
+      setFilter('Your Industry');
+      setSearch('');
+    }
   }, [user]);
 
   useEffect(() => {
