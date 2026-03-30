@@ -1,11 +1,9 @@
-// v3
 import { useState, useEffect } from 'react';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
 export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
-  console.log('NEW VERSION LOADED v3');
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -179,7 +177,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
       )}
 
       {/* Search bar */}
-      <div style={{ marginBottom: 16, position: 'relative' }}>
+      <div style={{ marginBottom: 16 }}>
         <input
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
@@ -370,7 +368,6 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
           })}
         </div>
       )}
-
 
       {/* Message modal */}
       {messaging && (
