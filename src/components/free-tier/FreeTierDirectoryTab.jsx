@@ -119,9 +119,10 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   useEffect(() => {
     if (!user) return;
     setFilter('All');
-    const topRole = user?.career_goals?.target_roles?.[0];
     const topIndustry = user?.career_goals?.target_industries?.[0];
-    const keyword = topRole || (topIndustry ? topIndustry.split('&')[0].trim() : '');
+    const topRole = user?.career_goals?.target_roles?.[0];
+    // Prefer industry keyword (e.g. "Marketing" from "Marketing & Brand"), fall back to role
+    const keyword = (topIndustry ? topIndustry.split('&')[0].trim() : '') || topRole || '';
     if (keyword) setSearch(keyword);
   }, [user]);
 
