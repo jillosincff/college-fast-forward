@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Loader2, Linkedin } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { INDUSTRY_MAP } from '@/constants/industryMap';
 import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 
 const FILTERS = ['All', 'Your Industry', 'Actively Helping', 'Recently Active'];
@@ -154,10 +155,14 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     if (!matchesSearch) return false;
     if (filter === 'Your Industry') {
       const targetIndustries = user?.career_goals?.target_industries || user?.target_industries || [];
-      return targetIndustries.some(ind =>
-        (p.industry || '').toLowerCase().includes(ind.toLowerCase()) ||
-        (p.expertise_areas || []).some(e => e.toLowerCase().includes(ind.toLowerCase()))
+      const allKeywords = targetIndustries.flatMap(ind =>
+        INDUSTRY_MAP[ind] || ind.toLowerCase().split(/[\s&,]+/).filter(w => w.length > 3)
       );
+      const memberText = [
+        p.full_name, p.job_title, p.current_position, p.company,
+        p.current_company, p.industry, p.bio, p.expertise_areas?.join(' '),
+      ].filter(Boolean).join(' ').toLowerCase();
+      return allKeywords.some(kw => memberText.includes(kw));
     }
     if (filter === 'Actively Helping') return p.intro_willingness === 'yes' || p.intro_willingness === 'happy_to_help';
     if (filter === 'Recently Active') return !!p.updated_date && (Date.now() - new Date(p.updated_date).getTime()) < 7 * 24 * 60 * 60 * 1000;
