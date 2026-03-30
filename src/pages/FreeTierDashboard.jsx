@@ -43,7 +43,7 @@ export default function FreeTierDashboard() {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    window.location.hash = `FreeTierDashboard?tab=${tab}`;
+    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#FreeTierDashboard?tab=${tab}`);
     // Track first-visit milestones
     if (tab === 'company_intel' && !user?.company_intel_viewed) {
       base44.auth.updateMe({ company_intel_viewed: true }).catch(() => {});
