@@ -186,7 +186,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         </div>
         <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10, overflowX: 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
           {targetCompanies.map(company => (
-            <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)', minWidth: 'clamp(160px, 80vw, 200px)' }}>
+            <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)', minWidth: 'clamp(150px, 65vw, 200px)' }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
                 {company[0]?.toUpperCase()}
               </div>
