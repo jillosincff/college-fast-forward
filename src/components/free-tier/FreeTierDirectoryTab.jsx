@@ -46,7 +46,7 @@ const getBestKeyword = (user) => {
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
-export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
+export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,7 +171,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
           </p>
         </div>
         <button
-          onClick={() => navigate('AlumniSearch')}
+          onClick={() => onTabChange ? onTabChange('alumni_search') : navigate('FreeTierDashboard')}
           style={{
             background: '#E85D20', border: 'none',
             borderRadius: 10, padding: '10px 20px',

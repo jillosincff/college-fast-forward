@@ -91,7 +91,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={handleTabChange} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} />}
-        {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
         {activeTab === 'notebook' && <NotebookPage user={user} />}
       </div>
