@@ -4,6 +4,7 @@ import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import { base44 } from '@/api/base44Client';
 
 export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
+  console.log('NEW VERSION LOADED');
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
