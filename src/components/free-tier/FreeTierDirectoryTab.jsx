@@ -16,9 +16,9 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   const [sent, setSent] = useState(false);
 
   const topRole = user?.career_goals?.target_roles?.[0];
-  const topIndustry = user?.career_goals?.target_industries?.[0]
+  const topIndustryKeyword = user?.career_goals?.target_industries?.[0]
     ?.split(' & ')[0]?.split('&')[0]?.trim();
-  const searchSuggestion = topRole || topIndustry || '';
+  const searchSuggestion = topIndustryKeyword || topRole || '';
 
   useEffect(() => {
     const load = async () => {
