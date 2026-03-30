@@ -3,7 +3,7 @@
  * Ready to load into Base44 automations after site QA.
  *
  * Variables: {firstName}, {schoolName}
- * Rules: no emoji in subject lines, no UF-specific language, school-agnostic body copy.
+ * Rules: no emoji in subject lines, school-agnostic body copy.
  */
 
 export const EMAIL_TEMPLATES = [

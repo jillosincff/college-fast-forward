@@ -54,7 +54,7 @@ ${content}
   <a href="${APP}" style="color:rgba(244,240,232,0.4);text-decoration:underline;">Visit CFF</a>
 </td>
 <td align="right" style="font-family:${DM};font-size:11px;font-weight:300;color:rgba(244,240,232,0.2);">
-  University of Florida &middot; ${YEAR}
+  ${YEAR}
 </td>
 </tr></table>
 </td></tr>
@@ -196,8 +196,7 @@ Deno.serve(async (req) => {
     return Response.json({
       APP_BASE_URL: APP,
       brandColors: { bg: '#f4f2ee', dark: '#0d1117', orange: '#E85D20', white: '#ffffff' },
-      fonts: { body: DM, display: PF },
-      school: 'University of Florida'
+      fonts: { body: DM, display: PF }
     });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
