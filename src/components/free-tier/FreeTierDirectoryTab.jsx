@@ -93,10 +93,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState(() => {
-    const hasIndustries = user?.career_goals?.target_industries?.length > 0;
-    return hasIndustries ? 'Your Industry' : 'All';
-  });
+  const [filter, setFilter] = useState('All');
   const [selectedParent, setSelectedParent] = useState(null);
   const [monthlyCount, setMonthlyCount] = useState(0);
   const isFree = !(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
@@ -120,11 +117,12 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   }, []);
 
   useEffect(() => {
-    const hasIndustries = user?.career_goals?.target_industries?.length > 0;
-    if (hasIndustries) {
-      setFilter('Your Industry');
-      setSearch('');
-    }
+    if (!user) return;
+    setFilter('All');
+    const topRole = user?.career_goals?.target_roles?.[0];
+    const topIndustry = user?.career_goals?.target_industries?.[0];
+    const keyword = topRole || (topIndustry ? topIndustry.split('&')[0].trim() : '');
+    if (keyword) setSearch(keyword);
   }, [user]);
 
   useEffect(() => {
@@ -141,14 +139,16 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
 
   const filtered = parents.filter(p => {
     const q = search.toLowerCase();
-    const matchesSearch = !q ||
-      (p.full_name || '').toLowerCase().includes(q) ||
-      (p.company || '').toLowerCase().includes(q) ||
-      (p.current_company || '').toLowerCase().includes(q) ||
-      (p.industry || '').toLowerCase().includes(q) ||
-      (p.job_title || '').toLowerCase().includes(q) ||
-      (p.current_position || '').toLowerCase().includes(q) ||
-      (p.bio || '').toLowerCase().includes(q);
+    const matchesSearch = !q || [
+      p.full_name,
+      p.job_title,
+      p.current_position,
+      p.company,
+      p.current_company,
+      p.industry,
+      p.bio,
+      p.expertise_areas?.join(' '),
+    ].some(field => field?.toLowerCase().includes(q));
     if (!matchesSearch) return false;
     if (filter === 'Your Industry') {
       const targetIndustries = user?.career_goals?.target_industries || user?.target_industries || [];
