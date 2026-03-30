@@ -121,10 +121,8 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     const topRole = user?.career_goals?.target_roles?.[0];
     const topIndustry = user?.career_goals?.target_industries?.[0];
     const keyword = topRole || (topIndustry ? topIndustry.split('&')[0].trim() : '');
-    if (keyword) {
-      setSearch(keyword);
-      setFilter('Your Industry');
-    }
+    setFilter('All');
+    if (keyword) setSearch(keyword);
   }, [user]);
 
   useEffect(() => {
