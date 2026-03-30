@@ -5,8 +5,6 @@ import { getCompanyIntel } from '@/functions/getCompanyIntel';
 import CompanyIntelCard from './CompanyIntelCard';
 import CompanyResearchChat from './CompanyResearchChat';
 
-// ── Upgrade Modal ─────────────────────────────────────────────────────────────
-
 function AlumniUpgradeModal({ company, university, onClose, onUpgrade }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
@@ -39,8 +37,6 @@ function AlumniUpgradeModal({ company, university, onClose, onUpgrade }) {
   );
 }
 
-// ── No goals gate ─────────────────────────────────────────────────────────────
-
 function NoGoalsGate({ onSetGoals }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 24 }}>
@@ -55,8 +51,6 @@ function NoGoalsGate({ onSetGoals }) {
     </div>
   );
 }
-
-// ── Filter bar ────────────────────────────────────────────────────────────────
 
 const FILTERS = [
   { key: 'all',    label: 'All' },
@@ -87,8 +81,6 @@ function FilterBar({ active, onChange }) {
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
-
 export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChange }) {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -109,21 +101,16 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   useEffect(() => {
     if (!user?.id) return;
     const goals = user?.career_goals || {};
-
-    const hasGoals =
+    const goalsExist =
       (goals.target_industries?.length > 0) ||
       (goals.target_roles?.length > 0) ||
       (goals.target_functions?.length > 0) ||
       (goals.target_companies?.length > 0);
 
-    if (!hasGoals) {
-      setHasGoals(false);
-      return;
-    }
+    if (!goalsExist) { setHasGoals(false); return; }
 
     const industries = [...(goals.target_industries || []), ...(user?.target_industries || [])].filter(Boolean);
     const roles = [...(goals.target_roles || []), ...(user?.target_roles || [])].filter(Boolean);
-
     setTargetRoles(roles);
     setTargetIndustries(industries);
     setHasGoals(true);
@@ -179,47 +166,53 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const role = targetRoles[0] || '';
   const industry = targetIndustries[0] || '';
 
-  const renderTargetCompanies = () => (
-    <div style={{ marginBottom: 32 }}>
-      {targetCompanies.length > 0 ? (
-        <>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: 0 }}>🎯 YOUR TARGET COMPANIES</p>
-            <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Edit →</button>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {targetCompanies.map(company => (
-              <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, minWidth: 180 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
-                  {company[0]?.toUpperCase()}
-                </div>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{company}</p>
-                <button
-                  onClick={() => { setSearch(company); setShowAll(true); if (!hasStarted) { setHasStarted(true); loadCompanies(); } }}
-                  style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
-                >
-                  Research →
-                </button>
-              </div>
-            ))}
-            <div onClick={() => onTabChange?.('career_goals')} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', minWidth: 120, justifyContent: 'center' }}>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', fontWeight: 600 }}>+ Add company</span>
-            </div>
-          </div>
-          <div style={{ height: 1, background: '#F0F0F0', margin: '24px 0' }} />
-        </>
-      ) : (
-        <div style={{ background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-          <div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Add your dream companies</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll show you hiring signals and alumni at the companies you care about most.</p>
-          </div>
-          <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>+ Add Target Companies →</button>
+  // Target companies — always visible
+  const renderTargetCompanies = () => {
+    if (targetCompanies.length === 0) return (
+      <div style={{ background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+        <div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Add your dream companies</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll show you hiring signals and alumni at the companies you care about most.</p>
         </div>
-      )}
-    </div>
-  );
+        <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>+ Add Target Companies →</button>
+      </div>
+    );
 
+    return (
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: 0 }}>🎯 YOUR TARGET COMPANIES</p>
+          <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Edit →</button>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          {targetCompanies.map(company => (
+            <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, minWidth: 180 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
+                {company[0]?.toUpperCase()}
+              </div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{company}</p>
+              <button
+                onClick={() => {
+                  setSearch(company);
+                  setShowAll(true);
+                  if (!hasStarted) { setHasStarted(true); loadCompanies(); }
+                }}
+                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
+              >
+                Research →
+              </button>
+            </div>
+          ))}
+          <div onClick={() => onTabChange?.('career_goals')} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', minWidth: 120, justifyContent: 'center' }}>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', fontWeight: 600 }}>+ Add company</span>
+          </div>
+        </div>
+        <div style={{ height: 1, background: '#F0F0F0', margin: '20px 0' }} />
+      </div>
+    );
+  };
+
+  // Pre-search landing
   if (!hasStarted) return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
       <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
@@ -254,6 +247,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
       </p>
 
+      {/* Target companies — always visible */}
       {renderTargetCompanies()}
 
       {/* Search */}
@@ -307,7 +301,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                 onUnsave={handleUnsave}
               />
             ))}
-
             {!showAll && filteredCompanies.length > 6 && (
               <button onClick={() => setShowAll(true)}
                 style={{ display: 'block', width: '100%', textAlign: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '14px', fontSize: 14, fontWeight: 500, color: '#555', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", marginTop: 4 }}>
@@ -318,18 +311,25 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         )
       )}
 
+      {/* Similar companies prompt */}
+      {!loading && companies.length > 0 && (
+        <div style={{ background: '#F5F5F5', borderRadius: 12, padding: '16px 20px', marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#555', margin: 0 }}>
+            Want to explore similar companies in {industry || role || 'your field'}?
+          </p>
+          <button
+            onClick={() => { setSearch(industry || role || ''); setShowAll(true); }}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+          >
+            Search {industry || 'Similar Companies'} →
+          </button>
+        </div>
+      )}
+
       {!loading && companies.length > 0 && (
         <button
           onClick={() => onTabChange?.('directory')}
-          style={{
-            background: '#E85D20', border: 'none',
-            borderRadius: 10, padding: '14px 28px',
-            fontSize: 14, fontWeight: 600,
-            color: '#fff', cursor: 'pointer',
-            width: '100%', marginTop: 32,
-            fontFamily: "'DM Sans', sans-serif",
-            minHeight: 'auto',
-          }}
+          style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', width: '100%', marginTop: 16, fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
         >
           Next: Find Your CFF Connections →
         </button>
