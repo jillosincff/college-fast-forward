@@ -241,7 +241,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
       {/* Header with CTA button in top right */}
       <div style={{ position: 'relative', marginBottom: 28 }}>
-        <div>
+        <div style={{ paddingRight: !loading && companies.length > 0 ? 320 : 0 }}>
           <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>
             {targetCompanies.length > 0 ? `Companies hiring ${role || 'in your field'}.` : 'Your Target Companies.'}
