@@ -11,7 +11,8 @@ import TailoringResults from '@/components/resume-tailor/TailoringResults';
 export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const onOpenUpgrade = onOpenUpgradeProp || (() => setShowUpgradeModal(true));
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const [upgradeSuccess, setUpgradeSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
   const [resumes, setResumes] = useState([]);
@@ -37,6 +38,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const canAddMore = isFastIQ || resumes.length === 0;
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasUpgradeSuccess = urlParams.get('upgrade') === 'success';
+    if (hasUpgradeSuccess) {
+      setUpgradeSuccess(true);
+      if (refreshUser) refreshUser();
+      setTimeout(() => setUpgradeSuccess(false), 3000);
+    } else if (refreshUser) {
+      refreshUser();
+    }
+  }, [refreshUser]);
+
+  useEffect(() => {
     const loadResumes = async () => {
       try {
         const [res, tailored] = await Promise.all([
@@ -52,7 +65,6 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           setResumeText(active.parsed_text || '');
           setFileName(active.original_file_name || 'Resume on file');
           setResumeId(active.id);
-          // Load cached analysis for this resume
           const cached = localStorage.getItem(`resume_analysis_${active.id}`);
           if (cached) {
             try { setAnalysis(JSON.parse(cached)); } catch (e) {}
@@ -74,7 +86,6 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     const runAnalysis = async () => {
       const primaryResume = resumes.find(r => r.is_active) || resumes[0];
       if (!primaryResume?.parsed_text && !primaryResume?.original_file_url) return;
-      // Skip if already cached for this resume
       const cached = localStorage.getItem(`resume_analysis_${primaryResume.id}`);
       if (cached) {
         try { setAnalysis(JSON.parse(cached)); } catch (e) {}
@@ -224,6 +235,17 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   };
 
   if (!user || phase === 'loading') return null;
+
+  // Show success toast if just upgraded
+  if (upgradeSuccess) {
+    return (
+      <div style={{ position: 'fixed', top: 0, inset: 0, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, flexDirection: 'column', gap: 16 }}>
+        <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
+        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', textAlign: 'center' }}>Welcome to FastIQ!</p>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', textAlign: 'center', maxWidth: 300 }}>Your subscription is now active. Unlocking all features...</p>
+      </div>
+    );
+  }
 
   // ── PHASE: tailoring loader ──────────────────────────────────────────────
   if (phase === 'tailoring') return <TailoringLoader />;
