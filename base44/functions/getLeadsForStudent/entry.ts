@@ -14,27 +14,108 @@ const SCHOOL_NAMES = {
 const normalizeSchool = (s) => SCHOOL_NAMES[s?.toLowerCase?.()?.trim?.()] || s?.trim?.() || '';
 
 const INDUSTRY_MAP = {
-  "Financial Services & Banking":  ["finance", "financial", "banking", "investment", "capital", "wealth", "equity", "accounting", "cpa", "analyst", "audit", "fintech", "jp morgan", "goldman", "morgan stanley", "citi", "bank of america", "wells fargo", "private equity", "hedge fund", "m&a", "mergers"],
-  "Technology & Software":         ["software", "tech", "technology", "engineering", "developer", "product", "saas", "cloud", "data", "ai", "machine learning", "it", "information technology", "startup", "google", "microsoft", "apple", "meta", "amazon"],
-  "Healthcare & Life Sciences":    ["healthcare", "health", "medical", "pharma", "clinical", "hospital", "biotech", "life sciences", "nursing", "physician"],
-  "Media & Entertainment":         ["media", "entertainment", "film", "music", "publishing", "content", "streaming", "broadcast", "disney", "netflix", "warner"],
-  "Consumer Goods & Retail":       ["retail", "cpg", "consumer goods", "brand", "merchandising", "ecommerce", "e-commerce", "fashion", "beauty", "supplier", "manufacturer", "manufacturing", "wholesale", "distribution", "nike", "target", "walmart"],
-  "Real Estate":                   ["real estate", "realty", "realtor", "property", "cre", "commercial real estate", "residential", "broker", "brokerage", "property management", "leasing", "development", "mortgage", "reit", "jll", "cbre"],
-  "Energy & Utilities":            ["energy", "oil", "gas", "utilities", "renewable", "solar", "sustainability", "climate", "power"],
-  "Government & Nonprofit":        ["government", "nonprofit", "non-profit", "ngo", "policy", "public sector", "advocacy", "charity", "foundation"],
-  "Logistics & Supply Chain":      ["logistics", "supply chain", "operations", "procurement", "sourcing", "distribution", "freight", "warehouse", "fedex", "ups", "supplier", "manufacturer"],
-  "Sports & Athletics":            ["sports", "athletics", "agency", "sponsorship", "esports", "fitness", "nfl", "nba", "mlb", "nhl", "espn"],
-  "Legal & Compliance":            ["legal", "law", "law & legal", "law and legal", "legal services", "attorney", "lawyer", "counsel", "compliance", "paralegal", "litigation", "regulatory"],
-  "Marketing & Brand":             ["marketing", "brand", "advertising", "pr", "public relations", "communications", "growth", "demand gen", "content", "seo", "social media", "digital marketing", "creative", "cmo"],
-  "Engineering":                   ["engineer", "engineering", "mechanical", "civil", "electrical", "chemical", "structural", "aerospace", "biomedical", "environmental", "industrial", "manufacturing", "construction", "infrastructure"],
-  "Pre-Med & Healthcare":          ["doctor", "physician", "surgeon", "nurse", "nursing", "hospital", "healthcare", "medical", "clinical", "pharmacy", "pharmacist", "dentist", "physical therapy", "pre-med", "premed", "residency", "health system", "patient care"],
-  "Hospitality & Tourism":         ["hospitality", "hotel", "restaurant", "food and beverage", "f&b", "tourism", "travel", "resort", "events", "event planning", "catering", "culinary", "chef", "marriott", "hilton", "hyatt", "disney"],
-  "Education":                     ["education", "teaching", "teacher", "professor", "faculty", "school", "university", "college", "k-12", "curriculum", "edtech", "academic", "training"],
-  "Human Resources":               ["human resources", "hr", "people ops", "people operations", "talent acquisition", "recruiting", "recruiter", "talent management", "compensation", "benefits", "employee relations", "dei"],
-  "Nonprofit & Social Impact":      ["nonprofit", "non-profit", "ngo", "social impact", "social enterprise", "philanthropy", "foundation", "charity", "501c3", "advocacy", "community", "volunteer", "mission", "esg", "csr"],
-  "Architecture & Design":          ["architecture", "architect", "interior design", "urban planning", "landscape architecture", "industrial design", "graphic design", "ux design", "product design", "creative director", "studio", "revit"],
-  "Biotech & Life Sciences":        ["biotech", "biotechnology", "life sciences", "pharmaceutical", "pharma", "drug discovery", "clinical trials", "fda", "regulatory affairs", "genomics", "molecular biology", "laboratory", "lab", "research scientist", "pfizer", "moderna", "merck", "abbvie", "amgen"],
-  "Consulting":                    ["consulting", "consultant", "consultancy", "advisory", "mckinsey", "bain", "bcg", "deloitte", "pwc", "kpmg", "ey", "ernst", "strategy", "accenture"],
+  "Financial Services & Banking": [
+    "finance", "banking", "investment", "hedge fund", "private equity",
+    "wealth management", "capital markets", "fintech", "goldman", "jpmorgan",
+    "morgan stanley", "blackrock", "fidelity", "financial", "accounting",
+    "financial services", "bank"
+  ],
+  "Consulting": [
+    "consulting", "consultant", "advisory", "mckinsey", "bain", "bcg",
+    "deloitte", "pwc", "kpmg", "ey", "ernst", "strategy", "accenture",
+    "consultancy", "management consulting"
+  ],
+  "Technology & Software": [
+    "technology", "software", "engineering", "developer", "product", "saas",
+    "cloud", "ai", "machine learning", "data", "google", "microsoft", "apple",
+    "meta", "amazon", "tech", "startup", "it", "information technology",
+    "computer science", "cybersecurity", "devops"
+  ],
+  "Healthcare & Life Sciences": [
+    "healthcare", "hospital", "medical", "clinical", "nursing", "physician",
+    "health system", "pharma", "biotech", "health", "medicine", "doctor",
+    "healthcare & life sciences", "life sciences"
+  ],
+  "Media & Entertainment": [
+    "media", "entertainment", "film", "television", "streaming", "publishing",
+    "content", "journalism", "broadcast", "disney", "netflix", "warner",
+    "music", "radio", "podcast", "production", "studio"
+  ],
+  "Consumer Goods & Retail": [
+    "consumer", "retail", "brand", "cpg", "fmcg", "e-commerce",
+    "merchandising", "buying", "nike", "target", "walmart", "supplier",
+    "manufacturer", "manufacturing", "supplier/manufacturer", "wholesale",
+    "distribution", "consumer goods", "ecommerce"
+  ],
+  "Real Estate": [
+    "real estate", "property", "development", "construction", "leasing",
+    "brokerage", "cbre", "jll", "realty", "mortgage", "housing"
+  ],
+  "Energy & Utilities": [
+    "energy", "oil", "gas", "renewable", "solar", "utilities", "power",
+    "exxon", "chevron", "clean energy", "sustainability", "environment"
+  ],
+  "Government & Nonprofit": [
+    "government", "nonprofit", "public sector", "federal", "state",
+    "municipal", "ngo", "policy", "non-profit", "public service",
+    "government & nonprofit"
+  ],
+  "Logistics & Supply Chain": [
+    "logistics", "supply chain", "operations", "procurement", "sourcing",
+    "distribution", "warehouse", "fedex", "ups", "shipping", "freight",
+    "supplier", "manufacturer"
+  ],
+  "Sports & Athletics": [
+    "sports", "athletics", "nfl", "nba", "mlb", "nhl", "espn", "team",
+    "league", "athletic", "fitness", "recreation", "coaching"
+  ],
+  "Legal & Compliance": [
+    "legal", "compliance", "counsel", "attorney", "law", "lawyer",
+    "paralegal", "litigation", "regulatory", "law & legal", "law and legal",
+    "legal services", "law firm", "barrister", "solicitor", "jurisprudence"
+  ],
+  "Marketing & Brand": [
+    "marketing", "brand", "growth", "content", "social media", "digital",
+    "advertising", "pr", "communications", "creative", "branding",
+    "public relations", "seo", "demand generation", "campaign"
+  ],
+  "Engineering": [
+    "engineering", "mechanical", "civil", "electrical", "chemical",
+    "aerospace", "manufacturing", "engineer", "structural", "industrial",
+    "systems engineering", "process engineering"
+  ],
+  "Pre-Med & Healthcare": [
+    "pre-med", "medical school", "clinical", "research", "laboratory",
+    "premed", "pre med", "medicine", "mcat", "residency"
+  ],
+  "Hospitality & Tourism": [
+    "hospitality", "hotel", "restaurant", "travel", "tourism", "events",
+    "food", "beverage", "catering", "lodging", "resort", "airline"
+  ],
+  "Education": [
+    "education", "teaching", "school", "university", "academic",
+    "curriculum", "edtech", "teacher", "professor", "principal",
+    "higher education", "k-12", "training"
+  ],
+  "Human Resources": [
+    "human resources", "hr", "recruiting", "talent", "people ops",
+    "organizational", "recruiter", "staffing", "workforce", "benefits",
+    "compensation", "hris"
+  ],
+  "Nonprofit & Social Impact": [
+    "nonprofit", "social impact", "mission", "ngo", "foundation",
+    "charity", "advocacy", "non-profit", "social enterprise",
+    "community", "volunteer", "philanthropy"
+  ],
+  "Architecture & Design": [
+    "architecture", "design", "interior", "urban planning", "landscape",
+    "studio", "architect", "graphic design", "ux", "ui", "product design"
+  ],
+  "Biotech & Life Sciences": [
+    "biotech", "life sciences", "genomics", "pharmaceutical",
+    "drug discovery", "clinical trials", "biopharma", "medtech",
+    "diagnostics", "research"
+  ],
 };
 
 function scoreMatch(member, studentIndustries) {
