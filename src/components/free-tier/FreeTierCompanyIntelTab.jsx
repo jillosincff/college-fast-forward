@@ -180,8 +180,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
     return (
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: 0 }}>🎯 YOUR TARGET COMPANIES</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8, minWidth: 0 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(9px, 2.2vw, 11px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#E85D20', margin: 0, minWidth: 0, whiteSpace: window.innerWidth < 500 ? 'nowrap' : 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>🎯 {window.innerWidth < 500 ? 'TARGETS' : 'YOUR TARGET COMPANIES'}</p>
           <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', flexShrink: 0 }}>Edit →</button>
         </div>
         <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10, overflowX: 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
