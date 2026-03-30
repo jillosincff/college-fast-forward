@@ -1,5 +1,6 @@
 // v2
 import { useState, useEffect } from 'react';
+import { navigate } from '@/components/utils/navigation';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import { base44 } from '@/api/base44Client';
 
@@ -431,6 +432,35 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {!loading && members.length > 0 && (
+        <div style={{
+          marginTop: 40, paddingTop: 24,
+          borderTop: '1px solid #F0F0F0',
+          textAlign: 'center',
+        }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 14, color: '#888',
+            margin: '0 0 16px', lineHeight: 1.6,
+          }}>
+            Want to find alumni at specific companies like Disney or Goldman?
+          </p>
+          <button
+            onClick={() => navigate('AlumniSearch')}
+            style={{
+              background: '#E85D20', border: 'none',
+              borderRadius: 10, padding: '14px 32px',
+              fontSize: 14, fontWeight: 600,
+              color: '#fff', cursor: 'pointer',
+              fontFamily: "'DM Sans', sans-serif",
+              minHeight: 'auto',
+            }}
+          >
+            Next: Search Alumni by Company →
+          </button>
         </div>
       )}
 
