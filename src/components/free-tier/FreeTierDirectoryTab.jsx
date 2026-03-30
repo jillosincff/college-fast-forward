@@ -17,9 +17,8 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   const [sent, setSent] = useState(false);
 
   const topRole = user?.career_goals?.target_roles?.[0];
-  const topIndustryKeyword = user?.career_goals?.target_industries?.[0]
-    ?.split(' & ')[0]?.split('&')[0]?.trim();
-  const searchSuggestion = topIndustryKeyword || topRole || '';
+  const ind = user?.career_goals?.target_industries?.[0] || '';
+  const searchSuggestion = ind.split('&')[0].trim() || topRole || '';
 
   useEffect(() => {
     const load = async () => {
@@ -109,26 +108,41 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     <div style={{ maxWidth: 880, margin: '0 auto', padding: '32px 24px' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 11, fontWeight: 700,
-          textTransform: 'uppercase', letterSpacing: '0.12em',
-          color: '#E85D20', margin: '0 0 8px'
-        }}>CFF CONNECTIONS</p>
-        <h1 style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 28, fontWeight: 700,
-          color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2
-        }}>
-          Find someone who can open a door.
-        </h1>
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 14, color: '#888', margin: 0
-        }}>
-          {loading ? 'Loading...' : `${members.length} parents and professionals in the CFF network — and they want to help.`}
-        </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, gap: 16 }}>
+        <div>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.12em',
+            color: '#E85D20', margin: '0 0 8px'
+          }}>CFF CONNECTIONS</p>
+          <h1 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 28, fontWeight: 700,
+            color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2
+          }}>
+            Find someone who can open a door.
+          </h1>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 14, color: '#888', margin: 0
+          }}>
+            {loading ? 'Loading...' : `${members.length} parents and professionals in the CFF network — and they want to help.`}
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('AlumniSearch')}
+          style={{
+            background: '#E85D20', border: 'none',
+            borderRadius: 10, padding: '10px 20px',
+            fontSize: 13, fontWeight: 600,
+            color: '#fff', cursor: 'pointer',
+            fontFamily: "'DM Sans', sans-serif",
+            whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto',
+          }}
+        >
+          Next Step →
+        </button>
       </div>
 
       {/* Search suggestion hint */}
@@ -357,35 +371,6 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         </div>
       )}
 
-      {/* Alumni Search CTA */}
-      {!loading && members.length > 0 && (
-        <div style={{
-          marginTop: 40, paddingTop: 24,
-          borderTop: '1px solid #F0F0F0',
-          textAlign: 'center',
-        }}>
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: '#888',
-            margin: '0 0 16px', lineHeight: 1.6,
-          }}>
-            Want to find alumni at specific companies like Disney or Goldman?
-          </p>
-          <button
-            onClick={() => navigate('AlumniSearch')}
-            style={{
-              background: '#E85D20', border: 'none',
-              borderRadius: 10, padding: '14px 32px',
-              fontSize: 14, fontWeight: 600,
-              color: '#fff', cursor: 'pointer',
-              fontFamily: "'DM Sans', sans-serif",
-              minHeight: 'auto',
-            }}
-          >
-            Next: Search Alumni by Company →
-          </button>
-        </div>
-      )}
 
       {/* Message modal */}
       {messaging && (
