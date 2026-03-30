@@ -170,10 +170,10 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         CFF CONNECTIONS
       </p>
       <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', marginBottom: 6 }}>
-        {user?.career_goals?.target_roles?.[0]
-          ? `${user.career_goals.target_roles[0]} professionals in your network.`
-          : user?.career_goals?.target_industries?.[0]
+        {user?.career_goals?.target_industries?.[0]
           ? `${user.career_goals.target_industries[0]} professionals in your network.`
+          : user?.career_goals?.target_roles?.[0]
+          ? `${user.career_goals.target_roles[0]} professionals in your network.`
           : 'Find someone who can open a door.'}
       </h1>
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 24 }}>
