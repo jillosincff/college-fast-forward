@@ -280,6 +280,23 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>
                         {alum.headline?.split('·')[0]?.replace(/\s+/g, ' ')?.trim() || ''}{alum.company ? ` · ${alum.company}` : ''}
                       </p>
+                      {alum.linkedin_url && (
+                        <a
+                          href={alum.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 12, color: '#0077B5',
+                            textDecoration: 'none', fontWeight: 600,
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            marginBottom: 3,
+                          }}
+                        >
+                          🔗 View LinkedIn Profile →
+                        </a>
+                      )}
                       {alum.location && (
                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: '0 0 2px' }}>📍 {alum.location}</p>
                       )}
