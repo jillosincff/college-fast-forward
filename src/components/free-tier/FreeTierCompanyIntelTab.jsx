@@ -266,6 +266,23 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         )
       )}
 
+      {!loading && companies.length > 0 && (
+        <button
+          onClick={() => onTabChange?.('directory')}
+          style={{
+            background: '#E85D20', border: 'none',
+            borderRadius: 10, padding: '14px 28px',
+            fontSize: 14, fontWeight: 600,
+            color: '#fff', cursor: 'pointer',
+            width: '100%', marginTop: 32,
+            fontFamily: "'DM Sans', sans-serif",
+            minHeight: 'auto',
+          }}
+        >
+          Next: Find Your CFF Connections →
+        </button>
+      )}
+
       {upgradeModal && (
         <AlumniUpgradeModal
           company={upgradeModal}
