@@ -328,11 +328,11 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                               </span>
                             ) : isSent ? (alum.cff_user_id ? 'Message sent ✓' : 'Sent ✓') : 'Connect →'}
                           </button>
-                          );
-                          })()}
-                          </div>
+                        );
+                      })()}
+                    </div>
 
-                          {/* Lock overlay on first blurred result */}
+                    {/* Lock overlay on first blurred result */}
                   {isLocked && i === 1 && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, borderRadius: 10, background: 'rgba(255,255,255,0.88)', padding: '16px 24px', textAlign: 'center' }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0, maxWidth: 260, lineHeight: 1.5 }}>
