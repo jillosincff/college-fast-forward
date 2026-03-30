@@ -179,7 +179,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
   }
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 24px)' }}>
 
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
@@ -197,7 +197,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
       {/* Major */}
       <div style={sectionStyle}>
         <label style={labelStyle}>What are you studying?</label>
-        <input value={form.major} onChange={e => update('major', e.target.value)} placeholder="e.g. Finance, Marketing, Computer Science..." style={inputStyle} />
+        <input value={form.major} onChange={e => update('major', e.target.value)} placeholder="e.g. Finance, Marketing, Computer Science..." style={{...inputStyle, fontSize: 'clamp(13px, 3vw, 14px)'}} />
       </div>
 
       {/* Target Roles */}
@@ -306,11 +306,11 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
         style={{
           background: saved ? '#22C55E' : '#E85D20',
           border: 'none', borderRadius: 10,
-          padding: '14px 40px', fontSize: 15,
+          padding: 'clamp(12px, 3vw, 14px) clamp(20px, 5vw, 40px)', fontSize: 'clamp(13px, 3vw, 15px)',
           fontWeight: 600, color: '#fff',
           cursor: saving ? 'not-allowed' : 'pointer',
           width: '100%', fontFamily: "'DM Sans', sans-serif",
-          transition: 'background 0.2s',
+          transition: 'background 0.2s', minHeight: 48
         }}
       >
         {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save My Goals →'}

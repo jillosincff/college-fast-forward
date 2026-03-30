@@ -355,7 +355,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                 <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px' }}>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>RESUME ANALYSIS · MATCHED TO YOUR GOALS</p>
 
-                  <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', flexDirection: window.innerWidth < 600 ? 'column' : 'row', gap: 24, alignItems: window.innerWidth < 600 ? 'center' : 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'center', flexShrink: 0 }}>
                       <div style={{ width: 90, height: 90, borderRadius: '50%', border: `4px solid ${analysis.overall_score >= 80 ? '#22C55E' : analysis.overall_score >= 60 ? '#F59E0B' : '#EF4444'}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 28, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{analysis.overall_score}</span>
@@ -373,7 +373,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 600 ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
                     <div>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#22C55E', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>✅ Strengths</p>
                       {analysis.strengths?.map((s, i) => (
@@ -533,7 +533,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 16, marginBottom: 32 }}>
           {/* Path A — Upload */}
           <div
             onDragOver={e => e.preventDefault()}

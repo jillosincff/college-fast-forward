@@ -116,7 +116,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
       {/* Hero Section */}
       <div style={{
         background: '#0A0A0A',
-        padding: hasGoals ? '32px 40px' : '48px 40px',
+        padding: 'clamp(24px, 6vw, 48px) clamp(16px, 4vw, 40px)',
         textAlign: 'center'
       }}>
         <p style={{
@@ -129,7 +129,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </p>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
-          fontSize: hasGoals ? 'clamp(22px, 4vw, 34px)' : 'clamp(28px, 5vw, 48px)',
+          fontSize: 'clamp(22px, 5vw, 48px)',
           fontWeight: 700, color: '#fff',
           lineHeight: 1.15, margin: '0 0 12px'
         }}>
@@ -137,9 +137,9 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </h1>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: 15, color: 'rgba(255,255,255,0.6)',
+          fontSize: 'clamp(13px, 3vw, 15px)', color: 'rgba(255,255,255,0.6)',
           margin: '0 auto', lineHeight: 1.6,
-          maxWidth: 500
+          maxWidth: 500, padding: '0 16px'
         }}>
           {heroSub}
         </p>

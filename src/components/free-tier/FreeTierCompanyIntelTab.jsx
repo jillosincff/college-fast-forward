@@ -62,7 +62,7 @@ const FILTERS = [
 
 function FilterBar({ active, onChange }) {
   return (
-    <div style={{ display: 'flex', gap: 4, marginBottom: 24, padding: 4, background: '#f5f5f5', borderRadius: 100, width: 'fit-content', overflowX: 'auto', scrollbarWidth: 'none' }}>
+    <div style={{ display: 'flex', gap: 4, marginBottom: 24, padding: 4, background: '#f5f5f5', borderRadius: 100, width: '100%', maxWidth: 'fit-content', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
       {FILTERS.map(f => (
         <button key={f.key} onClick={() => onChange(f.key)} style={{
           padding: '8px 16px', borderRadius: 100,
@@ -184,7 +184,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: 0 }}>🎯 YOUR TARGET COMPANIES</p>
           <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Edit →</button>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10, overflowX: 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
           {targetCompanies.map(company => (
             <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, minWidth: 180 }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>

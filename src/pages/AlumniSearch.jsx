@@ -154,15 +154,15 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 3vw, 24px)' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16 }}>
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 8px' }}>
             Alumni Search
           </p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
             Find your UF alumni<br />in any role, at any company.
           </h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
@@ -173,11 +173,11 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
           onClick={() => navigate('FreeTierDashboard')}
           style={{
             background: '#E85D20', border: 'none',
-            borderRadius: 10, padding: '10px 20px',
-            fontSize: 13, fontWeight: 600,
+            borderRadius: 10, padding: 'clamp(10px, 2vw, 12px) clamp(14px, 3vw, 20px)',
+            fontSize: 'clamp(12px, 2.5vw, 13px)', fontWeight: 600,
             color: '#fff', cursor: 'pointer',
             fontFamily: "'DM Sans', sans-serif",
-            whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto',
+            whiteSpace: 'nowrap', flexShrink: 0, minHeight: 44,
           }}
         >
           Next Step →
@@ -194,19 +194,19 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+          <div style={{ display: 'flex', flexDirection: window.innerWidth < 500 ? 'column' : 'row', gap: 8, marginBottom: 10 }}>
             <input
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               placeholder={`Try: "VP of Marketing at a Fortune 500" or "investment banker in NYC"`}
-              style={{ flex: 1, fontSize: 14, padding: '12px 16px', border: '1px solid #E0E0E0', borderRadius: 10, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
+              style={{ flex: 1, fontSize: 14, padding: '12px 16px', border: '1px solid #E0E0E0', borderRadius: 10, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', width: '100%' }}
             />
             <button
               onClick={() => handleSearch()}
               disabled={searching || !query.trim()}
-              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 500, color: '#fff', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', opacity: searching || !query.trim() ? 0.7 : 1, whiteSpace: 'nowrap', minHeight: 'auto' }}
+              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 500, color: '#fff', cursor: searching || !query.trim() ? 'not-allowed' : 'pointer', opacity: searching || !query.trim() ? 0.7 : 1, whiteSpace: 'nowrap', minHeight: 44, width: window.innerWidth < 500 ? '100%' : 'auto' }}
             >
               {searching ? 'Searching...' : 'Search →'}
             </button>
@@ -352,8 +352,8 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
 
       {/* LinkedIn outreach modal */}
       {outreachModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }} onClick={() => setOutreachModal(null)}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: window.innerWidth < 600 ? 'flex-end' : 'center', justifyContent: 'center', zIndex: 50, padding: window.innerWidth < 600 ? 0 : 20 }} onClick={() => setOutreachModal(null)}>
+          <div style={{ background: '#fff', borderRadius: window.innerWidth < 600 ? '16px 16px 0 0' : 16, padding: window.innerWidth < 600 ? '20px 16px' : 28, width: '100%', maxWidth: window.innerWidth < 600 ? '100%' : 520, maxHeight: window.innerWidth < 600 ? '90vh' : 'auto', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }} onClick={e => e.stopPropagation()}>
             <div>
               <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>Reaching out via LinkedIn</p>
               <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{outreachModal.alum.full_name}</p>
@@ -390,8 +390,8 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
 
       {/* CFF in-platform modal */}
       {cffModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }} onClick={() => setCffModal(null)}>
-          <div style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 16 }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: window.innerWidth < 600 ? 'flex-end' : 'center', justifyContent: 'center', zIndex: 50, padding: window.innerWidth < 600 ? 0 : 20 }} onClick={() => setCffModal(null)}>
+          <div style={{ background: '#fff', borderRadius: window.innerWidth < 600 ? '16px 16px 0 0' : 16, padding: window.innerWidth < 600 ? '20px 16px' : 28, width: '100%', maxWidth: window.innerWidth < 600 ? '100%' : 520, maxHeight: window.innerWidth < 600 ? '90vh' : 'auto', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }} onClick={e => e.stopPropagation()}>
             <div>
               <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>Send a message on CFF</p>
               <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{cffModal.full_name}</p>

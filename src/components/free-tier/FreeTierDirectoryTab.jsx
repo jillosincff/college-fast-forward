@@ -294,7 +294,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))', gap: 16 }}>
           {displayMembers.map(member => {
             const initials = (member.full_name || 'CFF')
               .split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -417,15 +417,20 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
           style={{
             position: 'fixed', inset: 0,
             background: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center', zIndex: 50, padding: 20,
+            display: 'flex', alignItems: window.innerWidth < 600 ? 'flex-end' : 'center',
+            justifyContent: 'center', zIndex: 50, padding: window.innerWidth < 600 ? 0 : 20,
           }}
           onClick={() => setMessaging(null)}
         >
           <div
             style={{
-              background: '#fff', borderRadius: 16,
-              padding: 28, width: '100%', maxWidth: 520,
+              background: '#fff',
+              borderRadius: window.innerWidth < 600 ? '16px 16px 0 0' : 16,
+              padding: window.innerWidth < 600 ? '20px 16px' : 28,
+              width: '100%',
+              maxWidth: window.innerWidth < 600 ? '100%' : 520,
+              maxHeight: window.innerWidth < 600 ? '90vh' : 'auto',
+              overflowY: 'auto',
               display: 'flex', flexDirection: 'column', gap: 16,
             }}
             onClick={e => e.stopPropagation()}
