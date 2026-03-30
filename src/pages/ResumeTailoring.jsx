@@ -493,7 +493,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {/* Next step CTA */}
           <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid #F0F0F0' }}>
             <button
-              onClick={() => navigate('FreeTierDashboard?tab=company_intel')}
+              onClick={() => {
+                const targetCompany = user?.career_goals?.target_companies?.[0] || '';
+                navigate(`FreeTierDashboard?tab=company_intel${targetCompany ? `&company=${encodeURIComponent(targetCompany)}` : ''}`);
+              }}
               style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
               >
               Next: Research Target Companies →
