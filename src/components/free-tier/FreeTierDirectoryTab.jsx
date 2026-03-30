@@ -92,7 +92,11 @@ function ParentCard({ parent, onMessage }) {
 export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => {
+    const topIndustry = user?.career_goals?.target_industries?.[0];
+    const topRole = user?.career_goals?.target_roles?.[0];
+    return topIndustry || topRole || '';
+  });
   const [filter, setFilter] = useState('All');
   const [selectedParent, setSelectedParent] = useState(null);
   const [monthlyCount, setMonthlyCount] = useState(0);
@@ -115,6 +119,13 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     };
     load();
   }, []);
+
+  useEffect(() => {
+    const topIndustry = user?.career_goals?.target_industries?.[0];
+    const topRole = user?.career_goals?.target_roles?.[0];
+    if (topIndustry) setSearch(topIndustry);
+    else if (topRole) setSearch(topRole);
+  }, [user?.career_goals?.target_industries?.[0], user?.career_goals?.target_roles?.[0]]);
 
   useEffect(() => {
     if (!user?.email) return;
@@ -157,10 +168,16 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         CFF CONNECTIONS
       </p>
       <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', marginBottom: 6 }}>
-        Find someone who can open a door.
+        {user?.career_goals?.target_industries?.[0]
+          ? `${user.career_goals.target_industries[0]} professionals in your network.`
+          : user?.career_goals?.target_roles?.[0]
+          ? `People who can help with ${user.career_goals.target_roles[0]} roles.`
+          : 'Find someone who can open a door.'}
       </h1>
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', marginBottom: 24 }}>
-        Browse parents and professionals in the College Fast Forward network.
+        {user?.career_goals?.target_industries?.[0]
+          ? `These CFF parents and alumni work in ${user.career_goals.target_industries[0]} — and they want to help.`
+          : 'Browse parents and professionals in the College Fast Forward network.'}
       </p>
 
       {isFree && monthlyCount >= FREE_LIMIT && (
@@ -177,6 +194,12 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
         </div>
       )}
 
+      {user?.career_goals?.target_industries?.length > 0 && (
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: '0 0 8px' }}>
+          Showing results for your target industry — search to explore more
+        </p>
+      )}
+
       <div className="relative mb-4">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999]" />
         <input
@@ -187,6 +210,15 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
           className="w-full pl-12 pr-4 py-3 rounded-full border border-[#E0E0E0] bg-white text-[#1A1A1A]"
         />
       </div>
+
+      {search && (
+        <button
+          onClick={() => setSearch('')}
+          style={{ background: 'none', border: 'none', fontSize: 12, color: '#E85D20', cursor: 'pointer', padding: '4px 0 12px', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+        >
+          Clear search — show all →
+        </button>
+      )}
 
       <div className="flex gap-2 mb-6 flex-wrap">
         {FILTERS.map(f => (
