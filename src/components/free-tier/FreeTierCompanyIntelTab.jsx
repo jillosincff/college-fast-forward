@@ -62,17 +62,17 @@ const FILTERS = [
 
 function FilterBar({ active, onChange }) {
   return (
-    <div style={{ display: 'flex', gap: 4, marginBottom: 24, padding: 4, background: '#f5f5f5', borderRadius: 100, width: '100%', maxWidth: 'fit-content', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+    <div style={{ display: 'flex', gap: 'clamp(3px, 1vw, 4px)', marginBottom: 24, padding: 'clamp(3px, 1vw, 4px)', background: '#f5f5f5', borderRadius: 100, width: '100%', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', flexShrink: 0 }}>
       {FILTERS.map(f => (
         <button key={f.key} onClick={() => onChange(f.key)} style={{
-          padding: '8px 16px', borderRadius: 100,
-          fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+          padding: 'clamp(6px, 1.5vw, 8px) clamp(12px, 2.5vw, 16px)', borderRadius: 100,
+          fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(11px, 2.5vw, 13px)',
           fontWeight: active === f.key ? 600 : 500,
           cursor: 'pointer', border: 'none',
           background: active === f.key ? '#fff' : 'transparent',
           color: active === f.key ? '#0d1117' : '#666',
           boxShadow: active === f.key ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-          transition: 'all 0.15s ease', whiteSpace: 'nowrap', minHeight: 'auto',
+          transition: 'all 0.15s ease', whiteSpace: 'nowrap', minHeight: 44, flexShrink: 0,
         }}>
           {f.label}
         </button>
