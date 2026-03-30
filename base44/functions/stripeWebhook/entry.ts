@@ -5,6 +5,17 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
   apiVersion: '2024-11-20.acacia',
 });
 
+// ── HTML escape utility ──
+const escapeHtml = (str) => {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 // ═══════════════════════════════════════════════════════════════
 // CFF + FASTIQ Stripe Webhook Handler
 // ═══════════════════════════════════════════════════════════════
@@ -95,7 +106,7 @@ async function sendStudentActivationEmails(billingUser, family) {
         body: `
 <div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#0A0A0A;color:#fff;">
   <h1 style="font-size:26px;font-weight:700;margin-bottom:20px;color:#fff;">Your parent just turbocharged your job search 🚀</h1>
-  <p style="font-size:16px;line-height:1.65;color:#ccc;margin-bottom:24px;">${parentName} just activated FastIQ for you.</p>
+  <p style="font-size:16px;line-height:1.65;color:#ccc;margin-bottom:24px;">${escapeHtml(parentName)} just activated FastIQ for you.</p>
   <p style="font-size:16px;line-height:1.65;color:#ccc;margin-bottom:8px;">You now have access to:</p>
   <ul style="font-size:15px;line-height:1.8;color:#ccc;margin-bottom:24px;padding-left:0;list-style:none;">
     <li>✓ Full alumni names and contacts at your target companies</li>
@@ -108,9 +119,9 @@ async function sendStudentActivationEmails(billingUser, family) {
   <p style="font-size:13px;color:#666;margin-top:32px;">— The College Fast Forward Team</p>
 </div>`,
       });
-      console.log('Sent activation email to student:', email);
-    } catch (e) {
-      console.error('Failed to send activation email to:', email, e.message);
+      console.log('[stripeWebhook] Email sent successfully:', { event: 'student_activation', email });
+    } catch (emailError) {
+      console.error('[stripeWebhook] Email failed:', { event: 'student_activation', email, error: emailError.message });
     }
   }
 }
@@ -306,15 +317,21 @@ Deno.serve(async (req) => {
               body: `
 <div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Your FastIQ subscription has been canceled</h1>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${billingUser.full_name?.split(' ')[0] || 'there'},</p>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
   <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Your FastIQ subscription has been canceled. Your student will revert to the free tier and lose access to full alumni contacts, personalized outreach, and the AI career engine.</p>
   <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">If this was a mistake, you can reactivate anytime from your dashboard.</p>
   <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Go to Dashboard →</a>
   <p style="font-size:13px;color:#999;margin-top:32px;">— The College Fast Forward Team</p>
 </div>`,
             });
-          } catch (e) {
-            console.error('Failed to send cancellation email:', e.message);
+            console.log('[stripeWebhook] Email sent successfully:', { event: 'subscription_canceled', email: billingUser.email });
+          } catch (emailError) {
+            console.error('[stripeWebhook] Email failed:', {
+              event: 'customer.subscription.deleted',
+              userId: billingUser.id,
+              email: billingUser.email,
+              error: emailError.message,
+            });
           }
         }
 
@@ -369,7 +386,6 @@ Deno.serve(async (req) => {
           console.log('Marked billing user as past_due:', billingUser.id, 'attempt:', attemptCount);
 
           // Send payment failure email
-          const isDay1 = attemptCount <= 1;
           const isDay3 = attemptCount >= 2;
           const urgency = isDay3 ? 'Your access will be deactivated soon' : 'Please update your payment method';
 
@@ -380,14 +396,20 @@ Deno.serve(async (req) => {
               body: `
 <div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Payment failed</h1>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${billingUser.full_name?.split(' ')[0] || 'there'},</p>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
   <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">We couldn't process your payment for FastIQ. ${isDay3 ? 'Your student\'s access will be deactivated within 24 hours unless payment is resolved.' : 'Please update your payment method to keep your student\'s access active.'}</p>
   <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Update Payment →</a>
   <p style="font-size:13px;color:#999;margin-top:32px;">— The College Fast Forward Team</p>
 </div>`,
             });
-          } catch (e) {
-            console.error('Failed to send payment failure email:', e.message);
+            console.log('[stripeWebhook] Email sent successfully:', { event: 'payment_failed', email: billingUser.email });
+          } catch (emailError) {
+            console.error('[stripeWebhook] Email failed:', {
+              event: 'invoice.payment_failed',
+              userId: billingUser.id,
+              email: billingUser.email,
+              error: emailError.message,
+            });
           }
         }
 

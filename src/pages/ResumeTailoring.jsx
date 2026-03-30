@@ -83,14 +83,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   }, [user?.email]);
 
   useEffect(() => {
+    if (analyzing || analysis || resumes.length === 0 || phase !== 'hub') return;
+
+    const primaryResume = resumes.find(r => r.is_active) || resumes[0];
+    if (!primaryResume?.parsed_text && !primaryResume?.original_file_url) return;
+
+    const cached = localStorage.getItem(`resume_analysis_${primaryResume.id}`);
+    if (cached) {
+      try { setAnalysis(JSON.parse(cached)); } catch (e) {}
+      return;
+    }
+
     const runAnalysis = async () => {
-      const primaryResume = resumes.find(r => r.is_active) || resumes[0];
-      if (!primaryResume?.parsed_text && !primaryResume?.original_file_url) return;
-      const cached = localStorage.getItem(`resume_analysis_${primaryResume.id}`);
-      if (cached) {
-        try { setAnalysis(JSON.parse(cached)); } catch (e) {}
-        return;
-      }
       setAnalyzing(true);
       setAnalysisError(false);
       try {
@@ -112,16 +116,13 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       } catch (e) {
         console.error('Analysis failed:', e);
         setAnalysisError(true);
+      } finally {
+        setAnalyzing(false);
       }
-      setAnalyzing(false);
     };
-    if (resumes.length > 0 && phase === 'hub') {
-      const primary = resumes.find(r => r.is_active) || resumes[0];
-      if (primary && !localStorage.getItem(`resume_analysis_${primary.id}`)) {
-        runAnalysis();
-      }
-    }
-  }, [phase, resumes.length]);
+
+    runAnalysis();
+  }, [resumes.length, user?.email, user?.career_goals?.target_roles?.length, phase, analysis]);
 
   const uploadResume = async (file) => {
     setFileName(file.name);
