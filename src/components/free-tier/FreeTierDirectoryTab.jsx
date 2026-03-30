@@ -1,5 +1,48 @@
 import { useState, useEffect } from 'react';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
+
+const ROLE_TO_SEARCH_KEYWORD = {
+  'social media': 'Marketing', 'marketing': 'Marketing', 'brand': 'Marketing',
+  'content': 'Marketing', 'pr': 'Marketing', 'communications': 'Marketing',
+  'finance': 'Finance', 'banking': 'Finance', 'investment': 'Finance',
+  'wealth': 'Finance', 'analyst': 'Finance', 'accounting': 'Finance',
+  'software': 'Technology', 'engineer': 'Technology', 'developer': 'Technology',
+  'product manager': 'Technology', 'data': 'Technology',
+  'therapist': 'Healthcare', 'nursing': 'Healthcare', 'medical': 'Healthcare',
+  'health': 'Healthcare', 'clinical': 'Healthcare',
+  'lawyer': 'Law', 'attorney': 'Law', 'legal': 'Law', 'compliance': 'Law',
+  'consultant': 'Consulting', 'consulting': 'Consulting', 'strategy': 'Consulting',
+  'sales': 'Sales', 'business development': 'Sales', 'account': 'Sales',
+  'film': 'Media', 'television': 'Media', 'journalism': 'Media', 'publishing': 'Media',
+};
+
+const INDUSTRY_TO_KEYWORD = {
+  'Marketing & Brand': 'Marketing', 'Media & Entertainment': 'Media',
+  'Financial Services & Banking': 'Finance', 'Technology & Software': 'Technology',
+  'Healthcare & Life Sciences': 'Healthcare', 'Legal & Compliance': 'Law',
+  'Consumer Goods & Retail': 'Retail', 'Real Estate': 'Real Estate',
+  'Education': 'Education', 'Nonprofit & Social Impact': 'Nonprofit',
+  'Government & Nonprofit': 'Nonprofit', 'Engineering': 'Engineering',
+  'Consulting': 'Consulting', 'Hospitality & Tourism': 'Hospitality',
+  'Sports & Athletics': 'Sports', 'Human Resources': 'HR',
+  'Architecture & Design': 'Design', 'Biotech & Life Sciences': 'Biotech',
+  'Logistics & Supply Chain': 'Logistics', 'Energy & Utilities': 'Energy',
+};
+
+const getBestKeyword = (user) => {
+  const roles = user?.career_goals?.target_roles || [];
+  const industries = user?.career_goals?.target_industries || [];
+  for (const role of roles) {
+    const roleLower = role.toLowerCase();
+    for (const [key, value] of Object.entries(ROLE_TO_SEARCH_KEYWORD)) {
+      if (roleLower.includes(key)) return value;
+    }
+  }
+  for (const ind of industries) {
+    if (INDUSTRY_TO_KEYWORD[ind]) return INDUSTRY_TO_KEYWORD[ind];
+  }
+  return roles[0] || '';
+};
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
@@ -15,11 +58,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   const [sent, setSent] = useState(false);
 
   const topRole = user?.career_goals?.target_roles?.[0];
-  const industries = user?.career_goals?.target_industries || [];
-  const marketingInd = industries.find(i => i.includes('Marketing'));
-  const searchSuggestion = marketingInd
-    ? 'Marketing'
-    : industries[0]?.split('&')[0].trim() || topRole || '';
+  const searchSuggestion = getBestKeyword(user);
 
   useEffect(() => {
     const load = async () => {
