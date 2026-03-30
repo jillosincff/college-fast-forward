@@ -123,12 +123,12 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
         {/* AI bubble */}
-        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 28 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 28, flexWrap: window.innerWidth < 500 ? 'wrap' : 'nowrap' }}>
           <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <span style={{ color: '#E85D20', fontSize: 16 }}>⚡</span>
           </div>
-          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: '16px 20px', maxWidth: 460 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>
+          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, borderTopLeftRadius: 4, padding: 'clamp(12px, 3vw, 20px)', maxWidth: window.innerWidth < 500 ? '100%' : 460, width: window.innerWidth < 500 ? 'calc(100% - 56px)' : 'auto' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(13px, 3vw, 15px)', color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>
               Got it. Here's your plan — let's make sure everything looks right.
             </p>
           </div>
