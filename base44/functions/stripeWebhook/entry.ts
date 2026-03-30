@@ -132,10 +132,11 @@ Deno.serve(async (req) => {
   const body = await req.text();
 
   try {
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')?.trim();
     const event = await stripe.webhooks.constructEventAsync(
       body,
       signature,
-      Deno.env.get('STRIPE_WEBHOOK_SECRET')
+      webhookSecret
     );
 
     console.log('Webhook received:', event.type);
