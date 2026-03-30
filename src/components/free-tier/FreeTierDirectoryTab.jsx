@@ -105,7 +105,8 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
       try {
         const res = await base44.functions.invoke('getDirectoryUsers', {});
         const all = res?.data?.data || [];
-        setParents(all.filter(p => p.full_name));
+        const filtered = all.filter(p => p.full_name && (p.persona === 'parent' || p.persona === 'alumni'));
+        setParents(filtered);
       } catch (e) {
         console.error('Directory load error:', e);
         setParents([]);
@@ -132,9 +133,19 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     const matchesSearch = !q ||
       (p.full_name || '').toLowerCase().includes(q) ||
       (p.company || '').toLowerCase().includes(q) ||
-      (p.industry || '').toLowerCase().includes(q);
+      (p.current_company || '').toLowerCase().includes(q) ||
+      (p.industry || '').toLowerCase().includes(q) ||
+      (p.job_title || '').toLowerCase().includes(q) ||
+      (p.current_position || '').toLowerCase().includes(q) ||
+      (p.bio || '').toLowerCase().includes(q);
     if (!matchesSearch) return false;
-    if (filter === 'Your Industry') return (user?.target_industries || []).some(i => p.industry === i);
+    if (filter === 'Your Industry') {
+      const targetIndustries = user?.career_goals?.target_industries || user?.target_industries || [];
+      return targetIndustries.some(ind =>
+        (p.industry || '').toLowerCase().includes(ind.toLowerCase()) ||
+        (p.expertise_areas || []).some(e => e.toLowerCase().includes(ind.toLowerCase()))
+      );
+    }
     if (filter === 'Actively Helping') return p.intro_willingness === 'yes' || p.intro_willingness === 'happy_to_help';
     if (filter === 'Recently Active') return !!p.updated_date && (Date.now() - new Date(p.updated_date).getTime()) < 7 * 24 * 60 * 60 * 1000;
     return true;
@@ -143,7 +154,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', marginBottom: 12 }}>
-        PARENT DIRECTORY
+        CFF CONNECTIONS
       </p>
       <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', marginBottom: 6 }}>
         Find someone who can open a door.
