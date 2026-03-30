@@ -154,6 +154,10 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     ].some(field => field?.toLowerCase().includes(q));
     if (!matchesSearch) return false;
     if (filter === 'Your Industry') {
+      // Skip members with no useful industry data or generic 'other'
+      const memberIndustry = (p.industry || '').toLowerCase();
+      if (!memberIndustry || memberIndustry === 'other') return false;
+
       const targetIndustries = user?.career_goals?.target_industries || user?.target_industries || [];
       const allKeywords = targetIndustries.flatMap(ind =>
         INDUSTRY_MAP[ind] || ind.toLowerCase().split(/[\s&,]+/).filter(w => w.length > 3)
