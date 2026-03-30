@@ -119,9 +119,8 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   useEffect(() => {
     if (!user) return;
     const topIndustry = user?.career_goals?.target_industries?.[0];
-    const keyword = topIndustry ? topIndustry.split('&')[0].trim() : '';
-    if (keyword) {
-      setSearch(keyword);
+    if (topIndustry) {
+      setSearch('');
       setFilter('Your Industry');
     } else {
       setFilter('All');
