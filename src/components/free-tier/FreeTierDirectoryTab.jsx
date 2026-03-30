@@ -92,11 +92,7 @@ function ParentCard({ parent, onMessage }) {
 export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState(() => {
-    const topIndustry = user?.career_goals?.target_industries?.[0];
-    const topRole = user?.career_goals?.target_roles?.[0];
-    return topIndustry || topRole || '';
-  });
+  const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [selectedParent, setSelectedParent] = useState(null);
   const [monthlyCount, setMonthlyCount] = useState(0);
@@ -125,7 +121,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade }) {
     const topRole = user?.career_goals?.target_roles?.[0];
     if (topIndustry) setSearch(topIndustry);
     else if (topRole) setSearch(topRole);
-  }, [user?.career_goals?.target_industries?.[0], user?.career_goals?.target_roles?.[0]]);
+  }, [user]);
 
   useEffect(() => {
     if (!user?.email) return;
