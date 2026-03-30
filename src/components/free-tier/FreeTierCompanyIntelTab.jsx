@@ -113,7 +113,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     const hasGoals =
       (goals.target_industries?.length > 0) ||
       (goals.target_roles?.length > 0) ||
-      (goals.target_functions?.length > 0);
+      (goals.target_functions?.length > 0) ||
+      (goals.target_companies?.length > 0);
 
     if (!hasGoals) {
       setHasGoals(false);
@@ -175,6 +176,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   if (!hasGoals) return <NoGoalsGate onSetGoals={() => onTabChange?.('career_goals')} />;
 
   const targetCompanies = user?.career_goals?.target_companies || [];
+  const role = targetRoles[0] || '';
+  const industry = targetIndustries[0] || '';
 
   const TargetCompaniesSection = () => (
     <div style={{ marginBottom: 32 }}>
@@ -240,9 +243,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       </div>
     </div>
   );
-
-  const role = targetRoles[0] || '';
-  const industry = targetIndustries[0] || '';
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
