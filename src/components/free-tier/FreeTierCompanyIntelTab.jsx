@@ -179,7 +179,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const role = targetRoles[0] || '';
   const industry = targetIndustries[0] || '';
 
-  const TargetCompaniesSection = () => (
+  const renderTargetCompanies = () => (
     <div style={{ marginBottom: 32 }}>
       {targetCompanies.length > 0 ? (
         <>
@@ -229,7 +229,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       <p style={{ fontSize: 14, color: '#888', margin: '0 0 28px' }}>
         {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
       </p>
-      <TargetCompaniesSection />
+      {renderTargetCompanies()}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', textAlign: 'center', gap: '16px' }}>
         <div style={{ fontSize: '13px', color: '#666', maxWidth: '400px', lineHeight: '1.6' }}>
           FastIQ will scan careers pages and hiring signals across companies matching your goals. Takes about 30 seconds.
@@ -254,7 +254,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
       </p>
 
-      <TargetCompaniesSection />
+      {renderTargetCompanies()}
 
       {/* Search */}
       <div style={{ position: 'relative', marginBottom: 20 }}>
