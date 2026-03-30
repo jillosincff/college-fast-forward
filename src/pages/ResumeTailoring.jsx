@@ -297,22 +297,22 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap'); @keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: window.innerWidth < 600 ? 'wrap' : 'nowrap' }}>
             <div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>RESUME HUB</p>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Resumes</h1>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Resumes</h1>
             </div>
             {canAddMore ? (
               <button
                 onClick={() => setPhase('entry')}
-                style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+                style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
               >
                 + Add Resume
               </button>
             ) : (
               <button
                 onClick={() => onOpenUpgrade()}
-                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
               >
                 + Add Resume · FastIQ
               </button>
