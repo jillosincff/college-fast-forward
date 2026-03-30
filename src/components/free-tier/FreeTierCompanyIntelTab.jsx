@@ -239,13 +239,26 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
-      <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
-      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>
-        {targetCompanies.length > 0 ? `Companies hiring ${role || 'in your field'}.` : 'Your Target Companies.'}
-      </h1>
-      <p style={{ fontSize: 14, color: '#888', margin: '0 0 28px' }}>
-        {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
-      </p>
+      {/* Header with CTA button in top right */}
+      <div style={{ position: 'relative', marginBottom: 28 }}>
+        <div>
+          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>
+            {targetCompanies.length > 0 ? `Companies hiring ${role || 'in your field'}.` : 'Your Target Companies.'}
+          </h1>
+          <p style={{ fontSize: 14, color: '#888', margin: 0 }}>
+            {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
+          </p>
+        </div>
+        {!loading && companies.length > 0 && (
+          <button
+            onClick={() => onTabChange?.('directory')}
+            style={{ position: 'absolute', top: 0, right: 0, background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', whiteSpace: 'nowrap' }}
+          >
+            Next: Find Your CFF Connections →
+          </button>
+        )}
+      </div>
 
       {/* Target companies — always visible */}
       {renderTargetCompanies()}
@@ -326,14 +339,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         </div>
       )}
 
-      {!loading && companies.length > 0 && (
-        <button
-          onClick={() => onTabChange?.('directory')}
-          style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', width: '100%', marginTop: 16, fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
-        >
-          Next: Find Your CFF Connections →
-        </button>
-      )}
+
 
       {upgradeModal && (
         <AlumniUpgradeModal
