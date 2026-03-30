@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 const EXAMPLE_SEARCHES = () => [
   "VP of Marketing at a Fortune 500 company",
@@ -156,16 +157,31 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 8px' }}>
-          Alumni Search
-        </p>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
-          Find a {schoolName} alumni<br />in any role, at any company.
-        </h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
-          Search in plain English · {schoolName} alumni only · Powered by Exa
-        </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16 }}>
+        <div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 8px' }}>
+            Alumni Search
+          </p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
+            Find your UF alumni<br />in any role, at any company.
+          </h1>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
+            Search in plain English · UF alumni only · Powered by Exa
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('FreeTierDashboard')}
+          style={{
+            background: '#E85D20', border: 'none',
+            borderRadius: 10, padding: '10px 20px',
+            fontSize: 13, fontWeight: 600,
+            color: '#fff', cursor: 'pointer',
+            fontFamily: "'DM Sans', sans-serif",
+            whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto',
+          }}
+        >
+          Next Step →
+        </button>
       </div>
 
       {/* Search bar — hidden when free tier search used */}
@@ -241,7 +257,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       {results.length > 0 && (
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '0 0 16px' }}>
-            {results.length} {schoolName === 'your school' ? 'UF' : schoolName} alumni found
+            {results.length} UF alumni found
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {results.map((alum, i) => {
@@ -262,7 +278,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{alum.full_name}</p>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#555', margin: '0 0 3px' }}>
-                        {alum.headline}{alum.company ? ` · ${alum.company}` : ''}
+                        {alum.headline?.split('·')[0]?.replace(/\s+/g, ' ')?.trim() || ''}{alum.company ? ` · ${alum.company}` : ''}
                       </p>
                       {alum.location && (
                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: '0 0 2px' }}>📍 {alum.location}</p>
@@ -271,28 +287,35 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#999', margin: 0, lineHeight: 1.4 }}>{alum.summary.slice(0, 100)}...</p>
                       )}
                     </div>
-                    <button
-                      onClick={() => handleConnect(alum)}
-                      disabled={connectLoading === (alum.cff_user_id || alum.linkedin_url) || sentTo.includes(alum.cff_user_id || alum.linkedin_url)}
-                      style={{
-                        background: 'none',
-                        border: `1px solid ${sentTo.includes(alum.cff_user_id || alum.linkedin_url) ? '#22C55E' : '#E85D20'}`,
-                        borderRadius: 6, padding: '7px 14px', fontSize: 12,
-                        color: sentTo.includes(alum.cff_user_id || alum.linkedin_url) ? '#22C55E' : '#E85D20',
-                        cursor: sentTo.includes(alum.cff_user_id || alum.linkedin_url) ? 'default' : 'pointer',
-                        whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto',
-                      }}
-                    >
-                      {(() => {
+                    {(() => {
                         const key = alum.cff_user_id || alum.linkedin_url;
-                        if (connectLoading === key) return 'Drafting...';
-                        if (sentTo.includes(key)) return alum.cff_user_id ? 'Message sent ✓' : 'Sent ✓';
-                        return 'Connect →';
-                      })()}
-                    </button>
-                  </div>
+                        const isLoading = connectLoading === key;
+                        const isSent = sentTo.includes(key);
+                        return (
+                          <button
+                            onClick={() => handleConnect(alum)}
+                            disabled={isLoading || isSent}
+                            style={{
+                              background: 'none',
+                              border: `1px solid ${isSent ? '#22C55E' : '#E85D20'}`,
+                              borderRadius: 6, padding: '7px 14px', fontSize: 12,
+                              color: isSent ? '#22C55E' : '#E85D20',
+                              cursor: isSent ? 'default' : 'pointer',
+                              whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto',
+                            }}
+                          >
+                            {isLoading ? (
+                              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(232,93,32,0.3)', borderTop: '2px solid #E85D20', animation: 'spin 0.8s linear infinite', display: 'inline-block' }} />
+                                Drafting...
+                              </span>
+                            ) : isSent ? (alum.cff_user_id ? 'Message sent ✓' : 'Sent ✓') : 'Connect →'}
+                          </button>
+                          );
+                          })()}
+                          </div>
 
-                  {/* Lock overlay on first blurred result */}
+                          {/* Lock overlay on first blurred result */}
                   {isLocked && i === 1 && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, borderRadius: 10, background: 'rgba(255,255,255,0.88)', padding: '16px 24px', textAlign: 'center' }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0, maxWidth: 260, lineHeight: 1.5 }}>
