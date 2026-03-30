@@ -169,24 +169,24 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   // Target companies — always visible
   const renderTargetCompanies = () => {
     if (targetCompanies.length === 0) return (
-      <div style={{ background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+      <div style={{ background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.3)', borderRadius: 12, padding: 'clamp(12px, 3vw, 20px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 24, flexWrap: 'wrap', flexDirection: window.innerWidth < 500 ? 'column' : 'row' }}>
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Add your dream companies</p>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll show you hiring signals and alumni at the companies you care about most.</p>
         </div>
-        <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>+ Add Target Companies →</button>
+        <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 44, width: window.innerWidth < 500 ? '100%' : 'auto' }}>+ Add Target Companies →</button>
       </div>
     );
 
     return (
       <div style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: 0 }}>🎯 YOUR TARGET COMPANIES</p>
-          <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Edit →</button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: 0 }}>🎯 YOUR TARGET COMPANIES</p>
+          <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', flexShrink: 0 }}>Edit →</button>
         </div>
         <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10, overflowX: 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
           {targetCompanies.map(company => (
-            <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, minWidth: 180 }}>
+            <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)', minWidth: 'clamp(160px, 80vw, 200px)' }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
                 {company[0]?.toUpperCase()}
               </div>
@@ -197,13 +197,13 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                   setShowAll(true);
                   if (!hasStarted) { setHasStarted(true); loadCompanies(); }
                 }}
-                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
+                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: 'clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)', fontSize: 'clamp(10px, 2vw, 11px)', fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
               >
                 Research →
               </button>
             </div>
           ))}
-          <div onClick={() => onTabChange?.('career_goals')} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', minWidth: 120, justifyContent: 'center' }}>
+          <div onClick={() => onTabChange?.('career_goals')} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', minWidth: 'clamp(100px, 30vw, 140px)' }}>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', fontWeight: 600 }}>+ Add company</span>
           </div>
         </div>
@@ -241,16 +241,16 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
       {/* Header with CTA button in top right */}
       <div style={{ position: 'relative', marginBottom: 28 }}>
-        <div style={{ paddingRight: !loading && companies.length > 0 ? 320 : 0 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>
+        <div style={{ paddingRight: window.innerWidth < 600 && !loading && companies.length > 0 ? 0 : !loading && companies.length > 0 ? 320 : 0 }}>
+          <p style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>
             {targetCompanies.length > 0 ? `Companies hiring ${role || 'in your field'}.` : 'Your Target Companies.'}
           </h1>
           <p style={{ fontSize: 14, color: '#888', margin: 0 }}>
             {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
           </p>
         </div>
-        {!loading && companies.length > 0 && (
+        {!loading && companies.length > 0 && window.innerWidth >= 600 && (
           <button
             onClick={() => onTabChange?.('directory')}
             style={{ position: 'absolute', top: 0, right: 0, background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', whiteSpace: 'nowrap' }}
@@ -271,7 +271,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           placeholder="Search companies..."
           value={search}
           onChange={e => { setSearch(e.target.value); setShowAll(true); }}
-          style={{ width: '100%', paddingLeft: 40, paddingRight: 16, paddingTop: 10, paddingBottom: 10, borderRadius: 100, border: '1px solid #e5e5e5', background: '#fff', fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
+          style={{ width: '100%', paddingLeft: 40, paddingRight: 16, paddingTop: 'clamp(10px, 2vw, 12px)', paddingBottom: 'clamp(10px, 2vw, 12px)', borderRadius: 100, border: '1px solid #e5e5e5', background: '#fff', fontSize: 'clamp(13px, 3vw, 14px)', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', minHeight: 44 }}
         />
       </div>
 
@@ -326,15 +326,15 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
       {/* Similar companies prompt */}
       {!loading && companies.length > 0 && (
-        <div style={{ background: '#F5F5F5', borderRadius: 12, padding: '16px 20px', marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#555', margin: 0 }}>
-            Want to explore similar companies in {industry || role || 'your field'}?
+        <div style={{ background: '#F5F5F5', borderRadius: 12, padding: 'clamp(12px, 3vw, 20px)', marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', flexDirection: window.innerWidth < 500 ? 'column' : 'row' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#555', margin: 0 }}>
+            Want to explore similar companies?
           </p>
           <button
             onClick={() => { setSearch(''); setFilter('all'); setShowAll(true); }}
-            style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: 'clamp(9px, 2vw, 10px) clamp(16px, 3vw, 18px)', fontSize: 'clamp(12px, 2.5vw, 13px)', fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 44, width: window.innerWidth < 500 ? '100%' : 'auto' }}
           >
-            Search {industry || 'Similar Companies'} →
+            Search {industry || 'Similar'} →
           </button>
         </div>
       )}
