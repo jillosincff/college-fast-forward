@@ -318,7 +318,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
             Want to explore similar companies in {industry || role || 'your field'}?
           </p>
           <button
-            onClick={() => { setSearch(industry || role || ''); setShowAll(true); }}
+            onClick={() => { setSearch(''); setFilter('all'); setShowAll(true); }}
             style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
           >
             Search {industry || 'Similar Companies'} →
