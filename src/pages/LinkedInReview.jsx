@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { Home, FileText, Search, Building2, MessageSquare, ChevronLeft } from 'lucide-react';
+import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
 
-function TopNav() {
+function SideNav() {
   const NAV = [
     { label: 'Home', icon: Home, page: 'FreeTierDashboard' },
     { label: 'Resume', icon: FileText, page: 'ResumeTailoring' },
@@ -13,20 +13,25 @@ function TopNav() {
     { label: 'Messages', icon: MessageSquare, page: 'MyMessages' },
   ];
   return (
-    <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 8, height: 52, position: 'sticky', top: 0, zIndex: 10 }}>
-      <button onClick={() => window.history.back()} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 8px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}>
-        <ChevronLeft size={14} /> Back
-      </button>
-      <div style={{ width: 1, height: 20, background: '#E5E5E5', margin: '0 4px' }} />
+    <div style={{
+      width: 60, background: '#fff', borderRight: '1px solid #E5E5E5',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      paddingTop: 20, position: 'sticky', top: 0, height: '100vh'
+    }}>
       {NAV.map(item => {
         const Icon = item.icon;
         return (
-          <button key={item.page} onClick={() => navigate(item.page)} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 10px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}
+          <button key={item.page} onClick={() => navigate(item.page)} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 44, height: 44, borderRadius: 8, background: 'none',
+            border: 'none', cursor: 'pointer', color: '#666',
+            minHeight: 'auto', minWidth: 'auto'
+          }}
             onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
             onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            title={item.label}
           >
-            <Icon size={14} />
-            <span className="hidden sm:inline">{item.label}</span>
+            <Icon size={18} />
           </button>
         );
       })}
@@ -81,9 +86,9 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   // FastIQ gate
   if (!isFastIQ) {
     return (
-      <>
-        <TopNav />
-        <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <SideNav />
+        <div style={{ flex: 1, maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#E8F4FD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 24px' }}>🔗</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>LinkedIn Profile Review</h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
@@ -93,14 +98,14 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             Unlock FastIQ →
           </button>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <TopNav />
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <SideNav />
+      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
@@ -296,7 +301,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
 
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
-    </>
+    </div>
   );
 }
 
