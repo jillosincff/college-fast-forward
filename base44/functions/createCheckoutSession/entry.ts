@@ -36,6 +36,9 @@ Deno.serve(async (req) => {
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
 
+    const subscriptionTier = plan.includes('fastiq') ? 'fastiq' : 'cff';
+    const isFoundingMember = isFoundingPlan;
+
     const body = new URLSearchParams({
       mode: isSubscription ? 'subscription' : 'payment',
       'line_items[0][price]': PRICES[plan],
@@ -46,12 +49,20 @@ Deno.serve(async (req) => {
       'metadata[user_id]': clientUser.id,
       'metadata[user_email]': clientUser.email,
       'metadata[plan]': plan,
+      'metadata[subscription_tier]': subscriptionTier,
+      'metadata[is_founding_member]': String(isFoundingMember),
     });
 
     if (isSubscription) {
       body.append('subscription_data[trial_period_days]', '7');
       body.append('subscription_data[metadata][user_id]', clientUser.id);
       body.append('subscription_data[metadata][plan]', plan);
+      body.append('subscription_data[metadata][subscription_tier]', subscriptionTier);
+      body.append('subscription_data[metadata][is_founding_member]', String(isFoundingMember));
+      if (clientUser.family_id) {
+        body.append('subscription_data[metadata][family_id]', clientUser.family_id);
+        body.append('metadata[family_id]', clientUser.family_id);
+      }
     }
 
     if (clientUser.email) {
