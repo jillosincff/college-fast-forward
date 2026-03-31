@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     // Step 1 — Scrape LinkedIn via NinjaPear
     let profile = null;
     const px = await fetch(
-      `https://nubela.co/api/v2/linkedin?url=${encodeURIComponent(linkedinUrl)}&use_cache=if-present`,
+      `https://api.ninjapear.com/api/v2/linkedin?url=${encodeURIComponent(linkedinUrl)}&use_cache=if-present`,
       { headers: { 'Authorization': `Bearer ${PROXYCURL_KEY}` } }
     );
     profile = await px.json();

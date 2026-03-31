@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const BASE_URL = 'https://nubela.co/api';
+const BASE_URL = 'https://api.ninjapear.com/api';
 
 async function proxycurlFetch(path, key) {
   const resp = await fetch(`${BASE_URL}${path}`, {
