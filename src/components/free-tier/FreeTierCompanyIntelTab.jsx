@@ -184,24 +184,22 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(9px, 2.2vw, 11px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#E85D20', margin: 0, minWidth: 0, whiteSpace: window.innerWidth < 500 ? 'nowrap' : 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>🎯 {window.innerWidth < 500 ? 'TARGETS' : 'YOUR TARGET COMPANIES'}</p>
           <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', flexShrink: 0 }}>Edit →</button>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10, overflowX: 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+        <div style={{ display: window.innerWidth < 500 ? 'grid' : 'flex', gridTemplateColumns: window.innerWidth < 500 ? 'repeat(auto-fit, minmax(140px, 1fr))' : undefined, flexWrap: window.innerWidth < 500 ? undefined : 'nowrap', gap: 10, overflowX: window.innerWidth < 500 ? undefined : 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
           {targetCompanies.map(company => (
-            <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)', minWidth: 'clamp(150px, 65vw, 200px)' }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
-                {company[0]?.toUpperCase()}
-              </div>
+            <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', flexDirection: 'column', gap: 'clamp(8px, 2vw, 12px)', minWidth: window.innerWidth < 500 ? undefined : 'clamp(150px, 65vw, 200px)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
+                  {company[0]?.toUpperCase()}
+                </div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{company}</p>
+              </div>
               <button
                 onClick={() => {
                   setSearch(company);
                   setShowAll(true);
                   if (!hasStarted) { setHasStarted(true); loadCompanies(); }
                 }}
-                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: 'clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)', fontSize: 'clamp(10px, 2vw, 11px)', fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                title="Research"
-              >
-                Research →
-              </button>
+                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)', fontSize: 'clamp(11px, 2vw, 12px)', fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: '100%' }}
             </div>
           ))}
           <div onClick={() => onTabChange?.('career_goals')} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', minWidth: 'clamp(100px, 30vw, 140px)' }}>
