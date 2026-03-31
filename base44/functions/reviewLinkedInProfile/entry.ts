@@ -11,14 +11,14 @@ Deno.serve(async (req) => {
 
     // DEBUG LOGS
     console.log('LinkedIn URL:', linkedinUrl);
-    console.log('Proxycurl key exists:', !!Deno.env.get('PROXYCURL_API_KEY'));
+    console.log('NinjaPear key exists:', !!Deno.env.get('PROXYCURL_API_KEY'));
 
     const PROXYCURL_KEY = Deno.env.get('PROXYCURL_API_KEY');
 
-    // Step 1 — Scrape LinkedIn via Proxycurl
+    // Step 1 — Scrape LinkedIn via NinjaPear
     let profile = null;
     const px = await fetch(
-      `https://nubela.co/proxycurl/api/v2/linkedin?url=${encodeURIComponent(linkedinUrl)}&use_cache=if-present`,
+      `https://nubela.co/api/v2/linkedin?url=${encodeURIComponent(linkedinUrl)}&use_cache=if-present`,
       { headers: { 'Authorization': `Bearer ${PROXYCURL_KEY}` } }
     );
     profile = await px.json();

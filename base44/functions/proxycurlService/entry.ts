@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const BASE_URL = 'https://nubela.co/proxycurl/api';
+const BASE_URL = 'https://nubela.co/api';
 
 async function proxycurlFetch(path, key) {
   const resp = await fetch(`${BASE_URL}${path}`, {
@@ -8,7 +8,7 @@ async function proxycurlFetch(path, key) {
   });
   if (!resp.ok) {
     const text = await resp.text();
-    throw new Error(`Proxycurl HTTP ${resp.status}: ${text}`);
+    throw new Error(`NinjaPear HTTP ${resp.status}: ${text}`);
   }
   return resp.json();
 }
