@@ -6,6 +6,7 @@ import { navigate } from '@/components/utils/navigation';
 
 const FREE_NAV_ITEMS = [
   { id: 'home', icon: Home, label: 'Home' },
+  { id: 'fastiq', icon: Zap, label: 'FastIQ Dashboard', isPage: true, page: 'FastIQDashboard' },
   { id: 'company_intel', icon: Building2, label: 'Company Intel' },
   { id: 'alumni_search', icon: Search, label: 'Alumni Search' },
   { id: 'career_goals', icon: Target, label: 'Career Goals' },
