@@ -274,7 +274,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             </button>
           </div>
         </div>
-      );
+      )}
     }
 }
 
