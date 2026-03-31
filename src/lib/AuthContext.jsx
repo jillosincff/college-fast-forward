@@ -143,9 +143,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = (shouldRedirect = true) => {
-
-    // Use the SDK's redirectToLogin method
-    base44.auth.redirectToLogin(window.location.href);
+    setUser(null);
+    setIsAuthenticated(false);
+    if (shouldRedirect) {
+      base44.auth.logout(window.location.href);
+    } else {
+      base44.auth.logout();
+    }
   };
 
   return (
