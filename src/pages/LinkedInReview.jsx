@@ -60,7 +60,8 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         major: user?.major,
       });
       if (res?.data?.success) {
-        setAnalysis(res.data.analysis);
+        const analysisData = res.data.analysis?.response || res.data.analysis;
+        setAnalysis(analysisData);
         setProfile(res.data.profile);
         base44.auth.updateMe({ linkedin_url: url.trim() }).catch(() => {});
       } else {
