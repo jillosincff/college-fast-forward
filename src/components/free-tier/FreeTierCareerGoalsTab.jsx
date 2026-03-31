@@ -310,7 +310,7 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
           fontWeight: 600, color: '#fff',
           cursor: saving ? 'not-allowed' : 'pointer',
           width: '100%', fontFamily: "'DM Sans', sans-serif",
-          transition: 'background 0.2s', minHeight: 48
+          transition: 'background 0.2s', minHeight: 'auto'
         }}
       >
         {saved ? '✓ Saved!' : saving ? 'Saving...' : 'Save My Goals →'}
