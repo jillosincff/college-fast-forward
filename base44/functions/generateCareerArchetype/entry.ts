@@ -57,7 +57,7 @@ Respond ONLY with valid JSON (no markdown, no preamble):
   "advice": "<3-4 sentences of honest, specific career advice for this exact person>"
 }`;
 
-    const archetype = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    const archetypeResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       model: 'claude_sonnet_4_6',
       response_json_schema: {
@@ -67,7 +67,18 @@ Respond ONLY with valid JSON (no markdown, no preamble):
           archetype_tagline: { type: 'string' },
           archetype_emoji: { type: 'string' },
           summary: { type: 'string' },
-          dimensions: { type: 'object' },
+          dimensions: {
+            type: 'object',
+            additionalProperties: {
+              type: 'object',
+              properties: {
+                label: { type: 'string' },
+                score: { type: 'number' },
+                description: { type: 'string' },
+              },
+              required: ['label', 'score', 'description'],
+            },
+          },
           superpowers: { type: 'array', items: { type: 'string' } },
           watch_out_for: { type: 'array', items: { type: 'string' } },
           ideal_roles: { type: 'array', items: { type: 'string' } },
@@ -76,10 +87,17 @@ Respond ONLY with valid JSON (no markdown, no preamble):
           famous_archetype: { type: 'string' },
           advice: { type: 'string' },
         },
-        required: ['archetype_name', 'archetype_tagline', 'summary', 'dimensions'],
+        required: ['archetype_name', 'archetype_tagline', 'archetype_emoji', 'summary', 'dimensions', 'superpowers', 'watch_out_for', 'ideal_roles', 'ideal_environments', 'career_path_insight', 'famous_archetype', 'advice'],
       },
     });
 
+    console.log('LLM Response:', JSON.stringify(archetypeResponse, null, 2));
+
+    if (!archetypeResponse || !archetypeResponse.archetype_name) {
+      return Response.json({ success: false, error: 'Invalid LLM response structure', details: archetypeResponse }, { status: 400 });
+    }
+
+    const archetype = archetypeResponse;
     return Response.json({ success: true, archetype });
   } catch (error) {
     console.error('generateCareerArchetype error:', error);

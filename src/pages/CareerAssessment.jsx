@@ -101,22 +101,27 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
     } else {
       setPhase('generating');
       try {
+        console.log('Calling generateCareerArchetype...');
         const res = await base44.functions.invoke('generateCareerArchetype', {
           responses: Object.values(newResponses),
           careerGoals: user?.career_goals,
           major: user?.major,
           name: firstName,
         });
-        if (res?.data?.success) {
+        console.log('Response:', res);
+        if (res?.data?.success && res?.data?.archetype) {
+          console.log('Archetype data:', res.data.archetype);
           setArchetype(res.data.archetype);
-          base44.auth.updateMe({ career_archetype: res.data.archetype?.archetype_name, archetype_completed: true }).catch(() => {});
+          base44.auth.updateMe({ career_archetype: res.data.archetype?.archetype_name, archetype_completed: true }).catch(() => {}); 
           setPhase('results');
         } else {
-          setError('Something went wrong. Please try again.');
-          setPhase('assessment');
-          setCurrentQ(QUESTIONS.length - 1);
+            console.error('Archetype generation failed:', res?.data?.error || 'Unknown error');
+            setError(res?.data?.error || 'Something went wrong. Please try again.');
+            setPhase('assessment');
+            setCurrentQ(QUESTIONS.length - 1);
         }
       } catch (e) {
+        console.error('Archetype generation error:', e);
         setError('Generation failed. Please try again.');
         setPhase('assessment');
         setCurrentQ(QUESTIONS.length - 1);
@@ -277,6 +282,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
 
   // Results
   if (phase === 'results' && archetype) {
+    console.log('Rendering archetype:', archetype);
     return (
       <>
         <TopNav />
@@ -295,7 +301,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           <div style={{ marginBottom: 24 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#888', margin: '0 0 16px' }}>YOUR 6 DIMENSIONS</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
-              {Object.entries(archetype.dimensions || {}).map(([key, dim]) => (
+              {archetype.dimensions && Object.entries(archetype.dimensions).length > 0 ? Object.entries(archetype.dimensions).map(([key, dim]) => (
                 <div key={key} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: '16px 20px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                     <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{dim.label}</p>
@@ -305,8 +311,11 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
                     <div style={{ height: '100%', width: `${dim.score * 10}%`, background: dimensionColor(dim.score), borderRadius: 2 }} />
                   </div>
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0, lineHeight: 1.5 }}>{dim.description}</p>
-                </div>
-              ))}
+                  </div>
+                  ))
+                  : (
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', gridColumn: '1/-1' }}>Dimensions data not available</p>
+                  )}
             </div>
           </div>
 
@@ -314,15 +323,21 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             <div style={{ background: '#F0FFF4', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14, padding: '20px 24px' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#22C55E', margin: '0 0 14px' }}>⚡ YOUR SUPERPOWERS</p>
-              {archetype.superpowers?.map((s, i) => (
+              {archetype.superpowers && archetype.superpowers.length > 0 ? archetype.superpowers.map((s, i) => (
                 <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: i < archetype.superpowers.length - 1 ? '0 0 10px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(34,197,94,0.4)' }}>{s}</p>
-              ))}
+                ))
+                : (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>No superpowers data</p>
+                ))
             </div>
             <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '20px 24px' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 14px' }}>⚠️ WATCH OUT FOR</p>
-              {archetype.watch_out_for?.map((w, i) => (
-                <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: i < archetype.watch_out_for.length - 1 ? '0 0 10px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(232,93,32,0.4)' }}>{w}</p>
-              ))}
+              {archetype.watch_out_for && archetype.watch_out_for.length > 0 ? archetype.watch_out_for.map((w, i) => (
+                 <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: i < archetype.watch_out_for.length - 1 ? '0 0 10px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(232,93,32,0.4)' }}>{w}</p>
+              ))
+              : (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>No areas to watch out for</p>
+              )}
             </div>
           </div>
 
@@ -330,15 +345,21 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 12px' }}>🎯 ROLES YOU'RE BUILT FOR</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-              {archetype.ideal_roles?.map(role => (
-                <span key={role} style={{ background: '#F5F5F5', borderRadius: 20, padding: '6px 14px', fontSize: 13, color: '#1A1A1A', fontWeight: 500, fontFamily: "'DM Sans', sans-serif" }}>{role}</span>
-              ))}
+              {archetype.ideal_roles && archetype.ideal_roles.length > 0 ? archetype.ideal_roles.map(role => (
+                 <span key={role} style={{ background: '#F5F5F5', borderRadius: 20, padding: '6px 14px', fontSize: 13, color: '#1A1A1A', fontWeight: 500, fontFamily: "'DM Sans', sans-serif" }}>{role}</span>
+              ))
+              : (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>No roles data</p>
+              )}
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 10px' }}>🏢 IDEAL ENVIRONMENTS</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {archetype.ideal_environments?.map(env => (
-                <span key={env} style={{ background: '#EFF6FF', borderRadius: 20, padding: '6px 14px', fontSize: 13, color: '#3B82F6', fontWeight: 500, fontFamily: "'DM Sans', sans-serif" }}>{env}</span>
-              ))}
+              {archetype.ideal_environments && archetype.ideal_environments.length > 0 ? archetype.ideal_environments.map(env => (
+                 <span key={env} style={{ background: '#EFF6FF', borderRadius: 20, padding: '6px 14px', fontSize: 13, color: '#3B82F6', fontWeight: 500, fontFamily: "'DM Sans', sans-serif" }}>{env}</span>
+              ))
+              : (
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>No environments data</p>
+              ))
             </div>
           </div>
 
