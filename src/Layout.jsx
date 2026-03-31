@@ -169,6 +169,7 @@ const ActionPlanTracker = React.lazy(() => import('./pages/ActionPlanTracker'));
 const ResumeTailoring = React.lazy(() => import('./pages/ResumeTailoring'));
 const MockInterview = React.lazy(() => import('./pages/MockInterview'));
 const LinkedInReview = React.lazy(() => import('./pages/LinkedInReview'));
+const CareerAssessment = React.lazy(() => import('./pages/CareerAssessment'));
 const ApplicationBoost = React.lazy(() => import('./pages/ApplicationBoost'));
 const StudentInvitedOnboarding = React.lazy(() => import('./pages/StudentInvitedOnboarding'));
 const FreeTierDashboard = React.lazy(() => import('./pages/FreeTierDashboard'));
@@ -582,6 +583,7 @@ const getPageComponent = (pageName) => {
     case 'ResumeTailoring': return ResumeTailoring;
     case 'MockInterview': return MockInterview;
     case 'LinkedInReview': return LinkedInReview;
+    case 'CareerAssessment': return CareerAssessment;
     case 'ApplicationBoost': return ApplicationBoost;
     case 'StudentInvitedOnboarding': return StudentInvitedOnboarding;
     case 'FreeTierDashboard': return FreeTierDashboard;
