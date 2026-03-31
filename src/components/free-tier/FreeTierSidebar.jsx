@@ -86,12 +86,13 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
         {/* Divider + upgrade label */}
         <div style={{ margin: '12px 4px 8px' }}>
           <div style={{ height: 1, background: '#E0E0E0', marginBottom: 8 }} />
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#BBBBBB', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0, paddingLeft: 4 }}>UNLOCK WITH FASTIQ</p>
+          {!isFastIQ && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#BBBBBB', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0, paddingLeft: 4 }}>UNLOCK WITH FASTIQ</p>}
+          {isFastIQ && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#22C55E', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0, paddingLeft: 4 }}>FASTIQ FEATURES</p>}
         </div>
 
-        {/* Career Concierge locked item + subtabs */}
+        {/* Career Concierge item + subtabs */}
         <button
-          onClick={() => { setConciergeOpen(p => !p); onOpenConcierge && onOpenConcierge(); }}
+          onClick={() => { setConciergeOpen(p => !p); if (!isFastIQ) onOpenConcierge?.(); }}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
           style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
         >
@@ -103,25 +104,26 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
           <div style={{ marginLeft: 16 }}>
             {CONCIERGE_SUBTABS.map(sub => {
               const Icon = sub.icon;
+              const pageMap = { resumes: 'ResumeTailoring', mock_interviews: 'MockInterview', linkedin: 'LinkedInReview' };
               return (
                 <button
                   key={sub.id}
-                  onClick={onOpenConcierge}
+                  onClick={() => isFastIQ ? navigate(pageMap[sub.id] || 'ResumeTailoring') : onOpenConcierge?.()}
                   className="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-[#999999] hover:text-[#666] transition-all"
                   style={{ minHeight: 'auto', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   <Icon style={{ width: 13, height: 13, color: '#BBBBBB', flexShrink: 0 }} />
                   <span className="flex-1 text-left">{sub.label}</span>
-                  <Lock style={{ width: 11, height: 11, color: '#CCCCCC' }} />
+                  {!isFastIQ && <Lock style={{ width: 11, height: 11, color: '#CCCCCC' }} />}
                 </button>
               );
             })}
           </div>
         )}
 
-        {/* Career Assessment locked item */}
+        {/* Career Assessment item */}
         <button
-          onClick={onOpenUpgrade}
+          onClick={() => isFastIQ ? navigate('FastIQAssessment') : onOpenUpgrade?.()}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
           style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
         >
