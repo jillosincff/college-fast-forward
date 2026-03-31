@@ -325,10 +325,10 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#22C55E', margin: '0 0 14px' }}>⚡ YOUR SUPERPOWERS</p>
               {archetype.superpowers && archetype.superpowers.length > 0 ? archetype.superpowers.map((s, i) => (
                 <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: i < archetype.superpowers.length - 1 ? '0 0 10px' : 0, lineHeight: 1.5, paddingLeft: 8, borderLeft: '2px solid rgba(34,197,94,0.4)' }}>{s}</p>
-                ))
-                : (
+              ))
+              : (
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>No superpowers data</p>
-                ))
+              )}
             </div>
             <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '20px 24px' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 14px' }}>⚠️ WATCH OUT FOR</p>
@@ -359,7 +359,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
               ))
               : (
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>No environments data</p>
-              ))
+              )}
             </div>
           </div>
 
