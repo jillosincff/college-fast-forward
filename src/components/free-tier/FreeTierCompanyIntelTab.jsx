@@ -200,7 +200,10 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                   if (!hasStarted) { setHasStarted(true); loadCompanies(); }
                 }}
                 style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)', fontSize: 'clamp(11px, 2vw, 12px)', fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: '100%' }}
-            </div>
+                >
+                Research →
+                </button>
+                </div>
           ))}
           <div onClick={() => onTabChange?.('career_goals')} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', minWidth: 'clamp(100px, 30vw, 140px)' }}>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', fontWeight: 600 }}>+ Add company</span>
