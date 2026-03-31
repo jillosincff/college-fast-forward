@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 import ArchetypeCard from '@/components/fastiq/ArchetypeCard';
 import { QUESTIONS, ASSESSMENT_SYSTEM_PROMPT, ASSESSMENT_RESPONSE_SCHEMA } from '@/components/fastiq/assessmentQuestions';
-import { useAuth } from '@/components/auth/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 
 // ─── Tiny helpers ─────────────────────────────────────────────────────────────
 
