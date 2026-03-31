@@ -42,17 +42,15 @@ Deno.serve(async (req) => {
 
     // Step 2 — Build profile summary
     const profileSummary = `
-Name: ${profile.full_name || 'Unknown'}
+Name: ${profile.fullName || 'Unknown'}
 Headline: ${profile.headline || 'None'}
-Summary/About: ${profile.summary || 'None'}
-Current Role: ${profile.experiences?.[0]?.title || 'None'} at ${profile.experiences?.[0]?.company || 'None'}
-Experience count: ${profile.experiences?.length || 0}
-Education: ${profile.education?.[0]?.school || 'None'}, ${profile.education?.[0]?.field_of_study || ''}
-Skills: ${profile.skills?.slice(0, 20).join(', ') || 'None listed'}
+Summary/About: ${profile.about || 'None'}
+Experience: ${profile.experiences?.slice(0, 3).map(e => `${e.title} at ${e.company}`).join('; ') || 'None'}
+Education: ${profile.education?.map(e => e.school).join(', ') || 'None'}
+Skills: ${profile.skills?.slice(0, 15).join(', ') || 'None listed'}
 Connections: ${profile.connections || 'Unknown'}
-Profile photo: ${profile.profile_pic_url ? 'Yes' : 'No'}
-Recommendations: ${profile.recommendations?.length || 0}
-Certifications: ${profile.certifications?.length || 0}
+Profile photo: ${profile.profile_photo ? 'Yes' : 'No'}
+Public identifier: ${profile.public_identifier || 'N/A'}
     `.trim();
 
     // Step 3 — Analyze via InvokeLLM
@@ -130,13 +128,13 @@ Analyze this LinkedIn profile and respond ONLY with valid JSON (no markdown, no 
       success: true,
       analysis,
       profile: {
-        full_name: profile.full_name,
+        full_name: profile.fullName,
         headline: profile.headline,
-        profile_pic_url: profile.profile_pic_url,
+        profile_pic_url: profile.profile_photo,
         connections: profile.connections,
-      },
-    });
-  } catch (error) {
+        },
+        });
+        } catch (error) {
     console.error('reviewLinkedInProfile error:', error);
     return Response.json({ success: false, error: error.message }, { status: 500 });
   }
