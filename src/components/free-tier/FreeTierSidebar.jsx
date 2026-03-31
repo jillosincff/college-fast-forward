@@ -132,9 +132,9 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
           {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
         </button>
 
-        {/* FastIQ locked item */}
+        {/* FastIQ item */}
         <button
-          onClick={onOpenUpgrade}
+          onClick={() => isFastIQ ? navigate('FastIQ') : onOpenUpgrade?.()}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
           style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
         >
