@@ -28,11 +28,33 @@ export default function FreeTierDashboard() {
     return params.get('tab') || 'home';
   });
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
   const [showConciergeModal, setShowConciergeModal] = useState(false);
   const [savedGoals, setSavedGoals] = useState(null);
 
   useEffect(() => {
     if (refreshUser) refreshUser();
+  }, []);
+
+  useEffect(() => {
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(hashPart);
+    if (params.get('upgraded') === 'true') {
+      setShowUpgradeSuccess(true);
+      window.history.replaceState(null, '', window.location.pathname + '#FreeTierDashboard');
+      // Poll until FastIQ is active — webhook may take a few seconds
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        const updatedUser = await base44.auth.me();
+        const isNowFastIQ = !!(updatedUser?.fastiq_setup_complete || updatedUser?.subscription_status === 'active' || updatedUser?.membership_tier === 'fastiq');
+        if (isNowFastIQ || attempts >= 10) {
+          clearInterval(poll);
+          if (refreshUser) refreshUser();
+        }
+      }, 2000);
+      return () => clearInterval(poll);
+    }
   }, []);
 
   const handleGoalsSaved = () => {
@@ -75,6 +97,7 @@ export default function FreeTierDashboard() {
     return null;
   }
 
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
   const handleOpenUpgrade = () => setShowUpgradeModal(true);
   const handleOpenConcierge = () => setShowConciergeModal(true);
 
@@ -84,6 +107,23 @@ export default function FreeTierDashboard() {
         <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={handleTabChange} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
       </div>
       <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        {showUpgradeSuccess && (
+          <div style={{
+            background: 'linear-gradient(135deg, #0A0A0A 0%, #1a1a1a 100%)',
+            borderRadius: 16, padding: '24px 28px',
+            margin: '16px 16px 0',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: 16,
+            flexWrap: 'wrap',
+          }}>
+            <div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 6px' }}>⚡ FASTIQ ACTIVATED</p>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Welcome to FastIQ, {firstName}! 🎉</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0 }}>Your full career engine is now unlocked. Check your email for your receipt.</p>
+            </div>
+            <button onClick={() => setShowUpgradeSuccess(false)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Dismiss</button>
+          </div>
+        )}
         {activeTab === 'home' && <FreeTierHomeTab key={savedGoals || 'home'} user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} />}

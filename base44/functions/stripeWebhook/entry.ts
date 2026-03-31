@@ -227,6 +227,43 @@ Deno.serve(async (req) => {
           await updateAllFamilyMembers(family, memberUpdates);
         }
 
+        // Send confirmation email to the buyer
+        if (billingUser?.email) {
+          const userName = billingUser.full_name?.split(' ')[0] || 'there';
+          const isAnnual = plan?.includes('annual');
+          const isFoundingEmail = isFoundingMember;
+          try {
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to: billingUser.email,
+              subject: `Welcome to FastIQ${isFoundingEmail ? ' — Founding Member' : ''}! 🎉`,
+              body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:40px 24px;">
+  <div style="background:#0A0A0A;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
+    <p style="color:#E85D20;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">⚡ FASTIQ ACTIVATED</p>
+    <h1 style="color:#fff;font-size:28px;margin:0 0 8px;">You're in, ${escapeHtml(userName)}!</h1>
+    <p style="color:rgba(255,255,255,0.6);font-size:15px;margin:0;">Your FastIQ career engine is now active.</p>
+  </div>
+  <p style="font-size:15px;color:#1A1A1A;line-height:1.6;">Here's what just unlocked for you:</p>
+  <div style="background:#F5F5F5;border-radius:12px;padding:20px;margin:16px 0;">
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Unlimited alumni searches</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Resume tailoring to any job description</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ AI outreach drafts</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Company hiring signals</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Full CFF network access</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0;">✅ Follow-up nudges</p>
+  </div>
+  ${isFoundingEmail ? '<div style="background:#FFF5F0;border:1px solid rgba(232,93,32,0.3);border-radius:12px;padding:16px 20px;margin:16px 0;"><p style="font-size:13px;color:#E85D20;font-weight:700;margin:0 0 4px;">🎖 FOUNDING MEMBER</p><p style="font-size:13px;color:#555;margin:0;">You locked in 50% off forever. Your rate never goes up — ever.</p></div>' : ''}
+  <div style="text-align:center;margin:32px 0;">
+    <a href="https://collegefastforward.com/#FreeTierDashboard" style="background:#E85D20;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">Go to My Dashboard →</a>
+  </div>
+  <p style="font-size:12px;color:#AAAAAA;text-align:center;">Questions? Reply to this email — we're real people.</p>
+</div>`,
+            });
+            console.log('[stripeWebhook] Confirmation email sent to:', billingUser.email);
+          } catch (emailError) {
+            console.error('[stripeWebhook] Confirmation email failed:', emailError.message);
+          }
+        }
+
         // Send activation emails to linked students
         if (subscriptionTier === 'fastiq' && billingUser) {
           await sendStudentActivationEmails(billingUser, family);
