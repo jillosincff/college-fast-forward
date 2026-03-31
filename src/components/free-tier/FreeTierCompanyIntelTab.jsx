@@ -197,7 +197,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                   setShowAll(true);
                   if (!hasStarted) { setHasStarted(true); loadCompanies(); }
                 }}
-                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: 'clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)', fontSize: 'clamp(10px, 2vw, 11px)', fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
+                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: 'clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)', fontSize: 'clamp(10px, 2vw, 11px)', fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                title="Research"
               >
                 Research →
               </button>
