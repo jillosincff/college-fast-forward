@@ -3,38 +3,7 @@ import { jsPDF } from 'jspdf';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { Home, FileText, Search, Building2, MessageSquare, ChevronLeft } from 'lucide-react';
-
-function TopNav() {
-  const NAV = [
-    { label: 'Home', icon: Home, page: 'FreeTierDashboard' },
-    { label: 'Resume', icon: FileText, page: 'ResumeTailoring' },
-    { label: 'Alumni', icon: Search, page: 'FreeTierDashboard?tab=alumni_search' },
-    { label: 'Companies', icon: Building2, page: 'FreeTierDashboard?tab=company_intel' },
-    { label: 'Messages', icon: MessageSquare, page: 'MyMessages' },
-  ];
-  return (
-    <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 8, height: 52, position: 'sticky', top: 0, zIndex: 10 }}>
-      <button onClick={() => window.history.back()} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 8px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}>
-        <ChevronLeft size={14} /> Back
-      </button>
-      <div style={{ width: 1, height: 20, background: '#E5E5E5', margin: '0 4px' }} />
-      {NAV.map(item => {
-        const Icon = item.icon;
-        return (
-          <button key={item.page} onClick={() => navigate(item.page)}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 10px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            <Icon size={14} />
-            <span className="hidden sm:inline">{item.label}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const QUESTIONS = [
   { id: 1, dimension: 'thinking', text: "I prefer to analyze data and facts before making decisions." },
@@ -79,6 +48,18 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [responses, setResponses] = useState({});
   const [archetype, setArchetype] = useState(null);
   const [error, setError] = useState('');
+  const [expandedSections, setExpandedSections] = useState({
+    dimensions: true,
+    superpowers: true,
+    roles: true,
+    insight: false,
+    famous: false,
+    advice: false
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   const isFastIQ = !!(
     user?.fastiq_setup_complete ||
@@ -189,8 +170,6 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
   // FastIQ gate
   if (!isFastIQ) {
     return (
-      <>
-        <TopNav />
         <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, margin: '0 auto 24px' }}>🧠</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Career Archetype Assessment</h1>
@@ -202,15 +181,12 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             Unlock FastIQ →
           </button>
         </div>
-      </>
     );
   }
 
   // Intro
   if (phase === 'intro') {
     return (
-      <>
-        <TopNav />
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>CAREER ARCHETYPE ASSESSMENT</p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>Who are you, really?</h1>
@@ -247,15 +223,12 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             Start My Assessment →
           </button>
         </div>
-      </>
     );
   }
 
   // Assessment
   if (phase === 'assessment') {
     return (
-      <>
-        <TopNav />
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
           {/* Progress */}
           <div style={{ marginBottom: 40 }}>
@@ -322,15 +295,12 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             </button>
           )}
         </div>
-      </>
     );
   }
 
   // Generating
   if (phase === 'generating') {
     return (
-      <>
-        <TopNav />
         <div style={{ maxWidth: 480, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', border: '4px solid rgba(232,93,32,0.2)', borderTop: '4px solid #E85D20', margin: '0 auto 32px', animation: 'spin 1s linear infinite' }} />
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Discovering your archetype...</h2>
@@ -339,17 +309,34 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           </p>
           <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         </div>
-      </>
     );
   }
 
   // Results
   if (phase === 'results' && archetype) {
+    const CollapsibleSection = ({ title, children, section }) => (
+      <div style={{ marginBottom: 24 }}>
+        <button
+          onClick={() => toggleSection(section)}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '16px 20px',
+            cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700,
+            color: '#1A1A1A', minHeight: 'auto'
+          }}
+        >
+          <span>{title}</span>
+          {expandedSections[section] ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+        </button>
+        {expandedSections[section] && <div style={{ marginTop: 12 }}>{children}</div>}
+      </div>
+    );
+
     console.log('Rendering archetype:', archetype);
     return (
-      <>
-        <TopNav />
-        <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ minHeight: '100vh', background: '#F5F5F5', display: 'flex' }}>
+        <div style={{ width: 60, background: '#fff', borderRight: '1px solid #E5E5E5' }} />
+        <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
 
           {/* Hero */}
           <div style={{ background: '#0A0A0A', borderRadius: 20, padding: '40px 36px', marginBottom: 24, textAlign: 'center' }}>
@@ -361,8 +348,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           </div>
 
           {/* 6 Dimensions */}
-          <div style={{ marginBottom: 24 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#888', margin: '0 0 16px' }}>YOUR 6 DIMENSIONS</p>
+          <CollapsibleSection title="📊 YOUR 6 DIMENSIONS" section="dimensions">
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 12 }}>
               {archetype.dimensions && Object.entries(archetype.dimensions).length > 0 ? Object.entries(archetype.dimensions).map(([key, dim]) => (
                 <div key={key} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: '16px 20px' }}>
@@ -380,10 +366,11 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', gridColumn: '1/-1' }}>Dimensions data not available</p>
                   )}
             </div>
-          </div>
+          </CollapsibleSection>
 
           {/* Superpowers + Watch out */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+          <CollapsibleSection title="⚡ SUPERPOWERS & GROWTH AREAS" section="superpowers">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div style={{ background: '#F0FFF4', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14, padding: '20px 24px' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#22C55E', margin: '0 0 14px' }}>⚡ YOUR SUPERPOWERS</p>
               {archetype.superpowers && archetype.superpowers.length > 0 ? archetype.superpowers.map((s, i) => (
@@ -402,10 +389,12 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>No areas to watch out for</p>
               )}
             </div>
-          </div>
+            </div>
+            </CollapsibleSection>
 
-          {/* Ideal roles + environments */}
-          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
+            {/* Ideal roles + environments */}
+            <CollapsibleSection title="🎯 ROLES & ENVIRONMENTS" section="roles">
+            <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 12px' }}>🎯 ROLES YOU'RE BUILT FOR</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
               {archetype.ideal_roles && archetype.ideal_roles.length > 0 ? archetype.ideal_roles.map(role => (
@@ -424,28 +413,35 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888' }}>No environments data</p>
               )}
             </div>
-          </div>
+            </div>
+            </CollapsibleSection>
 
-          {/* Career path insight */}
-          <div style={{ background: '#0A0A0A', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
+            {/* Career path insight */}
+            <CollapsibleSection title="🗺️ CAREER PATH INSIGHT" section="insight">
+            <div style={{ background: '#0A0A0A', borderRadius: 14, padding: '20px 24px' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 12px' }}>🗺️ YOUR CAREER PATH INSIGHT</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.7 }}>{archetype.career_path_insight}</p>
-          </div>
+            </div>
+            </CollapsibleSection>
 
-          {/* Famous match */}
-          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
+            {/* Famous match */}
+            <CollapsibleSection title="🌟 YOUR FAMOUS ARCHETYPE MATCH" section="famous">
+            <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', margin: '0 0 10px' }}>🌟 YOUR FAMOUS ARCHETYPE MATCH</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>{archetype.famous_archetype}</p>
-          </div>
+            </div>
+            </CollapsibleSection>
 
-          {/* Advice */}
-          <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '20px 24px', marginBottom: 32 }}>
+            {/* Advice */}
+            <CollapsibleSection title="💬 ADVICE FOR YOU" section="advice">
+            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '20px 24px', marginBottom: 16 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 12px' }}>💬 ADVICE FOR YOU</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0, lineHeight: 1.7 }}>{archetype.advice}</p>
-          </div>
+            </div>
+            </CollapsibleSection>
 
-          {/* CTAs */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {/* CTAs */}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 32 }}>
             <button onClick={() => navigate('FreeTierDashboard')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flex: 1 }}>
               Back to Dashboard →
             </button>
@@ -457,10 +453,10 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
               Retake Assessment
             </button>
           </div>
-        </div>
-      </>
-    );
-  }
+          </div>
+          </div>
+          );
+          }
 
-  return null;
-}
+          return null;
+          }
