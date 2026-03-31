@@ -9,6 +9,10 @@ Deno.serve(async (req) => {
     const { linkedinUrl, careerGoals, major } = await req.json();
     if (!linkedinUrl) return Response.json({ success: false, error: 'LinkedIn URL is required.' }, { status: 400 });
 
+    // DEBUG LOGS
+    console.log('LinkedIn URL:', linkedinUrl);
+    console.log('Proxycurl key exists:', !!Deno.env.get('PROXYCURL_API_KEY'));
+
     const PROXYCURL_KEY = Deno.env.get('PROXYCURL_API_KEY');
 
     // Step 1 — Scrape LinkedIn via Proxycurl
@@ -24,6 +28,8 @@ Deno.serve(async (req) => {
     }
 
     if (px.status !== 200) {
+      console.log('Proxycurl response status:', px.status);
+      console.log('Proxycurl response:', profile);
       return Response.json({ success: false, error: 'Could not fetch LinkedIn profile. Make sure your profile is public.' }, { status: 400 });
     }
 
