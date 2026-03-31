@@ -28,8 +28,7 @@ Deno.serve(async (req) => {
     );
     const profileResponse = await px.json();
     console.log('Scrapingdog response:', JSON.stringify(profileResponse).slice(0, 500));
-    let profile = profileResponse;
-    profile = await px.json();
+    const profile = profileResponse;
 
     if (!profile || profile.code === 404 || px.status === 404) {
       return Response.json({ success: false, error: 'LinkedIn profile not found. Make sure the URL is correct and your profile is public.' }, { status: 404 });
