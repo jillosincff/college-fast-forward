@@ -15,6 +15,7 @@ import StudentOnboarding from '@/pages/StudentOnboarding';
 import ResumeTailoring from '@/pages/ResumeTailoring';
 import MockInterview from '@/pages/MockInterview';
 import LinkedInReview from '@/pages/LinkedInReview';
+import LinkedInActionPlan from '@/pages/LinkedInActionPlan';
 import CareerAssessment from '@/pages/CareerAssessment';
 import FastIQDashboard from '@/pages/FastIQDashboard';
 import GatorAuth from '@/pages/GatorAuth';
@@ -52,6 +53,7 @@ const AuthenticatedApp = () => {
           <Route path="/ResumeTailoring" element={<LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper>} />
           <Route path="/MockInterview" element={<LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper>} />
           <Route path="/LinkedInReview" element={<LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper>} />
+          <Route path="/LinkedInActionPlan" element={<LayoutWrapper currentPageName="LinkedInActionPlan"><LinkedInActionPlan /></LayoutWrapper>} />
           <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
 

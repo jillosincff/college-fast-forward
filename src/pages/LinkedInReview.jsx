@@ -60,7 +60,9 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         major: user?.major,
       });
       if (res?.data?.success) {
-        setAnalysis(res.data.analysis?.response || res.data.analysis);
+        const analysisData = res.data.analysis?.response || res.data.analysis;
+        setAnalysis(analysisData);
+        sessionStorage.setItem('linkedin_analysis', JSON.stringify(analysisData));
         setProfile(res.data.profile);
         base44.auth.updateMe({ linkedin_url: url.trim() }).catch(() => {});
       } else {
@@ -257,16 +259,24 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             )}
           </div>
 
-          <button
-            onClick={() => { setAnalysis(null); setProfile(null); setError(''); }}
-            style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '12px', fontSize: 13, color: '#888', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif" }}
-          >
-            ← Analyze a Different Profile
-          </button>
+          <div style={{ display: 'flex', gap: 10, flexDirection: 'column' }}>
+            <button
+              onClick={() => navigate('LinkedInActionPlan')}
+              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+            >
+              Create Action Plan →
+            </button>
+            <button
+              onClick={() => { setAnalysis(null); setProfile(null); setError(''); }}
+              style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '12px', fontSize: 13, color: '#888', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+            >
+              ← Analyze a Different Profile
+            </button>
+          </div>
         </div>
-      )}
+      )
 
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      <style>{"@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }"}</style>
       </div>
     </div>
   );
