@@ -14,6 +14,7 @@ import FastIQAssessment from '@/pages/FastIQAssessment';
 import StudentOnboarding from '@/pages/StudentOnboarding';
 import ResumeTailoring from '@/pages/ResumeTailoring';
 import MockInterview from '@/pages/MockInterview';
+import LinkedInReview from '@/pages/LinkedInReview';
 import GatorAuth from '@/pages/GatorAuth';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -48,6 +49,7 @@ const AuthenticatedApp = () => {
           <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
           <Route path="/ResumeTailoring" element={<LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper>} />
           <Route path="/MockInterview" element={<LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper>} />
+          <Route path="/LinkedInReview" element={<LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper>} />
 
           {/* Main routes */}
           <Route path="/" element={
