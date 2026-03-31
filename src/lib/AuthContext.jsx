@@ -128,20 +128,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = (shouldRedirect = true) => {
-    setUser(null);
-    setIsAuthenticated(false);
-    
-    if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
-    } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
+  const refreshUser = async () => {
+    try {
+      const currentUser = await base44.auth.me();
+      setUser(currentUser);
+      return currentUser;
+    } catch (e) {
+      console.warn('refreshUser failed:', e);
     }
   };
 
-  const navigateToLogin = () => {
+  const logout = (shouldRedirect = true) => {
+
     // Use the SDK's redirectToLogin method
     base44.auth.redirectToLogin(window.location.href);
   };
@@ -149,13 +147,14 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{ 
       user, 
-      isAuthenticated, 
+      isAuthenticated,
       isLoadingAuth,
       isLoadingPublicSettings,
       authError,
       appPublicSettings,
       logout,
       navigateToLogin,
+      refreshUser,
       checkAppState
     }}>
       {children}
