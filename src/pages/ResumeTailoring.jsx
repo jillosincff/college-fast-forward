@@ -588,7 +588,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           </div>
           </div>
           </>
-          );}
+          );
 
   // ── PHASE: entry (default / no resumes) ─────────────────────────────────
   return (
@@ -663,5 +663,6 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         </div>
       </div>
     </>
-  );
-}
+    );
+    }
+    }
