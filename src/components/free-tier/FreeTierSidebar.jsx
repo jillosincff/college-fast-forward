@@ -97,8 +97,12 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
           style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
         >
           <Sparkles style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
-          <span className="flex-1 text-left">Career Concierge</span>
+          <div className="flex-1 text-left">
+            <div>Career Concierge</div>
+            {!conciergeOpen && <div style={{ fontSize: 10, color: '#BBBBBB', fontWeight: 400, marginTop: 1 }}>Resume · Interviews · LinkedIn</div>}
+          </div>
           {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
+          <span style={{ fontSize: 10, color: '#BBBBBB', marginLeft: !isFastIQ ? 0 : 'auto' }}>{conciergeOpen ? '▲' : '▼'}</span>
         </button>
         {conciergeOpen && (
           <div style={{ marginLeft: 16 }}>
