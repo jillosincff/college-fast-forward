@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import AssessmentSidebar from '@/components/AssessmentSidebar';
 
 const QUESTIONS = [
   { id: 1, dimension: 'thinking', text: "I prefer to analyze data and facts before making decisions." },
@@ -170,6 +171,8 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
   // FastIQ gate
   if (!isFastIQ) {
     return (
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <AssessmentSidebar />
         <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, margin: '0 auto 24px' }}>🧠</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Career Archetype Assessment</h1>
@@ -181,12 +184,15 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             Unlock FastIQ →
           </button>
         </div>
+      </div>
     );
   }
 
   // Intro
   if (phase === 'intro') {
     return (
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <AssessmentSidebar />
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>CAREER ARCHETYPE ASSESSMENT</p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>Who are you, really?</h1>
@@ -223,12 +229,15 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             Start My Assessment →
           </button>
         </div>
+      </div>
     );
   }
 
   // Assessment
   if (phase === 'assessment') {
     return (
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <AssessmentSidebar />
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
           {/* Progress */}
           <div style={{ marginBottom: 40 }}>
@@ -295,12 +304,15 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             </button>
           )}
         </div>
+      </div>
     );
   }
 
   // Generating
   if (phase === 'generating') {
     return (
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <AssessmentSidebar />
         <div style={{ maxWidth: 480, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
           <div style={{ width: 80, height: 80, borderRadius: '50%', border: '4px solid rgba(232,93,32,0.2)', borderTop: '4px solid #E85D20', margin: '0 auto 32px', animation: 'spin 1s linear infinite' }} />
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Discovering your archetype...</h2>
@@ -309,6 +321,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           </p>
           <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
         </div>
+      </div>
     );
   }
 
@@ -334,8 +347,8 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
 
     console.log('Rendering archetype:', archetype);
     return (
-      <div style={{ minHeight: '100vh', background: '#F5F5F5', display: 'flex' }}>
-        <div style={{ width: 60, background: '#fff', borderRight: '1px solid #E5E5E5' }} />
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#F5F5F5' }}>
+        <AssessmentSidebar />
         <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
 
           {/* Hero */}
@@ -452,11 +465,11 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
               style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 24px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
               Retake Assessment
             </button>
-          </div>
-          </div>
-          </div>
-          );
-          }
+            </div>
+            </div>
+            </div>
+            );
+            }
 
-          return null;
-          }
+            return null;
+            }
