@@ -275,9 +275,8 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
           </div>
         </div>
       )}
-    }
+    );
 }
-
 
 const feedbackStyle = { fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '0 0 12px', lineHeight: 1.5 };
 
