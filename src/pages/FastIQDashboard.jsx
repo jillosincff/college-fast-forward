@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
+import { Zap } from 'lucide-react';
 
-export default function FastIQDashboard() {
+export default function FastIQDashboard({ onOpenUpgrade }) {
   const { user } = useAuth();
 
   const isFastIQ = !!(
@@ -15,13 +17,13 @@ export default function FastIQDashboard() {
 
   const FASTIQ_FEATURES = [
     { icon: '📄', label: 'Resume Hub', desc: 'Upload, score, and tailor your resume to any job', page: 'ResumeTailoring' },
-    { icon: '🎯', label: 'Company Intel', desc: 'Hiring signals at companies matching your goals', page: 'FreeTierDashboard?tab=company_intel' },
-    { icon: '🔍', label: 'Alumni Search', desc: 'Find UF alumni at any company — unlimited searches', page: 'FreeTierDashboard?tab=alumni_search' },
+    { icon: '🎯', label: 'Company Intel', desc: 'Hiring signals at companies matching your goals', page: 'FreeTierDashboard' },
+    { icon: '🔍', label: 'Alumni Search', desc: 'Find UF alumni at any company — unlimited searches', page: 'AlumniSearch' },
     { icon: '🤝', label: 'CFF Connections', desc: 'Warm intros from parents and alumni in the network', page: 'FreeTierDashboard' },
     { icon: '🎤', label: 'Mock Interviews', desc: 'Full STAR method interview simulation', page: 'MockInterview' },
     { icon: '🔗', label: 'LinkedIn Review', desc: 'Score and optimize every section of your profile', page: 'LinkedInReview' },
     { icon: '🧠', label: 'Career Assessment', desc: 'Discover your unique career archetype', page: 'CareerAssessment' },
-    { icon: '✉️', label: 'Outreach Engine', desc: 'AI-written messages to alumni and connections', page: 'FreeTierDashboard?tab=alumni_search' },
+    { icon: '✉️', label: 'Outreach Drafts', desc: 'AI-written messages to alumni and connections', page: 'AlumniSearch' },
   ];
 
   // FastIQ gate — show upgrade prompt
@@ -33,7 +35,7 @@ export default function FastIQDashboard() {
           fontSize: 11, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.12em',
           color: '#E85D20', margin: '0 0 12px'
-        }}>⚡ FASTIQ™</p>
+        }}>FASTIQ™</p>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 32, fontWeight: 700,
@@ -75,14 +77,14 @@ export default function FastIQDashboard() {
         </div>
 
         <button
-          onClick={() => navigate('FreeTierDashboard')}
+          onClick={() => onOpenUpgrade?.()}
           style={{
             background: '#E85D20', border: 'none',
             borderRadius: 10, padding: '16px',
             fontSize: 15, fontWeight: 600,
             color: '#fff', cursor: 'pointer',
             fontFamily: "'DM Sans', sans-serif",
-            width: '100%', minHeight: 'auto'
+            width: '100%',
           }}
         >
           Unlock FastIQ — $29/month →
@@ -252,11 +254,13 @@ export default function FastIQDashboard() {
           display: 'flex', gap: 12,
         }}>
           <a
-            href="#"
+            href="https://billing.stripe.com/p/login/your_portal_link"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 13, color: '#555',
-              textDecoration: 'none', cursor: 'pointer',
+              textDecoration: 'none',
             }}
           >
             Manage billing →
