@@ -366,7 +366,9 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <>
         {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
-        <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
+        <div style={{ display: 'flex', minHeight: '100vh' }}>
+          <SideNav />
+          <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
           <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap'); @keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
           {/* Header */}
@@ -583,16 +585,18 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               Next: Research Target Companies →
             </button>
           </div>
-        </div>
-      </>
-    );
-  }
+          </div>
+          </div>
+          </>
+          );}
 
   // ── PHASE: entry (default / no resumes) ─────────────────────────────────
   return (
     <>
       {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>
+      <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <SideNav />
+        <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '48px 24px', width: '100%' }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');`}</style>
 
         {hasResumes && (
@@ -656,6 +660,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         >
           Skip for now — go to dashboard →
         </p>
+        </div>
       </div>
     </>
   );
