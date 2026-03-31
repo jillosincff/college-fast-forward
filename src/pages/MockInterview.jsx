@@ -2,6 +2,37 @@ import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
+import { Home, FileText, Search, Building2, MessageSquare, ChevronLeft } from 'lucide-react';
+
+function TopNav() {
+  const NAV = [
+    { label: 'Home', icon: Home, page: 'FreeTierDashboard' },
+    { label: 'Resume', icon: FileText, page: 'ResumeTailoring' },
+    { label: 'Alumni', icon: Search, page: 'FreeTierDashboard?tab=alumni_search' },
+    { label: 'Companies', icon: Building2, page: 'FreeTierDashboard?tab=company_intel' },
+    { label: 'Messages', icon: MessageSquare, page: 'MyMessages' },
+  ];
+  return (
+    <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 8, height: 52, position: 'sticky', top: 0, zIndex: 10 }}>
+      <button onClick={() => window.history.back()} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 8px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}>
+        <ChevronLeft size={14} /> Back
+      </button>
+      <div style={{ width: 1, height: 20, background: '#E5E5E5', margin: '0 4px' }} />
+      {NAV.map(item => {
+        const Icon = item.icon;
+        return (
+          <button key={item.page} onClick={() => navigate(item.page)} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 10px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
+            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+          >
+            <Icon size={14} />
+            <span className="hidden sm:inline">{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 const buildSystemPrompt = (user) => `You are a professional interviewer conducting a behavioral mock interview using the STAR method (Situation, Task, Action, Result).
 
@@ -108,7 +139,9 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   // FastIQ gate
   if (!isFastIQ) {
     return (
-      <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
+      <>
+        <TopNav />
+        <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 24px' }}>🎤</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Mock Interview</h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
@@ -118,13 +151,16 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
           Unlock FastIQ to Practice →
         </button>
       </div>
+      </>
     );
   }
 
   // Pre-start screen
   if (!started) {
     return (
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
+      <>
+        <TopNav />
+        <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>MOCK INTERVIEW</p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>
           Let's practice, {firstName}.
@@ -172,12 +208,15 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
           Start My Interview →
         </button>
       </div>
+      </>
     );
   }
 
   // Interview screen
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+    <>
+      <TopNav />
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 172px)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexShrink: 0 }}>
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 4px' }}>MOCK INTERVIEW · LIVE</p>
@@ -255,5 +294,6 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
 
       <style>{`@keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }`}</style>
     </div>
+    </>
   );
 }
