@@ -1,5 +1,4 @@
 import { ChevronLeft } from 'lucide-react';
-import { navigate } from '@/components/utils/navigation';
 
 export default function AssessmentSidebar() {
   return (
@@ -16,7 +15,7 @@ export default function AssessmentSidebar() {
       height: '100vh'
     }}>
       <button
-        onClick={() => navigate('FreeTierDashboard')}
+        onClick={() => window.history.back()}
         style={{
           background: 'none',
           border: 'none',
