@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { jsPDF } from 'jspdf';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
@@ -88,6 +89,62 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const progress = Math.round((currentQ / QUESTIONS.length) * 100);
   const currentQuestion = QUESTIONS[currentQ];
+
+  const generatePDF = () => {
+    if (!archetype) return;
+    const doc = new jsPDF();
+    let y = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const maxWidth = 170;
+
+    const addSection = (title, content) => {
+      if (y + 20 > pageHeight - margin) doc.addPage(), (y = 20);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text(title, margin, y);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      const lines = doc.splitTextToSize(content, maxWidth);
+      doc.text(lines, margin, y);
+      y += lines.length * 5 + 8;
+    };
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text(`${archetype.archetype_emoji} ${archetype.archetype_name}`, margin, y);
+    y += 12;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(12);
+    doc.text(archetype.archetype_tagline, margin, y);
+    y += 10;
+
+    addSection('Summary', archetype.summary);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('Your 6 Dimensions', margin, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    Object.entries(archetype.dimensions || {}).forEach(([_, dim]) => {
+      if (y + 8 > pageHeight - margin) doc.addPage(), (y = 20);
+      doc.text(`${dim.label}: ${dim.score}/10`, margin, y);
+      y += 5;
+    });
+    y += 3;
+
+    addSection('Your Superpowers', (archetype.superpowers || []).join(', '));
+    addSection('Watch Out For', (archetype.watch_out_for || []).join(', '));
+    addSection('Ideal Roles', (archetype.ideal_roles || []).join(', '));
+    addSection('Ideal Environments', (archetype.ideal_environments || []).join(', '));
+    addSection('Career Path Insight', archetype.career_path_insight);
+    addSection('Famous Archetype Match', archetype.famous_archetype);
+    addSection('Advice For You', archetype.advice);
+
+    doc.save(`${archetype.archetype_name.replace(/\s+/g, '_')}_Archetype.pdf`);
+  };
 
   const handleAnswer = async (score) => {
     const newResponses = {
@@ -391,6 +448,9 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <button onClick={() => navigate('FreeTierDashboard')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flex: 1 }}>
               Back to Dashboard →
+            </button>
+            <button onClick={generatePDF} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 24px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+              📥 Download PDF
             </button>
             <button onClick={() => { setPhase('intro'); setCurrentQ(0); setResponses({}); setArchetype(null); }}
               style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 24px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
