@@ -7,6 +7,7 @@ const SAMPLE_ALUMNI = [
 ];
 
 export default function FreeTierAlumniNetworkTab({ user, onOpenUpgrade }) {
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const savedGoals = user?.career_goals;
   const targetCompanies = savedGoals?.target_companies || user?.target_companies || [];
   const targetIndustries = savedGoals?.industries || user?.target_industries || [];
@@ -69,15 +70,17 @@ export default function FreeTierAlumniNetworkTab({ user, onOpenUpgrade }) {
                       <p className="text-xs text-gray-400">{item.roles[i - 1]?.title || 'Analyst'}</p>
                       <p className="text-xs text-gray-400">Class of 2020</p>
                     </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <button
-                        onClick={onOpenUpgrade}
-                        className="bg-[#E85D20] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#d44e14] transition-colors flex items-center gap-1"
-                        style={{ minHeight: 'auto' }}
-                      >
-                        🔒 See who to contact →
-                      </button>
-                    </div>
+                    {!isFastIQ && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <button
+                          onClick={onOpenUpgrade}
+                          className="bg-[#E85D20] text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-[#d44e14] transition-colors flex items-center gap-1"
+                          style={{ minHeight: 'auto' }}
+                        >
+                          🔒 See who to contact →
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
