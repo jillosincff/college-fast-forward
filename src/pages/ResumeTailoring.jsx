@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { tailorResume } from '@/functions/tailorResume';
 import JobDescriptionStep from '@/components/resume-tailor/JobDescriptionStep';
+import ResumeBuilderStep from '@/components/fast-track-pro/ResumeBuilderStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
 
@@ -307,6 +308,55 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         <div style={{ width: 64, height: 64, borderRadius: '50%', border: '4px solid #F0F0F0', borderTop: '4px solid #E85D20', margin: '0 auto 24px', animation: 'spin 1s linear infinite' }} />
         <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Uploading your resume...</p>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>This will only take a moment.</p>
+      </div>
+    );
+  }
+
+  // ── PHASE: builder ─────────────────────────────────────────────────────
+  if (phase === 'builder') {
+    return (
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');`}</style>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+          <button
+            onClick={() => setPhase('entry')}
+            style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', gap: 4, minHeight: 'auto' }}
+          >
+            ← Back
+          </button>
+          <div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 4px' }}>RESUME BUILDER</p>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Let's build your resume.</h1>
+          </div>
+        </div>
+        <div style={{ background: '#0d1117', borderRadius: 16, padding: 24 }}>
+          <ResumeBuilderStep
+            user={user}
+            onResumeReady={async (resumeText, parsed) => {
+              try {
+                const resume = await base44.entities.Resume.create({
+                  student_email: user?.email,
+                  original_file_name: `${user?.full_name?.split(' ')[0] || 'My'}_Resume_${new Date().getFullYear()}.txt`,
+                  parsed_text: resumeText || '',
+                  is_active: resumes.length === 0,
+                  name: 'My Resume',
+                  last_used_at: new Date().toISOString(),
+                });
+                await base44.auth.updateMe({ resume_url: resume?.id || 'built' }).catch(() => {});
+                setResumes(prev => [...prev, resume]);
+                setResumeText(resumeText || '');
+                setResumeId(resume.id);
+                setAnalysis(null);
+                setAnalysisError(false);
+                setPhase('hub');
+              } catch (e) {
+                console.error('Resume save failed:', e);
+                setPhase('hub');
+              }
+            }}
+            onBack={() => setPhase('entry')}
+          />
+        </div>
       </div>
     );
   }
