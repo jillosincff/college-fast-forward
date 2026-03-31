@@ -1,6 +1,38 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { navigate } from '@/components/utils/navigation';
+import { Home, FileText, Search, Building2, MessageSquare, ChevronLeft } from 'lucide-react';
+
+function TopNav() {
+  const NAV = [
+    { label: 'Home', icon: Home, page: 'FreeTierDashboard' },
+    { label: 'Resume', icon: FileText, page: 'ResumeTailoring' },
+    { label: 'Alumni', icon: Search, page: 'FreeTierDashboard?tab=alumni_search' },
+    { label: 'Companies', icon: Building2, page: 'FreeTierDashboard?tab=company_intel' },
+    { label: 'Messages', icon: MessageSquare, page: 'MyMessages' },
+  ];
+  return (
+    <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 8, height: 52, position: 'sticky', top: 0, zIndex: 10 }}>
+      <button onClick={() => window.history.back()} style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#888', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 8px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}>
+        <ChevronLeft size={14} /> Back
+      </button>
+      <div style={{ width: 1, height: 20, background: '#E5E5E5', margin: '0 4px' }} />
+      {NAV.map(item => {
+        const Icon = item.icon;
+        return (
+          <button key={item.page} onClick={() => navigate(item.page)} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: 13, fontFamily: "'DM Sans', sans-serif", padding: '4px 10px', borderRadius: 6, minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
+            onMouseLeave={e => e.currentTarget.style.background = 'none'}
+          >
+            <Icon size={14} />
+            <span className="hidden sm:inline">{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 const scoreColor = (score) =>
   score >= 80 ? '#22C55E' : score >= 60 ? '#F59E0B' : '#EF4444';
@@ -61,7 +93,9 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
+    <>
+      <TopNav />
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
 
       <div style={{ marginBottom: 32 }}>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>LINKEDIN PROFILE REVIEW</p>
@@ -238,7 +272,8 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
       )}
 
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </div>
+      </div>
+    </>
   );
 }
 
