@@ -228,16 +228,21 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#AAAAAA', margin: 0 }}>Strongly Agree</p>
             </div>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              {SCALE_LABELS.map(({ value, label }) => (
+              {SCALE_LABELS.map(({ value, label }) => {
+                const isSelected = responses[currentQuestion.id]?.score === value;
+                const [hovered, setHovered] = React.useState(false);
+                return (
                 <button
                   key={value}
                   onClick={() => handleAnswer(value)}
+                  onMouseEnter={() => setHovered(true)}
+                  onMouseLeave={() => setHovered(false)}
                   title={label}
                   style={{
                     width: 56, height: 56, borderRadius: '50%',
-                    border: '2px solid #E0E0E0',
-                    background: responses[currentQuestion.id]?.score === value ? '#E85D20' : '#fff',
-                    color: responses[currentQuestion.id]?.score === value ? '#fff' : '#1A1A1A',
+                    border: `2px solid ${isSelected ? '#E85D20' : hovered ? '#E85D20' : '#E0E0E0'}`,
+                    background: isSelected ? '#E85D20' : '#fff',
+                    color: isSelected ? '#fff' : '#1A1A1A',
                     fontSize: 18, fontWeight: 700, cursor: 'pointer',
                     fontFamily: "'DM Sans', sans-serif",
                     transition: 'all 0.15s',
@@ -247,7 +252,8 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
                 >
                   {value}
                 </button>
-              ))}
+                );
+              })}
             </div>
           </div>
 
