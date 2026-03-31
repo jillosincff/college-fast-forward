@@ -48,6 +48,18 @@ const BUILDER_STEPS = [
   },
 ];
 
+const formatResumeText = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/<strong>(EDUCATION|EXPERIENCE|PROJECTS|SKILLS|SUMMARY|OBJECTIVE|EXTRAS|CERTIFICATIONS|AWARDS|LEADERSHIP)<\/strong>/g,
+      '<strong style="display: block; margin-top: 20px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #E85D20;">$1</strong>'
+    )
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/^---$/gm, '<hr style="border: none; border-top: 1px solid #E0E0E0; margin: 16px 0;">')
+    .replace(/\n/g, '<br/>');
+};
+
 export default function ResumeBuilderStep({ user, onResumeReady, onBack }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({
@@ -244,9 +256,20 @@ Return the full resume text and a brief encouraging summary.`,
               rows={20}
             />
           ) : (
-            <pre className="p-4 text-white/80 text-xs font-mono whitespace-pre-wrap max-h-[400px] overflow-y-auto leading-relaxed">
-              {editText || generatedResume.resume_text}
-            </pre>
+            <div
+              dangerouslySetInnerHTML={{ __html: formatResumeText(editText || generatedResume.resume_text) }}
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 13,
+                lineHeight: 1.7,
+                color: '#1A1A1A',
+                background: '#fff',
+                padding: '28px 32px',
+                borderRadius: 8,
+                overflowY: 'auto',
+                maxHeight: 400,
+              }}
+            />
           )}
         </div>
 
