@@ -93,11 +93,12 @@ Respond ONLY with valid JSON (no markdown, no preamble):
 
     console.log('LLM Response:', JSON.stringify(archetypeResponse, null, 2));
 
-    if (!archetypeResponse || !archetypeResponse.archetype_name) {
-      return Response.json({ success: false, error: 'Invalid LLM response structure', details: archetypeResponse }, { status: 400 });
-    }
+    // Handle the response structure (may be wrapped in 'response' key)
+    const archetype = archetypeResponse.response || archetypeResponse;
 
-    const archetype = archetypeResponse;
+    if (!archetype || !archetype.archetype_name) {
+      return Response.json({ success: false, error: 'Invalid LLM response structure', details: archetype }, { status: 400 });
+    }
     return Response.json({ success: true, archetype });
   } catch (error) {
     console.error('generateCareerArchetype error:', error);
