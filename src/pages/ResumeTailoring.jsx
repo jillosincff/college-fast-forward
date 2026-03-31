@@ -375,21 +375,29 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>RESUME HUB</p>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Resumes</h1>
             </div>
-            {canAddMore ? (
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <button
-                onClick={() => setPhase('entry')}
-                style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
+                onClick={() => isFastIQ ? setPhase('builder') : onOpenUpgrade()}
+                style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 14px' : '10px 18px', fontSize: 13, fontWeight: 600, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
               >
-                + Add Resume
+                ✨ Build from scratch
               </button>
-            ) : (
-              <button
-                onClick={() => onOpenUpgrade()}
-                style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
-              >
-                + Add Resume · FastIQ
-              </button>
-            )}
+              {canAddMore ? (
+                <button
+                  onClick={() => setPhase('entry')}
+                  style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
+                >
+                  + Upload Resume
+                </button>
+              ) : (
+                <button
+                  onClick={() => onOpenUpgrade()}
+                  style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
+                >
+                  + Add Resume · FastIQ
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Free tier gate banner */}
