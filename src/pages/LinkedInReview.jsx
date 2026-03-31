@@ -275,6 +275,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
 const feedbackStyle = { fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '0 0 12px', lineHeight: 1.5 };
 
 function SectionCard({ title, score, children }) {
+  if (score === undefined) return null;
   const color = score >= 80 ? '#22C55E' : score >= 60 ? '#F59E0B' : '#EF4444';
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px' }}>
