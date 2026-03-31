@@ -1,8 +1,6 @@
-// AuthContext v3
+// AuthContext v4 — simplified, non-blocking
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { appParams } from '@/lib/app-params';
-import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
 
@@ -10,88 +8,29 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
   const [authError, setAuthError] = useState(null);
-  const [appPublicSettings, setAppPublicSettings] = useState(null);
+
+  // isLoadingPublicSettings is always false — no blocking public settings fetch needed
+  const isLoadingPublicSettings = false;
 
   useEffect(() => {
-    checkAppState();
+    checkUserAuth();
   }, []);
-
-  const checkAppState = async () => {
-    try {
-      setIsLoadingPublicSettings(true);
-      setAuthError(null);
-
-      const appClient = createAxiosClient({
-        baseURL: `${appParams.serverUrl}/api/apps/public`,
-        headers: { 'X-App-Id': appParams.appId },
-        token: appParams.token,
-        interceptResponses: true,
-      });
-
-      try {
-        const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
-        setAppPublicSettings(publicSettings);
-
-        if (appParams.token) {
-          await checkUserAuth();
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-        }
-        setIsLoadingPublicSettings(false);
-      } catch (appError) {
-        console.error('App state check failed:', appError);
-
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          setAuthError({ type: reason, message: appError.message });
-        } else {
-          setAuthError({ type: 'unknown', message: appError.message || 'Failed to load app' });
-        }
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      setAuthError({ type: 'unknown', message: error.message || 'An unexpected error occurred' });
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }
-  };
 
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
-
-      if (!currentUser?.persona || currentUser?.persona === 'gator') {
-        try {
-          await base44.auth.updateMe({ persona: 'student', roles: ['student'] });
-          currentUser.persona = 'student';
-          if (!currentUser.roles?.includes('student')) currentUser.roles = ['student'];
-        } catch (e) { console.warn('Failed to migrate persona:', e); }
-      }
-
-      if (currentUser?.onboarding_completed === false && currentUser?.career_goals?.saved_at) {
-        try {
-          await base44.auth.updateMe({ onboarding_completed: true });
-          currentUser.onboarding_completed = true;
-        } catch (e) { console.warn('Failed to fix onboarding_completed:', e); }
-      }
-
       setUser(currentUser);
       setIsAuthenticated(true);
-      setIsLoadingAuth(false);
     } catch (error) {
-      console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
       setIsAuthenticated(false);
-
+      setUser(null);
       if (error.status === 401 || error.status === 403) {
         setAuthError({ type: 'auth_required', message: 'Authentication required' });
       }
+    } finally {
+      setIsLoadingAuth(false);
     }
   };
 
@@ -112,11 +51,7 @@ export const AuthProvider = ({ children }) => {
   const logout = (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
-    if (shouldRedirect) {
-      base44.auth.logout(window.location.href);
-    } else {
-      base44.auth.logout();
-    }
+    base44.auth.logout(shouldRedirect ? window.location.href : undefined);
   };
 
   return (
@@ -126,11 +61,11 @@ export const AuthProvider = ({ children }) => {
       isLoadingAuth,
       isLoadingPublicSettings,
       authError,
-      appPublicSettings,
+      appPublicSettings: null,
       logout,
       navigateToLogin,
       refreshUser,
-      checkAppState,
+      checkAppState: checkUserAuth,
     }}>
       {children}
     </AuthContext.Provider>
