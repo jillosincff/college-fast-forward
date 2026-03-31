@@ -127,7 +127,7 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
 
         {/* Career Assessment item */}
         <button
-          onClick={() => isFastIQ ? navigate('FastIQAssessment') : onOpenUpgrade?.()}
+          onClick={() => isFastIQ ? navigate('CareerAssessment') : onOpenUpgrade?.()}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
           style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
         >
