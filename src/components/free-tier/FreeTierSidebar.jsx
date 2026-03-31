@@ -23,6 +23,7 @@ const CONCIERGE_SUBTABS = [
 ];
 
 export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUpgrade, onOpenConcierge }) {
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const firstName = user?.full_name?.split(' ')[0] || 'Student';
   const university = user?.school || user?.university || 'UF';
   const [showMenu, setShowMenu] = useState(false);
@@ -96,7 +97,7 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
         >
           <Sparkles style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
           <span className="flex-1 text-left">Career Concierge</span>
-          <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>
+          {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
         </button>
         {conciergeOpen && (
           <div style={{ marginLeft: 16 }}>
@@ -126,7 +127,7 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
         >
           <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>⚡</span>
           <span className="flex-1 text-left">Career Assessment</span>
-          <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>
+          {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
         </button>
 
         {/* FastIQ locked item */}
@@ -137,7 +138,8 @@ export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUp
         >
           <Zap style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
           <span className="flex-1 text-left">FastIQ</span>
-          <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>
+          {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
+          {isFastIQ && <span style={{ padding: '2px 7px', background: '#22C55E', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Active</span>}
         </button>
 
         {/* Notebook item */}
