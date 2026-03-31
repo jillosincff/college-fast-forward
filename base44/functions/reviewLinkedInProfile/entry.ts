@@ -1,5 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+const extractLinkedInId = (url) => {
+  const match = url.match(/linkedin\.com\/in\/([^\/\?]+)/);
+  return match?.[1] || url;
+};
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -13,14 +18,17 @@ Deno.serve(async (req) => {
     console.log('LinkedIn URL:', linkedinUrl);
     console.log('NinjaPear key exists:', !!Deno.env.get('PROXYCURL_API_KEY'));
 
-    const PROXYCURL_KEY = Deno.env.get('PROXYCURL_API_KEY');
+    const SCRAPINGDOG_KEY = Deno.env.get('SCRAPINGDOG_API_KEY');
 
-    // Step 1 — Scrape LinkedIn via NinjaPear
-    let profile = null;
+    // Step 1 — Scrape LinkedIn via Scrapingdog
+    const linkedinId = extractLinkedInId(linkedinUrl);
     const px = await fetch(
-      `https://api.ninjapear.com/api/v2/linkedin?url=${encodeURIComponent(linkedinUrl)}&use_cache=if-present`,
-      { headers: { 'Authorization': `Bearer ${PROXYCURL_KEY}` } }
+      `https://api.scrapingdog.com/linkedin?api_key=${SCRAPINGDOG_KEY}&type=profile&linkId=${linkedinId}`,
+      { method: 'GET' }
     );
+    const profileResponse = await px.json();
+    console.log('Scrapingdog response:', JSON.stringify(profileResponse).slice(0, 500));
+    let profile = profileResponse;
     profile = await px.json();
 
     if (!profile || profile.code === 404 || px.status === 404) {
