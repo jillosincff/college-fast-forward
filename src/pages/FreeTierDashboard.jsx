@@ -176,7 +176,23 @@ export default function FreeTierDashboard() {
   return (
     <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
       <div className="hidden md:block">
-        <FreeTierSidebar user={user} activeTab={activeTab} onTabChange={handleTabChange} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
+        <FreeTierSidebar user={user} currentPage={activeTab} onNavigate={(page) => {
+          // Map page names to tab keys or navigate to standalone pages
+          const tabMap = {
+            'FreeTierDashboard': 'home',
+            'CareerGoals': 'career_goals',
+            'CompanyIntel': 'company_intel',
+            'AlumniSearch': 'alumni_search',
+            'Connections': 'directory',
+            'Messages': 'messages',
+            'Notebook': 'notebook',
+          };
+          if (tabMap[page]) {
+            handleTabChange(tabMap[page]);
+          } else {
+            navigate(page);
+          }
+        }} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />
       </div>
       <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
         {showUpgradeSuccess && (

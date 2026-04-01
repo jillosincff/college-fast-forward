@@ -1,205 +1,348 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin, BookOpen, Search, Mail } from 'lucide-react';
-import UserAvatar from '@/components/common/UserAvatar';
-import { base44 } from '@/api/base44Client';
-import { navigate } from '@/components/utils/navigation';
+import { useState } from 'react';
+import {
+  Home, Target, FileText, Building2,
+  Users, Search, Mail, MessageSquare,
+  Sparkles, Brain, Zap, BookOpen,
+  ChevronDown, ChevronUp
+} from 'lucide-react';
 
-const FREE_NAV_ITEMS = [
-  { id: 'home', icon: Home, label: 'Home' },
-  { id: 'fastiq', icon: Zap, label: 'FastIQ Dashboard', isPage: true, page: 'FastIQDashboard' },
-  { id: 'company_intel', icon: Building2, label: 'Company Intel' },
-  { id: 'alumni_search', icon: Search, label: 'Alumni Search' },
-  { id: 'career_goals', icon: Target, label: 'Career Goals' },
-  { id: 'resume', icon: FileText, label: 'Resume', isPage: true, page: 'ResumeTailoring' },
-  { id: 'career_path', icon: Map, label: 'Career Path Research' },
-
-  { id: 'directory', icon: Users, label: 'CFF Connections' },
-  { id: 'messages', icon: MessageSquare, label: 'Messages' },
-  { id: 'outreach', icon: Mail, label: 'Outreach Drafts', isPage: true, page: 'OutreachDrafts' },
+const NAV_GROUPS = [
+  {
+    label: 'MY CAREER',
+    items: [
+      { label: 'Home', page: 'FreeTierDashboard', icon: Home },
+      { label: 'Career Goals', page: 'CareerGoals', icon: Target },
+      { label: 'Resume', page: 'ResumeTailoring', icon: FileText },
+      { label: 'Company Intel', page: 'CompanyIntel', icon: Building2 },
+    ]
+  },
+  {
+    label: 'MY NETWORK',
+    items: [
+      { label: 'CFF Connections', page: 'Connections', icon: Users },
+      { label: 'Alumni Search', page: 'AlumniSearch', icon: Search },
+      { label: 'Outreach Drafts', page: 'OutreachDrafts', icon: Mail },
+      { label: 'Messages', page: 'Messages', icon: MessageSquare },
+    ]
+  },
 ];
 
-const CONCIERGE_SUBTABS = [
-  { id: 'resumes', icon: FileText, label: 'Résumés & Cover Letters' },
-  { id: 'mock_interviews', icon: Mic, label: 'Mock Interviews' },
-  { id: 'linkedin', icon: Linkedin, label: 'LinkedIn Profile Review' },
+const FASTIQ_ITEMS = [
+  {
+    label: 'Career Concierge',
+    icon: Sparkles,
+    expandable: true,
+    children: [
+      { label: 'Mock Interviews', page: 'MockInterview' },
+      { label: 'LinkedIn Review', page: 'LinkedInReview' },
+      { label: 'Résumés & Cover Letters', page: 'ResumeTailoring' },
+    ]
+  },
+  { label: 'Career Assessment', page: 'CareerAssessment', icon: Brain },
+  { label: 'FastIQ', page: 'FastIQDashboard', icon: Zap },
 ];
 
-export default function FreeTierSidebar({ user, activeTab, onTabChange, onOpenUpgrade, onOpenConcierge }) {
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-  const firstName = user?.full_name?.split(' ')[0] || 'Student';
-  const university = user?.school || user?.university || 'UF';
-  const [showMenu, setShowMenu] = useState(false);
-  const [conciergeOpen, setConciergeOpen] = useState(false);
-  const [notebookCount, setNotebookCount] = useState(0);
-  const menuRef = useRef(null);
+export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
+  const [conciergeOpen, setConciergeOpen] = useState(
+    ['MockInterview', 'LinkedInReview'].includes(currentPage)
+  );
 
-  useEffect(() => {
-    if (!user?.email) return;
-    base44.entities.NotebookEntry.filter({ user_email: user.email }, '-saved_at', 200)
-      .then(data => setNotebookCount((data || []).length))
-      .catch(() => {});
-  }, [user?.email]);
+  const isFastIQ = !!(
+    user?.fastiq_setup_complete ||
+    user?.subscription_status === 'active' ||
+    user?.membership_tier === 'fastiq'
+  );
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setShowMenu(false);
-    };
-    if (showMenu) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showMenu]);
+  const firstName = user?.full_name?.split(' ')[0] || '';
+  const schoolName = user?.school_name || 'University of Florida';
+
+  const isActive = (page) => currentPage === page;
+
+  const NavItem = ({ item, indent = false }) => (
+    <button
+      onClick={() => onNavigate(item.page)}
+      style={{
+        width: '100%', display: 'flex',
+        alignItems: 'center', gap: 10,
+        padding: indent ? '7px 12px 7px 36px' : '8px 12px',
+        borderRadius: 8, border: 'none',
+        background: isActive(item.page) ? '#FFF5F0' : 'none',
+        cursor: 'pointer',
+        transition: 'background 0.15s',
+        minHeight: 'auto',
+      }}
+      onMouseEnter={e => {
+        if (!isActive(item.page)) e.currentTarget.style.background = '#F5F5F5';
+      }}
+      onMouseLeave={e => {
+        if (!isActive(item.page)) e.currentTarget.style.background = 'none';
+      }}
+    >
+      {item.icon && (
+        <item.icon
+          size={15}
+          color={isActive(item.page) ? '#E85D20' : '#888'}
+          strokeWidth={isActive(item.page) ? 2.5 : 1.8}
+        />
+      )}
+      <span style={{
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: indent ? 12 : 13,
+        fontWeight: isActive(item.page) ? 600 : 400,
+        color: isActive(item.page) ? '#E85D20' : '#444',
+        textAlign: 'left',
+      }}>
+        {item.label}
+      </span>
+      {isActive(item.page) && (
+        <div style={{
+          width: 4, height: 4, borderRadius: '50%',
+          background: '#E85D20', marginLeft: 'auto', flexShrink: 0,
+        }} />
+      )}
+    </button>
+  );
 
   return (
-    <div className="w-60 h-full bg-white border-r border-[#E0E0E0] flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b border-[#E0E0E0]">
+    <div style={{
+      width: 220, flexShrink: 0,
+      background: '#fff',
+      borderRight: '1px solid #F0F0F0',
+      height: '100vh',
+      position: 'sticky', top: 0,
+      display: 'flex', flexDirection: 'column',
+      overflowY: 'auto',
+      padding: '20px 12px',
+      boxSizing: 'border-box',
+    }}>
+
+      {/* Logo */}
+      <div style={{ marginBottom: 24, padding: '0 4px' }}>
         <img
           src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
           alt="CFF"
-          className="h-12 w-auto mb-3"
+          style={{ height: 32, width: 'auto', objectFit: 'contain' }}
         />
-        <p className="text-xs text-[#666666]">{firstName} · {university}</p>
       </div>
 
-      {/* Nav Items */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {FREE_NAV_ITEMS.map(item => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => item.isPage ? navigate(item.page) : onTabChange(item.id)}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all"
-              style={{
-                minHeight: 'auto',
-                background: 'transparent',
-                border: 'none',
-                borderLeft: isActive ? '3px solid #E85D20' : '3px solid transparent',
-                color: isActive ? '#E85D20' : '#666666',
-                cursor: 'pointer',
-              }}
-            >
-              <Icon style={{ width: 16, height: 16, color: isActive ? '#E85D20' : '#999999', flexShrink: 0 }} />
-              {item.label}
-            </button>
-          );
-        })}
-
-        {/* Divider + upgrade label */}
-        <div style={{ margin: '12px 4px 8px' }}>
-          <div style={{ height: 1, background: '#E0E0E0', marginBottom: 8 }} />
-          {!isFastIQ && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#BBBBBB', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0, paddingLeft: 4 }}>UNLOCK WITH FASTIQ</p>}
-          {isFastIQ && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#22C55E', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0, paddingLeft: 4 }}>FASTIQ FEATURES</p>}
+      {/* User pill */}
+      <div style={{
+        background: '#F5F5F5', borderRadius: 10,
+        padding: '8px 12px', marginBottom: 24,
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%',
+          background: '#E85D20', color: '#fff',
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'center', fontSize: 12,
+          fontWeight: 700, fontFamily: "'DM Sans', sans-serif",
+          flexShrink: 0,
+        }}>
+          {firstName?.[0] || 'S'}
         </div>
-
-        {/* Career Concierge item + subtabs */}
-        <button
-          onClick={() => { setConciergeOpen(p => !p); if (!isFastIQ) onOpenConcierge?.(); }}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
-          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
-        >
-          <Sparkles style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
-          <div className="flex-1 text-left">
-            <div>Career Concierge</div>
-            {!conciergeOpen && <div style={{ fontSize: 10, color: '#BBBBBB', fontWeight: 400, marginTop: 1 }}>Resume · Interviews · LinkedIn</div>}
-          </div>
-          {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
-          <span style={{ fontSize: 10, color: '#BBBBBB', marginLeft: !isFastIQ ? 0 : 'auto' }}>{conciergeOpen ? '▲' : '▼'}</span>
-        </button>
-        {conciergeOpen && (
-          <div style={{ marginLeft: 16 }}>
-            {CONCIERGE_SUBTABS.map(sub => {
-              const Icon = sub.icon;
-              const pageMap = { resumes: 'ResumeTailoring', mock_interviews: 'MockInterview', linkedin: 'LinkedInReview' };
-              return (
-                <button
-                  key={sub.id}
-                  onClick={() => isFastIQ ? navigate(pageMap[sub.id] || 'ResumeTailoring') : onOpenConcierge?.()}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-[#999999] hover:text-[#666] transition-all"
-                  style={{ minHeight: 'auto', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  <Icon style={{ width: 13, height: 13, color: '#BBBBBB', flexShrink: 0 }} />
-                  <span className="flex-1 text-left">{sub.label}</span>
-                  {!isFastIQ && <Lock style={{ width: 11, height: 11, color: '#CCCCCC' }} />}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Career Assessment item */}
-        <button
-          onClick={() => isFastIQ ? navigate('CareerAssessment') : onOpenUpgrade?.()}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
-          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
-        >
-          <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>⚡</span>
-          <span className="flex-1 text-left">Career Assessment</span>
-          {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
-        </button>
-
-        {/* FastIQ item */}
-        <button
-          onClick={() => isFastIQ ? navigate('FastIQDashboard') : onOpenUpgrade?.()}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
-          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: '3px solid transparent', color: '#666666', cursor: 'pointer' }}
-        >
-          <Zap style={{ width: 16, height: 16, color: '#999999', flexShrink: 0 }} />
-          <span className="flex-1 text-left">FastIQ</span>
-          {!isFastIQ && <span style={{ padding: '2px 7px', background: '#E85D20', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upgrade</span>}
-          {isFastIQ && <span style={{ padding: '2px 7px', background: '#22C55E', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Active</span>}
-        </button>
-
-        {/* Notebook item */}
-        <button
-          onClick={() => onTabChange('notebook')}
-          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all hover:bg-[#FFF5F0]"
-          style={{ minHeight: 'auto', background: 'transparent', border: 'none', borderLeft: activeTab === 'notebook' ? '3px solid #E85D20' : '3px solid transparent', color: activeTab === 'notebook' ? '#E85D20' : '#666666', cursor: 'pointer' }}
-        >
-          <BookOpen style={{ width: 16, height: 16, color: activeTab === 'notebook' ? '#E85D20' : '#999999', flexShrink: 0 }} />
-          <span className="flex-1 text-left">Notebook</span>
-          {notebookCount > 0 && (
-            <span style={{ padding: '1px 7px', background: '#E85D20', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 100 }}>{notebookCount}</span>
-          )}
-        </button>
-      </nav>
-
-      {/* Footer — Avatar popover */}
-      <div className="p-4 border-t border-[#E0E0E0]" ref={menuRef}>
-        {showMenu && (
-          <div style={{
-            position: 'absolute', bottom: 72, left: 12, width: 180,
-            background: '#1E1E1E', border: '1px solid #2A2A2A',
-            borderRadius: 10, boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-            overflow: 'hidden', zIndex: 100,
-          }}>
-            <button
-              onClick={() => { navigate('ProfileEdit'); setShowMenu(false); }}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 13, minHeight: 'auto' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#2A2A2A'}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}
-            >
-              <Settings style={{ width: 14, height: 14, color: '#888' }} /> Settings
-            </button>
-            <button
-              onClick={() => base44.auth.logout()}
-              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 13, minHeight: 'auto' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#2A2A2A'}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}
-            >
-              <LogOut style={{ width: 14, height: 14, color: '#888' }} /> Sign Out
-            </button>
-          </div>
-        )}
-        <button
-          onClick={() => setShowMenu(prev => !prev)}
-          style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', borderRadius: 8 }}
-          className="hover:bg-[#F5F5F5] transition-colors"
-        >
-          <UserAvatar user={user} className="h-8 w-8" showFallback={true} />
-          <p className="text-xs font-medium text-[#1A1A1A]">{firstName}</p>
-        </button>
+        <div style={{ minWidth: 0 }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 12, fontWeight: 600,
+            color: '#1A1A1A', margin: 0,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{firstName}</p>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 10, color: '#888', margin: 0,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{schoolName}</p>
+        </div>
       </div>
+
+      {/* MY CAREER + MY NETWORK groups */}
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label} style={{ marginBottom: 24 }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 9, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.12em',
+            color: '#BBBBBB', margin: '0 0 6px 4px',
+          }}>
+            {group.label}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {group.items.map(item => (
+              <NavItem key={item.label} item={item} />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* Divider */}
+      <div style={{ height: 1, background: '#F0F0F0', margin: '0 4px 20px' }} />
+
+      {/* FASTIQ FEATURES */}
+      <div style={{ marginBottom: 24 }}>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 9, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.12em',
+          color: isFastIQ ? '#E85D20' : '#BBBBBB',
+          margin: '0 0 6px 4px',
+        }}>
+          {isFastIQ ? '⚡' : '🔒'} FASTIQ FEATURES
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {FASTIQ_ITEMS.map(item => (
+            <div key={item.label}>
+              {item.expandable ? (
+                <>
+                  <button
+                    onClick={() => setConciergeOpen(prev => !prev)}
+                    style={{
+                      width: '100%', display: 'flex',
+                      alignItems: 'center', gap: 10,
+                      padding: '8px 12px', borderRadius: 8,
+                      border: 'none', background: 'none',
+                      cursor: 'pointer', minHeight: 'auto',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                  >
+                    <item.icon
+                      size={15}
+                      color={isFastIQ ? '#888' : '#CCCCCC'}
+                      strokeWidth={1.8}
+                    />
+                    <span style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 13, fontWeight: 400,
+                      color: isFastIQ ? '#444' : '#CCCCCC',
+                      flex: 1, textAlign: 'left',
+                    }}>
+                      {item.label}
+                    </span>
+                    {isFastIQ
+                      ? (conciergeOpen ? <ChevronUp size={12} color="#888" /> : <ChevronDown size={12} color="#888" />)
+                      : <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#CCCCCC', textTransform: 'uppercase', letterSpacing: '0.06em' }}>UPGRADE</span>
+                    }
+                  </button>
+                  {conciergeOpen && isFastIQ && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {item.children.map(child => (
+                        <NavItem key={child.label} item={child} indent />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <button
+                  onClick={() => isFastIQ ? onNavigate(item.page) : null}
+                  style={{
+                    width: '100%', display: 'flex',
+                    alignItems: 'center', gap: 10,
+                    padding: '8px 12px', borderRadius: 8,
+                    border: 'none',
+                    background: isActive(item.page) ? '#FFF5F0' : 'none',
+                    cursor: isFastIQ ? 'pointer' : 'default',
+                    opacity: isFastIQ ? 1 : 0.5,
+                    minHeight: 'auto',
+                  }}
+                  onMouseEnter={e => {
+                    if (isFastIQ && !isActive(item.page)) e.currentTarget.style.background = '#F5F5F5';
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive(item.page)) e.currentTarget.style.background = 'none';
+                  }}
+                >
+                  <item.icon
+                    size={15}
+                    color={isActive(item.page) ? '#E85D20' : isFastIQ ? '#888' : '#CCCCCC'}
+                    strokeWidth={isActive(item.page) ? 2.5 : 1.8}
+                  />
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 13,
+                    fontWeight: isActive(item.page) ? 600 : 400,
+                    color: isActive(item.page) ? '#E85D20' : isFastIQ ? '#444' : '#CCCCCC',
+                    flex: 1, textAlign: 'left',
+                  }}>
+                    {item.label}
+                  </span>
+                  {!isFastIQ && (
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#CCCCCC', textTransform: 'uppercase', letterSpacing: '0.06em' }}>UPGRADE</span>
+                  )}
+                  {isActive(item.page) && isFastIQ && (
+                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#E85D20', flexShrink: 0 }} />
+                  )}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div style={{ height: 1, background: '#F0F0F0', margin: '0 4px 16px' }} />
+
+      {/* Saved / Notebook */}
+      <button
+        onClick={() => onNavigate('Notebook')}
+        style={{
+          width: '100%', display: 'flex',
+          alignItems: 'center', gap: 10,
+          padding: '8px 12px', borderRadius: 8,
+          border: 'none',
+          background: isActive('Notebook') ? '#FFF5F0' : 'none',
+          cursor: 'pointer', marginBottom: 8, minHeight: 'auto',
+        }}
+        onMouseEnter={e => { if (!isActive('Notebook')) e.currentTarget.style.background = '#F5F5F5'; }}
+        onMouseLeave={e => { if (!isActive('Notebook')) e.currentTarget.style.background = 'none'; }}
+      >
+        <BookOpen size={15} color={isActive('Notebook') ? '#E85D20' : '#888'} strokeWidth={isActive('Notebook') ? 2.5 : 1.8} />
+        <span style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 13,
+          fontWeight: isActive('Notebook') ? 600 : 400,
+          color: isActive('Notebook') ? '#E85D20' : '#444',
+        }}>
+          Saved
+        </span>
+      </button>
+
+      {/* FastIQ upgrade CTA for free users */}
+      {!isFastIQ && (
+        <div style={{
+          marginTop: 'auto',
+          background: 'linear-gradient(135deg, #0A0A0A, #1A1A1A)',
+          borderRadius: 12, padding: '14px 16px',
+        }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, fontWeight: 700,
+            color: '#E85D20', margin: '0 0 4px',
+            textTransform: 'uppercase', letterSpacing: '0.08em',
+          }}>⚡ Unlock FastIQ</p>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, color: 'rgba(255,255,255,0.5)',
+            margin: '0 0 10px', lineHeight: 1.5,
+          }}>
+            AI interviews, LinkedIn review, unlimited alumni search & more.
+          </p>
+          <button
+            onClick={() => onNavigate('FastIQUpgrade')}
+            style={{
+              background: '#E85D20', border: 'none',
+              borderRadius: 8, padding: '8px 0',
+              fontSize: 11, fontWeight: 600,
+              color: '#fff', cursor: 'pointer',
+              fontFamily: "'DM Sans', sans-serif",
+              width: '100%', minHeight: 'auto',
+            }}
+          >
+            Upgrade — $29/mo →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
