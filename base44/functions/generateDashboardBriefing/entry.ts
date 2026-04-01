@@ -67,7 +67,7 @@ COMPLETION STATE:
 - Career goals set: ${completionState.hasGoals}
 - Resume uploaded: ${completionState.hasResume}
 - Resume analyzed: ${completionState.hasResumeAnalysis}
-- Resume score: ${actualResumeScore || 'analyzing...'}
+- Resume score: ${actualResumeScore || 'not yet scored'}
 - Has searched alumni: ${completionState.hasSearchedAlumni}
 - Has messaged a connection: ${completionState.hasMessaged}
 - Has drafted outreach: ${completionState.hasDraftedOutreach}
@@ -101,7 +101,11 @@ Write a briefing that is:
 BRIEFING RULES BY STATE:
 - No goals set → push hard to set goals, it unlocks everything
 - Goals set, no resume → praise goals, push resume upload
-- Resume uploaded, analyzing → acknowledge the upload, say analysis is underway, push next action
+- Resume uploaded but not analyzed yet → "Your resume is uploaded — FastIQ is scoring it now. Check back in a minute to see where you stand."
+- Resume uploaded and scored → reference actual score + push next step:
+  - Under 60: "Fix resume first — let's improve these gaps before outreach"
+  - 60-80: "Good foundation — let's tailor this and start reaching out"
+  - 80+: "You're ready — go find alumni at your target companies"
 - Resume scored, no alumni search → reference their score + push alumni search at target companies
 - Has searched alumni, no outreach → push drafting a message to someone specific
 - Has outreach sent, no reply → nudge follow-up if 5+ days
