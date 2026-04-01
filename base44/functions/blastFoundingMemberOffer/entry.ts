@@ -13,10 +13,7 @@ Deno.serve(async (req) => {
       u.membership_tier !== 'fastiq' &&
       u.fastiq_setup_complete !== true &&
       u.subscription_status !== 'active' &&
-      (
-        u.persona === 'student' ||
-        (u.persona === 'alumni' && u.alumni_intent === 'seeking_help')
-      )
+      (u.persona === 'gator' || u.persona === 'student')
     );
 
     const helpers = allUsers.filter(u =>
@@ -24,10 +21,7 @@ Deno.serve(async (req) => {
       u.membership_tier !== 'fastiq' &&
       u.fastiq_setup_complete !== true &&
       u.subscription_status !== 'active' &&
-      (
-        u.persona === 'parent' ||
-        (u.persona === 'alumni' && u.alumni_intent === 'helping')
-      )
+      u.persona === 'parent'
     );
 
     console.log(`Job seekers: ${jobSeekers.length}`);
