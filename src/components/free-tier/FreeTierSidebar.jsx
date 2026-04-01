@@ -12,7 +12,7 @@ const FREE_NAV_ITEMS = [
   { id: 'career_goals', icon: Target, label: 'Career Goals' },
   { id: 'resume', icon: FileText, label: 'Resume', isPage: true, page: 'ResumeTailoring' },
   { id: 'career_path', icon: Map, label: 'Career Path Research' },
-  { id: 'career_center', icon: GraduationCap, label: 'Career Center' },
+
   { id: 'directory', icon: Users, label: 'CFF Connections' },
   { id: 'messages', icon: MessageSquare, label: 'Messages' },
   { id: 'outreach', icon: Mail, label: 'Outreach Drafts', isPage: true, page: 'OutreachDrafts' },
