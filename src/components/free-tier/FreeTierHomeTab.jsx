@@ -8,7 +8,7 @@ import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 
 const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
 
-export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
+export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange, briefing, briefingLoading }) {
   const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
   const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
@@ -17,52 +17,10 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [sendingNudge, setSendingNudge] = useState(false);
   const [showParentModal, setShowParentModal] = useState(false);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
-  const [briefing, setBriefing] = useState(() => {
-    try { return sessionStorage.getItem('fastiq_briefing') || null; } catch { return null; }
-  });
-  const [briefingLoading, setBriefingLoading] = useState(false);
+
 
   useEffect(() => {
     if (!user) return;
-
-    // Generate AI briefing if not cached
-    if (!briefing) {
-      setBriefingLoading(true);
-      const lastLoginDays = user.last_login_at
-        ? Math.floor((Date.now() - new Date(user.last_login_at).getTime()) / (1000 * 60 * 60 * 24))
-        : 0;
-      generateDashboardBriefing({
-        firstName,
-        completionState: {
-          hasGoals,
-          hasResume,
-          hasSearchedAlumni: !!user.alumni_search_used,
-          hasMessaged: !!user.leads_viewed,
-          hasDraftedOutreach: false,
-          isFastIQ: fastiq,
-          hasArchetype: !!user.career_archetype,
-          hasLinkedInReview: !!user.linkedin_reviewed,
-          hasMockInterview: !!user.mock_interview_done,
-        },
-        lastLoginDays,
-        pendingFollowUps: 0,
-        unreadMessages: 0,
-        resumeScore: null,
-        archetypeName: user.career_archetype || null,
-        targetRoles: user.career_goals?.target_roles || [],
-        targetCompanies: user.career_goals?.target_companies || [],
-        targetIndustries: user.career_goals?.target_industries || [],
-        graduationYear: user.career_goals?.graduation_year || null,
-        newAlumniCount: 0,
-        outreachStats: { sent: 0, replied: 0 },
-      }).then(res => {
-        const greeting = res?.data?.briefing?.greeting;
-        if (greeting) {
-          setBriefing(greeting);
-          try { sessionStorage.setItem('fastiq_briefing', greeting); } catch {}
-        }
-      }).catch(() => {}).finally(() => setBriefingLoading(false));
-    }
 
     // Don't show banner for users less than 24h old
     const accountAgeDays = user.created_date ? (Date.now() - new Date(user.created_date).getTime()) / (1000 * 60 * 60 * 24) : 0;
@@ -159,46 +117,68 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* HERO — Dynamic AI Briefing */}
       <div style={{
         background: '#0A0A0A',
-        padding: 'clamp(24px, 6vw, 48px) clamp(16px, 4vw, 40px)',
-        textAlign: 'center'
+        borderRadius: 20,
+        padding: 'clamp(24px, 4vw, 40px) clamp(20px, 4vw, 36px)',
+        marginBottom: 32,
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        <div style={{
+          position: 'absolute', top: -40, right: -40,
+          width: 200, height: 200, borderRadius: '50%',
+          background: 'rgba(232,93,32,0.08)',
+          pointerEvents: 'none',
+        }} />
+
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: 13, fontWeight: 600,
-          color: '#E85D20', letterSpacing: '0.12em',
-          textTransform: 'uppercase', margin: '0 0 16px'
+          fontSize: 11, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.15em',
+          color: '#E85D20', margin: '0 0 16px',
+          display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          College Fast Forward · powered by FastIQ™
+          <span>⚡</span> FASTIQ BRIEFING
         </p>
-        <h1 style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 'clamp(22px, 5vw, 48px)',
-          fontWeight: 700, color: '#fff',
-          lineHeight: 1.15, margin: '0 0 12px'
-        }}>
-          {heroTitle}
-        </h1>
-        {briefingLoading && !briefing ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, margin: '0 auto', maxWidth: 500 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'pulse 1.2s ease-in-out 0s infinite' }} />
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'pulse 1.2s ease-in-out 0.2s infinite' }} />
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'pulse 1.2s ease-in-out 0.4s infinite' }} />
-            <style>{`@keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }`}</style>
+
+        {briefingLoading ? (
+          <div>
+            <div style={{ height: 28, background: 'rgba(255,255,255,0.06)', borderRadius: 6, marginBottom: 10, width: '80%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 20, background: 'rgba(255,255,255,0.04)', borderRadius: 6, marginBottom: 24, width: '60%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 40, background: 'rgba(232,93,32,0.15)', borderRadius: 10, width: 180, animation: 'pulse 1.5s ease-in-out infinite' }} />
           </div>
         ) : (
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 'clamp(13px, 3vw, 15px)', color: 'rgba(255,255,255,0.6)',
-            margin: '0 auto', lineHeight: 1.6,
-            maxWidth: 500, padding: '0 16px'
-          }}>
-            {heroSub}
-          </p>
+          <div>
+            <p style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 'clamp(18px, 3vw, 24px)',
+              fontWeight: 700, color: '#fff',
+              margin: '0 0 24px', lineHeight: 1.5,
+              maxWidth: 600,
+            }}>
+              {briefing?.greeting || `Hey ${firstName}! Ready to move your career forward today?`}
+            </p>
+            {briefing?.cta_label && (
+              <button
+                onClick={() => navigate(briefing.cta_page)}
+                style={{
+                  background: '#E85D20', border: 'none',
+                  borderRadius: 10, padding: '12px 24px',
+                  fontSize: 13, fontWeight: 600,
+                  color: '#fff', cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                }}
+              >
+                {briefing.cta_label} →
+              </button>
+            )}
+          </div>
         )}
       </div>
+      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
 
       {/* Parent Email Modal */}
       {showParentModal && (
