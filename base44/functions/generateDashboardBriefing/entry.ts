@@ -12,8 +12,7 @@ Deno.serve(async (req) => {
 
   const hasResumeRecord = resumes.length > 0;
   const primaryResume = resumes.find(r => r.is_active) || resumes[0];
-  console.log('primaryResume:', JSON.stringify(primaryResume, null, 2));
-  const resumeScoreFromEntity = primaryResume?.score || null;
+  const resumeScoreFromEntity = primaryResume?.analysis_data?.score || primaryResume?.score || null;
 
   const {
     firstName,
