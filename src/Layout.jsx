@@ -589,6 +589,7 @@ const getPageComponent = (pageName) => {
     case 'StudentInvitedOnboarding': return StudentInvitedOnboarding;
     case 'FreeTierDashboard': return FreeTierDashboard;
     case 'FastIQDashboard': return FastIQDashboard;
+    case 'OutreachDrafts': return React.lazy(() => import('./pages/OutreachDrafts'));
     default: return LandingPage;
   }
 };
