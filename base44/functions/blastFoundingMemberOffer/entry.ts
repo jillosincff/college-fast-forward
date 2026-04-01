@@ -9,9 +9,7 @@ Deno.serve(async (req) => {
     
     const eligible = allUsers.filter(u =>
       u.email &&
-      (u.is_founding_member === true ||
-       u.subscription_tier === 'free_forever' ||
-       u.price_tier === 'founding') &&
+      (u.is_founding_gator === true || u.membership_tier === 'founding_gator') &&
       u.fastiq_setup_complete !== true &&
       u.subscription_status !== 'active'
     );
