@@ -1,0 +1,83 @@
+{
+  "name": "OutreachDraft",
+  "type": "object",
+  "properties": {
+    "recipient_name": {
+      "type": "string",
+      "description": "Full name of the recipient"
+    },
+    "recipient_title": {
+      "type": "string",
+      "description": "Job title of the recipient"
+    },
+    "recipient_company": {
+      "type": "string",
+      "description": "Company of the recipient"
+    },
+    "recipient_linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL of the recipient"
+    },
+    "context": {
+      "type": "string",
+      "enum": [
+        "alumni_search",
+        "cff_connection",
+        "job_application",
+        "cold_outreach",
+        "thank_you"
+      ],
+      "description": "Context/purpose of the outreach"
+    },
+    "message": {
+      "type": "string",
+      "description": "The outreach message body"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "replied",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "Current status of the outreach"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the message was sent"
+    },
+    "follow_up_due_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a follow-up is due (5 days after sent)"
+    },
+    "follow_up_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the follow-up has been sent"
+    },
+    "job_url": {
+      "type": "string",
+      "description": "Related job posting URL (optional)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Private notes about this outreach"
+    }
+  },
+  "required": [
+    "recipient_name",
+    "recipient_company"
+  ],
+  "rls": {
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

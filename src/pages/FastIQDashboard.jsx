@@ -23,7 +23,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
     { icon: '🎤', label: 'Mock Interviews', desc: 'Full STAR method interview simulation', page: 'MockInterview' },
     { icon: '🔗', label: 'LinkedIn Review', desc: 'Score and optimize every section of your profile', page: 'LinkedInReview' },
     { icon: '🧠', label: 'Career Assessment', desc: 'Discover your unique career archetype', page: 'CareerAssessment' },
-    { icon: '✉️', label: 'Outreach Drafts', desc: 'AI-written messages to alumni and connections', page: 'AlumniSearch' },
+    { icon: '✉️', label: 'Outreach Drafts', desc: 'AI-written messages to alumni and connections', page: 'OutreachDrafts' },
   ];
 
   // FastIQ gate — show upgrade prompt
