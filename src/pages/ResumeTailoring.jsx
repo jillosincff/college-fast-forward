@@ -142,8 +142,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         if (res?.data?.analysis) {
           setAnalysis(res.data.analysis);
           localStorage.setItem(`resume_analysis_${primaryResume.id}`, JSON.stringify(res.data.analysis));
-          // Persist to entity so it survives re-mounts
           base44.entities.Resume.update(primaryResume.id, { analysis_data: res.data.analysis }).catch(() => {});
+          if (res.data.analysis.overall_score) {
+            base44.auth.updateMe({ resume_score: res.data.analysis.overall_score }).catch(() => {});
+          }
         } else {
           setAnalysisError(true);
         }

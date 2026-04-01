@@ -120,6 +120,9 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
         newCount >= 8
       ) {
         setIsComplete(true);
+        if (!user?.has_done_mock_interview) {
+          base44.auth.updateMe({ has_done_mock_interview: true }).catch(() => {});
+        }
       }
     } catch (e) {
       console.error('Message failed:', e);

@@ -61,6 +61,9 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       if (!isFastIQ && !user?.alumni_search_used) {
         base44.auth.updateMe({ alumni_search_used: true }).catch(() => {});
       }
+      if (!user?.has_searched_alumni) {
+        base44.auth.updateMe({ has_searched_alumni: true }).catch(() => {});
+      }
     } catch (e) {
       console.error('Search error:', e);
       setResults([]);

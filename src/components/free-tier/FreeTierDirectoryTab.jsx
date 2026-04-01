@@ -136,6 +136,9 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       }).catch(() => {});
       setSentTo(prev => [...prev, messaging.email]);
       setSent(true);
+      if (!user?.has_messaged_connection) {
+        base44.auth.updateMe({ has_messaged_connection: true }).catch(() => {});
+      }
       base44.entities.OutreachDraft.create({
         created_by: user?.email,
         recipient_name: messaging.full_name,
