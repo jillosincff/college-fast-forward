@@ -133,9 +133,29 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         setCffModal({ id: alum.cff_user_id, full_name: alum.full_name, headline: alum.headline, email: alum.email || null });
         setCffDraft(draft);
         setCffSent(false);
+        base44.entities.OutreachDraft.create({
+          created_by: user?.email,
+          recipient_name: alum.full_name,
+          recipient_title: alum.headline,
+          recipient_company: alum.company || '',
+          recipient_linkedin_url: alum.linkedin_url || '',
+          context: 'cff_connection',
+          message: draft,
+          status: 'draft',
+        }).catch(() => {});
       } else {
         setOutreachModal({ alum, draft });
         setEditedDraft(draft);
+        base44.entities.OutreachDraft.create({
+          created_by: user?.email,
+          recipient_name: alum.full_name,
+          recipient_title: alum.headline,
+          recipient_company: alum.company || '',
+          recipient_linkedin_url: alum.linkedin_url || '',
+          context: 'alumni_search',
+          message: draft,
+          status: 'draft',
+        }).catch(() => {});
       }
     } finally {
       setConnectLoading(null);

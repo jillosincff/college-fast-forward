@@ -126,6 +126,19 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       }).catch(() => {});
       setSentTo(prev => [...prev, messaging.email]);
       setSent(true);
+      base44.entities.OutreachDraft.create({
+        created_by: user?.email,
+        recipient_name: messaging.full_name,
+        recipient_title: messaging.job_title || messaging.current_position || '',
+        recipient_company: messaging.company || messaging.current_company || '',
+        recipient_linkedin_url: messaging.linkedin_url || '',
+        context: 'cff_connection',
+        message: draft,
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        follow_up_due_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+        follow_up_sent: false,
+      }).catch(() => {});
       setTimeout(() => { setMessaging(null); setSent(false); }, 1500);
     } catch (e) {
       console.error('Message failed:', e);
