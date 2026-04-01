@@ -28,6 +28,8 @@ export default function FreeTierDashboard() {
     return params.get('tab') || 'home';
   });
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [briefing, setBriefing] = useState(null);
+  const [briefingLoading, setBriefingLoading] = useState(true);
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
   const [showConciergeModal, setShowConciergeModal] = useState(false);
   const [savedGoals, setSavedGoals] = useState(null);
