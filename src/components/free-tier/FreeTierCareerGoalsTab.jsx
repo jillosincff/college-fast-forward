@@ -203,9 +203,9 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
       {/* Target Roles */}
       <div style={sectionStyle}>
         <label style={labelStyle}>What roles are you targeting?</label>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <input value={roleInput} onChange={e => setRoleInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addRole()} placeholder="e.g. Marketing Manager, Software Engineer..." style={{ ...inputStyle, flex: 1 }} />
-          <button onClick={addRole} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '0 16px', color: '#fff', cursor: 'pointer', fontSize: 22, fontWeight: 300, minHeight: 'auto' }}>+</button>
+        <div style={{ marginBottom: 8 }}>
+          <input value={roleInput} onChange={e => setRoleInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addRole()} placeholder="e.g. Marketing Manager, Software Engineer..." style={{ ...inputStyle, marginBottom: 8 }} />
+          <button onClick={addRole} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '12px 16px', color: '#fff', cursor: 'pointer', fontSize: 14, fontWeight: 600, minHeight: 'auto', width: '100%' }}>+ Add Role</button>
         </div>
         {form.target_roles.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
