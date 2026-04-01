@@ -139,6 +139,15 @@ export default function ParentOnboarding() {
         }).catch(() => {});
       } catch {}
 
+      // Send parent welcome email (non-blocking)
+      try {
+        base44.functions.invoke('sendParentWelcomeEmail', {
+          userEmail: user.email,
+          firstName: formData.fullName.split(' ')[0],
+          studentName: invitedStudents.length > 0 ? invitedStudents[0].name : '',
+        }).catch(() => {});
+      } catch {}
+
       // Clean up invite session data
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
