@@ -5,8 +5,14 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  console.log('resume_url:', user?.resume_url);
-  console.log('hasResume:', !!user?.resume_url);
+  // Check for resume in Resume entity
+  const resumes = await base44.entities.Resume.filter({ 
+    created_by: user?.email 
+  }).catch(() => []);
+
+  const hasResumeRecord = resumes.length > 0;
+  const primaryResume = resumes.find(r => r.is_active) || resumes[0];
+  const resumeScoreFromEntity = primaryResume?.score || null;
 
   const {
     firstName,
@@ -14,7 +20,7 @@ Deno.serve(async (req) => {
     lastLoginDays,
     pendingFollowUps,
     unreadMessages,
-    resumeScore,
+    resumeScore: receivedResumeScore,
     archetypeName,
     targetRoles,
     targetCompanies,
@@ -23,6 +29,10 @@ Deno.serve(async (req) => {
     newAlumniCount,
     outreachStats,
   } = await req.json();
+
+  // Override with actual Resume entity data
+  const actualResumeScore = resumeScoreFromEntity || receivedResumeScore || null;
+  completionState.hasResume = hasResumeRecord;
 
   const stateContext = `
 STUDENT PROFILE:
@@ -36,7 +46,7 @@ STUDENT PROFILE:
 COMPLETION STATE:
 - Career goals set: ${completionState.hasGoals}
 - Resume uploaded: ${completionState.hasResume}
-- Resume score: ${resumeScore || 'not scored'}
+- Resume score: ${actualResumeScore || 'not scored'}
 - Has searched alumni: ${completionState.hasSearchedAlumni}
 - Has messaged a connection: ${completionState.hasMessaged}
 - Has drafted outreach: ${completionState.hasDraftedOutreach}
