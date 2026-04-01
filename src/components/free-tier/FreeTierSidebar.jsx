@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin, BookOpen, Search } from 'lucide-react';
+import { Home, Building2, Map, GraduationCap, Target, Users, MessageSquare, Settings, LogOut, Lock, Sparkles, Zap, FileText, Mic, Linkedin, BookOpen, Search, Mail } from 'lucide-react';
 import UserAvatar from '@/components/common/UserAvatar';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
@@ -15,6 +15,7 @@ const FREE_NAV_ITEMS = [
   { id: 'career_center', icon: GraduationCap, label: 'Career Center' },
   { id: 'directory', icon: Users, label: 'CFF Connections' },
   { id: 'messages', icon: MessageSquare, label: 'Messages' },
+  { id: 'outreach', icon: Mail, label: 'Outreach Drafts', isPage: true, page: 'OutreachDrafts' },
 ];
 
 const CONCIERGE_SUBTABS = [
