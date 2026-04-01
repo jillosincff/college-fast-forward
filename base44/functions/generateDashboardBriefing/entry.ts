@@ -5,6 +5,9 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+  console.log('resume_url:', user?.resume_url);
+  console.log('hasResume:', !!user?.resume_url);
+
   const {
     firstName,
     completionState,
