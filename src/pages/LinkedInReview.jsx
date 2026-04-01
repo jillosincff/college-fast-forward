@@ -32,6 +32,31 @@ function SideNav() {
 const scoreColor = (score) =>
   score >= 80 ? '#22C55E' : score >= 60 ? '#F59E0B' : '#EF4444';
 
+const feedbackStyle = { fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '0 0 12px', lineHeight: 1.5 };
+
+function SectionCard({ title, score, children }) {
+  if (score === undefined) return null;
+  const color = score >= 80 ? '#22C55E' : score >= 60 ? '#F59E0B' : '#EF4444';
+  return (
+    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{title}</p>
+        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color }}>{score}/100</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function SuggestedBox({ label, children }) {
+  return (
+    <div style={{ background: '#F0FFF4', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, padding: '10px 14px' }}>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#22C55E', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>✨ {label}</p>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0, fontWeight: 600 }}>{children}</p>
+    </div>
+  );
+}
+
 export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const { user } = useAuth();
   const onOpenUpgrade = onOpenUpgradeProp || (() => {});
@@ -276,31 +301,6 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
         </div>
       )}
       </div>
-    </div>
-  );
-}
-
-const feedbackStyle = { fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: '0 0 12px', lineHeight: 1.5 };
-
-function SectionCard({ title, score, children }) {
-  if (score === undefined) return null;
-  const color = score >= 80 ? '#22C55E' : score >= 60 ? '#F59E0B' : '#EF4444';
-  return (
-    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px 24px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{title}</p>
-        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color }}>{score}/100</span>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function SuggestedBox({ label, children }) {
-  return (
-    <div style={{ background: '#F0FFF4', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 8, padding: '10px 14px' }}>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#22C55E', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>✨ {label}</p>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0, fontWeight: 600 }}>{children}</p>
     </div>
   );
 }
