@@ -308,6 +308,9 @@ export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
         </span>
       </button>
 
+      {/* Spacer pushes CTA to bottom */}
+      <div style={{ flex: 1 }} />
+
       {/* FastIQ upgrade CTA for free users */}
       {!isFastIQ && (
         <div style={{
