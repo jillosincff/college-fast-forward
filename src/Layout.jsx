@@ -173,6 +173,7 @@ const CareerAssessment = React.lazy(() => import('./pages/CareerAssessment'));
 const ApplicationBoost = React.lazy(() => import('./pages/ApplicationBoost'));
 const StudentInvitedOnboarding = React.lazy(() => import('./pages/StudentInvitedOnboarding'));
 const FreeTierDashboard = React.lazy(() => import('./pages/FreeTierDashboard'));
+const FastIQDashboard = React.lazy(() => import('./pages/FastIQDashboard'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -587,6 +588,7 @@ const getPageComponent = (pageName) => {
     case 'ApplicationBoost': return ApplicationBoost;
     case 'StudentInvitedOnboarding': return StudentInvitedOnboarding;
     case 'FreeTierDashboard': return FreeTierDashboard;
+    case 'FastIQDashboard': return FastIQDashboard;
     default: return LandingPage;
   }
 };
