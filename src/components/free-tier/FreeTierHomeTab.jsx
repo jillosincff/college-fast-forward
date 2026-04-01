@@ -16,10 +16,42 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
   const [sendingNudge, setSendingNudge] = useState(false);
   const [showParentModal, setShowParentModal] = useState(false);
   const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
+  const [briefing, setBriefing] = useState(() => {
+    try { return sessionStorage.getItem('fastiq_briefing') || null; } catch { return null; }
+  });
+  const [briefingLoading, setBriefingLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    
+
+    // Generate AI briefing if not cached
+    if (!briefing) {
+      setBriefingLoading(true);
+      const completedCount = Object.values(completedSteps).filter(Boolean).length;
+      base44.integrations.Core.InvokeLLM({
+        prompt: `You are FastIQ, a career AI for college students. Write a personalized 2-3 sentence dashboard briefing for this student. Be specific, encouraging, and action-oriented. Use their name naturally.
+
+Student: ${user.full_name || 'Student'}
+Major: ${user.major || 'undeclared'}
+Target roles: ${user.career_goals?.target_roles?.join(', ') || 'not set'}
+Target industries: ${user.career_goals?.target_industries?.join(', ') || 'not set'}
+Target companies: ${user.career_goals?.target_companies?.join(', ') || 'not set'}
+Graduation year: ${user.career_goals?.graduation_year || 'not set'}
+Has resume: ${!!user.resume_url}
+Alumni search used: ${!!user.alumni_search_used}
+Setup steps completed: ${completedCount} of 6
+Biggest struggle: ${user.career_goals?.biggest_struggle || 'not specified'}
+
+Write only the briefing text. No quotes, no labels, no intro. 2-3 sentences max.`,
+      }).then(text => {
+        const msg = typeof text === 'string' ? text.trim() : '';
+        if (msg) {
+          setBriefing(msg);
+          try { sessionStorage.setItem('fastiq_briefing', msg); } catch {}
+        }
+      }).catch(() => {}).finally(() => setBriefingLoading(false));
+    }
+
     // Don't show banner for users less than 24h old
     const accountAgeDays = user.created_date ? (Date.now() - new Date(user.created_date).getTime()) / (1000 * 60 * 60 * 24) : 0;
     if (accountAgeDays < 1) {
@@ -28,11 +60,11 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
     }
     
     // Show if career goals completed OR user has visited 2+ pages/features
-    const hasGoals = !!(user?.career_goals?.saved_at);
+    const hasGoals2 = !!(user?.career_goals?.saved_at);
     const visitCount = (user?.platform_visit_count || 0);
     const hasExploredFeatures = visitCount >= 2;
     
-    if (hasGoals || hasExploredFeatures) {
+    if (hasGoals2 || hasExploredFeatures) {
       setShowUpgradeBanner(true);
     } else {
       setShowUpgradeBanner(false);
@@ -98,18 +130,20 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
   const industries = user?.career_goals?.target_industries || [];
   const location = user?.career_goals?.location_preference || '';
 
-  // Hero copy based on state
+  // Hero copy — static title, dynamic AI sub
   const heroTitle = allStepsComplete
-    ? `Hey ${firstName}. You're ready. Now let's get you hired.`
+    ? `Hey ${firstName}. You're ready.`
     : hasGoals
     ? `Hey ${firstName}. You're on your way.`
     : `Hey ${firstName}. Let's get you hired.`;
 
-  const heroSub = allStepsComplete
-    ? 'All steps complete. Time to activate your network.'
-    : hasGoals
-    ? `You're working through the plan. Keep going — every step unlocks something.`
-    : `No more applying into the void. We'll help you figure out what you want, get your story straight, and connect with the right people — step by step.`;
+  const heroSub = briefing || (
+    allStepsComplete
+      ? 'All steps complete. Time to activate your network.'
+      : hasGoals
+      ? `You're working through the plan. Keep going — every step unlocks something.`
+      : `No more applying into the void. We'll help you figure out what you want, get your story straight, and connect with the right people — step by step.`
+  );
 
   return (
     <div>
@@ -135,14 +169,23 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         }}>
           {heroTitle}
         </h1>
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 'clamp(13px, 3vw, 15px)', color: 'rgba(255,255,255,0.6)',
-          margin: '0 auto', lineHeight: 1.6,
-          maxWidth: 500, padding: '0 16px'
-        }}>
-          {heroSub}
-        </p>
+        {briefingLoading && !briefing ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, margin: '0 auto', maxWidth: 500 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'pulse 1.2s ease-in-out 0s infinite' }} />
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'pulse 1.2s ease-in-out 0.2s infinite' }} />
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', animation: 'pulse 1.2s ease-in-out 0.4s infinite' }} />
+            <style>{`@keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }`}</style>
+          </div>
+        ) : (
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 'clamp(13px, 3vw, 15px)', color: 'rgba(255,255,255,0.6)',
+            margin: '0 auto', lineHeight: 1.6,
+            maxWidth: 500, padding: '0 16px'
+          }}>
+            {heroSub}
+          </p>
+        )}
       </div>
 
       {/* Parent Email Modal */}
