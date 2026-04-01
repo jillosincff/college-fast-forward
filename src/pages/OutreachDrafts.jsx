@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 
 const CONTEXTS = [
@@ -24,7 +25,9 @@ const STATUS_LABELS = {
   archived: 'Archived',
 };
 
-export default function OutreachDrafts({ user, onOpenUpgrade }) {
+export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
+  const { user: authUser } = useAuth();
+  const user = userProp || authUser;
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState('list'); // list | new | compose | followup
