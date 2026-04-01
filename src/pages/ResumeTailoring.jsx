@@ -92,9 +92,14 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           setResumeText(active.parsed_text || '');
           setFileName(active.original_file_name || 'Resume on file');
           setResumeId(active.id);
-          const cached = localStorage.getItem(`resume_analysis_${active.id}`);
-          if (cached) {
-            try { setAnalysis(JSON.parse(cached)); } catch (e) {}
+          // Load analysis from entity first, fallback to localStorage
+          if (active.analysis_data) {
+            setAnalysis(active.analysis_data);
+          } else {
+            const cached = localStorage.getItem(`resume_analysis_${active.id}`);
+            if (cached) {
+              try { setAnalysis(JSON.parse(cached)); } catch (e) {}
+            }
           }
           setPhase('hub');
         } else {
@@ -137,6 +142,8 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         if (res?.data?.analysis) {
           setAnalysis(res.data.analysis);
           localStorage.setItem(`resume_analysis_${primaryResume.id}`, JSON.stringify(res.data.analysis));
+          // Persist to entity so it survives re-mounts
+          base44.entities.Resume.update(primaryResume.id, { analysis_data: res.data.analysis }).catch(() => {});
         } else {
           setAnalysisError(true);
         }
@@ -177,11 +184,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       });
       setResumes(prev => [...prev, newResume]);
       setResumeId(newResume.id);
-      // Clear cache for this new resume so analysis runs fresh
+      // New resume — clear any cached analysis so it runs fresh
       localStorage.removeItem(`resume_analysis_${newResume.id}`);
       setAnalysis(null);
       setAnalysisError(false);
-      setPhase('hub');
     } catch (e) {
       console.error('Upload failed:', e);
       setPhase(hasResumes ? 'hub' : 'entry');
