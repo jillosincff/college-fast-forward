@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { generateDashboardBriefing } from '@/functions/generateDashboardBriefing';
 import { Loader2, X } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
@@ -27,27 +28,38 @@ export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange }) {
     // Generate AI briefing if not cached
     if (!briefing) {
       setBriefingLoading(true);
-      const completedCount = Object.values(completedSteps).filter(Boolean).length;
-      base44.integrations.Core.InvokeLLM({
-        prompt: `You are FastIQ, a career AI for college students. Write a personalized 2-3 sentence dashboard briefing for this student. Be specific, encouraging, and action-oriented. Use their name naturally.
-
-Student: ${user.full_name || 'Student'}
-Major: ${user.major || 'undeclared'}
-Target roles: ${user.career_goals?.target_roles?.join(', ') || 'not set'}
-Target industries: ${user.career_goals?.target_industries?.join(', ') || 'not set'}
-Target companies: ${user.career_goals?.target_companies?.join(', ') || 'not set'}
-Graduation year: ${user.career_goals?.graduation_year || 'not set'}
-Has resume: ${!!user.resume_url}
-Alumni search used: ${!!user.alumni_search_used}
-Setup steps completed: ${completedCount} of 6
-Biggest struggle: ${user.career_goals?.biggest_struggle || 'not specified'}
-
-Write only the briefing text. No quotes, no labels, no intro. 2-3 sentences max.`,
-      }).then(text => {
-        const msg = typeof text === 'string' ? text.trim() : '';
-        if (msg) {
-          setBriefing(msg);
-          try { sessionStorage.setItem('fastiq_briefing', msg); } catch {}
+      const lastLoginDays = user.last_login_at
+        ? Math.floor((Date.now() - new Date(user.last_login_at).getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+      generateDashboardBriefing({
+        firstName,
+        completionState: {
+          hasGoals,
+          hasResume,
+          hasSearchedAlumni: !!user.alumni_search_used,
+          hasMessaged: !!user.leads_viewed,
+          hasDraftedOutreach: false,
+          isFastIQ: fastiq,
+          hasArchetype: !!user.career_archetype,
+          hasLinkedInReview: !!user.linkedin_reviewed,
+          hasMockInterview: !!user.mock_interview_done,
+        },
+        lastLoginDays,
+        pendingFollowUps: 0,
+        unreadMessages: 0,
+        resumeScore: null,
+        archetypeName: user.career_archetype || null,
+        targetRoles: user.career_goals?.target_roles || [],
+        targetCompanies: user.career_goals?.target_companies || [],
+        targetIndustries: user.career_goals?.target_industries || [],
+        graduationYear: user.career_goals?.graduation_year || null,
+        newAlumniCount: 0,
+        outreachStats: { sent: 0, replied: 0 },
+      }).then(res => {
+        const greeting = res?.data?.briefing?.greeting;
+        if (greeting) {
+          setBriefing(greeting);
+          try { sessionStorage.setItem('fastiq_briefing', greeting); } catch {}
         }
       }).catch(() => {}).finally(() => setBriefingLoading(false));
     }

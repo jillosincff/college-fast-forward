@@ -5,8 +5,6 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const ANTHROPIC_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-
   const {
     firstName,
     completionState,
@@ -90,22 +88,10 @@ Respond with ONLY a JSON object:
   "cta_page": "<page name to navigate to e.g. 'ResumeTailoring' or 'AlumniSearch'>"
 }`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'claude-opus-4-20250514',
-      max_tokens: 300,
-      messages: [{ role: 'user', content: prompt }],
-    }),
+  const text = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt,
+    model: 'claude_sonnet_4_6',
   });
-
-  const data = await response.json();
-  const text = data.content?.[0]?.text || '{}';
 
   try {
     const briefing = JSON.parse(text.replace(/```json|```/g, '').trim());
