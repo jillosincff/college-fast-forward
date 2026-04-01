@@ -12,8 +12,25 @@ Deno.serve(async (req) => {
 
   const hasResumeRecord = resumes.length > 0;
   const primaryResume = resumes.find(r => r.is_active) || resumes[0];
-  console.log('analysis_data:', JSON.stringify(primaryResume?.analysis_data, null, 2));
+  const hasAnalysis = !!primaryResume?.analysis_data;
   const resumeScoreFromEntity = primaryResume?.analysis_data?.score || primaryResume?.score || null;
+
+  // Auto-trigger analysis if resume exists but no analysis yet
+  if (hasResumeRecord && !hasAnalysis && primaryResume?.parsed_text) {
+    const { isFastIQ } = await req.json().catch(() => ({}));
+    if (isFastIQ) {
+      base44.asServiceRole.functions.invoke('analyzeResumeAgainstGoals', {
+        resumeText: primaryResume.parsed_text,
+        careerGoals: user?.career_goals,
+      }).then(async (res) => {
+        if (res?.data?.analysis) {
+          await base44.asServiceRole.entities.Resume.update(primaryResume.id, {
+            analysis_data: res.data.analysis,
+          }).catch(() => {});
+        }
+      }).catch(() => {}); // fire and forget
+    }
+  }
 
   const {
     firstName,
@@ -29,11 +46,13 @@ Deno.serve(async (req) => {
     graduationYear,
     newAlumniCount,
     outreachStats,
+    isFastIQ,
   } = await req.json();
 
   // Override with actual Resume entity data
   const actualResumeScore = resumeScoreFromEntity || receivedResumeScore || null;
   completionState.hasResume = hasResumeRecord;
+  completionState.hasResumeAnalysis = hasAnalysis;
 
   const stateContext = `
 STUDENT PROFILE:
@@ -47,7 +66,8 @@ STUDENT PROFILE:
 COMPLETION STATE:
 - Career goals set: ${completionState.hasGoals}
 - Resume uploaded: ${completionState.hasResume}
-- Resume score: ${actualResumeScore || 'not scored'}
+- Resume analyzed: ${completionState.hasResumeAnalysis}
+- Resume score: ${actualResumeScore || 'analyzing...'}
 - Has searched alumni: ${completionState.hasSearchedAlumni}
 - Has messaged a connection: ${completionState.hasMessaged}
 - Has drafted outreach: ${completionState.hasDraftedOutreach}
@@ -81,7 +101,7 @@ Write a briefing that is:
 BRIEFING RULES BY STATE:
 - No goals set → push hard to set goals, it unlocks everything
 - Goals set, no resume → praise goals, push resume upload
-- Resume uploaded, not scored → push resume score
+- Resume uploaded, analyzing → acknowledge the upload, say analysis is underway, push next action
 - Resume scored, no alumni search → reference their score + push alumni search at target companies
 - Has searched alumni, no outreach → push drafting a message to someone specific
 - Has outreach sent, no reply → nudge follow-up if 5+ days

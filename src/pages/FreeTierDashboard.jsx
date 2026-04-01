@@ -86,7 +86,9 @@ export default function FreeTierDashboard() {
           targetCompanies: user?.career_goals?.target_companies,
           targetIndustries: user?.career_goals?.target_industries,
           graduationYear: user?.career_goals?.graduation_year,
+          newAlumniCount: 0,
           outreachStats,
+          isFastIQ,
         });
 
         if (res?.data?.success) {
