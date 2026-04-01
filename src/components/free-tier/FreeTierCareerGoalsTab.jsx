@@ -273,9 +273,9 @@ export default function FreeTierCareerGoalsTab({ user, onGoalsSaved, onTabChange
       {/* Target Companies */}
       <div style={sectionStyle}>
         <label style={labelStyle}>Any dream companies?</label>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-          <input value={companyInput} onChange={e => setCompanyInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCompany()} placeholder="e.g. Google, Goldman Sachs, Nike..." style={{ ...inputStyle, flex: 1 }} />
-          <button onClick={addCompany} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '0 16px', color: '#fff', cursor: 'pointer', fontSize: 22, fontWeight: 300, minHeight: 'auto' }}>+</button>
+        <div style={{ marginBottom: 8 }}>
+          <input value={companyInput} onChange={e => setCompanyInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCompany()} placeholder="e.g. Google, Goldman Sachs, Nike..." style={{ ...inputStyle, marginBottom: 8 }} />
+          <button onClick={addCompany} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '12px 16px', color: '#fff', cursor: 'pointer', fontSize: 14, fontWeight: 600, minHeight: 'auto', width: '100%' }}>+ Add Company</button>
         </div>
         {form.target_companies.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
