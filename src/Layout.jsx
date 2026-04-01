@@ -708,6 +708,9 @@ function AppContent() {
 
     if (currentPage === 'GatorAuth') { setResolvedPage(currentPage); return; }
 
+    // Admin users bypass all persona/onboarding checks
+    if (user?.roles?.includes('admin')) { setResolvedPage(currentPage); return; }
+
     // Auth loop protection
     const oauthAttempts = parseInt(localStorage.getItem('oauth_attempt_count') || '0');
     const oauthStartTime = parseInt(localStorage.getItem('oauth_start_time') || '0');
@@ -746,7 +749,7 @@ function AppContent() {
     // Pledge page is part of onboarding flow only — never force returning users back to it
     // Parents who haven't taken the pledge will see a gentle nudge on their dashboard instead
 
-    if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard') { setResolvedPage(currentPage); return; }
+    if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
     const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
