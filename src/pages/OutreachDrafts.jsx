@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { generateOutreachMessage } from '@/functions/generateOutreachMessage';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
@@ -238,30 +239,21 @@ function NewDraftModal({ user, onClose, onCreated }) {
     if (!form.recipient_name || !form.recipient_company) return;
     setGenerating(true);
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Write a concise, warm, and personalized outreach message for a college student at University of Florida.
-
-Student: ${user?.full_name || 'A UF student'}
-Major: ${user?.major || user?.career_goals?.major || 'undeclared'}
-Target roles: ${user?.career_goals?.target_roles?.join(', ') || 'open roles'}
-
-Recipient: ${form.recipient_name}
-Title: ${form.recipient_title || 'professional'}
-Company: ${form.recipient_company}
-Context: ${CONTEXT_LABELS[form.context]}
-${form.job_url ? `Job URL: ${form.job_url}` : ''}
-
-Rules:
-- Keep it under 150 words
-- Sound natural and human, not like a template
-- Reference their company specifically
-- Have a clear, low-friction ask (15-min call, advice, coffee chat)
-- Do NOT use "I hope this message finds you well" or clichés
-- Sign off with the student's first name only
-
-Return only the message text.`,
+      const res = await generateOutreachMessage({
+        context: form.context,
+        recipientName: form.recipient_name,
+        recipientTitle: form.recipient_title,
+        recipientCompany: form.recipient_company,
+        studentName: user?.full_name,
+        studentMajor: user?.major || user?.career_goals?.major,
+        targetRole: user?.career_goals?.target_roles?.[0],
+        targetIndustry: user?.career_goals?.target_industries?.[0],
+        graduationYear: user?.career_goals?.graduation_year,
+        school: user?.school || 'University of Florida',
+        jobTitle: form.job_url ? 'role of interest' : undefined,
+        jobUrl: form.job_url,
       });
-      setGeneratedMessage(typeof result === 'string' ? result : result?.response || '');
+      setGeneratedMessage(res?.data?.message || '');
     } catch (e) {
       setGeneratedMessage('');
     }
