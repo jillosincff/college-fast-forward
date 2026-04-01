@@ -82,7 +82,20 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
         alumniTitle: alum.headline,
         alumniCompany: alum.company || '',
       });
-      return res?.data?.message || res?.message || '';
+      const draft = res?.data?.message || res?.message || '';
+      if (draft) {
+        base44.entities.OutreachDraft.create({
+          created_by: user?.email,
+          recipient_name: alum.full_name,
+          recipient_title: alum.headline,
+          recipient_company: alum.company || '',
+          recipient_linkedin_url: alum.linkedin_url || '',
+          context: alum.cff_user_id ? 'cff_connection' : 'alumni_search',
+          message: draft,
+          status: 'draft',
+        }).catch(() => {});
+      }
+      return draft;
     } catch { return ''; }
   };
 

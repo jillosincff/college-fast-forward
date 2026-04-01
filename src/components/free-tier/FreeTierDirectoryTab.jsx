@@ -103,6 +103,16 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   const handleSendMessage = async () => {
     if (!messaging || !draft.trim() || sending) return;
     setSending(true);
+    base44.entities.OutreachDraft.create({
+      created_by: user?.email,
+      recipient_name: messaging.full_name,
+      recipient_title: messaging.job_title || messaging.current_position || '',
+      recipient_company: messaging.company || messaging.current_company || '',
+      recipient_linkedin_url: messaging.linkedin_url || '',
+      context: 'cff_connection',
+      message: draft,
+      status: 'draft',
+    }).catch(() => {});
     try {
       const convo = await base44.entities.Conversation.create({
         participant_emails: [user.email, messaging.email].filter(Boolean),
