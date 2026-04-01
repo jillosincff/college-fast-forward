@@ -30,6 +30,16 @@ export default function FreeTierDashboard() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [briefing, setBriefing] = useState(null);
   const [briefingLoading, setBriefingLoading] = useState(true);
+
+  const getLastLoginDays = () => {
+    const lastLogin = localStorage.getItem('cff_last_login');
+    if (!lastLogin) return 0;
+    return Math.floor((Date.now() - new Date(lastLogin).getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  useEffect(() => {
+    localStorage.setItem('cff_last_login', new Date().toISOString());
+  }, []);
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
   const [showConciergeModal, setShowConciergeModal] = useState(false);
   const [savedGoals, setSavedGoals] = useState(null);
