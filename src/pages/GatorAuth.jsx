@@ -166,11 +166,14 @@ export default function GatorAuth() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // app-params.js now handles OAuth token extraction from hash fragment
-        const me = await base44.auth.me();
+        // Race auth.me() against a timeout to avoid hanging after OAuth redirect
+        const me = await Promise.race([
+          base44.auth.me(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+        ]);
         setUser(me || null);
       } catch (e) {
-        console.warn('No user authenticated yet');
+        console.warn('No user authenticated yet or timeout:', e.message);
         setUser(null);
       }
       setIsLoading(false);
