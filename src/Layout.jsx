@@ -727,7 +727,7 @@ function AppContent() {
     }
 
     if (user && !user.persona?.trim()) {
-      if (newUserFlowPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
+      if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
       const pendingInviteRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
       const pendingInviteCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
       if (pendingInviteRole && pendingInviteCode) { navigate('GatorWelcome'); return; }
