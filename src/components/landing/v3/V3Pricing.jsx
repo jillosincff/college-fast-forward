@@ -172,9 +172,9 @@ export default function V3Pricing({ onCTA }) {
             highlighted
             name="FastIQ™"
             price="$29/mo"
-            descriptor="Start free for 7 days — then $29/month. Cancel anytime."
+            descriptor="$29/month. Cancel anytime."
             subhead="The full system. For families ready to act."
-            cta={{ text: 'Start Your Free Trial', onClick: onCTA }}
+            cta={{ text: 'Get Started with FastIQ', onClick: onCTA }}
             ctaStyle="solid"
             finePrint="Cancel anytime."
           >
