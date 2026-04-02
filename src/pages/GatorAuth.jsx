@@ -197,6 +197,16 @@ export default function GatorAuth() {
     }
     
     if (user && !user.persona) {
+      // After OAuth — check if role was already selected before sign-in
+      const pendingRole = localStorage.getItem('pending_invite_role');
+      if (pendingRole === 'parent') {
+        navigate('ParentOnboarding');
+        return;
+      }
+      if (pendingRole === 'gator') {
+        navigate('StudentOnboarding');
+        return;
+      }
       setStep('role-select');
       return;
     }
