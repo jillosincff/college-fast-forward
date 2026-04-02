@@ -63,7 +63,7 @@ export default function ParentOnboarding() {
     }
 
     await base44.auth.updateMe(updateData);
-    if (refreshUser) await refreshUser();
+    // Don't call refreshUser here — it remounts this component and resets step state
     setStep(2);
   };
 
@@ -159,9 +159,9 @@ export default function ParentOnboarding() {
       console.error('Failed to complete onboarding:', error);
     }
 
+    // Don't call refreshUser here — it causes Layout to remount this component and reset step.
+    // User gets a fresh auth context when they navigate to ParentHome from the welcome screen.
     setStep(3);
-    // Refresh in background — don't await or Layout will redirect before step 3 renders
-    if (refreshUser) refreshUser().catch(() => {});
   };
 
   const handleProfile = () => navigate('ParentHome');
