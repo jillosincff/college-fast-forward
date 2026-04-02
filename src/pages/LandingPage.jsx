@@ -35,6 +35,8 @@ export default function LandingPage() {
   }, []);
 
   const handleCTA = () => { trackEvent('cta_start_trial_clicked'); navigate('GetStarted'); };
+  const handleParentCTA = () => { trackEvent('cta_parent_clicked'); navigate('ParentOnboarding'); };
+  const handleStudentCTA = () => { trackEvent('cta_student_clicked'); navigate('StudentOnboarding'); };
   const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GetStarted'); };
   const scrollToHowItWorks = () => {
     const el = document.getElementById('how-it-works');
@@ -54,7 +56,7 @@ export default function LandingPage() {
         <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleCTA} />
 
         {/* 1 — Hero */}
-        <V3Hero onCTA={handleCTA} onHowItWorks={scrollToHowItWorks} />
+        <V3Hero onCTA={handleCTA} onParentCTA={handleParentCTA} onStudentCTA={handleStudentCTA} onHowItWorks={scrollToHowItWorks} />
 
 
 

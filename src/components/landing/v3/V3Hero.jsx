@@ -5,7 +5,9 @@ import V3HeroTypingBox from './V3HeroTypingBox';
 const dmSans = '"DM Sans", system-ui, sans-serif';
 const playfair = '"Playfair Display", Georgia, serif';
 
-export default function V3Hero({ onCTA }) {
+export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
+  const handleParent = onParentCTA || onCTA;
+  const handleStudent = onStudentCTA || onCTA;
   return (
     <section
       style={{
@@ -74,44 +76,49 @@ export default function V3Hero({ onCTA }) {
 
         {/* DUAL-PATH CTAs */}
         <div className="hf" style={{ animationDelay: '1800ms', marginBottom: 52 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
-            {/* Parent CTA — orange */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: 380, margin: '0 auto' }}>
+            {/* Parent CTA */}
             <button
-              onClick={onCTA}
-              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
-              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              onClick={handleParent}
+              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; }}
+              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               style={{
-                fontFamily: dmSans, fontSize: 15, fontWeight: 700,
+                fontFamily: dmSans, fontSize: 15, fontWeight: 600,
                 background: '#E85D20', color: '#fff',
-                padding: '15px 28px', borderRadius: 100, border: 'none',
-                cursor: 'pointer', transition: 'all 0.25s ease',
-                minHeight: 'auto', minWidth: 'auto', width: 'auto',
-                lineHeight: 1.3,
+                padding: '16px 32px', borderRadius: 12, border: 'none',
+                cursor: 'pointer', transition: 'filter 0.2s ease',
+                minHeight: 'auto', minWidth: 'auto', width: '100%',
+                marginBottom: 12,
               }}
             >
-              Activate FASTIQ for My Student – 7-Day Free Trial
+              Help my student get hired →
             </button>
-            {/* Student CTA — teal */}
+            {/* Student CTA */}
             <button
-              onClick={onCTA}
-              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
-              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              onClick={handleStudent}
+              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.95)'; }}
+              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
               style={{
-                fontFamily: dmSans, fontSize: 15, fontWeight: 700,
-                background: 'transparent', color: 'rgba(255,255,255,0.85)',
-                padding: '15px 28px', borderRadius: 100,
-                border: '2px solid rgba(255,255,255,0.4)',
-                cursor: 'pointer', transition: 'all 0.25s ease',
-                minHeight: 'auto', minWidth: 'auto', width: 'auto',
-                lineHeight: 1.3,
+                fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+                background: '#fff', color: '#E85D20',
+                padding: '16px 32px', borderRadius: 12,
+                border: '2px solid #E85D20',
+                cursor: 'pointer', transition: 'filter 0.2s ease',
+                minHeight: 'auto', minWidth: 'auto', width: '100%',
+                marginBottom: 20,
               }}
             >
-              I'm the Student – Start Free Trial
+              I'm the student →
             </button>
+            {/* Trust line */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
+              {['✓ Free to join', '✓ No credit card', '✓ Upgrade anytime'].map(item => (
+                <p key={item} style={{ fontFamily: dmSans, fontSize: 12, color: '#888', margin: 0, fontWeight: 500 }}>
+                  {item}
+                </p>
+              ))}
+            </div>
           </div>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888888', marginTop: 14, marginBottom: 0 }}>
-            Free to join. FastIQ from $29/mo. 7-day trial included.
-          </p>
         </div>
 
         {/* ALUMNI DEMO */}
