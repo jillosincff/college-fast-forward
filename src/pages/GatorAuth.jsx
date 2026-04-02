@@ -166,14 +166,10 @@ export default function GatorAuth() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        // Race auth.me() against a timeout to avoid hanging after OAuth redirect
-        const me = await Promise.race([
-          base44.auth.me(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
-        ]);
+        const me = await base44.auth.me();
         setUser(me || null);
       } catch (e) {
-        console.warn('No user authenticated yet or timeout:', e.message);
+        console.warn('No user authenticated yet');
         setUser(null);
       }
       setIsLoading(false);
@@ -200,13 +196,8 @@ export default function GatorAuth() {
     }
     
     if (user && !user.persona) {
-      // After OAuth — read role from URL params first (most reliable), then fallback to storage
-      const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-      const urlRole = hashParams.get('role');
-      const pendingRole = urlRole || localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      if (pendingRole) {
-        try { localStorage.setItem('pending_invite_role', pendingRole); } catch (e) {}
-      }
+      // After OAuth — read role from sessionStorage (reliable same-tab) or localStorage
+      const pendingRole = sessionStorage.getItem('pending_invite_role') || localStorage.getItem('pending_invite_role');
       if (pendingRole === 'parent') {
         navigate('ParentOnboarding');
         return;
@@ -226,11 +217,12 @@ export default function GatorAuth() {
   const handleGoogleSignIn = () => {
     const role = selectedRole || '';
     if (role) {
-      try { localStorage.setItem('pending_invite_role', role); } catch (e) {}
+      // sessionStorage persists within the same tab across OAuth redirects
       try { sessionStorage.setItem('pending_invite_role', role); } catch (e) {}
+      try { localStorage.setItem('pending_invite_role', role); } catch (e) {}
     }
-    // Encode role in callback URL so it survives the OAuth redirect
-    const callbackUrl = window.location.origin + '/#GetStarted?role=' + role;
+    // Keep callback URL clean — no extra params that could break OAuth token parsing
+    const callbackUrl = window.location.origin + '/#GetStarted';
     base44.auth.redirectToLogin(callbackUrl);
   };
 
