@@ -47,7 +47,7 @@ export default function LandingPage() {
     <>
       <SocialMetaTags
         title="College Fast Forward — FastIQ: Direction, Action, and Real Progress for Your Student"
-        description="FastIQ gives your student clear direction, daily actions, and real outreach. 7-day free trial. No credit card required."
+        description="College Fast Forward connects students with parents and alumni who want to help. Free to join. FastIQ AI upgrade from $29/month."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />

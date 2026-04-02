@@ -294,7 +294,7 @@ export default function GatorAuth() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 28 }}>
             {roles.map((r, i) => <RoleCard key={r.id} role={r} index={i} onClick={() => handleCardClick(r.id)} />)}
           </div>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>Free to join. FastIQ unlocks the full AI career engine — try it free for 7 days.</p>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.3)', textAlign: 'center', lineHeight: 1.5, marginBottom: 24 }}>Free to join. FastIQ is our optional AI upgrade for students who want to move faster.</p>
           {loading && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '8px 0 16px' }}><Loader2 className="w-5 h-5 animate-spin" style={{ color: ACCENT }} /><span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: 'rgba(255,255,255,0.4)' }}>Setting up...</span></div>}
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', marginBottom: 20 }} />
           <FinePrint />
