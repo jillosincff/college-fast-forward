@@ -155,12 +155,13 @@ export default function ParentOnboarding() {
       sessionStorage.removeItem('pending_invite_role');
       sessionStorage.removeItem('pending_invite_code');
 
-      if (refreshUser) await refreshUser();
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
     }
 
     setStep(3);
+    // Refresh in background — don't await or Layout will redirect before step 3 renders
+    if (refreshUser) refreshUser().catch(() => {});
   };
 
   const handleProfile = () => navigate('ParentHome');
