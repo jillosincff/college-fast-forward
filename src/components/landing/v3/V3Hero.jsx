@@ -49,28 +49,27 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#4F8CFF', margin: '4px 0 0', letterSpacing: 'normal' }}>
             powered by{' '}
             <span style={{ color: '#E85D20' }}>
-              FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>™</sup>
+              FastIQ<sup style={{ fontSize: '0.7em', verticalAlign: 'super', lineHeight: 0 }}>&#8482;</sup>
             </span>
           </p>
         </div>
-
 
         {/* HEADLINE */}
         <div className="hf" style={{ animationDelay: '1100ms', marginBottom: 20 }}>
           <h1 style={{
             fontFamily: playfair, fontWeight: 700,
-            fontSize: 'clamp(28px, 5vw, 42px)',
+            fontSize: 'clamp(28px, 5vw, 48px)',
             letterSpacing: '-0.02em', lineHeight: 1.2,
             color: '#fff', margin: 0,
           }}>
-            A smarter way to land internships and jobs&nbsp;— powered by parent connections and AI.
+            One warm intro beats<br />100 cold applications.
           </h1>
         </div>
 
         {/* BODY LINE */}
         <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 36 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.65, margin: 0, maxWidth: 680, marginLeft: 'auto', marginRight: 'auto', textAlign: 'center' }}>
-            The tech they want with the connections they need.
+          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.65, margin: '0 auto', maxWidth: 520, textAlign: 'center' }}>
+            College Fast Forward connects students with parents and alumni who want to help &mdash; and AI that makes every step faster.
           </p>
         </div>
 
@@ -91,7 +90,7 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
                 marginBottom: 12,
               }}
             >
-              Help my student get hired →
+              Help my student get hired &rarr;
             </button>
             {/* Student CTA */}
             <button
@@ -108,7 +107,7 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
                 marginBottom: 20,
               }}
             >
-              I'm the student →
+              I&apos;m the student &rarr;
             </button>
             {/* Trust line */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
@@ -122,10 +121,10 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
         </div>
 
         {/* TRUST BANNER */}
-        <div className="hf" style={{ animationDelay: '1900ms', marginBottom: 28, maxWidth: 480, margin: '0 auto 28px' }}>
+        <div className="hf" style={{ animationDelay: '1900ms', maxWidth: 480, margin: '0 auto 28px' }}>
           <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '14px 20px', textAlign: 'center' }}>
             <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>
-              🎓 <strong style={{ color: '#fff' }}>College Fast Forward is free.</strong> Always. No credit card needed to join. FastIQ is our optional AI upgrade for students who want to move faster.
+              &#127892; <strong style={{ color: '#fff' }}>College Fast Forward is free.</strong> Always. No credit card needed to join. FastIQ is our optional AI upgrade for students who want to move faster.
             </p>
           </div>
         </div>
@@ -134,8 +133,6 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
         <div className="hf" style={{ animationDelay: '2000ms', marginBottom: 64 }}>
           <V3HeroTypingBox />
         </div>
-
-
 
       </div>
     </section>
