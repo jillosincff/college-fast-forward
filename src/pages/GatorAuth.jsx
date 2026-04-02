@@ -197,8 +197,13 @@ export default function GatorAuth() {
     }
     
     if (user && !user.persona) {
-      // After OAuth — check if role was already selected before sign-in
-      const pendingRole = localStorage.getItem('pending_invite_role');
+      // After OAuth — read role from URL params first (most reliable), then fallback to storage
+      const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+      const urlRole = hashParams.get('role');
+      const pendingRole = urlRole || localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+      if (pendingRole) {
+        try { localStorage.setItem('pending_invite_role', pendingRole); } catch (e) {}
+      }
       if (pendingRole === 'parent') {
         navigate('ParentOnboarding');
         return;
@@ -216,12 +221,13 @@ export default function GatorAuth() {
   }, [user, isLoading]);
 
   const handleGoogleSignIn = () => {
-    if (selectedRole) {
-      try {
-        localStorage.setItem('pending_invite_role', selectedRole);
-      } catch (e) { /* private browsing */ }
+    const role = selectedRole || '';
+    if (role) {
+      try { localStorage.setItem('pending_invite_role', role); } catch (e) {}
+      try { sessionStorage.setItem('pending_invite_role', role); } catch (e) {}
     }
-    const callbackUrl = window.location.origin + '/#GetStarted';
+    // Encode role in callback URL so it survives the OAuth redirect
+    const callbackUrl = window.location.origin + '/#GetStarted?role=' + role;
     base44.auth.redirectToLogin(callbackUrl);
   };
 
