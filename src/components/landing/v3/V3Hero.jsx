@@ -60,7 +60,7 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
             fontFamily: playfair, fontWeight: 700,
             fontSize: 'clamp(28px, 5vw, 48px)',
             letterSpacing: '-0.02em', lineHeight: 1.2,
-            color: '#1A1A1A', margin: '0 0 16px',
+            color: '#fff', margin: '0 0 16px',
           }}>
             A smarter way to land internships and jobs &mdash; powered by parent connections &amp; AI.
           </h1>
@@ -68,7 +68,7 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
 
         {/* BODY LINE */}
         <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 36 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 16, color: '#666', lineHeight: 1.6, margin: '0 0 32px' }}>
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, margin: '0 0 32px' }}>
             The tech they want with the connections they need.
           </p>
         </div>
