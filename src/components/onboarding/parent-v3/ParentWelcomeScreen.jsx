@@ -1,108 +1,250 @@
-import React from 'react';
-import WelcomeExpectationCard from './WelcomeExpectationCard';
-// DirectoryConsentButton removed — visibility handled during onboarding
-import { MockNotification, MockWeeklyUpdate } from './WelcomeMockPreviews';
-import { FastIQNotActivated, FastIQActivated } from './WelcomeFastIQSection';
-import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
-import FoundingOfferWelcomeCard from '@/components/founding-offer/FoundingOfferWelcomeCard';
+import React, { useState } from 'react';
+import { navigate } from '@/components/utils/navigation';
 
-const dmSans = "'DM Sans', system-ui, sans-serif";
-const playfair = "'Playfair Display', Georgia, serif";
 const ORANGE = '#E85D20';
 
 export default function ParentWelcomeScreen({ user, studentName, isFastIQActive, onActivate, onSkip, onProfile }) {
-  const firstName = user?.full_name?.split(' ')[0] || 'there';
   const studentFirst = studentName || 'your student';
-  const offer = useFoundingOffer(user);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText('https://collegefastforward.com');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', padding: '48px 20px 60px' }}>
-      <div style={{ maxWidth: 600, margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: '#F5F5F5', padding: '48px 20px 60px' }}>
+      <div style={{ maxWidth: 580, margin: '0 auto', textAlign: 'center' }}>
 
-        {/* HEADER */}
-        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.14em', color: ORANGE, marginBottom: 14 }}>
-          WELCOME TO COLLEGE FAST FORWARD
-        </p>
-
-        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 4vw, 34px)', color: '#fff', lineHeight: 1.2, marginBottom: 4 }}>
-          You're in, {firstName}.
-        </h1>
-        <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 'clamp(20px, 3vw, 26px)', color: ORANGE, lineHeight: 1.3, marginBottom: 12 }}>
-          Here's what happens next.
-        </p>
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#888', lineHeight: 1.6, marginBottom: 36 }}>
-          Your role is simple. We'll handle the rest.
-        </p>
-
-        {/* SECTION 1 — What To Expect */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 0 }}>
-
-          <WelcomeExpectationCard
-            icon="👥"
-            title="You're in the directory."
-            body="Your professional background is now searchable by students in the network. A student targeting your industry or a company you've worked at can find your profile and reach out directly for guidance. You decide how much you engage — but showing up here could change someone's life."
-          />
-
-          <WelcomeExpectationCard
-            icon="🔔"
-            title="We'll ping you when it matters."
-            body="When a student in the network is targeting a company where you have connections, we'll send you a simple notification. One click to help — or pass. No pressure, no commitment. Every introduction you make helps a student get in the room."
-          >
-            <MockNotification />
-          </WelcomeExpectationCard>
-
-          <WelcomeExpectationCard
-            icon="📊"
-            title="You'll hear from us every week."
-            body="Every week we'll send you a short update on your student's progress — how many alumni they've found, how many messages they've sent, and how things are moving. No news is never the answer here."
-          >
-            <MockWeeklyUpdate studentName={studentFirst} />
-          </WelcomeExpectationCard>
-
-          <WelcomeExpectationCard
-            icon="🔄"
-            title="The network works both ways."
-            body="Every time you help another student, you're contributing to a community of parents who are doing the same for yours. The more active the network, the better it works for every family inside it."
-          >
-            <p style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 14, color: ORANGE, marginTop: 14 }}>
-              Other parents are already here. Your student benefits from every one of them.
-            </p>
-          </WelcomeExpectationCard>
-
+        {/* Success checkmark */}
+        <div style={{
+          width: 64, height: 64, borderRadius: '50%',
+          background: '#F0FFF4', border: '2px solid #22C55E',
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'center', fontSize: 28,
+          margin: '0 auto 24px',
+        }}>
+          ✓
         </div>
 
-        {/* Founding Member Offer — between expectation cards and FastIQ */}
-        {offer.active && (
-          <div style={{ marginTop: 32 }}>
-            <FoundingOfferWelcomeCard display={offer.display} studentName={studentFirst} />
-          </div>
-        )}
+        {/* Invitation confirmed */}
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 13, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.12em',
+          color: '#22C55E', margin: '0 0 32px',
+        }}>
+          Invitation sent to {studentFirst} ✓
+        </p>
 
-        {/* SECTION 2 — FastIQ */}
-        {isFastIQActive ? (
-          <FastIQActivated studentName={studentFirst} />
-        ) : (
-          <FastIQNotActivated studentName={studentFirst} onActivate={onActivate} onSkip={onSkip} />
-        )}
-
-        {/* FOOTER CTA */}
-        <div style={{ marginTop: 36 }}>
-          <button onClick={onProfile} style={{
-            fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: ORANGE,
-            background: 'transparent', border: `1.5px solid ${ORANGE}`,
-            borderRadius: 100, padding: '14px 28px', cursor: 'pointer',
-            width: '100%', minHeight: 'auto',
+        {/* Hero — dark card */}
+        <div style={{
+          background: '#0A0A0A', borderRadius: 20,
+          padding: '36px 32px', marginBottom: 32,
+          textAlign: 'left',
+        }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.15em',
+            color: '#E85D20', margin: '0 0 16px',
           }}>
-            Go to My Profile →
-          </button>
-          <p style={{ fontFamily: dmSans, fontSize: 12, color: '#555', textAlign: 'center', lineHeight: 1.6, marginTop: 12 }}>
-            You can update your availability, industry, and contact preferences anytime from your profile.
+            💙 YOU SHOWED UP
+          </p>
+          <h1 style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 'clamp(22px, 4vw, 30px)',
+            fontWeight: 700, color: '#fff',
+            margin: '0 0 16px', lineHeight: 1.3,
+          }}>
+            You've felt it. The worry.<br/>
+            The "I wish I could do more."<br/>
+            Today you did more.
+          </h1>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 15, color: 'rgba(255,255,255,0.55)',
+            margin: 0, lineHeight: 1.7,
+          }}>
+            Most parents watch from the sidelines while their kid applies and waits, applies and waits.
+            You just gave {studentFirst} something most students never get — a warm network,
+            real connections, and a platform built to get them hired.
           </p>
         </div>
 
-      </div>
+        {/* What happens next */}
+        <div style={{
+          background: '#fff', border: '1px solid #E5E5E5',
+          borderRadius: 16, padding: '24px 28px',
+          marginBottom: 24, textAlign: 'left',
+        }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.12em',
+            color: '#888', margin: '0 0 16px',
+          }}>
+            WHAT HAPPENS NEXT
+          </p>
+          {[
+            { icon: '✉️', text: `${studentFirst} gets an invite to join CFF` },
+            { icon: '🎯', text: 'She sets her career goals in 3 minutes' },
+            { icon: '👥', text: 'FastIQ matches her with alumni at her target companies' },
+            { icon: '🚀', text: 'She reaches out — with AI-drafted messages that actually get replies' },
+          ].map((item, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start',
+              gap: 12, marginBottom: i < 3 ? 14 : 0,
+            }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 14, color: '#444',
+                margin: 0, lineHeight: 1.5,
+              }}>{item.text}</p>
+            </div>
+          ))}
+        </div>
 
-      <style>{`@media(max-width:540px){.fiq-compare{grid-template-columns:1fr !important}}`}</style>
+        {/* FastIQ upsell */}
+        <div style={{
+          background: '#0A0A0A', borderRadius: 16,
+          padding: '28px 32px', marginBottom: 24,
+          textAlign: 'left',
+        }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.12em',
+            color: '#E85D20', margin: '0 0 12px',
+          }}>
+            ⚡ SUPERCHARGE {studentFirst?.toUpperCase()}'S JOB SEARCH
+          </p>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 15, color: 'rgba(255,255,255,0.75)',
+            margin: '0 0 20px', lineHeight: 1.7,
+          }}>
+            FastIQ gives {studentFirst} everything she needs to go from applicant to candidate —
+            resume scoring, mock interviews, LinkedIn optimization, unlimited alumni searches,
+            and AI outreach that gets responses.
+          </p>
+
+          {/* Stats */}
+          <div style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
+            {[
+              { stat: '10x', label: 'more likely to land interviews with warm intros' },
+              { stat: '85%', label: 'of jobs are filled through connections, not applications' },
+            ].map((item, i) => (
+              <div key={i} style={{
+                background: 'rgba(255,255,255,0.06)',
+                borderRadius: 10, padding: '12px 16px',
+                flex: 1, minWidth: 140,
+              }}>
+                <p style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: 28, fontWeight: 700,
+                  color: '#E85D20', margin: '0 0 4px',
+                }}>{item.stat}</p>
+                <p style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 12, color: 'rgba(255,255,255,0.5)',
+                  margin: 0, lineHeight: 1.4,
+                }}>{item.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Feature list */}
+          <div style={{ marginBottom: 24 }}>
+            {[
+              '📄 Resume scoring against her target roles',
+              '🔍 Unlimited alumni searches at dream companies',
+              '🎤 Mock interview practice with real STAR feedback',
+              '✉️ AI outreach drafts that get replies',
+              '🧠 Career archetype assessment',
+              '🔗 LinkedIn profile scoring and optimization',
+            ].map((item, i) => (
+              <p key={i} style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 13, color: 'rgba(255,255,255,0.75)',
+                margin: '0 0 8px', lineHeight: 1.5,
+              }}>{item}</p>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => navigate('FastIQDashboard')}
+            style={{
+              background: '#E85D20', border: 'none',
+              borderRadius: 10, padding: '14px',
+              fontSize: 14, fontWeight: 600,
+              color: '#fff', cursor: 'pointer',
+              fontFamily: "'DM Sans', sans-serif",
+              width: '100%', marginBottom: 12, minHeight: 'auto',
+            }}
+          >
+            Unlock FastIQ for {studentFirst} — $14.50/month →
+          </button>
+
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 12, color: 'rgba(255,255,255,0.4)',
+            textAlign: 'center', margin: 0,
+          }}>
+            🎖 Founding member rate — 50% off forever · Expires April 15, 2026
+          </p>
+        </div>
+
+        {/* Share CTA */}
+        <div style={{
+          background: '#F9F9F9', borderRadius: 14,
+          padding: '20px 24px', marginBottom: 24,
+        }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 13, fontWeight: 600,
+            color: '#1A1A1A', margin: '0 0 8px',
+          }}>
+            Know another parent who'd want this for their kid?
+          </p>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 13, color: '#888',
+            margin: '0 0 16px', lineHeight: 1.5,
+          }}>
+            Every parent in the network makes it stronger for everyone's kids.
+          </p>
+          <button
+            onClick={handleCopy}
+            style={{
+              background: 'none', border: '1px solid #E0E0E0',
+              borderRadius: 10, padding: '10px 20px',
+              fontSize: 13, fontWeight: 600, color: '#555',
+              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+              width: '100%', minHeight: 'auto',
+            }}
+          >
+            {copied ? 'Link copied! ✓' : 'Share College Fast Forward →'}
+          </button>
+        </div>
+
+        {/* Go to dashboard */}
+        <button
+          onClick={() => navigate('ParentHome')}
+          style={{
+            background: 'none', border: 'none',
+            fontSize: 13, color: '#AAAAAA',
+            cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+            minHeight: 'auto',
+          }}
+        >
+          Go to my dashboard →
+        </button>
+
+      </div>
     </div>
   );
 }
