@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 
-const ORANGE = '#E85D20';
-
 export default function ParentWelcomeScreen({ user, studentName, isFastIQActive, onActivate, onSkip, onProfile }) {
   const studentFirst = studentName || 'your student';
   const [copied, setCopied] = useState(false);
@@ -58,8 +56,8 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
             fontWeight: 700, color: '#fff',
             margin: '0 0 16px', lineHeight: 1.3,
           }}>
-            You've felt it. The worry.<br/>
-            The "I wish I could do more."<br/>
+            You've felt it. The worry.<br />
+            The "I wish I could do more."<br />
             Today you did more.
           </h1>
           <p style={{
@@ -119,7 +117,7 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
             textTransform: 'uppercase', letterSpacing: '0.12em',
             color: '#E85D20', margin: '0 0 12px',
           }}>
-            ⚡ SUPERCHARGE {studentFirst?.toUpperCase()}'S JOB SEARCH
+            ⚡ SUPERCHARGE {studentFirst.toUpperCase()}'S JOB SEARCH
           </p>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
@@ -174,7 +172,6 @@ export default function ParentWelcomeScreen({ user, studentName, isFastIQActive,
             ))}
           </div>
 
-          {/* CTA */}
           <button
             onClick={() => navigate('FastIQDashboard')}
             style={{
