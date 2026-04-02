@@ -55,21 +55,21 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
         </div>
 
         {/* HEADLINE */}
-        <div className="hf" style={{ animationDelay: '1100ms', marginBottom: 20 }}>
+        <div className="hf" style={{ animationDelay: '1100ms', marginBottom: 16 }}>
           <h1 style={{
             fontFamily: playfair, fontWeight: 700,
             fontSize: 'clamp(28px, 5vw, 48px)',
             letterSpacing: '-0.02em', lineHeight: 1.2,
-            color: '#fff', margin: 0,
+            color: '#1A1A1A', margin: '0 0 16px',
           }}>
-            One warm intro beats<br />100 cold applications.
+            A smarter way to land internships and jobs &mdash; powered by parent connections &amp; AI.
           </h1>
         </div>
 
         {/* BODY LINE */}
         <div className="hf" style={{ animationDelay: '1300ms', marginBottom: 36 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 400, color: '#FFFFFF', lineHeight: 1.65, margin: '0 auto', maxWidth: 520, textAlign: 'center' }}>
-            College Fast Forward connects students with parents and alumni who want to help &mdash; and AI that makes every step faster.
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: '#666', lineHeight: 1.6, margin: '0 0 32px' }}>
+            The tech they want with the connections they need.
           </p>
         </div>
 
