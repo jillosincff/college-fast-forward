@@ -69,19 +69,6 @@ export default function V3HeroBreakdown() {
             <p style={{ margin: '0 0 12px' }}>And even if you don't know what you want to do yet — that's okay. <strong style={{ color: '#1A1A1A' }}>We'll help you figure it out.</strong></p>
           </div>
 
-          <div style={{ background: '#0A0A0A', borderRadius: 12, padding: '20px 24px', marginBottom: 28 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.85)', lineHeight: 1.7, margin: '0 0 12px' }}>Because today you have something she didn't —</p>
-            {[
-              '⚡ Cutting-edge AI that helps you get organized and find your path',
-              '👥 A network of parents who care enough to pick up the phone, make the introduction, and open the door',
-            ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: i < 1 ? 10 : 0 }}>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.6 }}>{item}</p>
-              </div>
-            ))}
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: '#E85D20', margin: '16px 0 0' }}>You're not doing this alone. We got you.</p>
-          </div>
-
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#888', margin: '0 0 16px' }}>HERE'S WHAT WE DO TOGETHER — STEP BY STEP:</p>
 
           {[
@@ -123,41 +110,45 @@ export default function V3HeroBreakdown() {
           </h3>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 24px' }}>
-            We all know it. Watching your kid apply to hundreds of jobs and not hear anything back. They’re stressed and you’re secretly freaking out. You want to help but you’re not exactly sure what more you can do.
+            Watching your kid apply to hundreds of jobs and hear nothing back. They’re stressed. You’re secretly freaking out. You want to help — but how?
           </p>
 
           <div style={{ borderLeft: '3px solid #E85D20', paddingLeft: 20, marginBottom: 24 }}>
-            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 8px', lineHeight: 1.4 }}>Here’s what you don’t realize —</p>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: '#fff', margin: '0 0 8px', lineHeight: 1.4 }}>Here’s what you don’t realize —</p>
             <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#E85D20', margin: 0, lineHeight: 1.4 }}>You already have exactly what they need.</p>
           </div>
 
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 16px' }}>
-            A lifetime of connections. A career full of relationships. People you know at companies your student would love to work at.
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 24px' }}>
+            A lifetime of connections. People you know at companies your student is targeting. You just didn’t know how to put it to work. <strong style={{ color: '#fff' }}>Until now.</strong>
           </p>
 
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '0 0 24px' }} />
+
           <div style={{ background: 'rgba(232,93,32,0.12)', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 12, padding: '20px 24px', marginBottom: 20 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 16px' }}>
-              And here’s the magic — when you simply tell us who you are and where you work, you become part of something bigger. Every parent in this network is doing the same thing.
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 14px' }}>
+              When you tell us who you are and where you work, you become part of something bigger. Every parent in this network does the same thing.
             </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 16px' }}>
-              Together we’re collectively opening our networks — and suddenly a student has access to thousands of connections they never could have found on their own.
+              Together we collectively open our networks — and suddenly students have access to thousands of connections they never could have found alone.
             </p>
-            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.5 }}>CFF turns your network into their opportunity.</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#E85D20', margin: 0 }}>One intro carries more weight than 100 applications.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#E85D20', margin: 0 }}>
+              One intro carries more weight than 100 applications.
+            </p>
           </div>
 
-          <div style={{ borderLeft: '3px solid rgba(255,255,255,0.15)', paddingLeft: 20, marginBottom: 28 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 12px' }}>And it’s not just about making introductions.</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 12px' }}>It’s about offering guidance. Sharing your experience. Telling a student what it’s really like to work in your field — the stuff they can’t Google.</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#fff', margin: 0, lineHeight: 1.6 }}>That’s just as valuable as any job referral.</p>
-          </div>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.8, margin: '0 0 6px' }}>
+            And it’s not just introductions. It’s guidance. Real talk about your industry. The stuff they can’t Google.
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#fff', lineHeight: 1.6, margin: '0 0 28px' }}>
+            That’s just as valuable as any referral.
+          </p>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)', margin: '0 0 20px' }}>HERE’S HOW EASY IT IS:</p>
 
           {[
             { icon: '📋', title: 'Fill out your profile once.', desc: 'Tell us who you are, what you do, and how you can help. Takes 5 minutes.' },
             { icon: '👥', title: 'Students find you.', desc: 'They search our network and reach out when they need someone exactly like you.' },
-            { icon: '🤝', title: 'You decide how to help.', desc: 'A quick reply. A referral. An intro email. Career advice over coffee. On your schedule. No pressure. No commitment.' },
+            { icon: '🤝', title: 'You decide how to help.', desc: 'A quick reply. A referral. An intro email. Career advice over coffee. On your schedule. No pressure.' },
             { icon: '🌟', title: "You change someone's trajectory.", desc: "That's it. That's the whole thing." },
           ].map((step, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: i < 3 ? 20 : 0 }}>
