@@ -113,36 +113,62 @@ export default function V3HeroBreakdown() {
         </div>
 
         {/* PARENT / ALUMNI CARD */}
-        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 28px', textAlign: 'left' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 10px' }}>
+        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '36px 32px' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 16px' }}>
             💙 FOR PARENTS &amp; ALUMNI
           </p>
-          <h3 style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 6px', lineHeight: 1.3 }}>
-            It's easier than you think.
-          </h3>
-          <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '0 0 20px', lineHeight: 1.5 }}>
-            Fill out your profile once. Students will find you and reach out when they need your help. That's it.
-          </p>
 
-          {PARENT_FEATURES.map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: i < PARENT_FEATURES.length - 1 ? 14 : 0 }}>
-              <span style={{ fontSize: 20, flexShrink: 0, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{item.icon}</span>
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>{item.text}</p>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 3vw, 28px)', fontWeight: 700, color: '#fff', margin: '0 0 20px', lineHeight: 1.3 }}>
+            You've felt it. That helpless feeling.
+          </h3>
+
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, margin: '0 0 24px' }}>
+            <p style={{ margin: '0 0 12px' }}>Watching your kid apply and wait. Apply and wait. Seeing them stressed and not knowing how to help. Wishing you could do more than just say “keep trying, something will come through.”</p>
+          </div>
+
+          <div style={{ borderLeft: '3px solid #E85D20', paddingLeft: 20, marginBottom: 24 }}>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 8px', lineHeight: 1.4 }}>Here's what you don't realize —</p>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#E85D20', margin: 0, lineHeight: 1.4 }}>You already have exactly what they need.</p>
+          </div>
+
+          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: '0 0 24px' }}>
+            <p style={{ margin: '0 0 12px' }}>A lifetime of connections. A career full of relationships. People you know at companies your student would love to work at.</p>
+            <p style={{ margin: 0 }}>You just didn’t know how to put it to work.<strong style={{ color: '#fff' }}> Until now.</strong></p>
+          </div>
+
+          <div style={{ background: 'rgba(232,93,32,0.12)', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 12, padding: '20px 24px', marginBottom: 28 }}>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 12px', lineHeight: 1.4 }}>CFF turns your network into their opportunity.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: '0 0 12px', lineHeight: 1.7 }}>One introduction from you carries more weight than 100 applications from them.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: '#E85D20', margin: 0 }}>That’s not a small thing. That’s everything.</p>
+          </div>
+
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)', margin: '0 0 20px' }}>HERE'S HOW EASY IT IS:</p>
+
+          {[
+            { icon: '📋', title: 'Fill out your profile once.', desc: 'Tell us who you are, what you do, and how you can help. Takes 5 minutes.' },
+            { icon: '👥', title: 'Students find you.', desc: 'They search our network and reach out when they need someone exactly like you.' },
+            { icon: '🤝', title: 'You decide how to help.', desc: 'A quick reply. A referral. An intro email. On your schedule. No pressure. No commitment.' },
+            { icon: '🌟', title: "You change someone's trajectory.", desc: "That's it. That's the whole thing." },
+          ].map((step, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: i < 3 ? 20 : 0 }}>
+              <span style={{ fontSize: 22, flexShrink: 0, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{step.icon}</span>
+              <div>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>{step.title}</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.6 }}>{step.desc}</p>
+              </div>
             </div>
           ))}
 
-          <div style={{ background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '14px 16px', marginBottom: 24 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.6 }}>
-              ⚡ <strong style={{ color: '#E85D20' }}>Unlock FastIQ</strong> to supercharge your student's job search.
+          <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '14px 18px', margin: '28px 0 24px' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>
+              ⚡ <strong style={{ color: '#E85D20' }}>Unlock FastIQ</strong> to supercharge your student’s job search.
             </p>
           </div>
 
-          <button
-            onClick={() => navigate('ParentOnboarding')}
-            style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}
-          >
-            Join Free as a Parent or Alumni →
+          <button onClick={() => navigate('ParentOnboarding')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}>
+            Join Free — Put Your Network to Work →
           </button>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: '12px 0 0' }}>Free to join · No credit card · No pressure</p>
         </div>
 
       </div>
