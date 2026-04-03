@@ -153,7 +153,7 @@ export default function V3Pricing({ onCTA }) {
               <span style={{ fontFamily: playfair, fontSize: 48, fontWeight: 700, color: '#1A1A1A' }}>$0</span>
               <span style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginLeft: 4 }}>/ forever</span>
             </div>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 20px' }}>Free. Always. No credit card.</p>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 20px' }}>A warm network to kickstart your career.</p>
             {[
               'Student profile + career goals',
               'Resume upload + AI score',
@@ -186,7 +186,7 @@ export default function V3Pricing({ onCTA }) {
               <span style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>/ month</span>
             </div>
             <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 4px' }}>or $249/year — save 28%</p>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)', margin: '0 0 20px' }}>Everything in Free + the full AI engine.</p>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)', margin: '0 0 20px' }}>The warm network + AI to turbocharge your job search.</p>
             {[
               'Unlimited alumni searches at any company',
               'Resume tailoring to any job description',
