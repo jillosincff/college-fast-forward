@@ -67,7 +67,7 @@ export default function V3HeroBreakdown() {
 
           {STUDENT_FEATURES.map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: i < STUDENT_FEATURES.length - 1 ? 14 : 0 }}>
-              <span style={{ fontSize: 20, flexShrink: 0, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, sans-serif' }}>{item.icon}</span>
+              <span style={{ fontSize: 20, flexShrink: 0, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{item.icon}</span>
               <p style={{ fontFamily: dmSans, fontSize: 14, color: '#444', margin: 0, lineHeight: 1.5 }}>{item.text}</p>
             </div>
           ))}
@@ -109,7 +109,7 @@ export default function V3HeroBreakdown() {
 
           {PARENT_FEATURES.map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: i < PARENT_FEATURES.length - 1 ? 14 : 0 }}>
-              <span style={{ fontSize: 20, flexShrink: 0, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, sans-serif' }}>{item.icon}</span>
+              <span style={{ fontSize: 20, flexShrink: 0, fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>{item.icon}</span>
               <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>{item.text}</p>
             </div>
           ))}
