@@ -22,7 +22,7 @@ const SCHOOLS = [
       { name: 'Jake Williams', company: 'Spotify', role: 'Marketing Associate' },
       { name: 'Lauren Brooks', company: 'Ogilvy', role: 'Account Coordinator' },
     ],
-    outreach: { to: 'Sarah', toFull: 'Sarah Chen', company: 'Nike', from: 'Olivia', field: 'brand marketing' },
+    outreach: { to: 'Sarah', toFull: 'Sarah Chen', company: 'Nike', from: 'Alex', field: 'brand marketing' },
   },
   {
     abbr: 'FSU',
@@ -39,7 +39,7 @@ const SCHOOLS = [
       { name: 'Hannah Lee', company: 'Wasserman', role: 'Client Services Associate' },
       { name: 'Chris Walker', company: 'ESPN', role: 'Content Marketing Specialist' },
     ],
-    outreach: { to: 'Marcus', toFull: 'Marcus Rivera', company: 'IMG Academy', from: 'Olivia', field: 'sports marketing' },
+    outreach: { to: 'Marcus', toFull: 'Marcus Rivera', company: 'IMG Academy', from: 'Alex', field: 'sports marketing' },
   },
   {
     abbr: 'Wake Forest',
@@ -56,7 +56,7 @@ const SCHOOLS = [
       { name: 'Emily Carter', company: 'Merrill Lynch', role: 'Financial Advisor Associate' },
       { name: 'Kevin Shah', company: 'Raymond James', role: 'Client Associate' },
     ],
-    outreach: { to: 'Daniel', toFull: 'Daniel Green', company: 'Morgan Stanley', from: 'Olivia', field: 'wealth management' },
+    outreach: { to: 'Daniel', toFull: 'Daniel Green', company: 'Morgan Stanley', from: 'Alex', field: 'wealth management' },
   },
   {
     abbr: 'U of M',
@@ -73,7 +73,7 @@ const SCHOOLS = [
       { name: 'Nicole Tran', company: 'JP Morgan', role: 'Associate Analyst' },
       { name: 'Alex Martinez', company: 'Lazard', role: 'M&A Analyst' },
     ],
-    outreach: { to: 'Ryan', toFull: 'Ryan Goldberg', company: 'Goldman Sachs', from: 'Olivia', field: 'investment banking' },
+    outreach: { to: 'Ryan', toFull: 'Ryan Goldberg', company: 'Goldman Sachs', from: 'Alex', field: 'investment banking' },
   },
   {
     abbr: 'USC',
@@ -90,7 +90,7 @@ const SCHOOLS = [
       { name: 'Mia Gonzalez', company: 'CAA', role: 'Marketing Coordinator' },
       { name: 'Tyler Moreno', company: 'Disney', role: 'Entertainment Marketing Associate' },
     ],
-    outreach: { to: 'Jordan', toFull: 'Jordan Blake', company: 'WME', from: 'Olivia', field: 'entertainment marketing' },
+    outreach: { to: 'Jordan', toFull: 'Jordan Blake', company: 'WME', from: 'Alex', field: 'entertainment marketing' },
   },
 ];
 
