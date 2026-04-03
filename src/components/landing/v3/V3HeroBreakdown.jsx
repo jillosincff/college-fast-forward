@@ -123,14 +123,9 @@ export default function V3HeroBreakdown() {
           </div>
 
           <div style={{ background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '14px 16px', marginBottom: 24 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#E85D20', margin: '0 0 10px' }}>
-              ⚡ UPGRADE TO FASTIQ TO:
+            <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.6 }}>
+              ⚡ <strong style={{ color: '#E85D20' }}>Unlock FastIQ</strong> to supercharge your student's job search.
             </p>
-            {PARENT_FASTIQ.map((item, i) => (
-              <p key={i} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: i < PARENT_FASTIQ.length - 1 ? '0 0 6px' : 0, lineHeight: 1.4, paddingLeft: 8, borderLeft: '2px solid rgba(232,93,32,0.4)' }}>
-                {item}
-              </p>
-            ))}
           </div>
 
           <button
