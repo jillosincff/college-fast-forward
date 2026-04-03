@@ -50,6 +50,59 @@ export default function V3HeroBreakdown() {
         </h2>
       </div>
 
+      {/* Social Proof Section */}
+      <div style={{
+        padding: '48px 0',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        marginBottom: 48,
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'center', gap: 48,
+          flexWrap: 'wrap', marginBottom: 48,
+        }}>
+          {[
+            { stat: '1,000+', label: 'families joined' },
+            { stat: '15', label: 'universities' },
+            { stat: '455+', label: 'parents & professionals' },
+          ].map((item, i) => (
+            <div key={i} style={{ textAlign: 'center' }}>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', lineHeight: 1 }}>{item.stat}</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>{item.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(460px, 100%), 1fr))', gap: 20 }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '28px 32px' }}>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 64, color: '#E85D20', lineHeight: 1, margin: '0 0 8px', opacity: 0.4 }}>&ldquo;</p>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#fff', lineHeight: 1.6, margin: '0 0 24px', fontStyle: 'italic' }}>This site is invaluable. My son connected with a parent in the CPG industry and gave him advice that literally changed the trajectory of his career.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>D</div>
+              <div>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 2px' }}>Desiree M.</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>💙 CFF Parent · University of Florida</p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '28px 32px' }}>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 64, color: '#E85D20', lineHeight: 1, margin: '0 0 8px', opacity: 0.4 }}>&ldquo;</p>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#fff', lineHeight: 1.6, margin: '0 0 24px', fontStyle: 'italic' }}>I found an internship in legal marketing that was never posted. I got it through a parent in College Fast Forward.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(232,93,32,0.3)', border: '2px solid #E85D20', color: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>S</div>
+              <div>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 2px' }}>UF Student</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>🎓 CFF Member · University of Florida</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '32px 0 0', fontStyle: 'italic' }}>Real stories from real CFF families. Unedited.</p>
+      </div>
+
       {/* Two column grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: 20, marginBottom: 24 }}>
 
