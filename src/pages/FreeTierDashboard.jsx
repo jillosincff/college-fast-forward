@@ -28,6 +28,9 @@ export default function FreeTierDashboard() {
     return params.get('tab') || 'home';
   });
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(
+    localStorage.getItem('founding_banner_dismissed') === 'true'
+  );
   const [briefing, setBriefing] = useState(null);
   const [briefingLoading, setBriefingLoading] = useState(true);
 
@@ -42,6 +45,8 @@ export default function FreeTierDashboard() {
   }, []);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const showFoundingBanner = !isFastIQ && !bannerDismissed && new Date() < new Date('2026-04-15T23:59:59');
+  const handleDismissBanner = () => { localStorage.setItem('founding_banner_dismissed', 'true'); setBannerDismissed(true); };
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
   useEffect(() => {
@@ -210,6 +215,51 @@ export default function FreeTierDashboard() {
         />
       </div>
       <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        {showFoundingBanner && (
+          <div style={{
+            background: '#0A0A0A',
+            borderBottom: '1px solid rgba(232,93,32,0.3)',
+            padding: '12px 24px',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16, flexWrap: 'wrap',
+            position: 'sticky', top: 0, zIndex: 100,
+          }}>
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 13, color: 'rgba(255,255,255,0.82)',
+              margin: 0, lineHeight: 1.5,
+            }}>
+              🎖 <strong style={{ color: '#E85D20' }}>Founding rate expires April 15</strong> — lock in 50% off FastIQ forever. Only $14.50/month.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+              <button
+                onClick={() => navigate('FastIQDashboard')}
+                style={{
+                  background: '#E85D20', border: 'none',
+                  borderRadius: 8, padding: '8px 16px',
+                  fontSize: 12, fontWeight: 600,
+                  color: '#fff', cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  whiteSpace: 'nowrap', minHeight: 'auto',
+                }}
+              >
+                Claim $14.50/mo →
+              </button>
+              <button
+                onClick={handleDismissBanner}
+                style={{
+                  background: 'none', border: 'none',
+                  fontSize: 16, color: 'rgba(255,255,255,0.3)',
+                  cursor: 'pointer', padding: 4,
+                  lineHeight: 1, minHeight: 'auto', minWidth: 'auto',
+                }}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
         {showUpgradeSuccess && (
           <div style={{
             background: 'linear-gradient(135deg, #0A0A0A 0%, #1a1a1a 100%)',
