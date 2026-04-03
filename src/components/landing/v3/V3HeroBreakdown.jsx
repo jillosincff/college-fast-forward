@@ -26,7 +26,7 @@ const PARENT_FEATURES = [
   { icon: '📋', text: 'Create your professional profile and network listing' },
   { icon: '🤝', text: 'Make warm introductions for students in your field' },
   { icon: '💬', text: "Students reach out to you — on your schedule, when you're available" },
-  { icon: '🔍', text: 'Get matched with students who need exactly what you offer' },
+
   { icon: '🌟', text: "One intro can change a student's entire career trajectory" },
 ];
 
