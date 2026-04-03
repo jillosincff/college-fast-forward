@@ -78,11 +78,13 @@ export default function V3HeroBreakdown() {
             <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', margin: '0 0 10px' }}>
               ⚡ UPGRADE TO FASTIQ FOR:
             </p>
-            {STUDENT_FASTIQ.map((item, i) => (
-              <p key={i} style={{ fontFamily: dmSans, fontSize: 13, color: '#555', margin: i < STUDENT_FASTIQ.length - 1 ? '0 0 6px' : 0, lineHeight: 1.4, paddingLeft: 8, borderLeft: '2px solid #E85D20' }}>
-                {item}
-              </p>
-            ))}
+            {[
+            'Unlimited alumni searches at any company',
+            'Resume tailoring + mock interviews',
+            'AI outreach drafts + career archetype',
+          ].map((item, i) => (
+            <p key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: i < 2 ? '0 0 6px' : 0, lineHeight: 1.4, paddingLeft: 8, borderLeft: '2px solid #E85D20' }}>{item}</p>
+          ))}
           </div>
 
           <button
