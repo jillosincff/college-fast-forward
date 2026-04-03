@@ -1,6 +1,7 @@
 import React from 'react';
 import { Users, Zap } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
+import V3HeroBreakdown from './V3HeroBreakdown';
 import V3HeroTypingBox from './V3HeroTypingBox';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
@@ -139,8 +140,13 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
         </div>
 
         {/* ALUMNI DEMO */}
-        <div className="hf" style={{ animationDelay: '2000ms', marginBottom: 64 }}>
+        <div className="hf" style={{ animationDelay: '2000ms', marginBottom: 48 }}>
           <V3HeroTypingBox />
+        </div>
+
+        {/* TWO-SECTION BREAKDOWN */}
+        <div className="hf" style={{ animationDelay: '2200ms' }}>
+          <V3HeroBreakdown />
         </div>
 
       </div>
