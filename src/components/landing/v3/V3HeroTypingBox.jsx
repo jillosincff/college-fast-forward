@@ -6,112 +6,110 @@ const playfair = '"Playfair Display", Georgia, serif';
 const TYPING_SPEED = 70;
 const ORANGE = '#E85D20';
 
-const SCHOOLS = [
-  {
-    abbr: 'UF',
-    prompt: "I'm a marketing major at UF and want to work at a top brand like Nike or Spotify.",
+const SCHOOL_DEMOS = {
+  UF: {
+    studentName: 'Alex',
+    studentYear: '27',
+    alumniName: 'Jennifer Gomez',
+    alumniTitle: 'Brand Marketing Manager',
+    alumniCompany: 'Disney',
     companies: [
-      { name: 'Nike', tag: 'Brand Marketing' },
-      { name: 'Spotify', tag: 'Music/Tech' },
-      { name: 'Ogilvy', tag: 'Creative Agency' },
-      { name: 'PepsiCo', tag: 'CPG' },
-      { name: 'Lululemon', tag: 'DTC Brand' },
+      { name: 'Disney', tag: 'Top Pick' },
+      { name: 'Universal', tag: 'Strong Fit' },
+      { name: 'NBCUniversal', tag: 'Great Culture' },
+      { name: 'Spotify', tag: 'Alumni Network' },
+      { name: 'Nike', tag: 'Target' },
     ],
-    alumni: [
-      { name: 'Sarah Chen', company: 'Nike', role: 'Brand Marketing Coordinator' },
-      { name: 'Jake Williams', company: 'Spotify', role: 'Marketing Associate' },
-      { name: 'Lauren Brooks', company: 'Ogilvy', role: 'Account Coordinator' },
-    ],
-    outreach: { to: 'Sarah', toFull: 'Sarah Chen', company: 'Nike', from: 'Alex', field: 'brand marketing' },
+    prompt: "I'm a marketing major at UF looking to break into brand marketing at top entertainment or lifestyle companies.",
+    field: 'brand marketing',
   },
-  {
-    abbr: 'FSU',
-    prompt: "I'm interested in sports marketing agencies in New York.",
+  FSU: {
+    studentName: 'Jordan',
+    studentYear: '27',
+    alumniName: 'Marcus Reid',
+    alumniTitle: 'Investment Banking Analyst',
+    alumniCompany: 'Goldman Sachs',
     companies: [
-      { name: 'IMG Academy', tag: 'Sports Marketing' },
-      { name: 'Wasserman', tag: 'Sports Agency' },
-      { name: 'ESPN', tag: 'Media/Sports' },
-      { name: 'Endeavor', tag: 'Talent Agency' },
-      { name: 'Nike', tag: 'Sports Division' },
+      { name: 'Goldman Sachs', tag: 'Top Pick' },
+      { name: 'JP Morgan', tag: 'Strong Fit' },
+      { name: 'Morgan Stanley', tag: 'Great Culture' },
+      { name: 'BlackRock', tag: 'Alumni Network' },
+      { name: 'Deloitte', tag: 'Target' },
     ],
-    alumni: [
-      { name: 'Marcus Rivera', company: 'IMG Academy', role: 'Sports Marketing Coordinator' },
-      { name: 'Hannah Lee', company: 'Wasserman', role: 'Client Services Associate' },
-      { name: 'Chris Walker', company: 'ESPN', role: 'Content Marketing Specialist' },
-    ],
-    outreach: { to: 'Marcus', toFull: 'Marcus Rivera', company: 'IMG Academy', from: 'Alex', field: 'sports marketing' },
+    prompt: "I'm a finance major at FSU looking to break into investment banking in New York.",
+    field: 'investment banking',
   },
-  {
-    abbr: 'Wake Forest',
-    prompt: "I'm exploring careers in wealth management and financial advising.",
+  'Wake Forest': {
+    studentName: 'Emma',
+    studentYear: '26',
+    alumniName: 'Sarah Chen',
+    alumniTitle: 'Strategy Consultant',
+    alumniCompany: 'McKinsey',
     companies: [
-      { name: 'Morgan Stanley', tag: 'Wealth Management' },
-      { name: 'Merrill Lynch', tag: 'Financial Advisory' },
-      { name: 'Raymond James', tag: 'Wealth Management' },
-      { name: 'UBS', tag: 'Private Banking' },
-      { name: 'Edward Jones', tag: 'Financial Services' },
+      { name: 'McKinsey', tag: 'Top Pick' },
+      { name: 'BCG', tag: 'Strong Fit' },
+      { name: 'Bain', tag: 'Great Culture' },
+      { name: 'Deloitte', tag: 'Alumni Network' },
+      { name: 'Accenture', tag: 'Target' },
     ],
-    alumni: [
-      { name: 'Daniel Green', company: 'Morgan Stanley', role: 'Wealth Management Analyst' },
-      { name: 'Emily Carter', company: 'Merrill Lynch', role: 'Financial Advisor Associate' },
-      { name: 'Kevin Shah', company: 'Raymond James', role: 'Client Associate' },
-    ],
-    outreach: { to: 'Daniel', toFull: 'Daniel Green', company: 'Morgan Stanley', from: 'Alex', field: 'wealth management' },
+    prompt: "I'm a Wake Forest student exploring strategy consulting at top-tier firms.",
+    field: 'strategy consulting',
   },
-  {
-    abbr: 'U of M',
-    prompt: "I'm a finance major at U of M and want to break into investment banking in Chicago or New York.",
+  'U of M': {
+    studentName: 'Ryan',
+    studentYear: '27',
+    alumniName: 'David Park',
+    alumniTitle: 'Senior Software Engineer',
+    alumniCompany: 'Google',
     companies: [
-      { name: 'Goldman Sachs', tag: 'Investment Banking' },
-      { name: 'JP Morgan', tag: 'Banking' },
-      { name: 'Morgan Stanley', tag: 'IB Division' },
-      { name: 'Lazard', tag: 'M&A Advisory' },
-      { name: 'Evercore', tag: 'Investment Banking' },
+      { name: 'Google', tag: 'Top Pick' },
+      { name: 'Meta', tag: 'Strong Fit' },
+      { name: 'Apple', tag: 'Great Culture' },
+      { name: 'Microsoft', tag: 'Alumni Network' },
+      { name: 'Amazon', tag: 'Target' },
     ],
-    alumni: [
-      { name: 'Ryan Goldberg', company: 'Goldman Sachs', role: 'Investment Banking Analyst' },
-      { name: 'Nicole Tran', company: 'JP Morgan', role: 'Associate Analyst' },
-      { name: 'Alex Martinez', company: 'Lazard', role: 'M&A Analyst' },
-    ],
-    outreach: { to: 'Ryan', toFull: 'Ryan Goldberg', company: 'Goldman Sachs', from: 'Alex', field: 'investment banking' },
+    prompt: "I'm a CS major at U of M looking for software engineering roles at top tech companies.",
+    field: 'software engineering',
   },
-  {
-    abbr: 'USC',
+  USC: {
+    studentName: 'Olivia',
+    studentYear: '27',
+    alumniName: 'Jordan Blake',
+    alumniTitle: 'Talent Agency Assistant',
+    alumniCompany: 'WME',
+    companies: [
+      { name: 'WME', tag: 'Top Pick' },
+      { name: 'CAA', tag: 'Strong Fit' },
+      { name: 'Disney', tag: 'Great Culture' },
+      { name: 'Netflix', tag: 'Alumni Network' },
+      { name: 'Universal', tag: 'Target' },
+    ],
     prompt: "I'm a communications major at USC interested in entertainment marketing or talent agencies in LA.",
-    companies: [
-      { name: 'WME', tag: 'Talent Agency' },
-      { name: 'CAA', tag: 'Creative Agency' },
-      { name: 'Disney', tag: 'Entertainment' },
-      { name: 'Netflix', tag: 'Streaming/Marketing' },
-      { name: 'Universal', tag: 'Entertainment Marketing' },
-    ],
-    alumni: [
-      { name: 'Jordan Blake', company: 'WME', role: 'Talent Agency Assistant' },
-      { name: 'Mia Gonzalez', company: 'CAA', role: 'Marketing Coordinator' },
-      { name: 'Tyler Moreno', company: 'Disney', role: 'Entertainment Marketing Associate' },
-    ],
-    outreach: { to: 'Jordan', toFull: 'Jordan Blake', company: 'WME', from: 'Alex', field: 'entertainment marketing' },
+    field: 'entertainment marketing',
   },
-];
+};
 
-function buildDefaultMessage(school) {
-  const yr = `'${String(new Date().getFullYear() + 1).slice(2)}`;
-  const alumni = school.alumni[0];
-  return `Hey ${alumni.name.split(' ')[0]}, I'm a ${school.abbr} ${yr} student and noticed you're a ${alumni.role} at ${alumni.company}. Your path from ${school.abbr} is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — Alex, ${school.abbr} ${yr}`;
+const SCHOOL_KEYS = Object.keys(SCHOOL_DEMOS);
+
+function buildDefaultMessage(abbr) {
+  const s = SCHOOL_DEMOS[abbr];
+  return `Hey ${s.alumniName.split(' ')[0]}, I'm a ${abbr} '${s.studentYear} student and noticed you're a ${s.alumniTitle} at ${s.alumniCompany}. Your path from ${abbr} is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — ${s.studentName}, ${abbr} '${s.studentYear}`;
 }
 
-function buildDemoData(school) {
-  const yr = school.abbr;
+function buildDemoData(abbr) {
+  const s = SCHOOL_DEMOS[abbr];
   return {
-    companies: school.companies,
+    companies: s.companies,
     hasAsterisk: false,
-    alumni: school.alumni.map((a, i) => ({ ...a, year: `${yr} '${23 - i}` })),
+    alumni: [
+      { name: s.alumniName, company: s.alumniCompany, role: s.alumniTitle, year: `${abbr} '${s.studentYear}` },
+    ],
     outreach: {
-      to: school.outreach.to,
-      toFull: school.outreach.toFull,
-      company: school.outreach.company,
-      from: school.outreach.from,
-      body: `Hi ${school.outreach.to},\n\nI'm a student exploring ${school.outreach.field} and noticed you're at ${school.outreach.company} — I'd love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\n${school.outreach.from}`,
+      to: s.alumniName.split(' ')[0],
+      toFull: s.alumniName,
+      company: s.alumniCompany,
+      from: s.studentName,
+      body: `Hi ${s.alumniName.split(' ')[0]},\n\nI'm a student exploring ${s.field} and noticed you're at ${s.alumniCompany} — I'd love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\n${s.studentName}`,
     },
   };
 }
@@ -120,8 +118,8 @@ export default function V3HeroTypingBox() {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [playKey, setPlayKey] = useState(0);
 
-  const school = SCHOOLS[selectedIdx];
-  const demoData = buildDemoData(school);
+  const abbr = SCHOOL_KEYS[selectedIdx];
+  const demoData = buildDemoData(abbr);
 
   const handleChipClick = (idx) => {
     if (idx === selectedIdx) return;
@@ -138,11 +136,11 @@ export default function V3HeroTypingBox() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-2 mb-6">
-        {SCHOOLS.map((s, i) => {
+        {SCHOOL_KEYS.map((s, i) => {
           const active = i === selectedIdx;
           return (
             <button
-              key={s.abbr}
+              key={s}
               onClick={() => handleChipClick(i)}
               data-chip="true"
               style={{
@@ -155,18 +153,18 @@ export default function V3HeroTypingBox() {
                 minHeight: 'auto', minWidth: 'auto',
               }}
             >
-              {s.abbr}
+              {s}
             </button>
           );
         })}
       </div>
 
-      <DemoPlayer key={playKey} school={school} demoData={demoData} />
+      <DemoPlayer key={playKey} abbr={abbr} demoData={demoData} />
     </div>
   );
 }
 
-function DemoPlayer({ school, demoData }) {
+function DemoPlayer({ abbr, demoData }) {
   const [displayedText, setDisplayedText] = useState('');
   const [showCompanies, setShowCompanies] = useState(false);
   const [showAlumni, setShowAlumni] = useState(false);
@@ -211,14 +209,14 @@ function DemoPlayer({ school, demoData }) {
   }, []);
 
   const handleAlumniHover = useCallback((alumni) => {
-    const yr = `'${String(new Date().getFullYear() + 1).slice(2)}`;
-    const msg = `Hey ${alumni.name.split(' ')[0]}, I'm a ${school.abbr} ${yr} student and noticed you're a ${alumni.role} at ${alumni.company}. Your path from ${school.abbr} is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — Alex, ${school.abbr} ${yr}`;
+    const s = SCHOOL_DEMOS[abbr];
+    const msg = `Hey ${alumni.name.split(' ')[0]}, I'm a ${abbr} '${s.studentYear} student and noticed you're a ${alumni.role} at ${alumni.company}. Your path from ${abbr} is exactly what I'm aiming for — would love 15 minutes to learn how you did it. No pressure at all. — ${s.studentName}, ${abbr} '${s.studentYear}`;
     startTyping(msg);
-  }, [school, startTyping]);
+  }, [abbr, startTyping]);
 
   useEffect(() => {
     setHasStarted(true);
-    startTyping(buildDefaultMessage(school));
+    startTyping(buildDefaultMessage(abbr));
 
     schedule(() => {
       setShowCompanies(true);
