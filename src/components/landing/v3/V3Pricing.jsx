@@ -139,7 +139,7 @@ export default function V3Pricing({ onCTA }) {
             SIMPLE PRICING
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>
-            Two options. No surprises.
+            One platform. Two ways to use it.
           </h2>
         </div>
 
