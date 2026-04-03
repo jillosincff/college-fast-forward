@@ -69,11 +69,6 @@ export default function V3HeroBreakdown() {
             <p style={{ margin: '0 0 12px' }}>And even if you don't know what you want to do yet — that's okay. <strong style={{ color: '#1A1A1A' }}>We'll help you figure it out.</strong></p>
           </div>
 
-          <div style={{ background: '#F9F9F9', borderLeft: '3px solid #E85D20', borderRadius: '0 10px 10px 0', padding: '16px 20px', marginBottom: 24 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#555', lineHeight: 1.7, margin: '0 0 10px', fontStyle: 'italic' }}>Our founder graduated with no clue what she wanted to do. She sent her resume blindly, unsuccessfully, until she just fell into something.</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', lineHeight: 1.7, margin: 0, fontWeight: 600 }}>She built CFF so you don't have to.</p>
-          </div>
-
           <div style={{ background: '#0A0A0A', borderRadius: 12, padding: '20px 24px', marginBottom: 28 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.85)', lineHeight: 1.7, margin: '0 0 12px' }}>Because today you have something she didn't —</p>
             {[
