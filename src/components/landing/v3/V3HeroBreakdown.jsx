@@ -59,7 +59,7 @@ export default function V3HeroBreakdown() {
             🎓 FOR STUDENTS
           </p>
           <h3 style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px', lineHeight: 1.3 }}>
-            Get inside. Start exploring.
+            Get inside. Take action.
           </h3>
           <p style={{ fontFamily: dmSans, fontSize: 13, color: '#888', margin: '0 0 20px', lineHeight: 1.5 }}>
             Everything below is free. No credit card. No catch.
@@ -72,11 +72,7 @@ export default function V3HeroBreakdown() {
             </div>
           ))}
 
-          <div style={{ background: '#F0FFF4', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 10, padding: '12px 16px', margin: '20px 0 24px' }}>
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#16A34A', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
-              ✓ All of the above is <strong>completely free</strong> — no credit card, no trial, no catch. Upgrade to FastIQ anytime for unlimited AI tools.
-            </p>
-          </div>
+
 
           <div style={{ background: '#F9F9F9', borderRadius: 10, padding: '14px 16px', marginBottom: 24 }}>
             <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#888', margin: '0 0 10px' }}>
