@@ -54,7 +54,7 @@ export default function V3HeroBreakdown() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: 20, marginBottom: 24 }}>
 
         {/* STUDENT CARD */}
-        <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '28px 28px' }}>
+        <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '28px 28px', textAlign: 'left' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 10px' }}>
             🎓 FOR STUDENTS
           </p>
