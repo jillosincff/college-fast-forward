@@ -130,15 +130,6 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
           </div>
         </div>
 
-        {/* TRUST BANNER */}
-        <div className="hf" style={{ animationDelay: '1900ms', maxWidth: 480, margin: '0 auto 28px' }}>
-          <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '14px 20px', textAlign: 'center' }}>
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>
-              &#127892; <strong style={{ color: '#fff' }}>College Fast Forward is free.</strong> Always. No credit card needed to join. FastIQ is our optional AI upgrade for students who want to move faster.
-            </p>
-          </div>
-        </div>
-
         {/* ALUMNI DEMO */}
         <div className="hf" style={{ animationDelay: '2000ms', marginBottom: 48 }}>
           <V3HeroTypingBox />
