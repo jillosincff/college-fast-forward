@@ -10,6 +10,7 @@ const SCHOOL_DEMOS = {
   UF: {
     studentName: 'Alex',
     studentYear: '27',
+    targetRole: 'Marketing Coordinator',
     alumniName: 'Jennifer Gomez',
     alumniTitle: 'Brand Marketing Manager',
     alumniCompany: 'Disney',
@@ -26,6 +27,7 @@ const SCHOOL_DEMOS = {
   FSU: {
     studentName: 'Jordan',
     studentYear: '27',
+    targetRole: 'Financial Analyst',
     alumniName: 'Marcus Reid',
     alumniTitle: 'Investment Banking Analyst',
     alumniCompany: 'Goldman Sachs',
@@ -42,6 +44,7 @@ const SCHOOL_DEMOS = {
   'Wake Forest': {
     studentName: 'Emma',
     studentYear: '26',
+    targetRole: 'Consulting Analyst',
     alumniName: 'Sarah Chen',
     alumniTitle: 'Strategy Consultant',
     alumniCompany: 'McKinsey',
@@ -58,6 +61,7 @@ const SCHOOL_DEMOS = {
   'U of M': {
     studentName: 'Ryan',
     studentYear: '27',
+    targetRole: 'Software Engineer',
     alumniName: 'David Park',
     alumniTitle: 'Senior Software Engineer',
     alumniCompany: 'Google',
@@ -74,6 +78,7 @@ const SCHOOL_DEMOS = {
   USC: {
     studentName: 'Olivia',
     studentYear: '27',
+    targetRole: 'Talent Agency Assistant',
     alumniName: 'Jordan Blake',
     alumniTitle: 'Talent Agency Assistant',
     alumniCompany: 'WME',
@@ -109,7 +114,7 @@ function buildDemoData(abbr) {
       toFull: s.alumniName,
       company: s.alumniCompany,
       from: s.studentName,
-      body: `Hi ${s.alumniName.split(' ')[0]},\n\nI'm a student exploring ${s.field} and noticed you're at ${s.alumniCompany} — I'd love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\n${s.studentName}`,
+      body: `Hi ${s.alumniName.split(' ')[0]},\n\nI'm a student exploring ${s.targetRole.toLowerCase()} and noticed you're at ${s.alumniCompany} — I'd love to hear how you got started there.\n\nWould you have 15 minutes for a quick call? I'd really appreciate any advice.\n\nThanks so much,\n${s.studentName}`,
     },
   };
 }
