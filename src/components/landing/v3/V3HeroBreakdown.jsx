@@ -98,7 +98,7 @@ export default function V3HeroBreakdown() {
         </div>
 
         {/* PARENT / ALUMNI CARD */}
-        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 28px' }}>
+        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 28px', textAlign: 'left' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 10px' }}>
             💙 FOR PARENTS &amp; ALUMNI
           </p>
@@ -115,12 +115,6 @@ export default function V3HeroBreakdown() {
               <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>{item.text}</p>
             </div>
           ))}
-
-          <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 16px', margin: '20px 0 24px' }}>
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.5 }}>
-              ✓ <strong style={{ color: '#fff' }}>Completely free</strong> to join and contribute. No credit card. No commitment. Help as much or as little as you'd like.
-            </p>
-          </div>
 
           <div style={{ background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '14px 16px', marginBottom: 24 }}>
             <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.6 }}>
