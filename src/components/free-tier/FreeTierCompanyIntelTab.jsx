@@ -37,21 +37,6 @@ function AlumniUpgradeModal({ company, university, onClose, onUpgrade }) {
   );
 }
 
-function NoGoalsGate({ onSetGoals }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: 24 }}>
-      <div style={{ background: '#0d1117', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 16, padding: '40px 36px', maxWidth: 480, width: '100%', textAlign: 'center' }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 16px' }}>COMPANY INTEL</p>
-        <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#fff', margin: '0 0 16px', lineHeight: 1.3 }}>Your company list is personalized to your career goals.</p>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 28px', lineHeight: 1.7 }}>We show hiring signals, CFF network presence, and alumni counts for companies that actually matter for your path — not a generic list.</p>
-        <button onClick={onSetGoals} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-          Set My Career Goals →
-        </button>
-      </div>
-    </div>
-  );
-}
-
 const FILTERS = [
   { key: 'all',    label: 'All' },
   { key: 'hiring', label: '🟢 Actively Hiring' },
@@ -94,6 +79,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [researchCompany, setResearchCompany] = useState(null);
   const [savedCompanies, setSavedCompanies] = useState(() => user?.saved_company_intel || []);
   const [showAll, setShowAll] = useState(false);
+  const [skippedGoals, setSkippedGoals] = useState(false);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const university = user?.school || user?.university || 'UF';
@@ -160,7 +146,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const visibleCompanies = showAll ? filteredCompanies : filteredCompanies.slice(0, 6);
 
   if (!user) return null;
-  if (!hasGoals) return <NoGoalsGate onSetGoals={() => onTabChange?.('career_goals')} />;
+
+  const showGoalsBanner = !hasGoals && !skippedGoals;
 
   const targetCompanies = user?.career_goals?.target_companies || [];
   const role = targetRoles[0] || '';
@@ -217,13 +204,15 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   // Pre-search landing
   if (!hasStarted) return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
-      <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
-      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>
-        {targetCompanies.length > 0 ? `Companies hiring ${role || 'in your field'}.` : 'Your Target Companies.'}
-      </h1>
-      <p style={{ fontSize: 14, color: '#888', margin: '0 0 28px' }}>
-        {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
-      </p>
+      {showGoalsBanner && (
+        <div style={{ background: '#FFF5F5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: 0, fontWeight: 500 }}>⚠️ Set your career goals so we can find your target companies.</p>
+          <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+            <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Set Goals →</button>
+            <button onClick={() => setSkippedGoals(true)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Explore anyway</button>
+          </div>
+        </div>
+      )}
       {renderTargetCompanies()}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', textAlign: 'center', gap: '16px' }}>
         <div style={{ fontSize: '13px', color: '#666', maxWidth: '400px', lineHeight: '1.6' }}>
@@ -241,27 +230,16 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
-      {/* Header with CTA button in top right */}
-      <div style={{ position: 'relative', marginBottom: 28 }}>
-        <div style={{ paddingRight: window.innerWidth < 600 && !loading && companies.length > 0 ? 0 : !loading && companies.length > 0 ? 320 : 0 }}>
-          <p style={{ fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#E85D20', margin: '0 0 4px' }}>COMPANY INTEL</p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 700, color: '#0d1117', margin: '0 0 6px', lineHeight: 1.2 }}>
-            {targetCompanies.length > 0 ? `Companies hiring ${role || 'in your field'}.` : 'Your Target Companies.'}
-          </h1>
-          <p style={{ fontSize: 14, color: '#888', margin: 0 }}>
-            {targetCompanies.length > 0 ? 'Updated daily by FastIQ. Sorted by opportunity strength.' : 'FastIQ will scan careers pages and hiring signals across companies matching your goals.'}
-          </p>
+      {showGoalsBanner && (
+        <div style={{ background: '#FFF5F5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: 0, fontWeight: 500 }}>⚠️ Set your career goals so we can find your target companies.</p>
+          <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+            <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Set Goals →</button>
+            <button onClick={() => setSkippedGoals(true)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Explore anyway</button>
+          </div>
         </div>
-        {!loading && companies.length > 0 && window.innerWidth >= 600 && (
-          <button
-            onClick={() => onTabChange?.('directory')}
-            style={{ position: 'absolute', top: 0, right: 0, background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', whiteSpace: 'nowrap' }}
-          >
-            Next: Find Your CFF Connections →
-          </button>
-        )}
-      </div>
-
+      )}
+      {/* Header with CTA button in top right */}
       {/* Target companies — always visible */}
       {renderTargetCompanies()}
 
