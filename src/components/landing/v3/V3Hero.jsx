@@ -1,5 +1,6 @@
 import React from 'react';
 import { Users, Zap } from 'lucide-react';
+import { navigate } from '@/components/utils/navigation';
 import V3HeroTypingBox from './V3HeroTypingBox';
 
 const dmSans = '"DM Sans", system-ui, sans-serif';
@@ -74,45 +75,53 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
         </div>
 
         {/* DUAL-PATH CTAs */}
-        <div className="hf" style={{ animationDelay: '1800ms', marginBottom: 52 }}>
+        <div className="hf" style={{ animationDelay: '1800ms' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: 380, margin: '0 auto' }}>
             {/* Parent CTA */}
             <button
-              onClick={handleParent}
-              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(1.12)'; }}
-              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+              onClick={() => navigate('ParentOnboarding')}
               style={{
-                fontFamily: dmSans, fontSize: 15, fontWeight: 600,
-                background: '#E85D20', color: '#fff',
-                padding: '16px 32px', borderRadius: 12, border: 'none',
-                cursor: 'pointer', transition: 'filter 0.2s ease',
-                minHeight: 'auto', minWidth: 'auto', width: '100%',
-                marginBottom: 12,
+                background: '#E85D20', border: 'none',
+                borderRadius: 12, padding: '16px 32px',
+                fontSize: 15, fontWeight: 600,
+                color: '#fff', cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif",
+                width: '100%', marginBottom: 12,
+                minHeight: 'auto',
               }}
             >
               Help my student get hired &rarr;
             </button>
+
             {/* Student CTA */}
             <button
-              onClick={handleStudent}
-              onMouseEnter={e => { e.currentTarget.style.filter = 'brightness(0.95)'; }}
-              onMouseLeave={e => { e.currentTarget.style.filter = 'brightness(1)'; }}
+              onClick={() => navigate('StudentOnboarding')}
               style={{
-                fontFamily: dmSans, fontSize: 15, fontWeight: 600,
-                background: '#fff', color: '#E85D20',
-                padding: '16px 32px', borderRadius: 12,
+                background: '#fff',
                 border: '2px solid #E85D20',
-                cursor: 'pointer', transition: 'filter 0.2s ease',
-                minHeight: 'auto', minWidth: 'auto', width: '100%',
-                marginBottom: 20,
+                borderRadius: 12, padding: '16px 32px',
+                fontSize: 15, fontWeight: 600,
+                color: '#E85D20', cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif",
+                width: '100%', marginBottom: 16,
+                minHeight: 'auto',
               }}
             >
               I&apos;m the student &rarr;
             </button>
+
             {/* Trust line */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'center', gap: 16,
+              flexWrap: 'wrap', marginBottom: 48,
+            }}>
               {['✓ Free to join', '✓ No credit card', '✓ Upgrade anytime'].map(item => (
-                <p key={item} style={{ fontFamily: dmSans, fontSize: 12, color: '#888', margin: 0, fontWeight: 500 }}>
+                <p key={item} style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 12, color: '#888',
+                  margin: 0, fontWeight: 500,
+                }}>
                   {item}
                 </p>
               ))}
