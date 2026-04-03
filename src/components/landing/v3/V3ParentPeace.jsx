@@ -17,9 +17,10 @@ const STEPS = [
   },
   {
     num: '02',
-    title: 'The network steps in',
-    body: 'When a parent in the community is connected to someone at your student\'s target company, they get a simple nudge:',
-    nudge: '"A student is targeting Nike. You know someone there. Want to make an intro?" One click. Done.',
+    title: 'The student reaches out directly.',
+    body: 'Students find parents and alumni in the CFF network who work in their target industry — and send a warm, personalized message:',
+    quote: '"Hi Tyler, I\'m a student interested in finance and noticed you\'re a VP at Citibank. I\'d love to connect for some guidance on breaking into the industry. Would you have 15 minutes?"',
+    subBody: 'No cold emails. No LinkedIn into the void. A warm message to someone who\'s already agreed to help.',
     thumbnail: 'nudge',
   },
   {
@@ -145,18 +146,22 @@ export default function V3ParentPeace({ onCTA }) {
                 <h3 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 18, color: HEADLINE_COLOR, marginBottom: 14, lineHeight: 1.3 }}>{s.title}</h3>
                 <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: MUTED_COLOR, lineHeight: 1.65, margin: 0 }}>{s.body}</p>
 
-                {s.nudge && (
-                  <div style={{
-                    marginTop: 16,
-                    background: '#F9FAFB',
-                    borderRadius: 14,
-                    borderLeft: `3px solid ${ORANGE}`,
-                    padding: '14px 16px',
-                  }}>
-                    <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: HEADLINE_COLOR, lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
-                      {s.nudge}
-                    </p>
-                  </div>
+                {s.quote && (
+                  <>
+                    <div style={{
+                      marginTop: 16,
+                      background: '#F9FAFB',
+                      borderRadius: 14,
+                      borderLeft: `3px solid ${ORANGE}`,
+                      padding: '14px 16px',
+                      marginBottom: 12,
+                    }}>
+                      <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: HEADLINE_COLOR, lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
+                        {s.quote}
+                      </p>
+                    </div>
+                    <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: MUTED_COLOR, lineHeight: 1.65, margin: 0 }}>{s.subBody}</p>
+                  </>
                 )}
               </div>
             );
