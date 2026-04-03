@@ -130,90 +130,95 @@ export default function V3Pricing({ onCTA }) {
   const { ref, vis } = useFadeIn();
 
   return (
-    <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px', position: 'relative', overflow: 'hidden' }}>
-      <style>{`@media(max-width:820px){.v3-pricing-grid{flex-direction:column !important; max-width:420px !important; margin-left:auto !important; margin-right:auto !important}}`}</style>
+    <section ref={ref} style={{ background: DARK_BG_ALT, padding: '120px 24px 130px' }}>
+      <div className="max-w-[700px] mx-auto">
 
-      <div aria-hidden className="absolute top-[-60px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse, var(--accent-glow, rgba(79,140,255,0.05)), transparent 70%)' }} />
-
-      <div className="max-w-[1060px] mx-auto relative">
-        <p className="text-center" style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.15em', color: ORANGE, marginBottom: 14, ...fadeStyle(vis, 0) }}>
-          Pricing
-        </p>
-
-        <h2 className="text-center" style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(26px, 3.5vw, 42px)', color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 10, ...fadeStyle(vis, 0.02) }}>
-          Choose how your family gets started.
-        </h2>
-
-        <p className="text-center" style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 400, color: 'rgba(255,255,255,0.6)', lineHeight: 1.55, maxWidth: 520, margin: '0 auto 48px', ...fadeStyle(vis, 0.04) }}>
-          Free to explore. Powerful when you're ready to act.
-        </p>
-
-        {/* ── Three cards ───────────────────────────── */}
-        <div className="v3-pricing-grid" style={{ display: 'flex', gap: 20, alignItems: 'stretch', ...fadeStyle(vis, 0.08) }}>
-          {/* Free */}
-          <PricingCard
-            name="The Network"
-            price="$0"
-            descriptor="Free forever"
-            subhead="Get inside. Start exploring."
-            features={FREE_FEATURES}
-            cta={{ text: 'Get Started Free', onClick: onCTA }}
-            ctaStyle="outline"
-          >
-            {FREE_FEATURES.map((f, i) => <FeatureItem key={i} text={f} />)}
-            <p style={{ fontFamily: dmSans, fontStyle: 'italic', fontSize: 13, fontWeight: 400, color: 'rgba(232,93,32,0.7)', lineHeight: 1.5, marginTop: 6 }}>
-              🔒 Full alumni names and outreach tools require FastIQ
-            </p>
-          </PricingCard>
-
-          {/* FastIQ — highlighted */}
-          <PricingCard
-            badge="MOST POPULAR"
-            highlighted
-            name="FastIQ™"
-            price="$29/mo"
-            descriptor="$29/month. Cancel anytime."
-            subhead="The full system. For families ready to act."
-            cta={{ text: 'Get Started with FastIQ', onClick: onCTA }}
-            ctaStyle="solid"
-            finePrint="Cancel anytime."
-          >
-            <div style={{ marginBottom: 4 }}>
-              <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>
-                or $249/year
-              </p>
-              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: ORANGE, marginBottom: 14 }}>
-                Save 28% with annual
-              </p>
-            </div>
-
-            <FeatureGroupLabel text="Your student gets:" />
-            {FASTIQ_STUDENT.map((f, i) => <FeatureItem key={`s-${i}`} text={f} />)}
-
-            <div style={{ height: 16 }} />
-            <FeatureGroupLabel text="You get:" />
-            {FASTIQ_PARENT.map((f, i) => <FeatureItem key={`p-${i}`} text={f} />)}
-          </PricingCard>
-
-          {/* University */}
-          <PricingCard
-            name="University Partner"
-            price="Custom"
-            descriptor="Campus-wide access"
-            subhead="For career centers ready to scale."
-            features={UNI_FEATURES}
-            cta={{ text: 'Contact Us', onClick: () => { window.location.hash = '#SubmitFeedback'; } }}
-            ctaStyle="outline"
-          />
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 40, ...fadeStyle(vis, 0) }}>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#AAAAAA', margin: '0 0 8px' }}>
+            SIMPLE PRICING
+          </p>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>
+            Two options. No surprises.
+          </h2>
         </div>
 
-        {/* Closing lines */}
-        <p className="text-center" style={{ fontFamily: playfair, fontStyle: 'italic', fontWeight: 400, fontSize: 15, color: 'rgba(255,255,255,0.45)', marginTop: 36, lineHeight: 1.6, ...fadeStyle(vis, 0.14) }}>
-          The network grows stronger with every family. Your student benefits from every parent who joins.
+        {/* Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 16, marginBottom: 24, ...fadeStyle(vis, 0.06) }}>
+
+          {/* FREE TIER */}
+          <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '28px 24px' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#888', margin: '0 0 12px' }}>COLLEGE FAST FORWARD</p>
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontFamily: playfair, fontSize: 48, fontWeight: 700, color: '#1A1A1A' }}>$0</span>
+              <span style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginLeft: 4 }}>/ forever</span>
+            </div>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 20px' }}>Free. Always. No credit card.</p>
+            {[
+              'Student profile + career goals',
+              'Resume upload + AI score',
+              'Company Intel + hiring signals',
+              'Browse 455+ parents and professionals',
+              '1 free alumni search',
+              'Direct messaging',
+            ].map((item, i, arr) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: i < arr.length - 1 ? 10 : 0 }}>
+                <span style={{ color: '#22C55E', fontSize: 14, flexShrink: 0, marginTop: 2 }}>✓</span>
+                <p style={{ fontFamily: dmSans, fontSize: 13, color: '#444', margin: 0, lineHeight: 1.5 }}>{item}</p>
+              </div>
+            ))}
+            <button
+              onClick={() => { window.location.hash = '#StudentOnboarding'; }}
+              style={{ background: 'none', border: '2px solid #E85D20', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: dmSans, width: '100%', marginTop: 24, minHeight: 'auto' }}
+            >
+              Join Free →
+            </button>
+          </div>
+
+          {/* FASTIQ TIER */}
+          <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 24px', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: 16, right: 16, background: '#E85D20', borderRadius: 20, padding: '4px 12px' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#fff', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>MOST POPULAR</p>
+            </div>
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>CFF + FASTIQ™</p>
+            <div style={{ marginBottom: 8 }}>
+              <span style={{ fontFamily: playfair, fontSize: 48, fontWeight: 700, color: '#fff' }}>$29</span>
+              <span style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>/ month</span>
+            </div>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 4px' }}>or $249/year — save 28%</p>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)', margin: '0 0 20px' }}>Everything in Free + the full AI engine.</p>
+            {[
+              'Unlimited alumni searches at any company',
+              'Resume tailoring to any job description',
+              'Full STAR method mock interview practice',
+              'LinkedIn profile scoring and optimization',
+              'AI outreach drafts with follow-up nudges',
+              'Career archetype assessment',
+              'Personalized AI dashboard briefing',
+            ].map((item, i, arr) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: i < arr.length - 1 ? 10 : 0 }}>
+                <span style={{ color: '#E85D20', fontSize: 14, flexShrink: 0, marginTop: 2 }}>✓</span>
+                <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>{item}</p>
+              </div>
+            ))}
+            <button
+              onClick={onCTA}
+              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: dmSans, width: '100%', marginTop: 24, minHeight: 'auto' }}
+            >
+              Unlock FastIQ →
+            </button>
+            <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '12px 0 0' }}>
+              🎖 Founding rate: $14.50/mo forever · Expires April 15
+            </p>
+          </div>
+
+        </div>
+
+        {/* Trust line */}
+        <p style={{ fontFamily: dmSans, fontSize: 12, color: '#AAAAAA', textAlign: 'center', margin: 0, ...fadeStyle(vis, 0.12) }}>
+          Cancel anytime · No contracts · Founding rate locks in forever
         </p>
-        <p className="text-center" style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#fff', marginTop: 12, ...fadeStyle(vis, 0.16) }}>
-          <span style={{ color: ORANGE, fontWeight: 500 }}>1,200+</span> families already inside.
-        </p>
+
       </div>
     </section>
   );
