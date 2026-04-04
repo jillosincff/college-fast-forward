@@ -71,6 +71,20 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
         <HelperText>Not currently working? No problem — your past experience and network are just as valuable here.</HelperText>
       </div>
 
+      {/* Career Background */}
+      <div style={{ marginBottom: 20 }}>
+        <FieldLabel>
+          Career Background{' '}
+          <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+        </FieldLabel>
+        <FieldInput
+          value={formData.careerBackground || ''}
+          onChange={e => onUpdate({ careerBackground: e.target.value })}
+          placeholder="e.g. 20 years in finance, former marketing exec, retired teacher..."
+        />
+        <HelperText>This helps students understand your background even if you’re between roles or retired.</HelperText>
+      </div>
+
       {/* Industry */}
       <div style={{ marginBottom: 24 }}>
         <FieldLabel required>What industry are you in?</FieldLabel>

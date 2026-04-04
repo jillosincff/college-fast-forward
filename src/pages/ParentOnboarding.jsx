@@ -42,6 +42,7 @@ export default function ParentOnboarding() {
       full_name: formData.fullName.trim(),
       current_company: formData.company.trim(),
       company: formData.company.trim(),
+      career_background: formData.careerBackground?.trim() || '',
       industry: formData.industry,
       industries: [formData.industry],
       intro_willingness: formData.introWillingness,
