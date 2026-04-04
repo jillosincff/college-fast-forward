@@ -87,7 +87,10 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
       {/* Industry */}
       <div style={{ marginBottom: 24 }}>
-        <FieldLabel required>What industry are you in?</FieldLabel>
+        <FieldLabel>
+          What industry are you in or have you worked in?{' '}
+          <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+        </FieldLabel>
         <FieldSelect
           value={formData.industry || ''}
           onChange={e => onUpdate({ industry: e.target.value })}
