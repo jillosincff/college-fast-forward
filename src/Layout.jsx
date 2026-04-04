@@ -590,6 +590,7 @@ const getPageComponent = (pageName) => {
     case 'FreeTierDashboard': return FreeTierDashboard;
     case 'FastIQDashboard': return FastIQDashboard;
     case 'OutreachDrafts': return React.lazy(() => import('./pages/OutreachDrafts'));
+    case 'ParentWelcome': return React.lazy(() => import('./pages/ParentWelcome'));
     default: return LandingPage;
   }
 };
