@@ -591,6 +591,7 @@ const getPageComponent = (pageName) => {
     case 'FastIQDashboard': return FastIQDashboard;
     case 'OutreachDrafts': return React.lazy(() => import('./pages/OutreachDrafts'));
     case 'ParentWelcome': return React.lazy(() => import('./pages/ParentWelcome'));
+    case 'ParentUpsell': return React.lazy(() => import('./pages/ParentUpsell'));
     default: return LandingPage;
   }
 };
