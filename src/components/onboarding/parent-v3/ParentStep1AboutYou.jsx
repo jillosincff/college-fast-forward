@@ -19,7 +19,7 @@ const INTRO_OPTIONS = [
   { value: 'not_now', label: 'Not right now' },
 ];
 
-export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack }) {
+export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack, loading }) {
   const [errors, setErrors] = useState({});
 
   const validate = () => {
@@ -33,6 +33,7 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
   const handleContinue = () => {
     if (validate()) onNext();
+    // errors will show if invalid
   };
 
   return (
@@ -159,7 +160,9 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
       </div>
 
       {/* CTA */}
-      <PrimaryButton onClick={handleContinue}>Continue →</PrimaryButton>
+      <PrimaryButton onClick={handleContinue} loading={loading} disabled={loading}>
+        {loading ? 'Saving...' : 'Continue →'}
+      </PrimaryButton>
 
       <BackLink onClick={onBack} />
     </OnboardingShell>

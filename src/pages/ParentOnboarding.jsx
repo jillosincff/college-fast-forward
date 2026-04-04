@@ -9,6 +9,7 @@ import ParentWelcomeScreen from '../components/onboarding/parent-v3/ParentWelcom
 export default function ParentOnboarding() {
   const { user, refreshUser } = useAuth();
   const [step, setStep] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [invited, setInvited] = useState(false);
   const [invitedStudents, setInvitedStudents] = useState([]);
@@ -36,7 +37,7 @@ export default function ParentOnboarding() {
   const updateFormData = (updates) => setFormData(prev => ({ ...prev, ...updates }));
 
   const saveProfileAndContinue = async () => {
-    // Save parent profile data + founding offer timestamp
+    setIsSaving(true);
     const updateData = {
       full_name: formData.fullName.trim(),
       current_company: formData.company.trim(),
@@ -48,12 +49,10 @@ export default function ParentOnboarding() {
       directory_consent_given: formData.directoryVisible !== false,
     };
 
-    // Only set founding offer timestamp if not already set (prevents reset on back-navigation)
     if (!user?.founding_offer_started_at) {
       updateData.founding_offer_started_at = new Date().toISOString();
     }
 
-    // Map intro willingness to ways_to_help
     if (formData.introWillingness === 'yes') {
       updateData.ways_to_help = ['networking_intros', 'career_advice'];
       updateData.help_types = ['networking_intros', 'career_advice'];
@@ -62,8 +61,12 @@ export default function ParentOnboarding() {
       updateData.help_types = ['career_advice'];
     }
 
-    await base44.auth.updateMe(updateData);
-    // Don't call refreshUser here — it remounts this component and resets step state
+    try {
+      await base44.auth.updateMe(updateData);
+    } catch (err) {
+      console.error('updateMe failed, continuing anyway:', err);
+    }
+    setIsSaving(false);
     setStep(2);
   };
 
@@ -177,6 +180,7 @@ export default function ParentOnboarding() {
         onUpdate={updateFormData}
         onNext={saveProfileAndContinue}
         onBack={() => navigate('GatorAuth')}
+        loading={isSaving}
       />
     );
   }
