@@ -59,13 +59,16 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
       {/* Company */}
       <div style={{ marginBottom: 20 }}>
-        <FieldLabel required>Where do you work?</FieldLabel>
+        <FieldLabel>
+          Where do you work or have you worked?{' '}
+          <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+        </FieldLabel>
         <FieldInput
           value={formData.company || ''}
           onChange={e => onUpdate({ company: e.target.value })}
-          placeholder="Company name"
+          placeholder="e.g. Disney, Goldman Sachs, Google..."
         />
-        <HelperText>This is your core value to the network — students search by company.</HelperText>
+        <HelperText>Not currently working? No problem — your past experience and network are just as valuable here.</HelperText>
       </div>
 
       {/* Industry */}
