@@ -158,9 +158,8 @@ export default function ParentOnboarding() {
       console.error('Failed to complete onboarding:', error);
     }
 
-    // Don't call refreshUser here — it causes Layout to remount this component and reset step.
-    // User gets a fresh auth context when they navigate to ParentHome from the welcome screen.
-    setStep(3);
+    // Navigate to the standalone ParentWelcome page (emotional thank you → ParentUpsell flow)
+    navigate('ParentWelcome');
   };
 
   const handleProfile = () => navigate('ParentHome');
