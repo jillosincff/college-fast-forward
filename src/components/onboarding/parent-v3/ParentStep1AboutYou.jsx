@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   OnboardingShell, ProgressDots, FieldLabel, FieldInput, FieldSelect,
   HelperText, PrimaryButton, BackLink, dmSans, playfair, ORANGE,
@@ -20,20 +20,8 @@ const INTRO_OPTIONS = [
 ];
 
 export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack, loading }) {
-  const [errors, setErrors] = useState({});
-
-  const validate = () => {
-    const e = {};
-    if (!formData.fullName?.trim()) e.fullName = 'Full name is required';
-    if (!formData.company?.trim()) e.company = 'Company is required';
-    if (!formData.industry) e.industry = 'Industry is required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
   const handleContinue = () => {
-    if (validate()) onNext();
-    // errors will show if invalid
+    onNext();
   };
 
   return (
@@ -64,11 +52,9 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
         <FieldLabel required>Full Name</FieldLabel>
         <FieldInput
           value={formData.fullName || ''}
-          onChange={e => { onUpdate({ fullName: e.target.value }); setErrors(p => ({ ...p, fullName: null })); }}
+          onChange={e => onUpdate({ fullName: e.target.value })}
           placeholder="Your full name"
-          error={errors.fullName}
         />
-        {errors.fullName && <HelperText error>{errors.fullName}</HelperText>}
       </div>
 
       {/* Company */}
@@ -76,13 +62,10 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
         <FieldLabel required>Where do you work?</FieldLabel>
         <FieldInput
           value={formData.company || ''}
-          onChange={e => { onUpdate({ company: e.target.value }); setErrors(p => ({ ...p, company: null })); }}
+          onChange={e => onUpdate({ company: e.target.value })}
           placeholder="Company name"
-          error={errors.company}
         />
-        {errors.company ? <HelperText error>{errors.company}</HelperText> : (
-          <HelperText>This is your core value to the network — students search by company.</HelperText>
-        )}
+        <HelperText>This is your core value to the network — students search by company.</HelperText>
       </div>
 
       {/* Industry */}
@@ -90,12 +73,10 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
         <FieldLabel required>What industry are you in?</FieldLabel>
         <FieldSelect
           value={formData.industry || ''}
-          onChange={e => { onUpdate({ industry: e.target.value }); setErrors(p => ({ ...p, industry: null })); }}
+          onChange={e => onUpdate({ industry: e.target.value })}
           placeholder="Select your industry"
           options={INDUSTRIES}
-          error={errors.industry}
         />
-        {errors.industry && <HelperText error>{errors.industry}</HelperText>}
       </div>
 
       {/* Intro willingness */}
