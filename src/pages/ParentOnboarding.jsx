@@ -37,7 +37,7 @@ export default function ParentOnboarding() {
   const updateFormData = (updates) => setFormData(prev => ({ ...prev, ...updates }));
 
   const saveProfileAndContinue = async () => {
-    setIsSaving(true);
+    setStep(2); // advance immediately so auth refresh doesn't reset step
     const updateData = {
       full_name: formData.fullName.trim(),
       current_company: formData.company.trim(),
@@ -48,11 +48,9 @@ export default function ParentOnboarding() {
       visible_in_directory: formData.directoryVisible !== false,
       directory_consent_given: formData.directoryVisible !== false,
     };
-
     if (!user?.founding_offer_started_at) {
       updateData.founding_offer_started_at = new Date().toISOString();
     }
-
     if (formData.introWillingness === 'yes') {
       updateData.ways_to_help = ['networking_intros', 'career_advice'];
       updateData.help_types = ['networking_intros', 'career_advice'];
@@ -60,14 +58,11 @@ export default function ParentOnboarding() {
       updateData.ways_to_help = ['career_advice'];
       updateData.help_types = ['career_advice'];
     }
-
     try {
       await base44.auth.updateMe(updateData);
     } catch (err) {
       console.error('updateMe failed, continuing anyway:', err);
     }
-    setIsSaving(false);
-    setStep(2);
   };
 
   const handleInviteStudent = async () => {
