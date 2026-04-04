@@ -37,13 +37,16 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
       </p>
 
       {/* Framing card */}
-      <div style={{ background: '#1A1A1A', borderLeft: '3px solid #E85D20', borderRadius: 12, padding: 16, marginBottom: 24 }}>
-        <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: ORANGE, margin: '0 0 8px' }}>WHY WE ASK</p>
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', lineHeight: 1.65, margin: '0 0 8px' }}>
-          Your professional background is your superpower here. When you complete your profile, students targeting your industry can find you and reach out directly for guidance or introductions.
+      <div style={{ borderLeft: '3px solid #E85D20', padding: '16px 20px', background: 'rgba(255,255,255,0.04)', borderRadius: '0 10px 10px 0', marginBottom: 24 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, margin: '0 0 10px' }}>WHY WE ASK</p>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.82)', margin: '0 0 10px', lineHeight: 1.7 }}>
+          Your network is your superpower here — whether you’re currently working, between roles, retired, or a stay-at-home parent with years of professional experience.
         </p>
-        <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, fontStyle: 'italic', color: ORANGE, margin: 0 }}>
-          You decide how much you engage — but showing up here could change someone's life.
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.82)', margin: '0 0 10px', lineHeight: 1.7 }}>
+          When you share your background, students who need someone exactly like you can find you and reach out directly — for guidance, advice, or introductions.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: ORANGE, margin: 0, lineHeight: 1.7, fontStyle: 'italic' }}>
+          You decide how much you engage — but showing up here could change someone’s life.
         </p>
       </div>
 
