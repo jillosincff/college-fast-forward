@@ -107,10 +107,12 @@ Deno.serve(async (req) => {
     }),
   });
 
+  const responseBody = await sgRes.text();
+  console.log('[SendGrid Day5] Status:', sgRes.status, 'Body:', responseBody);
+
   if (!sgRes.ok) {
-    const err = await sgRes.text();
-    return Response.json({ error: err }, { status: 500 });
+    return Response.json({ error: responseBody, status: sgRes.status }, { status: 500 });
   }
 
-  return Response.json({ success: true });
+  return Response.json({ success: true, sgStatus: sgRes.status });
 });
