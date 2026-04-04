@@ -20,6 +20,8 @@ import CareerAssessment from '@/pages/CareerAssessment';
 import FastIQDashboard from '@/pages/FastIQDashboard';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
+import ParentWelcome from '@/pages/ParentWelcome';
+import ParentUpsell from '@/pages/ParentUpsell';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -58,6 +60,8 @@ const AuthenticatedApp = () => {
           <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
+          <Route path="/ParentWelcome" element={<LayoutWrapper currentPageName="ParentWelcome"><ParentWelcome /></LayoutWrapper>} />
+          <Route path="/ParentUpsell" element={<LayoutWrapper currentPageName="ParentUpsell"><ParentUpsell /></LayoutWrapper>} />
 
           {/* Main routes */}
           <Route path="/" element={
