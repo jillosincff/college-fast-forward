@@ -135,8 +135,8 @@ export default function StudentOnboarding() {
   };
 
   const handleWelcomeComplete = useCallback(() => {
-    // Flow B: Free tier — skip FastIQOnboarding, go to Dashboard
-    navigate('Dashboard');
+    // Flow B: Go to PostJoinUpsell (7-day trial offer)
+    navigate('PostJoinUpsell');
   }, []);
 
   // ── SCREEN 3: Welcome Moment ──
