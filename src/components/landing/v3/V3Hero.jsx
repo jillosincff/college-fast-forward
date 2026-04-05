@@ -80,7 +80,7 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: 380, margin: '0 auto' }}>
             {/* Parent CTA */}
             <button
-              onClick={() => navigate('ParentOnboarding')}
+              onClick={handleParent}
               style={{
                 background: '#E85D20', border: 'none',
                 borderRadius: 12, padding: '16px 32px',
@@ -96,7 +96,7 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
 
             {/* Student CTA */}
             <button
-              onClick={() => navigate('StudentOnboarding')}
+              onClick={handleStudent}
               style={{
                 background: '#fff',
                 border: '2px solid #E85D20',
