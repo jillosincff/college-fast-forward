@@ -4,40 +4,37 @@ import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentUpsell() {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);
 
-  if (isLoading) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
-
   const handleTrialStart = async () => {
-    if (!user) return;
     setLoading(true);
     setCheckoutError(null);
     try {
       const res = await base44.functions.invoke('createCheckoutSession', {
         plan: 'fastiq_founding_monthly',
-        user: { id: user.id, email: user.email },
+        user: { id: user?.id, email: user?.email },
         successUrl: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
         cancelUrl: `${window.location.origin}/#ParentHome`,
       });
-      if (res?.data?.url) {
-        window.location.href = res.data.url;
+      // SDK may return body directly or wrapped in .data
+      const url = res?.url || res?.data?.url;
+      if (url) {
+        window.location.href = url;
       } else {
         console.error('No checkout URL returned', res);
+        setCheckoutError('Could not start checkout. Please try again.');
       }
     } catch (e) {
       console.error('Checkout failed:', e);
       setCheckoutError('Something went wrong. Please try again or contact support.');
     }
     setLoading(false);
+  };
+
+  const handleSkip = () => {
+    window.location.href = '/#ParentHome';
   };
 
   return (
@@ -169,7 +166,7 @@ export default function ParentUpsell() {
         </div>
 
         <button
-          onClick={() => navigate('ParentHome')}
+          onClick={handleSkip}
           style={{
             background: 'none', border: 'none',
             width: '100%', padding: '14px',
