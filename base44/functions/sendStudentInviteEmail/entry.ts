@@ -1,10 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
-
 Deno.serve(async (req) => {
-  const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me();
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
+  // No auth check needed — this is called during onboarding before user is fully set up
   const { student_email, student_name, parent_name, student_university } = await req.json();
 
   if (!student_email) return Response.json({ error: 'Missing student_email' }, { status: 400 });

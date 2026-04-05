@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
@@ -9,32 +9,34 @@ export default function ParentUpsell() {
   const [checkoutError, setCheckoutError] = useState(null);
 
   const handleTrialStart = async () => {
+    if (!user) {
+      setCheckoutError('Please sign in to continue.');
+      return;
+    }
     setLoading(true);
     setCheckoutError(null);
     try {
-      const res = await base44.functions.invoke('createCheckoutSession', {
+      const res = await createCheckoutSession({
         plan: 'fastiq_founding_monthly',
-        user: { id: user?.id, email: user?.email },
+        user: { id: user.id, email: user.email },
         successUrl: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
         cancelUrl: `${window.location.origin}/#ParentHome`,
       });
-      // SDK may return body directly or wrapped in .data
-      const url = res?.url || res?.data?.url;
+      const url = res?.data?.url || res?.url;
       if (url) {
         window.location.href = url;
       } else {
-        console.error('No checkout URL returned', res);
         setCheckoutError('Could not start checkout. Please try again.');
       }
     } catch (e) {
       console.error('Checkout failed:', e);
-      setCheckoutError('Something went wrong. Please try again or contact support.');
+      setCheckoutError('Something went wrong. Please try again.');
     }
     setLoading(false);
   };
 
   const handleSkip = () => {
-    window.location.href = '/#ParentHome';
+    navigate('ParentHome');
   };
 
   return (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { sendStudentInviteEmail } from '@/functions/sendStudentInviteEmail';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
 import ParentStep1AboutYou from '../components/onboarding/parent-v3/ParentStep1AboutYou';
@@ -72,7 +73,7 @@ export default function ParentOnboarding() {
     setIsSending(true);
     try {
       const parentFirstName = formData.fullName.split(' ')[0] || formData.fullName;
-      await base44.functions.invoke('sendStudentInviteEmail', {
+      await sendStudentInviteEmail({
         student_email: formData.studentEmail.trim(),
         student_name: formData.studentFirstName.trim(),
         parent_name: parentFirstName,
