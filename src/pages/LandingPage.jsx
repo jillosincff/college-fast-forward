@@ -35,7 +35,12 @@ export default function LandingPage() {
   }, []);
 
   const handleCTA = () => { trackEvent('cta_start_trial_clicked'); navigate('GetStarted'); };
-  const handleParentCTA = () => { trackEvent('cta_parent_clicked'); navigate('ParentOnboarding'); };
+  const handleParentCTA = () => {
+    trackEvent('cta_parent_clicked');
+    try { localStorage.setItem('pending_invite_role', 'parent'); } catch (e) {}
+    try { sessionStorage.setItem('pending_invite_role', 'parent'); } catch (e) {}
+    navigate('GetStarted');
+  };
   const handleStudentCTA = () => { trackEvent('cta_student_clicked'); navigate('StudentOnboarding'); };
   const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GetStarted'); };
   const scrollToHowItWorks = () => {
