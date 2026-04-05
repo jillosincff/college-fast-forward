@@ -4,13 +4,15 @@ import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentUpsell() {
-  const { user } = useAuth();
+  const { user, isLoadingAuth } = useAuth();
   const [loading, setLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);
 
   const handleTrialStart = async () => {
+    if (isLoadingAuth) return; // still loading, ignore click
     if (!user) {
-      setCheckoutError('Please sign in to continue.');
+      // Refresh the page to re-trigger auth
+      window.location.reload();
       return;
     }
     setLoading(true);
@@ -138,7 +140,7 @@ export default function ParentUpsell() {
 
           <button
             onClick={handleTrialStart}
-            disabled={loading}
+            disabled={loading || isLoadingAuth}
             style={{
               background: loading ? '#555' : '#E85D20',
               border: 'none', borderRadius: 10,
