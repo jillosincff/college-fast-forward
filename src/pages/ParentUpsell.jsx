@@ -1,36 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentUpsell() {
-  const { user, refreshUser } = useAuth();
+  const { user, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  // Wait for auth to settle; if no user after loading, go to GatorAuth
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('GatorAuth');
+    }
+  }, [isLoading, user]);
+
+  if (isLoading || !user) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   const handleTrialStart = async () => {
     setLoading(true);
     try {
-      // Ensure we have fresh user data before checkout
-      let currentUser = user;
-      if (!currentUser?.id) {
-        currentUser = await refreshUser().then(() => null).catch(() => null);
-      }
-      const { base44: b44 } = await import('@/api/base44Client');
-      const me = await b44.auth.me().catch(() => null);
-      const uid = me?.id || user?.id;
-      const uemail = me?.email || user?.email;
-      if (!uid || !uemail) {
-        console.error('No user data available for checkout');
-        setLoading(false);
-        return;
-      }
       const res = await base44.functions.invoke('createCheckoutSession', {
-        userId: uid,
-        userEmail: uemail,
         plan: 'fastiq_founding_monthly',
-        isTrial: true,
-        trialDays: 7,
-        isFoundingMember: true,
+        user: { id: user.id, email: user.email },
+        successUrl: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
+        cancelUrl: `${window.location.origin}/#ParentHome`,
       });
       if (res?.data?.url) {
         window.location.href = res.data.url;
@@ -167,7 +167,7 @@ export default function ParentUpsell() {
         </div>
 
         <button
-          onClick={() => navigate('ParentHome')}
+          onClick={() => { window.location.hash = '#ParentHome'; }}
           style={{
             background: 'none', border: 'none',
             width: '100%', padding: '14px',
