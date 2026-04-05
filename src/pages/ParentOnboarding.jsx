@@ -38,6 +38,9 @@ export default function ParentOnboarding() {
   const saveProfileAndContinue = async () => {
     setStep(2); // advance immediately so auth refresh doesn't reset step
     const updateData = {
+      // Always assert persona so user exists in DB immediately
+      persona: 'parent',
+      roles: ['parent'],
       full_name: formData.fullName.trim(),
       current_company: formData.company.trim(),
       company: formData.company.trim(),
@@ -112,6 +115,9 @@ export default function ParentOnboarding() {
   const completeOnboarding = async (didInvite) => {
     try {
       await base44.auth.updateMe({
+        // Always re-assert persona so user is always in DB with correct role
+        persona: 'parent',
+        roles: ['parent'],
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         onboarding_flow_type: 'parent_v3',
