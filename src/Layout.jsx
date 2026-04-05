@@ -941,11 +941,9 @@ export default function Layout() {
   return (
     <AppErrorBoundary name="App">
       <ThemeProvider>
-        <AuthProvider>
-          <AppContent />
-          <Toaster />
-          {(window.location.hostname.includes('localhost') || window.location.hostname.includes('preview')) && <ErrorLogger />}
-        </AuthProvider>
+        <AppContent />
+        <Toaster />
+        {(window.location.hostname.includes('localhost') || window.location.hostname.includes('preview')) && <ErrorLogger />}
       </ThemeProvider>
     </AppErrorBoundary>
   );
