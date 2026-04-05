@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
+import { base44 } from '@/api/base44Client';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { toast } from 'sonner';
 import LandingStickyNav from '@/components/landing/LandingStickyNav';
@@ -39,7 +40,8 @@ export default function LandingPage() {
     trackEvent('cta_parent_clicked');
     try { localStorage.setItem('pending_invite_role', 'parent'); } catch (e) {}
     try { sessionStorage.setItem('pending_invite_role', 'parent'); } catch (e) {}
-    navigate('GetStarted');
+    const callbackUrl = window.location.origin + '/#GetStarted';
+    base44.auth.redirectToLogin(callbackUrl);
   };
   const handleStudentCTA = () => { trackEvent('cta_student_clicked'); navigate('StudentOnboarding'); };
   const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GetStarted'); };
