@@ -60,8 +60,8 @@ const AuthenticatedApp = () => {
           <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
-          <Route path="/ParentWelcome" element={<LayoutWrapper currentPageName="ParentWelcome"><ParentWelcome /></LayoutWrapper>} />
-          <Route path="/ParentUpsell" element={<LayoutWrapper currentPageName="ParentUpsell"><ParentUpsell /></LayoutWrapper>} />
+          <Route path="/ParentWelcome" element={<ParentWelcome />} />
+          <Route path="/ParentUpsell" element={<ParentUpsell />} />
 
           {/* Main routes */}
           <Route path="/" element={
