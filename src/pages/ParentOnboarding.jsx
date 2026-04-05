@@ -146,10 +146,12 @@ export default function ParentOnboarding() {
         }).catch(() => {});
       } catch {}
 
-      // Clean up invite session data
+      // Clean up invite session data + auth loop counters
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_invite_timestamp');
+      localStorage.removeItem('oauth_attempt_count');
+      localStorage.removeItem('oauth_start_time');
       sessionStorage.removeItem('pending_invite_role');
       sessionStorage.removeItem('pending_invite_code');
 

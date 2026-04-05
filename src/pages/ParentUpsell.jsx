@@ -6,6 +6,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 export default function ParentUpsell() {
   const { user, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
 
   if (isLoading) {
     return (
@@ -17,7 +18,9 @@ export default function ParentUpsell() {
   }
 
   const handleTrialStart = async () => {
+    if (!user) return;
     setLoading(true);
+    setCheckoutError(null);
     try {
       const res = await base44.functions.invoke('createCheckoutSession', {
         plan: 'fastiq_founding_monthly',
@@ -32,6 +35,7 @@ export default function ParentUpsell() {
       }
     } catch (e) {
       console.error('Checkout failed:', e);
+      setCheckoutError('Something went wrong. Please try again or contact support.');
     }
     setLoading(false);
   };
@@ -157,6 +161,11 @@ export default function ParentUpsell() {
           }}>
             No credit card needed · Cancel anytime
           </p>
+          {checkoutError && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#ff6b6b', textAlign: 'center', margin: '8px 0 0' }}>
+              {checkoutError}
+            </p>
+          )}
         </div>
 
         <button

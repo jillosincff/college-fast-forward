@@ -725,7 +725,7 @@ function AppContent() {
       sessionStorage.removeItem('pending_invite_role'); sessionStorage.removeItem('pending_invite_code');
       sessionStorage.removeItem('pending_student_email'); sessionStorage.removeItem('pending_referral_code');
       sessionStorage.removeItem('oauth_state_token'); sessionStorage.removeItem('oauth_callback_detected');
-      if (oauthAttempts >= 3 && currentPage !== 'LandingPage') { navigate('LandingPage?auth_error=timeout'); return; }
+      if (oauthAttempts >= 3 && currentPage !== 'LandingPage' && !onboardingPages.includes(currentPage)) { navigate('LandingPage?auth_error=timeout'); return; }
     }
 
     if (user && !user.persona?.trim()) {
