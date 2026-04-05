@@ -93,8 +93,8 @@ export default function V3HeroBreakdown() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(232,93,32,0.3)', border: '2px solid #E85D20', color: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>S</div>
               <div>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 2px' }}>UF Student</p>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>🎓 CFF Member · University of Florida</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 2px' }}>UCF Student</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>🎓 CFF Member · UCF</p>
               </div>
             </div>
           </div>
