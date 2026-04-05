@@ -65,29 +65,29 @@ export default function PostInviteConfirmation({ invitedStudents, offer, onInvit
         </div>
       )}
 
-      <button onClick={onInviteAnother} style={{
-        width: '100%', padding: '13px 24px', borderRadius: 100,
-        background: 'transparent', border: `1.5px solid ${ORANGE}`,
-        fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: ORANGE,
-        cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
+      <button onClick={onSkip} style={{
+        background: '#E85D20', border: 'none',
+        borderRadius: 10, padding: '14px',
+        fontSize: 15, fontWeight: 600,
+        color: '#fff', cursor: 'pointer',
+        width: '100%', marginBottom: 12,
+        fontFamily: dmSans, minHeight: 'auto',
       }}>
-        Invite Another Student →
+        Continue →
       </button>
 
       <button
         type="button"
-        onClick={onSkip}
+        onClick={onInviteAnother}
         style={{
-          display: 'block', width: '100%', marginTop: 16, textAlign: 'center',
+          display: 'block', width: '100%', textAlign: 'center',
           background: 'none', border: 'none',
-          fontFamily: dmSans, fontSize: 13, fontWeight: 300,
-          color: 'rgba(244,240,232,0.35)', cursor: 'pointer',
-          transition: 'color 0.2s', minHeight: 'auto',
+          fontFamily: dmSans, fontSize: 13,
+          color: 'rgba(244,240,232,0.4)', cursor: 'pointer',
+          minHeight: 'auto',
         }}
-        onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.55)'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.35)'; }}
       >
-        {"I'll decide later →"}
+        Invite another student →
       </button>
     </div>
   );
