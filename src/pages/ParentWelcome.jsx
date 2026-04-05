@@ -3,7 +3,9 @@ import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentWelcome() {
   const { user } = useAuth();
-  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  // Read name from URL param first (passed from onboarding), fall back to auth context
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const firstName = urlParams.get('name') || user?.full_name?.split(' ')[0] || 'there';
 
   return (
     <div style={{

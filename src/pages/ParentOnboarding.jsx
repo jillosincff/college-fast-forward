@@ -161,7 +161,8 @@ export default function ParentOnboarding() {
     try { await refreshUser(); } catch (e) { /* non-blocking */ }
 
     // Navigate to the standalone ParentWelcome page (emotional thank you → ParentUpsell flow)
-    navigate('ParentWelcome');
+    // Pass first name via URL param so it renders correctly before auth context re-hydrates
+    navigate('ParentWelcome', { name: formData.fullName.split(' ')[0] || '' });
   };
 
   if (step === 1) {

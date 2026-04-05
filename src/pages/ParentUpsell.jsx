@@ -4,15 +4,29 @@ import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentUpsell() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleTrialStart = async () => {
     setLoading(true);
     try {
+      // Ensure we have fresh user data before checkout
+      let currentUser = user;
+      if (!currentUser?.id) {
+        currentUser = await refreshUser().then(() => null).catch(() => null);
+      }
+      const { base44: b44 } = await import('@/api/base44Client');
+      const me = await b44.auth.me().catch(() => null);
+      const uid = me?.id || user?.id;
+      const uemail = me?.email || user?.email;
+      if (!uid || !uemail) {
+        console.error('No user data available for checkout');
+        setLoading(false);
+        return;
+      }
       const res = await base44.functions.invoke('createCheckoutSession', {
-        userId: user?.id,
-        userEmail: user?.email,
+        userId: uid,
+        userEmail: uemail,
         plan: 'fastiq_founding_monthly',
         isTrial: true,
         trialDays: 7,
@@ -20,6 +34,8 @@ export default function ParentUpsell() {
       });
       if (res?.data?.url) {
         window.location.href = res.data.url;
+      } else {
+        console.error('No checkout URL returned', res);
       }
     } catch (e) {
       console.error('Checkout failed:', e);
