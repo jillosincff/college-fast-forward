@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
@@ -7,14 +7,7 @@ export default function ParentUpsell() {
   const { user, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // Wait for auth to settle; if no user after loading, go to GatorAuth
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate('GatorAuth');
-    }
-  }, [isLoading, user]);
-
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <div style={{ minHeight: '100vh', background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 32, height: 32, border: '3px solid #E85D20', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
