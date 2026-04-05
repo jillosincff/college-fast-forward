@@ -210,6 +210,13 @@ export default function GatorAuth() {
       return;
     }
     
+    // If a role was pre-selected (e.g. from landing page CTA), skip role-select and go straight to OAuth
+    const preselectedRole = sessionStorage.getItem('pending_invite_role') || localStorage.getItem('pending_invite_role');
+    if (preselectedRole === 'parent' || preselectedRole === 'gator') {
+      setSelectedRole(preselectedRole);
+      setStep('oauth');
+      return;
+    }
     console.log('🔴 [GatorAuth] Routing to role-select. user:', user);
     setStep('role-select');
   }, [user, isLoading]);
