@@ -167,7 +167,7 @@ export default function ParentUpsell() {
         </div>
 
         <button
-          onClick={() => { window.location.hash = '#ParentHome'; }}
+          onClick={() => navigate('ParentHome')}
           style={{
             background: 'none', border: 'none',
             width: '100%', padding: '14px',
