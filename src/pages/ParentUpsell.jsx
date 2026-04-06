@@ -160,7 +160,7 @@ export default function ParentUpsell() {
             fontSize: 11, color: 'rgba(255,255,255,0.3)',
             textAlign: 'center', margin: 0,
           }}>
-            No credit card needed · Cancel anytime
+            Cancel anytime
           </p>
           {checkoutError && (
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#ff6b6b', textAlign: 'center', margin: '8px 0 0' }}>

@@ -94,7 +94,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 13, color: '#888', textAlign: 'center',
           margin: '8px 0 0',
         }}>
-          7 day free trial &middot; Cancel anytime &middot; No commitment
+          7 day free trial &middot; Cancel anytime
         </p>
       </div>
     );

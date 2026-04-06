@@ -94,8 +94,7 @@ export default function PostJoinUpsell() {
             lineHeight: 1.7, margin: '0 0 24px',
           }}>
             The free network gets you in the door. FastIQ gets
-            you the interview. No credit card. No commitment.
-            Just 7 days to see what AI can do for your search.
+            you the interview. Just 7 days to see what AI can do for your search.
           </p>
 
           {[
@@ -154,7 +153,7 @@ export default function PostJoinUpsell() {
             fontSize: 11, color: 'rgba(255,255,255,0.35)',
             textAlign: 'center', margin: 0,
           }}>
-            No credit card needed · Cancel anytime
+            Cancel anytime
           </p>
         </div>
 
