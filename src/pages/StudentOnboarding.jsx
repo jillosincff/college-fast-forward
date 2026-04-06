@@ -66,6 +66,8 @@ export default function StudentOnboarding() {
     setError(null);
     try {
       localStorage.setItem('pending_invite_role', 'student');
+      // Safari clears localStorage during OAuth — sessionStorage survives
+      sessionStorage.setItem('cff_onboarding_type', 'student');
     } catch (e) { /* private browsing */ }
 
     const callbackUrl = window.location.origin + '/#StudentOnboarding';

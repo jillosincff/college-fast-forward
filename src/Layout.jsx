@@ -737,6 +737,12 @@ function AppContent() {
       const pendingInviteCode = localStorage.getItem('pending_invite_code') || sessionStorage.getItem('pending_invite_code');
       if (pendingInviteRole && pendingInviteCode) { navigate('GatorWelcome'); return; }
       if (pendingInviteRole && !pendingInviteCode && (currentPage === 'GatorInviteCode' || currentPage === 'RequestInvite' || currentPage === 'InviteRequired')) { setResolvedPage(currentPage); return; }
+      // Safari OAuth fix: localStorage may be cleared; use cff_onboarding_type from sessionStorage
+      const safariOnboardingType = !pendingInviteRole ? sessionStorage.getItem('cff_onboarding_type') : null;
+      if (safariOnboardingType) {
+        sessionStorage.removeItem('cff_onboarding_type');
+        navigate(safariOnboardingType === 'parent' ? 'ParentOnboarding' : 'StudentOnboarding'); return;
+      }
       navigate('GatorAuth'); return;
     }
 

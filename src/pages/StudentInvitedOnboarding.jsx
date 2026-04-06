@@ -61,6 +61,8 @@ export default function StudentInvitedOnboarding() {
       localStorage.setItem('pending_student_invite_parent', parentName);
       localStorage.setItem('pending_student_invite_school', prefilledSchool);
       localStorage.setItem('pending_student_invite_email', prefilledEmail);
+      // Safari fix: sessionStorage survives OAuth redirect even when localStorage is cleared
+      sessionStorage.setItem('cff_onboarding_type', 'student');
     } catch (e) { /* private browsing */ }
 
     const callbackUrl = window.location.origin + '/#StudentInvitedOnboarding?email=' + encodeURIComponent(prefilledEmail) + '&parent=' + encodeURIComponent(parentName) + '&school=' + encodeURIComponent(prefilledSchool);
