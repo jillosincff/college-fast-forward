@@ -74,7 +74,7 @@ export default function V3HeroBreakdown() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))', gap: 20, marginBottom: 24 }}>
 
         {/* STUDENT CARD */}
-        <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '36px 32px' }}>
+        <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '36px 32px', textAlign: 'left' }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 16px' }}>
             🎓 FOR STUDENTS
           </p>
@@ -129,7 +129,7 @@ export default function V3HeroBreakdown() {
         </div>
 
         {/* PARENT / ALUMNI CARD */}
-        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '36px 32px' }}>
+        <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '36px 32px', textAlign: 'left' }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 16px' }}>
             💙 FOR PARENTS &amp; ALUMNI
           </p>
