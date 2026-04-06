@@ -170,7 +170,7 @@ export default function ParentUpsell() {
         </div>
 
         <button
-          onClick={handleSkip}
+          onClick={() => navigate('ParentAllSet')}
           style={{
             background: 'none', border: 'none',
             width: '100%', padding: '14px',
