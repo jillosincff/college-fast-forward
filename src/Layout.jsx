@@ -594,6 +594,7 @@ const getPageComponent = (pageName) => {
     case 'OutreachDrafts': return React.lazy(() => import('./pages/OutreachDrafts'));
     case 'ParentWelcome': return React.lazy(() => import('./pages/ParentWelcome'));
     case 'ParentUpsell': return React.lazy(() => import('./pages/ParentUpsell'));
+    case 'ParentAllSet': return React.lazy(() => import('./pages/ParentAllSet'));
     default: return LandingPage;
   }
 };
