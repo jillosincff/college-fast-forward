@@ -111,10 +111,23 @@ export default function FreeTierDashboard() {
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
   const [showConciergeModal, setShowConciergeModal] = useState(false);
   const [savedGoals, setSavedGoals] = useState(null);
+  const [showGiftBanner, setShowGiftBanner] = useState(false);
+  const [giftParentName, setGiftParentName] = useState('');
 
   useEffect(() => {
     if (refreshUser) refreshUser();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const fastiqActivatedRecently = user?.trial_start_date &&
+      (Date.now() - new Date(user.trial_start_date).getTime()) < 7 * 24 * 60 * 60 * 1000;
+    const giftedByParent = isFastIQ && fastiqActivatedRecently && !user?.stripe_customer_id;
+    if (giftedByParent) {
+      setShowGiftBanner(true);
+      setGiftParentName(user?.linked_parent_name || 'Your parent');
+    }
+  }, [user]);
 
   useEffect(() => {
     const hashPart = window.location.hash.split('?')[1] || '';
@@ -257,6 +270,36 @@ export default function FreeTierDashboard() {
               >
                 ×
               </button>
+            </div>
+          </div>
+        )}
+        {showGiftBanner && (
+          <div style={{
+            background: 'linear-gradient(135deg, #0A0A0A 0%, #1a1a1a 100%)',
+            borderRadius: 16, padding: '24px 28px',
+            margin: '16px 16px 0',
+            border: '1px solid rgba(232,93,32,0.3)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>💙 FASTIQ GIFTED TO YOU</p>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 6px', lineHeight: 1.3 }}>{giftParentName} just invested in your success.</p>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>Your full AI career engine is unlocked for 7 days. Let's make them count.</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+                <button
+                  onClick={() => handleTabChange('alumni_search')}
+                  style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+                >
+                  Start Now →
+                </button>
+                <button
+                  onClick={() => setShowGiftBanner(false)}
+                  style={{ background: 'none', border: 'none', fontSize: 12, color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+                >
+                  Dismiss
+                </button>
+              </div>
             </div>
           </div>
         )}
