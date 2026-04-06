@@ -19,13 +19,14 @@ export default function ParentAllSet() {
 
         {/* Check */}
         <div style={{
-          width: 72, height: 72, borderRadius: '50%',
-          background: 'rgba(74,222,128,0.15)',
-          border: '2px solid #4ADE80',
+          width: 80, height: 80, borderRadius: '50%',
+          background: '#4ADE80',
+          border: 'none',
           display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: 32,
+          justifyContent: 'center', fontSize: 42,
           margin: '0 auto 32px',
           fontFamily: 'Apple Color Emoji, Segoe UI Emoji, sans-serif',
+          color: '#fff', fontWeight: 700, lineHeight: 1,
         }}>
           ✓
         </div>
