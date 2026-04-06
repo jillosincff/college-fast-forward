@@ -223,8 +223,9 @@ export default function GatorDirectory() {
   return (
     <div style={{ minHeight: '100vh', background: isParent ? '#0A0A0A' : '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
       {isParent && <ParentProfileNav user={user} currentPage="GatorDirectory" />}
-      {/* Hero */}
-      <DirectoryHero stats={stats} loading={loading} />
+
+      {/* Hero — hidden for parents who have their own nav */}
+      {!isParent && <DirectoryHero stats={stats} loading={loading} />}
 
       {/* School scope toggle */}
       {userSchool && (
