@@ -162,6 +162,14 @@ export default function GatorAuth() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Safety fallback — if auth takes >4s to resolve, show role-select rather than spin forever
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setStep(prev => prev === null ? 'role-select' : prev);
+    }, 4000);
+    return () => clearTimeout(t);
+  }, []);
+
   // Route based on user state
   useEffect(() => {
     if (isLoading) return;
