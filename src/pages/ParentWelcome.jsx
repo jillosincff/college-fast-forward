@@ -163,7 +163,7 @@ export default function ParentWelcome() {
         </button>
 
         <button
-          onClick={() => navigate('ParentHome')}
+          onClick={() => navigate('ParentAllSet')}
           style={{
             background: 'none', border: 'none',
             fontSize: 13, color: 'rgba(255,255,255,0.25)',
