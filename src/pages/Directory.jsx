@@ -17,7 +17,7 @@ import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 const PAGE_SIZE = 24;
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
-export default function GatorDirectory() {
+export default function Directory() {
   const { user } = useAuth();
   const [showBanner, setShowBanner] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
@@ -221,10 +221,22 @@ export default function GatorDirectory() {
   }
 
   const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
 
   return (
     <div style={{ minHeight: '100vh', background: isParent ? '#0A0A0A' : '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
-      {isParent && <ParentProfileNav user={user} currentPage="GatorDirectory" />}
+      {isParent && <ParentProfileNav user={user} currentPage="Directory" />}
+
+      {/* Banner at top */}
+      {!isParent && (
+        <div style={{ background: '#f4f2ee', padding: '16px 24px 0', maxWidth: 900, margin: '0 auto', width: '100%' }}>
+          <FoundingMemberBanner
+            show={showBanner && !isFastIQ}
+            onUpgrade={() => navigate('FastIQDashboard')}
+            onDismiss={() => setShowBanner(false)}
+          />
+        </div>
+      )}
 
       {/* Hero — hidden for parents who have their own nav */}
       {!isParent && <DirectoryHero stats={stats} loading={loading} />}
@@ -232,16 +244,16 @@ export default function GatorDirectory() {
       {/* School scope toggle */}
       {userSchool && (
         <div style={{ background: isParent ? '#0A0A0A' : '#fff', borderBottom: isParent ? '1px solid rgba(232,93,32,0.3)' : '1px solid #E5E5E5', padding: '10px 24px', display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontFamily: dmSans, fontSize: 13, color: '#888', marginRight: 4 }}>Show:</span>
+          <span style={{ fontFamily: dmSans, fontSize: 13, color: isParent ? 'rgba(255,255,255,0.5)' : '#888', marginRight: 4 }}>Show:</span>
           <button
             onClick={() => setSchoolFilter('my_school')}
-            style={{ background: schoolFilter === 'my_school' ? '#DC2626' : '#F5F5F5', color: schoolFilter === 'my_school' ? '#fff' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
+            style={{ background: schoolFilter === 'my_school' ? '#DC2626' : isParent ? 'rgba(255,255,255,0.1)' : '#F5F5F5', color: schoolFilter === 'my_school' ? '#fff' : isParent ? 'rgba(255,255,255,0.6)' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
           >
             My School ({userSchool})
           </button>
           <button
             onClick={() => setSchoolFilter('all')}
-            style={{ background: schoolFilter === 'all' ? '#1A1A1A' : '#F5F5F5', color: schoolFilter === 'all' ? '#fff' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
+            style={{ background: schoolFilter === 'all' ? '#1A1A1A' : isParent ? 'rgba(255,255,255,0.1)' : '#F5F5F5', color: schoolFilter === 'all' ? '#fff' : isParent ? 'rgba(255,255,255,0.6)' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
           >
             All CFF Schools
           </button>

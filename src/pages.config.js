@@ -58,11 +58,11 @@ import CompanyProfile from './pages/CompanyProfile';
 // Connections removed
 import CookiePolicy from './pages/CookiePolicy';
 import Dashboard from './pages/Dashboard';
+import Directory from './pages/Directory';
 import FastIQ from './pages/FastIQ';
 import FastIQOnboarding from './pages/FastIQOnboarding';
 import Favorites from './pages/Favorites';
 import GatorAuth from './pages/GatorAuth';
-import GatorDirectory from './pages/GatorDirectory';
 import GatorInviteCode from './pages/GatorInviteCode';
 import GatorParentInvite from './pages/GatorParentInvite';
 import GatorWelcome from './pages/GatorWelcome';
@@ -120,7 +120,7 @@ export const PAGES = {
     "FastIQOnboarding": FastIQOnboarding,
     "Favorites": Favorites,
     "GatorAuth": GatorAuth,
-    "GatorDirectory": GatorDirectory,
+    "Directory": Directory,
     "GatorInviteCode": GatorInviteCode,
     "GatorParentInvite": GatorParentInvite,
     "GatorWelcome": GatorWelcome,
