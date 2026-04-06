@@ -1,13 +1,12 @@
 import React from 'react';
-import { Crown } from 'lucide-react';
+import { Crown, Linkedin, Building2, GraduationCap } from 'lucide-react';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
-// Stable avatar colors from user id/name
 const AVATAR_COLORS = [
-  '#E85D20', '#0821A5', '#6A2A60', '#16a34a', '#0891b2',
-  '#7c3aed', '#dc2626', '#ca8a04', '#4f46e5', '#059669',
+  '#E85D20', '#c9a84c', '#16a34a', '#0891b2',
+  '#7c3aed', '#dc2626', '#4f46e5', '#059669',
 ];
 
 function getAvatarColor(str) {
@@ -17,25 +16,20 @@ function getAvatarColor(str) {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-// Detect if a name looks like a username/email prefix rather than a real name
 function looksLikeUsername(name) {
   if (!name) return true;
   const trimmed = name.trim();
   if (trimmed.length === 0) return true;
   if (trimmed.includes('@')) return true;
-  // All lowercase with no spaces = likely a username (e.g. "amisokol", "alitloo")
   if (trimmed === trimmed.toLowerCase() && !trimmed.includes(' ') && trimmed.length < 20) return true;
-  // Contains numbers mixed with letters and no spaces = likely auto-generated
   if (/^[a-z0-9]+$/i.test(trimmed) && /\d/.test(trimmed) && !trimmed.includes(' ')) return true;
   return false;
 }
 
 function hasRealName(user) {
-  // Check if user has a proper display name from any field
   if (user?.first_name && user?.last_name && !looksLikeUsername(user.first_name)) return true;
   const full = user?.full_name || '';
   if (full.includes(' ') && !looksLikeUsername(full)) return true;
-  // Single word but capitalized properly (e.g. "Sarah") — allow it
   if (full.length > 0 && full[0] === full[0].toUpperCase() && full !== full.toLowerCase()) return true;
   return false;
 }
@@ -81,16 +75,20 @@ function getHelpTags(user) {
 }
 
 function getRoleBadge(persona) {
-  if (persona === 'parent') return { label: 'Parent', bg: '#E85D20', color: '#fff' };
-  if (persona === 'alumni') return { label: 'Alumni', bg: '#0d1117', color: '#fff' };
-  return { label: 'Student', bg: '#e5e7eb', color: '#555' };
+  if (persona === 'parent') return { label: 'Parent', bg: 'rgba(232,93,32,0.18)', color: '#E85D20', border: 'rgba(232,93,32,0.35)' };
+  if (persona === 'alumni') return { label: 'Alumni', bg: 'rgba(201,168,76,0.15)', color: '#c9a84c', border: 'rgba(201,168,76,0.35)' };
+  return { label: 'Student', bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: 'rgba(255,255,255,0.15)' };
 }
 
 function getCompanyLine(user) {
   const company = user.current_company || user.company || '';
+  const title = user.job_title || '';
   const industry = user.industry || '';
-  if (company && industry) return `${company} · ${industry}`;
-  return company || industry || '';
+  if (company && title) return { primary: company, secondary: title };
+  if (company && industry) return { primary: company, secondary: industry };
+  if (company) return { primary: company, secondary: null };
+  if (industry) return { primary: industry, secondary: null };
+  return null;
 }
 
 export default function DirectoryMemberCard({ user, onMessage, onViewProfile, viewMode = 'grid' }) {
@@ -98,219 +96,217 @@ export default function DirectoryMemberCard({ user, onMessage, onViewProfile, vi
   const avatarColor = getAvatarColor(user.id || user.full_name);
   const displayName = formatFirstL(user);
   const role = getRoleBadge(user.persona);
-  const companyLine = getCompanyLine(user);
+  const companyInfo = getCompanyLine(user);
   const helpTags = getHelpTags(user);
   const isFoundingMember = user.is_founding_member;
+  const hasLinkedIn = !!(user.linkedin_url);
+  const school = user.school_name || user.school_code?.toUpperCase() || '';
+  const gradYear = user.graduation_year;
 
+  // ── LIST MODE ──────────────────────────────────────────────────────────────
   if (viewMode === 'list') {
     return (
       <div style={{
-        background: '#fff', padding: '14px 20px',
-        borderBottom: '1px solid rgba(0,0,0,0.05)',
-        display: 'flex', alignItems: 'center', gap: 14,
-        transition: 'background 0.15s',
+        background: 'rgba(255,255,255,0.03)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        display: 'flex', alignItems: 'center', gap: 16,
+        padding: '14px 20px', transition: 'background 0.15s',
       }}
-        onMouseEnter={e => { e.currentTarget.style.background = '#fafafa'; }}
-        onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.05)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
       >
-        {/* Avatar */}
         <div style={{
           width: 44, height: 44, borderRadius: '50%', background: avatarColor,
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          border: '2px solid rgba(255,255,255,0.08)',
         }}>
-          <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff' }}>{initials}</span>
+          <span style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff' }}>{initials}</span>
         </div>
 
-        {/* Name + Role */}
-        <div style={{ minWidth: 120, flexShrink: 0 }}>
-          <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 14, color: '#1a1a1a' }}>
-            {displayName}
-          </span>
-          <span style={{
-            fontFamily: dmSans, fontSize: 10, fontWeight: 500,
-            background: role.bg, color: role.color, borderRadius: 100,
-            padding: '2px 8px', marginLeft: 8, whiteSpace: 'nowrap',
-          }}>
-            {role.label}
-          </span>
-          {user.persona === 'alumni' && user.graduation_year && (
+        <div style={{ minWidth: 140, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+            <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 14, color: '#fff' }}>{displayName}</span>
+            {hasLinkedIn && <Linkedin style={{ width: 12, height: 12, color: '#0a66c2', flexShrink: 0 }} />}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{
-              fontFamily: dmSans, fontSize: 10, color: '#888', marginLeft: 6,
-            }}>
-              Class of {user.graduation_year}
-            </span>
-          )}
+              fontFamily: dmSans, fontSize: 10, fontWeight: 600,
+              background: role.bg, color: role.color,
+              border: `1px solid ${role.border}`,
+              borderRadius: 100, padding: '1px 8px',
+            }}>{role.label}</span>
+            {isFoundingMember && <Crown style={{ width: 11, height: 11, color: '#c9a84c' }} />}
+          </div>
         </div>
 
-        {/* Company · Industry */}
-        {companyLine && (
-          <span style={{
-            fontFamily: dmSans, fontSize: 12, color: '#888', flex: 1,
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
-            {companyLine}
-          </span>
+        {companyInfo && (
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {companyInfo.primary}
+            </p>
+            {companyInfo.secondary && (
+              <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {companyInfo.secondary}
+              </p>
+            )}
+          </div>
         )}
 
-        {/* Help tags */}
         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-          {helpTags.slice(0, 3).map(tag => (
+          {helpTags.slice(0, 2).map(tag => (
             <span key={tag} style={{
-              fontFamily: dmSans, fontSize: 11, color: '#666',
-              background: 'rgba(0,0,0,0.04)', borderRadius: 100,
-              padding: '3px 10px', whiteSpace: 'nowrap',
-            }}>
-              {tag}
-            </span>
+              fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.45)',
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)',
+              borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap',
+            }}>{tag}</span>
           ))}
         </div>
 
-        {/* Actions */}
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           <button onClick={() => onMessage(user)} style={{
             fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#fff',
             background: '#E85D20', border: 'none', borderRadius: 8,
-            padding: '8px 16px', cursor: 'pointer', minHeight: 'auto', width: 'auto',
-            transition: 'opacity 0.15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-          >
-            Message
-          </button>
+            padding: '7px 16px', cursor: 'pointer', minHeight: 'auto', width: 'auto',
+          }}>Message</button>
           <button onClick={() => onViewProfile(user.id)} style={{
-            fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: '#E85D20',
-            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-            minHeight: 'auto', width: 'auto',
-          }}>
-            View Profile
-          </button>
+            fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.6)',
+            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 8, padding: '7px 14px', cursor: 'pointer', minHeight: 'auto', width: 'auto',
+          }}>View Profile</button>
         </div>
       </div>
     );
   }
 
-  // Grid card
+  // ── GRID MODE ──────────────────────────────────────────────────────────────
   return (
     <div style={{
-      background: '#fff', borderRadius: 16, overflow: 'hidden',
-      border: '1px solid rgba(0,0,0,0.06)', transition: 'all 0.2s',
-      display: 'flex', flexDirection: 'column', height: 340,
-      cursor: 'default',
+      background: 'rgba(255,255,255,0.04)',
+      backdropFilter: 'blur(12px)',
+      borderRadius: 16,
+      border: '1px solid rgba(255,255,255,0.08)',
+      transition: 'all 0.2s ease',
+      display: 'flex', flexDirection: 'column',
+      overflow: 'hidden',
     }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = '#E85D20';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.12)';
+        e.currentTarget.style.border = '1px solid rgba(232,93,32,0.4)';
+        e.currentTarget.style.background = 'rgba(232,93,32,0.06)';
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.12)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
+        e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)';
+        e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
         e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-      <div style={{ padding: '24px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-        {/* Avatar */}
-        <div style={{
-          width: 64, height: 64, borderRadius: '50%', background: avatarColor,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
-        }}>
-          <span style={{ fontFamily: dmSans, fontSize: 24, fontWeight: 600, color: '#fff' }}>{initials}</span>
+      {isFoundingMember && (
+        <div style={{ height: 2, background: 'linear-gradient(90deg, #c9a84c, rgba(201,168,76,0))' }} />
+      )}
+
+      <div style={{ padding: '20px 18px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%', background: avatarColor,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '2px solid rgba(255,255,255,0.1)',
+            boxShadow: `0 4px 16px ${avatarColor}40`,
+          }}>
+            <span style={{ fontFamily: dmSans, fontSize: 20, fontWeight: 700, color: '#fff' }}>{initials}</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            {isFoundingMember && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Crown style={{ width: 12, height: 12, color: '#c9a84c' }} />
+                <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 600, color: '#c9a84c', letterSpacing: '0.05em' }}>FOUNDING</span>
+              </div>
+            )}
+            {hasLinkedIn && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Linkedin style={{ width: 12, height: 12, color: '#0a66c2' }} />
+                <span style={{ fontFamily: dmSans, fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>LinkedIn</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Name */}
-        <p style={{
-          fontFamily: playfair, fontWeight: 700, fontSize: 17, color: '#1a1a1a',
-          letterSpacing: '-0.01em', marginBottom: 6, textAlign: 'center',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          maxWidth: '100%',
-        }}>
-          {displayName}
-        </p>
-
-        {/* Role badge */}
-        <span style={{
-          fontFamily: dmSans, fontSize: 11, fontWeight: 500,
-          background: role.bg, color: role.color, borderRadius: 100,
-          padding: '3px 12px', marginBottom: 6,
-        }}>
-          {role.label}
-        </span>
-
-        {/* Graduation year for alumni */}
-        {user.persona === 'alumni' && user.graduation_year && (
-          <span style={{
-            fontFamily: dmSans, fontSize: 11, fontWeight: 400,
-            color: '#888', marginBottom: 4,
-          }}>
-            Class of {user.graduation_year}
-          </span>
-        )}
-
-        {/* Founding Member badge */}
-        {isFoundingMember && (
-          <span style={{
-            fontFamily: dmSans, fontSize: 10, fontWeight: 500,
-            color: '#b8860b', display: 'flex', alignItems: 'center', gap: 4,
-            marginBottom: 6,
-          }}>
-            <Crown style={{ width: 12, height: 12, color: '#b8860b' }} />
-            Founding Member
-          </span>
-        )}
-
-        {/* Company + Industry */}
-        {companyLine && (
+        <div style={{ marginBottom: 10 }}>
           <p style={{
-            fontFamily: dmSans, fontSize: 12, color: '#888', textAlign: 'center',
-            marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap', maxWidth: '100%',
-          }}>
-            {companyLine}
-          </p>
+            fontFamily: playfair, fontWeight: 700, fontSize: 17, color: '#fff',
+            letterSpacing: '-0.01em', margin: '0 0 6px',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{displayName}</p>
+          <span style={{
+            fontFamily: dmSans, fontSize: 11, fontWeight: 600,
+            background: role.bg, color: role.color,
+            border: `1px solid ${role.border}`,
+            borderRadius: 100, padding: '3px 10px',
+          }}>{role.label}</span>
+        </div>
+
+        {companyInfo && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, marginBottom: 8 }}>
+            <Building2 style={{ width: 13, height: 13, color: 'rgba(255,255,255,0.3)', marginTop: 1, flexShrink: 0 }} />
+            <div>
+              <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.75)', margin: 0, fontWeight: 500 }}>{companyInfo.primary}</p>
+              {companyInfo.secondary && (
+                <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: 0 }}>{companyInfo.secondary}</p>
+              )}
+            </div>
+          </div>
         )}
 
-        {/* Help tags */}
+        {(school || gradYear) && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+            <GraduationCap style={{ width: 13, height: 13, color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+              {school}{school && gradYear ? ' · ' : ''}{gradYear ? `Class of ${gradYear}` : ''}
+            </p>
+          </div>
+        )}
+
         {helpTags.length > 0 && (
-          <div style={{
-            display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'nowrap',
-            overflow: 'hidden', maxWidth: '100%',
-          }}>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 'auto', paddingTop: 10 }}>
             {helpTags.slice(0, 3).map(tag => (
               <span key={tag} style={{
-                fontFamily: dmSans, fontSize: 11, color: '#666',
-                background: 'rgba(0,0,0,0.04)', borderRadius: 100,
-                padding: '2px 8px', whiteSpace: 'nowrap',
-              }}>
-                {tag}
-              </span>
+                fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.5)',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.09)',
+                borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap',
+              }}>{tag}</span>
             ))}
           </div>
         )}
       </div>
 
-      {/* Divider + Buttons */}
-      <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', padding: '12px 16px', display: 'flex', gap: 8 }}>
+      <div style={{
+        borderTop: '1px solid rgba(255,255,255,0.07)',
+        padding: '12px 14px',
+        display: 'flex', gap: 8,
+        background: 'rgba(0,0,0,0.15)',
+      }}>
         <button onClick={() => onMessage(user)} style={{
           flex: 1, fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff',
           background: '#E85D20', border: 'none', borderRadius: 10,
-          padding: '10px 0', cursor: 'pointer', minHeight: 'auto',
+          padding: '9px 0', cursor: 'pointer', minHeight: 'auto',
           transition: 'opacity 0.15s',
         }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
           onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-        >
-          Message
-        </button>
+        >Message</button>
         <button onClick={() => onViewProfile(user.id)} style={{
-          flex: 1, fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#333',
-          background: '#fff', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 10,
-          padding: '10px 0', cursor: 'pointer', minHeight: 'auto',
-          transition: 'border-color 0.15s',
+          flex: 1, fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+          color: 'rgba(255,255,255,0.7)',
+          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 10, padding: '9px 0', cursor: 'pointer', minHeight: 'auto',
+          transition: 'all 0.15s',
         }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = '#E85D20'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; }}
-        >
-          View Profile
-        </button>
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+        >View Profile</button>
       </div>
     </div>
   );
