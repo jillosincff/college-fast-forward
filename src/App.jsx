@@ -21,6 +21,7 @@ import FastIQDashboard from '@/pages/FastIQDashboard';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
 import ParentWelcome from '@/pages/ParentWelcome';
+import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -62,6 +63,7 @@ const AuthenticatedApp = () => {
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
+          <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
 
           {/* Main routes */}
           <Route path="/" element={

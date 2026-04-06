@@ -78,7 +78,7 @@ export default function ParentProfileHeader({ user }) {
       {/* Banner */}
       <div style={{ height: 120, background: 'linear-gradient(135deg, #111 0%, #0d1117 100%)', position: 'relative', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 80%, rgba(232,93,32,0.08), transparent 70%)' }} />
-        <button onClick={() => navigate('ProfileEdit')} style={{
+        <button onClick={() => navigate('ParentProfileEdit')} style={{
           position: 'absolute', top: 16, right: 16,
           fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: ORANGE,
           background: 'transparent', border: `1px solid ${ORANGE}`,
