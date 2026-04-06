@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
         ${parentFirst} just set you up on College Fast Forward.
       </h1>
       <p style="font-size:15px;color:rgba(255,255,255,0.55);margin:0;line-height:1.6;">
-        They care about your career${uni}. Now it's your turn.
+        They want to help supercharge your job search. Let's make it happen.
       </p>
     </div>
 
