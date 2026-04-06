@@ -16,8 +16,8 @@ export default function DirectoryLoadMore({ visibleCount, totalCount, onLoadMore
       ) : (
         <>
           <button onClick={onLoadMore} style={{
-            fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#0d1117',
-            background: 'transparent', border: '1.5px solid rgba(0,0,0,0.2)',
+            fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#E85D20',
+            background: '#fff', border: '1.5px solid #E85D20',
             borderRadius: 100, padding: '10px 32px', cursor: 'pointer',
             transition: 'border-color 0.15s', minHeight: 'auto',
           }}

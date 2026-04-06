@@ -184,7 +184,7 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
       <div style={{
         position: 'fixed', zIndex: 9999,
         top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-        width: '100%', maxWidth: 560, maxHeight: '88vh',
+        width: '100%', maxWidth: 560, maxHeight: '95vh',
         borderRadius: 20, overflow: 'hidden',
         background: '#0d1117',
         border: '1px solid rgba(255,255,255,0.1)',
