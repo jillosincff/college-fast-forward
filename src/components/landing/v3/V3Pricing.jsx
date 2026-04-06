@@ -216,7 +216,7 @@ export default function V3Pricing({ onCTA }) {
 
         {/* Trust line */}
         <p style={{ fontFamily: dmSans, fontSize: 12, color: '#AAAAAA', textAlign: 'center', margin: 0, ...fadeStyle(vis, 0.12) }}>
-          Cancel anytime · No contracts · Founding rate locks in forever
+          Free to join · Cancel anytime · Upgrade anytime
         </p>
 
       </div>
