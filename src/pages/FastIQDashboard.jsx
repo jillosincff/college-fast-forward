@@ -312,6 +312,9 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
               {portalError}
             </p>
           )}
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '8px 0 0', lineHeight: 1.5, width: '100%' }}>
+            To cancel your subscription, click "Manage billing" above. You'll retain access until the end of your billing period.
+          </p>
         </div>
       </div>
 
