@@ -217,12 +217,12 @@ export default function GatorAuth() {
   const handleGoogleSignIn = () => {
     const role = selectedRole || '';
     if (role) {
-      // sessionStorage persists within the same tab across OAuth redirects
-      try { sessionStorage.setItem('pending_invite_role', role); } catch (e) {}
+      try { sessionStorage.setItem('pending_invite_role', role); } catch (e) { console.warn('sessionStorage unavailable (Private Browsing):', e); }
       try { localStorage.setItem('pending_invite_role', role); } catch (e) {}
     }
-    // Keep callback URL clean — no extra params that could break OAuth token parsing
-    const callbackUrl = window.location.origin + '/#GetStarted';
+    // Encode destination in the callback URL — fallback for Private Browsing where sessionStorage/localStorage may be wiped
+    const dest = role === 'parent' ? 'ParentOnboarding' : role === 'gator' ? 'StudentOnboarding' : 'GetStarted';
+    const callbackUrl = window.location.origin + '/#' + dest;
     base44.auth.redirectToLogin(callbackUrl);
   };
 

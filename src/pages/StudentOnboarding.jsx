@@ -131,6 +131,7 @@ export default function StudentOnboarding() {
     }
 
     localStorage.removeItem('pending_invite_role');
+    try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
     if (refreshUser) await refreshUser();
     setLoading(false);
     setStep(3);
