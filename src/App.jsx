@@ -64,7 +64,11 @@ const AuthenticatedApp = () => {
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
-          <Route path="/ParentAllSet" element={<ParentAllSet />} />
+          <Route path="/ParentAllSet" element={
+            <LayoutWrapper currentPageName="ParentAllSet">
+              <ParentAllSet />
+            </LayoutWrapper>
+          } />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
 
           {/* Main routes */}
