@@ -228,7 +228,7 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
               <div style={{
                 background: 'linear-gradient(135deg, #1a0e06 0%, #1f1208 60%, #0d1117 100%)',
                 borderBottom: '1px solid rgba(232,93,32,0.15)',
-                padding: '28px 24px 20px',
+                padding: '36px 24px 20px',
                 position: 'relative',
               }}>
                 {profileUser.is_founding_member && (
