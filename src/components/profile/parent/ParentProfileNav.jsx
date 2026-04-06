@@ -7,7 +7,7 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 const ORANGE = '#E85D20';
 
 const NAV_LINKS = [
-  { label: 'Dashboard', page: 'ParentHome' },
+  { label: 'Home', page: 'ParentHome' },
   { label: 'Directory', page: 'GatorDirectory' },
   { label: 'Messages', page: 'MyMessages' },
 ];

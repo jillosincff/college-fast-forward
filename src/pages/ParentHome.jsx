@@ -87,7 +87,7 @@ export default function ParentHome() {
       <ParentProfileNav user={user} currentPage="ParentHome" />
 
       <PullToRefresh onRefresh={refresh}>
-        <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '0 24px 80px' }}>
+        <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '32px 24px 80px' }}>
           <ParentHomeHero user={user} />
 
           {/* Activation confirmation toast */}
