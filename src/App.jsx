@@ -23,6 +23,7 @@ import GatorAuth from '@/pages/GatorAuth';
 import ParentWelcome from '@/pages/ParentWelcome';
 import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
+import ParentAllSet from '@/pages/ParentAllSet';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
+          <Route path="/ParentAllSet" element={<ParentAllSet />} />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
 
           {/* Main routes */}
