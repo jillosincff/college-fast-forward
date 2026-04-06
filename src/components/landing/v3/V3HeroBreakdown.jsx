@@ -125,7 +125,7 @@ export default function V3HeroBreakdown() {
           <button onClick={() => navigate('StudentOnboarding')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}>
             Join Free — Let's Figure This Out Together →
           </button>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#AAAAAA', textAlign: 'center', margin: '10px 0 0' }}>Free to join · No credit card · No pressure</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#AAAAAA', textAlign: 'center', margin: '10px 0 0' }}>Free to join · Cancel anytime · Upgrade anytime</p>
         </div>
 
         {/* PARENT / ALUMNI CARD */}
@@ -193,14 +193,14 @@ export default function V3HeroBreakdown() {
           <button onClick={() => navigate('ParentOnboarding')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}>
             Join Free — Put Your Network to Work →
           </button>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: '10px 0 0' }}>Free to join · No commitment · Help on your own terms</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: '10px 0 0' }}>Free to join · Cancel anytime · Help on your own terms</p>
         </div>
 
       </div>
 
       {/* Bottom trust line */}
       <p style={{ fontFamily: dmSans, fontSize: 13, color: '#AAAAAA', textAlign: 'center', margin: 0 }}>
-        ✓ Free to join &nbsp;·&nbsp; ✓ No credit card needed &nbsp;·&nbsp; ✓ Students and helpers welcome
+        ✓ Free to join &nbsp;·&nbsp; ✓ Cancel anytime &nbsp;·&nbsp; ✓ Upgrade anytime
       </p>
     </div>
   );
