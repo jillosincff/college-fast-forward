@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/components/auth/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 console.log('🔵 [GatorAuth] Module loaded');
@@ -156,26 +157,10 @@ function GoogleIcon() {
 
 export default function GatorAuth() {
   console.log('🔵 [GatorAuth] Component rendering');
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoadingAuth: isLoading } = useAuth();
   const [step, setStep] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // Load user on mount
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const me = await base44.auth.me();
-        setUser(me || null);
-      } catch (e) {
-        console.warn('No user authenticated yet');
-        setUser(null);
-      }
-      setIsLoading(false);
-    };
-    loadUser();
-  }, []);
 
   // Route based on user state
   useEffect(() => {
