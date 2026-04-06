@@ -86,7 +86,7 @@ function InfoRow({ icon: Icon, label, value, link }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
         {link ? (
-          <a href={value} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dmSans, fontSize: 14, color: '#E85D20', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <a href={value.startsWith('http') ? value : `https://${value}`} target="_blank" rel="noopener noreferrer" style={{ fontFamily: dmSans, fontSize: 14, color: '#E85D20', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
             View LinkedIn Profile <ExternalLink style={{ width: 11, height: 11 }} />
           </a>
         ) : (

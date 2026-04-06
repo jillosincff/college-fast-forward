@@ -126,7 +126,7 @@ export default function DirectoryMemberCard({ user, onMessage, onViewProfile, vi
         <div style={{ minWidth: 140, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
             <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 14, color: '#fff' }}>{displayName}</span>
-            {hasLinkedIn && <Linkedin style={{ width: 12, height: 12, color: '#0a66c2', flexShrink: 0 }} />}
+            {hasLinkedIn && <a href={user.linkedin_url?.startsWith('http') ? user.linkedin_url : `https://${user.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', minHeight: 'auto', minWidth: 'auto' }}><Linkedin style={{ width: 12, height: 12, color: '#0a66c2', flexShrink: 0 }} /></a>}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{
@@ -224,10 +224,10 @@ export default function DirectoryMemberCard({ user, onMessage, onViewProfile, vi
               </div>
             )}
             {hasLinkedIn && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <a href={user.linkedin_url?.startsWith('http') ? user.linkedin_url : `https://${user.linkedin_url}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
                 <Linkedin style={{ width: 12, height: 12, color: '#0a66c2' }} />
                 <span style={{ fontFamily: dmSans, fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>LinkedIn</span>
-              </div>
+              </a>
             )}
           </div>
         </div>
