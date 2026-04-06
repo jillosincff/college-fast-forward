@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { trackEvent } from '@/components/utils/analytics';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
@@ -12,11 +12,10 @@ import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
 
 
 import V3Pricing from '@/components/landing/v3/V3Pricing';
-
-
-
+import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
 export default function LandingPage() {
+  const [showFoundingBanner, setShowFoundingBanner] = useState(true);
   useEffect(() => {
     if (!document.getElementById('lp-v2-fonts')) {
       const link = document.createElement('link');
@@ -52,6 +51,12 @@ export default function LandingPage() {
 
   return (
     <>
+      <FoundingMemberBanner
+        show={showFoundingBanner}
+        onUpgrade={() => navigate('Pricing')}
+        onDismiss={() => setShowFoundingBanner(false)}
+      />
+
       <SocialMetaTags
         title="College Fast Forward — FastIQ: Direction, Action, and Real Progress for Your Student"
         description="College Fast Forward connects students with parents and alumni who want to help. Free to join. FastIQ AI upgrade from $29/month."

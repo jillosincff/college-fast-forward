@@ -136,7 +136,7 @@ const PostRequest = React.lazy(() => import('./pages/PostRequest'));
 // ParentDashboard removed — parents now go to ParentHome
 const ParentHome = React.lazy(() => import('./pages/ParentHome'));
 const AlumniDashboard = React.lazy(() => import('./pages/AlumniDashboard'));
-const GatorDirectory = React.lazy(() => import('./pages/GatorDirectory'));
+const Directory = React.lazy(() => import('./pages/Directory'));
 const MyRequests = React.lazy(() => import('./pages/MyRequests'));
 // MyImpact removed
 const MyApplications = React.lazy(() => import('./pages/MyApplications'));
@@ -276,7 +276,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 
   const allNavItems = useMemo(() => [
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['gator', 'parent', 'alumni', 'admin'] },
-    { name: 'Directory', page: 'GatorDirectory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
+    { name: 'Directory', page: 'Directory', icon: Users, roles: ['gator', 'parent', 'alumni'] },
     { name: 'Pipeline', page: 'MyApplications', icon: Briefcase, roles: ['gator'] },
     { name: 'Messages', page: 'MyMessages', icon: Mail, roles: ['gator', 'parent', 'alumni'] },
     { name: 'FASTIQ', page: 'FastIQ', icon: Zap, roles: ['gator'] },
@@ -553,7 +553,7 @@ const getPageComponent = (pageName) => {
     case 'AlumniOnboarding': return AlumniOnboarding;
     case 'ParentOnboarding': return ParentOnboarding;
     case 'ShareExpertise': return ShareExpertise;
-    case 'GatorDirectory': return GatorDirectory;
+    case 'Directory': return Directory;
     case 'MyRequests': return MyRequests;
     case 'MyApplications': return MyApplications;
     case 'MyMessages': return MyMessages;
@@ -852,7 +852,7 @@ function AppContent() {
   // Pages where certain users have their own nav (hide the global header)
   // Pages where specific personas render their own nav bar — hide global header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard'];
-  const parentOwnNavPages = ['Profile', 'ParentHome', 'ParentProfileEdit', 'GatorDirectory'];
+  const parentOwnNavPages = ['Profile', 'ParentHome', 'ParentProfileEdit', 'Directory'];
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
   const isEstablishedAlumniUser = user?.persona === 'alumni' && user?.alumni_seniority !== 'recent_grad';
@@ -871,7 +871,7 @@ function AppContent() {
 
   const showBottomNav = user && bottomNavPages.includes(resolvedPage);
 
-  const pullRefreshPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
+  const pullRefreshPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'Directory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
 
   return (
