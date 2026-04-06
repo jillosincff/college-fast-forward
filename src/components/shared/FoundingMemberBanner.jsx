@@ -92,7 +92,7 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
           margin: '0 0 16px',
           lineHeight: 1.5,
         }}>
-          Lock in 50% off FastIQ forever — $14.50/mo instead of $29. Only available to our first 1,000 members.
+          Lock in 50% off FastIQ forever — $14.50/mo instead of $29. Available until April 15th only.
         </p>
 
         {/* Countdown or expired message */}
