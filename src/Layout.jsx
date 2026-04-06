@@ -792,7 +792,7 @@ function AppContent() {
     const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     const inNewUserFlow = pendingRole && hasNoRole;
 
-    const dashboardPages = ['Dashboard', 'Profile', 'ParentHome', 'RecentGradDashboard', 'AlumniDashboard', 'FreeTierDashboard', 'FastIQ'];
+    const dashboardPages = ['Dashboard', 'ParentHome', 'RecentGradDashboard', 'AlumniDashboard', 'FreeTierDashboard', 'FastIQ'];
     if (user && dashboardPages.includes(currentPage)) {
       let destination = currentPage;
 
