@@ -5,6 +5,7 @@ import { navigate } from '@/components/utils/navigation';
 import logger from '@/components/utils/logger';
 
 import DirectoryHero from '../components/directory/DirectoryHero';
+import ParentProfileNav from '@/components/profile/parent/ParentProfileNav';
 import DirectorySearchBar from '../components/directory/DirectorySearchBar';
 import DirectoryMemberCard from '../components/directory/DirectoryMemberCard';
 import DirectoryEmptyState from '../components/directory/DirectoryEmptyState';
@@ -217,8 +218,11 @@ export default function GatorDirectory() {
     );
   }
 
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+
   return (
-    <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: isParent ? '#0A0A0A' : '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
+      {isParent && <ParentProfileNav user={user} currentPage="GatorDirectory" />}
       {/* Hero */}
       <DirectoryHero stats={stats} loading={loading} />
 
