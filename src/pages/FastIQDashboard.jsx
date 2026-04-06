@@ -3,9 +3,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Zap } from 'lucide-react';
+import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
 export default function FastIQDashboard({ onOpenUpgrade }) {
   const { user } = useAuth();
+  const [showBanner, setShowBanner] = useState(true);
 
   const isFastIQ = !!(
     user?.fastiq_setup_complete ||
@@ -52,7 +54,13 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
   // FastIQ gate — show upgrade prompt
   if (!isFastIQ) {
     return (
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 24px 48px' }}>
+        <FoundingMemberBanner
+          show={showBanner}
+          onUpgrade={() => onOpenUpgrade?.()}
+          onDismiss={() => setShowBanner(false)}
+        />
+        <div style={{ marginTop: 32 }}>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 11, fontWeight: 700,
@@ -119,6 +127,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
         }}>
           7 day free trial &middot; Cancel anytime
         </p>
+        </div>
       </div>
     );
   }

@@ -14,9 +14,11 @@ import useParentHomeData from '@/components/parent-home/useParentHomeData';
 import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
 import FoundingOfferHomeCard from '@/components/founding-offer/FoundingOfferHomeCard';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
 export default function ParentHome() {
   const { user } = useAuth();
+  const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
     if (!document.getElementById('parent-home-fonts')) {
@@ -82,12 +84,19 @@ export default function ParentHome() {
     );
   }
 
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
       <ParentProfileNav user={user} currentPage="ParentHome" />
 
       <PullToRefresh onRefresh={refresh}>
         <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '32px 24px 80px' }}>
+          <FoundingMemberBanner
+            show={showBanner && !isFastIQ}
+            onUpgrade={() => navigate('FastIQDashboard')}
+            onDismiss={() => setShowBanner(false)}
+          />
           <ParentHomeHero user={user} />
 
           {/* Activation confirmation toast */}

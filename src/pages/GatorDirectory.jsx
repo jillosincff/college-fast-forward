@@ -12,12 +12,14 @@ import DirectoryEmptyState from '../components/directory/DirectoryEmptyState';
 import DirectoryLoadMore from '../components/directory/DirectoryLoadMore';
 import MessageUserModal from '../components/directory/MessageUserModal';
 import ProfileModal from '../components/directory/ProfileModal';
+import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
 const PAGE_SIZE = 24;
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
 export default function GatorDirectory() {
   const { user } = useAuth();
+  const [showBanner, setShowBanner] = useState(true);
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -229,7 +231,7 @@ export default function GatorDirectory() {
 
       {/* School scope toggle */}
       {userSchool && (
-        <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '10px 24px', display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ background: isParent ? '#0A0A0A' : '#fff', borderBottom: isParent ? '1px solid rgba(232,93,32,0.3)' : '1px solid #E5E5E5', padding: '10px 24px', display: 'flex', gap: 8, alignItems: 'center' }}>
           <span style={{ fontFamily: dmSans, fontSize: 13, color: '#888', marginRight: 4 }}>Show:</span>
           <button
             onClick={() => setSchoolFilter('my_school')}
