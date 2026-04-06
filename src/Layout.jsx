@@ -174,6 +174,7 @@ const ApplicationBoost = React.lazy(() => import('./pages/ApplicationBoost'));
 const StudentInvitedOnboarding = React.lazy(() => import('./pages/StudentInvitedOnboarding'));
 const FreeTierDashboard = React.lazy(() => import('./pages/FreeTierDashboard'));
 const FastIQDashboard = React.lazy(() => import('./pages/FastIQDashboard'));
+const ParentProfileEdit = React.lazy(() => import('./pages/ParentProfileEdit'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -589,6 +590,7 @@ const getPageComponent = (pageName) => {
     case 'StudentInvitedOnboarding': return StudentInvitedOnboarding;
     case 'FreeTierDashboard': return FreeTierDashboard;
     case 'FastIQDashboard': return FastIQDashboard;
+    case 'ParentProfileEdit': return ParentProfileEdit;
     case 'OutreachDrafts': return React.lazy(() => import('./pages/OutreachDrafts'));
     case 'ParentWelcome': return React.lazy(() => import('./pages/ParentWelcome'));
     case 'ParentUpsell': return React.lazy(() => import('./pages/ParentUpsell'));
@@ -843,7 +845,7 @@ function AppContent() {
   // Pages where certain users have their own nav (hide the global header)
   // Pages where specific personas render their own nav bar — hide global header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard'];
-  const parentOwnNavPages = ['Profile', 'ParentHome'];
+  const parentOwnNavPages = ['Profile', 'ParentHome', 'ParentProfileEdit'];
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
   const isEstablishedAlumniUser = user?.persona === 'alumni' && user?.alumni_seniority !== 'recent_grad';
