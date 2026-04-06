@@ -82,6 +82,11 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const fastiq = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
 
+  // Parent-gifted trial banner
+  const trialEndDate = user?.trial_end_date ? new Date(user.trial_end_date) : null;
+  const trialDaysLeft = trialEndDate ? Math.max(0, Math.ceil((trialEndDate - new Date()) / (1000 * 60 * 60 * 24))) : null;
+  const showParentGiftBanner = fastiq && trialDaysLeft !== null && trialDaysLeft >= 0;
+
   const hasGoals = !!(user?.career_goals?.target_roles?.length > 0);
   const hasResume = !!user?.resume_url;
   const hasSearched = !!user?.alumni_search_used;
@@ -117,6 +122,42 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
   return (
     <div>
+      {/* Parent-Gifted FastIQ Banner */}
+      {showParentGiftBanner && (
+        <div style={{
+          background: 'linear-gradient(135deg, #0A0A0A 0%, #1a0d00 100%)',
+          border: '1px solid rgba(232,93,32,0.35)',
+          borderRadius: 16,
+          padding: '18px 24px',
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+          flexWrap: 'wrap',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ fontSize: 28, flexShrink: 0 }}>⚡</div>
+            <div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#E85D20', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Your parent activated FastIQ for you
+              </p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0 }}>
+                {trialDaysLeft > 0
+                  ? `You have ${trialDaysLeft} day${trialDaysLeft !== 1 ? 's' : ''} of full access. Make them count.`
+                  : 'Your trial is active. All FastIQ features are unlocked.'}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => onOpenUpgrade?.()}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flexShrink: 0, minHeight: 'auto' }}
+          >
+            Keep Access →
+          </button>
+        </div>
+      )}
+
       {/* HERO — Dynamic AI Briefing */}
       <div style={{
         background: '#0A0A0A',
