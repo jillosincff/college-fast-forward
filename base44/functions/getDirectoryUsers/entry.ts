@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
       const company = getCompany(u);
       const industry = getIndustry(u);
-      const jobTitle = u.job_title || u.current_position || null;
+      const jobTitle = u.job_title || u.current_position || u.position || u.title || u.role_title || u.current_role || null;
 
       let availability = 'unknown';
       const rawAvail = u.intro_willingness || u.intro_availability || u.open_to_intros || u.availability;
