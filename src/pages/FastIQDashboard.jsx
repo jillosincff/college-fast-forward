@@ -13,7 +13,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
     user?.membership_tier === 'fastiq'
   );
 
-  const isFounding = user?.membership_tier === 'founding';
+  const isFounding = !!(user?.founding_offer_redeemed || user?.founding_member_plan);
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const [portalLoading, setPortalLoading] = useState(false);
   const [portalError, setPortalError] = useState('');
@@ -282,6 +282,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           marginTop: 16, paddingTop: 16,
           borderTop: '1px solid #E0E0E0',
           display: 'flex', gap: 12,
+          flexWrap: 'wrap', alignItems: 'center',
         }}>
           <button
             onClick={handleManageBilling}
