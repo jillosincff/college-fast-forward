@@ -94,7 +94,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { userEmail, firstName, schoolName } = await req.json();
+    const body = await req.json();
+    const { userEmail, schoolName } = body;
+    const firstName = body.firstName || body.userName || '';
 
     const html = emailWrapper(`
       ${darkHero(
