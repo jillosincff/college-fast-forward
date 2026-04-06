@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { useAuth } from '@/components/auth/AuthContext';
 
-export default function ParentAllSet({ user }) {
+export default function ParentAllSet() {
+  const { user } = useAuth();
   const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const [copied, setCopied] = useState(false);
 
   return (
     <div style={{
@@ -85,7 +89,8 @@ export default function ParentAllSet({ user }) {
           <button
             onClick={() => {
               navigator.clipboard.writeText('https://collegefastforward.com');
-              alert('Link copied! Share it with another parent.');
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2500);
             }}
             style={{
               background: 'none',
@@ -97,7 +102,7 @@ export default function ParentAllSet({ user }) {
               width: '100%',
             }}
           >
-            Share College Fast Forward →
+            {copied ? '✓ Link copied!' : 'Share College Fast Forward →'}
           </button>
         </div>
 
