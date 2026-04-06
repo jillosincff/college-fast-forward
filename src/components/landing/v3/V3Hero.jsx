@@ -117,7 +117,7 @@ export default function V3Hero({ onCTA, onParentCTA, onStudentCTA }) {
               justifyContent: 'center', gap: 16,
               flexWrap: 'wrap', marginBottom: 48,
             }}>
-              {['✓ Free to join', '✓ No credit card', '✓ Upgrade anytime'].map(item => (
+              {['✓ Free to join', '✓ Cancel anytime', '✓ Upgrade anytime'].map(item => (
                 <p key={item} style={{
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 12, color: '#888',
