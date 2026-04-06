@@ -20,8 +20,8 @@ export default function ParentAllSet() {
         {/* Check */}
         <div style={{
           width: 72, height: 72, borderRadius: '50%',
-          background: 'rgba(34,197,94,0.15)',
-          border: '2px solid #22C55E',
+          background: 'rgba(74,222,128,0.15)',
+          border: '2px solid #4ADE80',
           display: 'flex', alignItems: 'center',
           justifyContent: 'center', fontSize: 32,
           margin: '0 auto 32px',
