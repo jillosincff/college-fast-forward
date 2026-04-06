@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
+import { base44 } from '@/api/base44Client';
 import { Zap } from 'lucide-react';
 
 export default function FastIQDashboard({ onOpenUpgrade }) {
@@ -14,6 +15,28 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
 
   const isFounding = user?.membership_tier === 'founding';
   const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalError, setPortalError] = useState('');
+
+  const handleManageBilling = async () => {
+    setPortalLoading(true);
+    setPortalError('');
+    try {
+      const res = await base44.functions.invoke('createCustomerPortal', {
+        customerId: user?.stripe_customer_id,
+        returnUrl: 'https://collegefastforward.com/#FastIQDashboard',
+      });
+      if (res?.data?.success && res?.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        setPortalError(res?.data?.error || 'Unable to open billing portal. Please email support@collegefastforward.com');
+      }
+    } catch (e) {
+      console.error('Portal error:', e);
+      setPortalError('Something went wrong. Please email support@collegefastforward.com');
+    }
+    setPortalLoading(false);
+  };
 
   const FASTIQ_FEATURES = [
     { icon: '📄', label: 'Resume Hub', desc: 'Upload, score, and tailor your resume to any job', page: 'ResumeTailoring' },
@@ -260,18 +283,19 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           borderTop: '1px solid #E0E0E0',
           display: 'flex', gap: 12,
         }}>
-          <a
-            href="https://billing.stripe.com/p/login/your_portal_link"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={handleManageBilling}
+            disabled={portalLoading}
             style={{
+              background: 'none', border: 'none', padding: 0,
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13, color: '#555',
-              textDecoration: 'none',
+              fontSize: 13, color: portalLoading ? '#AAAAAA' : '#555',
+              cursor: portalLoading ? 'not-allowed' : 'pointer',
+              textDecoration: 'underline', minHeight: 'auto', minWidth: 'auto',
             }}
           >
-            Manage billing →
-          </a>
+            {portalLoading ? 'Loading...' : 'Manage billing →'}
+          </button>
           <span style={{ color: '#E0E0E0' }}>·</span>
           <a
             href="mailto:support@collegefastforward.com"
@@ -283,6 +307,11 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           >
             Contact support →
           </a>
+          {portalError && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#EF4444', margin: '8px 0 0', width: '100%' }}>
+              {portalError}
+            </p>
+          )}
         </div>
       </div>
 

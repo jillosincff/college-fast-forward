@@ -155,6 +155,7 @@ Deno.serve(async (req) => {
         const billingUser = await findUserByCustomerId(customerId);
         if (billingUser) {
           const userUpdates = {
+            stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             subscription_tier: subscriptionTier,
             subscription_status: 'active',
