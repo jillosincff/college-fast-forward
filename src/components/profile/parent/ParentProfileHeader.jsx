@@ -74,9 +74,9 @@ export default function ParentProfileHeader({ user }) {
   const isComplete = pct === 100;
 
   return (
-    <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 12, overflow: 'hidden' }}>
+    <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 12 }}>
       {/* Banner */}
-      <div style={{ height: 120, background: 'linear-gradient(135deg, #111 0%, #0d1117 100%)', position: 'relative' }}>
+      <div style={{ height: 120, background: 'linear-gradient(135deg, #111 0%, #0d1117 100%)', position: 'relative', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 80%, rgba(232,93,32,0.08), transparent 70%)' }} />
         <button onClick={() => navigate('ProfileEdit')} style={{
           position: 'absolute', top: 16, right: 16,
