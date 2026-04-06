@@ -13,10 +13,16 @@ const FOUNDING_OFFER_DEADLINE = new Date('2026-04-15T23:59:59');
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { plan, successUrl, cancelUrl, user: clientUser } = await req.json();
+    let { plan, successUrl, cancelUrl, user: clientUser } = await req.json();
 
     if (!clientUser?.id || !clientUser?.email) {
       return Response.json({ error: 'User context required' }, { status: 400 });
+    }
+
+    // Auto-apply founding rate if within deadline and plan is not already founding
+    const now = new Date();
+    if (now <= FOUNDING_OFFER_DEADLINE && !plan.includes('founding') && plan.includes('fastiq')) {
+      plan = plan.replace('fastiq_', 'fastiq_founding_');
     }
 
     if (!PRICES[plan]) {
