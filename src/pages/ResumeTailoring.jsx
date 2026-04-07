@@ -8,32 +8,7 @@ import JobDescriptionStep from '@/components/resume-tailor/JobDescriptionStep';
 import ResumeBuilderStep from '@/components/fast-track-pro/ResumeBuilderStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
-import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
 
-function SideNav() {
-  const NAV = [
-    { icon: Home, page: 'FreeTierDashboard' },
-    { icon: FileText, page: 'ResumeTailoring' },
-    { icon: Search, page: 'FreeTierDashboard?tab=alumni_search' },
-    { icon: Building2, page: 'FreeTierDashboard?tab=company_intel' },
-    { icon: MessageSquare, page: 'MyMessages' },
-  ];
-  return (
-    <div style={{ width: 60, background: '#fff', borderRight: '1px solid #E5E5E5', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 20, position: 'sticky', top: 0, height: '100vh', flexShrink: 0 }}>
-      {NAV.map(item => {
-        const Icon = item.icon;
-        return (
-          <button key={item.page} onClick={() => navigate(item.page)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer', color: '#666', minHeight: 'auto', minWidth: 'auto' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#F5F5F5'}
-            onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
-            <Icon size={18} />
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -400,9 +375,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     return (
       <>
         {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
-          <SideNav />
-          <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
+        <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
           <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap'); @keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
           {/* Header */}
@@ -620,7 +593,6 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
             </button>
           </div>
           </div>
-          </div>
           </>
           );
 
@@ -628,9 +600,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   return (
     <>
       {showUpgradeModal && <FastIQUpgradeModal user={user} onClose={() => setShowUpgradeModal(false)} />}
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
-        <SideNav />
-        <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '48px 24px', width: '100%' }}>
+      <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '48px 24px', width: '100%' }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');`}</style>
 
         {hasResumes && (
@@ -695,7 +665,6 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           Skip for now — go to dashboard →
         </p>
         </div>
-      </div>
     </>
     );
     }
