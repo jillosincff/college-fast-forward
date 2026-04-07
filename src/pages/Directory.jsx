@@ -27,7 +27,7 @@ export default function Directory() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ persona: 'all', industry: 'all', helpType: 'all' });
-  const [schoolFilter, setSchoolFilter] = useState('my_school');
+  const [schoolFilter] = useState('my_school');
   const [viewMode, setViewMode] = useState('grid');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -241,24 +241,6 @@ export default function Directory() {
       {/* Hero — hidden for parents who have their own nav */}
       {!isParent && <DirectoryHero stats={stats} loading={loading} />}
 
-      {/* School scope toggle */}
-      {userSchool && (
-        <div style={{ background: isParent ? '#0A0A0A' : '#fff', borderBottom: isParent ? '1px solid rgba(232,93,32,0.3)' : '1px solid #E5E5E5', padding: '10px 24px', display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontFamily: dmSans, fontSize: 13, color: isParent ? 'rgba(255,255,255,0.5)' : '#888', marginRight: 4 }}>Show:</span>
-          <button
-            onClick={() => setSchoolFilter('my_school')}
-            style={{ background: schoolFilter === 'my_school' ? '#DC2626' : isParent ? 'rgba(255,255,255,0.1)' : '#F5F5F5', color: schoolFilter === 'my_school' ? '#fff' : isParent ? 'rgba(255,255,255,0.6)' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
-          >
-            My School ({userSchool})
-          </button>
-          <button
-            onClick={() => setSchoolFilter('all')}
-            style={{ background: schoolFilter === 'all' ? '#1A1A1A' : isParent ? 'rgba(255,255,255,0.1)' : '#F5F5F5', color: schoolFilter === 'all' ? '#fff' : isParent ? 'rgba(255,255,255,0.6)' : '#444', border: 'none', borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
-          >
-            All CFF Schools
-          </button>
-        </div>
-      )}
 
       {/* Sticky search + filters */}
       <DirectorySearchBar
