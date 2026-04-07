@@ -15,6 +15,7 @@ import FreeTierCareerGoalsTab from '@/components/free-tier/FreeTierCareerGoalsTa
 import FreeTierAlumniNetworkTab from '@/components/free-tier/FreeTierAlumniNetworkTab';
 import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
+import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeUpgradeModal';
 import NotebookPage from '@/components/free-tier/NotebookPage';
 import AlumniSearch from '@/pages/AlumniSearch';
