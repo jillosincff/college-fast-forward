@@ -139,12 +139,12 @@ Deno.serve(async (req) => {
       const { 
         query: freeTextQuery, 
         universityName: clientUniversityName,
-        maxResults = 5,
-        isFastIQ = false 
+        maxResults = 5
       } = params;
 
-      // Always derive university from authenticated session — never trust client value
+      // Always derive university and FastIQ status from authenticated session — never trust client
       let universityName = clientUniversityName; // fallback for service-role calls
+      let isFastIQ = false;
       try {
         const base44 = createClientFromRequest(req);
         const sessionUser = await base44.auth.me();
@@ -155,6 +155,8 @@ Deno.serve(async (req) => {
             return Response.json({ success: false, error: 'School not set on your profile. Please update your profile to search alumni.', profiles: [] });
           }
           universityName = sessionSchool;
+          // Derive FastIQ status from user subscription — never trust client param
+          isFastIQ = !!(sessionUser.fastiq_setup_complete || sessionUser.subscription_status === 'active' || sessionUser.membership_tier === 'fastiq');
         }
       } catch (_) {
         // Service-role internal call — use passed universityName
@@ -223,8 +225,8 @@ Deno.serve(async (req) => {
                 photo_url: px_data.profile_pic || '',
                 industry: px_data.industry || '',
                 skills: px_data.skills || [],
-                verified_uf: (px_data.summary || '').toLowerCase().includes('florida') ||
-                             profile.headline.toLowerCase().includes('florida'),
+                verified_school: (px_data.summary || '').toLowerCase().includes(universityName.toLowerCase()) ||
+                                profile.headline.toLowerCase().includes(universityName.toLowerCase()),
                 source: 'exa_proxycurl',
               };
             } catch (e) {
