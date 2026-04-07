@@ -13,7 +13,9 @@ const EXAMPLE_SEARCHES = () => [
 
 export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [query, setQuery] = useState('');
-  const [searchUsedThisSession, setSearchUsedThisSession] = useState(false);
+  const [searchUsedThisSession, setSearchUsedThisSession] = useState(
+    () => localStorage.getItem('alumni_search_used') === 'true'
+  );
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -66,6 +68,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
 
       if (!isFastIQ && !user?.alumni_search_used) {
         setSearchUsedThisSession(true);
+        localStorage.setItem('alumni_search_used', 'true');
         base44.auth.updateMe({ alumni_search_used: true }).catch(() => {});
       }
       if (!user?.has_searched_alumni) {
