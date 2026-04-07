@@ -86,7 +86,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
   const handleLiveResearch = async (companyName) => {
     if (!companyName.trim()) return;
-    if (!isFastIQ) { onOpenUpgrade?.(); return; }
     setLiveSearchLoading(true);
     setLiveSearchError(null);
     try {
@@ -328,7 +327,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                     onClick={() => handleLiveResearch(search)}
                     style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
                   >
-                    {isFastIQ ? `Research ${search} now →` : `🔒 Research ${search} now (FastIQ)`}
+                    Research {search} now →
                   </button>
                 )}
               </>
