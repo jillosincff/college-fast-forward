@@ -48,6 +48,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [upgradeModal, setUpgradeModal] = useState(null);
   const [researchCompany, setResearchCompany] = useState(null);
   const [savedCompanies, setSavedCompanies] = useState(() => user?.saved_company_intel || []);
+  const [localTargetCompanies, setLocalTargetCompanies] = useState(() => user?.career_goals?.target_companies || []);
   const [showAll, setShowAll] = useState(false);
   const [skippedGoals, setSkippedGoals] = useState(false);
   const [liveSearchLoading, setLiveSearchLoading] = useState(false);
@@ -157,7 +158,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
   const showGoalsBanner = !hasGoals && !skippedGoals;
 
-  const targetCompanies = user?.career_goals?.target_companies || [];
+  const targetCompanies = localTargetCompanies;
   const role = targetRoles[0] || '';
   const industry = targetIndustries[0] || '';
 
@@ -364,7 +365,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           user={user}
           onClose={() => setShowAddCompanyModal(false)}
           onSaved={(updatedCompanies) => {
-            // Reload company intel with the new targets
+            setLocalTargetCompanies(updatedCompanies);
             setHasStarted(false);
           }}
         />
