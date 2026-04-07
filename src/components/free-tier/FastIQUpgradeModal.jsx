@@ -22,7 +22,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
   const [sending, setSending] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
 
-  const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
+  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
   const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
@@ -112,10 +112,10 @@ export default function FastIQUpgradeModal({ user, onClose }) {
 
           <div className="bg-[#0A0A0A] rounded-lg p-4 mb-6">
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-             $29/month or $249/year
+             {foundingOfferActive ? '🎖 $14.50/month — Founding Rate (50% off forever)' : '$29/month or $249/year'}
            </p>
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
-             Start free for 7 days — then $29/month. Cancel anytime.
+             {foundingOfferActive ? 'Start free for 7 days — then $14.50/month. Founding rate expires April 15.' : 'Start free for 7 days — then $29/month. Cancel anytime.'}
            </p>
           </div>
 

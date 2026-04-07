@@ -6,12 +6,12 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
  * Banner shown to CFF-only subscribers or non-subscribers when they visit FASTIQ.
  * Not shown to founding members (they have full access).
  */
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59'); = new Date('2025-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
 
 export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
   const [upgrading, setUpgrading] = useState(false);
 
-  const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
+  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
   const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const handleUpgrade = async () => {

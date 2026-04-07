@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Check, Loader2, Shield } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59'); = new Date('2025-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
 
 const FEATURES = [
   'Everything in CFF Membership',
@@ -18,7 +18,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
 
   if (!isOpen) return null;
 
-  const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
+  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
   const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const handleSelectPlan = async (planId) => {
