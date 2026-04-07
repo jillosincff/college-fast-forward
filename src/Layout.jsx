@@ -517,7 +517,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 }
 
 const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
-const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
 const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
