@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { getCompanyIntel } from '@/functions/getCompanyIntel';
+import { researchSpecificCompany } from '@/functions/researchSpecificCompany';
 import CompanyIntelCard from './CompanyIntelCard';
 import CompanyResearchChat from './CompanyResearchChat';
 
@@ -80,6 +81,39 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [savedCompanies, setSavedCompanies] = useState(() => user?.saved_company_intel || []);
   const [showAll, setShowAll] = useState(false);
   const [skippedGoals, setSkippedGoals] = useState(false);
+  const [liveSearchLoading, setLiveSearchLoading] = useState(false);
+  const [liveSearchError, setLiveSearchError] = useState(null);
+
+  const handleLiveResearch = async (companyName) => {
+    if (!companyName.trim()) return;
+    if (!isFastIQ) { onOpenUpgrade?.(); return; }
+    setLiveSearchLoading(true);
+    setLiveSearchError(null);
+    try {
+      const res = await researchSpecificCompany({ companyName: companyName.trim(), userId: user.id, schoolCode: user.school || user.university || '' });
+      const data = res?.data || res;
+      if (!data?.success || !data?.data) throw new Error('No data');
+      const intel = data.data;
+      const newCompany = {
+        name: intel.company_name,
+        hiring_signal: intel.is_actively_hiring ? 'active' : 'selective',
+        known_for: intel.hiring_summary || '',
+        careers_url: intel.careers_url || '',
+        culture_notes: intel.culture_notes || '',
+        application_tips: intel.application_tips || '',
+        headquarters: '', size: 'enterprise', what_they_look_for: [],
+        entry_level_programs: null, campus_recruiting: false,
+        cff_parent_count: 0, cff_parents: [], alumni_count: null, is_combo: false,
+        signals: { open_roles: { count: intel.open_role_types?.length || 0, matched_roles: intel.open_role_types || [] } },
+      };
+      setCompanies(prev => [newCompany, ...prev.filter(c => c.name.toLowerCase() !== newCompany.name.toLowerCase())]);
+      setSearch(intel.company_name);
+      setShowAll(true);
+    } catch (e) {
+      setLiveSearchError("Couldn't find intel for this company. Try a slightly different name (e.g. 'Citi' instead of 'Citibank').");
+    }
+    setLiveSearchLoading(false);
+  };
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const university = user?.school || user?.university || 'UF';
@@ -250,7 +284,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           type="text"
           placeholder="Search companies..."
           value={search}
-          onChange={e => { setSearch(e.target.value); setShowAll(true); }}
+          onChange={e => { setSearch(e.target.value); setShowAll(true); setLiveSearchError(null); }}
+          onKeyDown={e => { if (e.key === 'Enter' && search.trim() && filteredCompanies.length === 0) handleLiveResearch(search); }}
           style={{ width: '100%', paddingLeft: 40, paddingRight: 16, paddingTop: 'clamp(10px, 2vw, 12px)', paddingBottom: 'clamp(10px, 2vw, 12px)', borderRadius: 100, border: '1px solid #e5e5e5', background: '#fff', fontSize: 'clamp(13px, 3vw, 14px)', fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', minHeight: 44 }}
         />
       </div>
@@ -271,11 +306,35 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       {!loading && (
         filteredCompanies.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <p style={{ fontSize: 15, color: '#888', margin: '0 0 12px' }}>No companies match this filter.</p>
-            <button onClick={() => { setFilter('all'); setSearch(''); setShowAll(false); }}
-              style={{ background: 'none', border: '1px solid #e5e5e5', borderRadius: 100, padding: '8px 20px', fontSize: 13, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-              Show all companies
-            </button>
+            {search.trim() ? (
+              <>
+                <p style={{ fontSize: 15, color: '#888', margin: '0 0 16px' }}>No results for "{search}" in your generated list.</p>
+                {liveSearchError && (
+                  <p style={{ fontSize: 13, color: '#EF4444', margin: '0 0 16px', fontFamily: "'DM Sans', sans-serif" }}>{liveSearchError}</p>
+                )}
+                {liveSearchLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    <Loader2 style={{ width: 20, height: 20, color: '#E85D20', animation: 'ciSpin 1s linear infinite' }} />
+                    <span style={{ fontSize: 14, color: '#555', fontFamily: "'DM Sans', sans-serif" }}>Researching {search}…</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleLiveResearch(search)}
+                    style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
+                  >
+                    {isFastIQ ? `Research ${search} now →` : `🔒 Research ${search} now (FastIQ)`}
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 15, color: '#888', margin: '0 0 12px' }}>No companies match this filter.</p>
+                <button onClick={() => { setFilter('all'); setSearch(''); setShowAll(false); }}
+                  style={{ background: 'none', border: '1px solid #e5e5e5', borderRadius: 100, padding: '8px 20px', fontSize: 13, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+                  Show all companies
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <>
