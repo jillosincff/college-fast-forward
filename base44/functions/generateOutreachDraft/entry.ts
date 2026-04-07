@@ -1,4 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import Anthropic from 'npm:@anthropic-ai/sdk@0.27.3';
+
+const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
 Deno.serve(async (req) => {
   try {
@@ -23,10 +26,12 @@ Rules (follow exactly):
 - Sound like a real student, not a cover letter.
 - Return the message body only. No subject line. No greeting label. No sign-off label.`;
 
-    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt,
-      model: 'gemini_3_flash',
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 300,
+      messages: [{ role: 'user', content: prompt }],
     });
+    const result = response.content?.[0]?.text || '';
 
     return Response.json({ success: true, message: result || '' });
   } catch (error) {
