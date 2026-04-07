@@ -7,38 +7,6 @@ import { researchSpecificCompany } from '@/functions/researchSpecificCompany';
 import CompanyIntelCard from './CompanyIntelCard';
 import CompanyResearchChat from './CompanyResearchChat';
 
-function AlumniUpgradeModal({ company, university, onClose, onUpgrade }) {
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: '#fff', borderRadius: 16, maxWidth: 400, width: '100%', overflow: 'hidden' }}>
-        <div style={{ background: '#0d1117', padding: '24px 24px 20px' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#E85D20', margin: '0 0 8px' }}>⚡ FASTIQ</p>
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
-            See {university} Alumni at {company?.name}
-          </p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
-            FastIQ found ~{company?.alumni_count} {university} alumni at {company?.name}.
-          </p>
-        </div>
-        <div style={{ padding: '20px 24px' }}>
-          {['Full names and current roles', 'Who works in your target department', 'AI-drafted personalized outreach', `Interview prep for ${company?.name}`, 'Follow-up reminders'].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <span style={{ color: '#22C55E', fontWeight: 700, fontSize: 16 }}>✓</span>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#333' }}>{item}</span>
-            </div>
-          ))}
-          <button onClick={onUpgrade} style={{ width: '100%', background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '14px 24px', fontSize: 15, fontWeight: 700, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", marginTop: 16 }}>
-            Unlock FastIQ — $29/month →
-          </button>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', textAlign: 'center', margin: '8px 0 4px' }}>⭐ Founding rate: $187/year</p>
-          <button onClick={onClose} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 13, minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>Maybe later</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const FILTERS = [
   { key: 'all',    label: 'All' },
   { key: 'hiring', label: '🟢 Actively Hiring' },
@@ -85,6 +53,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [liveSearchLoading, setLiveSearchLoading] = useState(false);
   const [liveSearchError, setLiveSearchError] = useState(null);
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
+  const [researchCompany2, setResearchCompany2] = useState(null); // unused, kept for clarity
 
   const handleLiveResearch = async (companyName) => {
     if (!companyName.trim()) return;
@@ -117,7 +86,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     setLiveSearchLoading(false);
   };
 
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const university = user?.school || user?.university || 'UF';
 
   useEffect(() => {
@@ -350,10 +318,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                 key={company.name}
                 company={company}
                 user={user}
-                isFastIQ={isFastIQ}
-                onUpgrade={() => setUpgradeModal(company)}
-                onUnlockFastIQ={() => onOpenUpgrade?.()}
-                onViewAlumni={() => setUpgradeModal(company)}
+                isFastIQ={true}
                 onResearch={() => setResearchCompany(company)}
                 savedCompanies={savedCompanies}
                 onSave={handleSave}
@@ -387,21 +352,12 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
 
 
 
-      {upgradeModal && (
-        <AlumniUpgradeModal
-          company={upgradeModal}
-          university={university}
-          onClose={() => setUpgradeModal(null)}
-          onUpgrade={() => { setUpgradeModal(null); onOpenUpgrade?.(); }}
-        />
-      )}
       {researchCompany && (
         <CompanyResearchChat
           company={researchCompany}
           user={user}
-          isFastIQ={isFastIQ}
+          isFastIQ={true}
           onClose={() => setResearchCompany(null)}
-          onUpgrade={() => { setResearchCompany(null); onOpenUpgrade?.(); }}
         />
       )}
       {showAddCompanyModal && (

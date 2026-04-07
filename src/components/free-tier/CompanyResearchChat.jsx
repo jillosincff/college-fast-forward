@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Loader2, Lock } from 'lucide-react';
+import { X, Send, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-
-const MAX_FREE_QUESTIONS = 3;
 
 export default function CompanyResearchChat({ company, user, isFastIQ, onClose, onUpgrade }) {
   const [messages, setMessages] = useState([
@@ -23,8 +21,6 @@ export default function CompanyResearchChat({ company, user, isFastIQ, onClose, 
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
-
-    if (!isFastIQ && questionCount.current >= MAX_FREE_QUESTIONS) return;
 
     setInput('');
     const newMessages = [...messages, { role: 'user', content: trimmed }];
@@ -58,8 +54,6 @@ Respond in 2-4 sentences. Be specific, honest, and actionable. No markdown. No b
     }
     setLoading(false);
   };
-
-  const atLimit = !isFastIQ && questionCount.current >= MAX_FREE_QUESTIONS;
 
   return (
     <div style={{
@@ -113,32 +107,12 @@ Respond in 2-4 sentences. Be specific, honest, and actionable. No markdown. No b
               <Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> Researching...
             </div>
           )}
-          {atLimit && (
-            <div style={{ background: '#FFF5F0', border: '1px solid #FDDBC8', borderRadius: 12, padding: '16px 20px', marginTop: 8, textAlign: 'center' }}>
-              <Lock style={{ width: 20, height: 20, color: '#E85D20', margin: '0 auto 8px' }} />
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 6px' }}>
-                Unlock FastIQ for unlimited company research
-              </p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 14px' }}>
-                Get unlimited research, interview prep, and AI-drafted alumni outreach for every company on your list.
-              </p>
-              <button onClick={onUpgrade}
-                style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-                Unlock FastIQ →
-              </button>
-            </div>
-          )}
+
           <div ref={bottomRef} />
         </div>
 
         {/* Input */}
-        {!atLimit && (
-          <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0', flexShrink: 0 }}>
-            {!isFastIQ && (
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', textAlign: 'right', margin: '0 0 8px' }}>
-                {MAX_FREE_QUESTIONS - questionCount.current} free question{MAX_FREE_QUESTIONS - questionCount.current !== 1 ? 's' : ''} remaining
-              </p>
-            )}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0', flexShrink: 0 }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#f9f9f9', border: '1px solid #e5e5e5', borderRadius: 16, padding: '8px 12px' }}>
               <textarea
                 value={input}
