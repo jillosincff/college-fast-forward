@@ -53,7 +53,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [liveSearchLoading, setLiveSearchLoading] = useState(false);
   const [liveSearchError, setLiveSearchError] = useState(null);
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
-  const [researchCompany2, setResearchCompany2] = useState(null); // unused, kept for clarity
 
   const handleLiveResearch = async (companyName) => {
     if (!companyName.trim()) return;
@@ -215,9 +214,9 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
       {showGoalsBanner && (
         <div style={{ background: '#FFF5F5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: 0, fontWeight: 500 }}>⚠️ Set your career goals so we can find your target companies.</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: 0, fontWeight: 500 }}>⚠️ Add target companies so we can find the right intel for you.</p>
           <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-            <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Set Goals →</button>
+            <button onClick={() => setShowAddCompanyModal(true)} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Add Companies →</button>
             <button onClick={() => setSkippedGoals(true)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Explore anyway</button>
           </div>
         </div>
@@ -241,9 +240,9 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
       {showGoalsBanner && (
         <div style={{ background: '#FFF5F5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '14px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: 0, fontWeight: 500 }}>⚠️ Set your career goals so we can find your target companies.</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: 0, fontWeight: 500 }}>⚠️ Add target companies so we can find the right intel for you.</p>
           <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-            <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Set Goals →</button>
+            <button onClick={() => setShowAddCompanyModal(true)} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Add Companies →</button>
             <button onClick={() => setSkippedGoals(true)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#888', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Explore anyway</button>
           </div>
         </div>
