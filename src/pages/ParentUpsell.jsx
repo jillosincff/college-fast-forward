@@ -3,8 +3,11 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
+const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+
 export default function ParentUpsell() {
   const { user, isLoadingAuth } = useAuth();
+  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
   const [loading, setLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);
 
@@ -19,7 +22,7 @@ export default function ParentUpsell() {
     setCheckoutError(null);
     try {
       const res = await createCheckoutSession({
-        plan: 'fastiq_founding_monthly',
+        plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
         user: { id: user.id, email: user.email },
         successUrl: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
         cancelUrl: `${window.location.origin}/#ParentHome`,
@@ -130,11 +133,11 @@ export default function ParentUpsell() {
               fontSize: 13, color: 'rgba(255,255,255,0.82)',
               margin: 0, lineHeight: 1.6,
             }}>
-              🎖 After your trial, continue at the{' '}
-              <strong style={{ color: '#E85D20' }}>
-                Founding Rate of $14.50/month forever
-              </strong>{' '}
-              — 50% off the regular price. Expires April 15th.
+              {foundingOfferActive ? (
+                <>🎖 After your trial, continue at the{' '}<strong style={{ color: '#E85D20' }}>Founding Rate of $14.50/month forever</strong>{' '}— 50% off the regular price. Expires April 15th.</>
+              ) : (
+                <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$29/month</strong>. Cancel anytime.</>
+              )}
             </p>
           </div>
 

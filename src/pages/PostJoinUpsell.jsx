@@ -3,9 +3,12 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
+const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+
 export default function PostJoinUpsell() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
   const handleTrialStart = async () => {
@@ -14,7 +17,7 @@ export default function PostJoinUpsell() {
       const res = await base44.functions.invoke('createCheckoutSession', {
         userId: user?.id,
         userEmail: user?.email,
-        plan: 'fastiq_founding_monthly',
+        plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
         isTrial: true,
         trialDays: 7,
         isFoundingMember: true,
@@ -129,7 +132,9 @@ export default function PostJoinUpsell() {
               fontSize: 13, color: 'rgba(255,255,255,0.82)',
               margin: 0, lineHeight: 1.6,
             }}>
-              🎖 After your trial, continue at the <strong style={{ color: '#E85D20' }}>Founding Rate of $14.50/month forever</strong> — 50% off the regular price. This rate disappears after April 15th.
+              {foundingOfferActive
+                ? <>🎖 After your trial, continue at the <strong style={{ color: '#E85D20' }}>Founding Rate of $14.50/month forever</strong> — 50% off the regular price. This rate disappears after April 15th.</>
+                : <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$29/month</strong>. Cancel anytime.</>}
             </p>
           </div>
 

@@ -8,7 +8,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
+  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
   const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const handleUpgrade = async (plan = 'fastiq_monthly') => {
@@ -147,7 +147,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', textAlign: 'center', margin: 0 }}>
-            Start free for 7 days — then $29/month. Cancel anytime.
+            {foundingOfferActive ? 'Start free for 7 days — then $14.50/month. Cancel anytime.' : 'Start free for 7 days — then $29/month. Cancel anytime.'}
           </p>
         </div>
       </div>
