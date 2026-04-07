@@ -24,6 +24,8 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [outreachModal, setOutreachModal] = useState(null);
   const [editedDraft, setEditedDraft] = useState('');
   const [draftLoading, setDraftLoading] = useState(false);
+  const [draftHint, setDraftHint] = useState(null);
+  const DRAFT_TIMEOUT_MS = 15000;
   const [copyToast, setCopyToast] = useState(false);
   const [cffModal, setCffModal] = useState(null);
   const [cffDraft, setCffDraft] = useState('');
@@ -167,8 +169,16 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
     setDraftLoading(true);
     setConnectLoading(null);
 
-    // Generate draft in background
-    generateDraft(alum)
+    // Generate draft in background with 15s timeout
+    setDraftHint(null);
+    const draftWithTimeout = Promise.race([
+      generateDraft(alum),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), DRAFT_TIMEOUT_MS)
+      )
+    ]);
+
+    draftWithTimeout
       .then(draft => {
         if (alum.cff_user_id) {
           setCffDraft(draft);
@@ -186,9 +196,14 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
           status: 'draft',
         }).catch(() => {});
       })
-      .catch(() => {
-        if (alum.cff_user_id) setCffDraft('');
-        else setEditedDraft('');
+      .catch((err) => {
+        const firstName = alum.full_name?.split(' ')[0] || 'there';
+        const fallback = `Hi ${firstName}, I came across your profile on College Fast Forward and wanted to reach out…`;
+        if (alum.cff_user_id) setCffDraft(fallback);
+        else setEditedDraft(fallback);
+        if (err?.message === 'timeout') {
+          setDraftHint('Draft generation timed out — here\'s a starter you can edit:');
+        }
       })
       .finally(() => setDraftLoading(false));
   };
@@ -442,12 +457,17 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                   ✦ Drafting your personalized message…
                 </div>
               ) : (
-                <textarea
-                  value={editedDraft}
-                  onChange={e => setEditedDraft(e.target.value)}
-                  rows={6}
-                  style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: `1px solid ${editedDraft.length > 300 ? '#EF4444' : '#E0E0E0'}`, borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
-                />
+                <>
+                  {draftHint && (
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#F59E0B', margin: '0 0 8px', fontWeight: 500 }}>{draftHint}</p>
+                  )}
+                  <textarea
+                    value={editedDraft}
+                    onChange={e => setEditedDraft(e.target.value)}
+                    rows={6}
+                    style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: `1px solid ${editedDraft.length > 300 ? '#EF4444' : '#E0E0E0'}`, borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+                  />
+                </>
               )}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
                 <span style={{ fontSize: 12, color: '#EF4444', fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>
@@ -485,12 +505,17 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
                 ✦ Drafting your personalized message…
               </div>
             ) : (
-              <textarea
-                value={cffDraft}
-                onChange={e => setCffDraft(e.target.value)}
-                rows={6}
-                style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
-              />
+              <>
+                {draftHint && (
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#F59E0B', margin: '0 0 8px', fontWeight: 500 }}>{draftHint}</p>
+                )}
+                <textarea
+                  value={cffDraft}
+                  onChange={e => setCffDraft(e.target.value)}
+                  rows={6}
+                  style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+                />
+              </>
             )}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setCffModal(null)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
