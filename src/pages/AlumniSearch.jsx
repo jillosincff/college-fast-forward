@@ -13,6 +13,7 @@ const EXAMPLE_SEARCHES = () => [
 
 export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [query, setQuery] = useState('');
+  const [searchUsedThisSession, setSearchUsedThisSession] = useState(false);
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -39,7 +40,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       return;
     }
 
-    if (!isFastIQ && user?.alumni_search_used) {
+    if (!isFastIQ && (user?.alumni_search_used || searchUsedThisSession)) {
       onOpenUpgrade?.();
       return;
     }
@@ -64,6 +65,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       setResults(profiles);
 
       if (!isFastIQ && !user?.alumni_search_used) {
+        setSearchUsedThisSession(true);
         base44.auth.updateMe({ alumni_search_used: true }).catch(() => {});
       }
       if (!user?.has_searched_alumni) {
@@ -250,7 +252,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
 
       {/* Search bar — hidden when free tier search used */}
       <div style={{ marginBottom: 24 }}>
-        {!isFastIQ && user?.alumni_search_used ? (
+        {!isFastIQ && (user?.alumni_search_used || searchUsedThisSession) ? (
           <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 10, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>You've used your 1 free search.</p>
             <button onClick={() => onOpenUpgrade?.()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap' }}>
