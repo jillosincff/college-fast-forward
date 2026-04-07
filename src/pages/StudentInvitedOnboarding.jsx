@@ -81,6 +81,7 @@ export default function StudentInvitedOnboarding() {
       is_new_signup: true,
       invite_code_used: 'parent_invite',
       school: school.trim(),
+      school_name: school.trim(),
       university: school.trim(),
       first_name: firstName.trim(),
     };

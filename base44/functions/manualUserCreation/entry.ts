@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { email, full_name, persona, password } = await req.json();
+    const { email, full_name, persona, password, school_name } = await req.json();
 
     if (!email || !full_name || !persona) {
       return Response.json(
@@ -73,11 +73,18 @@ Deno.serve(async (req) => {
     }
 
     // Update user metadata in User entity via service role
-    await base44.asServiceRole.entities.User.update(authUser.user.id, {
+    const userMeta = {
       full_name: full_name.trim(),
       persona: persona,
-      onboarding_completed: false
-    });
+      roles: [persona],
+      onboarding_completed: false,
+    };
+    if (school_name) {
+      userMeta.school_name = school_name.trim();
+      userMeta.school = school_name.trim();
+      userMeta.university = school_name.trim();
+    }
+    await base44.asServiceRole.entities.User.update(authUser.user.id, userMeta);
 
     console.log('✅ User manually created:', email);
 

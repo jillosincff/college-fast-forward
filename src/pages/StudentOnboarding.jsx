@@ -90,6 +90,7 @@ export default function StudentOnboarding() {
       is_new_signup: true,
       invite_code_used: 'direct',
       school: school.trim(),
+      school_name: school.trim(),
       university: school.trim(),
       first_name: firstName.trim(),
     };
