@@ -20,6 +20,11 @@ import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeU
 import NotebookPage from '@/components/free-tier/NotebookPage';
 import AlumniSearch from '@/pages/AlumniSearch';
 import FreeTierDirectoryTab from '@/components/free-tier/FreeTierDirectoryTab';
+import ResumeTailoring from '@/pages/ResumeTailoring';
+import MockInterview from '@/pages/MockInterview';
+import LinkedInReview from '@/pages/LinkedInReview';
+import OutreachDrafts from '@/pages/OutreachDrafts';
+import CareerAssessment from '@/pages/CareerAssessment';
 
 export default function FreeTierDashboard() {
   const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
@@ -200,31 +205,8 @@ export default function FreeTierDashboard() {
       <div className="hidden md:block">
         <FreeTierSidebar
           user={user}
-          currentPage={{
-            home: 'FreeTierDashboard',
-            career_goals: 'CareerGoals',
-            company_intel: 'CompanyIntel',
-            alumni_search: 'AlumniSearch',
-            directory: 'Connections',
-            messages: 'Messages',
-            notebook: 'Notebook',
-          }[activeTab] || activeTab}
-          onNavigate={(page) => {
-            const tabMap = {
-              'FreeTierDashboard': 'home',
-              'CareerGoals': 'career_goals',
-              'CompanyIntel': 'company_intel',
-              'AlumniSearch': 'alumni_search',
-              'Connections': 'directory',
-              'Messages': 'messages',
-              'Notebook': 'notebook',
-            };
-            if (tabMap[page]) {
-              handleTabChange(tabMap[page]);
-            } else {
-              navigate(page);
-            }
-          }}
+          currentTab={activeTab}
+          onNavigate={(tab) => handleTabChange(tab)}
           onOpenUpgrade={handleOpenUpgrade}
           onOpenConcierge={handleOpenConcierge}
         />
@@ -339,6 +321,11 @@ export default function FreeTierDashboard() {
         {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
         {activeTab === 'notebook' && <NotebookPage user={user} />}
+        {activeTab === 'resume' && <ResumeTailoring />}
+        {activeTab === 'mock_interview' && <MockInterview />}
+        {activeTab === 'linkedin_review' && <LinkedInReview />}
+        {activeTab === 'outreach_drafts' && <OutreachDrafts />}
+        {activeTab === 'career_assessment' && <CareerAssessment />}
       </div>
       <div className="md:hidden">
         <FreeTierMobileNav activeTab={activeTab} onTabChange={handleTabChange} onOpenUpgrade={handleOpenUpgrade} onOpenConcierge={handleOpenConcierge} />

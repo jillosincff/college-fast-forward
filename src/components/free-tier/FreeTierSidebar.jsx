@@ -10,19 +10,19 @@ const NAV_GROUPS = [
   {
     label: 'MY CAREER',
     items: [
-      { label: 'Home', page: 'FreeTierDashboard', icon: Home },
-      { label: 'Career Goals', page: 'CareerGoals', icon: Target },
-      { label: 'Resume', page: 'ResumeTailoring', icon: FileText },
-      { label: 'Company Intel', page: 'CompanyIntel', icon: Building2 },
+      { label: 'Home', tab: 'home', icon: Home },
+      { label: 'Career Goals', tab: 'career_goals', icon: Target },
+      { label: 'Resume', tab: 'resume', icon: FileText },
+      { label: 'Company Intel', tab: 'company_intel', icon: Building2 },
     ]
   },
   {
     label: 'MY NETWORK',
     items: [
-      { label: 'CFF Connections', page: 'Connections', icon: Users },
-      { label: 'Alumni Search', page: 'AlumniSearch', icon: Search },
-      { label: 'Outreach Drafts', page: 'OutreachDrafts', icon: Mail },
-      { label: 'Messages', page: 'Messages', icon: MessageSquare },
+      { label: 'CFF Connections', tab: 'directory', icon: Users },
+      { label: 'Alumni Search', tab: 'alumni_search', icon: Search },
+      { label: 'Outreach Drafts', tab: 'outreach_drafts', icon: Mail },
+      { label: 'Messages', tab: 'messages', icon: MessageSquare },
     ]
   },
 ];
@@ -33,18 +33,18 @@ const FASTIQ_ITEMS = [
     icon: Sparkles,
     expandable: true,
     children: [
-      { label: 'Mock Interviews', page: 'MockInterview' },
-      { label: 'LinkedIn Review', page: 'LinkedInReview' },
-      { label: 'Résumés & Cover Letters', page: 'ResumeTailoring' },
+      { label: 'Mock Interviews', tab: 'mock_interview' },
+      { label: 'LinkedIn Review', tab: 'linkedin_review' },
+      { label: 'Résumés & Cover Letters', tab: 'resume' },
     ]
   },
-  { label: 'Career Assessment', page: 'CareerAssessment', icon: Brain },
-  { label: 'FastIQ', page: 'FastIQDashboard', icon: Zap },
+  { label: 'Career Assessment', tab: 'career_assessment', icon: Brain },
+  { label: 'FastIQ', tab: 'fastiq_dashboard', icon: Zap },
 ];
 
-export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
+export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUpgrade }) {
   const [conciergeOpen, setConciergeOpen] = useState(
-    ['MockInterview', 'LinkedInReview'].includes(currentPage)
+    ['mock_interview', 'linkedin_review'].includes(currentTab)
   );
 
   const isFastIQ = !!(
@@ -56,45 +56,45 @@ export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
   const firstName = user?.full_name?.split(' ')[0] || '';
   const schoolName = user?.school_name || 'University of Florida';
 
-  const isActive = (page) => currentPage === page;
+  const isActive = (tab) => currentTab === tab;
 
   const NavItem = ({ item, indent = false }) => (
     <button
-      onClick={() => onNavigate(item.page)}
+      onClick={() => onNavigate(item.tab)}
       style={{
         width: '100%', display: 'flex',
         alignItems: 'center', gap: 10,
         padding: indent ? '7px 12px 7px 36px' : '8px 12px',
         borderRadius: 8, border: 'none',
-        background: isActive(item.page) ? '#FFF5F0' : 'none',
+        background: isActive(item.tab) ? '#FFF5F0' : 'none',
         cursor: 'pointer',
         transition: 'background 0.15s',
         minHeight: 'auto',
       }}
       onMouseEnter={e => {
-        if (!isActive(item.page)) e.currentTarget.style.background = '#F5F5F5';
+        if (!isActive(item.tab)) e.currentTarget.style.background = '#F5F5F5';
       }}
       onMouseLeave={e => {
-        if (!isActive(item.page)) e.currentTarget.style.background = 'none';
+        if (!isActive(item.tab)) e.currentTarget.style.background = 'none';
       }}
     >
       {item.icon && (
         <item.icon
           size={15}
-          color={isActive(item.page) ? '#E85D20' : '#888'}
-          strokeWidth={isActive(item.page) ? 2.5 : 1.8}
+          color={isActive(item.tab) ? '#E85D20' : '#888'}
+          strokeWidth={isActive(item.tab) ? 2.5 : 1.8}
         />
       )}
       <span style={{
         fontFamily: "'DM Sans', sans-serif",
         fontSize: indent ? 12 : 13,
-        fontWeight: isActive(item.page) ? 600 : 400,
-        color: isActive(item.page) ? '#E85D20' : '#444',
+        fontWeight: isActive(item.tab) ? 600 : 400,
+        color: isActive(item.tab) ? '#E85D20' : '#444',
         textAlign: 'left',
       }}>
         {item.label}
       </span>
-      {isActive(item.page) && (
+      {isActive(item.tab) && (
         <div style={{
           width: 4, height: 4, borderRadius: '50%',
           background: '#E85D20', marginLeft: 'auto', flexShrink: 0,
@@ -235,34 +235,34 @@ export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
                 </>
               ) : (
                 <button
-                  onClick={() => isFastIQ ? onNavigate(item.page) : null}
+                  onClick={() => isFastIQ ? onNavigate(item.tab) : onOpenUpgrade?.()}
                   style={{
                     width: '100%', display: 'flex',
                     alignItems: 'center', gap: 10,
                     padding: '8px 12px', borderRadius: 8,
                     border: 'none',
-                    background: isActive(item.page) ? '#FFF5F0' : 'none',
-                    cursor: isFastIQ ? 'pointer' : 'default',
+                    background: isActive(item.tab) ? '#FFF5F0' : 'none',
+                    cursor: 'pointer',
                     opacity: isFastIQ ? 1 : 0.5,
                     minHeight: 'auto',
                   }}
                   onMouseEnter={e => {
-                    if (isFastIQ && !isActive(item.page)) e.currentTarget.style.background = '#F5F5F5';
+                    if (!isActive(item.tab)) e.currentTarget.style.background = '#F5F5F5';
                   }}
                   onMouseLeave={e => {
-                    if (!isActive(item.page)) e.currentTarget.style.background = 'none';
+                    if (!isActive(item.tab)) e.currentTarget.style.background = 'none';
                   }}
                 >
                   <item.icon
                     size={15}
-                    color={isActive(item.page) ? '#E85D20' : isFastIQ ? '#888' : '#CCCCCC'}
-                    strokeWidth={isActive(item.page) ? 2.5 : 1.8}
+                    color={isActive(item.tab) ? '#E85D20' : isFastIQ ? '#888' : '#CCCCCC'}
+                    strokeWidth={isActive(item.tab) ? 2.5 : 1.8}
                   />
                   <span style={{
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 13,
-                    fontWeight: isActive(item.page) ? 600 : 400,
-                    color: isActive(item.page) ? '#E85D20' : isFastIQ ? '#444' : '#CCCCCC',
+                    fontWeight: isActive(item.tab) ? 600 : 400,
+                    color: isActive(item.tab) ? '#E85D20' : isFastIQ ? '#444' : '#CCCCCC',
                     flex: 1, textAlign: 'left',
                   }}>
                     {item.label}
@@ -270,7 +270,7 @@ export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
                   {!isFastIQ && (
                     <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#CCCCCC', textTransform: 'uppercase', letterSpacing: '0.06em' }}>UPGRADE</span>
                   )}
-                  {isActive(item.page) && isFastIQ && (
+                  {isActive(item.tab) && isFastIQ && (
                     <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#E85D20', flexShrink: 0 }} />
                   )}
                 </button>
@@ -285,24 +285,24 @@ export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
 
       {/* Saved / Notebook */}
       <button
-        onClick={() => onNavigate('Notebook')}
+        onClick={() => onNavigate('notebook')}
         style={{
           width: '100%', display: 'flex',
           alignItems: 'center', gap: 10,
           padding: '8px 12px', borderRadius: 8,
           border: 'none',
-          background: isActive('Notebook') ? '#FFF5F0' : 'none',
+          background: isActive('notebook') ? '#FFF5F0' : 'none',
           cursor: 'pointer', marginBottom: 8, minHeight: 'auto',
-        }}
-        onMouseEnter={e => { if (!isActive('Notebook')) e.currentTarget.style.background = '#F5F5F5'; }}
-        onMouseLeave={e => { if (!isActive('Notebook')) e.currentTarget.style.background = 'none'; }}
-      >
-        <BookOpen size={15} color={isActive('Notebook') ? '#E85D20' : '#888'} strokeWidth={isActive('Notebook') ? 2.5 : 1.8} />
-        <span style={{
+          }}
+          onMouseEnter={e => { if (!isActive('notebook')) e.currentTarget.style.background = '#F5F5F5'; }}
+          onMouseLeave={e => { if (!isActive('notebook')) e.currentTarget.style.background = 'none'; }}
+          >
+          <BookOpen size={15} color={isActive('notebook') ? '#E85D20' : '#888'} strokeWidth={isActive('notebook') ? 2.5 : 1.8} />
+          <span style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 13,
-          fontWeight: isActive('Notebook') ? 600 : 400,
-          color: isActive('Notebook') ? '#E85D20' : '#444',
+          fontWeight: isActive('notebook') ? 600 : 400,
+          color: isActive('notebook') ? '#E85D20' : '#444',
         }}>
           Saved
         </span>
@@ -332,7 +332,7 @@ export default function FreeTierSidebar({ currentPage, onNavigate, user }) {
             AI interviews, LinkedIn review, unlimited alumni search & more.
           </p>
           <button
-            onClick={() => onNavigate('FastIQUpgrade')}
+            onClick={() => onOpenUpgrade?.()}
             style={{
               background: '#E85D20', border: 'none',
               borderRadius: 8, padding: '8px 0',
