@@ -106,6 +106,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         cff_parent_count: 0, cff_parents: [], alumni_count: null, is_combo: false,
         signals: { open_roles: { count: intel.open_role_types?.length || 0, matched_roles: intel.open_role_types || [] } },
       };
+      setHasStarted(true);
       setCompanies(prev => [newCompany, ...prev.filter(c => c.name.toLowerCase() !== newCompany.name.toLowerCase())]);
       setSearch(intel.company_name);
       setShowAll(true);
@@ -142,7 +143,12 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       const res = await getCompanyIntel({ student_id: user.id });
       const data = res?.data || res;
       if (data.noGoals) { setHasGoals(false); setLoading(false); return; }
-      setCompanies(data.companies || []);
+      setCompanies(prev => {
+        const incoming = data.companies || [];
+        // Preserve any manually researched companies not in the AI list
+        const manual = prev.filter(p => !incoming.find(c => c.name.toLowerCase() === p.name.toLowerCase()));
+        return [...manual, ...incoming];
+      });
       setTargetRoles(data.targetRoles || []);
       setTargetIndustries(data.targetIndustries || []);
     } catch (e) {
