@@ -234,6 +234,18 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           Results are cached for 24 hours — you won't wait again today
         </p>
       </div>
+      {showAddCompanyModal && (
+        <AddTargetCompanyModal
+          user={user}
+          onClose={() => setShowAddCompanyModal(false)}
+          onSaved={(updatedCompanies) => {
+            setLocalTargetCompanies(updatedCompanies);
+            setHasGoals(true);
+            setSkippedGoals(true);
+          }}
+        />
+      )}
+      <style>{`@keyframes ciSpin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 
