@@ -25,6 +25,7 @@ import ParentWelcome from '@/pages/ParentWelcome';
 import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
+import PostJoinUpsell from '@/pages/PostJoinUpsell';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
             </LayoutWrapper>
           } />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
+          <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
 
           {/* Main routes */}
           <Route path="/" element={
