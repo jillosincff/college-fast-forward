@@ -592,9 +592,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               Next: Research Target Companies →
             </button>
           </div>
-          </div>
-          </>
-          );
+        </div>
+      </>
+    );
+  }
 
   // ── PHASE: entry (default / no resumes) ─────────────────────────────────
   return (
@@ -664,8 +665,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         >
           Skip for now — go to dashboard →
         </p>
-        </div>
+      </div>
     </>
-    );
-    }
-    }
+  );
+}
