@@ -1,4 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import Anthropic from 'npm:@anthropic-ai/sdk@0.39.0';
+
+const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
 Deno.serve(async (req) => {
   try {
@@ -91,12 +94,12 @@ ${pageContent.slice(0, 3000)}`
 }`;
 
     try {
-      const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
-        prompt,
-        model: 'claude_sonnet_4_6',
+      const message = await anthropic.messages.create({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
       });
-      // InvokeLLM returns a string when no response_json_schema is set
-      const raw = typeof llmRes === 'string' ? llmRes : JSON.stringify(llmRes);
+      const raw = message.content?.[0]?.text || '';
       const clean = raw.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
       if (parsed && parsed.company_name) intel = parsed;
