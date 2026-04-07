@@ -150,6 +150,7 @@ export default function ProfileEdit() {
     mentorship_topics: [],
     companies_worked_at: [],
     can_provide_referrals: false,
+    school_name: '',
     major: '',
     graduation_year: '',
     gpa: '',
@@ -185,6 +186,7 @@ export default function ProfileEdit() {
         mentorship_topics: user.mentorship_topics || [],
         companies_worked_at: user.companies_worked_at || [],
         can_provide_referrals: user.can_provide_referrals || false,
+        school_name: user.school_name || user.school || '',
         major: user.major || '',
         graduation_year: user.graduation_year || '',
         gpa: user.gpa || '',
@@ -246,6 +248,8 @@ export default function ProfileEdit() {
         mentorship_topics: formData.mentorship_topics || [],
         companies_worked_at: formData.companies_worked_at || [],
         can_provide_referrals: formData.can_provide_referrals || false,
+        school_name: formData.school_name || '',
+        school: formData.school_name || '',
         major: formData.major || '',
         graduation_year: formData.graduation_year || '',
         gpa: formData.gpa || '',
@@ -612,6 +616,16 @@ export default function ProfileEdit() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="school_name">School / University</Label>
+                  <Input
+                    id="school_name"
+                    value={formData.school_name || ''}
+                    onChange={(e) => handleChange('school_name', e.target.value)}
+                    placeholder="e.g. University of Wisconsin"
+                  />
+                </div>
+
+              <div className="space-y-2">
                   <Label htmlFor="major">Major</Label>
                   <Input
                     id="major"
