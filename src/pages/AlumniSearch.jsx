@@ -23,6 +23,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [connectLoading, setConnectLoading] = useState(null);
   const [outreachModal, setOutreachModal] = useState(null);
   const [editedDraft, setEditedDraft] = useState('');
+  const [draftLoading, setDraftLoading] = useState(false);
   const [copyToast, setCopyToast] = useState(false);
   const [cffModal, setCffModal] = useState(null);
   const [cffDraft, setCffDraft] = useState('');
@@ -153,39 +154,43 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
     const key = alum.cff_user_id || alum.linkedin_url;
     if (sentTo.includes(key)) return;
     setConnectLoading(key);
-    try {
-      const draft = await generateDraft(alum);
-      if (alum.cff_user_id) {
-        setCffModal({ id: alum.cff_user_id, full_name: alum.full_name, headline: alum.headline, email: alum.email || null });
-        setCffDraft(draft);
-        setCffSent(false);
-        base44.entities.OutreachDraft.create({
-          created_by: user?.email,
-          recipient_name: alum.full_name,
-          recipient_title: alum.headline,
-          recipient_company: alum.company || '',
-          recipient_linkedin_url: alum.linkedin_url || '',
-          context: 'cff_connection',
-          message: draft,
-          status: 'draft',
-        }).catch(() => {});
-      } else {
-        setOutreachModal({ alum, draft });
-        setEditedDraft(draft);
-        base44.entities.OutreachDraft.create({
-          created_by: user?.email,
-          recipient_name: alum.full_name,
-          recipient_title: alum.headline,
-          recipient_company: alum.company || '',
-          recipient_linkedin_url: alum.linkedin_url || '',
-          context: 'alumni_search',
-          message: draft,
-          status: 'draft',
-        }).catch(() => {});
-      }
-    } finally {
-      setConnectLoading(null);
+
+    // Open modal immediately with loading state
+    if (alum.cff_user_id) {
+      setCffModal({ id: alum.cff_user_id, full_name: alum.full_name, headline: alum.headline, email: alum.email || null });
+      setCffDraft('');
+      setCffSent(false);
+    } else {
+      setOutreachModal({ alum });
+      setEditedDraft('');
     }
+    setDraftLoading(true);
+    setConnectLoading(null);
+
+    // Generate draft in background
+    generateDraft(alum)
+      .then(draft => {
+        if (alum.cff_user_id) {
+          setCffDraft(draft);
+        } else {
+          setEditedDraft(draft);
+        }
+        base44.entities.OutreachDraft.create({
+          created_by: user?.email,
+          recipient_name: alum.full_name,
+          recipient_title: alum.headline,
+          recipient_company: alum.company || '',
+          recipient_linkedin_url: alum.linkedin_url || '',
+          context: alum.cff_user_id ? 'cff_connection' : 'alumni_search',
+          message: draft,
+          status: 'draft',
+        }).catch(() => {});
+      })
+      .catch(() => {
+        if (alum.cff_user_id) setCffDraft('');
+        else setEditedDraft('');
+      })
+      .finally(() => setDraftLoading(false));
   };
 
   const handleSendLinkedIn = () => {
@@ -432,12 +437,18 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
               Edit your message, then click "Copy & Open LinkedIn" — paste it into your connection request.
             </div>
             <div>
-              <textarea
-                value={editedDraft}
-                onChange={e => setEditedDraft(e.target.value)}
-                rows={6}
-                style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: `1px solid ${editedDraft.length > 300 ? '#EF4444' : '#E0E0E0'}`, borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
-              />
+              {draftLoading ? (
+                <div style={{ background: 'rgba(0,0,0,0.04)', borderRadius: 8, padding: 16, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#999', fontStyle: 'italic', minHeight: 100, display: 'flex', alignItems: 'center' }}>
+                  ✦ Drafting your personalized message…
+                </div>
+              ) : (
+                <textarea
+                  value={editedDraft}
+                  onChange={e => setEditedDraft(e.target.value)}
+                  rows={6}
+                  style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: `1px solid ${editedDraft.length > 300 ? '#EF4444' : '#E0E0E0'}`, borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+                />
+              )}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
                 <span style={{ fontSize: 12, color: '#EF4444', fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}>
                   {editedDraft.length > 300 ? 'LinkedIn connection requests have a 300 character limit' : ''}
@@ -469,12 +480,18 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
             <div style={{ background: '#F0F7FF', border: '1px solid #B3D9FF', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#0057B8', lineHeight: 1.5 }}>
               ⚡ FastIQ drafted this for you — edit freely before sending.
             </div>
-            <textarea
-              value={cffDraft}
-              onChange={e => setCffDraft(e.target.value)}
-              rows={6}
-              style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
-            />
+            {draftLoading ? (
+              <div style={{ background: 'rgba(0,0,0,0.04)', borderRadius: 8, padding: 16, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#999', fontStyle: 'italic', minHeight: 100, display: 'flex', alignItems: 'center' }}>
+                ✦ Drafting your personalized message…
+              </div>
+            ) : (
+              <textarea
+                value={cffDraft}
+                onChange={e => setCffDraft(e.target.value)}
+                rows={6}
+                style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+              />
+            )}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setCffModal(null)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
               <button onClick={sendCffMessage} disabled={!cffDraft.trim() || cffSending || cffSent}
