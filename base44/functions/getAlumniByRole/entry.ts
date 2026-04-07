@@ -6,7 +6,15 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { targetFunctions, targetRoles, location, schoolName = 'University of Florida' } = await req.json();
+    const { targetFunctions, targetRoles, location } = await req.json();
+
+    // Always derive university from authenticated session — never trust client
+    const sessionSchool = user.school_name || user.school || user.university;
+    if (!sessionSchool) {
+      console.warn('[getAlumniByRole] User has no school set:', user.email);
+      return Response.json({ success: false, error: 'School not set on user profile.', clusters: [] });
+    }
+    const schoolName = sessionSchool;
 
     const FUNCTION_TO_TITLES = {
       'Marketing & Brand': ['Social Media Manager', 'Content Strategist', 'Brand Manager', 'Marketing Manager'],
@@ -29,7 +37,7 @@ Deno.serve(async (req) => {
         const exaRes = await base44.asServiceRole.functions.invoke('exaService', {
           action: 'searchAlumni',
           jobTitle: titles[0],
-          universityName: schoolName,
+          universityName: schoolName, // from authenticated session
           companyName: '',
           maxResults: 3,
         });

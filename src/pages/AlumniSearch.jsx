@@ -27,12 +27,17 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [cffSent, setCffSent] = useState(false);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-  const schoolName = user?.school_name || user?.school || user?.university || user?.school_code?.toUpperCase() || 'your school';
+  const schoolName = user?.school_name || user?.school || user?.university || null;
   const examples = EXAMPLE_SEARCHES();
 
   const handleSearch = async (searchQuery) => {
     const q = (searchQuery || query).trim();
     if (!q) return;
+
+    if (!schoolName) {
+      // Blocked at render level but guard here too
+      return;
+    }
 
     if (!isFastIQ && user?.alumni_search_used) {
       onOpenUpgrade?.();
@@ -48,7 +53,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       const res = await base44.functions.invoke('exaService', {
         action: 'searchAlumni',
         query: q,
-        universityName: schoolName || user?.school || user?.university || 'University of Florida',
+        universityName: schoolName,
         maxResults: isFastIQ ? 8 : 5,
         isFastIQ: isFastIQ,
       });
@@ -189,6 +194,26 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
     setOutreachModal(null);
   };
 
+  // Gate: school must be set
+  if (!schoolName) {
+    return (
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 3vw, 24px)', textAlign: 'center' }}>
+        <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '32px 24px', marginTop: 40 }}>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 10px' }}>School not set</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#555', margin: '0 0 20px', lineHeight: 1.6 }}>
+            Your school selection is required to search alumni. Please complete your profile to continue.
+          </p>
+          <button
+            onClick={() => navigate('ProfileEdit')}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Update Profile →
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 3vw, 24px)' }}>
 
@@ -199,10 +224,13 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
             Alumni Search
           </p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
-            Find your UF alumni<br />in any role, at any company.
+            Find alumni in any role, at any company.
           </h1>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
-            Search in plain English · UF alumni only · Powered by Exa
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 6px' }}>
+            Search in plain English · powered by Exa
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600, margin: 0 }}>
+            🎓 Searching alumni from: {schoolName}
           </p>
         </div>
         <button
@@ -293,7 +321,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       {results.length > 0 && (
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '0 0 16px' }}>
-            {results.length} UF alumni found
+            {results.length} {schoolName} alumni found
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {results.map((alum, i) => {

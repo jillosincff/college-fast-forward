@@ -1,3 +1,5 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+
 const FUNCTION_TO_KEYWORDS = {
   'Software Engineering': ['engineer', 'developer', 'swe', 'backend', 'frontend'],
   'Product Management': ['product manager', 'pm', 'product lead'],
@@ -136,10 +138,32 @@ Deno.serve(async (req) => {
     if (action === 'searchAlumni') {
       const { 
         query: freeTextQuery, 
-        universityName = 'University of Florida', 
+        universityName: clientUniversityName,
         maxResults = 5,
         isFastIQ = false 
       } = params;
+
+      // Always derive university from authenticated session — never trust client value
+      let universityName = clientUniversityName; // fallback for service-role calls
+      try {
+        const base44 = createClientFromRequest(req);
+        const sessionUser = await base44.auth.me();
+        if (sessionUser) {
+          const sessionSchool = sessionUser.school_name || sessionUser.school || sessionUser.university;
+          if (!sessionSchool) {
+            console.warn('[exaService] searchAlumni called by user with no school_code:', sessionUser.email);
+            return Response.json({ success: false, error: 'School not set on your profile. Please update your profile to search alumni.', profiles: [] });
+          }
+          universityName = sessionSchool;
+        }
+      } catch (_) {
+        // Service-role internal call — use passed universityName
+      }
+
+      if (!universityName) {
+        console.warn('[exaService] searchAlumni called with no university name');
+        return Response.json({ success: false, error: 'University not set. Please update your profile.', profiles: [] });
+      }
 
       const query = `${universityName} alumni ${freeTextQuery}`;
       
