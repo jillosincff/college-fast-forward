@@ -11,7 +11,8 @@ Deno.serve(async (req) => {
 
     const { studentName, major, targetRole, graduationYear, school, alumniName, alumniTitle, alumniCompany } = await req.json();
 
-    const schoolLabel = school || 'University of Florida';
+    const schoolLabel = user.school_name || user.school || school || '';
+    if (!schoolLabel) return Response.json({ error: 'School not set on profile' }, { status: 400 });
 
     const prompt = `Write a LinkedIn connection request message from a ${schoolLabel} student to a ${schoolLabel} alumni.
 
