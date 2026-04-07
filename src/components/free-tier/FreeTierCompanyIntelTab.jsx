@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Loader2 } from 'lucide-react';
+import AddTargetCompanyModal from './AddTargetCompanyModal';
 import { base44 } from '@/api/base44Client';
 import { getCompanyIntel } from '@/functions/getCompanyIntel';
 import { researchSpecificCompany } from '@/functions/researchSpecificCompany';
@@ -83,6 +84,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [skippedGoals, setSkippedGoals] = useState(false);
   const [liveSearchLoading, setLiveSearchLoading] = useState(false);
   const [liveSearchError, setLiveSearchError] = useState(null);
+  const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
 
   const handleLiveResearch = async (companyName) => {
     if (!companyName.trim()) return;
@@ -200,7 +202,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Add your dream companies</p>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll show you hiring signals and alumni at the companies you care about most.</p>
         </div>
-        <button onClick={() => onTabChange?.('career_goals')} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 44, width: window.innerWidth < 500 ? '100%' : 'auto' }}>+ Add Target Companies →</button>
+        <button onClick={() => setShowAddCompanyModal(true)} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 44, width: window.innerWidth < 500 ? '100%' : 'auto' }}>+ Add Target Companies →</button>
       </div>
     );
 
@@ -208,7 +210,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8, minWidth: 0 }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(9px, 2.2vw, 11px)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#E85D20', margin: 0, minWidth: 0, whiteSpace: window.innerWidth < 500 ? 'nowrap' : 'normal', overflow: 'hidden', textOverflow: 'ellipsis' }}>🎯 {window.innerWidth < 500 ? 'TARGETS' : 'YOUR TARGET COMPANIES'}</p>
-          <button onClick={() => onTabChange?.('career_goals')} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', flexShrink: 0 }}>Edit →</button>
+          <button onClick={() => setShowAddCompanyModal(true)} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', flexShrink: 0 }}>Edit →</button>
         </div>
         <div style={{ display: window.innerWidth < 500 ? 'grid' : 'flex', gridTemplateColumns: window.innerWidth < 500 ? 'repeat(auto-fit, minmax(140px, 1fr))' : undefined, flexWrap: window.innerWidth < 500 ? undefined : 'nowrap', gap: 10, overflowX: window.innerWidth < 500 ? undefined : 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
           {targetCompanies.map(company => (
@@ -231,7 +233,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                 </button>
                 </div>
           ))}
-          <div onClick={() => onTabChange?.('career_goals')} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', minWidth: 'clamp(100px, 30vw, 140px)' }}>
+          <div onClick={() => setShowAddCompanyModal(true)} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: 'clamp(10px, 2vw, 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', minWidth: 'clamp(100px, 30vw, 140px)' }}>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', fontWeight: 600 }}>+ Add company</span>
           </div>
         </div>
@@ -400,6 +402,16 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           isFastIQ={isFastIQ}
           onClose={() => setResearchCompany(null)}
           onUpgrade={() => { setResearchCompany(null); onOpenUpgrade?.(); }}
+        />
+      )}
+      {showAddCompanyModal && (
+        <AddTargetCompanyModal
+          user={user}
+          onClose={() => setShowAddCompanyModal(false)}
+          onSaved={(updatedCompanies) => {
+            // Reload company intel with the new targets
+            setHasStarted(false);
+          }}
         />
       )}
 
