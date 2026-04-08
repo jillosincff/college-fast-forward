@@ -11,7 +11,7 @@ const EXAMPLE_SEARCHES = () => [
   "consultant at McKinsey Bain or BCG",
 ];
 
-export default function AlumniSearch({ user, onOpenUpgrade }) {
+export default function AlumniSearch({ user, onOpenUpgrade, onTabChange }) {
   const [query, setQuery] = useState('');
   const [searchUsedThisSession, setSearchUsedThisSession] = useState(() => {
     // Only trust localStorage if the user's DB record also confirms it
@@ -258,7 +258,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
           </p>
         </div>
         <button
-          onClick={() => navigate('FreeTierDashboard')}
+          onClick={() => onTabChange ? onTabChange('outreach_drafts') : navigate('FreeTierDashboard')}
           style={{
             background: '#E85D20', border: 'none',
             borderRadius: 10, padding: 'clamp(10px, 2vw, 12px) clamp(14px, 3vw, 20px)',
