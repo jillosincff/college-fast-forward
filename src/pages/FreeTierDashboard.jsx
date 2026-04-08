@@ -85,7 +85,7 @@ export default function FreeTierDashboard() {
             hasResume: !!user?.resume_url,
             hasSearchedAlumni: !!user?.has_searched_alumni,
             hasMessaged: !!user?.has_messaged_connection,
-            hasDraftedOutreach: outreachDrafts.length > 0,
+            hasDraftedOutreach: outreachDrafts.length > 0 && !!(user?.career_goals?.target_roles?.length > 0),
             isFastIQ,
             hasArchetype: !!user?.career_archetype,
             hasLinkedInReview: !!user?.linkedin_url,
