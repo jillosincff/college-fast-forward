@@ -41,11 +41,13 @@ export default function FreeTierDashboard() {
   const [briefing, setBriefing] = useState(null);
   const [briefingLoading, setBriefingLoading] = useState(true);
 
-  const getLastLoginDays = () => {
+  // Read previous login BEFORE overwriting — capture it once on mount
+  const lastLoginDaysRef = useRef(() => {
     const lastLogin = localStorage.getItem('cff_last_login');
     if (!lastLogin) return 0;
     return Math.floor((Date.now() - new Date(lastLogin).getTime()) / (1000 * 60 * 60 * 24));
-  };
+  });
+  const lastLoginDays = useRef(lastLoginDaysRef.current());
 
   useEffect(() => {
     localStorage.setItem('cff_last_login', new Date().toISOString());
@@ -89,7 +91,7 @@ export default function FreeTierDashboard() {
             hasLinkedInReview: !!user?.linkedin_url,
             hasMockInterview: !!user?.has_done_mock_interview,
           },
-          lastLoginDays: getLastLoginDays(),
+          lastLoginDays: lastLoginDays.current,
           pendingFollowUps,
           unreadMessages: 0,
           resumeScore: user?.resume_score,
