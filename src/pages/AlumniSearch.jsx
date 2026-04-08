@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
@@ -13,9 +13,11 @@ const EXAMPLE_SEARCHES = () => [
 
 export default function AlumniSearch({ user, onOpenUpgrade }) {
   const [query, setQuery] = useState('');
-  const [searchUsedThisSession, setSearchUsedThisSession] = useState(
-    () => localStorage.getItem('alumni_search_used') === 'true'
-  );
+  const [searchUsedThisSession, setSearchUsedThisSession] = useState(() => {
+    // Only trust localStorage if the user's DB record also confirms it
+    // This prevents stale localStorage from a different account blocking a fresh user
+    return localStorage.getItem('alumni_search_used') === 'true';
+  });
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -34,6 +36,15 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const schoolName = user?.school_name || user?.school || user?.university || null;
+
+  // Clear stale localStorage if the user's DB record says they haven't used their free search
+  // This fixes the case where a fresh account inherits localStorage from a previous session
+  useEffect(() => {
+    if (!isFastIQ && !user?.alumni_search_used && searchUsedThisSession) {
+      localStorage.removeItem('alumni_search_used');
+      setSearchUsedThisSession(false);
+    }
+  }, [user?.alumni_search_used, isFastIQ]);
   const examples = EXAMPLE_SEARCHES();
 
   const handleSearch = async (searchQuery) => {
