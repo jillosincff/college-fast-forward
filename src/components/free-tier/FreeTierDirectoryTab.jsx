@@ -49,6 +49,8 @@ import { navigate } from '@/components/utils/navigation';
 export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [schoolName, setSchoolName] = useState('');
+  const [schoolError, setSchoolError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [sentTo, setSentTo] = useState([]);
@@ -63,13 +65,19 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setSchoolError(false);
       try {
         const res = await getDirectoryUsers({});
-        const all = res?.data?.data || [];
-        const filtered = all.filter(u =>
-          u.persona === 'parent' || u.persona === 'alumni'
-        );
-        setMembers(filtered);
+        const payload = res?.data || {};
+        if (payload.error === 'School not set on your profile.') {
+          setSchoolError(true);
+          setMembers([]);
+        } else {
+          const all = payload.data || [];
+          setSchoolName(payload.school || '');
+          const filtered = all.filter(u => u.persona === 'parent' || u.persona === 'alumni');
+          setMembers(filtered);
+        }
       } catch (e) {
         console.error('Directory load error:', e);
         setMembers([]);
@@ -193,8 +201,13 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
             fontFamily: "'DM Sans', sans-serif",
             fontSize: 14, color: '#888', margin: 0
           }}>
-            {loading ? 'Loading...' : `${members.length} parents and professionals in the CFF network — and they want to help.`}
+            {loading ? 'Loading...' : schoolError ? 'Set your school to see your network.' : `${members.length} parents and professionals in the network — and they want to help.`}
           </p>
+          {!loading && schoolName && (
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600, margin: '4px 0 0' }}>
+              Showing {schoolName} network · {members.length} members
+            </p>
+          )}
         </div>
         <button
           onClick={() => onTabChange ? onTabChange('alumni_search') : navigate('FreeTierDashboard')}
@@ -210,6 +223,14 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
           Next Step →
         </button>
       </div>
+
+      {/* School not set error */}
+      {schoolError && (
+        <div style={{ background: '#FFF5F5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: '0 0 10px', fontWeight: 500 }}>Your school isn't set. Please update your profile to see your network.</p>
+          <button onClick={() => navigate('ProfileEdit')} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Update Profile →</button>
+        </div>
+      )}
 
       {/* Search suggestion hint */}
       {searchSuggestion && !searchQuery && (

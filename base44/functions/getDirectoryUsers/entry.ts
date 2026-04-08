@@ -32,6 +32,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const isAdmin = user.roles?.includes('admin') || user.role === 'admin';
+
+    // School isolation — derive from session, never trust client
+    const schoolCode = user.school_name || user.school || user.university || user.school_code || '';
+    if (!isAdmin && !schoolCode) {
+      return Response.json({
+        success: false,
+        error: 'School not set on your profile.',
+        data: [],
+        count: 0,
+      });
+    }
+
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
 
     const directoryUsers = [];
@@ -41,6 +54,12 @@ Deno.serve(async (req) => {
       const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
       const isStudent = u.persona === 'gator' || u.persona === 'student' || (Array.isArray(u.roles) && (u.roles.includes('gator') || u.roles.includes('student')));
       if (!isParent && !isAlumni && !isStudent) continue;
+
+      // School isolation: only show users from the same school (admins see all)
+      if (!isAdmin) {
+        const uSchool = u.school_name || u.school || u.university || u.school_code || '';
+        if (!uSchool || uSchool.toLowerCase() !== schoolCode.toLowerCase()) continue;
+      }
 
       const hasName = !!(u.full_name || u.first_name);
       if (!hasName) continue;
@@ -102,12 +121,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log('Directory: returning ' + directoryUsers.length + ' members');
+    console.log(`Directory: returning ${directoryUsers.length} members for school: ${schoolCode || 'ALL (admin)'}`);
 
     return Response.json({
       success: true,
       data: directoryUsers,
       count: directoryUsers.length,
+      school: schoolCode || null,
     });
 
   } catch (error) {
