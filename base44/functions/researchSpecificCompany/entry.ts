@@ -130,6 +130,16 @@ ${pageContent.slice(0, 3000)}`
       console.warn('[researchSpecificCompany] Failed to save to cache:', e.message);
     }
 
+    // Log company_intel feature usage (fire-and-forget)
+    base44.asServiceRole.entities.AnalyticsEvent.create({
+      event_name: 'fastiq_feature_used',
+      user_id: user.id,
+      user_email: user.email,
+      school_code: schoolCode || user.school_name || user.school || '',
+      persona: user.persona || '',
+      properties: { feature_type: 'company_intel', company_name: intel.company_name },
+    }).catch(() => {});
+
     return Response.json({ success: true, data: intel });
   } catch (error) {
     console.error('[researchSpecificCompany] Error:', error);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X, Sparkles, Loader2 } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
+import { logAnalyticsEvent } from '@/functions/logAnalyticsEvent';
 
 const FEATURES = [
   'Full alumni names and direct contacts',
@@ -30,6 +31,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
 
   const handleUpgrade = async (plan = 'fastiq_monthly') => {
     setUpgrading(true);
+    logAnalyticsEvent({ event_name: 'upgrade_clicked', properties: { source: 'upgrade_modal', plan } }).catch(() => {});
     try {
       const response = await createCheckoutSession({
         plan,

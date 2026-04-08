@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import { logAnalyticsEvent } from '@/functions/logAnalyticsEvent';
 
 const ROLE_TO_SEARCH_KEYWORD = {
   'social media': 'Marketing', 'marketing': 'Marketing', 'brand': 'Marketing',
@@ -72,6 +73,9 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   };
 
   useEffect(() => {
+    // Log directory_viewed on mount
+    logAnalyticsEvent({ event_name: 'directory_viewed', properties: {} }).catch(() => {});
+
     const load = async () => {
       setLoading(true);
       setSchoolError(false);
@@ -145,6 +149,8 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       }).catch(() => {});
       setSentTo(prev => [...prev, messaging.email]);
       setSent(true);
+      // Log message_sent
+      logAnalyticsEvent({ event_name: 'message_sent', properties: { recipient_persona: messaging.persona || 'unknown' } }).catch(() => {});
       if (!user?.has_messaged_connection) {
         base44.auth.updateMe({ has_messaged_connection: true }).catch(() => {});
       }

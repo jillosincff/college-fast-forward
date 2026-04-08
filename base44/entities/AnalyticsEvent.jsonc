@@ -4,7 +4,7 @@
   "properties": {
     "event_name": {
       "type": "string",
-      "description": "Name of the event e.g. fastiq_trial_started, fastiq_feature_used"
+      "description": "Event name e.g. fastiq_trial_started, fastiq_feature_used, upgrade_clicked"
     },
     "user_id": {
       "type": "string",
@@ -18,14 +18,25 @@
       "type": "string",
       "description": "School code or name for segmentation"
     },
+    "persona": {
+      "type": "string",
+      "enum": [
+        "student",
+        "parent",
+        "alumni",
+        "gator"
+      ],
+      "description": "Persona of the user at time of event"
+    },
     "properties": {
       "type": "object",
-      "description": "Additional event metadata e.g. { feature_type: 'alumni_search' }",
+      "description": "Flexible JSON \u2014 event-specific metadata",
       "default": {}
     }
   },
   "required": [
-    "event_name"
+    "event_name",
+    "user_id"
   ],
   "rls": {
     "read": {

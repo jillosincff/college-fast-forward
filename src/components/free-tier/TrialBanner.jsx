@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { base44 } from '@/api/base44Client';
+import { logAnalyticsEvent } from '@/functions/logAnalyticsEvent';
 
 const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
 
@@ -25,11 +26,7 @@ export default function TrialBanner({ user }) {
 
   const handleUpgrade = async () => {
     setLoading(true);
-    // Log upgrade_clicked analytics event
-    base44.entities.AnalyticsEvent.create({
-      event_name: 'upgrade_clicked',
-      properties: { source: 'trial_banner', days_left: daysLeft },
-    }).catch(() => {});
+    logAnalyticsEvent({ event_name: 'upgrade_clicked', properties: { source: 'trial_banner', days_left: daysLeft } }).catch(() => {});
     try {
       const res = await createCheckoutSession({
         plan: foundingActive ? 'founding_monthly' : 'monthly',

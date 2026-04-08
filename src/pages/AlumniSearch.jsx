@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { logAnalyticsEvent } from '@/functions/logAnalyticsEvent';
 import { navigate } from '@/components/utils/navigation';
 import { maybeActivateTrial } from '@/utils/trialActivation';
 
@@ -68,6 +69,8 @@ export default function AlumniSearch({ user, onOpenUpgrade, onTabChange, refresh
         localStorage.setItem('alumni_search_used', 'true');
         base44.auth.updateMe({ alumni_search_used: true }).catch(() => {});
       }
+      // Log alumni_profile_viewed (search run)
+      logAnalyticsEvent({ event_name: 'fastiq_feature_used', properties: { feature_type: 'alumni_search', result_count: profiles.length } }).catch(() => {});
       if (!user?.has_searched_alumni) {
         base44.auth.updateMe({ has_searched_alumni: true }).catch(() => {});
       }
