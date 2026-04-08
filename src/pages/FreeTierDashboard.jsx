@@ -85,7 +85,13 @@ export default function FreeTierDashboard() {
             hasResume: !!user?.resume_url,
             hasSearchedAlumni: !!user?.has_searched_alumni,
             hasMessaged: !!user?.has_messaged_connection,
-            hasDraftedOutreach: outreachDrafts.length > 0 && !!(user?.career_goals?.target_roles?.length > 0),
+            hasDraftedOutreach: (() => {
+              const goalsSavedAt = user?.career_goals?.saved_at;
+              const hasGoals = !!(user?.career_goals?.target_roles?.length > 0);
+              if (!hasGoals) return false;
+              if (!goalsSavedAt) return outreachDrafts.length > 0;
+              return outreachDrafts.some(d => new Date(d.created_date) > new Date(goalsSavedAt));
+            })(),
             isFastIQ,
             hasArchetype: !!user?.career_archetype,
             hasLinkedInReview: !!user?.linkedin_url,
