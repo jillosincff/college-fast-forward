@@ -145,9 +145,10 @@ Deno.serve(async (req) => {
       // Always derive university and FastIQ status from authenticated session — never trust client
       let universityName = clientUniversityName; // fallback for service-role calls
       let isFastIQ = false;
+      let sessionUser = null;
       const base44 = createClientFromRequest(req);
       try {
-        const sessionUser = await base44.auth.me();
+        sessionUser = await base44.auth.me();
         if (sessionUser) {
           const sessionSchool = sessionUser.school_name || sessionUser.school || sessionUser.university;
           if (!sessionSchool) {
