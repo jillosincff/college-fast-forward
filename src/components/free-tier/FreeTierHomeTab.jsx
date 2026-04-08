@@ -5,6 +5,7 @@ import { Loader2, X } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
+import TrialUsageRecap from '@/components/free-tier/TrialUsageRecap';
 
 const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
 
@@ -122,6 +123,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
   return (
     <div>
+      <TrialUsageRecap user={user} />
       {/* Parent-Gifted FastIQ Banner */}
       {showParentGiftBanner && (
         <div style={{

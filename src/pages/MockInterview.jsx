@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { maybeActivateTrial } from '@/utils/trialActivation';
 import { navigate } from '@/components/utils/navigation';
+import PostTrialUpgradePrompt from '@/components/free-tier/PostTrialUpgradePrompt';
 import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
 
 function SideNav() {
@@ -64,6 +65,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const messagesEndRef = useRef(null);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
+  const trialExpired = user?.trial_status === 'expired' && user?.subscription_status !== 'active';
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
@@ -135,6 +137,16 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
     }
     setLoading(false);
   };
+
+  // Trial expired gate
+  if (trialExpired) {
+    return (
+      <>
+        <TopNav />
+        <PostTrialUpgradePrompt message="Practice AI mock interviews, get STAR method feedback, and sharpen your answers." />
+      </>
+    );
+  }
 
   // FastIQ gate
   if (!isFastIQ) {

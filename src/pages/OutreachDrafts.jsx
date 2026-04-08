@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { maybeActivateTrial } from '@/utils/trialActivation';
+import PostTrialUpgradePrompt from '@/components/free-tier/PostTrialUpgradePrompt';
 import { navigate } from '@/components/utils/navigation';
 
 const CONTEXTS = [
@@ -236,6 +237,12 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     textTransform: 'uppercase', letterSpacing: '0.1em',
     color: '#888', display: 'block', marginBottom: 6,
   };
+
+  // Trial expired gate
+  const trialExpired = user?.trial_status === 'expired' && user?.subscription_status !== 'active';
+  if (trialExpired) {
+    return <PostTrialUpgradePrompt message="Draft AI-written outreach messages and track your networking pipeline." />;
+  }
 
   // FastIQ gate — attempt trial activation first
   if (!isFastIQ) {

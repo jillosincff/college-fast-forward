@@ -28,6 +28,7 @@ import { errorReporter } from './components/utils/errorReporter';
 import ErrorLogger from './components/debug/ErrorLogger';
 import MobileBottomNav from './components/navigation/MobileBottomNav';
 import AccountDeletionModal from './components/profile/AccountDeletionModal';
+import TrialBanner from './components/free-tier/TrialBanner';
 import { AnimatePresence, motion } from 'framer-motion';
 import PullToRefresh from './components/common/PullToRefresh';
 
@@ -883,6 +884,7 @@ function AppContent() {
             <SimpleHeader currentPage={resolvedPage} onNavigate={navigate} user={user} logout={logout} />
           </AppErrorBoundary>
         )}
+        {user && <TrialBanner user={user} />}
         <main className={`flex-grow ${showBottomNav ? 'pb-16 md:pb-0' : ''}`}>
           {supportsPullRefresh ? (
             <PullToRefresh onRefresh={handleGlobalRefresh}>
