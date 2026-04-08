@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
+import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 const ROLE_TO_SEARCH_KEYWORD = {
   'social media': 'Marketing', 'marketing': 'Marketing', 'brand': 'Marketing',
@@ -43,8 +45,6 @@ const getBestKeyword = (user) => {
   }
   return roles[0] || '';
 };
-import { base44 } from '@/api/base44Client';
-import { navigate } from '@/components/utils/navigation';
 
 export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange }) {
   const [members, setMembers] = useState([]);
@@ -55,7 +55,13 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   const [activeFilter, setActiveFilter] = useState('all');
   const [sentTo, setSentTo] = useState([]);
   const [messaging, setMessaging] = useState(null);
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+
+  const topRole = user?.career_goals?.target_roles?.[0];
+  const searchSuggestion = getBestKeyword(user);
 
   const handleShareInvite = () => {
     const link = `${window.location.origin}/#GatorAuth`;
@@ -64,12 +70,6 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       setTimeout(() => setLinkCopied(false), 2500);
     });
   };
-  const [draft, setDraft] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-
-  const topRole = user?.career_goals?.target_roles?.[0];
-  const searchSuggestion = getBestKeyword(user);
 
   useEffect(() => {
     const load = async () => {
@@ -99,16 +99,8 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   const searchedMembers = members.filter(m => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
-    return [
-      m.full_name,
-      m.job_title,
-      m.current_position,
-      m.company,
-      m.current_company,
-      m.industry,
-      m.bio,
-      m.expertise_areas?.join(' '),
-    ].some(f => f?.toLowerCase().includes(q));
+    return [m.full_name, m.job_title, m.current_position, m.company, m.current_company, m.industry, m.bio, m.expertise_areas?.join(' ')]
+      .some(f => f?.toLowerCase().includes(q));
   });
 
   const displayMembers = searchedMembers.filter(m => {
@@ -193,23 +185,13 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, gap: 16 }}>
         <div>
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 11, fontWeight: 700,
-            textTransform: 'uppercase', letterSpacing: '0.12em',
-            color: '#E85D20', margin: '0 0 8px'
-          }}>CFF CONNECTIONS</p>
-          <h1 style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: 28, fontWeight: 700,
-            color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2
-          }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>
+            CFF CONNECTIONS
+          </p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
             Find someone who can open a door.
           </h1>
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: '#888', margin: 0
-          }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
             {loading ? 'Loading...' : schoolError ? 'Set your school to see your network.' : `${members.length} parents and professionals in the network — and they want to help.`}
           </p>
           {!loading && schoolName && (
@@ -220,14 +202,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
         </div>
         <button
           onClick={() => onTabChange ? onTabChange('alumni_search') : navigate('FreeTierDashboard')}
-          style={{
-            background: '#E85D20', border: 'none',
-            borderRadius: 10, padding: '10px 20px',
-            fontSize: 13, fontWeight: 600,
-            color: '#fff', cursor: 'pointer',
-            fontFamily: "'DM Sans', sans-serif",
-            whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto',
-          }}
+          style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', flexShrink: 0, minHeight: 'auto' }}
         >
           Next Step →
         </button>
@@ -236,38 +211,24 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       {/* School not set error */}
       {schoolError && (
         <div style={{ background: '#FFF5F5', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: '0 0 10px', fontWeight: 500 }}>Your school isn't set. Please update your profile to see your network.</p>
-          <button onClick={() => navigate('ProfileEdit')} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Update Profile →</button>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#EF4444', margin: '0 0 10px', fontWeight: 500 }}>
+            Your school isn't set. Please update your profile to see your network.
+          </p>
+          <button onClick={() => navigate('ProfileEdit')} style={{ background: '#EF4444', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
+            Update Profile →
+          </button>
         </div>
       )}
 
       {/* Search suggestion hint */}
       {searchSuggestion && !searchQuery && (
-        <div style={{
-          background: '#FFF5F0',
-          border: '1px solid rgba(232,93,32,0.2)',
-          borderRadius: 10, padding: '10px 16px',
-          marginBottom: 12,
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', gap: 12,
-          flexWrap: 'wrap',
-        }}>
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 13, color: '#555', margin: 0
-          }}>
+        <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '10px 16px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: 0 }}>
             💡 Try searching <strong>"{searchSuggestion}"</strong> to find relevant connections
           </p>
           <button
             onClick={() => setSearchQuery(searchSuggestion)}
-            style={{
-              background: '#E85D20', border: 'none',
-              borderRadius: 6, padding: '6px 14px',
-              fontSize: 12, fontWeight: 600,
-              color: '#fff', cursor: 'pointer',
-              fontFamily: "'DM Sans', sans-serif",
-              whiteSpace: 'nowrap', minHeight: 'auto',
-            }}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
           >
             Search "{searchSuggestion}" →
           </button>
@@ -280,25 +241,12 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Search by industry, company, or name..."
-          style={{
-            width: '100%', fontSize: 14,
-            padding: '12px 16px',
-            border: '1px solid #E0E0E0',
-            borderRadius: 10, background: '#fff',
-            color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif",
-            boxSizing: 'border-box', outline: 'none',
-          }}
+          style={{ width: '100%', fontSize: 14, padding: '12px 16px', border: '1px solid #E0E0E0', borderRadius: 10, background: '#fff', color: '#1A1A1A', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box', outline: 'none' }}
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            style={{
-              background: 'none', border: 'none',
-              fontSize: 12, color: '#E85D20',
-              cursor: 'pointer', padding: '4px 0',
-              fontFamily: "'DM Sans', sans-serif",
-              display: 'block', marginTop: 4, minHeight: 'auto',
-            }}
+            style={{ background: 'none', border: 'none', fontSize: 12, color: '#E85D20', cursor: 'pointer', padding: '4px 0', fontFamily: "'DM Sans', sans-serif", display: 'block', marginTop: 4, minHeight: 'auto' }}
           >
             Clear search — show all →
           </button>
@@ -334,7 +282,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
                 <button onClick={handleShareInvite} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
                   {linkCopied ? '✓ Link Copied!' : '📨 Share with a Parent or Alumni →'}
                 </button>
-                <button onClick={() => onTabChange?.('alumni_search')} style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 10, padding: '11px 20px', fontSize: 13, fontWeight: 600, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
+                <button onClick={() => onTabChange && onTabChange('alumni_search')} style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 10, padding: '11px 20px', fontSize: 13, fontWeight: 600, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
                   🔍 Search Alumni on LinkedIn Instead →
                 </button>
               </div>
@@ -353,25 +301,28 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       )}
 
       {/* Results */}
-      {loading ? (
+      {loading && (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #F0F0F0', borderTop: '3px solid #E85D20', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>Loading connections...</p>
         </div>
-      ) : displayMembers.length === 0 && members.length >= 10 ? (
+      )}
+
+      {!loading && displayMembers.length === 0 && searchQuery && (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>No results found — try a different search.</p>
-          <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 600, minHeight: 'auto' }}>Clear Search →</button>
+          <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 600, minHeight: 'auto' }}>
+            Clear Search →
+          </button>
         </div>
-      ) : members.length >= 10 || searchQuery ? (
+      )}
+
+      {!loading && displayMembers.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))', gap: 16 }}>
           {displayMembers.map(member => {
-            const initials = (member.full_name || 'CFF')
-              .split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+            const initials = (member.full_name || 'CFF').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
             const alreadySent = sentTo.includes(member.email);
-            const subtitle = [member.company || member.current_company, member.job_title || member.current_position]
-              .filter(Boolean).join(' · ');
-
+            const subtitle = [member.company || member.current_company, member.job_title || member.current_position].filter(Boolean).join(' · ');
             return (
               <div key={member.id} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
@@ -383,14 +334,22 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
                     {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</p>}
                   </div>
                 </div>
-                {member.industry && <span style={{ background: '#F5F5F5', borderRadius: 20, padding: '3px 10px', fontSize: 11, color: '#666', fontFamily: "'DM Sans', sans-serif", alignSelf: 'flex-start' }}>{member.industry}</span>}
+                {member.industry && (
+                  <span style={{ background: '#F5F5F5', borderRadius: 20, padding: '3px 10px', fontSize: 11, color: '#666', fontFamily: "'DM Sans', sans-serif", alignSelf: 'flex-start' }}>
+                    {member.industry}
+                  </span>
+                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: member.availability === 'actively_helping' ? '#22C55E' : member.availability === 'occasionally_available' ? '#F59E0B' : '#CCCCCC' }} />
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>
                     {member.availability === 'actively_helping' ? 'Actively helping' : member.availability === 'occasionally_available' ? 'Occasionally available' : 'Availability unknown'}
                   </p>
                 </div>
-                {member.linkedin_url && <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#0077B5', textDecoration: 'none', fontWeight: 600 }}>🔗 View LinkedIn →</a>}
+                {member.linkedin_url && (
+                  <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#0077B5', textDecoration: 'none', fontWeight: 600 }}>
+                    🔗 View LinkedIn →
+                  </a>
+                )}
                 <button
                   onClick={() => { if (alreadySent) return; setMessaging(member); setDraft(''); setSent(false); }}
                   disabled={alreadySent}
@@ -402,83 +361,42 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
             );
           })}
         </div>
-      ) : null}
+      )}
 
       {/* Message modal */}
       {messaging && (
         <div
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: window.innerWidth < 600 ? 'flex-end' : 'center',
-            justifyContent: 'center', zIndex: 50, padding: window.innerWidth < 600 ? 0 : 20,
-          }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}
           onClick={() => setMessaging(null)}
         >
           <div
-            style={{
-              background: '#fff',
-              borderRadius: window.innerWidth < 600 ? '16px 16px 0 0' : 16,
-              padding: window.innerWidth < 600 ? '20px 16px' : 28,
-              width: '100%',
-              maxWidth: window.innerWidth < 600 ? '100%' : 520,
-              maxHeight: window.innerWidth < 600 ? '90vh' : 'auto',
-              overflowY: 'auto',
-              display: 'flex', flexDirection: 'column', gap: 16,
-            }}
+            style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}
             onClick={e => e.stopPropagation()}
           >
             <div>
-              <p style={{
-                fontSize: 11, color: '#888', margin: '0 0 4px',
-                textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600
-              }}>
+              <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>
                 Send a message on CFF
               </p>
-              <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>
-                {messaging.full_name}
-              </p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>{messaging.full_name}</p>
               {(messaging.job_title || messaging.current_position) && (
-                <p style={{ fontSize: 13, color: '#666', margin: '2px 0 0' }}>
-                  {messaging.job_title || messaging.current_position}
-                </p>
+                <p style={{ fontSize: 13, color: '#666', margin: '2px 0 0' }}>{messaging.job_title || messaging.current_position}</p>
               )}
             </div>
             <textarea
               value={draft}
               onChange={e => setDraft(e.target.value)}
               rows={5}
-              placeholder={`Hi ${messaging.full_name?.split(' ')[0] || 'there'}, I'm a UF student interested in ${topRole || 'your industry'}...`}
-              style={{
-                width: '100%', fontSize: 13, lineHeight: 1.6,
-                color: '#1A1A1A', background: '#F9F9F9',
-                border: '1px solid #E0E0E0', borderRadius: 8,
-                padding: 12, resize: 'vertical',
-                fontFamily: "'DM Sans', sans-serif",
-                boxSizing: 'border-box',
-              }}
+              placeholder={`Hi ${messaging.full_name?.split(' ')[0] || 'there'}, I'm a student interested in ${topRole || 'your industry'}...`}
+              style={{ width: '100%', fontSize: 13, lineHeight: 1.6, color: '#1A1A1A', background: '#F9F9F9', border: '1px solid #E0E0E0', borderRadius: 8, padding: 12, resize: 'vertical', fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
             />
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setMessaging(null)}
-                style={{
-                  background: 'none', border: '1px solid #E0E0E0',
-                  borderRadius: 8, padding: '8px 16px',
-                  fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto',
-                }}
-              >
+              <button onClick={() => setMessaging(null)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto' }}>
                 Cancel
               </button>
               <button
                 onClick={handleSendMessage}
                 disabled={!draft.trim() || sending || sent}
-                style={{
-                  background: sent ? '#22C55E' : '#E85D20',
-                  border: 'none', borderRadius: 8,
-                  padding: '8px 20px', fontSize: 13,
-                  fontWeight: 600, color: '#fff',
-                  cursor: sending || sent ? 'default' : 'pointer', minHeight: 'auto',
-                }}
+                style={{ background: sent ? '#22C55E' : '#E85D20', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: sending || sent ? 'default' : 'pointer', minHeight: 'auto' }}
               >
                 {sent ? 'Sent ✓' : sending ? 'Sending...' : 'Send Message →'}
               </button>
