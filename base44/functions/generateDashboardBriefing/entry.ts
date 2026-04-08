@@ -56,7 +56,8 @@ Deno.serve(async (req) => {
 
   const stateContext = `
 STUDENT PROFILE:
-- Name: ${firstName}
+- Name: ${firstName || 'Student'}
+- School: ${user.school_name || user.school || user.university || user.school_code || 'not set'}
 - Target Roles: ${targetRoles?.join(', ') || 'not set'}
 - Target Companies: ${targetCompanies?.join(', ') || 'not set'}
 - Target Industries: ${targetIndustries?.join(', ') || 'not set'}
@@ -100,6 +101,7 @@ Write a briefing that is:
 
 BRIEFING RULES BY STATE:
 - New user (lastLoginDays is 0 or null) → NEVER say "good to see you back" or imply they've visited before. Use a fresh welcome like "Hey [Name]!"
+- NEVER reference a specific school (e.g. UF, University of Florida, Gators) unless it explicitly appears in the student profile above. Use "your university" or "alumni from your school" as a generic fallback.
 - No goals set → push hard to set goals, it unlocks everything
 - Goals set, no resume → praise goals, push resume upload
 - Resume uploaded but not analyzed yet → "Your resume is uploaded — FastIQ is scoring it now. Check back in a minute to see where you stand."
