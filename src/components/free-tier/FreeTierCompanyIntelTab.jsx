@@ -18,27 +18,6 @@ const FILTERS = [
 
 const EXAMPLE_CHIPS = ['IPSY', 'Biotech in New York', 'Chicago finance firms', 'Miami e-commerce', 'Sustainability startups in Austin'];
 
-const FREE_TIER_DAILY_LIMIT = 3;
-
-function getDailyCount() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('cff_company_research') || '{}');
-    const today = new Date().toDateString();
-    if (stored.date !== today) return 0;
-    return stored.count || 0;
-  } catch { return 0; }
-}
-
-function incrementDailyCount() {
-  try {
-    const today = new Date().toDateString();
-    const stored = JSON.parse(localStorage.getItem('cff_company_research') || '{}');
-    const count = stored.date === today ? (stored.count || 0) + 1 : 1;
-    localStorage.setItem('cff_company_research', JSON.stringify({ date: today, count }));
-    return count;
-  } catch { return 1; }
-}
-
 function isSpecificCompany(query) {
   return query.split(' ').length <= 3 && !query.includes(' in ') && !query.includes(' at ') && !query.includes(' hiring ');
 }
@@ -128,10 +107,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [researchError, setResearchError] = useState(null);
   const [discoverResults, setDiscoverResults] = useState([]);
   const [addedToList, setAddedToList] = useState([]);
-  const [dailyCount, setDailyCount] = useState(() => getDailyCount());
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-  const researchesLeft = FREE_TIER_DAILY_LIMIT - dailyCount;
 
   useEffect(() => {
     if (!user?.id) return;
@@ -168,7 +145,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const handleResearch = async (queryOverride) => {
     const query = (queryOverride || searchInput).trim();
     if (!query) return;
-    if (!isFastIQ && dailyCount >= FREE_TIER_DAILY_LIMIT) { onOpenUpgrade?.(); return; }
 
     setResearchError(null);
     setDiscoverResults([]);
@@ -193,8 +169,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           cff_parent_count: 0, cff_parents: [], alumni_count: null, is_combo: false,
           signals: { open_roles: { count: intel.open_role_types?.length || 0, matched_roles: intel.open_role_types || [] } },
         };
-        const newCount = incrementDailyCount();
-        setDailyCount(newCount);
         setHasStarted(true);
         setCompanies(prev => [newCompany, ...prev.filter(c => c.name.toLowerCase() !== newCompany.name.toLowerCase())]);
         setFilterSearch(intel.company_name);
@@ -206,8 +180,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           const fallbackData = fallbackRes?.data || fallbackRes;
           if (fallbackData?.success && fallbackData?.companies?.length > 0) {
             setDiscoverResults(fallbackData.companies);
-            incrementDailyCount();
-            setDailyCount(getDailyCount());
           } else {
             setResearchError(`We couldn't find hiring data for "${query}". Try a different spelling or a broader search like "${query} company jobs".`);
           }
@@ -225,8 +197,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         const res = await discoverCompanies({ query });
         const data = res?.data || res;
         if (!data?.success || !data?.companies?.length) throw new Error('no_results');
-        const newCount = incrementDailyCount();
-        setDailyCount(newCount);
         setDiscoverResults(data.companies);
       } catch (e) {
         setResearchError(`No companies found for "${query}". Try rephrasing — e.g. add a city, role type, or industry.`);
@@ -368,15 +338,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
           ))}
         </div>
 
-        {/* Free tier counter */}
-        {!isFastIQ && (
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: researchesLeft <= 1 ? '#E85D20' : '#AAAAAA', margin: '10px 0 0', fontWeight: researchesLeft <= 1 ? 600 : 400 }}>
-            {researchesLeft <= 0
-              ? <>0 free researches left today — <button onClick={onOpenUpgrade} style={{ background: 'none', border: 'none', color: '#E85D20', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 12, padding: 0, minHeight: 'auto', display: 'inline' }}>Upgrade for unlimited →</button></>
-              : `${researchesLeft} of ${FREE_TIER_DAILY_LIMIT} free researches left today`
-            }
-          </p>
-        )}
+
       </div>
 
       {/* Loading state */}
