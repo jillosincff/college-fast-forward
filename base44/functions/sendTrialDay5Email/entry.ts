@@ -5,12 +5,13 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { userEmail, firstName, school, persona, trialEndDate } = await req.json();
+  const { userEmail, firstName, school, persona, trialEndDate, daysLeft = 2, upgradeUrl = 'https://collegefastforward.com/#FastIQDashboard' } = await req.json();
   const isParent = persona === 'parent';
 
+  const daysLabel = daysLeft === 1 ? '1 day' : `${daysLeft} days`;
   const subject = isParent
-    ? `Your student's FastIQ trial ends in 2 days — don't lose the momentum`
-    : `Your FastIQ trial ends in 2 days — here's what you've unlocked`;
+    ? `Your student's FastIQ trial ends in ${daysLabel} — don't lose the momentum`
+    : `Your FastIQ trial ends in ${daysLabel} — here's what you've unlocked`;
 
   const html = `
 <!DOCTYPE html>
@@ -29,7 +30,7 @@ Deno.serve(async (req) => {
 
     <div style="background:#0A0A0A;padding:32px 36px;">
       <p style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#E85D20;margin:0 0 12px;">
-        ⚡ FASTIQ TRIAL — 2 DAYS LEFT
+        ⚡ FASTIQ TRIAL — ${daysLabel.toUpperCase()} LEFT
       </p>
       <h1 style="font-size:24px;font-weight:700;color:#fff;margin:0 0 10px;line-height:1.3;">
         ${isParent ? `${firstName}, your student's trial ends soon.` : `${firstName}, you're making progress — don't lose the momentum.`}
@@ -66,7 +67,7 @@ Deno.serve(async (req) => {
       </p>
 
       <div style="text-align:center;margin:24px 0;">
-        <a href="https://collegefastforward.com/#FastIQDashboard"
+        <a href="${upgradeUrl}"
            style="display:inline-block;background:#E85D20;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">
           ${isParent ? 'Continue at Founding Rate for My Student →' : 'Continue at Founding Rate →'}
         </a>

@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
   );
 
   const results = { day5: 0, day7: 0, day8: 0, errors: [] };
+  const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 
   for (const u of trialUsers) {
     const daysSinceTrial = Math.floor(
@@ -26,9 +27,22 @@ Deno.serve(async (req) => {
     );
 
     const firstName = u.full_name?.split(' ')[0] || 'there';
-    const trialEndDate = new Date(
-      new Date(u.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000
-    ).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+    // Use trial_end_date if set, otherwise derive from trial_start_date
+    const trialEndDateTime = u.trial_end_date
+      ? new Date(u.trial_end_date)
+      : new Date(new Date(u.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const daysLeft = Math.max(0, Math.ceil((trialEndDateTime - new Date()) / (1000 * 60 * 60 * 24)));
+
+    const trialEndDate = trialEndDateTime.toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric',
+    });
+
+    const upgradeUrl = `${appBaseUrl}/#FastIQDashboard`;
+
+    // Day 5 trigger: trial_end_date is exactly 2 days away
+    const isDay5 = daysLeft === 2;
 
     const payload = {
       userEmail: u.email,
@@ -36,10 +50,12 @@ Deno.serve(async (req) => {
       school: u.school_name || 'your school',
       persona: u.persona,
       trialEndDate,
+      daysLeft,
+      upgradeUrl,
     };
 
     try {
-      if (daysSinceTrial === 5) {
+      if (isDay5) {
         await base44.asServiceRole.functions.invoke('sendTrialDay5Email', payload);
         results.day5++;
       } else if (daysSinceTrial === 7) {
