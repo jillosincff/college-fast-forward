@@ -32,6 +32,9 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Server-side trial enforcement — return simplified briefing for expired trials
+  const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
+
   const {
     firstName,
     completionState,
@@ -48,6 +51,18 @@ Deno.serve(async (req) => {
     outreachStats,
     isFastIQ,
   } = await req.json();
+
+  if (trialExpired) {
+    return Response.json({
+      success: true,
+      briefing: {
+        greeting: `Welcome back, ${firstName || 'there'}.`,
+        body: 'Upgrade to FastIQ to get your personalized daily briefing, alumni recommendations, and follow-up reminders.',
+        cta_label: 'Upgrade to FastIQ →',
+        cta_page: 'FastIQDashboard',
+      }
+    });
+  }
 
   // Override with actual Resume entity data
   const actualResumeScore = resumeScoreFromEntity || receivedResumeScore || null;

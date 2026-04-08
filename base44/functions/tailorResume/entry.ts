@@ -12,6 +12,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Resume text and job description are required' }, { status: 400 });
     }
 
+    // Server-side trial enforcement — return basic keyword score only if trial expired
+    const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
+    if (trialExpired) {
+      const basicResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Score this resume against the job description on a scale of 0-100 and list the top 5 missing keywords. Resume: ${resumeText.substring(0, 3000)} Job Description: ${jobDescription.substring(0, 2000)}`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            original_score: { type: 'number' },
+            keywords_missing: { type: 'array', items: { type: 'string' } },
+          }
+        }
+      });
+      return Response.json({
+        success: true,
+        trial_expired: true,
+        originalScore: basicResult.original_score || 0,
+        tailoredScore: null,
+        keywords_missing: basicResult.keywords_missing || [],
+        message: 'Upgrade to FastIQ for full resume tailoring.',
+        upgrade_required: true,
+      });
+    }
+
     const prompt = `You are FASTIQ, an AI career advisor helping a UF student tailor their resume.
 
 STUDENT RESUME:

@@ -156,7 +156,12 @@ Deno.serve(async (req) => {
           }
           universityName = sessionSchool;
           // Derive FastIQ status from user subscription — never trust client param
-          isFastIQ = !!(sessionUser.fastiq_setup_complete || sessionUser.subscription_status === 'active' || sessionUser.membership_tier === 'fastiq');
+          isFastIQ = !!(sessionUser.fastiq_setup_complete || sessionUser.subscription_status === 'active' || sessionUser.membership_tier === 'fastiq' || sessionUser.trial_status === 'active' || sessionUser.fastiq_trial_active === true);
+          // Enforce free tier limit for expired trials
+          const trialExpired = sessionUser.trial_status === 'expired' && sessionUser.subscription_status !== 'active';
+          if (trialExpired) {
+            params.maxResults = 1;
+          }
         }
       } catch (_) {
         // Service-role internal call — use passed universityName

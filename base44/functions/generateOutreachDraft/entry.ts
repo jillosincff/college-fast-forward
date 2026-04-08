@@ -11,6 +11,16 @@ Deno.serve(async (req) => {
 
     const { studentName, major, targetRole, graduationYear, school, alumniName, alumniTitle, alumniCompany } = await req.json();
 
+    // Server-side trial enforcement — never trust client
+    const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
+    if (trialExpired) {
+      return Response.json({
+        success: false,
+        error: 'Your FastIQ trial has ended. Upgrade to continue drafting messages.',
+        upgrade_required: true,
+      });
+    }
+
     const schoolLabel = user.school_name || user.school || school || '';
     if (!schoolLabel) return Response.json({ error: 'School not set on profile' }, { status: 400 });
 

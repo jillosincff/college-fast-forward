@@ -8,6 +8,16 @@ Deno.serve(async (req) => {
 
     const { action, sessionId, interviewType, difficulty, companyName, jobTitle, questionCount, questionIndex, studentResponse } = await req.json();
 
+    // Server-side trial enforcement
+    const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
+    if (trialExpired) {
+      return Response.json({
+        success: false,
+        error: 'Upgrade to FastIQ to access mock interviews.',
+        upgrade_required: true,
+      });
+    }
+
     // ACTION: generate — create questions for a new interview
     if (action === 'generate') {
       // Check for real questions from DB
