@@ -241,9 +241,7 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', lineHeight: 1.2 }}>
             Find alumni in any role, at any company.
           </h1>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 6px' }}>
-            Search in plain English · powered by Exa
-          </p>
+
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600, margin: 0 }}>
             🎓 Searching alumni from: {schoolName}
           </p>
