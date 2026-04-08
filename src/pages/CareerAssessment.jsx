@@ -62,11 +62,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const isFastIQ = !!(
-    user?.fastiq_setup_complete ||
-    user?.subscription_status === 'active' ||
-    user?.membership_tier === 'fastiq'
-  );
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const progress = Math.round((currentQ / QUESTIONS.length) * 100);

@@ -67,11 +67,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState('');
 
-  const isFastIQ = !!(
-    user?.fastiq_setup_complete ||
-    user?.subscription_status === 'active' ||
-    user?.membership_tier === 'fastiq'
-  );
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
 
   const handleReview = async () => {
     if (!url.trim()) return;

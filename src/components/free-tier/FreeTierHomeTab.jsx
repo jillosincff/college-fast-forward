@@ -80,7 +80,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
-  const fastiq = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const fastiq = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
 
   // Parent-gifted trial banner
   const trialEndDate = user?.trial_end_date ? new Date(user.trial_end_date) : null;

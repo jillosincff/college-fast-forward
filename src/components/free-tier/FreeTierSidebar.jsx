@@ -47,11 +47,7 @@ export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUp
     ['mock_interview', 'linkedin_review'].includes(currentTab)
   );
 
-  const isFastIQ = !!(
-    user?.fastiq_setup_complete ||
-    user?.subscription_status === 'active' ||
-    user?.membership_tier === 'fastiq'
-  );
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
 
   const firstName = user?.full_name?.split(' ')[0] || '';
   const schoolName = user?.school_name || 'University of Florida';

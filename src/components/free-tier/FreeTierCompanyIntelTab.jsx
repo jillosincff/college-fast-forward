@@ -108,7 +108,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   const [discoverResults, setDiscoverResults] = useState([]);
   const [addedToList, setAddedToList] = useState([]);
 
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
 
   useEffect(() => {
     if (!user?.id) return;

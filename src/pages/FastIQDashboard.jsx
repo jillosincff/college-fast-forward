@@ -9,11 +9,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
   const { user } = useAuth();
   const [showBanner, setShowBanner] = useState(true);
 
-  const isFastIQ = !!(
-    user?.fastiq_setup_complete ||
-    user?.subscription_status === 'active' ||
-    user?.membership_tier === 'fastiq'
-  );
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
 
   const isFounding = !!(user?.founding_offer_redeemed || user?.founding_member_plan);
   const firstName = user?.full_name?.split(' ')[0] || 'there';
