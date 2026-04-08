@@ -16,7 +16,7 @@ const FILTERS = [
   { key: 'saved',  label: '🔖 Saved' },
 ];
 
-const EXAMPLE_CHIPS = ['IPSY', 'Biotech in New York', 'Chicago finance firms', 'Miami e-commerce', 'Sustainability startups in Austin'];
+const EXAMPLE_CHIPS = ['Biotech in New York', 'Chicago finance firms', 'Miami e-commerce', 'Sustainability startups in Austin'];
 
 function isSpecificCompany(query) {
   return query.split(' ').length <= 3 && !query.includes(' in ') && !query.includes(' at ') && !query.includes(' hiring ');
