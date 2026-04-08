@@ -277,11 +277,36 @@
     },
     "subscription_status": {
       "type": "string",
-      "description": "Stripe subscription status (e.g. active, trialing, canceled)"
+      "description": "Stripe subscription status (e.g. active, trialing, canceled, trial)"
     },
     "membership_tier": {
       "type": "string",
-      "description": "Membership tier (e.g. fastiq, free)"
+      "description": "Membership tier (e.g. fastiq, fastiq_trial, free)"
+    },
+    "trial_start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 7-day free trial started"
+    },
+    "trial_end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 7-day free trial ends"
+    },
+    "trial_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "active",
+        "expired"
+      ],
+      "default": "not_started",
+      "description": "Current status of the free trial"
+    },
+    "fastiq_trial_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user is currently on an active 7-day FastIQ trial"
     },
     "career_goals": {
       "type": "object",

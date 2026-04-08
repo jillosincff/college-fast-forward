@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { maybeActivateTrial } from '@/utils/trialActivation';
 import { navigate } from '@/components/utils/navigation';
 
 const CONTEXTS = [
@@ -26,7 +27,7 @@ const STATUS_LABELS = {
 };
 
 export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
-  const { user: authUser } = useAuth();
+  const { user: authUser, refreshUser } = useAuth();
   const user = userProp || authUser;
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,11 +51,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const [followUpDraft, setFollowUpDraft] = useState(null);
   const [followUpMessage, setFollowUpMessage] = useState('');
 
-  const isFastIQ = !!(
-    user?.fastiq_setup_complete ||
-    user?.subscription_status === 'active' ||
-    user?.membership_tier === 'fastiq'
-  );
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
@@ -240,28 +237,21 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     color: '#888', display: 'block', marginBottom: 6,
   };
 
-  // FastIQ gate
+  // FastIQ gate — attempt trial activation first
   if (!isFastIQ) {
+    const handleTryTrial = async () => {
+      const activated = await maybeActivateTrial(user, refreshUser);
+      if (!activated) onOpenUpgrade?.();
+    };
     return (
       <div style={{ maxWidth: 600, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
-        <div style={{
-          width: 72, height: 72, borderRadius: '50%',
-          background: '#FFF5F0', display: 'flex',
-          alignItems: 'center', justifyContent: 'center',
-          fontSize: 32, margin: '0 auto 24px',
-        }}>✉️</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>
-          Outreach Drafts
-        </h1>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 24px' }}>✉️</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>Outreach Drafts</h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
           Draft AI-written messages for any outreach context, track who you've contacted, and get follow-up nudges 5 days after sending.
         </p>
-        <button onClick={() => onOpenUpgrade?.()} style={{
-          background: '#E85D20', border: 'none', borderRadius: 10,
-          padding: '14px 32px', fontSize: 15, fontWeight: 600,
-          color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-        }}>
-          Unlock FastIQ →
+        <button onClick={handleTryTrial} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+          Start Free 7-Day Trial →
         </button>
       </div>
     );

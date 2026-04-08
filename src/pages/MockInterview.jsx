@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { maybeActivateTrial } from '@/utils/trialActivation';
 import { navigate } from '@/components/utils/navigation';
 import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
 
@@ -50,7 +51,7 @@ Interview rules:
 8. Tailor questions to their target role and industry when possible`;
 
 export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const onOpenUpgrade = onOpenUpgradeProp || (() => setShowUpgradeModal(true));
 
@@ -62,11 +63,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [isComplete, setIsComplete] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const isFastIQ = !!(
-    user?.fastiq_setup_complete ||
-    user?.subscription_status === 'active' ||
-    user?.membership_tier === 'fastiq'
-  );
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
@@ -84,6 +81,11 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   };
 
   const startInterview = async () => {
+    // Try to activate trial if not yet a FastIQ member
+    if (!isFastIQ) {
+      const activated = await maybeActivateTrial(user, refreshUser);
+      if (!activated) { onOpenUpgrade(); return; }
+    }
     setStarted(true);
     setLoading(true);
     try {

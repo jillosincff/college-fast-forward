@@ -53,7 +53,7 @@ export default function FreeTierDashboard() {
     localStorage.setItem('cff_last_login', new Date().toISOString());
   }, []);
 
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
   const showFoundingBanner = !isFastIQ && !bannerDismissed && new Date() < new Date('2026-04-15T23:59:59');
   const handleDismissBanner = () => { localStorage.setItem('founding_banner_dismissed', 'true'); setBannerDismissed(true); };
   const firstName = user?.full_name?.split(' ')[0] || 'there';
@@ -321,11 +321,11 @@ export default function FreeTierDashboard() {
         )}
         {activeTab === 'home' && <FreeTierHomeTab key={savedGoals || 'home'} user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} briefing={briefing} briefingLoading={briefingLoading} />}
         {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
-        {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
+        {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} refreshUser={refreshUser} />}
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={handleTabChange} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-        {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
+        {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} refreshUser={refreshUser} />}
         {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'messages' && <FreeTierMessagesTab user={user} />}
         {activeTab === 'notebook' && <NotebookPage user={user} />}

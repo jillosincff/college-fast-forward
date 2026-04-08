@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Send, RefreshCw, Loader2 } from 'lucide-react';
+import { maybeActivateTrial } from '@/utils/trialActivation';
 import SaveToNotebookButton from './SaveToNotebookButton';
 
 const SYSTEM_PROMPT = `You are FastIQ, the AI career intelligence engine inside College Fast Forward (CFF) — a platform that connects college students with parent and alumni professional networks.
@@ -76,7 +77,7 @@ function SuggestedPrompts({ prompts, onSelect }) {
   );
 }
 
-export default function FreeTierCareerPathTab({ user, onTabChange }) {
+export default function FreeTierCareerPathTab({ user, onTabChange, refreshUser }) {
   const [messages, setMessages] = useState([]);
   const [suggestedPrompts, setSuggestedPrompts] = useState([]);
   const [input, setInput] = useState('');
@@ -131,6 +132,8 @@ export default function FreeTierCareerPathTab({ user, onTabChange }) {
   const sendMessage = async (text) => {
     const trimmed = (text || input).trim();
     if (!trimmed || loading) return;
+    // Attempt trial activation on first message
+    maybeActivateTrial(user, refreshUser).catch(() => {});
     setInput('');
     setError(false);
     setSuggestedPrompts([]);

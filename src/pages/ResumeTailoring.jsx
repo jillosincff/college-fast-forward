@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
+import { maybeActivateTrial } from '@/utils/trialActivation';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
@@ -14,6 +15,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const onOpenUpgrade = onOpenUpgradeProp || (() => setShowUpgradeModal(true));
   const { user, refreshUser } = useAuth();
+  const [trialAttempted, setTrialAttempted] = useState(false);
   const [upgradeSuccess, setUpgradeSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -35,7 +37,15 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState(false);
 
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
+
+  // Auto-activate trial when user first lands on this page
+  useEffect(() => {
+    if (!trialAttempted && user && !isFastIQ) {
+      setTrialAttempted(true);
+      maybeActivateTrial(user, refreshUser).catch(() => {});
+    }
+  }, [user?.id]);
   const hasResumes = resumes.length > 0;
   const canAddMore = isFastIQ || resumes.length === 0;
 

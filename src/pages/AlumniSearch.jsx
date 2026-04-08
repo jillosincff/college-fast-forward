@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
+import { maybeActivateTrial } from '@/utils/trialActivation';
 
 const EXAMPLE_SEARCHES = () => [
   "VP of Marketing at a Fortune 500 company",
@@ -11,30 +12,8 @@ const EXAMPLE_SEARCHES = () => [
   "consultant at McKinsey Bain or BCG",
 ];
 
-export default function AlumniSearch({ user, onOpenUpgrade, onTabChange }) {
-  const [query, setQuery] = useState('');
-  const [searchUsedThisSession, setSearchUsedThisSession] = useState(() => {
-    // Only trust localStorage if the user's DB record also confirms it
-    // This prevents stale localStorage from a different account blocking a fresh user
-    return localStorage.getItem('alumni_search_used') === 'true';
-  });
-  const [results, setResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [sentTo, setSentTo] = useState([]);
-  const [connectLoading, setConnectLoading] = useState(null);
-  const [outreachModal, setOutreachModal] = useState(null);
-  const [editedDraft, setEditedDraft] = useState('');
-  const [draftLoading, setDraftLoading] = useState(false);
-  const [draftHint, setDraftHint] = useState(null);
-  const DRAFT_TIMEOUT_MS = 15000;
-  const [copyToast, setCopyToast] = useState(false);
-  const [cffModal, setCffModal] = useState(null);
-  const [cffDraft, setCffDraft] = useState('');
-  const [cffSending, setCffSending] = useState(false);
-  const [cffSent, setCffSent] = useState(false);
-
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+export default function AlumniSearch({ user, onOpenUpgrade, onTabChange, refreshUser }) {
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
   const schoolName = user?.school_name || user?.school || user?.university || null;
 
   // Clear stale localStorage if the user's DB record says they haven't used their free search
@@ -57,8 +36,12 @@ export default function AlumniSearch({ user, onOpenUpgrade, onTabChange }) {
     }
 
     if (!isFastIQ && (user?.alumni_search_used || searchUsedThisSession)) {
-      onOpenUpgrade?.();
-      return;
+      // Try to activate a free trial before blocking
+      const activated = await maybeActivateTrial(user, refreshUser);
+      if (!activated) {
+        onOpenUpgrade?.();
+        return;
+      }
     }
 
     setQuery(q);
