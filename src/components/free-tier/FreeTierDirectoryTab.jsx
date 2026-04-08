@@ -55,6 +55,15 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   const [activeFilter, setActiveFilter] = useState('all');
   const [sentTo, setSentTo] = useState([]);
   const [messaging, setMessaging] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleShareInvite = () => {
+    const link = `${window.location.origin}/#GatorAuth`;
+    navigator.clipboard.writeText(link).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    });
+  };
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -309,38 +318,52 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
         ))}
       </div>
 
+      {/* Growth banners */}
+      {!loading && !schoolError && !searchQuery && members.length < 25 && (
+        <div style={{ marginBottom: 24 }}>
+          {members.length < 10 ? (
+            <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 14, padding: '24px 28px', textAlign: 'center' }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>🌱</div>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
+                We're building the {schoolName || 'your school'} parent &amp; alumni network!
+              </p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 20px', lineHeight: 1.6, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+                We're reaching out to {schoolName || 'your school'} families and alumni now. Check back soon — or help us grow faster by sharing CFF with a parent or alumni you know.
+              </p>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button onClick={handleShareInvite} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
+                  {linkCopied ? '✓ Link Copied!' : '📨 Share with a Parent or Alumni →'}
+                </button>
+                <button onClick={() => onTabChange?.('alumni_search')} style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 10, padding: '11px 20px', fontSize: 13, fontWeight: 600, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
+                  🔍 Search Alumni on LinkedIn Instead →
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#555', margin: 0 }}>
+                🌱 <strong>{schoolName || 'Your school'}'s</strong> parent &amp; alumni network is growing — {members.length} members and counting. Know a parent or alumni who should be here?
+              </p>
+              <button onClick={handleShareInvite} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>
+                {linkCopied ? '✓ Copied!' : 'Invite them →'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Results */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%',
-            border: '3px solid #F0F0F0',
-            borderTop: '3px solid #E85D20',
-            margin: '0 auto 16px',
-            animation: 'spin 1s linear infinite',
-          }} />
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>
-            Loading connections...
-          </p>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '3px solid #F0F0F0', borderTop: '3px solid #E85D20', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>Loading connections...</p>
         </div>
-      ) : displayMembers.length === 0 ? (
+      ) : displayMembers.length === 0 && members.length >= 10 ? (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>
-            No results found — try a different search.
-          </p>
-          <button
-            onClick={() => setSearchQuery('')}
-            style={{
-              background: 'none', border: 'none',
-              color: '#E85D20', fontSize: 13,
-              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 600, minHeight: 'auto',
-            }}
-          >
-            Clear Search →
-          </button>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>No results found — try a different search.</p>
+          <button onClick={() => setSearchQuery('')} style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 13, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 600, minHeight: 'auto' }}>Clear Search →</button>
         </div>
-      ) : (
+      ) : members.length >= 10 || searchQuery ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(340px, 100%), 1fr))', gap: 16 }}>
           {displayMembers.map(member => {
             const initials = (member.full_name || 'CFF')
@@ -350,105 +373,28 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
               .filter(Boolean).join(' · ');
 
             return (
-              <div key={member.id} style={{
-                background: '#fff',
-                border: '1px solid #E5E5E5',
-                borderRadius: 14, padding: '20px',
-                display: 'flex', flexDirection: 'column', gap: 12,
-              }}>
+              <div key={member.id} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 14, padding: '20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: '50%',
-                    background: '#E85D20', color: '#fff',
-                    display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', fontSize: 15,
-                    fontWeight: 700, flexShrink: 0,
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}>
                     {initials}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 14, fontWeight: 600,
-                      color: '#1A1A1A', margin: '0 0 2px'
-                    }}>
-                      {member.full_name || 'CFF Member'}
-                    </p>
-                    {subtitle && (
-                      <p style={{
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 12, color: '#666', margin: 0,
-                        overflow: 'hidden', textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {subtitle}
-                      </p>
-                    )}
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{member.full_name || 'CFF Member'}</p>
+                    {subtitle && <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitle}</p>}
                   </div>
                 </div>
-
-                {member.industry && (
-                  <span style={{
-                    background: '#F5F5F5',
-                    borderRadius: 20, padding: '3px 10px',
-                    fontSize: 11, color: '#666',
-                    fontFamily: "'DM Sans', sans-serif",
-                    alignSelf: 'flex-start',
-                  }}>
-                    {member.industry}
-                  </span>
-                )}
-
+                {member.industry && <span style={{ background: '#F5F5F5', borderRadius: 20, padding: '3px 10px', fontSize: 11, color: '#666', fontFamily: "'DM Sans', sans-serif", alignSelf: 'flex-start' }}>{member.industry}</span>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{
-                    width: 8, height: 8, borderRadius: '50%',
-                    background: member.availability === 'actively_helping' ? '#22C55E' :
-                                member.availability === 'occasionally_available' ? '#F59E0B' : '#CCCCCC',
-                  }} />
-                  <p style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 12, color: '#888', margin: 0
-                  }}>
-                    {member.availability === 'actively_helping' ? 'Actively helping' :
-                     member.availability === 'occasionally_available' ? 'Occasionally available' :
-                     'Availability unknown'}
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: member.availability === 'actively_helping' ? '#22C55E' : member.availability === 'occasionally_available' ? '#F59E0B' : '#CCCCCC' }} />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>
+                    {member.availability === 'actively_helping' ? 'Actively helping' : member.availability === 'occasionally_available' ? 'Occasionally available' : 'Availability unknown'}
                   </p>
                 </div>
-
-                {member.linkedin_url && (
-                  <a
-                    href={member.linkedin_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 12, color: '#0077B5',
-                      textDecoration: 'none', fontWeight: 600,
-                    }}
-                  >
-                    🔗 View LinkedIn →
-                  </a>
-                )}
-
+                {member.linkedin_url && <a href={member.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#0077B5', textDecoration: 'none', fontWeight: 600 }}>🔗 View LinkedIn →</a>}
                 <button
-                  onClick={() => {
-                    if (alreadySent) return;
-                    setMessaging(member);
-                    setDraft('');
-                    setSent(false);
-                  }}
+                  onClick={() => { if (alreadySent) return; setMessaging(member); setDraft(''); setSent(false); }}
                   disabled={alreadySent}
-                  style={{
-                    background: alreadySent ? '#F5F5F5' : '#E85D20',
-                    border: 'none', borderRadius: 8,
-                    padding: '11px', fontSize: 13,
-                    fontWeight: 600,
-                    color: alreadySent ? '#AAAAAA' : '#fff',
-                    cursor: alreadySent ? 'default' : 'pointer',
-                    fontFamily: "'DM Sans', sans-serif",
-                    width: '100%', minHeight: 'auto',
-                  }}
+                  style={{ background: alreadySent ? '#F5F5F5' : '#E85D20', border: 'none', borderRadius: 8, padding: '11px', fontSize: 13, fontWeight: 600, color: alreadySent ? '#AAAAAA' : '#fff', cursor: alreadySent ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
                 >
                   {alreadySent ? 'Message Sent ✓' : 'Send a Message →'}
                 </button>
@@ -456,7 +402,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
             );
           })}
         </div>
-      )}
+      ) : null}
 
       {/* Message modal */}
       {messaging && (
