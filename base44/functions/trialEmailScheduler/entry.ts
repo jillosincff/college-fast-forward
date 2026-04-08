@@ -56,14 +56,29 @@ Deno.serve(async (req) => {
 
     try {
       if (isDay5) {
-        await base44.asServiceRole.functions.invoke('sendTrialDay5Email', payload);
-        results.day5++;
+        const sentToday = u.last_day5_email_sent_at &&
+          new Date(u.last_day5_email_sent_at).toDateString() === new Date().toDateString();
+        if (!sentToday) {
+          await base44.asServiceRole.functions.invoke('sendTrialDay5Email', payload);
+          await base44.asServiceRole.entities.User.update(u.id, { last_day5_email_sent_at: new Date().toISOString() });
+          results.day5++;
+        }
       } else if (daysSinceTrial === 7) {
-        await base44.asServiceRole.functions.invoke('sendTrialDay7Email', payload);
-        results.day7++;
+        const sentToday = u.last_day7_email_sent_at &&
+          new Date(u.last_day7_email_sent_at).toDateString() === new Date().toDateString();
+        if (!sentToday) {
+          await base44.asServiceRole.functions.invoke('sendTrialDay7Email', payload);
+          await base44.asServiceRole.entities.User.update(u.id, { last_day7_email_sent_at: new Date().toISOString() });
+          results.day7++;
+        }
       } else if (daysSinceTrial === 8) {
-        await base44.asServiceRole.functions.invoke('sendTrialDay8Email', payload);
-        results.day8++;
+        const sentToday = u.last_day8_email_sent_at &&
+          new Date(u.last_day8_email_sent_at).toDateString() === new Date().toDateString();
+        if (!sentToday) {
+          await base44.asServiceRole.functions.invoke('sendTrialDay8Email', payload);
+          await base44.asServiceRole.entities.User.update(u.id, { last_day8_email_sent_at: new Date().toISOString() });
+          results.day8++;
+        }
       }
       await new Promise(r => setTimeout(r, 100));
     } catch (e) {

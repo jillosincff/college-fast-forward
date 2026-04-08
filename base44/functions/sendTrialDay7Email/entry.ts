@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
 
-  const { userEmail, firstName, school, persona, trialEndDate } = await req.json();
+  const { userEmail, firstName, school, persona, trialEndDate, upgradeUrl } = await req.json();
   const isParent = persona === 'parent';
 
   const subject = isParent
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       </div>
 
       <div style="text-align:center;margin:24px 0 8px;">
-        <a href="https://collegefastforward.com/#FastIQDashboard"
+        <a href="${upgradeUrl || 'https://collegefastforward.com/#FastIQDashboard'}"
            style="display:inline-block;background:#E85D20;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">
           ${isParent ? 'Yes, Lock in $14.50/mo for My Student →' : 'Yes, Lock in $14.50/mo →'}
         </a>

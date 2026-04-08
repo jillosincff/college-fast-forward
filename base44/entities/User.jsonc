@@ -308,6 +308,21 @@
       "default": false,
       "description": "Whether the user is currently on an active 7-day FastIQ trial"
     },
+    "last_day5_email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trial Day 5 reminder email was last sent"
+    },
+    "last_day7_email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trial Day 7 (trial ending today) email was last sent"
+    },
+    "last_day8_email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trial Day 8 (trial ended) email was last sent"
+    },
     "career_goals": {
       "type": "object",
       "description": "Structured career goals saved from FastIQ career goals chat",
