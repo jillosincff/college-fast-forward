@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Loader2, Plus, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Loader2 } from 'lucide-react';
 import AddTargetCompanyModal from './AddTargetCompanyModal';
 import { base44 } from '@/api/base44Client';
 import { getCompanyIntel } from '@/functions/getCompanyIntel';
@@ -16,12 +16,7 @@ const FILTERS = [
   { key: 'saved',  label: '🔖 Saved' },
 ];
 
-const DISCOVER_PLACEHOLDERS = [
-  'e.g. "e-commerce companies in Miami hiring operations roles"',
-  'e.g. "biotech companies in New York for pre-med students"',
-  'e.g. "Chicago finance firms that hire liberal arts majors"',
-  'e.g. "sustainability startups in Austin"',
-];
+const EXAMPLE_CHIPS = ['IPSY', 'Biotech in New York', 'Chicago finance firms', 'Miami e-commerce', 'Sustainability startups in Austin'];
 
 const FREE_TIER_DAILY_LIMIT = 3;
 
@@ -42,6 +37,10 @@ function incrementDailyCount() {
     localStorage.setItem('cff_company_research', JSON.stringify({ date: today, count }));
     return count;
   } catch { return 1; }
+}
+
+function isSpecificCompany(query) {
+  return query.split(' ').length <= 3 && !query.includes(' in ') && !query.includes(' at ') && !query.includes(' hiring ');
 }
 
 function FilterBar({ active, onChange }) {
@@ -98,27 +97,10 @@ function DiscoveredCompanyCard({ company, onAddToList, onResearchMore, added }) 
         </div>
       )}
       <div style={{ display: 'flex', gap: 10 }}>
-        <button
-          onClick={() => onAddToList(company.name)}
-          disabled={added}
-          style={{
-            background: added ? '#DCFCE7' : '#E85D20', border: 'none', borderRadius: 8,
-            padding: '8px 16px', fontSize: 12, fontWeight: 600,
-            color: added ? '#166534' : '#fff', cursor: added ? 'default' : 'pointer',
-            fontFamily: "'DM Sans', sans-serif", minHeight: 'auto',
-          }}
-        >
+        <button onClick={() => onAddToList(company.name)} disabled={added} style={{ background: added ? '#DCFCE7' : '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 600, color: added ? '#166534' : '#fff', cursor: added ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
           {added ? '✓ Added to My List' : '+ Add to My List'}
         </button>
-        <button
-          onClick={() => onResearchMore(company.name)}
-          style={{
-            background: 'none', border: '1px solid #E0E0E0', borderRadius: 8,
-            padding: '8px 16px', fontSize: 12, fontWeight: 600,
-            color: '#555', cursor: 'pointer',
-            fontFamily: "'DM Sans', sans-serif", minHeight: 'auto',
-          }}
-        >
+        <button onClick={() => onResearchMore(company.name)} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 600, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
           Research More →
         </button>
       </div>
@@ -129,116 +111,42 @@ function DiscoveredCompanyCard({ company, onAddToList, onResearchMore, added }) 
 export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChange }) {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingQuery, setLoadingQuery] = useState('');
   const [hasStarted, setHasStarted] = useState(false);
   const [targetRoles, setTargetRoles] = useState([]);
   const [targetIndustries, setTargetIndustries] = useState([]);
   const [hasGoals, setHasGoals] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [search, setSearch] = useState('');
+  const [filterSearch, setFilterSearch] = useState('');
   const [researchCompany, setResearchCompany] = useState(null);
   const [savedCompanies, setSavedCompanies] = useState(() => user?.saved_company_intel || []);
   const [localTargetCompanies, setLocalTargetCompanies] = useState(() => user?.career_goals?.target_companies || []);
   const [showAll, setShowAll] = useState(false);
   const [skippedGoals, setSkippedGoals] = useState(false);
-  const [liveSearchLoading, setLiveSearchLoading] = useState(false);
-  const [liveSearchError, setLiveSearchError] = useState(null);
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
-
-  // Discovery state
-  const [discoverQuery, setDiscoverQuery] = useState('');
-  const [discoverLoading, setDiscoverLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [researchError, setResearchError] = useState(null);
   const [discoverResults, setDiscoverResults] = useState([]);
-  const [discoverError, setDiscoverError] = useState(null);
   const [addedToList, setAddedToList] = useState([]);
-  const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [dailyCount, setDailyCount] = useState(() => getDailyCount());
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
   const researchesLeft = FREE_TIER_DAILY_LIMIT - dailyCount;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholderIdx(i => (i + 1) % DISCOVER_PLACEHOLDERS.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleLiveResearch = async (companyName) => {
-    if (!companyName.trim()) return;
-    if (!isFastIQ && dailyCount >= FREE_TIER_DAILY_LIMIT) { onOpenUpgrade?.(); return; }
-    setLiveSearchLoading(true);
-    setLiveSearchError(null);
-    try {
-      const res = await researchSpecificCompany({ companyName: companyName.trim(), userId: user.id, schoolCode: user.school || user.university || '' });
-      const data = res?.data || res;
-      if (!data?.success || !data?.data) throw new Error('No data');
-      const intel = data.data;
-      const newCompany = {
-        name: intel.company_name, hiring_signal: intel.is_actively_hiring ? 'active' : 'selective',
-        known_for: intel.hiring_summary || '', careers_url: intel.careers_url || '',
-        culture_notes: intel.culture_notes || '', application_tips: intel.application_tips || '',
-        headquarters: '', size: 'enterprise', what_they_look_for: [],
-        entry_level_programs: null, campus_recruiting: false,
-        cff_parent_count: 0, cff_parents: [], alumni_count: null, is_combo: false,
-        signals: { open_roles: { count: intel.open_role_types?.length || 0, matched_roles: intel.open_role_types || [] } },
-      };
-      const newCount = incrementDailyCount();
-      setDailyCount(newCount);
-      setHasStarted(true);
-      setCompanies(prev => [newCompany, ...prev.filter(c => c.name.toLowerCase() !== newCompany.name.toLowerCase())]);
-      setSearch(intel.company_name);
-      setShowAll(true);
-    } catch (e) {
-      setLiveSearchError("Couldn't find intel for this company. Try a slightly different name.");
-    }
-    setLiveSearchLoading(false);
-  };
-
-  const handleDiscover = async () => {
-    if (!discoverQuery.trim()) return;
-    if (!isFastIQ && dailyCount >= FREE_TIER_DAILY_LIMIT) { onOpenUpgrade?.(); return; }
-    setDiscoverLoading(true);
-    setDiscoverError(null);
-    setDiscoverResults([]);
-    try {
-      const res = await discoverCompanies({ query: discoverQuery.trim() });
-      const data = res?.data || res;
-      if (!data?.success) throw new Error('Discovery failed');
-      const newCount = incrementDailyCount();
-      setDailyCount(newCount);
-      setDiscoverResults(data.companies || []);
-    } catch (e) {
-      setDiscoverError("Couldn't find companies for that search. Try rephrasing.");
-    }
-    setDiscoverLoading(false);
-  };
-
-  const handleAddDiscoveredToList = async (companyName) => {
-    setAddedToList(prev => [...prev, companyName]);
-    const updated = [...localTargetCompanies, companyName];
-    setLocalTargetCompanies(updated);
-    try {
-      const goals = user?.career_goals || {};
-      await base44.auth.updateMe({ career_goals: { ...goals, target_companies: updated } });
-    } catch (_) {}
-  };
-
-  const university = user?.school || user?.university || '';
-
-  useEffect(() => {
     if (!user?.id) return;
     const goals = user?.career_goals || {};
     const goalsExist = (goals.target_industries?.length > 0) || (goals.target_roles?.length > 0) || (goals.target_companies?.length > 0);
     if (!goalsExist) { setHasGoals(false); return; }
-    const industries = [...(goals.target_industries || []), ...(user?.target_industries || [])].filter(Boolean);
-    const roles = [...(goals.target_roles || []), ...(user?.target_roles || [])].filter(Boolean);
-    setTargetRoles(roles);
-    setTargetIndustries(industries);
+    setTargetRoles([...(goals.target_roles || []), ...(user?.target_roles || [])].filter(Boolean));
+    setTargetIndustries([...(goals.target_industries || []), ...(user?.target_industries || [])].filter(Boolean));
     setHasGoals(true);
   }, [user?.id]);
 
   const loadCompanies = async () => {
     setLoading(true);
+    setLoadingQuery('your goals');
+    setResearchError(null);
     try {
       const res = await getCompanyIntel({ student_id: user.id });
       const data = res?.data || res;
@@ -251,9 +159,90 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       setTargetRoles(data.targetRoles || []);
       setTargetIndustries(data.targetIndustries || []);
     } catch (e) {
-      console.error('Company intel error:', e);
+      setResearchError("Couldn't load company intel. Please try again.");
     }
     setLoading(false);
+    setLoadingQuery('');
+  };
+
+  const handleResearch = async (queryOverride) => {
+    const query = (queryOverride || searchInput).trim();
+    if (!query) return;
+    if (!isFastIQ && dailyCount >= FREE_TIER_DAILY_LIMIT) { onOpenUpgrade?.(); return; }
+
+    setResearchError(null);
+    setDiscoverResults([]);
+    setFilterSearch('');
+    setFilter('all');
+
+    if (isSpecificCompany(query)) {
+      // Single company research
+      setLoading(true);
+      setLoadingQuery(query);
+      try {
+        const res = await researchSpecificCompany({ companyName: query, userId: user.id, schoolCode: user.school || user.university || '' });
+        const data = res?.data || res;
+        if (!data?.success || !data?.data) throw new Error('no_data');
+        const intel = data.data;
+        const newCompany = {
+          name: intel.company_name, hiring_signal: intel.is_actively_hiring ? 'active' : 'selective',
+          known_for: intel.hiring_summary || '', careers_url: intel.careers_url || '',
+          culture_notes: intel.culture_notes || '', application_tips: intel.application_tips || '',
+          headquarters: '', size: 'enterprise', what_they_look_for: [],
+          entry_level_programs: null, campus_recruiting: false,
+          cff_parent_count: 0, cff_parents: [], alumni_count: null, is_combo: false,
+          signals: { open_roles: { count: intel.open_role_types?.length || 0, matched_roles: intel.open_role_types || [] } },
+        };
+        const newCount = incrementDailyCount();
+        setDailyCount(newCount);
+        setHasStarted(true);
+        setCompanies(prev => [newCompany, ...prev.filter(c => c.name.toLowerCase() !== newCompany.name.toLowerCase())]);
+        setFilterSearch(intel.company_name);
+        setShowAll(true);
+      } catch (e) {
+        // Fallback: try broad discover search
+        try {
+          const fallbackRes = await discoverCompanies({ query: `${query} company jobs hiring careers` });
+          const fallbackData = fallbackRes?.data || fallbackRes;
+          if (fallbackData?.success && fallbackData?.companies?.length > 0) {
+            setDiscoverResults(fallbackData.companies);
+            incrementDailyCount();
+            setDailyCount(getDailyCount());
+          } else {
+            setResearchError(`We couldn't find hiring data for "${query}". Try a different spelling or a broader search like "${query} company jobs".`);
+          }
+        } catch (_) {
+          setResearchError(`We couldn't find hiring data for "${query}". Try a different spelling or a broader search.`);
+        }
+      }
+      setLoading(false);
+      setLoadingQuery('');
+    } else {
+      // Natural language discovery
+      setLoading(true);
+      setLoadingQuery(query);
+      try {
+        const res = await discoverCompanies({ query });
+        const data = res?.data || res;
+        if (!data?.success || !data?.companies?.length) throw new Error('no_results');
+        const newCount = incrementDailyCount();
+        setDailyCount(newCount);
+        setDiscoverResults(data.companies);
+      } catch (e) {
+        setResearchError(`No companies found for "${query}". Try rephrasing — e.g. add a city, role type, or industry.`);
+      }
+      setLoading(false);
+      setLoadingQuery('');
+    }
+  };
+
+  const handleAddDiscoveredToList = async (companyName) => {
+    setAddedToList(prev => [...prev, companyName]);
+    const updated = [...localTargetCompanies, companyName];
+    setLocalTargetCompanies(updated);
+    try {
+      await base44.auth.updateMe({ career_goals: { ...(user?.career_goals || {}), target_companies: updated } });
+    } catch (_) {}
   };
 
   const handleSave = async (name) => {
@@ -269,7 +258,7 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   };
 
   const filteredCompanies = companies.filter(c => {
-    if (search) return c.name.toLowerCase().includes(search.toLowerCase());
+    if (filterSearch) return c.name.toLowerCase().includes(filterSearch.toLowerCase());
     if (filter === 'hiring') return c.hiring_signal === 'active';
     if (filter === 'cff') return c.cff_parent_count > 0 || c.alumni_count > 0;
     if (filter === 'best') return c.is_combo;
@@ -278,16 +267,14 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
   });
 
   const visibleCompanies = showAll ? filteredCompanies : filteredCompanies.slice(0, 6);
-
-  if (!user) return null;
-
-  const targetCompanies = localTargetCompanies;
   const role = targetRoles[0] || '';
   const industry = targetIndustries[0] || '';
 
+  if (!user) return null;
+
   const renderTargetCompanies = () => {
-    if (targetCompanies.length === 0) return (
-      <div style={{ background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
+    if (localTargetCompanies.length === 0) return (
+      <div style={{ background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>Research companies you're interested in</p>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>We'll show you hiring signals and alumni at the companies you care about most.</p>
@@ -297,13 +284,13 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
     );
 
     return (
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#E85D20', margin: 0 }}>🎯 YOUR TARGET COMPANIES</p>
           <button onClick={() => setShowAddCompanyModal(true)} style={{ background: 'none', border: 'none', fontSize: 12, color: '#AAAAAA', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Edit →</button>
         </div>
         <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10, overflowX: 'auto', paddingBottom: 8, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
-          {targetCompanies.map(company => (
+          {localTargetCompanies.map(company => (
             <div key={company} style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 12, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10, minWidth: 180 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#E85D20', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>
@@ -312,91 +299,21 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1A1A', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{company}</p>
               </div>
               <button
-                onClick={() => { setSearch(company); setShowAll(true); if (!hasStarted) { setHasStarted(true); loadCompanies(); } }}
+                onClick={() => { setSearchInput(company); handleResearch(company); }}
                 style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: '100%' }}
               >
                 Research →
               </button>
             </div>
           ))}
-          <div onClick={() => setShowAddCompanyModal(true)} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', minWidth: 120 }}>
+          <div onClick={() => setShowAddCompanyModal(true)} style={{ background: '#F5F5F5', border: '1px dashed #CCCCCC', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minWidth: 100 }}>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', fontWeight: 600 }}>+ Add</span>
           </div>
         </div>
+        <div style={{ height: 1, background: '#F0F0F0', margin: '16px 0 0' }} />
       </div>
     );
   };
-
-  const renderDiscoverSection = () => (
-    <div style={{ marginBottom: 32 }}>
-      {/* Divider */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '28px 0 24px' }}>
-        <div style={{ flex: 1, height: 1, background: '#E5E5E5' }} />
-        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', fontWeight: 600 }}>OR</span>
-        <div style={{ flex: 1, height: 1, background: '#E5E5E5' }} />
-      </div>
-
-      <div style={{ marginBottom: 8 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#555', margin: '0 0 6px' }}>HELP ME FIND COMPANIES</p>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 14px' }}>🔍 Don't know where to start? Describe what you're looking for.</p>
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <input
-          type="text"
-          value={discoverQuery}
-          onChange={e => setDiscoverQuery(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleDiscover()}
-          placeholder={DISCOVER_PLACEHOLDERS[placeholderIdx]}
-          style={{ flex: 1, minWidth: 200, padding: '12px 16px', borderRadius: 10, border: '1px solid #E0E0E0', background: '#fff', fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }}
-        />
-        <button
-          onClick={handleDiscover}
-          disabled={discoverLoading || !discoverQuery.trim()}
-          style={{ background: '#0d1117', border: 'none', borderRadius: 10, padding: '12px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: discoverLoading || !discoverQuery.trim() ? 'not-allowed' : 'pointer', opacity: !discoverQuery.trim() ? 0.5 : 1, fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
-        >
-          {discoverLoading ? <Loader2 style={{ width: 16, height: 16, animation: 'ciSpin 1s linear infinite', display: 'inline-block' }} /> : 'Find Companies →'}
-        </button>
-      </div>
-
-      {/* Free tier counter */}
-      {!isFastIQ && (
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: researchesLeft <= 1 ? '#E85D20' : '#AAAAAA', margin: '8px 0 0', fontWeight: researchesLeft <= 1 ? 600 : 400 }}>
-          {researchesLeft <= 0 ? '0 free researches left today — ' : `${researchesLeft} of ${FREE_TIER_DAILY_LIMIT} free researches left today`}
-          {researchesLeft <= 0 && <button onClick={onOpenUpgrade} style={{ background: 'none', border: 'none', color: '#E85D20', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 12, padding: 0, minHeight: 'auto', display: 'inline' }}>Upgrade for unlimited →</button>}
-        </p>
-      )}
-
-      {discoverLoading && (
-        <div style={{ background: '#F5F5F5', borderRadius: 12, padding: '20px 24px', marginTop: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
-          <Loader2 style={{ width: 20, height: 20, color: '#E85D20', animation: 'ciSpin 1s linear infinite', flexShrink: 0 }} />
-          <div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>🔍 Finding companies matching "{discoverQuery}"…</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>This takes about 30 seconds.</p>
-          </div>
-        </div>
-      )}
-
-      {discoverError && (
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#EF4444', margin: '12px 0 0' }}>{discoverError}</p>
-      )}
-
-      {discoverResults.length > 0 && (
-        <div style={{ marginTop: 20 }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '0 0 12px' }}>{discoverResults.length} companies found</p>
-          {discoverResults.map(company => (
-            <DiscoveredCompanyCard
-              key={company.name}
-              company={company}
-              onAddToList={handleAddDiscoveredToList}
-              onResearchMore={handleLiveResearch}
-              added={addedToList.includes(company.name)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 80px', fontFamily: "'DM Sans', sans-serif" }}>
@@ -412,113 +329,141 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         </div>
       )}
 
-      {/* Section 1 — Target Companies */}
-      <div style={{ marginBottom: 4 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#0d1117', margin: '0 0 14px' }}>Section 1 — <span style={{ color: '#555', fontWeight: 500 }}>Your target companies</span></p>
-        {renderTargetCompanies()}
-      </div>
+      {/* Target companies */}
+      {renderTargetCompanies()}
 
-      {/* Section 2 — Search a specific company */}
-      <div style={{ marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '28px 0 16px' }}>
-          <div style={{ flex: 1, height: 1, background: '#E5E5E5' }} />
-        </div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#555', margin: '0 0 6px' }}>I KNOW THE COMPANY I WANT TO RESEARCH</p>
-        <div style={{ position: 'relative', marginBottom: 8 }}>
-          <Search style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: '#aaa' }} />
-          <input
-            type="text"
-            placeholder="Search or research a specific company..."
-            value={search}
-            onChange={e => { setSearch(e.target.value); setShowAll(true); setLiveSearchError(null); }}
-            onKeyDown={e => { if (e.key === 'Enter' && search.trim() && filteredCompanies.length === 0) handleLiveResearch(search); }}
-            style={{ width: '100%', paddingLeft: 40, paddingRight: 16, paddingTop: 12, paddingBottom: 12, borderRadius: 100, border: '1px solid #e5e5e5', background: '#fff', fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', minHeight: 44 }}
-          />
-        </div>
-
-        {/* Start search prompt if not started */}
-        {!hasStarted && !search && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F9F9F9', borderRadius: 10, padding: '12px 16px', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0 }}>FastIQ will scan careers pages and hiring signals for your goals. ~30 seconds.</p>
-            <button onClick={() => { setHasStarted(true); loadCompanies(); }} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
-              Search Now →
-            </button>
+      {/* Unified search bar */}
+      <div style={{ marginBottom: 6 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <Search style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: '#aaa' }} />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={e => { setSearchInput(e.target.value); setResearchError(null); }}
+              onKeyDown={e => e.key === 'Enter' && handleResearch()}
+              placeholder="Search a company or describe what you're looking for..."
+              style={{ width: '100%', paddingLeft: 40, paddingRight: 16, paddingTop: 13, paddingBottom: 13, borderRadius: 100, border: '1px solid #e5e5e5', background: '#fff', fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box', minHeight: 48 }}
+            />
           </div>
-        )}
+          <button
+            onClick={() => handleResearch()}
+            disabled={loading || !searchInput.trim()}
+            style={{ background: '#0d1117', border: 'none', borderRadius: 100, padding: '13px 22px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: loading || !searchInput.trim() ? 'not-allowed' : 'pointer', opacity: !searchInput.trim() ? 0.5 : 1, fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+          >
+            Research →
+          </button>
+        </div>
 
-        {liveSearchError && (
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#EF4444', margin: '8px 0' }}>{liveSearchError}</p>
+        {/* Example chips */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+          {EXAMPLE_CHIPS.map(chip => (
+            <button
+              key={chip}
+              onClick={() => { setSearchInput(chip); handleResearch(chip); }}
+              style={{ background: '#F5F5F5', border: '1px solid #E5E5E5', borderRadius: 100, padding: '5px 14px', fontSize: 12, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto', transition: 'all 0.15s' }}
+            >
+              {chip}
+            </button>
+          ))}
+        </div>
+
+        {/* Free tier counter */}
+        {!isFastIQ && (
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: researchesLeft <= 1 ? '#E85D20' : '#AAAAAA', margin: '10px 0 0', fontWeight: researchesLeft <= 1 ? 600 : 400 }}>
+            {researchesLeft <= 0
+              ? <>0 free researches left today — <button onClick={onOpenUpgrade} style={{ background: 'none', border: 'none', color: '#E85D20', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 12, padding: 0, minHeight: 'auto', display: 'inline' }}>Upgrade for unlimited →</button></>
+              : `${researchesLeft} of ${FREE_TIER_DAILY_LIMIT} free researches left today`
+            }
+          </p>
         )}
       </div>
 
-      {/* Section 3 — Discover */}
-      {renderDiscoverSection()}
+      {/* Loading state */}
+      {loading && (
+        <div style={{ background: '#F9F9F9', borderRadius: 12, padding: '24px', margin: '24px 0', display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <Loader2 style={{ width: 20, height: 20, color: '#E85D20', animation: 'ciSpin 1s linear infinite', flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#0d1117', margin: '0 0 4px' }}>🔍 Researching {loadingQuery}…</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Scanning their careers page and hiring signals. This takes about 20 seconds.</p>
+          </div>
+        </div>
+      )}
 
-      {/* Filter bar + results (only when search started) */}
-      {hasStarted && (
+      {/* Error state */}
+      {!loading && researchError && (
+        <div style={{ background: '#FFF5F5', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '16px 20px', margin: '20px 0' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#EF4444', margin: 0 }}>{researchError}</p>
+        </div>
+      )}
+
+      {/* Discover results */}
+      {!loading && discoverResults.length > 0 && (
+        <div style={{ marginTop: 24, marginBottom: 16 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '0 0 12px' }}>{discoverResults.length} companies found</p>
+          {discoverResults.map(company => (
+            <DiscoveredCompanyCard
+              key={company.name}
+              company={company}
+              onAddToList={handleAddDiscoveredToList}
+              onResearchMore={(name) => { setSearchInput(name); handleResearch(name); }}
+              added={addedToList.includes(company.name)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Filter bar + existing company cards */}
+      {(hasStarted || companies.length > 0) && !loading && discoverResults.length === 0 && (
         <>
-          <FilterBar active={filter} onChange={(f) => { setFilter(f); setSearch(''); setShowAll(false); }} />
+          <div style={{ marginTop: 24 }}>
+            <FilterBar active={filter} onChange={(f) => { setFilter(f); setFilterSearch(''); setShowAll(false); }} />
+          </div>
 
-          {loading && (
-            <div style={{ textAlign: 'center', padding: '60px 0' }}>
-              <Loader2 style={{ width: 28, height: 28, color: '#E85D20', animation: 'ciSpin 1s linear infinite', margin: '0 auto 16px' }} />
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#0d1117', margin: '0 0 8px' }}>⚡ Building your company list...</p>
-              <p style={{ fontSize: 13, color: '#888', margin: 0 }}>Finding companies hiring {role || 'for your role'}{industry ? ` in ${industry}` : ''}. About 30 seconds.</p>
+          {filteredCompanies.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <p style={{ fontSize: 15, color: '#888', margin: '0 0 12px' }}>No companies match this filter.</p>
+              <button onClick={() => { setFilter('all'); setFilterSearch(''); setShowAll(false); }}
+                style={{ background: 'none', border: '1px solid #e5e5e5', borderRadius: 100, padding: '8px 20px', fontSize: 13, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+                Show all companies
+              </button>
             </div>
-          )}
-
-          {!loading && (
-            filteredCompanies.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                {search.trim() ? (
-                  <>
-                    <p style={{ fontSize: 15, color: '#888', margin: '0 0 16px' }}>No results for "{search}" in your list.</p>
-                    {liveSearchLoading ? (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                        <Loader2 style={{ width: 20, height: 20, color: '#E85D20', animation: 'ciSpin 1s linear infinite' }} />
-                        <span style={{ fontSize: 14, color: '#555', fontFamily: "'DM Sans', sans-serif" }}>Researching {search}…</span>
-                      </div>
-                    ) : (
-                      <button onClick={() => handleLiveResearch(search)}
-                        style={{ background: '#E85D20', border: 'none', borderRadius: 100, padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-                        Research {search} now →
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <p style={{ fontSize: 15, color: '#888', margin: '0 0 12px' }}>No companies match this filter.</p>
-                    <button onClick={() => { setFilter('all'); setSearch(''); setShowAll(false); }}
-                      style={{ background: 'none', border: '1px solid #e5e5e5', borderRadius: 100, padding: '8px 20px', fontSize: 13, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-                      Show all companies
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (
-              <>
-                {visibleCompanies.map(company => (
-                  <CompanyIntelCard
-                    key={company.name}
-                    company={company}
-                    user={user}
-                    isFastIQ={true}
-                    onResearch={() => setResearchCompany(company)}
-                    savedCompanies={savedCompanies}
-                    onSave={handleSave}
-                    onUnsave={handleUnsave}
-                  />
-                ))}
-                {!showAll && filteredCompanies.length > 6 && (
-                  <button onClick={() => setShowAll(true)}
-                    style={{ display: 'block', width: '100%', textAlign: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '14px', fontSize: 14, fontWeight: 500, color: '#555', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", marginTop: 4 }}>
-                    Show {filteredCompanies.length - 6} more companies →
-                  </button>
-                )}
-              </>
-            )
+          ) : (
+            <>
+              {visibleCompanies.map(company => (
+                <CompanyIntelCard
+                  key={company.name}
+                  company={company}
+                  user={user}
+                  isFastIQ={true}
+                  onResearch={() => setResearchCompany(company)}
+                  savedCompanies={savedCompanies}
+                  onSave={handleSave}
+                  onUnsave={handleUnsave}
+                />
+              ))}
+              {!showAll && filteredCompanies.length > 6 && (
+                <button onClick={() => setShowAll(true)}
+                  style={{ display: 'block', width: '100%', textAlign: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '14px', fontSize: 14, fontWeight: 500, color: '#555', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", marginTop: 4 }}>
+                  Show {filteredCompanies.length - 6} more companies →
+                </button>
+              )}
+            </>
           )}
         </>
+      )}
+
+      {/* First-load prompt (no research done yet) */}
+      {!hasStarted && companies.length === 0 && !loading && !researchError && discoverResults.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '48px 0 24px', color: '#AAAAAA' }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, margin: '0 0 12px' }}>Search a company above, or click a chip to get started.</p>
+          {hasGoals && (
+            <button onClick={() => { setHasStarted(true); loadCompanies(); }}
+              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
+              Auto-generate list from my goals →
+            </button>
+          )}
+        </div>
       )}
 
       {researchCompany && (

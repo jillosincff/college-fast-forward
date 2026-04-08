@@ -22,13 +22,17 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          query: `${companyName} official careers jobs page site`,
-          numResults: 3,
+          query: `${companyName} careers jobs site:greenhouse.io OR site:lever.co OR site:myworkdayjobs.com OR site:${companyName.toLowerCase().replace(/\s+/g, '')}.com/careers`,
+          numResults: 5,
           useAutoprompt: true,
         }),
       });
       const exaData = await exaRes.json();
-      const firstResult = exaData?.results?.[0]?.url;
+      // Prefer known job board URLs, then company domain
+      const jobBoardDomains = ['greenhouse.io', 'lever.co', 'myworkdayjobs.com', 'smartrecruiters.com', 'jobs.lever.co', 'boards.greenhouse.io'];
+      const results = exaData?.results || [];
+      const jobBoardResult = results.find(r => jobBoardDomains.some(d => r.url?.includes(d)));
+      const firstResult = jobBoardResult?.url || results[0]?.url;
       if (firstResult) careersUrl = firstResult;
       console.log(`[researchSpecificCompany] Careers URL found: ${careersUrl}`);
     } catch (e) {
