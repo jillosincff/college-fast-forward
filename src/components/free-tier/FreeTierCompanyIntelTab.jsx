@@ -384,8 +384,8 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
         <div style={{ background: '#F9F9F9', borderRadius: 12, padding: '24px', margin: '24px 0', display: 'flex', alignItems: 'flex-start', gap: 16 }}>
           <Loader2 style={{ width: 20, height: 20, color: '#E85D20', animation: 'ciSpin 1s linear infinite', flexShrink: 0, marginTop: 2 }} />
           <div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#0d1117', margin: '0 0 4px' }}>🔍 Researching {loadingQuery}…</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Scanning their careers page and hiring signals. This takes about 20 seconds.</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#0d1117', margin: '0 0 4px' }}>🔍 {isSpecificCompany(loadingQuery) ? `Researching ${loadingQuery}…` : `Finding ${loadingQuery}…`}</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>{isSpecificCompany(loadingQuery) ? 'Scanning their careers page and hiring signals. This takes about 20 seconds.' : 'Searching across multiple sources and scanning careers pages. Usually takes 20–40 seconds.'}</p>
           </div>
         </div>
       )}
@@ -401,6 +401,12 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
       {!loading && discoverResults.length > 0 && (
         <div style={{ marginTop: 24, marginBottom: 16 }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', margin: '0 0 12px' }}>{discoverResults.length} companies found</p>
+          {discoverResults.length < 3 && (
+            <div style={{ background: '#FFFBEB', border: '1px solid rgba(234,179,8,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 14 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#854D0E', margin: '0 0 8px' }}>We found {discoverResults.length} {discoverResults.length === 1 ? 'company' : 'companies'} matching your search. Try broadening it — e.g. add a state instead of a city, or remove a specific role type.</p>
+              <button onClick={() => { setDiscoverResults([]); setSearchInput(''); }} style={{ background: 'none', border: '1px solid #D97706', borderRadius: 8, padding: '6px 14px', fontSize: 12, fontWeight: 600, color: '#92400E', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>Try a broader search</button>
+            </div>
+          )}
           {discoverResults.map(company => (
             <DiscoveredCompanyCard
               key={company.name}
@@ -410,59 +416,6 @@ export default function FreeTierCompanyIntelTab({ user, onOpenUpgrade, onTabChan
               added={addedToList.includes(company.name)}
             />
           ))}
-        </div>
-      )}
-
-      {/* Filter bar + existing company cards */}
-      {(hasStarted || companies.length > 0) && !loading && discoverResults.length === 0 && (
-        <>
-          <div style={{ marginTop: 24 }}>
-            <FilterBar active={filter} onChange={(f) => { setFilter(f); setFilterSearch(''); setShowAll(false); }} />
-          </div>
-
-          {filteredCompanies.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <p style={{ fontSize: 15, color: '#888', margin: '0 0 12px' }}>No companies match this filter.</p>
-              <button onClick={() => { setFilter('all'); setFilterSearch(''); setShowAll(false); }}
-                style={{ background: 'none', border: '1px solid #e5e5e5', borderRadius: 100, padding: '8px 20px', fontSize: 13, cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
-                Show all companies
-              </button>
-            </div>
-          ) : (
-            <>
-              {visibleCompanies.map(company => (
-                <CompanyIntelCard
-                  key={company.name}
-                  company={company}
-                  user={user}
-                  isFastIQ={true}
-                  onResearch={() => setResearchCompany(company)}
-                  savedCompanies={savedCompanies}
-                  onSave={handleSave}
-                  onUnsave={handleUnsave}
-                />
-              ))}
-              {!showAll && filteredCompanies.length > 6 && (
-                <button onClick={() => setShowAll(true)}
-                  style={{ display: 'block', width: '100%', textAlign: 'center', background: '#fff', border: '1px solid #e5e5e5', borderRadius: 12, padding: '14px', fontSize: 14, fontWeight: 500, color: '#555', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif", marginTop: 4 }}>
-                  Show {filteredCompanies.length - 6} more companies →
-                </button>
-              )}
-            </>
-          )}
-        </>
-      )}
-
-      {/* First-load prompt (no research done yet) */}
-      {!hasStarted && companies.length === 0 && !loading && !researchError && discoverResults.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 0 24px', color: '#AAAAAA' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, margin: '0 0 12px' }}>Search a company above, or click a chip to get started.</p>
-          {hasGoals && (
-            <button onClick={() => { setHasStarted(true); loadCompanies(); }}
-              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}>
-              Auto-generate list from my goals →
-            </button>
-          )}
         </div>
       )}
 
