@@ -99,6 +99,7 @@ Write a briefing that is:
 - Never generic — always specific to their actual data
 
 BRIEFING RULES BY STATE:
+- New user (lastLoginDays is 0 or null) → NEVER say "good to see you back" or imply they've visited before. Use a fresh welcome like "Hey [Name]!"
 - No goals set → push hard to set goals, it unlocks everything
 - Goals set, no resume → praise goals, push resume upload
 - Resume uploaded but not analyzed yet → "Your resume is uploaded — FastIQ is scoring it now. Check back in a minute to see where you stand."
