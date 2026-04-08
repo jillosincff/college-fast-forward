@@ -260,6 +260,17 @@ Deno.serve(async (req) => {
 
       profiles = profiles.slice(0, maxResults);
 
+      // Log feature usage
+      if (sessionUser) {
+        base44.asServiceRole.entities.AnalyticsEvent.create({
+          event_name: 'fastiq_feature_used',
+          user_id: sessionUser.id,
+          user_email: sessionUser.email,
+          school_code: universityName || '',
+          properties: { feature_type: 'alumni_search', results_count: profiles.length },
+        }).catch(() => {});
+      }
+
       // FastIQ only — enrich with Proxycurl
       if (isFastIQ && profiles.length > 0) {
         const enriched = await Promise.all(

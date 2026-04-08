@@ -1,0 +1,38 @@
+{
+  "name": "AnalyticsEvent",
+  "type": "object",
+  "properties": {
+    "event_name": {
+      "type": "string",
+      "description": "Name of the event e.g. fastiq_trial_started, fastiq_feature_used"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who triggered the event"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user for quick lookups"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "School code or name for segmentation"
+    },
+    "properties": {
+      "type": "object",
+      "description": "Additional event metadata e.g. { feature_type: 'alumni_search' }",
+      "default": {}
+    }
+  },
+  "required": [
+    "event_name"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {}
+  }
+}

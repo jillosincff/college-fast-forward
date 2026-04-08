@@ -34,14 +34,12 @@ Deno.serve(async (req) => {
     });
 
     // Log analytics event (fire-and-forget)
-    base44.asServiceRole.entities.ActivityLog.create({
-      event_type: 'fastiq_trial_started',
+    base44.asServiceRole.entities.AnalyticsEvent.create({
+      event_name: 'fastiq_trial_started',
       user_id: user.id,
       user_email: user.email,
-      metadata: {
-        school_code: user.school || user.university || '',
-        trial_end_date: end.toISOString(),
-      },
+      school_code: user.school_name || user.school || user.university || '',
+      properties: { trial_end_date: end.toISOString(), persona: user.persona || '' },
     }).catch(() => {});
 
     return Response.json({ 

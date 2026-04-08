@@ -133,6 +133,15 @@ Return as JSON.`;
       console.log('Activity log failed (non-critical):', e.message);
     }
 
+    // Log feature usage (fire-and-forget)
+    base44.asServiceRole.entities.AnalyticsEvent.create({
+      event_name: 'fastiq_feature_used',
+      user_id: user.id,
+      user_email: user.email,
+      school_code: user.school_name || user.school || '',
+      properties: { feature_type: 'resume_tailoring', original_score: result.original_score || 0 },
+    }).catch(() => {});
+
     return Response.json({
       success: true,
       tailoredResume,

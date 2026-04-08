@@ -24,12 +24,12 @@ Deno.serve(async (req) => {
         subscription_status: 'inactive',
       });
 
-      await base44.asServiceRole.entities.ActivityLog.create({
-        event_type: 'trial_ended',
+      await base44.asServiceRole.entities.AnalyticsEvent.create({
+        event_name: 'trial_ended',
         user_id: u.id,
         user_email: u.email,
-        school_code: u.school_code || null,
-        occurred_at: new Date().toISOString(),
+        school_code: u.school_name || u.school || '',
+        properties: { persona: u.persona || '', trial_end_date: u.trial_end_date || '' },
       }).catch(() => {});
 
       results.processed++;

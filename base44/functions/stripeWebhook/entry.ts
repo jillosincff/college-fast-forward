@@ -198,6 +198,15 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
           console.log('Updated billing user:', billingUser.id, 'tier:', subscriptionTier, 'founding:', isFoundingMember);
 
+          // Log subscription_activated analytics event
+          base44.asServiceRole.entities.AnalyticsEvent.create({
+            event_name: 'subscription_activated',
+            user_id: billingUser.id,
+            user_email: billingUser.email,
+            school_code: billingUser.school_name || billingUser.school || '',
+            properties: { plan: plan || subscriptionTier, is_founding: isFoundingMember, persona: billingUser.persona || '' },
+          }).catch(() => {});
+
           // Update Stripe customer metadata
           if (isFoundingMember) {
             try {

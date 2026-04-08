@@ -44,6 +44,15 @@ Rules (follow exactly):
     });
     const result = response.content?.[0]?.text || '';
 
+    // Log feature usage (fire-and-forget)
+    base44.asServiceRole.entities.AnalyticsEvent.create({
+      event_name: 'fastiq_feature_used',
+      user_id: user.id,
+      user_email: user.email,
+      school_code: user.school_name || user.school || '',
+      properties: { feature_type: 'outreach_draft' },
+    }).catch(() => {});
+
     return Response.json({ success: true, message: result || '' });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
