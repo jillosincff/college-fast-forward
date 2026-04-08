@@ -32,6 +32,30 @@ async function findUserByCustomerId(customerId) {
   return users?.length > 0 ? users[0] : null;
 }
 
+async function findBillingUser(customerId, userId, userEmail) {
+  // 1. Try stripe_customer_id
+  if (customerId) {
+    const user = await findUserByCustomerId(customerId);
+    if (user) return user;
+  }
+  // 2. Fall back to metadata.user_id
+  if (userId) {
+    try {
+      const user = await base44.asServiceRole.entities.User.get(userId);
+      if (user) return user;
+    } catch (e) {
+      console.log('User not found by metadata user_id:', userId);
+    }
+  }
+  // 3. Fall back to metadata.user_email
+  if (userEmail) {
+    const users = await base44.asServiceRole.entities.User.filter({ email: userEmail });
+    if (users?.length > 0) return users[0];
+  }
+  console.error('[stripeWebhook] CRITICAL: Could not find billing user. customerId:', customerId, 'userId:', userId, 'email:', userEmail);
+  return null;
+}
+
 async function findFamily(familyId, customerId) {
   if (familyId) {
     try {
@@ -151,8 +175,8 @@ Deno.serve(async (req) => {
 
         console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail, isFoundingMember, plan });
 
-        // Update billing user
-        const billingUser = await findUserByCustomerId(customerId);
+        // Update billing user — try all lookup methods
+        const billingUser = await findBillingUser(customerId, billingUserId, billingUserEmail);
         if (billingUser) {
           const userUpdates = {
             stripe_customer_id: customerId,
