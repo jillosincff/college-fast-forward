@@ -167,23 +167,42 @@ Deno.serve(async (req) => {
         return Response.json({ success: false, error: 'University not set. Please update your profile.', profiles: [] });
       }
 
-      const query = `${universityName} alumni ${freeTextQuery}`;
-      
-      console.log('QUERY SENT TO EXA:', query);
+      // Build short school name: "University of Florida" → "Florida", "Tulane University" → "Tulane"
+      const universityShortName = universityName
+        .replace(/^University of /i, '')
+        .replace(/ University$/i, '')
+        .replace(/ College$/i, '')
+        .trim();
 
-      const data = await exaFetch('search', {
-        query,
-        type: 'auto',
-        category: 'people',
-        numResults: maxResults * 2,
-        contents: {
-          highlights: { maxCharacters: 500 }
-        },
-      });
+      const excludeTerms = `NOT "director of athletics" NOT "assistant coach" NOT "staff" NOT "faculty" NOT "administrator" NOT "department of"`;
 
-      console.log('RAW EXA RESPONSE:', JSON.stringify(data));
+      const queries = [
+        `${universityShortName} alumnus alumna graduate ${freeTextQuery} ${excludeTerms}`,
+        `studied at ${universityName} ${freeTextQuery} career ${excludeTerms}`,
+        `${universityName} graduate ${freeTextQuery} professional ${excludeTerms}`,
+      ];
 
-      const profiles = (data.results || [])
+      console.log('[Alumni Search] Queries:', queries);
+
+      const exaResults = await Promise.all(
+        queries.map(q => exaFetch('search', {
+          query: q,
+          type: 'auto',
+          category: 'people',
+          numResults: Math.ceil((maxResults * 2) / queries.length) + 2,
+          contents: { highlights: { maxCharacters: 500 } },
+        }).catch(() => ({ results: [] })))
+      );
+
+      // Merge and deduplicate by URL
+      const seen = new Set();
+      const rawProfiles = exaResults
+        .flatMap(d => d.results || [])
+        .filter(r => {
+          if (!r?.url || seen.has(r.url)) return false;
+          seen.add(r.url);
+          return true;
+        })
         .map(r => {
           const parts = (r.title || '').split(/[|\-·]/).map(s => s.trim()).filter(Boolean);
           const full_name = parts[0]?.replace(/\s+Bio$/i, '').trim() || 'Unknown';
@@ -193,18 +212,48 @@ Deno.serve(async (req) => {
             .replace(/^#+\s*/gm, '')
             .trim()
             .slice(0, 200);
-          return {
-            full_name,
-            linkedin_url: r.url,
-            headline,
-            summary,
-            source: 'exa',
-            cff_user_id: null,
-            email: null,
-          };
+          return { full_name, linkedin_url: r.url, headline, summary, source: 'exa', cff_user_id: null, email: null };
         })
-        .filter(p => p.full_name !== 'Unknown' && p.full_name.length < 50)
-        .slice(0, maxResults);
+        .filter(p => p.full_name !== 'Unknown' && p.full_name.length < 50);
+
+      // Claude post-filter — remove staff/faculty who work AT the university vs attended it
+      let profiles = rawProfiles;
+      if (rawProfiles.length > 0) {
+        try {
+          const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'x-api-key': Deno.env.get('ANTHROPIC_API_KEY'),
+              'anthropic-version': '2023-06-01',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 500,
+              messages: [{
+                role: 'user',
+                content: `A student at ${universityName} is searching for alumni who ATTENDED ${universityName} and now work in: ${freeTextQuery}\n\nFor each person, determine if they are:\nA) An alumnus/alumna who ATTENDED ${universityName} as a student → KEEP\nB) Someone who currently WORKS AT ${universityName} (staff, faculty, administrator, coach, director) → REMOVE\nC) Unclear → REMOVE to be safe\n\nResults:\n${rawProfiles.map((p, i) => `${i + 1}. ${p.full_name} — ${p.headline}`).join('\n')}\n\nReturn ONLY a JSON array of the numbers to KEEP, e.g. [1, 3, 4]\nNo markdown, no explanation.`,
+              }],
+            }),
+          });
+          const claudeData = await claudeRes.json();
+          const rawText = claudeData?.content?.[0]?.text || '[]';
+          let keepIndices;
+          try {
+            keepIndices = new Set(JSON.parse(rawText.replace(/```json|```/g, '').trim()));
+          } catch {
+            keepIndices = new Set(rawProfiles.map((_, i) => i + 1));
+          }
+          const filteredProfiles = rawProfiles.filter((_, i) => keepIndices.has(i + 1));
+          console.log(`[Alumni Search] Raw results: ${rawProfiles.length}, After Claude filter: ${filteredProfiles.length}`);
+          console.log(`[Alumni Search] Removed as non-alumni:`, rawProfiles.filter((_, i) => !keepIndices.has(i + 1)).map(p => p.full_name));
+          profiles = filteredProfiles;
+        } catch (e) {
+          console.warn('[Alumni Search] Claude filter failed, using raw results:', e.message);
+        }
+      }
+
+      profiles = profiles.slice(0, maxResults);
 
       // FastIQ only — enrich with Proxycurl
       if (isFastIQ && profiles.length > 0) {

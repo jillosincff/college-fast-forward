@@ -322,11 +322,24 @@ export default function AlumniSearch({ user, onOpenUpgrade }) {
       )}
 
       {/* No results */}
-      {searched && results.length === 0 && (
+      {searched && results.length < 2 && (
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888' }}>
-            No results found — try different keywords or a broader search.
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', marginBottom: 16 }}>
+            {results.length === 0
+              ? `We couldn't find strong alumni matches for "${query}" right now.`
+              : `Only ${results.length} match found for "${query}" — try broader terms:`}
           </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+            {['sports business', 'sports marketing', 'entertainment', 'media', 'finance', 'consulting'].map(term => (
+              <button
+                key={term}
+                onClick={() => { setQuery(term); handleSearch(term); }}
+                style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 20, padding: '7px 16px', fontSize: 13, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, minHeight: 'auto' }}
+              >
+                {term}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
