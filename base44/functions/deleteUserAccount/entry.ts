@@ -49,7 +49,16 @@ Deno.serve(async (req) => {
       deleteUserRecords('Connection', { request_creator_email: userEmail }),
       deleteUserRecords('Connection', { connector_user_id: userId }),
       deleteUserRecords('SuccessStory', { created_by: userEmail }),
-      // Note: We are not deleting messages to preserve the other user's inbox.
+      deleteUserRecords('Resume', { student_email: userEmail }),
+      deleteUserRecords('Resume', { created_by: userEmail }),
+      deleteUserRecords('TailoredResume', { created_by: userEmail }),
+      deleteUserRecords('OutreachDraft', { created_by: userEmail }),
+      deleteUserRecords('OpportunityApplication', { applicant_id: userId }),
+      deleteUserRecords('NotebookEntry', { created_by: userEmail }),
+      deleteUserRecords('NetworkingPipeline', { created_by: userEmail }),
+      deleteUserRecords('ActionPlan', { created_by: userEmail }),
+      deleteUserRecords('AIAdvisorConversation', { created_by: userEmail }),
+      deleteUserRecords('Notification', { recipient_email: userEmail }),
     ]);
 
     // 5. Finally, delete the user's own record
