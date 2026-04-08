@@ -26,9 +26,8 @@ Deno.serve(async (req) => {
           headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             query: q,
-            numResults: 8,
+            numResults: 15,
             useAutoprompt: true,
-            category: 'company',
             contents: { highlights: { maxCharacters: 300 } },
           }),
         }).then(r => r.json()).catch(() => ({ results: [] }))
@@ -36,10 +35,13 @@ Deno.serve(async (req) => {
     );
 
     // Merge and deduplicate by domain
+    console.log('Exa raw result counts:', exaResults.map(r => r.results?.length || 0));
+
     const seen = new Set();
     const rawCompanies = exaResults
       .flatMap(r => r.results || [])
       .filter(r => {
+        if (!r?.url) return false;
         try {
           const domain = new URL(r.url).hostname.replace('www.', '');
           if (seen.has(domain)) return false;
@@ -52,8 +54,10 @@ Deno.serve(async (req) => {
         url: r.url,
         snippet: r.highlights?.[0] || '',
       }))
-      .filter(c => c.name.length > 1 && c.name.length < 60)
-      .slice(0, 10);
+      .filter(c => c.name && c.name.length > 1 && c.name.length < 60)
+      .slice(0, 12);
+
+    console.log('Exa merged companies:', rawCompanies.map(c => c.name));
 
     // Part 2 — Claude validation + gap-fill
     let finalNames = rawCompanies.map(c => c.name);
