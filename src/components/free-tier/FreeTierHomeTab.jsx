@@ -185,34 +185,34 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
         {/* Card header row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <p style={{
+          <span style={{
             fontFamily: "'DM Sans', sans-serif",
             fontSize: 11, fontWeight: 700,
-            textTransform: 'uppercase', letterSpacing: '0.15em',
-            color: '#E85D20', margin: 0,
-            display: 'flex', alignItems: 'center', gap: 6,
+            letterSpacing: '0.1em', color: '#E85D20',
+            textTransform: 'uppercase',
           }}>
-            <span>⚡</span> FASTIQ BRIEFING
-          </p>
-          {trialActive && (
-            <button onClick={() => onOpenUpgrade?.()} style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600,
-              color: '#E85D20', background: 'rgba(232,93,32,0.12)',
-              border: '1px solid rgba(232,93,32,0.25)', borderRadius: 100,
-              padding: '3px 10px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
-            }}>
-              ⚡ Trial — {trialDaysRemaining}d left
-            </button>
-          )}
+            ⚡ FastIQ Briefing
+          </span>
           {trialNotStarted && (
             <button onClick={() => onOpenUpgrade?.()} style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600,
               color: '#E85D20', background: 'rgba(232,93,32,0.12)',
               border: '1px solid rgba(232,93,32,0.25)', borderRadius: 100,
-              padding: '3px 10px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+              padding: '4px 12px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
             }}>
-              🎁 Start free trial
+              🎁 Start Free Trial →
             </button>
+          )}
+          {trialActive && (
+            <span style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 11,
+              color: 'rgba(255,255,255,0.35)',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 100, padding: '4px 12px',
+            }}>
+              ⚡ {trialDaysRemaining} days left in trial
+            </span>
           )}
         </div>
 
