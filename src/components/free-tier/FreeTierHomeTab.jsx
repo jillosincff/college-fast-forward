@@ -174,64 +174,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {trialNotStarted && (
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '12px 16px',
-            background: 'rgba(232,93,32,0.08)',
-            borderBottom: '1px solid rgba(232,93,32,0.15)',
-            borderRadius: '20px 20px 0 0',
-            gap: 12,
-            flexWrap: 'wrap',
-          }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
-                color: '#E85D20', margin: '0 0 2px'
-              }}>
-                Your free 7-day FastIQ trial is waiting
-              </p>
-              <p style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 12,
-                color: 'rgba(255,255,255,0.4)', margin: 0
-              }}>
-                Alumni search, AI outreach drafts, resume tailoring and more. No credit card needed.
-              </p>
-            </div>
-            <button onClick={() => onOpenUpgrade?.()} style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#fff',
-              background: '#E85D20', border: 'none', borderRadius: 10,
-              padding: '9px 20px', cursor: 'pointer', minHeight: 'auto',
-              whiteSpace: 'nowrap', flexShrink: 0,
-            }}>Start Free Trial →</button>
-          </div>
-        )}
-        {trialActive && (
-          <div style={{
-            padding: '8px 16px',
-            background: 'rgba(232,93,32,0.06)',
-            borderBottom: '1px solid rgba(232,93,32,0.1)',
-            borderRadius: '20px 20px 0 0',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-          }}>
-            <span style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 12,
-              color: 'rgba(255,255,255,0.45)'
-            }}>
-              ⚡ FastIQ Trial — {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining
-            </span>
-            <button onClick={() => onOpenUpgrade?.()} style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#E85D20',
-              background: 'none', border: 'none', cursor: 'pointer',
-              padding: 0, minHeight: 'auto', whiteSpace: 'nowrap',
-            }}>
-              Upgrade to keep access →
-            </button>
-          </div>
-        )}
+
         <div style={{ padding: 'clamp(24px, 4vw, 40px) clamp(20px, 4vw, 36px)', position: 'relative' }}>
         <div style={{
           position: 'absolute', top: -40, right: -40,
@@ -249,6 +192,42 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         }}>
           <span>⚡</span> FASTIQ BRIEFING
         </p>
+
+        {trialNotStarted && (
+          <>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 20px' }} />
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#E85D20', margin: '0 0 4px' }}>
+                Your free 7-day FastIQ trial is waiting
+              </p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 14px', lineHeight: 1.5 }}>
+                Alumni search, AI outreach drafts, resume tailoring. No credit card needed.
+              </p>
+              <button onClick={() => onOpenUpgrade?.()} style={{
+                fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#fff',
+                background: '#E85D20', border: 'none', borderRadius: 10,
+                padding: '10px 22px', cursor: 'pointer', minHeight: 'auto',
+              }}>Start Free Trial →</button>
+            </div>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 20px' }} />
+          </>
+        )}
+
+        {trialActive && (
+          <>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 16px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+                ⚡ FastIQ Trial — {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining
+              </span>
+              <button onClick={() => onOpenUpgrade?.()} style={{
+                fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#E85D20',
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', whiteSpace: 'nowrap',
+              }}>Upgrade to keep access →</button>
+            </div>
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 20px' }} />
+          </>
+        )}
 
         {briefingLoading ? (
           <div>
