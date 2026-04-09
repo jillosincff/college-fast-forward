@@ -5,8 +5,9 @@ Deno.serve(async (req) => {
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { studentEmail } = await req.json();
-  if (!studentEmail) return Response.json({ error: 'Student email required' }, { status: 400 });
+  const { studentEmail: rawEmail } = await req.json();
+  if (!rawEmail) return Response.json({ error: 'Student email required' }, { status: 400 });
+  const studentEmail = rawEmail.trim().toLowerCase();
 
   // Add to parent's student_emails array if not already there
   const currentEmails = user.student_emails || [];
@@ -24,8 +25,10 @@ Deno.serve(async (req) => {
   const student = students?.[0];
 
   if (student) {
-    // Never overwrite an existing paying subscription
-    if (student.stripe_customer_id && student.subscription_status === 'active' && !student.fastiq_trial_active) {
+    // Never overwrite an existing paying subscription (Stripe-paid OR non-trial gift)
+    const hasPaidSub = student.stripe_customer_id && student.subscription_status === 'active' && !student.fastiq_trial_active;
+    const alreadyGiftedActive = student.fastiq_active && !student.fastiq_trial_active && !student.stripe_customer_id;
+    if (hasPaidSub || alreadyGiftedActive) {
       return Response.json({ success: true, status: 'already_active' });
     }
 
@@ -51,14 +54,18 @@ Deno.serve(async (req) => {
       studentFirstName: student.full_name?.split(' ')[0] || 'there',
       parentFirstName,
       trialDays: 7,
-    });
+    }).catch(e => console.error('[giftFastIQToStudent] Gift email failed:', e.message));
 
     return Response.json({ success: true, status: 'activated' });
 
   } else {
-    // Student hasn't signed up yet — store pending gift on parent
+    // Student hasn't signed up yet — store pending gifts as array on parent
+    const existingPending = user.pending_fastiq_gift_emails || [];
+    const updatedPending = existingPending.includes(studentEmail)
+      ? existingPending
+      : [...existingPending, studentEmail];
     await base44.entities.User.update(user.id, {
-      pending_fastiq_gift_email: studentEmail,
+      pending_fastiq_gift_emails: updatedPending,
     });
 
     await base44.asServiceRole.functions.invoke('sendParentGiftedFastIQEmail', {

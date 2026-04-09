@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { X, Loader2, Gift } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { giftFastIQToStudent } from '@/functions/giftFastIQToStudent';
 
 export default function GiftFastIQModal({ user, onClose }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-  const [status, setStatus] = useState(null); // 'activated' | 'pending'
+  const [status, setStatus] = useState(null); // 'activated' | 'pending' | 'already_active'
 
   const savedEmail = user?.student_emails?.[0] || null;
 
@@ -52,7 +52,7 @@ export default function GiftFastIQModal({ user, onClose }) {
             <div className="text-center">
               <p style={{ fontSize: 32, marginBottom: 12 }}>🎉</p>
               <p style={{ fontSize: 16, fontWeight: 700, color: '#1A1A1A', marginBottom: 8 }}>
-                {status === 'activated' ? 'Gift activated!' : 'Invite sent!'}
+                {status === 'already_active' ? 'Already active!' : status === 'activated' ? 'Gift activated!' : 'Invite sent!'}
               </p>
               <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 20 }}>
                 {status === 'already_active'

@@ -339,9 +339,13 @@ Deno.serve(async (req) => {
 
                 console.log('[stripeWebhook] FastIQ gifted to student:', studentEmail);
               } else {
-                // Student hasn't signed up yet — store pending gift on parent
+                // Student hasn't signed up yet — append to pending gifts array on parent
+                const existingPending = billingUser.pending_fastiq_gift_emails || [];
+                const updatedPending = existingPending.includes(studentEmail)
+                  ? existingPending
+                  : [...existingPending, studentEmail];
                 await base44.asServiceRole.entities.User.update(billingUser.id, {
-                  pending_fastiq_gift_email: studentEmail,
+                  pending_fastiq_gift_emails: updatedPending,
                 });
                 console.log('[stripeWebhook] Student not yet signed up — gift pending:', studentEmail);
               }

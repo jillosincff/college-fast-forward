@@ -89,8 +89,13 @@ Deno.serve(async (req) => {
 
     // Check if a parent gifted FastIQ to this email before they signed up
     try {
-      const parentRecords = await base44.asServiceRole.entities.User.filter({ pending_fastiq_gift_email: lowerCaseEmail });
-      if (parentRecords && parentRecords.length > 0) {
+      // Find parents who have this email in their pending_fastiq_gift_emails array
+      const allParents = await base44.asServiceRole.entities.User.filter({ persona: 'parent' });
+      const parentRecords = (allParents || []).filter(p =>
+        Array.isArray(p.pending_fastiq_gift_emails) && p.pending_fastiq_gift_emails.includes(lowerCaseEmail)
+      );
+
+      if (parentRecords.length > 0) {
         const parent = parentRecords[0];
         const trialStart = new Date();
         const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -109,12 +114,12 @@ Deno.serve(async (req) => {
           linked_parent_name: parent.full_name?.split(' ')[0] || 'Your parent',
         });
 
-        // Clear pending gift from parent
+        // Remove this email from parent's pending array
+        const updatedPending = (parent.pending_fastiq_gift_emails || []).filter(e => e !== lowerCaseEmail);
         await base44.asServiceRole.entities.User.update(parent.id, {
-          pending_fastiq_gift_email: null,
+          pending_fastiq_gift_emails: updatedPending,
         });
 
-        // Notify student
         await base44.asServiceRole.functions.invoke('sendParentGiftedFastIQEmail', {
           studentEmail: lowerCaseEmail,
           studentFirstName: full_name?.split(' ')[0] || 'there',
