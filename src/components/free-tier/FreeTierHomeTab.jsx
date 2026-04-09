@@ -285,8 +285,20 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </div>
       )}
 
+      {/* Roadmap section header */}
+      <div style={{ padding: '0 24px', marginBottom: 16, marginTop: 8 }}>
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 12, fontWeight: 700,
+          letterSpacing: '0.08em', textTransform: 'uppercase',
+          color: 'rgba(0,0,0,0.35)', margin: 0,
+        }}>
+          Your Career Roadmap
+        </p>
+      </div>
+
       {/* Roadmap — always shown */}
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px 40px' }}>
         <CareerRoadmap user={user} onTabChange={onTabChange} onOpenUpgrade={onOpenUpgrade} />
 
         {/* STATE 2: Snapshot card */}
