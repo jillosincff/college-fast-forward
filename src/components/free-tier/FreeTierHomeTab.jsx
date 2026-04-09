@@ -168,79 +168,56 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
       {/* HERO — Dynamic AI Briefing */}
       <div style={{
-        background: '#0A0A0A',
+        background: '#fff',
+        border: '1px solid rgba(0,0,0,0.08)',
         borderLeft: '3px solid #E85D20',
         borderRadius: '0 12px 12px 0',
-        marginBottom: 32,
-        position: 'relative',
-        overflow: 'hidden',
+        padding: '20px 24px',
+        margin: '20px 24px',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
       }}>
-
-        <div style={{ padding: 'clamp(24px, 4vw, 40px) clamp(20px, 4vw, 36px)', position: 'relative' }}>
-        <div style={{
-          position: 'absolute', top: -40, right: -40,
-          width: 200, height: 200, borderRadius: '50%',
-          background: 'rgba(232,93,32,0.08)',
-          pointerEvents: 'none',
-        }} />
-
-        {/* Card header row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <span style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 11, fontWeight: 700,
-            letterSpacing: '0.1em', color: '#E85D20',
-            textTransform: 'uppercase',
-          }}>
-            ⚡ FastIQ Briefing
-          </span>
-          {trialNotStarted && (
-            <button onClick={() => onOpenUpgrade?.()} style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600,
-              color: '#E85D20', background: 'rgba(232,93,32,0.12)',
-              border: '1px solid rgba(232,93,32,0.25)', borderRadius: 100,
-              padding: '4px 12px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
-            }}>
-              🎁 Start Free Trial →
-            </button>
-          )}
-          {trialActive && (
-            <span style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 11,
-              color: 'rgba(255,255,255,0.35)',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 100, padding: '4px 12px',
-            }}>
-              ⚡ {trialDaysRemaining} days left in trial
-            </span>
-          )}
-        </div>
-
-
-
-
-
         {briefingLoading ? (
-          <div>
-            <div style={{ height: 16, background: 'rgba(255,255,255,0.06)', borderRadius: 6, marginBottom: 8, width: '85%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-            <div style={{ height: 16, background: 'rgba(255,255,255,0.04)', borderRadius: 6, marginBottom: 8, width: '70%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-            <div style={{ height: 16, background: 'rgba(255,255,255,0.03)', borderRadius: 6, marginBottom: 20, width: '55%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-            <div style={{ height: 36, background: 'rgba(232,93,32,0.15)', borderRadius: 10, width: 160, animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ height: 12, background: 'rgba(0,0,0,0.06)', borderRadius: 6, width: '40%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 15, background: 'rgba(0,0,0,0.05)', borderRadius: 6, width: '85%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 15, background: 'rgba(0,0,0,0.04)', borderRadius: 6, width: '70%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 15, background: 'rgba(0,0,0,0.03)', borderRadius: 6, width: '55%', animation: 'pulse 1.5s ease-in-out infinite' }} />
           </div>
         ) : (
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Header row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: '#E85D20',
+              }}>
+                ⚡ FastIQ Briefing
+              </span>
+              <span style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 11, color: 'rgba(0,0,0,0.25)',
+              }}>
+                Updated just now
+              </span>
+            </div>
+
+            {/* Briefing text */}
             <p style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: 15,
-              fontWeight: 400, color: 'rgba(255,255,255,0.82)',
-              margin: '0 0 20px', lineHeight: 1.65,
-              maxWidth: 600,
+              fontSize: 15, fontWeight: 400,
+              color: '#1a1a1a', lineHeight: 1.65, margin: 0,
             }}>
               {briefing?.greeting || `Hey ${firstName} — ready to move your career forward today?`}
             </p>
+
+            {/* CTA row */}
             {briefing?.cta_label && (
-              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)',
+              }}>
                 <button
                   onClick={() => navigate(briefing.cta_page)}
                   style={{
@@ -253,19 +230,30 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                 >
                   {briefing.cta_label} →
                 </button>
-                <p style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 11,
-                  color: 'rgba(255,255,255,0.2)',
-                  margin: 0, flexShrink: 0,
-                }}>
-                  Updated just now
-                </p>
+                {trialNotStarted && (
+                  <button onClick={() => onOpenUpgrade?.()} style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 12, fontWeight: 600, color: '#E85D20',
+                    background: 'rgba(232,93,32,0.08)',
+                    border: '1px solid rgba(232,93,32,0.2)',
+                    borderRadius: 100, padding: '5px 14px',
+                    cursor: 'pointer', minHeight: 'auto',
+                  }}>
+                    🎁 Start Free Trial
+                  </button>
+                )}
+                {trialActive && (
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 11, color: 'rgba(0,0,0,0.35)',
+                  }}>
+                    ⚡ {trialDaysRemaining} days left in trial
+                  </span>
+                )}
               </div>
             )}
           </div>
         )}
-        </div>
       </div>
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
 
