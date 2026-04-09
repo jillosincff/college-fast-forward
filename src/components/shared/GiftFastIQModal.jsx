@@ -15,7 +15,8 @@ export default function GiftFastIQModal({ user, onClose }) {
     if (!target) return;
     setLoading(true);
     const res = await giftFastIQToStudent({ studentEmail: target });
-    setStatus(res?.data?.status || 'activated');
+    const resultStatus = res?.data?.status || 'activated';
+    setStatus(resultStatus);
     setDone(true);
     setLoading(false);
   };
@@ -54,7 +55,9 @@ export default function GiftFastIQModal({ user, onClose }) {
                 {status === 'activated' ? 'Gift activated!' : 'Invite sent!'}
               </p>
               <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 20 }}>
-                {status === 'activated'
+                {status === 'already_active'
+                  ? 'Your student already has an active FastIQ subscription — no action needed!'
+                  : status === 'activated'
                   ? 'Your student now has 7 days of full FastIQ access. We sent them an email to let them know.'
                   : "We sent your student an invite. Once they sign up, FastIQ will activate automatically."}
               </p>

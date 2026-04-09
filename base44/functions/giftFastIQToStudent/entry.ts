@@ -24,6 +24,11 @@ Deno.serve(async (req) => {
   const student = students?.[0];
 
   if (student) {
+    // Never overwrite an existing paying subscription
+    if (student.stripe_customer_id && student.subscription_status === 'active' && !student.fastiq_trial_active) {
+      return Response.json({ success: true, status: 'already_active' });
+    }
+
     const trialStart = new Date();
     const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
 

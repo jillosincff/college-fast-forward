@@ -310,6 +310,12 @@ Deno.serve(async (req) => {
               const student = studentMatches?.[0];
 
               if (student) {
+                // Never overwrite a paying subscription with a trial gift
+                if (student.stripe_customer_id && student.subscription_status === 'active' && !student.fastiq_trial_active) {
+                  console.log('[stripeWebhook] Student already has paid FastIQ — skipping gift:', studentEmail);
+                  continue;
+                }
+
                 await base44.asServiceRole.entities.User.update(student.id, {
                   subscription_status: 'active',
                   membership_tier: 'fastiq',

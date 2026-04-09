@@ -47,6 +47,14 @@ export default function ParentHome() {
   const offer = useFoundingOffer(user);
   const [showActivationConfirm, setShowActivationConfirm] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
+
+  // Auto-open gift modal when linked from email CTA (?gift=open)
+  useEffect(() => {
+    if (params.gift === 'open') {
+      setShowGiftModal(true);
+      window.history.replaceState(null, '', window.location.origin + '/#ParentHome');
+    }
+  }, [params.gift]);
   const params = useParams();
 
   // Detect payment success from Stripe redirect
