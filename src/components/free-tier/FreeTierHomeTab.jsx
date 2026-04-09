@@ -82,6 +82,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const fastiq = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
+  const trialNotStarted = !fastiq && user?.trial_status !== 'expired';
 
   // Parent-gifted trial banner
   const trialEndDate = user?.trial_end_date ? new Date(user.trial_end_date) : null;
@@ -164,11 +165,44 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
       <div style={{
         background: '#0A0A0A',
         borderRadius: 20,
-        padding: 'clamp(24px, 4vw, 40px) clamp(20px, 4vw, 36px)',
         marginBottom: 32,
         position: 'relative',
         overflow: 'hidden',
       }}>
+        {trialNotStarted && (
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            background: 'rgba(232,93,32,0.08)',
+            borderBottom: '1px solid rgba(232,93,32,0.15)',
+            borderRadius: '20px 20px 0 0',
+            gap: 12,
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
+                color: '#E85D20', margin: '0 0 2px'
+              }}>
+                Your free 7-day FastIQ trial is waiting
+              </p>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif", fontSize: 12,
+                color: 'rgba(255,255,255,0.4)', margin: 0
+              }}>
+                Alumni search, AI outreach drafts, resume tailoring and more. No credit card needed.
+              </p>
+            </div>
+            <button onClick={() => onOpenUpgrade?.()} style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#fff',
+              background: '#E85D20', border: 'none', borderRadius: 10,
+              padding: '9px 20px', cursor: 'pointer', minHeight: 'auto',
+              whiteSpace: 'nowrap', flexShrink: 0,
+            }}>Start Free Trial →</button>
+          </div>
+        )}
+        <div style={{ padding: 'clamp(24px, 4vw, 40px) clamp(20px, 4vw, 36px)', position: 'relative' }}>
         <div style={{
           position: 'absolute', top: -40, right: -40,
           width: 200, height: 200, borderRadius: '50%',
@@ -220,6 +254,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             )}
           </div>
         )}
+        </div>
       </div>
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
 

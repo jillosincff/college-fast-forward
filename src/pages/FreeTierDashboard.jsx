@@ -15,7 +15,7 @@ import FreeTierCareerGoalsTab from '@/components/free-tier/FreeTierCareerGoalsTa
 import FreeTierAlumniNetworkTab from '@/components/free-tier/FreeTierAlumniNetworkTab';
 import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
-import WelcomeBackTrialBanner from '@/components/free-tier/WelcomeBackTrialBanner';
+
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 import CareerConciergeUpgradeModal from '@/components/free-tier/CareerConciergeUpgradeModal';
 import NotebookPage from '@/components/free-tier/NotebookPage';
@@ -303,10 +303,7 @@ export default function FreeTierDashboard() {
             </div>
           </div>
         )}
-        <WelcomeBackTrialBanner
-          user={user}
-          onTrialActivated={() => { if (refreshUser) refreshUser(); }}
-        />
+
         {showUpgradeSuccess && (
           <div style={{
             background: 'linear-gradient(135deg, #0A0A0A 0%, #1a1a1a 100%)',
