@@ -183,68 +183,60 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
           pointerEvents: 'none',
         }} />
 
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 11, fontWeight: 700,
-          textTransform: 'uppercase', letterSpacing: '0.15em',
-          color: '#E85D20', margin: '0 0 16px',
-          display: 'flex', alignItems: 'center', gap: 6,
-        }}>
-          <span>⚡</span> FASTIQ BRIEFING
-        </p>
+        {/* Card header row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <p style={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.15em',
+            color: '#E85D20', margin: 0,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <span>⚡</span> FASTIQ BRIEFING
+          </p>
+          {trialActive && (
+            <button onClick={() => onOpenUpgrade?.()} style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600,
+              color: '#E85D20', background: 'rgba(232,93,32,0.12)',
+              border: '1px solid rgba(232,93,32,0.25)', borderRadius: 100,
+              padding: '3px 10px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+            }}>
+              ⚡ Trial — {trialDaysRemaining}d left
+            </button>
+          )}
+          {trialNotStarted && (
+            <button onClick={() => onOpenUpgrade?.()} style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600,
+              color: '#E85D20', background: 'rgba(232,93,32,0.12)',
+              border: '1px solid rgba(232,93,32,0.25)', borderRadius: 100,
+              padding: '3px 10px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+            }}>
+              🎁 Start free trial
+            </button>
+          )}
+        </div>
 
-        {trialNotStarted && (
-          <>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 20px' }} />
-            <div style={{ marginBottom: 20 }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#E85D20', margin: '0 0 4px' }}>
-                Your free 7-day FastIQ trial is waiting
-              </p>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 14px', lineHeight: 1.5 }}>
-                Alumni search, AI outreach drafts, resume tailoring. No credit card needed.
-              </p>
-              <button onClick={() => onOpenUpgrade?.()} style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#fff',
-                background: '#E85D20', border: 'none', borderRadius: 10,
-                padding: '10px 22px', cursor: 'pointer', minHeight: 'auto',
-              }}>Start Free Trial →</button>
-            </div>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 20px' }} />
-          </>
-        )}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginBottom: 18 }} />
 
-        {trialActive && (
-          <>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 16px' }} />
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
-                ⚡ FastIQ Trial — {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining
-              </span>
-              <button onClick={() => onOpenUpgrade?.()} style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#E85D20',
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', whiteSpace: 'nowrap',
-              }}>Upgrade to keep access →</button>
-            </div>
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0 0 20px' }} />
-          </>
-        )}
+
 
         {briefingLoading ? (
           <div>
-            <div style={{ height: 28, background: 'rgba(255,255,255,0.06)', borderRadius: 6, marginBottom: 10, width: '80%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-            <div style={{ height: 20, background: 'rgba(255,255,255,0.04)', borderRadius: 6, marginBottom: 24, width: '60%', animation: 'pulse 1.5s ease-in-out infinite' }} />
-            <div style={{ height: 40, background: 'rgba(232,93,32,0.15)', borderRadius: 10, width: 180, animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 16, background: 'rgba(255,255,255,0.06)', borderRadius: 6, marginBottom: 8, width: '85%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 16, background: 'rgba(255,255,255,0.04)', borderRadius: 6, marginBottom: 8, width: '70%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 16, background: 'rgba(255,255,255,0.03)', borderRadius: 6, marginBottom: 20, width: '55%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 36, background: 'rgba(232,93,32,0.15)', borderRadius: 10, width: 160, animation: 'pulse 1.5s ease-in-out infinite' }} />
           </div>
         ) : (
           <div>
             <p style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 'clamp(18px, 3vw, 24px)',
-              fontWeight: 700, color: '#fff',
-              margin: '0 0 24px', lineHeight: 1.5,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 15,
+              fontWeight: 400, color: 'rgba(255,255,255,0.82)',
+              margin: '0 0 20px', lineHeight: 1.65,
               maxWidth: 600,
             }}>
-              {briefing?.greeting || `Hey ${firstName}! Ready to move your career forward today?`}
+              {briefing?.greeting || `Hey ${firstName} — ready to move your career forward today?`}
             </p>
             {briefing?.cta_label && (
               <button
