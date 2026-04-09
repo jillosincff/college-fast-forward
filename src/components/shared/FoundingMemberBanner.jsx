@@ -38,145 +38,44 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
 
   if (!show) return null;
 
+  const days = timeLeft?.days ?? 0;
+  const hours = timeLeft?.hours ?? 0;
+  const minutes = timeLeft?.minutes ?? 0;
+
+  if (isExpired) return null;
+
   return (
-    <div
-      style={{
-        background: 'linear-gradient(135deg, #1a0e06 0%, #2a1410 100%)',
-        border: '1px solid rgba(232,93,32,0.3)',
-        borderRadius: 12,
-        padding: '16px',
-        position: 'relative',
-        marginBottom: 20,
-        boxShadow: '0 8px 24px rgba(232,93,32,0.15)',
-      }}
-    >
-      {/* Dismiss button */}
-      <button
-        onClick={onDismiss}
-        style={{
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: 'auto',
-          minWidth: 'auto',
-        }}
-      >
-        <X style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.4)' }} />
-      </button>
-
-      <div style={{ paddingRight: 24 }}>
-        {/* Headline */}
-        <h3 style={{
-          fontFamily: playfair,
-          fontSize: 'clamp(16px, 4.5vw, 22px)',
-          lineHeight: 1.25,
-          fontWeight: 700,
-          color: '#E85D20',
-          margin: '0 0 8px',
-          letterSpacing: '-0.01em',
-        }}>
-          Founding Member Pricing Ends April 15
-        </h3>
-
-        {/* Subtext */}
-        <p style={{
-          fontFamily: dmSans,
-          fontSize: 14,
-          color: 'rgba(255,255,255,0.75)',
-          margin: '0 0 16px',
-          lineHeight: 1.5,
-        }}>
-          Lock in 50% off FastIQ forever — $14.50/mo instead of $29. Available until April 15th only.
-        </p>
-
-        {/* Countdown or expired message */}
-        {isExpired ? (
-          <p style={{
-            fontFamily: dmSans,
-            fontSize: 13,
-            color: '#c9a84c',
-            margin: 0,
-            fontWeight: 600,
-          }}>
-            Offer has ended
-          </p>
-        ) : timeLeft ? (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 8,
-            marginBottom: 16,
-          }}>
-            {[
-              { value: timeLeft.days, label: 'Days' },
-              { value: timeLeft.hours, label: 'Hours' },
-              { value: timeLeft.minutes, label: 'Min' },
-              { value: timeLeft.seconds, label: 'Sec' },
-            ].map((item) => (
-              <div key={item.label} style={{ textAlign: 'center' }}>
-                <p style={{
-                  fontFamily: playfair,
-                  fontSize: 20,
-                  fontWeight: 700,
-                  color: '#E85D20',
-                  margin: '0 0 4px',
-                }}>
-                  {String(item.value).padStart(2, '0')}
-                </p>
-                <p style={{
-                  fontFamily: dmSans,
-                  fontSize: 11,
-                  color: 'rgba(255,255,255,0.5)',
-                  margin: 0,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  fontWeight: 600,
-                }}>
-                  {item.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        {/* CTA button */}
-        {!isExpired && (
-          <button
-            onClick={onUpgrade}
-            style={{
-              background: '#E85D20',
-              border: 'none',
-              borderRadius: 8,
-              padding: '12px 20px',
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#fff',
-              cursor: 'pointer',
-              fontFamily: dmSans,
-              minHeight: 'auto',
-              width: '100%',
-              transition: 'opacity 0.2s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.88'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
-          >
-            Claim Founding Price →
-          </button>
-        )}
+    <div style={{
+      background: 'linear-gradient(90deg, #1a0e06, #2a1506)',
+      borderBottom: '1px solid rgba(232,93,32,0.2)',
+      padding: '10px 16px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+      flexWrap: 'wrap',
+    }}>
+      <span style={{
+        fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.8)',
+        display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap',
+      }}>
+        🏅{' '}
+        <span style={{ color: '#E85D20', fontWeight: 600 }}>
+          Founding Member Pricing ends in {days}d {hours}h {minutes}m
+        </span>
+        {' '}— lock in $14.50/mo forever instead of $29
+      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+        <button onClick={onUpgrade} style={{
+          fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#fff',
+          background: '#E85D20', border: 'none', borderRadius: 8,
+          padding: '6px 16px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+        }}>Claim Now →</button>
+        <button onClick={onDismiss} style={{
+          background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
+          cursor: 'pointer', fontSize: 16, minHeight: 'auto', minWidth: 'auto', padding: 0,
+        }}>✕</button>
       </div>
-
-      <style>{`
-        @media (max-width: 640px) {
-          /* Mobile adjustments handled via clamp() */
-        }
-      `}</style>
     </div>
   );
 }
