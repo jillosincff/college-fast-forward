@@ -128,7 +128,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
   );
 
   return (
-    <div>
+    <div style={{ background: '#f7f6f3', minHeight: '100vh' }}>
       <TrialUsageRecap user={user} />
       {/* Parent-Gifted FastIQ Banner */}
       {showParentGiftBanner && (
