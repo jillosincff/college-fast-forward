@@ -696,6 +696,7 @@ function AppContent() {
       // Aliases
       if (pageHash === 'GetStarted') pageHash = 'GatorAuth';
       if (pageHash === 'PreAuth') pageHash = 'StudentInvitedOnboarding';
+      if (pageHash === 'GiftFastIQ') { window.location.hash = '#ParentHome?gift=open'; return; }
       setCurrentPage(pageHash || 'LandingPage');
       setResolvedPage(null);
     };
