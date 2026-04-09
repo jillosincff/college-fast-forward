@@ -3,20 +3,21 @@ import { X, Loader2 } from 'lucide-react';
 import { giftFastIQToStudent } from '@/functions/giftFastIQToStudent';
 import { findStudentOnCFF } from '@/functions/findStudentOnCFF';
 
-// step: 'search' | 'results' | 'email' | 'done'
+const dm = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
+
 export default function GiftFastIQModal({ user, onClose }) {
-  const [step, setStep] = useState('search');
+  const [step, setStep] = useState('search'); // search | found | multiple | notfound | email | loading | success
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [searching, setSearching] = useState(false);
   const [matches, setMatches] = useState([]);
   const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [doneStatus, setDoneStatus] = useState(null); // { status, studentName, email }
+  const [gifting, setGifting] = useState(false);
+  const [result, setResult] = useState(null); // { status, studentName }
 
   const savedEmail = user?.student_emails?.[0] || null;
 
-  // Step 1 — Search by name
   const handleSearch = async () => {
     if (!firstName.trim() || !lastName.trim()) return;
     setSearching(true);
@@ -24,78 +25,77 @@ export default function GiftFastIQModal({ user, onClose }) {
       const res = await findStudentOnCFF({ firstName: firstName.trim(), lastName: lastName.trim() });
       const found = res?.data?.matches || [];
       setMatches(found);
-      setStep('results');
+      if (found.length === 0) setStep('notfound');
+      else if (found.length === 1) setStep('found');
+      else setStep('multiple');
     } catch (e) {
-      console.error(e);
       setMatches([]);
-      setStep('results');
+      setStep('notfound');
     }
     setSearching(false);
   };
 
-  // Step 2a — Gift to found student by ID
-  const handleGiftById = async (studentId, studentName) => {
-    setLoading(true);
+  const doGift = async ({ studentId, studentEmail }) => {
+    setStep('loading');
+    setGifting(true);
     try {
-      const res = await giftFastIQToStudent({ studentId });
+      const payload = studentId ? { studentId } : { studentEmail: studentEmail.trim().toLowerCase() };
+      const res = await giftFastIQToStudent(payload);
       const status = res?.data?.status || 'activated';
-      setDoneStatus({ status, studentName, email: null });
-      setStep('done');
+      const studentName = res?.data?.studentName || (studentId ? matches[0]?.first_name : null) || null;
+      setResult({ status, studentName, email: studentEmail || null });
+      setStep('success');
     } catch (e) {
-      console.error(e);
+      setResult({ status: 'pending', studentName: null, email: studentEmail || null });
+      setStep('success');
     }
-    setLoading(false);
-  };
-
-  // Step 2b — Gift by email (student not found or parent enters manually)
-  const handleGiftByEmail = async (emailToUse) => {
-    const target = (emailToUse || email).trim().toLowerCase();
-    if (!target) return;
-    setLoading(true);
-    try {
-      const res = await giftFastIQToStudent({ studentEmail: target });
-      const status = res?.data?.status || 'activated';
-      setDoneStatus({ status, studentName: null, email: target });
-      setStep('done');
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
+    setGifting(false);
   };
 
   const inputStyle = {
     width: '100%', padding: '12px 16px', borderRadius: 10,
     border: '1.5px solid #E0E0E0', fontSize: 15, outline: 'none',
-    boxSizing: 'border-box', fontFamily: 'inherit',
+    boxSizing: 'border-box', fontFamily: dm,
   };
 
-  const btnPrimary = (disabled) => ({
+  const btnOrange = (disabled) => ({
     width: '100%', background: disabled ? '#E0E0E0' : '#E85D20',
     border: 'none', borderRadius: 10, padding: '13px',
     fontSize: 15, fontWeight: 600, color: '#fff',
-    cursor: disabled ? 'default' : 'pointer',
-    minHeight: 'auto', display: 'flex',
-    alignItems: 'center', justifyContent: 'center', gap: 8,
+    cursor: disabled ? 'default' : 'pointer', fontFamily: dm,
+    minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
   });
 
-  const btnGhost = {
-    background: 'none', border: 'none', fontSize: 13,
-    color: '#E85D20', cursor: 'pointer', minHeight: 'auto',
-    textDecoration: 'underline', width: '100%', marginTop: 10, padding: 0,
+  const btnOutline = {
+    background: 'none', border: '1.5px solid #E0E0E0', borderRadius: 10,
+    padding: '11px', fontSize: 14, fontWeight: 600, color: '#555',
+    cursor: 'pointer', fontFamily: dm, minHeight: 'auto', width: '100%',
   };
+
+  const btnGhost = {
+    background: 'none', border: 'none', fontSize: 13, color: '#E85D20',
+    cursor: 'pointer', fontFamily: dm, minHeight: 'auto', textDecoration: 'underline',
+    padding: 0,
+  };
+
+  const backBtn = (
+    <button onClick={() => setStep('search')} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: '0 0 16px', display: 'block', fontFamily: dm }}>
+      ← Back
+    </button>
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div style={{ background: '#0A0A0A', padding: '28px 28px 24px' }}>
-          <div className="flex items-start justify-between">
+        <div style={{ background: '#0A0A0A', padding: '24px 24px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div>
-              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#E85D20', margin: '0 0 8px' }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#E85D20', margin: '0 0 6px', fontFamily: dm }}>
                 🎁 FASTIQ GIFT
               </p>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>
+              <h2 style={{ fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3, fontFamily: playfair }}>
                 Give Your Student<br />FastIQ Free
               </h2>
             </div>
@@ -105,177 +105,168 @@ export default function GiftFastIQModal({ user, onClose }) {
           </div>
         </div>
 
-        <div style={{ padding: '24px 28px 28px' }}>
+        <div style={{ padding: '24px 24px 28px' }}>
 
           {/* STEP: search */}
           {step === 'search' && (
             <>
-              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20 }}>
-                Your student gets <strong>7 days of full FastIQ access</strong> — alumni search, AI outreach drafts, resume tailoring, mock interviews, and their personalized daily briefing.{' '}
-                <span style={{ color: '#22C55E', fontWeight: 600 }}>No credit card. No commitment.</span>
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20, fontFamily: dm }}>
+                First, let's check if your student is already on CFF.
               </p>
 
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', marginBottom: 12 }}>
-                Is your student already on CFF?
-              </p>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>First Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Alex"
-                    value={firstName}
-                    onChange={e => setFirstName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                    style={inputStyle}
-                  />
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6, fontFamily: dm }}>First Name</label>
+                  <input type="text" placeholder="Alex" value={firstName} onChange={e => setFirstName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSearch()} style={inputStyle} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6 }}>Last Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Smith"
-                    value={lastName}
-                    onChange={e => setLastName(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                    style={inputStyle}
-                  />
+                  <label style={{ fontSize: 11, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6, fontFamily: dm }}>Last Name</label>
+                  <input type="text" placeholder="Smith" value={lastName} onChange={e => setLastName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSearch()} style={inputStyle} />
                 </div>
               </div>
 
-              <button
-                onClick={handleSearch}
-                disabled={!firstName.trim() || !lastName.trim() || searching}
-                style={btnPrimary(!firstName.trim() || !lastName.trim() || searching)}
-              >
-                {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search →'}
+              <button onClick={handleSearch} disabled={!firstName.trim() || !lastName.trim() || searching} style={btnOrange(!firstName.trim() || !lastName.trim() || searching)}>
+                {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Find My Student →'}
               </button>
 
-              <button onClick={() => setStep('email')} style={btnGhost}>
-                Skip — I'll enter their email directly
-              </button>
-
-              {savedEmail && (
-                <button onClick={() => handleGiftByEmail(savedEmail)} disabled={loading} style={{ ...btnGhost, color: '#555' }}>
-                  Use {savedEmail} on file →
-                </button>
-              )}
+              <div style={{ borderTop: '1px solid #F0F0F0', marginTop: 20, paddingTop: 16, textAlign: 'center' }}>
+                <span style={{ fontSize: 13, color: '#888', fontFamily: dm }}>Or skip to </span>
+                <button onClick={() => setStep('email')} style={btnGhost}>Enter their email instead →</button>
+              </div>
             </>
           )}
 
-          {/* STEP: results */}
-          {step === 'results' && (
+          {/* STEP: found (exactly 1 match) */}
+          {step === 'found' && matches.length === 1 && (
             <>
-              <button onClick={() => setStep('search')} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: '0 0 16px', display: 'block' }}>
-                ← Back
-              </button>
-
-              {matches.length === 0 ? (
+              {backBtn}
+              {matches[0].already_has_fastiq ? (
                 <>
-                  <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, marginBottom: 20 }}>
-                    No match found for <strong>{firstName} {lastName}</strong> at your school. They may not have signed up yet — enter their email and we'll send them an invite.
-                  </p>
-                  <button onClick={() => setStep('email')} style={btnPrimary(false)}>
-                    Enter Their Email →
-                  </button>
+                  <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                    <p style={{ fontSize: 28, margin: '0 0 12px' }}>✅</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px', fontFamily: playfair }}>
+                      {matches[0].first_name} is already set!
+                    </p>
+                    <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, fontFamily: dm }}>
+                      {matches[0].first_name} is already on CFF with FastIQ access — they're all set!
+                    </p>
+                  </div>
+                  <button onClick={onClose} style={btnOrange(false)}>Close</button>
                 </>
               ) : (
                 <>
-                  <p style={{ fontSize: 13, color: '#555', marginBottom: 16 }}>
-                    We found {matches.length} match{matches.length > 1 ? 'es' : ''} — is this your student?
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-                    {matches.map(m => (
-                      <div key={m.id} style={{ border: '1.5px solid #E0E0E0', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#0A0A0A', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
-                            {m.avatar_initials}
-                          </div>
-                          <div>
-                            <p style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 2px' }}>{m.first_name} {m.last_name}</p>
-                            <p style={{ fontSize: 12, color: '#888', margin: 0 }}>{m.school_name || 'CFF Member'}</p>
-                          </div>
-                        </div>
-                        {m.already_has_fastiq ? (
-                          <span style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', background: '#F0FFF4', border: '1px solid #BBF7D0', borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap' }}>
-                            Active ✓
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleGiftById(m.id, m.first_name)}
-                            disabled={loading}
-                            style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', flexShrink: 0 }}
-                          >
-                            {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Gift →'}
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                  <p style={{ fontSize: 13, fontWeight: 700, color: '#22C55E', marginBottom: 14, fontFamily: dm }}>✅ We found them!</p>
+                  <div style={{ border: '1.5px solid #E0E0E0', borderRadius: 12, padding: '16px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                    <div style={{ width: 42, height: 42, borderRadius: '50%', background: '#0A0A0A', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0, fontFamily: dm }}>
+                      {matches[0].avatar_initials}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: dm }}>{matches[0].first_name} {matches[0].last_name}</p>
+                      <p style={{ fontSize: 13, color: '#888', margin: 0, fontFamily: dm }}>{matches[0].school_name || 'CFF Member'}</p>
+                    </div>
                   </div>
-                  <button onClick={() => setStep('email')} style={btnGhost}>
-                    Not them — use email instead
-                  </button>
+                  <p style={{ fontSize: 14, color: '#555', marginBottom: 16, fontFamily: dm }}>Is this your student?</p>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button onClick={() => doGift({ studentId: matches[0].id })} style={{ ...btnOrange(false), flex: 2 }}>
+                      Yes, Gift FastIQ Free →
+                    </button>
+                    <button onClick={() => setStep('email')} style={{ ...btnOutline, flex: 1 }}>
+                      Not them
+                    </button>
+                  </div>
                 </>
               )}
             </>
           )}
 
-          {/* STEP: email */}
+          {/* STEP: multiple matches */}
+          {step === 'multiple' && (
+            <>
+              {backBtn}
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, marginBottom: 16, fontFamily: dm }}>
+                We found a few students named <strong>{firstName} {lastName}</strong>.<br />Enter their email so we can find the right one:
+              </p>
+              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && doGift({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
+              <button onClick={() => doGift({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+                Find My Student →
+              </button>
+            </>
+          )}
+
+          {/* STEP: no match */}
+          {step === 'notfound' && (
+            <>
+              {backBtn}
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, marginBottom: 16, fontFamily: dm }}>
+                We don't see anyone by that name on CFF yet.<br /><br />
+                Enter their email and we'll send them a free FastIQ trial invite:
+              </p>
+              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && doGift({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
+              <button onClick={() => doGift({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+                Send Invite →
+              </button>
+            </>
+          )}
+
+          {/* STEP: email (manual entry / skip) */}
           {step === 'email' && (
             <>
-              <button onClick={() => setStep('search')} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: '0 0 16px', display: 'block' }}>
-                ← Back
-              </button>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>
+              {backBtn}
+              <label style={{ fontSize: 12, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8, fontFamily: dm }}>
                 Student's email address
               </label>
-              <input
-                type="email"
-                placeholder="student@university.edu"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleGiftByEmail()}
-                style={{ ...inputStyle, marginBottom: 12 }}
-              />
-              <button
-                onClick={() => handleGiftByEmail()}
-                disabled={!email.trim() || loading}
-                style={btnPrimary(!email.trim() || loading)}
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Gift →'}
+              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && doGift({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
+              <button onClick={() => doGift({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+                Send Gift →
               </button>
               {savedEmail && (
-                <button onClick={() => handleGiftByEmail(savedEmail)} disabled={loading} style={btnGhost}>
+                <button onClick={() => doGift({ studentEmail: savedEmail })} style={{ ...btnGhost, marginTop: 12 }}>
                   Use {savedEmail} on file →
                 </button>
               )}
             </>
           )}
 
-          {/* STEP: done */}
-          {step === 'done' && doneStatus && (
-            <div className="text-center">
+          {/* STEP: loading */}
+          {step === 'loading' && (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <p style={{ fontSize: 28, marginBottom: 12 }}>🎁</p>
+              <p style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A', fontFamily: dm }}>Sending gift...</p>
+            </div>
+          )}
+
+          {/* STEP: success */}
+          {step === 'success' && result && (
+            <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: 32, marginBottom: 12 }}>
-                {doneStatus.status === 'already_active' ? '✅' : '🎉'}
+                {result.status === 'already_active' ? '✅' : '🎉'}
               </p>
-              <p style={{ fontSize: 16, fontWeight: 700, color: '#1A1A1A', marginBottom: 8 }}>
-                {doneStatus.status === 'already_active'
+              <p style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 10, fontFamily: playfair }}>
+                {result.status === 'already_active'
                   ? 'Already active!'
-                  : doneStatus.status === 'activated'
-                  ? `Done! ${doneStatus.studentName || doneStatus.email || 'Your student'}'s access is live.`
-                  : 'Invite sent!'}
+                  : 'Done!'}
               </p>
-              <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 20 }}>
-                {doneStatus.status === 'already_active'
-                  ? 'Your student already has an active FastIQ subscription — no action needed!'
-                  : doneStatus.status === 'activated'
-                  ? `We've emailed ${doneStatus.studentName || doneStatus.email} their access. They can start using FastIQ immediately.`
-                  : `We sent an invite to ${doneStatus.email}. Once they sign up, FastIQ will activate automatically.`}
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, marginBottom: 24, fontFamily: dm }}>
+                {result.status === 'already_active'
+                  ? `${result.studentName || 'Your student'} already has an active FastIQ subscription — they're all set!`
+                  : result.status === 'activated'
+                  ? `${result.studentName ? result.studentName + "'s" : 'Your student\'s'} FastIQ trial is active right now. We've sent them an email so they know.\n\nTheir trial runs for 7 days. If they love it, lock in $14.50/mo before April 15th.`
+                  : `We've sent an invite to ${result.email || 'your student'}. Once they sign up, FastIQ will activate automatically.`}
               </p>
-              <button onClick={onClose} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto' }}>
-                Done
-              </button>
+              {result.status === 'activated' && (
+                <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
+                  <a
+                    href="https://collegefastforward.com/#FastIQDashboard"
+                    style={{ ...btnOrange(false), flex: 2, textDecoration: 'none', fontSize: 13 }}
+                  >
+                    Lock In Founding Rate →
+                  </a>
+                  <button onClick={onClose} style={{ ...btnOutline, flex: 1 }}>Close</button>
+                </div>
+              )}
+              {result.status !== 'activated' && (
+                <button onClick={onClose} style={btnOrange(false)}>Done</button>
+              )}
             </div>
           )}
 
