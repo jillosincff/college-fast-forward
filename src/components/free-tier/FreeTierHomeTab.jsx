@@ -169,7 +169,8 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
       {/* HERO — Dynamic AI Briefing */}
       <div style={{
         background: '#0A0A0A',
-        borderRadius: 20,
+        borderLeft: '3px solid #E85D20',
+        borderRadius: '0 12px 12px 0',
         marginBottom: 32,
         position: 'relative',
         overflow: 'hidden',
@@ -250,10 +251,18 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                     padding: 0, minHeight: 'auto',
                   }}
                 >
-                  {briefing.cta_label} →
+                {briefing.cta_label} →
                 </button>
-              </div>
-            )}
+                <p style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 11,
+                color: 'rgba(255,255,255,0.2)',
+                margin: '8px 0 0',
+                }}>
+                Updated just now
+                </p>
+                </div>
+                )}
           </div>
         )}
         </div>
