@@ -15,6 +15,7 @@ import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
 import FoundingOfferHomeCard from '@/components/founding-offer/FoundingOfferHomeCard';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
+import GiftFastIQModal from '@/components/shared/GiftFastIQModal';
 
 export default function ParentHome() {
   const { user } = useAuth();
@@ -45,6 +46,7 @@ export default function ParentHome() {
 
   const offer = useFoundingOffer(user);
   const [showActivationConfirm, setShowActivationConfirm] = useState(false);
+  const [showGiftModal, setShowGiftModal] = useState(false);
   const params = useParams();
 
   // Detect payment success from Stripe redirect
@@ -141,10 +143,23 @@ export default function ParentHome() {
           {/* Priority 5 — All clear */}
           {allClear && <AllClearCard students={students} />}
 
+          {/* Gift FastIQ CTA */}
+          {!isFastIQ && (
+            <div style={{ marginTop: 24, textAlign: 'center' }}>
+              <button
+                onClick={() => setShowGiftModal(true)}
+                style={{ background: 'none', border: '1.5px solid #E85D20', borderRadius: 12, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', system-ui, sans-serif", minHeight: 'auto' }}
+              >
+                🎁 Give My Student FastIQ Free →
+              </button>
+            </div>
+          )}
+
           {/* Student Progress — always shown */}
           <StudentProgressSection students={students} />
         </main>
       </PullToRefresh>
+      {showGiftModal && <GiftFastIQModal user={user} onClose={() => setShowGiftModal(false)} />}
     </div>
   );
 }

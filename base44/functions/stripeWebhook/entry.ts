@@ -299,14 +299,17 @@ Deno.serve(async (req) => {
 
         // Parent-gifted FastIQ: activate student account + send gift email
         if (subscriptionTier === 'fastiq' && billingUser?.persona === 'parent') {
-          const studentEmail = billingUser.pending_student_invite_email || billingUser.student_email;
-          if (studentEmail) {
+          const studentEmailsToGift = [
+            ...(billingUser.student_emails || []),
+            billingUser.pending_student_invite_email,
+          ].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i); // dedupe
+
+          for (const studentEmail of studentEmailsToGift) {
             try {
               const studentMatches = await base44.asServiceRole.entities.User.filter({ email: studentEmail });
               const student = studentMatches?.[0];
 
               if (student) {
-                // Activate FastIQ on student account
                 await base44.asServiceRole.entities.User.update(student.id, {
                   subscription_status: 'active',
                   membership_tier: 'fastiq',
@@ -314,11 +317,13 @@ Deno.serve(async (req) => {
                   is_fastiq: true,
                   fastiq_setup_complete: true,
                   gifted_by_parent_email: billingUser.email,
+                  linked_parent_name: billingUser.full_name?.split(' ')[0] || 'Your parent',
                   trial_start_date: new Date().toISOString(),
                   trial_end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                  trial_status: 'active',
+                  fastiq_trial_active: true,
                 });
 
-                // Send rich gift notification email to student
                 await base44.asServiceRole.functions.invoke('sendParentGiftedFastIQEmail', {
                   studentEmail: student.email,
                   studentFirstName: student.full_name?.split(' ')[0] || 'there',
@@ -328,14 +333,14 @@ Deno.serve(async (req) => {
 
                 console.log('[stripeWebhook] FastIQ gifted to student:', studentEmail);
               } else {
-                // Student hasn't signed up yet — store pending gift so it activates on signup
+                // Student hasn't signed up yet — store pending gift on parent
                 await base44.asServiceRole.entities.User.update(billingUser.id, {
                   pending_fastiq_gift_email: studentEmail,
                 });
                 console.log('[stripeWebhook] Student not yet signed up — gift pending:', studentEmail);
               }
             } catch (giftErr) {
-              console.error('[stripeWebhook] Parent gift FastIQ error:', giftErr.message);
+              console.error('[stripeWebhook] Parent gift FastIQ error for', studentEmail, ':', giftErr.message);
             }
           }
         }
