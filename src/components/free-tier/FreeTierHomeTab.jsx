@@ -239,19 +239,20 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
               {briefing?.greeting || `Hey ${firstName} — ready to move your career forward today?`}
             </p>
             {briefing?.cta_label && (
-              <button
-                onClick={() => navigate(briefing.cta_page)}
-                style={{
-                  background: '#E85D20', border: 'none',
-                  borderRadius: 10, padding: '12px 24px',
-                  fontSize: 13, fontWeight: 600,
-                  color: '#fff', cursor: 'pointer',
-                  fontFamily: "'DM Sans', sans-serif",
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                }}
-              >
-                {briefing.cta_label} →
-              </button>
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <button
+                  onClick={() => navigate(briefing.cta_page)}
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 14, fontWeight: 600,
+                    color: '#E85D20', background: 'none',
+                    border: 'none', cursor: 'pointer',
+                    padding: 0, minHeight: 'auto',
+                  }}
+                >
+                  {briefing.cta_label} →
+                </button>
+              </div>
             )}
           </div>
         )}
