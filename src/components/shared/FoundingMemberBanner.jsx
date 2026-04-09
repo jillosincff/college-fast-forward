@@ -44,7 +44,7 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
         background: 'linear-gradient(135deg, #1a0e06 0%, #2a1410 100%)',
         border: '1px solid rgba(232,93,32,0.3)',
         borderRadius: 12,
-        padding: '20px 24px',
+        padding: '16px',
         position: 'relative',
         marginBottom: 20,
         boxShadow: '0 8px 24px rgba(232,93,32,0.15)',
@@ -71,11 +71,12 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
         <X style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.4)' }} />
       </button>
 
-      <div style={{ paddingRight: 28 }}>
+      <div style={{ paddingRight: 24 }}>
         {/* Headline */}
         <h3 style={{
           fontFamily: playfair,
-          fontSize: 'clamp(18px, 3vw, 24px)',
+          fontSize: 'clamp(16px, 4.5vw, 22px)',
+          lineHeight: 1.25,
           fontWeight: 700,
           color: '#E85D20',
           margin: '0 0 8px',
@@ -108,9 +109,9 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
           </p>
         ) : timeLeft ? (
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))',
-            gap: 12,
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 8,
             marginBottom: 16,
           }}>
             {[
@@ -160,6 +161,7 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
               cursor: 'pointer',
               fontFamily: dmSans,
               minHeight: 'auto',
+              width: '100%',
               transition: 'opacity 0.2s',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.88'; }}
