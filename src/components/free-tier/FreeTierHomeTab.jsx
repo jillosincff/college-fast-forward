@@ -217,7 +217,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
           )}
         </div>
 
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginBottom: 18 }} />
+
 
 
 
@@ -240,7 +240,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
               {briefing?.greeting || `Hey ${firstName} — ready to move your career forward today?`}
             </p>
             {briefing?.cta_label && (
-              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <button
                   onClick={() => navigate(briefing.cta_page)}
                   style={{
@@ -251,18 +251,18 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
                     padding: 0, minHeight: 'auto',
                   }}
                 >
-                {briefing.cta_label} →
+                  {briefing.cta_label} →
                 </button>
                 <p style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 11,
-                color: 'rgba(255,255,255,0.2)',
-                margin: '8px 0 0',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.2)',
+                  margin: 0, flexShrink: 0,
                 }}>
-                Updated just now
+                  Updated just now
                 </p>
-                </div>
-                )}
+              </div>
+            )}
           </div>
         )}
         </div>
