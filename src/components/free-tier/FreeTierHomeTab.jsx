@@ -82,7 +82,12 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const fastiq = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
-  const trialNotStarted = !fastiq && user?.trial_status !== 'expired';
+  const isPaying = user?.subscription_status === 'active';
+  const trialActive = !isPaying && (user?.trial_status === 'active' || user?.fastiq_trial_active === true);
+  const trialNotStarted = !isPaying && !trialActive && user?.trial_status !== 'expired';
+  const trialDaysRemaining = user?.trial_end_date
+    ? Math.max(0, Math.ceil((new Date(user.trial_end_date) - new Date()) / (1000 * 60 * 60 * 24)))
+    : 7;
 
   // Parent-gifted trial banner
   const trialEndDate = user?.trial_end_date ? new Date(user.trial_end_date) : null;
@@ -200,6 +205,31 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
               padding: '9px 20px', cursor: 'pointer', minHeight: 'auto',
               whiteSpace: 'nowrap', flexShrink: 0,
             }}>Start Free Trial →</button>
+          </div>
+        )}
+        {trialActive && (
+          <div style={{
+            padding: '8px 16px',
+            background: 'rgba(232,93,32,0.06)',
+            borderBottom: '1px solid rgba(232,93,32,0.1)',
+            borderRadius: '20px 20px 0 0',
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}>
+            <span style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 12,
+              color: 'rgba(255,255,255,0.45)'
+            }}>
+              ⚡ FastIQ Trial — {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining
+            </span>
+            <button onClick={() => onOpenUpgrade?.()} style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, color: '#E85D20',
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: 0, minHeight: 'auto', whiteSpace: 'nowrap',
+            }}>
+              Upgrade to keep access →
+            </button>
           </div>
         )}
         <div style={{ padding: 'clamp(24px, 4vw, 40px) clamp(20px, 4vw, 36px)', position: 'relative' }}>

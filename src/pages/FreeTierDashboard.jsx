@@ -55,7 +55,9 @@ export default function FreeTierDashboard() {
   }, []);
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
-  const showFoundingBanner = !isFastIQ && !bannerDismissed && new Date() < new Date('2026-04-15T23:59:59');
+  const isPaying = user?.subscription_status === 'active';
+  const foundingDeadlinePassed = new Date() > new Date('2026-04-15T23:59:59');
+  const showFoundingBanner = !isPaying && !isFastIQ && !bannerDismissed && !foundingDeadlinePassed;
   const handleDismissBanner = () => { localStorage.setItem('founding_banner_dismissed', 'true'); setBannerDismissed(true); };
   const firstName = user?.full_name?.split(' ')[0] || 'there';
 
