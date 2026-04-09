@@ -313,6 +313,7 @@ Deno.serve(async (req) => {
                   fastiq_active: true,
                   is_fastiq: true,
                   fastiq_setup_complete: true,
+                  gifted_by_parent_email: billingUser.email,
                   trial_start_date: new Date().toISOString(),
                   trial_end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
                 });

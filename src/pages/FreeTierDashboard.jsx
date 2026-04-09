@@ -140,7 +140,11 @@ export default function FreeTierDashboard() {
     if (!user) return;
     const fastiqActivatedRecently = user?.trial_start_date &&
       (Date.now() - new Date(user.trial_start_date).getTime()) < 7 * 24 * 60 * 60 * 1000;
-    const giftedByParent = isFastIQ && fastiqActivatedRecently && !user?.stripe_customer_id;
+    const giftedByParent = isFastIQ &&
+      fastiqActivatedRecently &&
+      !user?.stripe_customer_id &&
+      !!(user?.gifted_by_parent_email || user?.family_id) &&
+      user?.persona === 'student';
     if (giftedByParent) {
       setShowGiftBanner(true);
       setGiftParentName(user?.linked_parent_name || 'Your parent');

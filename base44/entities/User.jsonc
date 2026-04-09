@@ -323,6 +323,10 @@
       "format": "date-time",
       "description": "When the trial Day 8 (trial ended) email was last sent"
     },
+    "gifted_by_parent_email": {
+      "type": "string",
+      "description": "Email of the parent who gifted FastIQ to this student"
+    },
     "career_goals": {
       "type": "object",
       "description": "Structured career goals saved from FastIQ career goals chat",
