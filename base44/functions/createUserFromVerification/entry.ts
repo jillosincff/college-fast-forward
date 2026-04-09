@@ -87,12 +87,53 @@ Deno.serve(async (req) => {
 
     console.log("User created successfully:", newUser.id);
 
-    return new Response(JSON.stringify({ 
-      success: true, 
+    // Check if a parent gifted FastIQ to this email before they signed up
+    try {
+      const parentRecords = await base44.asServiceRole.entities.User.filter({ pending_fastiq_gift_email: lowerCaseEmail });
+      if (parentRecords && parentRecords.length > 0) {
+        const parent = parentRecords[0];
+        const trialStart = new Date();
+        const trialEnd = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+        await base44.asServiceRole.entities.User.update(newUser.id, {
+          fastiq_active: true,
+          is_fastiq: true,
+          fastiq_setup_complete: true,
+          membership_tier: 'fastiq',
+          subscription_status: 'active',
+          trial_start_date: trialStart.toISOString(),
+          trial_end_date: trialEnd.toISOString(),
+          trial_status: 'active',
+          fastiq_trial_active: true,
+          gifted_by_parent_email: parent.email,
+          linked_parent_name: parent.full_name?.split(' ')[0] || 'Your parent',
+        });
+
+        // Clear pending gift from parent
+        await base44.asServiceRole.entities.User.update(parent.id, {
+          pending_fastiq_gift_email: null,
+        });
+
+        // Notify student
+        await base44.asServiceRole.functions.invoke('sendParentGiftedFastIQEmail', {
+          studentEmail: lowerCaseEmail,
+          studentFirstName: full_name?.split(' ')[0] || 'there',
+          parentFirstName: parent.full_name?.split(' ')[0] || 'Your parent',
+          trialDays: 7,
+        }).catch(e => console.error('[createUserFromVerification] Gift email failed:', e.message));
+
+        console.log('[createUserFromVerification] Pending FastIQ gift activated from parent:', parent.email);
+      }
+    } catch (giftErr) {
+      console.error('[createUserFromVerification] Pending gift check failed:', giftErr.message);
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
       user: newUser,
       session_token: sessionToken,
-      message: 'Account created and verified successfully!' 
-    }), { 
+      message: 'Account created and verified successfully!'
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
