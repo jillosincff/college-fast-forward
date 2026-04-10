@@ -69,7 +69,7 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
           padding: '0 0 0 8px', flexShrink: 0,
         }}>✕</button>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
         <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
           — lock in $14.50/mo forever instead of $29
         </span>
@@ -77,7 +77,7 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
           fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#fff',
           background: '#E85D20', border: 'none', borderRadius: 8,
           padding: '6px 16px', cursor: 'pointer', minHeight: 'auto',
-          whiteSpace: 'nowrap', flexShrink: 0,
+          whiteSpace: 'nowrap',
         }}>Claim $14.50/mo →</button>
       </div>
     </div>
