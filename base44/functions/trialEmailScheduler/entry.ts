@@ -59,8 +59,10 @@ Deno.serve(async (req) => {
     // Day 6 parent nudge: trial ends tomorrow AND was gifted by a parent
     const isDay6ParentNudge = daysLeft === 1 && !!u.gifted_by_parent_email;
 
-    // Day 6 payment method nudge: Stripe-based trial user with no payment method on file
-    const isDay6PaymentNudge = daysLeft === 1 && !!u.stripe_customer_id && !u.stripe_payment_method_id;
+    // Day 6 payment method nudge: Stripe-based trial user (self-initiated, not parent-gifted).
+    // stripe_payment_method_id is never written to the user record, so we can't filter on it.
+    // Sending to all Stripe trial users is safe — having a card already is harmless.
+    const isDay6PaymentNudge = daysLeft === 1 && !!u.stripe_customer_id && !u.gifted_by_parent_email;
 
     try {
       if (isDay5) {
