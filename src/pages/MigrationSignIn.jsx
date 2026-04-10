@@ -111,86 +111,20 @@ export default function MigrationSignIn() {
           <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0 }}>Your network. Your career. Let's go.</p>
         </div>
 
-        <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, textAlign: 'center' }}>
+        <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 28, fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, textAlign: 'center' }}>
           👋 Welcome to the new College Fast Forward.<br/>
           Enter your email below and we'll send you a one-time login link — no password needed.
         </div>
-
-        <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 4, marginBottom: 28, display: 'flex', gap: 4 }}>
-          {['signin', 'signup', 'magic'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => { setActiveTab(tab); setError(''); setInfo(''); }}
-              style={{
-                flex: 1, padding: '10px 12px', borderRadius: 8, border: 'none',
-                background: activeTab === tab ? '#fff' : 'transparent',
-                color: activeTab === tab ? '#1a1a1a' : 'rgba(255,255,255,0.4)',
-                fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: dmSans,
-                transition: 'all 0.2s', minHeight: 'auto',
-              }}
-            >
-              {tab === 'signin' && 'Sign in'}
-              {tab === 'signup' && 'Create'}
-              {tab === 'magic' && 'Magic link'}
-            </button>
-          ))}
-        </div>
-
-        {/* Sign In Tab */}
-        {activeTab === 'signin' && (
-          <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
-              <input type="email" value={signinEmail} onChange={(e) => setSigninEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-            <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Password</label>
-              <input type="password" value={signinPassword} onChange={(e) => setSigninPassword(e.target.value)} placeholder="••••••••" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-            <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-        )}
-
-        {/* Sign Up Tab */}
-        {activeTab === 'signup' && (
-          <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Full Name</label>
-              <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Albert Gator" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-            <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
-              <input type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-            <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Password</label>
-              <input type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="Min. 8 characters" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-            <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Confirm Password</label>
-              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-            <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
-              {isLoading ? 'Creating...' : 'Create Account'}
-            </button>
-          </form>
-        )}
-
-        {/* Magic Link Tab */}
-        {activeTab === 'magic' && (
-          <form onSubmit={handleSendMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div>
-              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
-              <input type="email" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-            <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
-              {isLoading ? 'Sending...' : 'Send Magic Link'}
-            </button>
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
-          </form>
-        )}
+        <form onSubmit={handleSendMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
+            <input type="email" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+            {isLoading ? 'Sending...' : 'Send Magic Link'}
+          </button>
+          <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
+        </form>
 
         {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#EF4444', margin: 0 }}>{error}</p></div>}
         {info && !error && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#22C55E', margin: 0 }}>{info}</p></div>}
