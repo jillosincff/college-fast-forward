@@ -15,7 +15,8 @@ export default function EmailPasswordAuth({ defaultTab = 'existing' }) {
   const [info, setInfo] = useState('');
   const [isMigration] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('migration') === 'true';
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    return params.get('migration') === 'true' || hashParams.get('migration') === 'true';
   }); // New state for success/info messages
 
   // Sign in
