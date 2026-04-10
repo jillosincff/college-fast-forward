@@ -21,6 +21,7 @@ import CareerAssessment from '@/pages/CareerAssessment';
 import FastIQDashboard from '@/pages/FastIQDashboard';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
+import MigrationSignIn from '@/pages/MigrationSignIn';
 import ParentWelcome from '@/pages/ParentWelcome';
 import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
