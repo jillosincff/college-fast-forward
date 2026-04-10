@@ -239,19 +239,21 @@ export default function GiftFastIQModal({ user, onClose }) {
           {step === 'success' && result && (
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: 32, marginBottom: 12 }}>
-                {result.status === 'already_active' ? '✅' : '🎉'}
+                {result.status === 'already_active' ? '✅' : result.status === 'pending' ? '📬' : '🎉'}
               </p>
               <p style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 10, fontFamily: playfair }}>
                 {result.status === 'already_active'
-                  ? 'Already active!'
+                  ? 'Already covered!'
+                  : result.status === 'pending'
+                  ? 'Invite sent!'
                   : 'Done!'}
               </p>
               <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, marginBottom: 24, fontFamily: dm }}>
                 {result.status === 'already_active'
-                  ? `${result.studentName || 'Your student'} already has an active FastIQ subscription — they're all set!`
+                  ? `${result.studentName || 'Your student'} already has FastIQ access. They're all set.`
                   : result.status === 'activated'
-                  ? `${result.studentName ? result.studentName + "'s" : 'Your student\'s'} FastIQ trial is active right now. We've sent them an email so they know.\n\nTheir trial runs for 7 days. If they love it, lock in $14.50/mo before April 15th.`
-                  : `We've sent an invite to ${result.email || 'your student'}. Once they sign up, FastIQ will activate automatically.`}
+                  ? `${result.studentName ? result.studentName + "'s" : "Your student's"} FastIQ trial is active right now. We've sent them an email so they know. Their trial runs for 7 days. If they love it, lock in $14.50/mo before April 15th.`
+                  : `We've emailed ${result.email || 'your student'} with their free FastIQ trial. Their 7-day clock starts the moment they sign up.`}
               </p>
               {result.status === 'activated' && (
                 <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
