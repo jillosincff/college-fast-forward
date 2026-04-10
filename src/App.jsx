@@ -56,6 +56,7 @@ const AuthenticatedApp = () => {
 
           {/* Public/Auth routes - no layout wrapper */}
           <Route path="/GetStarted" element={<GatorAuth />} />
+          <Route path="/MigrationSignIn" element={<MigrationSignIn />} />
 
           {/* Explicit routes first for higher priority */}
           <Route path="/FreeTierDashboard" element={<LayoutWrapper currentPageName="FreeTierDashboard"><FreeTierDashboard /></LayoutWrapper>} />
