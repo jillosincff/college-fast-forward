@@ -8,8 +8,10 @@ export default function MigrationSignIn() {
 
   useEffect(() => {
     // Auto-select Magic Link tab for migration users
+    // Check both URL search params and hash for migration parameter
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('migration') === 'true') {
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    if (urlParams.get('migration') === 'true' || hashParams.get('migration') === 'true') {
       setDefaultTab('magic');
     }
   }, []);
