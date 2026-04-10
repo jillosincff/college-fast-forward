@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
 
     if (isSubscription) {
       body.append('subscription_data[trial_period_days]', '7');
+      body.append('payment_method_collection', 'if_required');
       body.append('subscription_data[metadata][user_id]', clientUser.id);
       body.append('subscription_data[metadata][plan]', plan);
       body.append('subscription_data[metadata][subscription_tier]', subscriptionTier);
