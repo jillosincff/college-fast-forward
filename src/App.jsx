@@ -5,7 +5,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { HashRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -51,6 +51,9 @@ const AuthenticatedApp = () => {
   // Render the main app
       return (
         <Routes>
+          {/* Redirects */}
+          <Route path="/Home" element={<Navigate to="/" replace />} />
+
           {/* Public/Auth routes - no layout wrapper */}
           <Route path="/GetStarted" element={<GatorAuth />} />
 
