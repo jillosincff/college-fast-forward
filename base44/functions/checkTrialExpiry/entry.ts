@@ -8,10 +8,14 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
   }
 
-  const expiredTrialUsers = await base44.asServiceRole.entities.User.filter({
+  // Only expire app-level trials (no stripe_subscription_id).
+  // Stripe-based trial users are expired by the stripeWebhook via
+  // customer.subscription.updated with status: 'past_due' or 'canceled'.
+  const allExpiredCandidates = await base44.asServiceRole.entities.User.filter({
     trial_status: 'active',
     trial_end_date: { $lt: new Date().toISOString() },
   });
+  const expiredTrialUsers = allExpiredCandidates.filter(u => !u.stripe_subscription_id);
 
   const results = { processed: 0, errors: [] };
 

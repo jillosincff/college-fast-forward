@@ -385,6 +385,18 @@ Deno.serve(async (req) => {
           userUpdates.membership_tier = (status === 'active' || status === 'trialing') ? 'fastiq' : billingUser?.membership_tier;
         }
 
+        // Expire Stripe-based trials when subscription goes past_due or canceled
+        // This is the authoritative expiry path for Stripe checkout trial users.
+        if (status === 'past_due' || status === 'canceled') {
+          userUpdates.trial_status = 'expired';
+          userUpdates.fastiq_trial_active = false;
+          if (status === 'canceled') {
+            userUpdates.subscription_status = 'canceled';
+            userUpdates.fastiq_active = false;
+            userUpdates.membership_tier = 'free';
+          }
+        }
+
         if (billingUser) {
           await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
           console.log('Updated billing user subscription:', billingUser.id, status);
