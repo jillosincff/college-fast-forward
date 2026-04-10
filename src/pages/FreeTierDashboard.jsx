@@ -227,13 +227,7 @@ export default function FreeTierDashboard() {
         />
       </div>
       <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
-        <div style={{ padding: '16px 16px 0' }}>
-          <FoundingMemberBanner
-            show={showBanner && !isFastIQ}
-            onUpgrade={() => navigate('FastIQDashboard')}
-            onDismiss={() => setShowBanner(false)}
-          />
-        </div>
+
         {showFoundingBanner && (
           <div style={{
             background: '#0A0A0A',
