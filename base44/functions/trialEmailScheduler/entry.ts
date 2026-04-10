@@ -52,6 +52,8 @@ Deno.serve(async (req) => {
       trialEndDate,
       daysLeft,
       upgradeUrl,
+      giftedByParent: u.gifted_by_parent_email || null,
+      parentName: u.linked_parent_name || null,
     };
 
     try {
