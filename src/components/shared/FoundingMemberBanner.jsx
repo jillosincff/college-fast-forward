@@ -49,32 +49,36 @@ export default function FoundingMemberBanner({ onUpgrade, onDismiss, show }) {
       background: 'linear-gradient(90deg, #1a0e06, #2a1506)',
       borderBottom: '1px solid rgba(232,93,32,0.2)',
       padding: '10px 16px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 12,
-      flexWrap: 'wrap',
     }}>
-      <span style={{
-        fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.8)',
-        display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap',
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', gap: 8,
       }}>
-        🏅{' '}
-        <span style={{ color: '#E85D20', fontWeight: 600 }}>
-          Founding Member Pricing ends in {days}d {hours}h {minutes}m
+        <span style={{
+          fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.8)',
+          flex: 1, minWidth: 0,
+        }}>
+          🏅{' '}
+          <span style={{ color: '#E85D20', fontWeight: 600 }}>
+            Founding Member Pricing ends in {days}d {hours}h {minutes}m
+          </span>
         </span>
-        {' '}— lock in $14.50/mo forever instead of $29
-      </span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+        <button onClick={onDismiss} style={{
+          background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
+          cursor: 'pointer', fontSize: 16, minHeight: 'auto', minWidth: 'auto',
+          padding: '0 0 0 8px', flexShrink: 0,
+        }}>✕</button>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+        <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+          — lock in $14.50/mo forever instead of $29
+        </span>
         <button onClick={onUpgrade} style={{
           fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#fff',
           background: '#E85D20', border: 'none', borderRadius: 8,
-          padding: '6px 16px', cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
-        }}>Claim Now →</button>
-        <button onClick={onDismiss} style={{
-          background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
-          cursor: 'pointer', fontSize: 16, minHeight: 'auto', minWidth: 'auto', padding: 0,
-        }}>✕</button>
+          padding: '6px 16px', cursor: 'pointer', minHeight: 'auto',
+          whiteSpace: 'nowrap', flexShrink: 0,
+        }}>Claim $14.50/mo →</button>
       </div>
     </div>
   );
