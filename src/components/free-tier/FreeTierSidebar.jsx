@@ -117,7 +117,7 @@ export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUp
         <img
           src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/801071149_BlackWhiteMinimalistInitialsMonogramJewelryLogo.jpg"
           alt="CFF"
-          style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+          style={{ height: 72, width: 'auto', objectFit: 'contain' }}
         />
       </div>
 
