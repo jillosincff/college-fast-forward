@@ -43,6 +43,10 @@ export default function GatorAuth() {
   const { user, isLoadingAuth: isLoading } = useAuth();
   const [step, setStep] = useState(null);
   const [activeTab, setActiveTab] = useState('signin');
+  const [isMigration] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('migration') === 'true';
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -191,6 +195,24 @@ export default function GatorAuth() {
               Your network. Your career. Let's go.
             </p>
           </div>
+
+          {isMigration && (
+            <div style={{
+              background: 'rgba(232,93,32,0.08)',
+              border: '1px solid rgba(232,93,32,0.2)',
+              borderRadius: 10,
+              padding: '12px 16px',
+              marginBottom: 20,
+              fontFamily: dmSans,
+              fontSize: 13,
+              color: 'rgba(255,255,255,0.75)',
+              lineHeight: 1.6,
+              textAlign: 'center',
+            }}>
+              👋 Welcome to the new College Fast Forward.<br/>
+              Enter your email below and we'll send you a one-time login link — no password needed.
+            </div>
+          )}
 
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 4, marginBottom: 28, display: 'flex', gap: 4 }}>
             {['signin', 'signup', 'magic'].map(tab => (
