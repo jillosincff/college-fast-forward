@@ -126,13 +126,14 @@ Deno.serve(async (req) => {
   const offset = body.offset || 0;
   const batchSize = body.batch_size || 300;
 
-  // Fetch parents + alumni helpers (exclude alumni who are job seekers)
-  const [parents, allAlumni] = await Promise.all([
-    base44.asServiceRole.entities.User.filter({ persona: 'parent' }),
+  // Fetch students (gator/student persona) + alumni seekers
+  const [students, gators, allAlumni] = await Promise.all([
+    base44.asServiceRole.entities.User.filter({ persona: 'student' }),
+    base44.asServiceRole.entities.User.filter({ persona: 'gator' }),
     base44.asServiceRole.entities.User.filter({ persona: 'alumni' }),
   ]);
-  const alumniHelpers = allAlumni.filter(u => u.alumni_intent !== 'seeker');
-  const allRecipients = [...parents, ...alumniHelpers].filter(u => !!u.email);
+  const alumniSeekers = allAlumni.filter(u => u.alumni_intent === 'seeker');
+  const allRecipients = [...students, ...gators, ...alumniSeekers].filter(u => !!u.email);
   const batch = allRecipients.slice(offset, offset + batchSize);
 
   const results = { sent: 0, failed: 0, errors: [], total: allRecipients.length, offset, batch_size: batchSize, has_more: offset + batchSize < allRecipients.length };
