@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     u.fastiq_setup_complete !== true
   );
 
-  const results = { day5: 0, day7: 0, day8: 0, errors: [] };
+  const results = { day5: 0, day6_payment: 0, day7: 0, day8: 0, errors: [] };
   const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 
   for (const u of trialUsers) {
@@ -59,6 +59,9 @@ Deno.serve(async (req) => {
     // Day 6 parent nudge: trial ends tomorrow AND was gifted by a parent
     const isDay6ParentNudge = daysLeft === 1 && !!u.gifted_by_parent_email;
 
+    // Day 6 payment method nudge: Stripe-based trial user with no payment method on file
+    const isDay6PaymentNudge = daysLeft === 1 && !!u.stripe_customer_id && !u.stripe_payment_method_id;
+
     try {
       if (isDay5) {
         const sentToday = u.last_day5_email_sent_at &&
@@ -67,6 +70,37 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.functions.invoke('sendTrialDay5Email', payload);
           await base44.asServiceRole.entities.User.update(u.id, { last_day5_email_sent_at: new Date().toISOString() });
           results.day5++;
+        }
+      } else if (isDay6PaymentNudge) {
+        const sentToday = u.last_day6_payment_email_sent_at &&
+          new Date(u.last_day6_payment_email_sent_at).toDateString() === new Date().toDateString();
+        if (!sentToday) {
+          // Generate a Stripe customer portal URL for adding a payment method
+          const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
+          let portalUrl = `${appBaseUrl}/#FastIQDashboard`;
+          try {
+            const portalRes = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${STRIPE_SECRET}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({
+                customer: u.stripe_customer_id,
+                return_url: `${appBaseUrl}/#FreeTierDashboard`,
+              }),
+            });
+            const portalSession = await portalRes.json();
+            if (portalSession.url) portalUrl = portalSession.url;
+          } catch (_) {}
+
+          await base44.asServiceRole.functions.invoke('sendTrialPaymentReminderEmail', {
+            userEmail: u.email,
+            firstName,
+            portalUrl,
+          });
+          await base44.asServiceRole.entities.User.update(u.id, { last_day6_payment_email_sent_at: new Date().toISOString() });
+          results.day6_payment++;
         }
       } else if (isDay6ParentNudge) {
         // Dedup on the PARENT record using last_parent_day6_email_sent_at
