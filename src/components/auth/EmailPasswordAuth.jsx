@@ -12,7 +12,11 @@ export default function EmailPasswordAuth({ defaultTab = 'existing' }) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [info, setInfo] = useState(''); // New state for success/info messages
+  const [info, setInfo] = useState('');
+  const [isMigration] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('migration') === 'true';
+  }); // New state for success/info messages
 
   // Sign in
   const [signinEmail, setSigninEmail] = useState('');
@@ -115,6 +119,24 @@ export default function EmailPasswordAuth({ defaultTab = 'existing' }) {
           <h1 className="text-3xl font-bold text-white">College Fast Forward</h1>
           <p className="text-white/80 mt-1">Choose how you want to sign in</p> {/* Updated text */}
         </div>
+
+        {isMigration && (
+          <div style={{
+            background: 'rgba(232,93,32,0.08)',
+            border: '1px solid rgba(232,93,32,0.2)',
+            borderRadius: 10,
+            padding: '12px 16px',
+            marginBottom: 20,
+            fontFamily: "'DM Sans', system-ui, sans-serif",
+            fontSize: 13,
+            color: 'rgba(255,255,255,0.75)',
+            lineHeight: 1.6,
+            textAlign: 'center',
+          }}>
+            👋 Welcome to the new College Fast Forward.<br/>
+            Enter your email below and we'll send you a one-time login link — no password needed.
+          </div>
+        )}
 
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setError(''); setInfo(''); }}> {/* Clear messages on tab change */}
           <TabsList className="grid w-full grid-cols-3">
