@@ -855,13 +855,14 @@ function AppContent() {
 
   // Pages where certain users have their own nav (hide the global header)
   // Pages where specific personas render their own nav bar — hide global header
-  const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard'];
+  const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard', 'FastIQDashboard'];
   const parentOwnNavPages = ['Profile', 'ParentHome', 'ParentProfileEdit', 'Directory'];
   const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
   const isEstablishedAlumniUser = user?.persona === 'alumni' && user?.alumni_seniority !== 'recent_grad';
   const isParentUser = user?.persona === 'parent' || user?.roles?.includes('parent');
   const hasOwnNav =
+    resolvedPage === 'FreeTierDashboard' ||
     ((isStudentUser || isRecentGradAlumni) && studentOwnNavPages.includes(resolvedPage)) ||
     (isEstablishedAlumniUser && resolvedPage === 'AlumniDashboard') ||
     (isParentUser && parentOwnNavPages.includes(resolvedPage));
