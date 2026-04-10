@@ -69,24 +69,27 @@ Deno.serve(async (req) => {
           results.day5++;
         }
       } else if (isDay6ParentNudge) {
-        const sentToday = u.last_parent_nudge_email_sent_at &&
-          new Date(u.last_parent_nudge_email_sent_at).toDateString() === new Date().toDateString();
-        if (!sentToday) {
-          // Look up the parent's name
-          let parentFirstName = u.linked_parent_name || null;
-          if (!parentFirstName) {
-            try {
-              const parents = await base44.asServiceRole.entities.User.filter({ email: u.gifted_by_parent_email });
-              parentFirstName = parents?.[0]?.full_name?.split(' ')[0] || null;
-            } catch (_) {}
-          }
+        // Dedup on the PARENT record using last_parent_day6_email_sent_at
+        let parentRecord = null;
+        try {
+          const parents = await base44.asServiceRole.entities.User.filter({ email: u.gifted_by_parent_email });
+          parentRecord = parents?.[0] || null;
+        } catch (_) {}
+
+        const alreadySentToday = parentRecord?.last_parent_day6_email_sent_at &&
+          new Date(parentRecord.last_parent_day6_email_sent_at).toDateString() === new Date().toDateString();
+
+        if (!alreadySentToday && parentRecord) {
+          const parentFirstName = parentRecord.full_name?.split(' ')[0] || u.linked_parent_name || null;
           await base44.asServiceRole.functions.invoke('sendParentTrialEndingEmail', {
             parentEmail: u.gifted_by_parent_email,
             parentName: parentFirstName,
             studentName: firstName,
             upgradeUrl: `${appBaseUrl}/#ParentHome`,
           });
-          await base44.asServiceRole.entities.User.update(u.id, { last_parent_nudge_email_sent_at: new Date().toISOString() });
+          await base44.asServiceRole.entities.User.update(parentRecord.id, {
+            last_parent_day6_email_sent_at: new Date().toISOString(),
+          });
         }
       } else if (daysSinceTrial === 7) {
         const sentToday = u.last_day7_email_sent_at &&

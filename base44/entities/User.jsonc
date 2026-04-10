@@ -323,9 +323,26 @@
       "format": "date-time",
       "description": "When the trial Day 8 (trial ended) email was last sent"
     },
+    "last_parent_day6_email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the Day 6 parent nudge email was last sent (stored on the parent record)"
+    },
     "gifted_by_parent_email": {
       "type": "string",
       "description": "Email of the parent who gifted FastIQ to this student"
+    },
+    "linked_parent_name": {
+      "type": "string",
+      "description": "First name of the parent who gifted FastIQ"
+    },
+    "pending_fastiq_gift_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Student emails pending a FastIQ gift once they sign up"
     },
     "career_goals": {
       "type": "object",
@@ -463,6 +480,88 @@
       },
       "default": [],
       "description": "Target industries"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "School code for school isolation (must never be overwritten)"
+    },
+    "school_name": {
+      "type": "string",
+      "description": "Human-readable school name"
+    },
+    "career_archetype": {
+      "type": "string",
+      "description": "Career archetype from assessment"
+    },
+    "resume_score": {
+      "type": "number",
+      "description": "Resume quality score"
+    },
+    "has_searched_alumni": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user has searched alumni"
+    },
+    "has_messaged_connection": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user has messaged a connection"
+    },
+    "has_done_mock_interview": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether user has done a mock interview"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID"
+    },
+    "founding_offer_redeemed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the founding member offer was redeemed"
+    },
+    "founding_offer_redeemed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the founding offer was redeemed"
+    },
+    "founding_member_plan": {
+      "type": "string",
+      "description": "Plan name for founding members"
+    },
+    "founding_offer_home_seen": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the founding offer home card has been shown"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current Stripe billing period ends"
+    },
+    "payment_failed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the last payment failure occurred"
+    },
+    "payment_failure_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of consecutive payment failures"
+    },
+    "fastiq_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether FastIQ is currently active for this user"
+    },
+    "family_id": {
+      "type": "string",
+      "description": "ID of the Family record this user belongs to"
     }
   },
   "required": []
