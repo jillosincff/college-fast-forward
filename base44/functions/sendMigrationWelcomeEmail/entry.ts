@@ -138,7 +138,7 @@ const EMAIL_TEMPLATE = (firstName) => `<!DOCTYPE html>
                   <table cellpadding="0" cellspacing="0" border="0">
                     <tr>
                       <td style="background-color:#E85D20;border-radius:12px;">
-                        <a href="https://collegefastforward.com/#GetStarted?migration=true" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;letter-spacing:0.01em;">
+                        <a href="https://collegefastforward.com/#MigrationSignIn?migration=true" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;letter-spacing:0.01em;">
                           Access My Account →
                         </a>
                       </td>

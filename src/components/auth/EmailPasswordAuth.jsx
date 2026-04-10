@@ -8,9 +8,9 @@ import { registerUser } from '@/functions/registerUser';
 import { signInWithPassword } from '@/functions/signInWithPassword';
 import { sendMagicLink } from '@/functions/sendMagicLink'; // New import
 
-export default function EmailPasswordAuth() {
+export default function EmailPasswordAuth({ defaultTab = 'existing' }) {
   const { navigate } = useRouter();
-  const [activeTab, setActiveTab] = useState('existing');
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState(''); // New state for success/info messages
@@ -118,10 +118,10 @@ export default function EmailPasswordAuth() {
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setError(''); setInfo(''); }}> {/* Clear messages on tab change */}
-          <TabsList className="grid w-full grid-cols-3"> {/* Changed to 3 columns */}
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="existing">Sign in</TabsTrigger>
             <TabsTrigger value="new">Create account</TabsTrigger>
-            <TabsTrigger value="magic">Magic link</TabsTrigger> {/* New tab trigger */}
+            <TabsTrigger value="magic">Magic link</TabsTrigger>
           </TabsList>
 
           <TabsContent value="existing" className="mt-6">
