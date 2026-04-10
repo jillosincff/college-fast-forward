@@ -122,24 +122,26 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Unknown mode. Use mode: "test" or mode: "blast".' }, { status: 400 });
   }
 
+  // Batch support: offset + batch_size to split large sends across multiple calls
+  const offset = body.offset || 0;
+  const batchSize = body.batch_size || 300;
+
   // Fetch parents + alumni helpers (exclude alumni who are job seekers)
   const [parents, allAlumni] = await Promise.all([
     base44.asServiceRole.entities.User.filter({ persona: 'parent' }),
     base44.asServiceRole.entities.User.filter({ persona: 'alumni' }),
   ]);
   const alumniHelpers = allAlumni.filter(u => u.alumni_intent !== 'seeker');
-  const recipients = [...parents, ...alumniHelpers];
+  const allRecipients = [...parents, ...alumniHelpers].filter(u => !!u.email);
+  const batch = allRecipients.slice(offset, offset + batchSize);
 
-  const results = { sent: 0, failed: 0, errors: [] };
+  const results = { sent: 0, failed: 0, errors: [], total: allRecipients.length, offset, batch_size: batchSize, has_more: offset + batchSize < allRecipients.length };
 
-  for (const recipient of recipients) {
-    if (!recipient.email) continue;
+  for (const recipient of batch) {
     const firstName = recipient.full_name?.split(' ')[0] || 'there';
     try {
       await sendViaSendGrid(recipient.email, firstName, SENDGRID_API_KEY, body.subject, body.html_body);
       results.sent++;
-      // Throttle — 3 per second to stay within SendGrid rate limits
-      await new Promise(r => setTimeout(r, 333));
     } catch (e) {
       results.failed++;
       results.errors.push({ email: recipient.email, error: e.message });
