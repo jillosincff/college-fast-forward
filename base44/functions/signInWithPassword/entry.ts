@@ -1,3 +1,6 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import bcrypt from 'npm:bcryptjs@2.4.3';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -5,42 +8,69 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  try {
+    const { email, password } = await req.json();
+
+    if (!email || !password) {
+      return new Response(JSON.stringify({ error: 'Email and password are required.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    try {
-        const { email, password } = await req.json();
-        
-        if (!email || !password) {
-            return new Response(JSON.stringify({ 
-                error: "Email and password are required." 
-            }), { 
-                status: 400, 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-            });
-        }
+    const emailLower = email.toLowerCase().trim();
+    const base44 = createClientFromRequest(req);
 
-        // For now, just return a success response
-        return new Response(JSON.stringify({ 
-            success: true,
-            message: "Sign in request received. We're working on authenticating you!",
-            debug: {
-                email: email.toLowerCase()
-            }
-        }), { 
-            status: 200, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        });
+    // Find the most recent registration attempt for this email that has a password hash
+    const attempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({ email: emailLower });
+    // Sort by created_date descending to get most recent password change
+    const attempt = attempts
+      ?.filter(a => a.password_hash)
+      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
 
-    } catch (e) {
-        console.error('Sign in error:', e);
-        return new Response(JSON.stringify({ 
-            error: "Sign in failed. Please try again.",
-            details: e.message 
-        }), { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        });
+    if (!attempt) {
+      return new Response(JSON.stringify({ error: 'No account found with this email. Try signing in with Google or use a magic link.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+
+    // Verify password
+    const passwordValid = await bcrypt.compare(password, attempt.password_hash);
+    if (!passwordValid) {
+      return new Response(JSON.stringify({ error: 'Incorrect password. Try a magic link if you recently changed your password.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Password is valid — generate a one-time magic link to create a real session
+    const token = `ml_${crypto.randomUUID()}`;
+    const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
+
+    await base44.asServiceRole.entities.MagicLink.create({
+      email: emailLower,
+      token,
+      expires_at,
+    });
+
+    const origin = req.headers.get('origin') || 'https://www.collegefastforward.com';
+    const magicLink = `${origin}/#PreAuth?token=${token}`;
+
+    return new Response(JSON.stringify({ success: true, magicLink }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (e) {
+    console.error('signInWithPassword error:', e);
+    return new Response(JSON.stringify({ error: 'Sign in failed. Please try again.' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 });

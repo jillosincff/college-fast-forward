@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -138,6 +137,12 @@ export default function EmailPasswordAuth() {
               <Button type="submit" disabled={isLoading} className="w-full h-12 bg-[var(--uf-orange)] hover:bg-orange-600">
                 {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing in...</> : 'Sign in'}
               </Button>
+              <p className="text-xs text-white/70 text-center mt-2">
+                Trouble signing in?{' '}
+                <button type="button" onClick={() => { setActiveTab('magic'); setMagicEmail(signinEmail); setError(''); setInfo(''); }} className="underline text-white/90 hover:text-white" style={{ minHeight: 'auto', minWidth: 'auto' }}>
+                  Use a magic link instead
+                </button>
+              </p>
             </form>
           </TabsContent>
 
