@@ -14,8 +14,12 @@ export default function useCheckout(user) {
     setError(null);
     try {
       const origin = window.location.origin;
-      const successUrl = `${origin}/#ParentHome?payment=success`;
-      const cancelUrl = `${origin}/#ParentHome?payment=cancelled`;
+      const successUrl = user?.persona === 'parent'
+        ? `${origin}/#ParentHome?payment=success`
+        : `${origin}/#FreeTierDashboard?upgraded=true`;
+      const cancelUrl = user?.persona === 'parent'
+        ? `${origin}/#ParentHome?payment=cancelled`
+        : `${origin}/#FreeTierDashboard`;
 
       const response = await createCheckoutSession({
         plan,

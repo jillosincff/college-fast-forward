@@ -14,6 +14,9 @@ export default function PostJoinUpsell() {
   const handleTrialStart = async () => {
     setLoading(true);
     try {
+      const successUrl = user?.persona === 'parent'
+        ? `${window.location.origin}/#ParentHome?payment=success`
+        : `${window.location.origin}/#FreeTierDashboard?upgraded=true`;
       const res = await base44.functions.invoke('createCheckoutSession', {
         userId: user?.id,
         userEmail: user?.email,
@@ -21,6 +24,8 @@ export default function PostJoinUpsell() {
         isTrial: true,
         trialDays: 7,
         isFoundingMember: true,
+        successUrl,
+        cancelUrl: `${window.location.origin}/#PostJoinUpsell`,
       });
       if (res?.data?.url) {
         window.location.href = res.data.url;
