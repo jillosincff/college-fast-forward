@@ -164,7 +164,7 @@ export default function GatorAuth() {
     }
     
     if (user && !user.persona) {
-      setStep('auth');
+      navigate('WelcomeRole');
       return;
     }
     
