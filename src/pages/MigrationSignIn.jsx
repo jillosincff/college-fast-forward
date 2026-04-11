@@ -8,6 +8,7 @@ import { registerUser } from '@/functions/registerUser';
 import { signInWithPassword } from '@/functions/signInWithPassword';
 import { sendMagicLink } from '@/functions/sendMagicLink';
 import { verifyMagicLink } from '@/functions/verifyMagicLink';
+import { base44 } from '@/api/base44Client';
 
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -31,16 +32,20 @@ export default function MigrationSignIn() {
       .then(({ data }) => {
         if (data?.success) {
           setTokenVerified(true);
-          setInfo(`Welcome back! Signing you in as ${data.email}...`);
-          // Redirect to login to establish a real platform session
+          // Store verified email so GatorAuth can pre-fill and show a welcome message
+          if (data.email) {
+            sessionStorage.setItem('migration_verified_email', data.email);
+          }
+          setInfo(`Identity verified! Redirecting you to sign in with Google...`);
+          // Base44 sessions are Google OAuth only — redirect to complete sign-in
           setTimeout(() => {
-            window.location.href = window.location.origin + '/#GatorAuth';
-          }, 1500);
+            base44.auth.redirectToLogin(window.location.origin + '/#FreeTierDashboard');
+          }, 1800);
         } else {
-          setError(data?.error || 'This link is invalid or has expired.');
+          setError(data?.error || 'This link is invalid or has expired. Please request a new one.');
         }
       })
-      .catch(() => setError('This link is invalid or has expired.'))
+      .catch(() => setError('This link is invalid or has expired. Please request a new one.'))
       .finally(() => setIsLoading(false));
   }, []);
   const [signinEmail, setSigninEmail] = useState('');

@@ -32,8 +32,19 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
     // Create a one-time magic link token
+    // Rate limit: block if a link was already sent in the last 2 minutes
+    const recentLinks = await base44.asServiceRole.entities.MagicLink.filter({ email: emailLower });
+    const twoMinsAgo = new Date(Date.now() - 2 * 60 * 1000);
+    const recentlySent = recentLinks?.some(l => !l.used && new Date(l.created_date) > twoMinsAgo);
+    if (recentlySent) {
+      return new Response(JSON.stringify({ success: false, error: 'A magic link was already sent recently. Please check your inbox or wait 2 minutes before trying again.' }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const token = `ml_${crypto.randomUUID()}`;
-    const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+    const expires_at = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 60 minutes
 
     await base44.asServiceRole.entities.MagicLink.create({
       email: emailLower,
