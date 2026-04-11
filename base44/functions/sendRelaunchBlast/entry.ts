@@ -65,7 +65,7 @@ const EMAIL_BODY = `<!DOCTYPE html>
                 <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;color:#ffffff;line-height:1.7;margin:0 0 28px;">Click below to create your account on the new platform. Free forever — takes less than 2 minutes.</p>
                 <table cellpadding="0" cellspacing="0" border="0"><tr>
                   <td style="background-color:#E85D20;border-radius:12px;">
-                    <a href="https://www.collegefastforward.com" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;">Join College Fast Forward →</a>
+                    <a href="https://collegefastforward.com" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;">Join College Fast Forward →</a>
                   </td>
                 </tr></table>
               </td></tr>
