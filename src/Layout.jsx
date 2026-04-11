@@ -126,7 +126,7 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 // Connections (Ask the Network) removed
 const Profile = React.lazy(() => import('./pages/Profile'));
 const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
-const WelcomeRole = React.lazy(() => import('./pages/WelcomeRole'));
+// WelcomeRole removed — replaced by GatorWelcome
 const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
 const Onboarding = React.lazy(() => import('./pages/Onboarding'));
 const AlumniOnboarding = React.lazy(() => import('./pages/AlumniOnboarding'));
@@ -518,7 +518,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 }
 
 const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
-const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
 const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
@@ -548,7 +548,7 @@ const getPageComponent = (pageName) => {
     case 'PostRequest': return PostRequest;
     case 'Profile': return Profile;
     case 'ProfileEdit': return ProfileEdit;
-    case 'WelcomeRole': return WelcomeRole;
+    case 'WelcomeRole': return GatorWelcome;
     case 'StudentOnboarding': return StudentOnboarding;
     case 'Onboarding': return Onboarding;
     case 'AlumniOnboarding': return AlumniOnboarding;
@@ -695,6 +695,7 @@ function AppContent() {
       if (pageHash.startsWith('/')) pageHash = pageHash.slice(1);
       // Aliases
       if (pageHash === 'GetStarted') pageHash = 'GatorAuth';
+      if (pageHash === 'WelcomeRole') pageHash = 'GatorWelcome';
       if (pageHash === 'PreAuth') pageHash = 'StudentInvitedOnboarding';
       if (pageHash === 'Home') pageHash = 'LandingPage';
       if (pageHash === 'GiftFastIQ') { window.location.hash = '#ParentHome?gift=open'; return; }
