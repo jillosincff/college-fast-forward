@@ -254,7 +254,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required.' }, { status: 403, headers: corsHeaders });
     }
 
-    const { blast = false } = await req.json().catch(() => ({}));
+    const { blast = false, test_email } = await req.json().catch(() => ({}));
 
     const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
     const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://www.collegefastforward.com';
@@ -262,14 +262,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'SENDGRID_API_KEY not set.' }, { status: 500, headers: corsHeaders });
     }
 
-    // TEST MODE: send only to josinoff@gmail.com
+    // TEST MODE
     if (!blast) {
+      const recipient = test_email || 'josinoff@gmail.com';
       const html = buildEmailHtml('Jill', appBaseUrl);
       const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: { Authorization: `Bearer ${SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          personalizations: [{ to: [{ email: 'josinoff@gmail.com', name: 'Jill Osinoff' }] }],
+          personalizations: [{ to: [{ email: recipient, name: 'Jill Osinoff' }] }],
           from: { email: 'jill@collegefastforward.com', name: 'Jill Osinoff' },
           reply_to: { email: 'jill@collegefastforward.com', name: 'Jill Osinoff' },
           subject: "We're now one platform — here's how to access your account",
@@ -280,7 +281,7 @@ Deno.serve(async (req) => {
         const err = await sgRes.text();
         return Response.json({ error: err }, { status: 500, headers: corsHeaders });
       }
-      return Response.json({ success: true, mode: 'test', sent_to: 'josinoff@gmail.com' }, { headers: corsHeaders });
+      return Response.json({ success: true, mode: 'test', sent_to: recipient }, { headers: corsHeaders });
     }
 
     // BLAST MODE: migrated users only
