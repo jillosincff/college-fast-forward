@@ -41,22 +41,33 @@ Deno.serve(async (req) => {
       expires_at,
     });
 
-    const magicLink = `https://www.collegefastforward.com/#PreAuth?token=${token}`;
+    const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://www.collegefastforward.com';
+    const magicLink = `${appBaseUrl}/#MigrationSignIn?token=${token}`;
 
     const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
 
     const emailBody = `
-      <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px;">
-        <h1 style="color: #0021A5; text-align: center;">Your College Fast Forward Login Link</h1>
-        <p>Hi,</p>
-        <p>Click the button below to sign in to your account. This link is valid for 15 minutes and can only be used once.</p>
-        <div style="text-align: center; margin: 20px 0;">
-          <a href="${magicLink}" style="display: inline-block; background-color: #FA4616; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Sign In Securely</a>
+      <div style="font-family: 'DM Sans', sans-serif; background: #0d1117; padding: 40px 20px; min-height: 100vh;">
+        <div style="max-width: 520px; margin: 0 auto; background: #13191f; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden;">
+          <div style="padding: 40px 40px 32px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <h1 style="font-family: Georgia, serif; font-size: 22px; font-weight: 700; color: #ffffff; margin: 0 0 8px; letter-spacing: -0.02em;">COLLEGE FAST FORWARD</h1>
+            <p style="font-size: 13px; color: rgba(255,255,255,0.4); margin: 0;">Your network. Your career.</p>
+          </div>
+          <div style="padding: 40px;">
+            <p style="font-size: 15px; color: rgba(255,255,255,0.75); margin: 0 0 12px; line-height: 1.6;">Here's your secure sign-in link.</p>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.45); margin: 0 0 32px; line-height: 1.6;">Click the button below to access your account. This link expires in 15 minutes and can only be used once.</p>
+            <div style="text-align: center; margin-bottom: 32px;">
+              <a href="${magicLink}" style="display: inline-block; background: #E85D20; color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 15px;">Sign In to My Account →</a>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+              <p style="font-size: 12px; color: rgba(255,255,255,0.3); margin: 0 0 6px;">If the button doesn't work, copy this link:</p>
+              <p style="font-size: 12px; color: rgba(232,93,32,0.8); margin: 0; word-break: break-all;">${magicLink}</p>
+            </div>
+          </div>
+          <div style="padding: 24px 40px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
+            <p style="font-size: 12px; color: rgba(255,255,255,0.2); margin: 0;">If you didn't request this, you can safely ignore this email.</p>
+          </div>
         </div>
-        <p>If the button doesn't work, copy and paste this link:</p>
-        <p style="word-break: break-all;"><a href="${magicLink}">${magicLink}</a></p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-        <p style="font-size: 12px; color: #777;">Go Gators! 🐊</p>
       </div>
     `;
 
@@ -64,7 +75,7 @@ Deno.serve(async (req) => {
       const sendgridPayload = {
         personalizations: [{ to: [{ email: emailLower }] }],
         from: { email: 'hello@collegefastforward.com', name: 'College Fast Forward' },
-        subject: '🐊 Your Secure Sign-In Link',
+        subject: 'Your College Fast Forward Sign-In Link',
         content: [{ type: 'text/html', value: emailBody }],
       };
 

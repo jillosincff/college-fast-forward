@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { navigate } from '@/components/utils/navigation';
 import { registerUser } from '@/functions/registerUser';
 import { signInWithPassword } from '@/functions/signInWithPassword';
 import { sendMagicLink } from '@/functions/sendMagicLink';
+import { verifyMagicLink } from '@/functions/verifyMagicLink';
 
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -17,6 +18,31 @@ export default function MigrationSignIn() {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const [magicEmail, setMagicEmail] = useState('');
+  const [tokenVerified, setTokenVerified] = useState(false);
+
+  useEffect(() => {
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(hashPart);
+    const token = params.get('token');
+    if (!token) return;
+
+    setIsLoading(true);
+    verifyMagicLink({ token })
+      .then(({ data }) => {
+        if (data?.success) {
+          setTokenVerified(true);
+          setInfo(`Welcome back! Signing you in as ${data.email}...`);
+          // Redirect to login to establish a real platform session
+          setTimeout(() => {
+            window.location.href = window.location.origin + '/#GatorAuth';
+          }, 1500);
+        } else {
+          setError(data?.error || 'This link is invalid or has expired.');
+        }
+      })
+      .catch(() => setError('This link is invalid or has expired.'))
+      .finally(() => setIsLoading(false));
+  }, []);
   const [signinEmail, setSigninEmail] = useState('');
   const [signinPassword, setSigninPassword] = useState('');
   const [fullName, setFullName] = useState('');
