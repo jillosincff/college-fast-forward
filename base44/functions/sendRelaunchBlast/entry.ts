@@ -110,7 +110,6 @@ Deno.serve(async (req) => {
   const { testEmail, blast } = await req.json().catch(() => ({}));
 
   const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
-  const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 
   const sendEmail = async (to, firstName) => {
     const body = getEmailBody().replace('{{first_name}}', firstName || 'there');
