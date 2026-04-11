@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const getEmailBody = (appBaseUrl) => `<!DOCTYPE html>
+const getEmailBody = () => `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -65,7 +65,7 @@ const getEmailBody = (appBaseUrl) => `<!DOCTYPE html>
                 <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;color:#ffffff;line-height:1.7;margin:0 0 28px;">Click below to create your account on the new platform. Free forever — takes less than 2 minutes.</p>
                 <table cellpadding="0" cellspacing="0" border="0"><tr>
                   <td style="background-color:#E85D20;border-radius:12px;">
-                    <a href="${appBaseUrl}/" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;">Join College Fast Forward →</a>
+                    <a href="https://collegefastforward.com/#LandingPage" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;">Join College Fast Forward →</a>
                   </td>
                 </tr></table>
               </td></tr>
@@ -105,8 +105,6 @@ const getEmailBody = (appBaseUrl) => `<!DOCTYPE html>
 </body>
 </html>`;
 
-const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
-
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const { testEmail, blast } = await req.json().catch(() => ({}));
@@ -115,7 +113,7 @@ Deno.serve(async (req) => {
   const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 
   const sendEmail = async (to, firstName) => {
-    const body = getEmailBody(APP_BASE_URL).replace('{{first_name}}', firstName || 'there');
+    const body = getEmailBody().replace('{{first_name}}', firstName || 'there');
     const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
