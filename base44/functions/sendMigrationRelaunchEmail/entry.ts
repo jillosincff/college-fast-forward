@@ -283,13 +283,17 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, mode: 'test', sent_to: 'josinoff@gmail.com' }, { headers: corsHeaders });
     }
 
-    // BLAST MODE: find all migrated parents and alumni (have hashed_password, persona is parent or alumni)
+    // BLAST MODE: migrated users only
+    // Cutoff: April 1, 2026 — all migrated users were imported before the new platform launched
+    const MIGRATION_CUTOFF = new Date('2026-04-01T00:00:00.000Z');
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
     const targets = allUsers.filter(u =>
       u.hashed_password &&
       (u.persona === 'parent' || u.persona === 'alumni') &&
-      u.email
+      u.email &&
+      new Date(u.created_date) < MIGRATION_CUTOFF
     );
+    console.log(`📊 Total with hashed_password+persona: ${allUsers.filter(u => u.hashed_password && (u.persona === 'parent' || u.persona === 'alumni')).length}, after cutoff filter: ${targets.length}`);
 
     console.log(`📧 Blast mode: sending to ${targets.length} migrated parents/alumni`);
 
