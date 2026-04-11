@@ -50,7 +50,10 @@ export default function MigrationSignIn() {
       })
       .finally(() => setChecking(false));
   }, []);
-  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotMode, setForgotMode] = useState(() => {
+    const hashPart = window.location.hash.split('?')[1] || '';
+    return new URLSearchParams(hashPart).get('forgot') === 'true';
+  });
   const [forgotEmail, setForgotEmail] = useState('');
   const [signinEmail, setSigninEmail] = useState('');
   const [signinPassword, setSigninPassword] = useState('');

@@ -244,6 +244,15 @@ export default function GatorAuth() {
                 <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Password</label>
                 <input type="password" value={signinPassword} onChange={(e) => setSigninPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
               </div>
+              <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => navigate('MigrationSignIn?forgot=true')}
+                  style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
+                >
+                  Forgot your password?
+                </button>
+              </div>
               <button type="submit" disabled={loading} style={{ background: loading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
