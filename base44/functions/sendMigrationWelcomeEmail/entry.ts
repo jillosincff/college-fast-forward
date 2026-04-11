@@ -87,7 +87,10 @@ const EMAIL_TEMPLATE = (firstName) => `<!DOCTYPE html>
                       </td>
                       <td style="padding-left:10px;">
                         <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.6;margin:0;">
-                          Click the <strong>Magic Link</strong> tab and enter the email address you used to sign up
+                          Choose how you want to sign in:<br>
+                          <span style="color:#555555;">&bull; Sign in with Google <em>(easiest)</em><br>
+                          &bull; Use your email and password from before<br>
+                          &bull; Request a magic link to your inbox</span>
                         </p>
                       </td>
                     </tr>
@@ -103,7 +106,7 @@ const EMAIL_TEMPLATE = (firstName) => `<!DOCTYPE html>
                       </td>
                       <td style="padding-left:10px;">
                         <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.6;margin:0;">
-                          Check your inbox for a one-time login link — click it and you're in. No password needed.
+                          Your profile is already there — pick up right where you left off.
                         </p>
                       </td>
                     </tr>
@@ -133,7 +136,7 @@ const EMAIL_TEMPLATE = (firstName) => `<!DOCTYPE html>
                     Ready to log in?
                   </p>
                   <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;color:#ffffff;line-height:1.7;margin:0 0 28px;">
-                    Click below to go to the new platform. Use the Magic Link tab to sign in with this email address — no password needed.
+                    Click below to go straight to your account. Sign in with Google, your old password, or a magic link — whichever is easiest for you.
                   </p>
                   <table cellpadding="0" cellspacing="0" border="0">
                     <tr>
