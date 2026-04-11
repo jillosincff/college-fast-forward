@@ -248,7 +248,7 @@ export default function GatorAuth() {
                 <button
                   type="button"
                   onClick={() => navigate('MigrationSignIn?forgot=true')}
-                  style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
+                  style={{ fontFamily: dmSans, fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
                 >
                   Forgot your password?
                 </button>
@@ -256,7 +256,6 @@ export default function GatorAuth() {
               <button type="submit" disabled={loading} style={{ background: loading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
             </form>
           )}
 
