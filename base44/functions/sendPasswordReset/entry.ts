@@ -67,6 +67,14 @@ Deno.serve(async (req) => {
               <p style="font-size: 12px; color: rgba(255,255,255,0.3); margin: 0 0 6px;">If the button doesn't work, copy this link:</p>
               <p style="font-size: 12px; color: rgba(232,93,32,0.8); margin: 0; word-break: break-all;">${resetLink}</p>
             </div>
+            <div style="margin-top: 28px; background: rgba(79,140,255,0.06); border: 1px solid rgba(79,140,255,0.15); border-radius: 10px; padding: 20px;">
+              <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin: 0 0 12px; font-weight: 600;">After resetting, here's how to sign in:</p>
+              <ol style="font-size: 13px; color: rgba(255,255,255,0.45); margin: 0; padding-left: 18px; line-height: 1.8;">
+                <li>Go to <a href="${appBaseUrl}/#GetStarted" style="color: rgba(232,93,32,0.8); text-decoration: none;">${appBaseUrl}</a> and click <strong style="color: rgba(255,255,255,0.6);">Sign In</strong></li>
+                <li>Enter your email and password — or click <strong style="color: rgba(255,255,255,0.6);">Forgot Password</strong> to set a new one</li>
+                <li>Your profile is already there waiting for you</li>
+              </ol>
+            </div>
           </div>
           <div style="padding: 24px 40px; border-top: 1px solid rgba(255,255,255,0.06); text-align: center;">
             <p style="font-size: 12px; color: rgba(255,255,255,0.2); margin: 0;">If you didn't request this, you can safely ignore this email.</p>
