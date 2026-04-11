@@ -40,9 +40,13 @@ export default function MigrationSignIn() {
           }, 1800);
         } else {
           setError(data?.error || 'This link is invalid or has expired. Please request a new one.');
+          setTimeout(() => { window.location.hash = '#GetStarted?migration=true'; }, 2500);
         }
       })
-      .catch(() => setError('This link is invalid or has expired. Please request a new one.'))
+      .catch(() => {
+        setError('This link is invalid or has expired. Please request a new one.');
+        setTimeout(() => { window.location.hash = '#GetStarted?migration=true'; }, 2500);
+      })
       .finally(() => setChecking(false));
   }, []);
   const [signinEmail, setSigninEmail] = useState('');
