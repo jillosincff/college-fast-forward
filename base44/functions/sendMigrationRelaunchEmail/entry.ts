@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-function buildEmailHtml(firstName) {
+function buildEmailHtml(firstName, appBaseUrl) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,7 +166,7 @@ function buildEmailHtml(firstName) {
                   <table cellpadding="0" cellspacing="0" border="0">
                     <tr>
                       <td style="background-color:#E85D20;border-radius:12px;">
-                        <a href="https://collegefastforward.com/#GetStarted" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;letter-spacing:0.01em;">
+                        <a href="${appBaseUrl}/#GetStarted" style="display:inline-block;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;padding:16px 32px;border-radius:12px;letter-spacing:0.01em;">
                           Access My Account →
                         </a>
                       </td>
@@ -257,13 +257,14 @@ Deno.serve(async (req) => {
     const { blast = false } = await req.json().catch(() => ({}));
 
     const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
+    const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://www.collegefastforward.com';
     if (!SENDGRID_API_KEY) {
       return Response.json({ error: 'SENDGRID_API_KEY not set.' }, { status: 500, headers: corsHeaders });
     }
 
     // TEST MODE: send only to josinoff@gmail.com
     if (!blast) {
-      const html = buildEmailHtml('Jill');
+      const html = buildEmailHtml('Jill', appBaseUrl);
       const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: { Authorization: `Bearer ${SENDGRID_API_KEY}`, 'Content-Type': 'application/json' },
@@ -298,7 +299,7 @@ Deno.serve(async (req) => {
 
     for (const target of targets) {
       const firstName = target.full_name?.split(' ')[0] || 'there';
-      const html = buildEmailHtml(firstName);
+      const html = buildEmailHtml(firstName, appBaseUrl);
       try {
         const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
           method: 'POST',
