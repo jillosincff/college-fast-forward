@@ -20,6 +20,7 @@ export default function MigrationSignIn() {
   const [info, setInfo] = useState('');
   const [magicEmail, setMagicEmail] = useState('');
   const [tokenVerified, setTokenVerified] = useState(false);
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     const hashPart = window.location.hash.split('?')[1] || '';
@@ -27,17 +28,13 @@ export default function MigrationSignIn() {
     const token = params.get('token');
     if (!token) return;
 
-    setIsLoading(true);
+    setChecking(true);
     verifyMagicLink({ token })
       .then(({ data }) => {
         if (data?.success) {
           setTokenVerified(true);
-          // Store verified email so GatorAuth can pre-fill and show a welcome message
-          if (data.email) {
-            sessionStorage.setItem('migration_verified_email', data.email);
-          }
-          setInfo(`Identity verified! Redirecting you to sign in with Google...`);
-          // Base44 sessions are Google OAuth only — redirect to complete sign-in
+          if (data.email) sessionStorage.setItem('migration_verified_email', data.email);
+          setInfo('Identity verified! Redirecting you to sign in with Google...');
           setTimeout(() => {
             base44.auth.redirectToLogin(window.location.origin + '/#FreeTierDashboard');
           }, 1800);
@@ -46,7 +43,7 @@ export default function MigrationSignIn() {
         }
       })
       .catch(() => setError('This link is invalid or has expired. Please request a new one.'))
-      .finally(() => setIsLoading(false));
+      .finally(() => setChecking(false));
   }, []);
   const [signinEmail, setSigninEmail] = useState('');
   const [signinPassword, setSigninPassword] = useState('');
@@ -132,6 +129,14 @@ export default function MigrationSignIn() {
       setIsLoading(false);
     }
   };
+
+  if (checking) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0d1117', flexDirection: 'column', gap: 12 }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ width: 28, height: 28, border: '2px solid rgba(232,93,32,0.3)', borderTop: '2px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)', margin: 0 }}>Signing you in...</p>
+    </div>
+  );
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', background: '#0d1117', position: 'relative', overflow: 'hidden' }}>
