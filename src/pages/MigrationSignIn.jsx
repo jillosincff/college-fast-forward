@@ -8,6 +8,7 @@ import { registerUser } from '@/functions/registerUser';
 import { signInWithPassword } from '@/functions/signInWithPassword';
 import { sendMagicLink } from '@/functions/sendMagicLink';
 import { verifyMagicLink } from '@/functions/verifyMagicLink';
+import { sendPasswordReset } from '@/functions/sendPasswordReset';
 import { base44 } from '@/api/base44Client';
 
 const playfair = "'Playfair Display', Georgia, serif";
@@ -49,6 +50,8 @@ export default function MigrationSignIn() {
       })
       .finally(() => setChecking(false));
   }, []);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
   const [signinEmail, setSigninEmail] = useState('');
   const [signinPassword, setSigninPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -155,6 +158,29 @@ export default function MigrationSignIn() {
           👋 Welcome to the new College Fast Forward.<br/>
           Enter your email below and we'll send you a one-time login link — no password needed.
         </div>
+        {forgotMode ? (
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            setError(''); setInfo('');
+            if (!forgotEmail) { setError('Please enter your email.'); return; }
+            setIsLoading(true);
+            try {
+              const { data } = await sendPasswordReset({ email: forgotEmail });
+              if (data?.success) setInfo('If an account exists, a reset link has been sent. Check your inbox.');
+              else setError(data?.error || 'Could not send reset email.');
+            } catch { setError('Could not send reset email. Please try again.'); }
+            finally { setIsLoading(false); }
+          }} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Your Email</label>
+              <input type="email" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', fontSize: 14, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', borderRadius: 10, color: '#fff', fontFamily: dmSans, outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+            <button type="submit" disabled={isLoading} style={{ background: isLoading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
+            </button>
+            <button type="button" onClick={() => { setForgotMode(false); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>← Back to sign in</button>
+          </form>
+        ) : (
         <form onSubmit={handleSendMagicLink} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
@@ -164,7 +190,9 @@ export default function MigrationSignIn() {
             {isLoading ? 'Sending...' : 'Send Magic Link'}
           </button>
           <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
+          <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(magicEmail); setError(''); setInfo(''); }} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', cursor: 'pointer', textDecoration: 'underline', minHeight: 'auto' }}>Forgot your password?</button>
         </form>
+        )}
 
         {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#EF4444', margin: 0 }}>{error}</p></div>}
         {info && !error && <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 10, padding: '12px 16px', marginTop: 16 }}><p style={{ fontFamily: dmSans, fontSize: 13, color: '#22C55E', margin: 0 }}>{info}</p></div>}
