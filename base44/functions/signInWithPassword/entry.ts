@@ -25,22 +25,29 @@ Deno.serve(async (req) => {
     const emailLower = email.toLowerCase().trim();
     const base44 = createClientFromRequest(req);
 
-    // Find the most recent registration attempt for this email that has a password hash
+    // First check RegistrationAttempt entity (new signups)
     const attempts = await base44.asServiceRole.entities.RegistrationAttempt.filter({ email: emailLower });
-    // Sort by created_date descending to get most recent password change
     const attempt = attempts
       ?.filter(a => a.password_hash)
       .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0];
 
-    if (!attempt) {
-      return new Response(JSON.stringify({ error: 'No account found with this email. Try signing in with Google or use a magic link.' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    let passwordValid = false;
+
+    if (attempt) {
+      passwordValid = await bcrypt.compare(password, attempt.password_hash);
+    } else {
+      // Fall back to hashed_password stored directly on User record (original/migrated users)
+      const users = await base44.asServiceRole.entities.User.filter({ email: emailLower });
+      const userRecord = users?.[0];
+      if (!userRecord?.hashed_password) {
+        return new Response(JSON.stringify({ error: 'No account found with this email. Try signing in with Google or use a magic link.' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      passwordValid = await bcrypt.compare(password, userRecord.hashed_password);
     }
 
-    // Verify password
-    const passwordValid = await bcrypt.compare(password, attempt.password_hash);
     if (!passwordValid) {
       return new Response(JSON.stringify({ error: 'Incorrect password. Try a magic link if you recently changed your password.' }), {
         status: 401,
