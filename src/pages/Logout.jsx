@@ -1,8 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 
 export default function Logout() {
+  const didLogout = useRef(false);
   useEffect(() => {
+    if (didLogout.current) return;
+    didLogout.current = true;
     base44.auth.logout();
   }, []);
 
