@@ -1,12 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 
 export default function Logout() {
-  const didLogout = useRef(false);
   useEffect(() => {
-    if (didLogout.current) return;
-    didLogout.current = true;
-    base44.auth.logout();
+    // Hard redirect so the router doesn't re-mount this component
+    base44.auth.logout(window.location.origin + '/#GatorAuth');
   }, []);
 
   return (
