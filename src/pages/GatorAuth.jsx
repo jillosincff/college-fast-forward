@@ -294,6 +294,10 @@ export default function GatorAuth() {
                 {loading ? 'Sending...' : 'Send Magic Link'}
               </button>
               <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
+              <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '8px 0 0' }}>
+                Need to reset your password?{' '}
+                <button type="button" onClick={() => navigate('MigrationSignIn?forgot=true')} style={{ fontFamily: dmSans, fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none' }}>Click here →</button>
+              </p>
             </form>
           )}
 

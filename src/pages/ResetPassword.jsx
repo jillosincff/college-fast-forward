@@ -34,6 +34,7 @@ export default function ResetPassword() {
       const { data } = await resetPasswordWithToken({ token, new_password: password });
       if (data?.success) {
         setSuccess(true);
+        setTimeout(() => navigate('GetStarted'), 2500);
       } else {
         setError(data?.error || 'Reset failed. Please try again.');
       }
@@ -70,14 +71,8 @@ export default function ResetPassword() {
               <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
               <p style={{ fontFamily: dmSans, fontSize: 16, color: '#22C55E', fontWeight: 600, margin: '0 0 12px' }}>Password updated!</p>
               <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 24px' }}>
-                You can now sign in with your new password.
+                Redirecting you to sign in...
               </p>
-              <button
-                onClick={() => { window.location.hash = '#MigrationSignIn'; }}
-                style={{ background: '#E85D20', border: 'none', borderRadius: 12, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: dmSans, minHeight: 'auto' }}
-              >
-                Go to Sign In →
-              </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
