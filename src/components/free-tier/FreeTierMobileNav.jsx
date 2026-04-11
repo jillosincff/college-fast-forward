@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Home, Building2, Target, MessageSquare, Search, Zap, Sparkles, Brain, MoreHorizontal } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
+import { base44 } from '@/api/base44Client';
 
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', Icon: Home },
@@ -29,6 +30,7 @@ export default function FreeTierMobileNav({ activeTab, onTabChange, onOpenUpgrad
             { label: '🧠 Career Assessment', action: () => { navigate('CareerAssessment'); setShowMore(false); } },
             { label: '💬 Messages', action: () => { onTabChange('messages'); setShowMore(false); } },
             { label: '📓 Notebook', action: () => { onTabChange('notebook'); setShowMore(false); } },
+            { label: '🚪 Log Out', action: () => { base44.auth.logout(); } },
           ].map(item => (
             <button
               key={item.label}

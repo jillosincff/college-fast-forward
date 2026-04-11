@@ -3,8 +3,9 @@ import {
   Home, Target, FileText, Building2,
   Users, Search, Mail, MessageSquare,
   Sparkles, Brain, Zap, BookOpen,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, LogOut
 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const NAV_GROUPS = [
   {
@@ -306,6 +307,24 @@ export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUp
 
       {/* Spacer pushes CTA to bottom */}
       <div style={{ flex: 1 }} />
+
+      {/* Logout */}
+      <button
+        onClick={() => base44.auth.logout()}
+        style={{
+          width: '100%', display: 'flex',
+          alignItems: 'center', gap: 10,
+          padding: '8px 12px', borderRadius: 8,
+          border: 'none', background: 'none',
+          cursor: 'pointer', marginBottom: 12,
+          minHeight: 'auto',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = '#FFF0EE'}
+        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+      >
+        <LogOut size={15} color="#E85D20" strokeWidth={1.8} />
+        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 400, color: '#E85D20' }}>Log Out</span>
+      </button>
 
       {/* FastIQ upgrade CTA for free users */}
       {!isFastIQ && (
