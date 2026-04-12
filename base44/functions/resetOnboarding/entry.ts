@@ -9,13 +9,21 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (user.role !== 'admin' && !user.is_admin) {
+      return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
+    }
+
     // Parse request body
     let targetEmail = user.email;
     let mode = 'full';
     let bodyData = {};
     try {
       bodyData = await req.json();
-      if (bodyData.email && user.role === 'admin') {
+      if (bodyData.email) {
         targetEmail = bodyData.email;
       }
       if (bodyData.mode) mode = bodyData.mode;
@@ -40,11 +48,22 @@ Deno.serve(async (req) => {
         first_question_shown: true,
       });
     } else if (mode === 'set') {
-      // Set specific fields from the request body
+      const ALLOWED_FIELDS = [
+        'persona', 'onboarding_completed', 'school_code',
+        'school_name', 'ways_to_help', 'industry',
+        'graduation_year', 'major',
+      ];
+
       const fieldsToSet = bodyData.fields || {};
-      if (Object.keys(fieldsToSet).length > 0) {
-        await base44.asServiceRole.entities.User.update(targetUserId, fieldsToSet);
+      const safeFields = Object.fromEntries(
+        Object.entries(fieldsToSet).filter(([key]) => ALLOWED_FIELDS.includes(key))
+      );
+
+      if (Object.keys(safeFields).length === 0) {
+        return Response.json({ error: 'No valid fields to set' }, { status: 400 });
       }
+
+      await base44.asServiceRole.entities.User.update(targetUserId, safeFields);
     } else if (mode === 'fix') {
       // Minimal fix - just reset onboarding state flags
       await base44.asServiceRole.entities.User.update(targetUserId, {

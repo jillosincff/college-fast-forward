@@ -16,13 +16,16 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     
     if (!user) {
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: 'Unauthorized',
-        tests: {}
-      }), { 
-        status: 401, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      return new Response(JSON.stringify({ success: false, error: 'Unauthorized', tests: {} }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!user.roles?.includes('admin') && user.role !== 'admin') {
+      return new Response(JSON.stringify({ success: false, error: 'Forbidden — admin only', tests: {} }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
