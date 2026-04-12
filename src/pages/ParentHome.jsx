@@ -44,6 +44,7 @@ export default function ParentHome() {
     profileScore, profileTotal, profileComplete, profileNudge, allClear,
   } = useParentHomeData(user);
 
+  const params = useParams();
   const offer = useFoundingOffer(user);
   const [showActivationConfirm, setShowActivationConfirm] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
@@ -62,7 +63,6 @@ export default function ParentHome() {
       window.history.replaceState(null, '', window.location.origin + '/#ParentHome');
     }
   }, [user]);
-  const params = useParams();
 
   // Detect payment success from Stripe redirect
   useEffect(() => {
