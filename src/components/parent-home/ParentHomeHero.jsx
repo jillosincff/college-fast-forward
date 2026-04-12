@@ -1,4 +1,5 @@
 import React from 'react';
+import { navigate } from '@/components/utils/navigation';
 import { dmSans, playfair, ORANGE, MUTED } from './constants';
 
 export default function ParentHomeHero({ user }) {

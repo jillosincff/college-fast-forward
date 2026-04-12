@@ -53,7 +53,7 @@ export default function LandingPage() {
     <>
       <FoundingMemberBanner
         show={showFoundingBanner}
-        onUpgrade={() => navigate('Pricing')}
+        onUpgrade={() => navigate('GetStarted')}
         onDismiss={() => setShowFoundingBanner(false)}
       />
 
