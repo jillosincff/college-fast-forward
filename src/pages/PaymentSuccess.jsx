@@ -1,18 +1,35 @@
 import { useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Zap, Crown, Home } from 'lucide-react';
+import { CheckCircle, Zap, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const blankScreen = (
+  <div style={{
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    height: '100vh', background: '#0d1117',
+    fontFamily: 'DM Sans, sans-serif', color: 'rgba(255,255,255,0.5)',
+    fontSize: 16
+  }}>
+    Nothing to see here.
+  </div>
+);
+
 export default function PaymentSuccess() {
+  const { user } = useAuth();
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
   const familyId = urlParams.get('family_id');
+  const isAuthorized = user && (user.subscription_status === 'active' || user.trial_status === 'active');
 
   useEffect(() => {
+    if (!isAuthorized) return;
     try {
       base44.analytics.track({ eventName: 'payment_success_viewed', properties: { family_id: familyId } });
     } catch (e) { /* non-critical */ }
-  }, [familyId]);
+  }, [familyId, isAuthorized]);
+
+  if (!isAuthorized) return blankScreen;
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
