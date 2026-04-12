@@ -9,40 +9,34 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { confirm = false, dry_run = true } = await req.json().catch(() => ({}));
+    const { dryRun = true, confirmMassUpdate = false } = await req.json().catch(() => ({}));
 
-    if (!dry_run) {
-      console.warn('[markAsFoundingMembers] LIVE MODE — changes will be written to DB');
+    if (!dryRun && !confirmMassUpdate) {
+      return Response.json({
+        error: 'Mass founding member update requires confirmMassUpdate: true',
+        message: 'This will mark ALL users without is_founding_gator as founding members. Pass confirmMassUpdate: true to proceed.',
+      }, { status: 400 });
+    }
+
+    if (!dryRun) {
+      console.warn('[markAsFoundingMembers] LIVE MODE — marking all eligible users as founding members');
     }
 
     const allUsers = await base44.asServiceRole.entities.User.list();
-    const needsMarking = allUsers.filter(u => !u.is_founding_gator);
+    const affectedUsers = allUsers.filter(u => !u.is_founding_gator);
 
-    // Dry run — return preview only
-    if (dry_run) {
+    if (dryRun) {
       return Response.json({
-        success: true,
         dry_run: true,
-        affected_count: needsMarking.length,
-        preview: needsMarking.slice(0, 10).map(u => u.email),
-        message: 'Dry run complete. Pass dry_run: false and confirm: true to apply.',
+        would_affect: affectedUsers.length,
+        preview: affectedUsers.slice(0, 10).map(u => u.email),
       });
-    }
-
-    // Live mode requires explicit confirmation
-    if (!confirm) {
-      return Response.json({
-        error: 'This operation requires confirm: true to proceed in live mode',
-        hint: 'Re-run with dry_run: false AND confirm: true',
-        affected_count: needsMarking.length,
-        preview: needsMarking.slice(0, 5).map(u => u.email),
-      }, { status: 400 });
     }
 
     const updated = [];
     const skipped = [];
 
-    for (const userToFix of needsMarking) {
+    for (const userToFix of affectedUsers) {
       try {
         const countResult = await base44.asServiceRole.functions.invoke('getUserCount', {});
         const nextNumber = (countResult.data?.count || 0) + 1;
@@ -64,7 +58,7 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       dry_run: false,
-      total_processed: needsMarking.length,
+      total_processed: affectedUsers.length,
       updated: updated.length,
       skipped: skipped.length,
       updated_users: updated,
