@@ -10,7 +10,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const { dryRun = true } = await req.json().catch(() => ({ dryRun: true }));
+    const { 
+      dryRun = true,
+      confirmFoundingBackfill = false,
+      confirmOnboardingBackfill = false,
+    } = await req.json().catch(() => ({ dryRun: true }));
+
+    if (!dryRun) {
+      console.warn('[auditAndFixUsers] LIVE MODE — changes will be written to DB');
+    }
 
     console.log(`[Audit] Starting audit - dryRun: ${dryRun}`);
 
@@ -59,6 +67,12 @@ Deno.serve(async (req) => {
         userIssues.push('not_founding_member');
         
         if (!dryRun) {
+          if (!confirmFoundingBackfill) {
+            return Response.json({
+              error: 'Founding member backfill requires confirmFoundingBackfill: true',
+              hint: 'Re-run with confirmFoundingBackfill: true to proceed',
+            }, { status: 400 });
+          }
           userFixes.is_founding_gator = true;
           userFixes.founding_gator_number = nextFoundingNumber;
           userFixes.membership_tier = 'founding_gator';
@@ -72,6 +86,12 @@ Deno.serve(async (req) => {
         userIssues.push('onboarding_incomplete');
         
         if (!dryRun) {
+          if (!confirmOnboardingBackfill) {
+            return Response.json({
+              error: 'Onboarding backfill requires confirmOnboardingBackfill: true',
+              hint: 'Re-run with confirmOnboardingBackfill: true to proceed',
+            }, { status: 400 });
+          }
           userFixes.onboarding_completed = true;
           fixes.push({ email: u.email, fix: 'onboarding', value: true });
         }
