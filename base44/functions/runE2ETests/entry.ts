@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!user.roles?.includes('admin') && user.role !== 'admin') {
+    if (user.role !== 'admin' && !user.is_admin) {
       return new Response(JSON.stringify({ success: false, error: 'Forbidden — admin only', tests: {} }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
