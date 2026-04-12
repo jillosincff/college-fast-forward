@@ -25,10 +25,8 @@ function formatNameClean(raw) {
 
 export default function MyMessagesPage() {
   const { user } = useAuth();
-
-  // Parents get the dark CFF design system messages view
   const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
-  if (isParent) return <ParentMessagesView user={user} />;
+
   const [messages, setMessages] = useState([]);
   const [userLookup, setUserLookup] = useState({});
   const [loading, setLoading] = useState(true);
@@ -165,6 +163,8 @@ export default function MyMessagesPage() {
   };
 
   const filterLabels = { all: 'All', unread: 'unread', parents: 'parent', alumni: 'alumni' };
+
+  if (isParent) return <ParentMessagesView user={user} />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>

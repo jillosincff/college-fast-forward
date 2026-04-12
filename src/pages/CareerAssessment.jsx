@@ -265,17 +265,16 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
               {SCALE_LABELS.map(({ value, label }) => {
                 const isSelected = responses[currentQuestion.id]?.score === value;
-                const [hovered, setHovered] = React.useState(false);
                 return (
                 <button
                   key={value}
                   onClick={() => handleAnswer(value)}
-                  onMouseEnter={() => setHovered(true)}
-                  onMouseLeave={() => setHovered(false)}
+                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.borderColor = '#E85D20'; }}
+                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.borderColor = '#E0E0E0'; }}
                   title={label}
                   style={{
                     width: 56, height: 56, borderRadius: '50%',
-                    border: `2px solid ${isSelected ? '#E85D20' : hovered ? '#E85D20' : '#E0E0E0'}`,
+                    border: `2px solid ${isSelected ? '#E85D20' : '#E0E0E0'}`,
                     background: isSelected ? '#E85D20' : '#fff',
                     color: isSelected ? '#fff' : '#1A1A1A',
                     fontSize: 18, fontWeight: 700, cursor: 'pointer',

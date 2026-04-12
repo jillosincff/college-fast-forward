@@ -27,7 +27,7 @@ export default function Directory() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({ persona: 'all', industry: 'all', helpType: 'all' });
-  const [schoolFilter] = useState('my_school');
+  const [schoolFilter, setSchoolFilter] = useState('my_school');
   const [viewMode, setViewMode] = useState('grid');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 

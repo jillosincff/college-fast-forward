@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Zap, Crown, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -9,7 +10,6 @@ export default function PaymentSuccess() {
 
   useEffect(() => {
     try {
-      const { base44 } = require('@/api/base44Client');
       base44.analytics.track({ eventName: 'payment_success_viewed', properties: { family_id: familyId } });
     } catch (e) { /* non-critical */ }
   }, [familyId]);

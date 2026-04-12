@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Zap, Loader2 } from 'lucide-react';

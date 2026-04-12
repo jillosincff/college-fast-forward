@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { resetPasswordWithToken } from '@/functions/resetPasswordWithToken';
+import { navigate } from '@/components/utils/navigation';
 
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";

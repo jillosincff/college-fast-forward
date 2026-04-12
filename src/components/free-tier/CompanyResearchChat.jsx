@@ -56,11 +56,14 @@ Respond in 2-4 sentences. Be specific, honest, and actionable. No markdown. No b
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 1000,
-      background: 'rgba(0,0,0,0.5)',
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-    }} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.5)',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      }}
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
       <div style={{
         background: '#fff',
         borderRadius: '16px 16px 0 0',
@@ -107,29 +110,27 @@ Respond in 2-4 sentences. Be specific, honest, and actionable. No markdown. No b
               <Loader2 style={{ width: 14, height: 14, animation: 'spin 1s linear infinite' }} /> Researching...
             </div>
           )}
-
           <div ref={bottomRef} />
         </div>
 
         {/* Input */}
         <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0', flexShrink: 0 }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#f9f9f9', border: '1px solid #e5e5e5', borderRadius: 16, padding: '8px 12px' }}>
-              <textarea
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                placeholder={`Ask anything about ${company.name}...`}
-                rows={1}
-                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', resize: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.5, maxHeight: 100 }}
-              />
-              <button
-                onClick={sendMessage}
-                disabled={!input.trim() || loading}
-                style={{ background: input.trim() && !loading ? '#E85D20' : '#e0e0e0', border: 'none', borderRadius: 10, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'default', flexShrink: 0, minHeight: 'auto' }}
-              >
-                <Send style={{ width: 14, height: 14, color: '#fff' }} />
-              </button>
-            </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', background: '#f9f9f9', border: '1px solid #e5e5e5', borderRadius: 16, padding: '8px 12px' }}>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+              placeholder={`Ask anything about ${company.name}...`}
+              rows={1}
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', resize: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.5, maxHeight: 100 }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || loading}
+              style={{ background: input.trim() && !loading ? '#E85D20' : '#e0e0e0', border: 'none', borderRadius: 10, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'default', flexShrink: 0, minHeight: 'auto' }}
+            >
+              <Send style={{ width: 14, height: 14, color: '#fff' }} />
+            </button>
           </div>
         </div>
       </div>

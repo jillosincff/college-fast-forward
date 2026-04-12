@@ -25,6 +25,18 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
+  // Compute initials: handle "Last, First" format
+  const fullName = user?.full_name || user?.email || '??';
+  let initials = '??';
+  if (fullName.includes(',')) {
+    const parts = fullName.split(',').map(s => s.trim());
+    const first = parts[1]?.split(/\s+/)[0] || '';
+    const last = parts[0] || '';
+    initials = ((first[0] || '') + (last[0] || '')).toUpperCase();
+  } else {
+    initials = fullName.split(/[\s@]+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
+  }
+
   // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return;

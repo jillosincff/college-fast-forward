@@ -6,6 +6,10 @@ import { navigate } from '@/components/utils/navigation';
 import PostTrialUpgradePrompt from '@/components/free-tier/PostTrialUpgradePrompt';
 import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
 
+function TopNav() {
+  return null;
+}
+
 function SideNav() {
   const NAV = [
     { icon: Home, page: 'FreeTierDashboard' },
