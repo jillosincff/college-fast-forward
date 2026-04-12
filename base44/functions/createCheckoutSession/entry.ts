@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
 
     // Auto-apply founding rate if within deadline and plan is not already founding
     const now = new Date();
-    if (now <= FOUNDING_OFFER_DEADLINE && !plan.includes('founding') && plan.includes('fastiq')) {
+    if (now <= FOUNDING_OFFER_DEADLINE && !plan?.includes('founding') && plan?.includes('fastiq')) {
       plan = plan.replace('fastiq_', 'fastiq_founding_');
     }
 
