@@ -29,7 +29,7 @@ export default function LandingPage() {
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('auth_error') === 'timeout') {
-      toast.error('Sign-in timed out. Please try again.', { duration: 5000 });
+      toast.error('Sign-in timed out. Please try again or use Magic Link.', { duration: 6000 });
       window.history.replaceState({}, '', window.location.pathname + window.location.hash);
     }
   }, []);
