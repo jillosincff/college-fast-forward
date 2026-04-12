@@ -39,7 +39,7 @@ export default function LandingPage() {
     trackEvent('cta_parent_clicked');
     try { localStorage.setItem('pending_invite_role', 'parent'); } catch (e) {}
     try { sessionStorage.setItem('pending_invite_role', 'parent'); } catch (e) {}
-    const callbackUrl = window.location.origin + '/#GetStarted';
+    const callbackUrl = window.location.origin + '/#ParentAllSet';
     base44.auth.redirectToLogin(callbackUrl);
   };
   const handleStudentCTA = () => { trackEvent('cta_student_clicked'); navigate('StudentOnboarding'); };
