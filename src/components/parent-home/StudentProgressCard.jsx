@@ -126,7 +126,7 @@ function NoFastIQStudentCard({ student, email }) {
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE, flexShrink: 0 }} />
         <span style={{ fontFamily: dmSans, fontSize: 11, color: ORANGE }}>FastIQ not activated</span>
       </div>
-      <button onClick={() => navigate('GatorWelcome')} style={{
+      <button onClick={() => navigate('ParentUpsell')} style={{
         background: 'none', border: 'none', padding: 0, marginTop: 8,
         fontFamily: dmSans, fontSize: 13, color: ORANGE, cursor: 'pointer', minHeight: 'auto',
       }}>Activate FastIQ →</button>

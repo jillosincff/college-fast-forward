@@ -26,7 +26,7 @@ export default function FastIQNudgeCard({ studentsNeedingFastIQ }) {
               <p style={{ fontFamily: dmSans, fontSize: 13, color: MUTED, lineHeight: 1.6, margin: '0 0 16px' }}>
                 They're in the network but missing their career plan, alumni contacts, and personalized outreach. Activate FastIQ to give them the full system.
               </p>
-              <button onClick={() => navigate('GatorWelcome')} style={{
+              <button onClick={() => navigate('ParentUpsell')} style={{
                 width: '100%', padding: '13px 20px', borderRadius: 100, border: 'none',
                 background: ORANGE, color: '#fff', fontFamily: dmSans, fontSize: 14, fontWeight: 600,
                 cursor: 'pointer', minHeight: 'auto',
