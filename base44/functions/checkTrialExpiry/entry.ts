@@ -15,7 +15,11 @@ Deno.serve(async (req) => {
     trial_status: 'active',
     trial_end_date: { $lt: new Date().toISOString() },
   });
-  const expiredTrialUsers = allExpiredCandidates.filter(u => !u.stripe_subscription_id);
+  const expiredTrialUsers = allExpiredCandidates.filter(u =>
+    !u.stripe_subscription_id &&
+    !u.is_founding_member &&
+    !u.founding_offer_redeemed
+  );
 
   const results = { processed: 0, errors: [] };
 
