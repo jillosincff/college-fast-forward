@@ -59,6 +59,8 @@ Deno.serve(async (req) => {
       deleteUserRecords('ActionPlan', { created_by: userEmail }),
       deleteUserRecords('AIAdvisorConversation', { created_by: userEmail }),
       deleteUserRecords('Notification', { recipient_email: userEmail }),
+      deleteUserRecords('Message', { sender_email: userEmail }),
+      deleteUserRecords('Message', { recipient_email: userEmail }),
     ]);
 
     // 5. Finally, delete the user's own record

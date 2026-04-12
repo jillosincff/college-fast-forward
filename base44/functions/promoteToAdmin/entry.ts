@@ -1,7 +1,5 @@
 import { createClient } from 'npm:@base44/sdk@0.8.6';
 
-const ADMIN_SETUP_KEY = 'college-fast-forward-admin-2024';
-
 Deno.serve(async (req) => {
   try {
     const { email, adminSetupKey } = await req.json();
@@ -16,7 +14,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (adminSetupKey !== ADMIN_SETUP_KEY) {
+    const ADMIN_SETUP_KEY = Deno.env.get('ADMIN_SETUP_KEY');
+    if (!ADMIN_SETUP_KEY || adminSetupKey !== ADMIN_SETUP_KEY) {
       console.log('Invalid admin key provided');
       return Response.json(
         { error: 'Invalid admin setup key' },
@@ -36,11 +35,8 @@ Deno.serve(async (req) => {
 
     console.log('Searching for user with email:', email);
     
-    // List all users and filter manually as a fallback
-    const allUsers = await base44.entities.User.list();
-    console.log('Total users in database:', allUsers.length);
-    
-    const user = allUsers.find(u => u.email?.toLowerCase() === email.toLowerCase());
+    const allUsers = await base44.entities.User.filter({ email: email.toLowerCase() });
+    const user = allUsers?.[0] || null;
     
     if (!user) {
       console.log('No user found with email:', email);
