@@ -27,7 +27,7 @@ import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
 import PostJoinUpsell from '@/pages/PostJoinUpsell';
-import TestGiftFastIQ from '@/pages/TestGiftFastIQ';
+
 import ResetPassword from '@/pages/ResetPassword';
 import Logout from '@/pages/Logout';
 
@@ -82,7 +82,7 @@ const AuthenticatedApp = () => {
           } />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
           <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
-          <Route path="/TestGiftFastIQ" element={<TestGiftFastIQ />} />
+
           <Route path="/ResetPassword" element={<ResetPassword />} />
           <Route path="/Logout" element={<Logout />} />
 
