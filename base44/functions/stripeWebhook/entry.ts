@@ -5,7 +5,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
   apiVersion: '2024-11-20.acacia',
 });
 
-// ── HTML escape utility ──
+// HTML escape utility
 const escapeHtml = (str) => {
   if (!str) return '';
   return String(str)
@@ -16,15 +16,6 @@ const escapeHtml = (str) => {
     .replace(/'/g, '&#039;');
 };
 
-// ═══════════════════════════════════════════════════════════════
-// CFF + FASTIQ Stripe Webhook Handler
-// ═══════════════════════════════════════════════════════════════
-// Family entity is the SOURCE OF TRUTH for billing.
-// One subscription per family covers all linked members.
-// Handles: checkout, subscription lifecycle, founding member,
-//          payment failures, cancellation emails.
-// ═══════════════════════════════════════════════════════════════
-
 let base44;
 
 async function findUserByCustomerId(customerId) {
@@ -33,12 +24,10 @@ async function findUserByCustomerId(customerId) {
 }
 
 async function findBillingUser(customerId, userId, userEmail) {
-  // 1. Try stripe_customer_id
   if (customerId) {
     const user = await findUserByCustomerId(customerId);
     if (user) return user;
   }
-  // 2. Fall back to metadata.user_id
   if (userId) {
     try {
       const user = await base44.asServiceRole.entities.User.get(userId);
@@ -47,7 +36,6 @@ async function findBillingUser(customerId, userId, userEmail) {
       console.log('User not found by metadata user_id:', userId);
     }
   }
-  // 3. Fall back to metadata.user_email
   if (userEmail) {
     const users = await base44.asServiceRole.entities.User.filter({ email: userEmail });
     if (users?.length > 0) return users[0];
@@ -92,16 +80,11 @@ async function updateAllFamilyMembers(family, updates) {
   }
 }
 
-/**
- * Find linked student emails for a parent user.
- */
 async function getLinkedStudentEmails(billingUser, family) {
   const emails = [];
-  // From user record
   if (billingUser?.student_emails?.length) {
     emails.push(...billingUser.student_emails);
   }
-  // From family student_ids
   if (family?.student_ids?.length) {
     for (const sid of family.student_ids) {
       try {
@@ -115,16 +98,12 @@ async function getLinkedStudentEmails(billingUser, family) {
   return emails;
 }
 
-/**
- * Send activation email to linked students.
- */
 async function sendStudentActivationEmails(billingUser, family) {
   const studentEmails = await getLinkedStudentEmails(billingUser, family);
   const parentName = billingUser?.full_name?.split(' ')[0] || 'Your parent';
 
   for (const email of studentEmails) {
     try {
-      // Look up student first name
       let studentFirstName = 'there';
       try {
         const students = await base44.asServiceRole.entities.User.filter({ email });
@@ -161,7 +140,7 @@ Deno.serve(async (req) => {
 
     switch (event.type) {
 
-      // ── CHECKOUT COMPLETED ──
+      // CHECKOUT COMPLETED
       case 'checkout.session.completed': {
         const session = event.data.object;
         const customerId = session.customer;
@@ -175,7 +154,6 @@ Deno.serve(async (req) => {
 
         console.log('Checkout completed:', { subscriptionTier, customerId, familyId, billingUserEmail, isFoundingMember, plan });
 
-        // Update billing user — try all lookup methods
         const billingUser = await findBillingUser(customerId, billingUserId, billingUserEmail);
         if (billingUser) {
           const userUpdates = {
@@ -188,7 +166,6 @@ Deno.serve(async (req) => {
             membership_tier: subscriptionTier === 'fastiq' ? 'fastiq' : billingUser.membership_tier,
           };
 
-          // Founding member metadata
           if (isFoundingMember) {
             userUpdates.founding_offer_redeemed = true;
             userUpdates.founding_offer_redeemed_at = new Date().toISOString();
@@ -198,7 +175,6 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
           console.log('Updated billing user:', billingUser.id, 'tier:', subscriptionTier, 'founding:', isFoundingMember);
 
-          // Log subscription_activated analytics event
           base44.asServiceRole.entities.AnalyticsEvent.create({
             event_name: 'subscription_activated',
             user_id: billingUser.id,
@@ -207,7 +183,6 @@ Deno.serve(async (req) => {
             properties: { plan: plan || subscriptionTier, is_founding: isFoundingMember, persona: billingUser.persona || '' },
           }).catch(() => {});
 
-          // Update Stripe customer metadata
           if (isFoundingMember) {
             try {
               await stripe.customers.update(customerId, {
@@ -222,7 +197,6 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Update Family record (source of truth)
         const family = await findFamily(familyId, customerId);
         if (family) {
           const familyUpdates = {
@@ -242,7 +216,6 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.Family.update(family.id, familyUpdates);
           console.log('Updated family:', family.id, 'tier:', subscriptionTier);
 
-          // Propagate to ALL family members
           const memberUpdates = {
             subscription_status: 'active',
             subscription_tier: subscriptionTier,
@@ -258,32 +231,31 @@ Deno.serve(async (req) => {
         // Send confirmation email to the buyer
         if (billingUser?.email) {
           const userName = billingUser.full_name?.split(' ')[0] || 'there';
-          const isAnnual = plan?.includes('annual');
           const isFoundingEmail = isFoundingMember;
           try {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: billingUser.email,
-              subject: `Welcome to FastIQ${isFoundingEmail ? ' — Founding Member' : ''}! 🎉`,
+              subject: `Welcome to FastIQ${isFoundingEmail ? ' - Founding Member' : ''}! 🎉`,
               body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:600px;margin:0 auto;padding:40px 24px;">
   <div style="background:#0A0A0A;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;">
-    <p style="color:#E85D20;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">⚡ FASTIQ ACTIVATED</p>
+    <p style="color:#E85D20;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">FASTIQ ACTIVATED</p>
     <h1 style="color:#fff;font-size:28px;margin:0 0 8px;">You're in, ${escapeHtml(userName)}!</h1>
     <p style="color:rgba(255,255,255,0.6);font-size:15px;margin:0;">Your FastIQ career engine is now active.</p>
   </div>
   <p style="font-size:15px;color:#1A1A1A;line-height:1.6;">Here's what just unlocked for you:</p>
   <div style="background:#F5F5F5;border-radius:12px;padding:20px;margin:16px 0;">
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Unlimited alumni searches</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Resume tailoring to any job description</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ AI outreach drafts</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Company hiring signals</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">✅ Full CFF network access</p>
-    <p style="font-size:14px;color:#1A1A1A;margin:0;">✅ Follow-up nudges</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Unlimited alumni searches</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Resume tailoring to any job description</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">AI outreach drafts</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Company hiring signals</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0 0 8px;">Full CFF network access</p>
+    <p style="font-size:14px;color:#1A1A1A;margin:0;">Follow-up nudges</p>
   </div>
-  ${isFoundingEmail ? '<div style="background:#FFF5F0;border:1px solid rgba(232,93,32,0.3);border-radius:12px;padding:16px 20px;margin:16px 0;"><p style="font-size:13px;color:#E85D20;font-weight:700;margin:0 0 4px;">🎖 FOUNDING MEMBER</p><p style="font-size:13px;color:#555;margin:0;">You locked in 50% off forever. Your rate never goes up — ever.</p></div>' : ''}
+  ${isFoundingEmail ? '<div style="background:#FFF5F0;border:1px solid rgba(232,93,32,0.3);border-radius:12px;padding:16px 20px;margin:16px 0;"><p style="font-size:13px;color:#E85D20;font-weight:700;margin:0 0 4px;">FOUNDING MEMBER</p><p style="font-size:13px;color:#555;margin:0;">You locked in 50% off forever. Your rate never goes up.</p></div>' : ''}
   <div style="text-align:center;margin:32px 0;">
-    <a href="https://collegefastforward.com/#FreeTierDashboard" style="background:#E85D20;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">Go to My Dashboard →</a>
+    <a href="https://collegefastforward.com/#FreeTierDashboard" style="background:#E85D20;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">Go to My Dashboard</a>
   </div>
-  <p style="font-size:12px;color:#AAAAAA;text-align:center;">Questions? Reply to this email — we're real people.</p>
+  <p style="font-size:12px;color:#AAAAAA;text-align:center;">Questions? Reply to this email - we're real people.</p>
 </div>`,
             });
             console.log('[stripeWebhook] Confirmation email sent to:', billingUser.email);
@@ -292,8 +264,9 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Send activation emails to linked students (family-linked)
-        if (subscriptionTier === 'fastiq' && billingUser) {
+        // Send activation emails to non-parent FastIQ buyers with family-linked students
+        // Parent buyers are handled by the gifting loop below to avoid duplicate emails
+        if (subscriptionTier === 'fastiq' && billingUser && billingUser.persona !== 'parent') {
           await sendStudentActivationEmails(billingUser, family);
         }
 
@@ -302,7 +275,7 @@ Deno.serve(async (req) => {
           const studentEmailsToGift = [
             ...(billingUser.student_emails || []),
             billingUser.pending_student_invite_email,
-          ].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i); // dedupe
+          ].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i);
 
           for (const studentEmail of studentEmailsToGift) {
             try {
@@ -310,9 +283,8 @@ Deno.serve(async (req) => {
               const student = studentMatches?.[0];
 
               if (student) {
-                // Never overwrite a paying subscription with a trial gift
                 if (student.stripe_customer_id && student.subscription_status === 'active' && !student.fastiq_trial_active) {
-                  console.log('[stripeWebhook] Student already has paid FastIQ — skipping gift:', studentEmail);
+                  console.log('[stripeWebhook] Student already has paid FastIQ - skipping gift:', studentEmail);
                   continue;
                 }
 
@@ -339,7 +311,6 @@ Deno.serve(async (req) => {
 
                 console.log('[stripeWebhook] FastIQ gifted to student:', studentEmail);
               } else {
-                // Student hasn't signed up yet — append to pending gifts array on parent
                 const existingPending = billingUser.pending_fastiq_gift_emails || [];
                 const updatedPending = existingPending.includes(studentEmail)
                   ? existingPending
@@ -347,7 +318,7 @@ Deno.serve(async (req) => {
                 await base44.asServiceRole.entities.User.update(billingUser.id, {
                   pending_fastiq_gift_emails: updatedPending,
                 });
-                console.log('[stripeWebhook] Student not yet signed up — gift pending:', studentEmail);
+                console.log('[stripeWebhook] Student not yet signed up - gift pending:', studentEmail);
               }
             } catch (giftErr) {
               console.error('[stripeWebhook] Parent gift FastIQ error for', studentEmail, ':', giftErr.message);
@@ -358,7 +329,7 @@ Deno.serve(async (req) => {
         break;
       }
 
-      // ── SUBSCRIPTION CREATED / UPDATED ──
+      // SUBSCRIPTION CREATED / UPDATED
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
@@ -379,14 +350,11 @@ Deno.serve(async (req) => {
         if (subscription.trial_end) userUpdates.trial_end_date = new Date(subscription.trial_end * 1000).toISOString();
         if (subscription.current_period_end) userUpdates.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
 
-        // Set fastiq_active based on status
         if (subscriptionTier === 'fastiq') {
           userUpdates.fastiq_active = (status === 'active' || status === 'trialing');
           userUpdates.membership_tier = (status === 'active' || status === 'trialing') ? 'fastiq' : billingUser?.membership_tier;
         }
 
-        // Expire Stripe-based trials when subscription goes past_due or canceled
-        // This is the authoritative expiry path for Stripe checkout trial users.
         if (status === 'past_due' || status === 'canceled') {
           userUpdates.trial_status = 'expired';
           userUpdates.fastiq_trial_active = false;
@@ -425,7 +393,7 @@ Deno.serve(async (req) => {
         break;
       }
 
-      // ── SUBSCRIPTION DELETED ──
+      // SUBSCRIPTION DELETED
       case 'customer.subscription.deleted': {
         const deletedSub = event.data.object;
         const customerId = deletedSub.customer;
@@ -445,35 +413,29 @@ Deno.serve(async (req) => {
           });
           console.log('Subscription canceled for billing user:', billingUser.id);
 
-          // Send cancellation email
           try {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: billingUser.email,
               subject: 'Your FastIQ subscription has been canceled',
-              body: `
-<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+              body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Your FastIQ subscription has been canceled</h1>
   <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
   <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Your FastIQ subscription has been canceled. Your student will revert to the free tier and lose access to full alumni contacts, personalized outreach, and the AI career engine.</p>
   <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">If this was a mistake, you can reactivate anytime from your dashboard.</p>
-  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Go to Dashboard →</a>
-  <p style="font-size:13px;color:#999;margin-top:32px;">— The College Fast Forward Team</p>
+  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Go to Dashboard</a>
+  <p style="font-size:13px;color:#999;margin-top:32px;">The College Fast Forward Team</p>
 </div>`,
             });
-            console.log('[stripeWebhook] Email sent successfully:', { event: 'subscription_canceled', email: billingUser.email });
+            console.log('[stripeWebhook] Cancellation email sent:', billingUser.email);
           } catch (emailError) {
-            console.error('[stripeWebhook] Email failed:', {
-              event: 'customer.subscription.deleted',
-              userId: billingUser.id,
-              email: billingUser.email,
-              error: emailError.message,
-            });
+            console.error('[stripeWebhook] Cancellation email failed:', emailError.message);
           }
         }
 
         const family = await findFamily(familyId, customerId);
         if (family) {
-          if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding') {
+          // Guard founding families from cancellation (check all possible flags)
+          if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding' || family.is_founding_subscriber) {
             console.log('Skipping cancellation for founding family:', family.id);
             break;
           }
@@ -481,7 +443,6 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.Family.update(family.id, { subscription_status: 'canceled' });
           console.log('Family subscription canceled:', family.id);
 
-          // Deactivate all family members
           await updateAllFamilyMembers(family, {
             subscription_status: 'canceled',
             fastiq_active: false,
@@ -490,7 +451,7 @@ Deno.serve(async (req) => {
         break;
       }
 
-      // ── PAYMENT FAILED ──
+      // PAYMENT FAILED
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         const customerId = invoice.customer;
@@ -521,37 +482,30 @@ Deno.serve(async (req) => {
           });
           console.log('Marked billing user as past_due:', billingUser.id, 'attempt:', attemptCount);
 
-          // Send payment failure email
           const isDay3 = attemptCount >= 2;
           const urgency = isDay3 ? 'Your access will be deactivated soon' : 'Please update your payment method';
 
           try {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: billingUser.email,
-              subject: `Action required: Payment failed for FastIQ — ${urgency}`,
-              body: `
-<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
+              subject: `Action required: Payment failed for FastIQ - ${urgency}`,
+              body: `<div style="font-family:'DM Sans',system-ui,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h1 style="font-size:24px;font-weight:700;margin-bottom:16px;color:#333;">Payment failed</h1>
   <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">Hi ${escapeHtml(billingUser.full_name?.split(' ')[0] || 'there')},</p>
-  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">We couldn't process your payment for FastIQ. ${isDay3 ? 'Your student\'s access will be deactivated within 24 hours unless payment is resolved.' : 'Please update your payment method to keep your student\'s access active.'}</p>
-  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Update Payment →</a>
-  <p style="font-size:13px;color:#999;margin-top:32px;">— The College Fast Forward Team</p>
+  <p style="font-size:16px;line-height:1.65;color:#666;margin-bottom:24px;">We couldn't process your payment for FastIQ. ${isDay3 ? "Your student's access will be deactivated within 24 hours unless payment is resolved." : "Please update your payment method to keep your student's access active."}</p>
+  <a href="https://www.collegefastforward.com/#ParentHome" style="display:inline-block;background:#E85D20;color:#fff;padding:14px 36px;border-radius:100px;text-decoration:none;font-weight:600;font-size:16px;">Update Payment</a>
+  <p style="font-size:13px;color:#999;margin-top:32px;">The College Fast Forward Team</p>
 </div>`,
             });
-            console.log('[stripeWebhook] Email sent successfully:', { event: 'payment_failed', email: billingUser.email });
+            console.log('[stripeWebhook] Payment failed email sent:', billingUser.email, 'attempt:', attemptCount);
           } catch (emailError) {
-            console.error('[stripeWebhook] Email failed:', {
-              event: 'invoice.payment_failed',
-              userId: billingUser.id,
-              email: billingUser.email,
-              error: emailError.message,
-            });
+            console.error('[stripeWebhook] Payment failed email error:', emailError.message);
           }
         }
 
         const family = await findFamily(familyId, customerId);
         if (family) {
-          if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding') break;
+          if (family.subscription_tier === 'free_founding' || family.price_tier === 'founding' || family.is_founding_subscriber) break;
           await base44.asServiceRole.entities.Family.update(family.id, { subscription_status: 'past_due' });
           await updateAllFamilyMembers(family, { subscription_status: 'past_due' });
           console.log('Family marked past_due:', family.id);
