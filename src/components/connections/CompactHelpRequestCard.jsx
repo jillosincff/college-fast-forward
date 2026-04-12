@@ -66,9 +66,9 @@ export default function CompactHelpRequestCard({
   onSave,
   isFeatured = false 
 }) {
-  if (!request) return null;
-
   const [isSaved, setIsSaved] = useState(false);
+
+  if (!request) return null;
 
   const handleSaveClick = (e) => {
     e.stopPropagation(); // Prevent card click from firing

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import CTAButton from '@/components/landing/v3/CTAButton';
 import ConstellationBackground from '@/components/landing/ConstellationBackground';
 import InteractiveTeaserDemo from '@/components/landing/InteractiveTeaserDemo';
 

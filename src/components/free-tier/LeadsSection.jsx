@@ -46,6 +46,48 @@ function initials(name) {
   return (name || '?').split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
 }
 
+const WAYS_TO_HELP_LABELS = {
+  'career_advice': '💬 Career Advice',
+  'introductions': '🤝 Introductions',
+  'resume_interviews': '📄 Resume & Interviews',
+  'resume_review': '📄 Resume Review',
+  'mock_interviews': '🎤 Mock Interviews',
+  'industry_insights': '💡 Industry Insights',
+  'mentorship': '⭐ Mentorship',
+  'jobs_referrals': '✉️ Can Refer You',
+  'networking': '🌐 Networking',
+  'career_guidance': '🧭 Career Guidance',
+  'grad_school': '🎓 Grad School Advice',
+  'salary_negotiation': '💰 Salary Negotiation',
+  'interview_prep': '🎯 Interview Prep',
+};
+
+function getIntroSignal(m) {
+  const w = (m.intro_willingness || m.intro_availability || '').toLowerCase();
+  if (w === 'happy_to_help' || w === 'yes') return { label: '✓ Open to intro requests', color: '#22C55E', bg: '#F0FDF4', border: '#86EFAC' };
+  if (w === 'occasionally') return { label: '◎ Available occasionally', color: '#F59E0B', bg: '#FFFBEB', border: '#FCD34D' };
+  return { label: '✓ In the CFF network', color: '#22C55E', bg: '#F0FDF4', border: '#86EFAC' };
+}
+
+function getPersonaLabel(m) {
+  if (m.persona === 'parent' || m.roles?.includes('parent')) return '👨‍👩‍👧 CFF Parent';
+  if (m.persona === 'alumni' || m.roles?.includes('alumni')) return '🎓 CFF Alumni';
+  return '✓ CFF Member';
+}
+
+function getOutreachSuggestion(m) {
+  const helps = m.ways_to_help || [];
+  if (helps.includes('jobs_referrals')) return 'Ask about open roles at their company';
+  if (helps.includes('mock_interviews')) return "Ask if they'd do a mock interview";
+  if (helps.includes('introductions')) return 'Ask for an intro to someone in your field';
+  if (helps.includes('salary_negotiation')) return 'Ask about salary expectations in their field';
+  if (helps.includes('industry_insights')) return 'Ask about breaking into their industry';
+  if (helps.includes('resume_interviews') || helps.includes('resume_review')) return 'Ask them to review your resume';
+  if (helps.includes('mentorship')) return "Ask if they'd be open to a mentorship conversation";
+  if (helps.includes('career_advice') || helps.includes('career_guidance')) return 'Ask for 15 minutes of career advice';
+  return 'Introduce yourself and ask for advice';
+}
+
 
 
 function CFFMemberCard({ member, accentColor, onContact, onSave, onUnsave, isSaved }) {

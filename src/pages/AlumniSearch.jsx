@@ -17,8 +17,27 @@ export default function AlumniSearch({ user, onOpenUpgrade, onTabChange, refresh
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
   const schoolName = user?.school_name || user?.school || user?.university || null;
 
-  // Clear stale localStorage if the user's DB record says they haven't used their free search
-  // This fixes the case where a fresh account inherits localStorage from a previous session
+  const DRAFT_TIMEOUT_MS = 15000;
+  const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [results, setResults] = useState([]);
+  const [searchUsedThisSession, setSearchUsedThisSession] = useState(
+    () => typeof window !== 'undefined' && !!localStorage.getItem('alumni_search_used')
+  );
+  const [cffModal, setCffModal] = useState(null);
+  const [cffDraft, setCffDraft] = useState('');
+  const [cffSending, setCffSending] = useState(false);
+  const [cffSent, setCffSent] = useState(false);
+  const [sentTo, setSentTo] = useState([]);
+  const [connectLoading, setConnectLoading] = useState(null);
+  const [outreachModal, setOutreachModal] = useState(null);
+  const [editedDraft, setEditedDraft] = useState('');
+  const [draftLoading, setDraftLoading] = useState(false);
+  const [draftHint, setDraftHint] = useState(null);
+  const [copyToast, setCopyToast] = useState(false);
+
+  // Clear stale localStorage
   useEffect(() => {
     if (!isFastIQ && !user?.alumni_search_used && searchUsedThisSession) {
       localStorage.removeItem('alumni_search_used');

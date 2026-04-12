@@ -63,10 +63,11 @@ function ContactDraft({ contact, index }) {
 }
 
 export default function NetworkThankYouCard({ data, onSendMessage }) {
+  const [allCopied, setAllCopied] = useState(false);
+
   if (!data) return null;
 
   const contacts = data.contacts || [];
-  const [allCopied, setAllCopied] = useState(false);
 
   const handleCopyAll = () => {
     const allText = contacts.map(c =>

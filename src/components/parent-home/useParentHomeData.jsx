@@ -9,7 +9,6 @@ function hasFastIQ(student) {
 
 function getStudentStatus(student) {
   if (!student) return 'pending';
-  if (!hasFastIQ(student) && student.onboarding_completed !== true) return 'no_fastiq';
   if (!hasFastIQ(student)) return 'no_fastiq';
   // Check inactive: 7+ days since last_active_at
   if (student.last_active_at) {
@@ -32,16 +31,21 @@ export default function useParentHomeData(user) {
     const emails = user.student_emails || [];
 
     // Load students, matches, and FastIQ profiles in parallel
-    const [studentResults, matchResults, profileResults] = await Promise.all([
-      Promise.all(emails.map(async (email) => {
-        const found = await base44.entities.User.filter({ email }).catch(() => []);
-        return { email, student: found?.length ? found[0] : null };
-      })),
-      base44.entities.Match.filter({ parent_id: user.id, status: 'pending' }, '-created_date', 10).catch(() => []),
-      emails.length > 0
-        ? base44.entities.FastTrackProProfile.filter({ user_email: { $in: emails } }).catch(() => [])
-        : Promise.resolve([]),
-    ]);
+    let studentResults = [], matchResults = [], profileResults = [];
+    try {
+      [studentResults, matchResults, profileResults] = await Promise.all([
+        Promise.all(emails.map(async (email) => {
+          const found = await base44.entities.User.filter({ email }).catch(() => []);
+          return { email, student: found?.length ? found[0] : null };
+        })),
+        base44.entities.Match.filter({ parent_id: user.id, status: 'pending' }, '-created_date', 10).catch(() => []),
+        emails.length > 0
+          ? base44.entities.FastTrackProProfile.filter({ user_email: { $in: emails } }).catch(() => [])
+          : Promise.resolve([]),
+      ]);
+    } catch (e) {
+      console.error('useParentHomeData load error:', e);
+    }
 
     setStudents(studentResults);
     setPendingMatches(matchResults || []);

@@ -172,7 +172,7 @@ export default function ParentMessageComposer({ user, parent, onClose, onSent })
           {threadState === 'awaiting_reply' && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#92400E', marginBottom: 4 }}>
-                You've already reached out to {parentMasked} — waiting for their response.
+                You've already reached out to {parentDisplayName} — waiting for their response.
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#78350F' }}>
                 {daysSinceInitial} day{daysSinceInitial !== 1 ? 's' : ''} since you sent your initial message.
@@ -215,7 +215,7 @@ export default function ParentMessageComposer({ user, parent, onClose, onSent })
           {threadState === 'blocked' && (
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666' }}>
-                {parentMasked} hasn't responded yet. Consider reaching out to someone else in the network.
+                {parentDisplayName} hasn't responded yet. Consider reaching out to someone else in the network.
               </p>
             </div>
           )}
@@ -272,7 +272,7 @@ export default function ParentMessageComposer({ user, parent, onClose, onSent })
               </div>
               <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#1A1A1A', marginBottom: 6 }}>Message sent!</p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666' }}>
-                {parentMasked} has been notified. Check your Messages tab for their reply.
+                {parentDisplayName} has been notified. Check your Messages tab for their reply.
               </p>
             </div>
           )}

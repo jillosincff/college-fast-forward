@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, X, FileText, MapPin, Clock, Users } from 'lucide-react';
+import { Loader2, X, FileText, MapPin, Clock, Users, Briefcase } from 'lucide-react';
 import { JobRequest } from '@/entities/JobRequest';
 import { User } from '@/entities/User';
 import { useToast } from '@/components/ui/use-toast';

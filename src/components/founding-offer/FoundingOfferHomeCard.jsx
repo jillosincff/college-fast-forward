@@ -51,7 +51,7 @@ export default function FoundingOfferHomeCard({ display, studentName, user }) {
           fontFamily: dmSans, fontSize: 13, color: '#888',
           lineHeight: 1.6, marginBottom: 20, textAlign: 'center',
         }}>
-          Activate the annual plan before it expires and pay just $249 — save $99.
+          Activate FastIQ before it expires and lock in just $29/month — forever.
           <br />This offer won't appear again.
         </p>
 
@@ -76,7 +76,7 @@ export default function FoundingOfferHomeCard({ display, studentName, user }) {
           fontFamily: dmSans, fontSize: 11, color: '#555',
           textAlign: 'center', lineHeight: 1.6, marginTop: 14,
         }}>
-          Start free for 7 days — then $29/month. Cancel anytime.
+          $29/month · Cancel anytime
         </p>
       </div>
     </div>

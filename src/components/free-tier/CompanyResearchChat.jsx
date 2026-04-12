@@ -131,7 +131,7 @@ Respond in 2-4 sentences. Be specific, honest, and actionable. No markdown. No b
               </button>
             </div>
           </div>
-        )}
+        </div>
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

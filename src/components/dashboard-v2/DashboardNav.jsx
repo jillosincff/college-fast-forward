@@ -19,24 +19,11 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
   const isStudent = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isParentOrAlumni = user?.persona === 'parent' || user?.persona === 'alumni' ||
     user?.roles?.includes('parent') || user?.roles?.includes('alumni');
-  if (isParentOrAlumni && !isStudent) return null;
+
   const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
-
-  // Compute initials: handle "Last, First" format
-  const fullName = user?.full_name || user?.email || '??';
-  let initials = '??';
-  if (fullName.includes(',')) {
-    // "Osinoff, Lindsey M." → first = "Lindsey", last = "Osinoff"
-    const parts = fullName.split(',').map(s => s.trim());
-    const first = parts[1]?.split(/\s+/)[0] || '';
-    const last = parts[0] || '';
-    initials = ((first[0] || '') + (last[0] || '')).toUpperCase();
-  } else {
-    initials = fullName.split(/[\s@]+/).slice(0, 2).map(w => w[0]?.toUpperCase()).join('');
-  }
 
   // Close menu on outside click
   useEffect(() => {
@@ -45,6 +32,8 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
+
+  if (isParentOrAlumni && !isStudent) return null;
 
   return (
     <nav style={{

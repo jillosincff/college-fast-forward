@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { generateDashboardBriefing } from '@/functions/generateDashboardBriefing';
 import { Loader2, X } from 'lucide-react';

@@ -137,7 +137,7 @@ export default function ParentHome() {
 
           {/* Founding Member Offer — between intro requests and FastIQ nudge */}
           {showFoundingHome && (
-            <FoundingOfferHomeCard display={offer.display} studentName={firstStudentName} />
+            <FoundingOfferHomeCard display={offer.display} studentName={firstStudentName} user={user} />
           )}
 
           {/* Priority 2 — FastIQ not activated */}
