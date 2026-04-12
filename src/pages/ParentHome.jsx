@@ -107,13 +107,13 @@ export default function ParentHome() {
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
       <ParentProfileNav user={user} currentPage="ParentHome" />
 
+      <FoundingMemberBanner
+        show={showBanner && !isFastIQ}
+        onUpgrade={() => navigate('FastIQDashboard')}
+        onDismiss={() => setShowBanner(false)}
+      />
       <PullToRefresh onRefresh={refresh}>
-        <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '32px 24px 80px' }}>
-          <FoundingMemberBanner
-            show={showBanner && !isFastIQ}
-            onUpgrade={() => navigate('FastIQDashboard')}
-            onDismiss={() => setShowBanner(false)}
-          />
+        <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '0 24px 80px' }}>
           <ParentHomeHero user={user} />
 
           {/* Activation confirmation toast */}
