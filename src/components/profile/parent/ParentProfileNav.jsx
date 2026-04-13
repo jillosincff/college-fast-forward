@@ -8,7 +8,7 @@ const ORANGE = '#E85D20';
 
 const NAV_LINKS = [
   { label: 'Home', page: 'ParentHome' },
-  { label: 'Directory', page: 'GatorDirectory' },
+  { label: 'Directory', page: 'Directory' },
   { label: 'Messages', page: 'MyMessages' },
 ];
 
