@@ -17,6 +17,7 @@ export default function ParentProfileEdit() {
   const { user, refreshUser } = useAuth();
   const [form, setForm] = useState({
     full_name: '',
+    school_name: '',
     company: '',
     industry: '',
     linkedin_url: '',
@@ -29,6 +30,7 @@ export default function ParentProfileEdit() {
     if (user) {
       setForm({
         full_name: user.full_name || '',
+        school_name: user.school_name || user.school || user.university || '',
         company: user.current_company || user.company || '',
         industry: user.industry || (user.industries?.[0] || ''),
         linkedin_url: user.linkedin_url || '',
@@ -41,6 +43,7 @@ export default function ParentProfileEdit() {
     setSaving(true);
     await base44.auth.updateMe({
       full_name: form.full_name.trim(),
+      school_name: form.school_name.trim(),
       current_company: form.company.trim(),
       company: form.company.trim(),
       industry: form.industry,
@@ -77,6 +80,7 @@ export default function ParentProfileEdit() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <Field label="Full Name" value={form.full_name} onChange={v => setForm(f => ({ ...f, full_name: v }))} placeholder="Your full name" />
+          <Field label="School / University" value={form.school_name} onChange={v => setForm(f => ({ ...f, school_name: v }))} placeholder="e.g. University of Florida" />
           <Field label="Company" value={form.company} onChange={v => setForm(f => ({ ...f, company: v }))} placeholder="Where you work" />
 
           {/* Industry select */}

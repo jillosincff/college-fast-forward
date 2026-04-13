@@ -68,6 +68,7 @@ export default function ParentProfileHeader({ user }) {
   const name = formatName(user);
   const initials = getInitials(user);
   const company = user?.current_company || user?.company || '';
+  const school = user?.school_name || user?.school || user?.university || '';
   const industry = user?.industry || (user?.industries?.length ? user.industries[0] : '');
   const { pct } = completionScore(user);
   const nudge = getNudge(user);
@@ -107,6 +108,7 @@ export default function ParentProfileHeader({ user }) {
           <div>
             <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 14 }}>Professional Info</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <InfoRow icon="🎓" label={school || 'No school set'} muted={!school} />
               <InfoRow icon="🏢" label={company || 'No company'} muted={!company} />
               <InfoRow icon="🏷️" label={industry ? industry.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'No industry'} muted={!industry} />
               <InfoRow icon="✉️" label={user?.email} />
