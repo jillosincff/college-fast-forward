@@ -39,9 +39,10 @@ Deno.serve(async (req) => {
     if (!isAdmin && !schoolCode) {
       return Response.json({
         success: false,
-        error: 'School not set on your profile.',
+        error: 'incomplete_profile',
+        message: 'Please complete your profile to see your network.',
+        cta: 'CompleteProfile',
         data: [],
-        count: 0,
       });
     }
 

@@ -31,6 +31,8 @@ export default function Directory() {
   const [viewMode, setViewMode] = useState('grid');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  const [incompleteProfile, setIncompleteProfile] = useState(false);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMessageModalOpen, setMessageModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
@@ -53,6 +55,11 @@ export default function Directory() {
     try {
       const response = await base44.functions.invoke('getDirectoryUsers', {});
       const result = response?.data || response;
+      if (result?.error === 'incomplete_profile') {
+        setIncompleteProfile(true);
+        setLoading(false);
+        return;
+      }
       if (result?.error) throw new Error(result.error);
       const rawUsers = result?.data || [];
 
@@ -183,6 +190,31 @@ export default function Directory() {
   const handleMessage = (u) => { setSelectedUser(u); setMessageModalOpen(true); };
   const handleViewProfile = (userId) => { setSelectedProfileId(userId); setProfileModalOpen(true); };
   const resetFilters = () => { setSearchTerm(''); setFilters({ persona: 'all', industry: 'all', helpType: 'all' }); setSchoolFilter('my_school'); };
+
+  const playfair = "'Playfair Display', Georgia, serif";
+
+  if (incompleteProfile) {
+    return (
+      <div style={{ minHeight: '100vh', background: isParent ? '#0A0A0A' : '#f4f2ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', padding: 48 }}>
+          <p style={{ fontFamily: playfair, fontSize: 22, color: isParent ? '#fff' : '#1a1a1a', marginBottom: 12 }}>
+            Almost there
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 15, color: isParent ? 'rgba(255,255,255,0.5)' : '#666', marginBottom: 24 }}>
+            Add your school to your profile to see your network.
+          </p>
+          <button onClick={() => navigate('ProfileEdit')} style={{
+            background: '#E85D20', color: '#fff', border: 'none',
+            borderRadius: 12, padding: '12px 28px',
+            fontFamily: dmSans, fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', minHeight: 'auto'
+          }}>
+            Complete My Profile →
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
