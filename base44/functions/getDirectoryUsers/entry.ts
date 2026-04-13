@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const TEST_NAMES = ['test', 'movie', 'demo', 'sample', 'fake'];
 
@@ -118,6 +118,7 @@ Deno.serve(async (req) => {
         onboarding_completed: u.onboarding_completed || false,
         profile_image_url: u.profile_image_url || '',
         show_in_directory: u.show_in_directory,
+        subscription_status: u.subscription_status || '',
         updated_date: u.updated_date,
       });
     }

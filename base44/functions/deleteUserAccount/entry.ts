@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
@@ -26,13 +26,13 @@ Deno.serve(async (req) => {
     const userEmail = user.email;
     const userId = user.id;
 
-    // A helper function to run deletions in parallel
+    // A helper function to run deletions in parallel — uses service role to bypass RLS
     const deleteUserRecords = async (entity, filter) => {
       try {
-        const records = await base44.entities[entity].filter(filter);
+        const records = await base44.asServiceRole.entities[entity].filter(filter);
         if (records && records.length > 0) {
           for (const record of records) {
-            await base44.entities[entity].delete(record.id);
+            await base44.asServiceRole.entities[entity].delete(record.id);
           }
         }
       } catch (e) {
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     ]);
 
     // 5. Finally, delete the user's own record
-    await base44.entities.User.delete(userId);
+    await base44.asServiceRole.entities.User.delete(userId);
 
     return new Response(JSON.stringify({ success: true, message: 'Your account and all associated data have been permanently deleted.' }), {
       status: 200,
