@@ -5,6 +5,7 @@ import { maybeActivateTrial } from '@/utils/trialActivation';
 import { navigate } from '@/components/utils/navigation';
 import PostTrialUpgradePrompt from '@/components/free-tier/PostTrialUpgradePrompt';
 import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
+import { checkIsFastIQ } from '@/utils/isFastIQ';
 
 function TopNav() {
   return null;
@@ -68,7 +69,7 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [isComplete, setIsComplete] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
+  const isFastIQ = checkIsFastIQ(user);
   const trialExpired = user?.trial_status === 'expired' && user?.subscription_status !== 'active';
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';

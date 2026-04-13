@@ -25,7 +25,18 @@ export default function useCheckout(user) {
         plan,
         successUrl,
         cancelUrl,
-        user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
+        user: {
+            id: user?.id,
+            email: user?.email,
+            persona: user?.persona,
+            roles: user?.roles,
+            full_name: user?.full_name,
+            stripe_customer_id: user?.stripe_customer_id,
+            family_id: user?.family_id,
+            founding_offer_started_at: user?.founding_offer_started_at,
+            student_emails: user?.student_emails,
+            pending_student_invite_email: user?.pending_student_invite_email,
+          },
       });
 
       const result = response?.data || response;

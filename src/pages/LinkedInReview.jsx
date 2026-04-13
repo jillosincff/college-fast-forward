@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { Home, FileText, Search, Building2, MessageSquare } from 'lucide-react';
+import { checkIsFastIQ } from '@/utils/isFastIQ';
 
 function SideNav() {
   const NAV = [
@@ -60,14 +61,13 @@ function SuggestedBox({ label, children }) {
 export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const { user } = useAuth();
   const onOpenUpgrade = onOpenUpgradeProp || (() => {});
+  const isFastIQ = checkIsFastIQ(user);
 
   const [url, setUrl] = useState(user?.linkedin_url || '');
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState('');
-
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
 
   const handleReview = async () => {
     if (!url.trim()) return;

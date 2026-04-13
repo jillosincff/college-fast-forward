@@ -4,12 +4,12 @@ import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Zap } from 'lucide-react';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
+import { checkIsFastIQ } from '@/utils/isFastIQ';
 
 export default function FastIQDashboard({ onOpenUpgrade }) {
   const { user } = useAuth();
   const [showBanner, setShowBanner] = useState(true);
-
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
+  const isFastIQ = checkIsFastIQ(user);
 
   const isFounding = !!(user?.founding_offer_redeemed || user?.founding_member_plan);
   const firstName = user?.full_name?.split(' ')[0] || 'there';

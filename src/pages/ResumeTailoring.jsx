@@ -9,12 +9,14 @@ import JobDescriptionStep from '@/components/resume-tailor/JobDescriptionStep';
 import ResumeBuilderStep from '@/components/fast-track-pro/ResumeBuilderStep';
 import TailoringLoader from '@/components/resume-tailor/TailoringLoader';
 import TailoringResults from '@/components/resume-tailor/TailoringResults';
+import { checkIsFastIQ } from '@/utils/isFastIQ';
 
 
 export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const onOpenUpgrade = onOpenUpgradeProp || (() => setShowUpgradeModal(true));
   const { user, refreshUser } = useAuth();
+  const isFastIQ = checkIsFastIQ(user);
   const [trialAttempted, setTrialAttempted] = useState(false);
   const [upgradeSuccess, setUpgradeSuccess] = useState(false);
   const fileInputRef = useRef(null);
@@ -36,8 +38,6 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState(false);
-
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
 
   // Auto-activate trial when user first lands on this page
   useEffect(() => {
