@@ -194,8 +194,8 @@ export default function GatorWelcome() {
     if (intendedRole === 'gator' && !isUFLStudent) {
       console.log('🚫 [GatorWelcome] Non-UFL email trying to register as student - blocked');
       clearPendingInviteData();
-      // Redirect back to role selection with error
-      navigate('GatorAuth');
+      // Redirect to LandingPage (NOT GatorAuth) to avoid infinite loop
+      navigate('LandingPage');
       return;
     }
     

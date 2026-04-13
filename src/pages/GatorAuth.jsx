@@ -164,7 +164,13 @@ export default function GatorAuth() {
     }
     
     if (user && !user.persona) {
-      navigate('GatorWelcome');
+      // Only go to GatorWelcome if there's a pending role — otherwise show the auth form
+      const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+      if (pendingRole) {
+        navigate('GatorWelcome');
+      } else {
+        setStep('auth');
+      }
       return;
     }
     
