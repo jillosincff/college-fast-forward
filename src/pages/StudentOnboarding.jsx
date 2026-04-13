@@ -70,7 +70,7 @@ export default function StudentOnboarding() {
       sessionStorage.setItem('cff_onboarding_type', 'student');
     } catch (e) { /* private browsing */ }
 
-    const callbackUrl = window.location.origin + '/#StudentOnboarding';
+    const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };
 

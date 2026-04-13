@@ -170,7 +170,9 @@ export default function GatorWelcome() {
     // This handles the case where user.persona hasn't been updated yet due to propagation delay
     // or where user had a stale persona from a previous incomplete signup
     // Also check user.roles array as fallback since persona might not be set but role was
-    const intendedRole = pendingRole || user.persona || (user.roles?.length > 0 ? user.roles[0] : null);
+    // Normalize 'student' to 'gator' for backward compat
+    const rawRole = pendingRole || user.persona || (user.roles?.length > 0 ? user.roles[0] : null);
+    const intendedRole = rawRole === 'student' ? 'gator' : rawRole;
     
     // GATE: If no role selected yet, redirect back to role selection
     if (!intendedRole) {

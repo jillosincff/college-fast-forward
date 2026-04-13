@@ -169,7 +169,14 @@ export default function GatorAuth() {
       if (pendingRole) {
         navigate('GatorWelcome');
       } else {
-        setStep('auth');
+        // Check sessionStorage fallback (Safari clears localStorage during OAuth)
+        const safariType = sessionStorage.getItem('cff_onboarding_type');
+        if (safariType) {
+          localStorage.setItem('pending_invite_role', safariType);
+          navigate('GatorWelcome');
+        } else {
+          setStep('auth');
+        }
       }
       return;
     }
