@@ -42,7 +42,10 @@ export default function LandingPage() {
     const callbackUrl = window.location.origin + '/#ParentAllSet';
     base44.auth.redirectToLogin(callbackUrl);
   };
-  const handleStudentCTA = () => { trackEvent('cta_student_clicked'); navigate('StudentOnboarding'); };
+  const handleStudentCTA = () => {
+    trackEvent('cta_student_clicked');
+    navigate('StudentOnboarding');
+  };
   const handleSignIn = () => { trackEvent('cta_signin_clicked'); navigate('GetStarted'); };
   const scrollToHowItWorks = () => {
     const el = document.getElementById('how-it-works');
