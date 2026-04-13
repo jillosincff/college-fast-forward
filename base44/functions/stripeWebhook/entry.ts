@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
           if (isFoundingMember) {
             userUpdates.founding_offer_redeemed = true;
             userUpdates.founding_offer_redeemed_at = new Date().toISOString();
-            userUpdates.founding_member_plan = 'fastiq_founding_annual';
+            userUpdates.founding_member_plan = plan;
           }
 
           await base44.asServiceRole.entities.User.update(billingUser.id, userUpdates);
@@ -401,7 +401,7 @@ Deno.serve(async (req) => {
 
         const billingUser = await findUserByCustomerId(customerId);
 
-        if (billingUser && (billingUser.subscription_tier === 'free_founding' || billingUser.is_founding_member || billingUser.price_tier === 'founding')) {
+        if (billingUser && (billingUser.subscription_tier === 'free_founding' || billingUser.is_founding_member || billingUser.price_tier === 'founding' || billingUser.membership_tier === 'founding_gator')) {
           console.log('Skipping cancellation for founding member:', billingUser.id);
           break;
         }
