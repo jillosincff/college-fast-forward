@@ -147,7 +147,7 @@ const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
 const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
 const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
 const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
-const ReferralAnswer = React.lazy(() => import('./pages/ReferralAnswer'));
+
 const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
 const ParentPledge = React.lazy(() => import('./pages/ParentPledge'));
 const SubmitFeedback = React.lazy(() => import('./pages/SubmitFeedback'));
@@ -563,7 +563,7 @@ const getPageComponent = (pageName) => {
     case 'GatorInviteCode': return GatorInviteCode;
     case 'GatorWelcome': return GatorWelcome;
     case 'GatorParentInvite': return GatorParentInvite;
-    case 'ReferralAnswer': return ReferralAnswer;
+
     case 'MatchesReview': return MatchesReview;
     case 'Insights': return Dashboard;
     case 'ParentPledge': return ParentPledge;
