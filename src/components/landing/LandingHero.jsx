@@ -11,12 +11,12 @@ const STATS = [
 ];
 
 const SOCIAL_PROOF = [
-  { quote: 'A conversation through CFF changed the trajectory of my son\'s career.', author: 'UF Parent' },
+  { quote: "A conversation through CFF changed the trajectory of my son's career.", author: 'UF Parent' },
   { quote: 'My daughter landed her internship through a connection she never would have found alone.', author: 'CFF Member' },
   { quote: 'One warm intro did more than 50 applications.', author: 'Student, Class of 2025' },
 ];
 
-export default function LandingHero({ onParentJoin, onStudentJoin, onClaim }) {
+export default function LandingHero({ onParentJoin, onStudentJoin }) {
   const [mounted, setMounted] = useState(false);
   const [activeQuote, setActiveQuote] = useState(0);
 
@@ -27,9 +27,6 @@ export default function LandingHero({ onParentJoin, onStudentJoin, onClaim }) {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
-
-  const handleParentJoin = onParentJoin || onClaim || (() => navigate('GetStarted'));
-  const handleStudentJoin = onStudentJoin || (() => navigate('GetStarted'));
 
   return (
     <div style={{
@@ -106,7 +103,7 @@ export default function LandingHero({ onParentJoin, onStudentJoin, onClaim }) {
             Sign In
           </button>
           <button
-            onClick={handleParentJoin}
+            onClick={onParentJoin}
             style={{
               fontFamily: dmSans,
               fontSize: 13,
@@ -240,7 +237,7 @@ export default function LandingHero({ onParentJoin, onStudentJoin, onClaim }) {
           transition: 'all 0.7s ease 0.3s',
         }}>
           <button
-            onClick={handleParentJoin}
+            onClick={onParentJoin}
             style={{
               fontFamily: dmSans,
               fontSize: 15,
@@ -267,7 +264,7 @@ export default function LandingHero({ onParentJoin, onStudentJoin, onClaim }) {
             Join as a Parent or Alumni — Free →
           </button>
           <button
-            onClick={handleStudentJoin}
+            onClick={onStudentJoin}
             style={{
               fontFamily: dmSans,
               fontSize: 15,
@@ -328,6 +325,84 @@ export default function LandingHero({ onParentJoin, onStudentJoin, onClaim }) {
               </p>
             </div>
           ))}
+        </div>
+
+        {/* Village section */}
+        <div style={{
+          maxWidth: 640,
+          marginBottom: 64,
+          opacity: mounted ? 1 : 0,
+          transition: 'all 0.7s ease 0.45s',
+          textAlign: 'center',
+        }}>
+          <div style={{
+            background: 'rgba(232,93,32,0.05)',
+            border: '1px solid rgba(232,93,32,0.15)',
+            borderRadius: 20,
+            padding: '40px 36px',
+          }}>
+            <p style={{
+              fontFamily: playfair,
+              fontSize: 'clamp(26px, 4vw, 38px)',
+              fontWeight: 700,
+              color: '#fff',
+              lineHeight: 1.2,
+              margin: '0 0 8px',
+              letterSpacing: '-0.02em',
+            }}>
+              It takes a village.
+            </p>
+            <p style={{
+              fontFamily: playfair,
+              fontSize: 'clamp(26px, 4vw, 38px)',
+              fontWeight: 700,
+              color: '#E85D20',
+              fontStyle: 'italic',
+              lineHeight: 1.2,
+              margin: '0 0 24px',
+              letterSpacing: '-0.02em',
+            }}>
+              And you're a big part of it.
+            </p>
+            <p style={{
+              fontFamily: dmSans,
+              fontSize: 16,
+              color: 'rgba(255,255,255,0.55)',
+              lineHeight: 1.65,
+              margin: '0 0 28px',
+              maxWidth: 460,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}>
+              Every parent who joins makes the network stronger — not just for their own student, but for every student in it. The more of us who show up, the more doors get opened.
+            </p>
+            <button
+              onClick={onParentJoin}
+              style={{
+                fontFamily: dmSans,
+                fontSize: 14,
+                fontWeight: 600,
+                color: '#E85D20',
+                background: 'none',
+                border: '1px solid rgba(232,93,32,0.4)',
+                borderRadius: 10,
+                padding: '12px 28px',
+                cursor: 'pointer',
+                minHeight: 'auto',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(232,93,32,0.1)';
+                e.currentTarget.style.borderColor = '#E85D20';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'none';
+                e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)';
+              }}
+            >
+              Help grow the village — join free →
+            </button>
+          </div>
         </div>
 
         {/* Social proof ticker */}
@@ -406,7 +481,7 @@ export default function LandingHero({ onParentJoin, onStudentJoin, onClaim }) {
           fontSize: 12,
           color: 'rgba(255,255,255,0.25)',
         }}>
-          Trusted by parents and alumni at UF, Tulane, Wake Forest, USC and 11 more universities
+          Building parent networks at colleges across the country
         </span>
       </div>
 
