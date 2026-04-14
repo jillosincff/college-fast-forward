@@ -192,21 +192,16 @@ export default function LandingPage() {
 
   const onParentJoin = () => {
     trackEvent('cta_parent_clicked');
-    try {
-      localStorage.setItem('pending_invite_role', 'parent');
-      localStorage.setItem('pending_invite_code', 'direct');
-    } catch (e) {}
-    try {
-      sessionStorage.setItem('pending_invite_role', 'parent');
-      sessionStorage.setItem('pending_invite_code', 'direct');
-    } catch (e) {}
+    // Route to GatorWelcome — user picks their path there
     const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };
 
   const onStudentJoin = () => {
     trackEvent('cta_student_clicked');
-    navigate('StudentOnboarding');
+    // Route to GatorWelcome — user picks their path there
+    const callbackUrl = window.location.origin + '/#GatorWelcome';
+    base44.auth.redirectToLogin(callbackUrl);
   };
 
   return (

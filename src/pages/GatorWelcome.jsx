@@ -1,52 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
-import { ArrowRight, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
 
-/**
- * GatorWelcome - Bulletproof welcome page
- * 
- * FLOW:
- * 1. Determine the intended role (from localStorage > user.persona)
- * 2. If user.persona doesn't match intended role, update it
- * 3. Show welcome message and button
- * 4. Navigate to correct onboarding
- */
-
-// Helper to clear all pending invite data from storage
-const clearPendingInviteData = () => {
-  localStorage.removeItem('pending_invite_role');
-  localStorage.removeItem('pending_invite_code');
-  localStorage.removeItem('pending_invite_timestamp');
-  localStorage.removeItem('pending_invite_code_id');
-  sessionStorage.removeItem('pending_invite_role');
-  sessionStorage.removeItem('pending_invite_code');
-};
+const dmSans = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
 
 export default function GatorWelcome() {
   const { user, refreshUser, isLoading } = useAuth();
-  const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'error' | 'payment_required'
-  const [role, setRole] = useState(null);
+  const [choosing, setChoosing] = useState(false); // show choice screen
+  const [saving, setSaving] = useState(null); // 'seeker' | 'helper'
   const [error, setError] = useState(null);
-  const [pricingInfo, setPricingInfo] = useState(null);
-  const [isCreatingFamily, setIsCreatingFamily] = useState(false);
-  
-  // Track if update is in progress to prevent duplicate calls
-  const updateInProgressRef = useRef(false);
-  // Track if component is mounted for safe async updates
   const isMountedRef = useRef(true);
 
   // Cleanup on unmount
   useEffect(() => {
     isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
+    return () => { isMountedRef.current = false; };
   }, []);
 
   // Clear OAuth tracking on mount
@@ -58,396 +28,196 @@ export default function GatorWelcome() {
     sessionStorage.removeItem('oauth_redirect_in_progress');
   }, []);
 
-  // Re-verify invite code on mount (prevents localStorage manipulation)
-  // CRITICAL: Only do a lightweight check — do NOT redirect on failure
-  // The code was already verified on GatorInviteCode. Re-verification failures
-  // (e.g. function not deployed, network issue) should NOT block the user.
-  useEffect(() => {
-    const storedCode = localStorage.getItem('pending_invite_code');
-    const storedTimestamp = localStorage.getItem('pending_invite_timestamp');
-    const pendingRole = localStorage.getItem('pending_invite_role');
-
-    // Only verify if we have a stored code and this is a parent/alumni flow
-    if (!storedCode || !pendingRole || pendingRole === 'gator') {
-      return;
-    }
-
-    // Check if code expired (30 min timeout)
-    if (storedTimestamp && Date.now() - parseInt(storedTimestamp) > 30 * 60 * 1000) {
-      console.log('⏰ [GatorWelcome] Invite code session expired');
-      clearPendingInviteData();
-      navigate('GatorInviteCode');
-      return;
-    }
-
-    // Non-blocking re-verification — log only, never redirect on failure
-    const verifyCodeAgain = async () => {
-      try {
-        console.log('🔄 [GatorWelcome] Re-verifying invite code:', storedCode);
-        const result = await base44.functions.invoke('verifyInviteCode', { 
-          code: storedCode,
-          skipUsageIncrement: true
-        });
-        
-        if (result.data?.success) {
-          console.log('✅ [GatorWelcome] Code re-verified successfully');
-        } else {
-          // Log but do NOT redirect — the code was already verified once
-          console.warn('⚠️ [GatorWelcome] Code re-verify returned false, but allowing to continue:', result.data?.error);
-        }
-      } catch (err) {
-        // On any error, allow to continue — don't lock out the user
-        console.warn('⚠️ [GatorWelcome] Re-verification error (allowing to continue):', err.message);
-      }
-    };
-
-    verifyCodeAgain();
-  }, []);
-
-  // Main setup effect
+  // Main routing effect — once we have a user, decide what to show
   useEffect(() => {
     if (isLoading) return;
 
-    // No user - wait a bit then redirect (session might still be loading)
+    // No user yet — poll for session
     if (!user) {
-      console.log('⏳ [GatorWelcome] No user yet, waiting for session...');
-      
-      // Poll for user session before giving up
       let attempts = 0;
-      const maxAttempts = 15; // Increase for slower connections (Edge/mobile)
-      const pollInterval = 600; // ms
-      
       const checkSession = async () => {
-        while (attempts < maxAttempts) {
+        while (attempts < 15) {
           attempts++;
-          await new Promise(r => setTimeout(r, pollInterval));
-          
-          // Check if component is still mounted
+          await new Promise(r => setTimeout(r, 600));
           if (!isMountedRef.current) return;
-          
           try {
             const freshUser = await base44.auth.me();
             if (freshUser?.email) {
-              console.log('✅ [GatorWelcome] Session found after polling:', freshUser.email, 'attempt:', attempts);
-              refreshUser(); // Trigger AuthContext update
-              return; // Effect will re-run with user
+              refreshUser();
+              return;
             }
-          } catch (e) {
-            console.log('⏳ [GatorWelcome] Polling attempt', attempts, 'failed:', e.message);
-            // Keep polling
-          }
+          } catch (e) { /* keep polling */ }
         }
-        // After max attempts, redirect to auth
-        if (isMountedRef.current) {
-          console.log('❌ [GatorWelcome] No session after', maxAttempts, 'polling attempts, redirecting to GatorAuth');
-          navigate('GatorAuth');
-        }
+        if (isMountedRef.current) navigate('GatorAuth');
       };
-      
       checkSession();
       return;
     }
 
-    // Check if there's a pending invite role - if so, this is a NEW user flow, don't redirect
-    const pendingRole = localStorage.getItem('pending_invite_role');
-    
-    // Already fully onboarded AND no pending role - redirect to dashboard
-    // CRITICAL: Only redirect if onboarding is EXPLICITLY true AND there's no pending role
-    if (user.onboarding_completed === true && !pendingRole) {
-      console.log('✅ [GatorWelcome] Already onboarded, redirecting to dashboard');
-      let destination = 'Dashboard';
-      if (user.persona === 'parent') destination = 'ParentDashboard';
-      else if (user.persona === 'alumni') destination = 'AlumniDashboard';
-      navigate(destination);
+    // Already onboarded — send to the right dashboard
+    if (user.onboarding_completed === true) {
+      const dest = (user.alumni_intent === 'help_students' || user.persona === 'parent')
+        ? 'ParentHome'
+        : 'FreeTierDashboard';
+      navigate(dest);
       return;
     }
 
-    // STEP 1: Determine the intended role
-    // Priority: localStorage (set by GatorAuth after OAuth) > user.persona (database) > user.roles[0]
-    // (pendingRole already read above for redirect check)
-    
-    // CRITICAL: For new signups, ALWAYS trust localStorage over user.persona
-    // This handles the case where user.persona hasn't been updated yet due to propagation delay
-    // or where user had a stale persona from a previous incomplete signup
-    // Also check user.roles array as fallback since persona might not be set but role was
-    // Normalize 'student' to 'gator' for backward compat
-    const rawRole = pendingRole || user.persona || (user.roles?.length > 0 ? user.roles[0] : null);
-    const intendedRole = rawRole === 'student' ? 'gator' : rawRole;
-    
-    // GATE: If no role selected yet, redirect back to role selection
-    if (!intendedRole) {
-      console.log('🚫 [GatorWelcome] No role found - redirecting to role selection');
-      navigate('GatorAuth');
+    // Has a persona set but not completed onboarding — route to correct onboarding
+    if (user.persona === 'parent') {
+      navigate('ParentOnboarding');
       return;
     }
-    
-    // GATE: Parents/Alumni need invite code (unless they already used one)
-    const isUFLStudent = user.email?.toLowerCase().endsWith('@ufl.edu');
-    const hasInviteCode = localStorage.getItem('pending_invite_code') || user.invite_code_used;
-    
-    if ((intendedRole === 'parent' || intendedRole === 'alumni') && !hasInviteCode) {
-      console.log('🚫 [GatorWelcome] Parent/Alumni without invite code - redirecting');
-      localStorage.setItem('pending_invite_role', intendedRole);
-      navigate('GatorInviteCode');
+    if (user.persona === 'student' || user.persona === 'gator') {
+      navigate('StudentOnboarding');
       return;
     }
-    
 
-    
-    console.log('🔍 [GatorWelcome] Role sources:', {
-      pendingRole,
-      userPersona: user.persona,
-      userRoles: user.roles,
-      intendedRole
-    });
-
-    console.log('🔍 [GatorWelcome] Role determination:', {
-      pendingRole,
-      userPersona: user.persona,
-      userRoles: user.roles,
-      intendedRole,
-      updateInProgress: updateInProgressRef.current,
-      isNewSignup: user.is_new_signup
-    });
-
-    // (Role validation already done above - this is now redundant but kept for safety)
-
-    // Set role for display immediately (optimistic UI)
-    setRole(intendedRole);
-
-    // STEP 2: Check if we need to update the database
-    // Consider persona updated if EITHER persona OR roles array contains the intended role
-    const personaMatches = user.persona === intendedRole;
-    const rolesMatch = user.roles?.includes(intendedRole);
-    const needsUpdate = !personaMatches && !rolesMatch;
-    
-    console.log('🔍 [GatorWelcome] Needs update check:', { personaMatches, rolesMatch, needsUpdate });
-
-    if (needsUpdate && !updateInProgressRef.current) {
-      console.log('🔄 [GatorWelcome] Updating persona from', user.persona, 'to', intendedRole);
-      console.log('🔄 [GatorWelcome] intendedRole value:', intendedRole, 'type:', typeof intendedRole);
-      updateInProgressRef.current = true;
-      
-      // CRITICAL: Ensure intendedRole is the actual value ('alumni', 'parent', 'gator')
-      const updateData = {
-        persona: intendedRole,
-        roles: [intendedRole],
-        onboarding_completed: false,
-        is_new_signup: true,
-        ...(intendedRole === 'parent' ? { pledge_taken: false, first_question_shown: false } : {})
-      };
-      console.log('🔄 [GatorWelcome] Update data:', JSON.stringify(updateData));
-      
-      const MAX_VERIFY_ATTEMPTS = 2;
-      
-      base44.auth.updateMe(updateData)
-        .then(async () => {
-          // Only update state if still mounted
-          if (!isMountedRef.current) return;
-          
-          // CRITICAL: Verify the update with retry loop (max 2 attempts)
-          let verified = false;
-          let attempts = 0;
-          let currentUser;
-          
-          while (attempts < MAX_VERIFY_ATTEMPTS && !verified) {
-            attempts++;
-            
-            // Small delay before verification to allow DB propagation
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            currentUser = await base44.auth.me();
-            
-            if (currentUser.persona === intendedRole) {
-              verified = true;
-              console.log(`✅ [GatorWelcome] VERIFIED on attempt ${attempts}: persona = ${currentUser.persona}`);
-            } else {
-              console.warn(`⚠️ [GatorWelcome] VERIFICATION FAILED on attempt ${attempts}: got ${currentUser.persona}, expected ${intendedRole}`);
-              
-              // Log mismatch to backend for monitoring (non-blocking)
-              base44.functions.invoke('logPersonaMismatch', {
-                user_id: currentUser.id,
-                email: currentUser.email,
-                expected: intendedRole,
-                actual: currentUser.persona,
-                attempt: attempts,
-                location: 'GatorWelcome'
-              }).catch(() => {});
-              
-              if (attempts < MAX_VERIFY_ATTEMPTS) {
-                console.log('🔄 [GatorWelcome] Retrying update...');
-                await base44.auth.updateMe(updateData);
-              }
-            }
-          }
-          
-          if (verified) {
-            console.log('✅ [GatorWelcome] Persona verified, routing based on role');
-            clearPendingInviteData();
-            updateInProgressRef.current = false;
-            
-            // CRITICAL: Wait for AuthContext to fully refresh BEFORE navigating
-            // Otherwise Layout will see stale user.persona = undefined and redirect to GatorAuth
-            await refreshUser();
-            // Small extra delay to ensure state propagation
-            await new Promise(resolve => setTimeout(resolve, 200));
-            
-            console.log('✅ [GatorWelcome] AuthContext refreshed, now navigating to onboarding');
-            
-            // Non-blocking notifications - fire and forget
-            base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(e => {
-              console.log('incrementUserCount failed (non-critical):', e.message);
-            });
-            base44.functions.invoke('notifyNewUserJoined', {
-              user_email: user.email,
-              user_name: user.full_name,
-              user_persona: intendedRole,
-              user_id: user.id
-            }).catch(e => {
-              console.log('notifyNewUserJoined failed (non-critical):', e.message);
-            });
-
-            // Skip welcome screen - go directly to role-specific onboarding
-            if (intendedRole === 'gator') {
-              navigate('StudentOnboarding');
-            } else if (intendedRole === 'parent') {
-              navigate('ParentOnboarding');
-            } else if (intendedRole === 'alumni') {
-              navigate('Onboarding');
-            } else {
-              navigate('StudentOnboarding'); // Fallback
-            }
-            return;
-          } else {
-            console.error(`❌ [GatorWelcome] FINAL VERIFICATION FAILED after ${MAX_VERIFY_ATTEMPTS} attempts`);
-            setError('Failed to save your role. Please refresh and try again.');
-            setStatus('error');
-            updateInProgressRef.current = false;
-            
-            // Log final failure to backend for monitoring
-            base44.functions.invoke('logPersonaMismatch', {
-              user_id: currentUser?.id,
-              email: currentUser?.email,
-              expected: intendedRole,
-              actual: currentUser?.persona,
-              attempt: 'final_failure',
-              location: 'GatorWelcome'
-            }).catch(() => {});
-          }
-        })
-        .catch((err) => {
-          if (!isMountedRef.current) return;
-          
-          console.error('❌ [GatorWelcome] Failed to update persona:', err);
-          setError(err.message || 'Failed to set up your account');
-          setStatus('error');
-          updateInProgressRef.current = false;
-        });
-    } else if (!needsUpdate) {
-      // Persona already correct - route appropriately
-      console.log('✅ [GatorWelcome] Persona already correct:', intendedRole, 'onboarding_completed:', user.onboarding_completed);
-      clearPendingInviteData();
-      
-      if (user.onboarding_completed !== true) {
-        // New signup - skip welcome screen, go directly to onboarding
-        // Each onboarding page has its own empathy section
-        console.log('📝 [GatorWelcome] New signup - routing to onboarding');
-        if (intendedRole === 'gator') {
-          navigate('StudentOnboarding');
-        } else if (intendedRole === 'parent') {
-          navigate('ParentOnboarding');
-        } else if (intendedRole === 'alumni') {
-          navigate('Onboarding');
-        } else {
-          navigate('StudentOnboarding'); // Fallback
-        }
-      } else {
-        // Truly returning user - redirect to dashboard
-        console.log('✅ [GatorWelcome] Returning user - redirecting to dashboard');
-        let destination = 'Dashboard';
-        if (intendedRole === 'parent') destination = 'ParentDashboard';
-        else if (intendedRole === 'alumni') destination = 'AlumniDashboard';
-        navigate(destination);
-      }
-    }
-    // If needsUpdate && updateInProgressRef.current, do nothing (update already in flight)
-    
+    // No persona yet — show the choice screen
+    setChoosing(true);
   }, [user, isLoading, refreshUser]);
 
-  // Load pricing info on mount
-  useEffect(() => {
-    const loadPricing = async () => {
-      try {
-        const response = await base44.functions.invoke('getPricingTierForSignup', {});
-        if (response.data?.success) {
-          setPricingInfo(response.data);
-        }
-      } catch (err) {
-        console.error('Failed to load pricing info:', err);
-      }
-    };
-    loadPricing();
-  }, []);
-
-
-
-  const handleGetStarted = async () => {
-    console.log('🚀 [GatorWelcome] Starting onboarding for role:', role);
-    trackEvent('onboarding_started', { role, tier: pricingInfo?.tier });
-
-    // For founding members, go straight to onboarding
-    if (!pricingInfo || pricingInfo.tier === 'founding' || !pricingInfo.requires_payment) {
-      proceedToOnboarding();
-      return;
-    }
-
-    // For paid tiers, create family and redirect to Stripe
-    setIsCreatingFamily(true);
+  const handleChoice = async (intent) => {
+    setSaving(intent);
+    setError(null);
     try {
-      const response = await base44.functions.invoke('createFamilyAndCheckout', {
-        successUrl: `${window.location.origin}/#${role === 'gator' ? 'StudentOnboarding' : 'Onboarding'}?payment=success`,
-        cancelUrl: `${window.location.origin}/#GatorWelcome?payment=cancelled`
+      const isHelper = intent === 'helper';
+      await base44.auth.updateMe({
+        persona: isHelper ? 'parent' : 'student',
+        roles: [isHelper ? 'parent' : 'student'],
+        alumni_intent: isHelper ? 'help_students' : 'seeking',
+        onboarding_completed: false,
+        is_new_signup: true,
+        ...(isHelper ? { pledge_taken: false, first_question_shown: false } : {}),
       });
 
-      if (response.data?.requires_payment && response.data?.checkout_url) {
-        // Redirect to Stripe Checkout
-        window.location.href = response.data.checkout_url;
-      } else if (response.data?.success) {
-        // No payment required (edge case - became founding during signup)
-        proceedToOnboarding();
-      } else {
-        throw new Error(response.data?.error || 'Failed to create checkout');
+      // Non-blocking notifications
+      base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(() => {});
+      base44.functions.invoke('notifyNewUserJoined', {
+        user_email: user.email,
+        user_name: user.full_name,
+        user_persona: isHelper ? 'parent' : 'student',
+        user_id: user.id,
+      }).catch(() => {});
+
+      await refreshUser();
+
+      // Clear any stale invite data
+      localStorage.removeItem('pending_invite_role');
+      localStorage.removeItem('pending_invite_code');
+      localStorage.removeItem('pending_invite_timestamp');
+      sessionStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('pending_invite_code');
+
+      navigate(isHelper ? 'ParentOnboarding' : 'StudentOnboarding');
+    } catch (e) {
+      console.error('[GatorWelcome] Choice save failed:', e);
+      if (isMountedRef.current) {
+        setError('Something went wrong. Please try again.');
+        setSaving(null);
       }
-    } catch (err) {
-      console.error('Failed to create checkout:', err);
-      setError(err.message || 'Failed to start subscription');
-      setIsCreatingFamily(false);
     }
   };
 
-  const proceedToOnboarding = () => {
-    if (role === 'gator') {
-      navigate('StudentOnboarding');
-    } else if (role === 'parent') {
-      navigate('ParentOnboarding');
-    } else if (role === 'alumni') {
-      navigate('Onboarding');
-    } else {
-      console.warn('⚠️ [GatorWelcome] Unexpected role, falling back to Dashboard:', role);
-      navigate('Dashboard');
-    }
-  };
+  // Loading state — waiting for session or routing
+  if (!choosing) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTopColor: '#E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.45)' }}>Setting up your account...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
 
-  // ALWAYS show loading - this page is now just a router
-  // All roles skip the welcome screen and go directly to onboarding
+  // Two-button choice screen
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTopColor: '#E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
-        <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>Setting up your account...</p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
+
+        {/* Logo dot */}
+        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 16px rgba(232,93,32,0.6)', margin: '0 auto 32px' }} />
+
+        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#E85D20', margin: '0 0 16px' }}>
+          Welcome to College Fast Forward
+        </p>
+
+        <h1 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 5vw, 38px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, margin: '0 0 40px', letterSpacing: '-0.02em' }}>
+          What brings you here?
+        </h1>
+
+        {error && (
+          <p style={{ fontFamily: dmSans, fontSize: 13, color: '#f87171', marginBottom: 20 }}>{error}</p>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Job seeker */}
+          <button
+            onClick={() => handleChoice('seeker')}
+            disabled={!!saving}
+            style={{
+              background: saving === 'seeker' ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.04)',
+              border: '1.5px solid ' + (saving === 'seeker' ? '#E85D20' : 'rgba(255,255,255,0.12)'),
+              borderRadius: 16,
+              padding: '22px 28px',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              textAlign: 'left',
+              transition: 'all 0.2s ease',
+              opacity: saving && saving !== 'seeker' ? 0.4 : 1,
+            }}
+            onMouseEnter={e => { if (!saving) { e.currentTarget.style.borderColor = '#E85D20'; e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; } }}
+            onMouseLeave={e => { if (!saving) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; } }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 28, flexShrink: 0 }}>🎯</span>
+              <div>
+                <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>
+                  {saving === 'seeker' ? 'Setting up your account...' : "I'm looking for a job or internship"}
+                </p>
+                <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.5 }}>
+                  Access the network, AI tools, and alumni connections
+                </p>
+              </div>
+            </div>
+          </button>
+
+          {/* Network helper */}
+          <button
+            onClick={() => handleChoice('helper')}
+            disabled={!!saving}
+            style={{
+              background: saving === 'helper' ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.04)',
+              border: '1.5px solid ' + (saving === 'helper' ? '#E85D20' : 'rgba(255,255,255,0.12)'),
+              borderRadius: 16,
+              padding: '22px 28px',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              textAlign: 'left',
+              transition: 'all 0.2s ease',
+              opacity: saving && saving !== 'helper' ? 0.4 : 1,
+            }}
+            onMouseEnter={e => { if (!saving) { e.currentTarget.style.borderColor = '#E85D20'; e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; } }}
+            onMouseLeave={e => { if (!saving) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; } }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 28, flexShrink: 0 }}>🤝</span>
+              <div>
+                <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>
+                  {saving === 'helper' ? 'Setting up your account...' : "I'm happy to open my network"}
+                </p>
+                <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.5 }}>
+                  Help students with introductions, advice, or referrals
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', marginTop: 28 }}>
+          You can always change this later in your profile.
+        </p>
       </div>
     </div>
   );
-
 }

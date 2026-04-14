@@ -74,24 +74,13 @@ function getDashboardForUser(user) {
   if (user.roles?.includes('admin')) return 'AdminDashboard';
 
   const persona = user.persona;
-  
-  // Students/Gators — always use FreeTierDashboard; FastIQ features unlock via isFastIQ flag
-  if (persona === 'gator' || persona === 'student') {
-    return 'FreeTierDashboard';
-  }
-  
-  if (persona === 'parent') return 'ParentHome';
-  if (persona === 'alumni') {
-    if (user.alumni_seniority === 'recent_grad') return 'RecentGradDashboard';
-    return 'AlumniDashboard';
-  }
-  
-  // Fallback: check roles array
-  if (user.roles?.includes('parent')) return 'ParentHome';
-  if (user.roles?.includes('gator')) {
-    return 'FreeTierDashboard';
-  }
-  if (user.roles?.includes('alumni')) return 'AlumniDashboard';
+
+  if (persona === 'parent' || user.roles?.includes('parent')) return 'ParentHome';
+
+  // Intent-based routing: helpers go to ParentHome, seekers go to FreeTierDashboard
+  if (user.alumni_intent === 'help_students') return 'ParentHome';
+
+  // Students/Gators/Alumni seeking — all use FreeTierDashboard
   return 'FreeTierDashboard';
 }
 
@@ -136,7 +125,7 @@ const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
 // ParentDashboard removed — parents now go to ParentHome
 const ParentHome = React.lazy(() => import('./pages/ParentHome'));
-const AlumniDashboard = React.lazy(() => import('./pages/AlumniDashboard'));
+// AlumniDashboard removed — alumni now route to FreeTierDashboard or ParentHome based on intent
 const Directory = React.lazy(() => import('./pages/Directory'));
 const MyRequests = React.lazy(() => import('./pages/MyRequests'));
 // MyImpact removed
@@ -539,7 +528,7 @@ const getPageComponent = (pageName) => {
     case 'Dashboard': return Dashboard;
     case 'ParentDashboard': return ParentHome;
     case 'ParentHome': return ParentHome;
-    case 'AlumniDashboard': return AlumniDashboard;
+    case 'AlumniDashboard': return FreeTierDashboard;
     case 'RecentGradDashboard': return RecentGradDashboard;
     case 'AdminDashboard': return AdminDashboard;
     case 'CompanyProfile': return CompanyProfile;
@@ -860,15 +849,12 @@ function AppContent() {
   // Pages where specific personas render their own nav bar — hide global header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard', 'FastIQDashboard'];
   const parentOwnNavPages = ['Profile', 'ParentHome', 'ParentProfileEdit', 'Directory'];
-  const isStudentUser = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
-  const isRecentGradAlumni = user?.persona === 'alumni' && user?.alumni_seniority === 'recent_grad';
-  const isEstablishedAlumniUser = user?.persona === 'alumni' && user?.alumni_seniority !== 'recent_grad';
-  const isParentUser = user?.persona === 'parent' || user?.roles?.includes('parent');
+  const isStudentUser = user?.persona === 'gator' || user?.persona === 'student' || user?.email?.toLowerCase().endsWith('@ufl.edu');
+  const isHelperUser = user?.persona === 'parent' || user?.roles?.includes('parent') || user?.alumni_intent === 'help_students';
   const hasOwnNav =
     resolvedPage === 'FreeTierDashboard' ||
-    ((isStudentUser || isRecentGradAlumni) && studentOwnNavPages.includes(resolvedPage)) ||
-    (isEstablishedAlumniUser && resolvedPage === 'AlumniDashboard') ||
-    (isParentUser && parentOwnNavPages.includes(resolvedPage));
+    (isStudentUser && studentOwnNavPages.includes(resolvedPage)) ||
+    (isHelperUser && parentOwnNavPages.includes(resolvedPage));
 
   const showHeader = user &&
     resolvedPage !== 'LandingPage' &&
