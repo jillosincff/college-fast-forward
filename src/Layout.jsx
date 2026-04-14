@@ -33,12 +33,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import PullToRefresh from './components/common/PullToRefresh';
 
 const childPages = [
-  'QuestionDetail', 'ProfileEdit', 'MessageComposer', 'PostRequest', 'PostOpportunity',
+  'ProfileEdit', 'MessageComposer', 'PostRequest', 'PostOpportunity',
   'CompanyProfile', 'PublicProfile', 'SubmitFeedback', 'Notifications', 'MyMatches', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'
 ];
 
 const childPageTitles = {
-  QuestionDetail: 'Question',
   ProfileEdit: 'Edit Profile',
   MessageComposer: 'New Message',
   PostRequest: 'Post Request',
@@ -140,7 +139,6 @@ const Terms = React.lazy(() => import('./pages/Terms'));
 const CookiePolicy = React.lazy(() => import('./pages/CookiePolicy'));
 const CompanyProfile = React.lazy(() => import('./pages/CompanyProfile'));
 const PublicProfile = React.lazy(() => import('./pages/PublicProfile'));
-const QuestionDetail = React.lazy(() => import('./pages/QuestionDetail'));
 const Notifications = React.lazy(() => import('./pages/Notifications'));
 const MyMatches = React.lazy(() => import('./pages/MyMatches'));
 const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
@@ -509,9 +507,9 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
-const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'QuestionDetail', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
+const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
-const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'QuestionDetail', 'StudentInvitedOnboarding'];
+const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'StudentInvitedOnboarding'];
 
 const isUserVerified = (user) => {
   if (!user) return false;
@@ -554,7 +552,6 @@ const getPageComponent = (pageName) => {
     case 'Terms': return Terms;
     case 'CookiePolicy': return CookiePolicy;
     case 'PublicProfile': return PublicProfile;
-    case 'QuestionDetail': return QuestionDetail;
     case 'InviteRequired': return React.lazy(() => import('./pages/InviteRequired'));
     case 'RequestInvite': return React.lazy(() => import('./pages/RequestInvite'));
     case 'Notifications': return Notifications;
@@ -688,6 +685,7 @@ function AppContent() {
       if (pageHash === 'WelcomeRole') pageHash = 'GatorWelcome';
       if (pageHash === 'PreAuth') pageHash = 'StudentInvitedOnboarding';
       if (pageHash === 'Home') pageHash = 'LandingPage';
+      if (pageHash === 'QuestionDetail') pageHash = 'LandingPage';
       if (pageHash === 'GiftFastIQ') { window.location.hash = '#ParentHome?gift=open'; return; }
       setCurrentPage(pageHash || 'LandingPage');
       setResolvedPage(null);

@@ -91,7 +91,6 @@ import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
 import ProfileEdit from './pages/ProfileEdit';
 import PublicProfile from './pages/PublicProfile';
-import QuestionDetail from './pages/QuestionDetail';
 import RequestInvite from './pages/RequestInvite';
 import ShareExpertise from './pages/ShareExpertise';
 import StudentOnboarding from './pages/StudentOnboarding';
@@ -148,7 +147,6 @@ export const PAGES = {
     "Profile": Profile,
     "ProfileEdit": ProfileEdit,
     "PublicProfile": PublicProfile,
-    "QuestionDetail": QuestionDetail,
     "RequestInvite": RequestInvite,
     "ShareExpertise": ShareExpertise,
     "StudentOnboarding": StudentOnboarding,
