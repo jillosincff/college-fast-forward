@@ -120,6 +120,8 @@ export default function Directory() {
   };
 
   const userSchool = user?.school || user?.university || '';
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
 
   // Filtered & sorted users
   const filteredUsers = useMemo(() => {
@@ -251,9 +253,6 @@ export default function Directory() {
       </div>
     );
   }
-
-  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
 
   return (
     <div style={{ minHeight: '100vh', background: isParent ? '#0A0A0A' : '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
