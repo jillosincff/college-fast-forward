@@ -44,6 +44,8 @@ export default function ParentProfileEdit() {
     await base44.auth.updateMe({
       full_name: form.full_name.trim(),
       school_name: form.school_name.trim(),
+      school: form.school_name.trim(),
+      university: form.school_name.trim(),
       current_company: form.company.trim(),
       company: form.company.trim(),
       industry: form.industry,
