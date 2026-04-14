@@ -63,6 +63,8 @@ export default function ParentProfileEdit() {
       directory_consent_given: form.directoryVisible,
     });
     if (refreshUser) await refreshUser();
+    // Clear directory cache so updated profile appears immediately
+    try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
     setSaving(false);
     setSaved(true);
     setTimeout(() => { setSaved(false); navigate('Profile'); }, 1200);

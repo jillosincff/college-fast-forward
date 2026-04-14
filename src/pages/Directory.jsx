@@ -127,6 +127,9 @@ export default function Directory() {
   const filteredUsers = useMemo(() => {
     let users = [...allUsers];
 
+    // Filter out hidden profiles (unless viewing own profile)
+    users = users.filter(u => u.visible_in_directory !== false || u.id === user?.id);
+
     // School filter
     if (schoolFilter === 'my_school' && userSchool) {
       users = users.filter(u => {
