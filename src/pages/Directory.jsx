@@ -205,7 +205,7 @@ export default function Directory() {
           <p style={{ fontFamily: dmSans, fontSize: 15, color: isParent ? 'rgba(255,255,255,0.5)' : '#666', marginBottom: 24 }}>
             Add your school to your profile to see your network.
           </p>
-          <button onClick={() => navigate('ProfileEdit')} style={{
+          <button onClick={() => navigate('ParentProfileEdit')} style={{
             background: '#E85D20', color: '#fff', border: 'none',
             borderRadius: 12, padding: '12px 28px',
             fontFamily: dmSans, fontSize: 14, fontWeight: 600,
