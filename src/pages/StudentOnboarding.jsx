@@ -100,42 +100,48 @@ export default function StudentOnboarding() {
       updateData.full_name = firstName.trim();
     }
 
-    await base44.auth.updateMe(updateData);
+    try {
+      await base44.auth.updateMe(updateData);
 
-    // Auto-link to parent if any (non-blocking)
-    base44.functions.invoke('linkStudentToParent', {
-      action: 'auto_link',
-      studentUserId: user.id,
-      studentEmailAddress: user.email,
-    }).catch(() => {});
-
-    // Award karma (non-blocking)
-    base44.functions.invoke('awardStudentKarma', {
-      userId: user.id, userEmail: user.email,
-      actionType: 'complete_profile', description: 'Completed student profile',
-    }).catch(() => {});
-
-    // Welcome email (non-blocking)
-    base44.functions.invoke('sendWelcomeEmail', {
-      userId: user.id, userEmail: user.email,
-      userName: firstName.trim(), persona: 'student',
-    }).catch(() => {});
-
-    // Credit ambassador referral (non-blocking)
-    if (referralCode) {
-      base44.functions.invoke('trackReferralClick', {
-        referral_code: referralCode,
-        action: 'signup_completed',
-        user_email: user.email,
+      // Auto-link to parent if any (non-blocking)
+      base44.functions.invoke('linkStudentToParent', {
+        action: 'auto_link',
+        studentUserId: user.id,
+        studentEmailAddress: user.email,
       }).catch(() => {});
-      try { sessionStorage.removeItem('pending_referral_code'); } catch (e) { /* ok */ }
-    }
 
-    localStorage.removeItem('pending_invite_role');
-    try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
-    if (refreshUser) await refreshUser();
-    setLoading(false);
-    setStep(3);
+      // Award karma (non-blocking)
+      base44.functions.invoke('awardStudentKarma', {
+        userId: user.id, userEmail: user.email,
+        actionType: 'complete_profile', description: 'Completed student profile',
+      }).catch(() => {});
+
+      // Welcome email (non-blocking)
+      base44.functions.invoke('sendWelcomeEmail', {
+        userId: user.id, userEmail: user.email,
+        userName: firstName.trim(), persona: 'student',
+      }).catch(() => {});
+
+      // Credit ambassador referral (non-blocking)
+      if (referralCode) {
+        base44.functions.invoke('trackReferralClick', {
+          referral_code: referralCode,
+          action: 'signup_completed',
+          user_email: user.email,
+        }).catch(() => {});
+        try { sessionStorage.removeItem('pending_referral_code'); } catch (e) { /* ok */ }
+      }
+
+      localStorage.removeItem('pending_invite_role');
+      try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
+      if (refreshUser) await refreshUser();
+      setStep(3);
+    } catch (e) {
+      console.error('Onboarding update failed:', e.message);
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleWelcomeComplete = useCallback(() => {

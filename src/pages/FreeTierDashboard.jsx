@@ -56,7 +56,7 @@ export default function FreeTierDashboard() {
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.fastiq_trial_active || user?.trial_status === 'active' || user?.membership_tier === 'fastiq_trial');
   const isPaying = user?.subscription_status === 'active';
-  const foundingDeadlinePassed = new Date() > new Date('2026-04-15T23:59:59');
+  const foundingDeadlinePassed = new Date() > new Date('2026-04-30T23:59:59');
   const showFoundingBanner = !isPaying && !isFastIQ && !bannerDismissed && !foundingDeadlinePassed;
   const handleDismissBanner = () => { localStorage.setItem('founding_banner_dismissed', 'true'); setBannerDismissed(true); };
   const firstName = user?.full_name?.split(' ')[0] || 'there';
@@ -243,7 +243,7 @@ export default function FreeTierDashboard() {
               fontSize: 13, color: 'rgba(255,255,255,0.82)',
               margin: 0, lineHeight: 1.5,
             }}>
-              🎖 <strong style={{ color: '#E85D20' }}>Founding rate expires April 15</strong> — lock in 50% off FastIQ forever. Only $14.50/month.
+              🎖 <strong style={{ color: '#E85D20' }}>Founding rate expires April 30</strong> — lock in 50% off FastIQ forever. Only $14.50/month.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
               <button

@@ -157,7 +157,7 @@ export default function GatorWelcome() {
       console.log('✅ [GatorWelcome] Already onboarded, redirecting to dashboard');
       let destination = 'Dashboard';
       if (user.persona === 'parent') destination = 'ParentDashboard';
-      else if (user.persona === 'alumni') destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+      else if (user.persona === 'alumni') destination = 'AlumniDashboard';
       navigate(destination);
       return;
     }
@@ -366,7 +366,7 @@ export default function GatorWelcome() {
         console.log('✅ [GatorWelcome] Returning user - redirecting to dashboard');
         let destination = 'Dashboard';
         if (intendedRole === 'parent') destination = 'ParentDashboard';
-        else if (intendedRole === 'alumni') destination = user.alumni_intent === 'help_students' ? 'ParentDashboard' : 'AlumniDashboard';
+        else if (intendedRole === 'alumni') destination = 'AlumniDashboard';
         navigate(destination);
       }
     }
