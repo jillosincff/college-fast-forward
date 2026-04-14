@@ -3,9 +3,19 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // Allow checking without auth for debugging
+    const currentUser = await base44.auth.me();
+
+    if (!currentUser) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { studentEmail, parentEmail } = await req.json();
+
+    // Only allow users to check links involving their own email, unless admin
+    const emailsInRequest = [studentEmail, parentEmail].filter(Boolean).map(e => e.toLowerCase());
+    if (!currentUser.roles?.includes('admin') && !emailsInRequest.includes(currentUser.email.toLowerCase())) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
     
     // Get all users to check link status
     const allUsers = await base44.asServiceRole.entities.User.list();
