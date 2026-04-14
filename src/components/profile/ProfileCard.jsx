@@ -159,12 +159,12 @@ export default function ProfileCard({ user, isMyProfile }) {
       </div>
 
       {/* Profile info */}
-      <div style={{ padding: '0 28px 24px', marginTop: -32, position: 'relative' }}>
+      <div style={{ padding: '0 28px 24px', marginTop: -32, position: 'relative', overflow: 'visible' }}>
         {/* Avatar */}
         <div style={{
           width: 72, height: 72, borderRadius: '50%', background: '#0d1117',
           border: '3px solid #ffffff', display: 'inline-flex',
-          alignItems: 'center', justifyContent: 'center',
+          alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1,
         }}>
           {user.profile_image_url ? (
             <img src={user.profile_image_url} alt={displayName}
