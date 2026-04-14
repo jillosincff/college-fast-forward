@@ -89,7 +89,7 @@ import PostOpportunity from './pages/PostOpportunity';
 import PostRequest from './pages/PostRequest';
 import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
-import ProfileEdit from './pages/ProfileEdit';
+
 import PublicProfile from './pages/PublicProfile';
 import RequestInvite from './pages/RequestInvite';
 import ShareExpertise from './pages/ShareExpertise';
@@ -145,7 +145,7 @@ export const PAGES = {
     "PostRequest": PostRequest,
     "Privacy": Privacy,
     "Profile": Profile,
-    "ProfileEdit": ProfileEdit,
+
     "PublicProfile": PublicProfile,
     "RequestInvite": RequestInvite,
     "ShareExpertise": ShareExpertise,
