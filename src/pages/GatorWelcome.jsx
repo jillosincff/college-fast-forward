@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
@@ -8,12 +8,11 @@ const playfair = "'Playfair Display', Georgia, serif";
 
 export default function GatorWelcome() {
   const { user, refreshUser, isLoading } = useAuth();
-  const [choosing, setChoosing] = useState(false); // show choice screen
+  const [choosing, setChoosing] = useState(false);
   const [saving, setSaving] = useState(null); // 'seeker' | 'helper'
   const [error, setError] = useState(null);
   const isMountedRef = useRef(true);
 
-  // Cleanup on unmount
   useEffect(() => {
     isMountedRef.current = true;
     return () => { isMountedRef.current = false; };
@@ -27,6 +26,48 @@ export default function GatorWelcome() {
     sessionStorage.removeItem('oauth_state_token');
     sessionStorage.removeItem('oauth_redirect_in_progress');
   }, []);
+
+  const handleChoice = useCallback(async (intent) => {
+    setSaving(intent);
+    setError(null);
+    try {
+      const isHelper = intent === 'helper';
+      await base44.auth.updateMe({
+        persona: isHelper ? 'parent' : 'student',
+        roles: [isHelper ? 'parent' : 'student'],
+        alumni_intent: isHelper ? 'help_students' : 'seeking',
+        onboarding_completed: false,
+        is_new_signup: true,
+        ...(isHelper ? { pledge_taken: false, first_question_shown: false } : {}),
+      });
+
+      // Non-blocking notifications
+      base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
+      base44.functions.invoke('notifyNewUserJoined', {
+        user_email: user?.email,
+        user_name: user?.full_name,
+        user_persona: isHelper ? 'parent' : 'student',
+        user_id: user?.id,
+      }).catch(() => {});
+
+      await refreshUser();
+
+      // Clear stale invite data
+      localStorage.removeItem('pending_invite_role');
+      localStorage.removeItem('pending_invite_code');
+      localStorage.removeItem('pending_invite_timestamp');
+      sessionStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('pending_invite_code');
+
+      navigate(isHelper ? 'ParentOnboarding' : 'StudentOnboarding');
+    } catch (e) {
+      console.error('[GatorWelcome] Choice save failed:', e);
+      if (isMountedRef.current) {
+        setError('Something went wrong. Please try again.');
+        setSaving(null);
+      }
+    }
+  }, [user, refreshUser]);
 
   // Main routing effect — once we have a user, decide what to show
   useEffect(() => {
@@ -42,10 +83,7 @@ export default function GatorWelcome() {
           if (!isMountedRef.current) return;
           try {
             const freshUser = await base44.auth.me();
-            if (freshUser?.email) {
-              refreshUser();
-              return;
-            }
+            if (freshUser?.email) { refreshUser(); return; }
           } catch (e) { /* keep polling */ }
         }
         if (isMountedRef.current) navigate('GatorAuth');
@@ -64,7 +102,7 @@ export default function GatorWelcome() {
       return;
     }
 
-    // Check for a pre-stored intent from a landing page CTA — skip the choice screen
+    // Pre-stored intent from landing page CTA — skip the choice screen
     const pendingIntent = localStorage.getItem('pending_intent');
     if (pendingIntent === 'helper' || pendingIntent === 'seeker') {
       localStorage.removeItem('pending_intent');
@@ -73,62 +111,14 @@ export default function GatorWelcome() {
     }
 
     // Has a persona set but not completed onboarding — route to correct onboarding
-    if (user.persona === 'parent') {
-      navigate('ParentOnboarding');
-      return;
-    }
-    if (user.persona === 'student' || user.persona === 'gator') {
-      navigate('StudentOnboarding');
-      return;
-    }
+    if (user.persona === 'parent') { navigate('ParentOnboarding'); return; }
+    if (user.persona === 'student' || user.persona === 'gator') { navigate('StudentOnboarding'); return; }
 
     // No persona, no intent — show the choice screen
     setChoosing(true);
-  }, [user, isLoading, refreshUser]);
+  }, [user, isLoading, refreshUser, handleChoice]);
 
-  const handleChoice = async (intent) => {
-    setSaving(intent);
-    setError(null);
-    try {
-      const isHelper = intent === 'helper';
-      await base44.auth.updateMe({
-        persona: isHelper ? 'parent' : 'student',
-        roles: [isHelper ? 'parent' : 'student'],
-        alumni_intent: isHelper ? 'help_students' : 'seeking',
-        onboarding_completed: false,
-        is_new_signup: true,
-        ...(isHelper ? { pledge_taken: false, first_question_shown: false } : {}),
-      });
-
-      // Non-blocking notifications
-      base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(() => {});
-      base44.functions.invoke('notifyNewUserJoined', {
-        user_email: user.email,
-        user_name: user.full_name,
-        user_persona: isHelper ? 'parent' : 'student',
-        user_id: user.id,
-      }).catch(() => {});
-
-      await refreshUser();
-
-      // Clear any stale invite data
-      localStorage.removeItem('pending_invite_role');
-      localStorage.removeItem('pending_invite_code');
-      localStorage.removeItem('pending_invite_timestamp');
-      sessionStorage.removeItem('pending_invite_role');
-      sessionStorage.removeItem('pending_invite_code');
-
-      navigate(isHelper ? 'ParentOnboarding' : 'StudentOnboarding');
-    } catch (e) {
-      console.error('[GatorWelcome] Choice save failed:', e);
-      if (isMountedRef.current) {
-        setError('Something went wrong. Please try again.');
-        setSaving(null);
-      }
-    }
-  };
-
-  // Loading state — waiting for session or routing
+  // Loading / processing state
   if (!choosing) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#050505' }}>
@@ -141,12 +131,11 @@ export default function GatorWelcome() {
     );
   }
 
-  // Two-button choice screen
+  // Two-button choice screen (generic signup — no intent pre-stored)
   return (
     <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
       <div style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
 
-        {/* Logo dot */}
         <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 16px rgba(232,93,32,0.6)', margin: '0 auto 32px' }} />
 
         <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#E85D20', margin: '0 0 16px' }}>
@@ -162,20 +151,10 @@ export default function GatorWelcome() {
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Job seeker */}
           <button
             onClick={() => handleChoice('seeker')}
             disabled={!!saving}
-            style={{
-              background: saving === 'seeker' ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.04)',
-              border: '1.5px solid ' + (saving === 'seeker' ? '#E85D20' : 'rgba(255,255,255,0.12)'),
-              borderRadius: 16,
-              padding: '22px 28px',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.2s ease',
-              opacity: saving && saving !== 'seeker' ? 0.4 : 1,
-            }}
+            style={{ background: saving === 'seeker' ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.04)', border: '1.5px solid ' + (saving === 'seeker' ? '#E85D20' : 'rgba(255,255,255,0.12)'), borderRadius: 16, padding: '22px 28px', cursor: saving ? 'not-allowed' : 'pointer', textAlign: 'left', transition: 'all 0.2s ease', opacity: saving && saving !== 'seeker' ? 0.4 : 1 }}
             onMouseEnter={e => { if (!saving) { e.currentTarget.style.borderColor = '#E85D20'; e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; } }}
             onMouseLeave={e => { if (!saving) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; } }}
           >
@@ -192,20 +171,10 @@ export default function GatorWelcome() {
             </div>
           </button>
 
-          {/* Network helper */}
           <button
             onClick={() => handleChoice('helper')}
             disabled={!!saving}
-            style={{
-              background: saving === 'helper' ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.04)',
-              border: '1.5px solid ' + (saving === 'helper' ? '#E85D20' : 'rgba(255,255,255,0.12)'),
-              borderRadius: 16,
-              padding: '22px 28px',
-              cursor: saving ? 'not-allowed' : 'pointer',
-              textAlign: 'left',
-              transition: 'all 0.2s ease',
-              opacity: saving && saving !== 'helper' ? 0.4 : 1,
-            }}
+            style={{ background: saving === 'helper' ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.04)', border: '1.5px solid ' + (saving === 'helper' ? '#E85D20' : 'rgba(255,255,255,0.12)'), borderRadius: 16, padding: '22px 28px', cursor: saving ? 'not-allowed' : 'pointer', textAlign: 'left', transition: 'all 0.2s ease', opacity: saving && saving !== 'helper' ? 0.4 : 1 }}
             onMouseEnter={e => { if (!saving) { e.currentTarget.style.borderColor = '#E85D20'; e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; } }}
             onMouseLeave={e => { if (!saving) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; } }}
           >
