@@ -101,9 +101,9 @@ Deno.serve(async (req) => {
 
       if (!sgRes.ok) {
         const txt = await sgRes.text();
-        // Return success with link so user can still sign in manually if email fails
-        return new Response(JSON.stringify({ success: true, emailed: false, link: magicLink, note: `Email send failed (${sgRes.status})` }), {
-          status: 200,
+        console.error('SendGrid failed:', sgRes.status, txt);
+        return new Response(JSON.stringify({ success: false, error: 'Failed to send email. Please try again.' }), {
+          status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
@@ -113,9 +113,9 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     } else {
-      // If email provider is not configured, don't fail; return the link
-      return new Response(JSON.stringify({ success: true, emailed: false, link: magicLink, note: 'Email provider not configured' }), {
-        status: 200,
+      console.error('SendGrid API key not configured');
+      return new Response(JSON.stringify({ success: false, error: 'Email service not configured.' }), {
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
