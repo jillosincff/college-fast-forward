@@ -71,6 +71,27 @@ export default function ParentAllSet() {
           Until then, you don't need to do a thing.
         </p>
 
+        {/* Profile CTAs */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 0 }}>
+          <button onClick={() => navigate('ProfileEdit')} style={{
+            background: '#E85D20', color: '#fff', border: 'none',
+            borderRadius: 12, padding: '14px 32px',
+            fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600,
+            cursor: 'pointer', minHeight: 'auto', marginBottom: 12,
+            width: '100%', maxWidth: 360,
+          }}>
+            Complete Your Profile →
+          </button>
+          <button onClick={() => navigate('Profile')} style={{
+            background: 'none', color: '#E85D20', border: 'none',
+            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
+            cursor: 'pointer', minHeight: 'auto', marginBottom: 32,
+            padding: 0,
+          }}>
+            View my profile →
+          </button>
+        </div>
+
         {/* Share box */}
         <div style={{
           background: 'rgba(255,255,255,0.04)',
