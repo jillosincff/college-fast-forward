@@ -84,8 +84,10 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Rate limit check error:', error);
-    // On error, allow sending (fail open) so we don't block legitimate emails
-    return Response.json({ allowed: true, error: error.message });
+    console.error('Rate limit check failed:', error);
+    return Response.json({
+      allowed: false,
+      error: 'Rate limit check unavailable. Please try again shortly.'
+    }, { status: 429 });
   }
 });
