@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 
 export default function Logout() {
   useEffect(() => {
-    // Hard redirect so the router doesn't re-mount this component
+    localStorage.removeItem('pending_intent');
     base44.auth.logout(window.location.origin + '/#GatorAuth');
   }, []);
 

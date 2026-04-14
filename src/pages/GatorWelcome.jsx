@@ -56,10 +56,19 @@ export default function GatorWelcome() {
 
     // Already onboarded — send to the right dashboard
     if (user.onboarding_completed === true) {
+      localStorage.removeItem('pending_intent');
       const dest = (user.alumni_intent === 'help_students' || user.persona === 'parent')
         ? 'ParentHome'
         : 'FreeTierDashboard';
       navigate(dest);
+      return;
+    }
+
+    // Check for a pre-stored intent from a landing page CTA — skip the choice screen
+    const pendingIntent = localStorage.getItem('pending_intent');
+    if (pendingIntent === 'helper' || pendingIntent === 'seeker') {
+      localStorage.removeItem('pending_intent');
+      handleChoice(pendingIntent);
       return;
     }
 
@@ -73,7 +82,7 @@ export default function GatorWelcome() {
       return;
     }
 
-    // No persona yet — show the choice screen
+    // No persona, no intent — show the choice screen
     setChoosing(true);
   }, [user, isLoading, refreshUser]);
 

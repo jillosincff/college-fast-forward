@@ -192,12 +192,14 @@ export default function LandingPage() {
 
   const onParentJoin = () => {
     trackEvent('cta_parent_clicked');
+    localStorage.setItem('pending_intent', 'helper');
     const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };
 
   const onStudentJoin = () => {
     trackEvent('cta_student_clicked');
+    localStorage.setItem('pending_intent', 'seeker');
     const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };
