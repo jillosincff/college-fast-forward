@@ -1,5 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 Deno.serve(async (req) => {
   const {
     studentEmail,
@@ -30,7 +40,7 @@ Deno.serve(async (req) => {
         ⚡ FASTIQ ACTIVATED
       </p>
       <h1 style="font-size:26px;font-weight:700;color:#fff;margin:0 0 10px;line-height:1.3;">
-        ${parentFirstName} just did something really cool for you.
+        ${escapeHtml(parentFirstName)} just did something really cool for you.
       </h1>
       <p style="font-size:15px;color:rgba(255,255,255,0.55);margin:0;line-height:1.6;">
         Your job search just got a serious upgrade.
@@ -38,9 +48,9 @@ Deno.serve(async (req) => {
     </div>
 
     <div style="padding:28px 36px 32px;">
-      <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Hey ${studentFirstName},</p>
+      <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">Hey ${escapeHtml(studentFirstName)},</p>
       <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 8px;">
-        ${parentFirstName} just activated FastIQ on your College Fast Forward account.
+        ${escapeHtml(parentFirstName)} just activated FastIQ on your College Fast Forward account.
       </p>
       <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 24px;">
         <strong>Translation?</strong> Your job search just got a serious upgrade.
@@ -78,7 +88,7 @@ Deno.serve(async (req) => {
 
       <div style="background:#0A0A0A;border-radius:12px;padding:20px 24px;margin-bottom:28px;">
         <p style="font-size:15px;color:rgba(255,255,255,0.82);line-height:1.7;margin:0 0 8px;">
-          ${parentFirstName} believed in you enough to invest in your success.
+          ${escapeHtml(parentFirstName)} believed in you enough to invest in your success.
         </p>
         <p style="font-size:16px;font-weight:700;color:#fff;margin:0;">Now it's your turn.</p>
       </div>

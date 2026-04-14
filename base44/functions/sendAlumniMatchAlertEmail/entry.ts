@@ -1,5 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 const FROM = 'support@collegefastforward.com';
 const FROM_NAME = 'College Fast Forward';
 const APP_URL = Deno.env.get('APP_BASE_URL') || 'https://app.collegefastforward.com';
@@ -15,19 +25,19 @@ function html({ firstName, alumni, targetRole, targetCompany }) {
     <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;max-width:560px;width:100%">
       <tr><td style="background:#0A0A0A;padding:28px 40px">
         <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#E85D20">NEW ALUMNI MATCHES</p>
-        <h1 style="margin:10px 0 0;font-size:24px;font-weight:700;color:#ffffff;line-height:1.3">${firstName}, ${alumni.length} UF alumni match your search.</h1>
-        ${targetRole || targetCompany ? `<p style="margin:8px 0 0;font-size:13px;color:rgba(255,255,255,0.5)">${[targetRole, targetCompany].filter(Boolean).join(' · ')}</p>` : ''}
+        <h1 style="margin:10px 0 0;font-size:24px;font-weight:700;color:#ffffff;line-height:1.3">${escapeHtml(firstName)}, ${alumni.length} UF alumni match your search.</h1>
+        ${targetRole || targetCompany ? `<p style="margin:8px 0 0;font-size:13px;color:rgba(255,255,255,0.5)">${[targetRole, targetCompany].filter(Boolean).map(escapeHtml).join(' · ')}</p>` : ''}
       </td></tr>
       <tr><td style="padding:28px 40px">
         <p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.7">Here are the top matches. A warm message from a fellow Gator gets replies — reach out while you're on their mind.</p>
         ${topAlumni.map(a => `
         <div style="border:1px solid #E5E5E5;border-radius:12px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center">
           <div style="width:40px;height:40px;border-radius:50%;background:#E85D20;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;margin-right:14px;vertical-align:middle">
-            ${(a.name || 'UF').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()}
+            ${escapeHtml((a.name || 'UF').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase())}
           </div>
           <div style="display:inline-block;vertical-align:middle">
-            <p style="margin:0;font-size:14px;font-weight:600;color:#1A1A1A">${a.name}</p>
-            <p style="margin:2px 0 0;font-size:12px;color:#888">${a.title || ''}${a.company ? ' · ' + a.company : ''}</p>
+            <p style="margin:0;font-size:14px;font-weight:600;color:#1A1A1A">${escapeHtml(a.name)}</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#888">${escapeHtml(a.title || '')}${a.company ? ' · ' + escapeHtml(a.company) : ''}</p>
           </div>
         </div>`).join('')}
         ${alumni.length > 3 ? `<p style="margin:8px 0 24px;font-size:13px;color:#888;text-align:center">+ ${alumni.length - 3} more alumni in your search results</p>` : '<div style="height:16px"></div>'}
@@ -59,7 +69,7 @@ Deno.serve(async (req) => {
       from: { email: FROM, name: FROM_NAME },
       personalizations: [{ to: [{ email: to }] }],
       subject: `${alumni.length} UF alumni match your search, ${firstName || to.split('@')[0]}`,
-      content: [{ type: 'text/html', value: html({ firstName: firstName || to.split('@')[0], alumni, targetRole, targetCompany }) }],
+      content: [{ type: 'text/html', value: html({ firstName: escapeHtml(firstName || to.split('@')[0]), alumni, targetRole: escapeHtml(targetRole), targetCompany: escapeHtml(targetCompany) }) }],
     }),
   });
 

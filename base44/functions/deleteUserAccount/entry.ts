@@ -61,10 +61,37 @@ Deno.serve(async (req) => {
       deleteUserRecords('Notification', { recipient_email: userEmail }),
       deleteUserRecords('Message', { sender_email: userEmail }),
       deleteUserRecords('Message', { recipient_email: userEmail }),
+      // GDPR additions
+      deleteUserRecords('AnalyticsEvent', { user_id: userId }),
+      deleteUserRecords('MagicLink', { email: userEmail }),
+      deleteUserRecords('ReferralLink', { created_by: userEmail }),
+      deleteUserRecords('Family', { primary_parent_id: userId }),
+      deleteUserRecords('KarmaTransaction', { parent_user_id: userId }),
     ]);
+
+    // Cancel Stripe subscription if exists
+    const userRecords = await base44.asServiceRole.entities.User.filter({ id: userId });
+    const userRecord = userRecords?.[0];
+    if (userRecord?.stripe_subscription_id) {
+      try {
+        const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
+        await fetch(
+          `https://api.stripe.com/v1/subscriptions/${userRecord.stripe_subscription_id}`,
+          {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${STRIPE_SECRET}` },
+          }
+        );
+        console.log(`[GDPR] Cancelled Stripe subscription ${userRecord.stripe_subscription_id}`);
+      } catch (e) {
+        console.error('Failed to cancel Stripe subscription:', e.message);
+      }
+    }
 
     // 5. Finally, delete the user's own record
     await base44.asServiceRole.entities.User.delete(userId);
+
+    console.log(`[GDPR] User deletion completed for ${userId} at ${new Date().toISOString()}`);
 
     return new Response(JSON.stringify({ success: true, message: 'Your account and all associated data have been permanently deleted.' }), {
       status: 200,

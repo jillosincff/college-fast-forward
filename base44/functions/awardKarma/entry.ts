@@ -73,18 +73,28 @@ function getBenefitLabel(tierName) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // Auth check - allow system calls too
-    const user = await base44.auth.me().catch(() => null);
-    
+
+    // Require authentication
+    const currentUser = await base44.auth.me().catch(() => null);
+    if (!currentUser) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const { familyGroupId, parentUserId, parentEmail, parentName, actionType, referenceType, referenceId, description } = body;
-    
+
     console.log('awardKarma called:', { familyGroupId, parentUserId, parentEmail, actionType, referenceId });
-    
+
     // Allow calls without familyGroupId - we'll look it up from the parent
     if (!parentUserId || !actionType) {
       return Response.json({ error: 'Missing required fields (parentUserId, actionType)' }, { status: 400 });
+    }
+
+    // Prevent self-award: caller must be awarding to themselves (their own action)
+    // OR be an admin invoking on behalf of another user
+    const isAdmin = currentUser.role === 'admin' || currentUser.roles?.includes('admin');
+    if (parentUserId !== currentUser.id && !isAdmin) {
+      return Response.json({ error: 'Forbidden: cannot award karma on behalf of another user' }, { status: 403 });
     }
     
     const points = KARMA_VALUES[actionType];
