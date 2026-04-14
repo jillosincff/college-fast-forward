@@ -147,10 +147,10 @@ export default function ProfileCard({ user, isMyProfile }) {
   return (
     <div style={{
       background: '#ffffff', border: '0.5px solid rgba(0,0,0,0.08)',
-      borderRadius: 20, overflow: 'hidden',
+      borderRadius: 20,
     }}>
       {/* Cover */}
-      <div style={{ height: 100, background: '#0d1117', position: 'relative' }}>
+      <div style={{ height: 100, background: '#0d1117', position: 'relative', borderRadius: '20px 20px 0 0' }}>
         <div style={{
           position: 'absolute', inset: 0,
           background: 'radial-gradient(ellipse at center, rgba(232,93,32,0.08), transparent 70%)',
@@ -159,7 +159,7 @@ export default function ProfileCard({ user, isMyProfile }) {
       </div>
 
       {/* Profile info */}
-      <div style={{ padding: '0 28px 24px', marginTop: -32, position: 'relative', overflow: 'visible' }}>
+      <div style={{ padding: '0 28px 24px', marginTop: -32, position: 'relative' }}>
         {/* Avatar */}
         <div style={{
           width: 72, height: 72, borderRadius: '50%', background: '#0d1117',
