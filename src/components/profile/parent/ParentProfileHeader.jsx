@@ -87,7 +87,7 @@ export default function ParentProfileHeader({ user }) {
         }}>Edit Profile</button>
       </div>
 
-      <div style={{ padding: '0 16px 24px', marginTop: -36 }}>
+      <div style={{ padding: '0 12px 24px', marginTop: -36 }}>
         {/* Avatar */}
         <div style={{
           width: 72, height: 72, borderRadius: '50%', background: '#0d1117',
