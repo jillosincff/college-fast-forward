@@ -4,8 +4,7 @@ import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { toast } from 'sonner';
-import LandingStickyNav from '@/components/landing/LandingStickyNav';
-import V3Hero from '@/components/landing/v3/V3Hero';
+import LandingHero from '@/components/landing/LandingHero';
 import V3Problem from '@/components/landing/v3/V3Problem';
 
 import V3ParentPeace from '@/components/landing/v3/V3ParentPeace';
@@ -68,10 +67,8 @@ export default function LandingPage() {
       />
 
       <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#050505' }}>
-        <LandingStickyNav onSignIn={handleSignIn} onGetStarted={handleCTA} />
-
         {/* 1 — Hero */}
-        <V3Hero onCTA={handleCTA} onParentCTA={handleParentCTA} onStudentCTA={handleStudentCTA} onHowItWorks={scrollToHowItWorks} />
+        <LandingHero onParentJoin={handleParentCTA} onStudentJoin={handleStudentCTA} />
 
 
 
