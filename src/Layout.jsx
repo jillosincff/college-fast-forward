@@ -113,13 +113,10 @@ const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 // Connections (Ask the Network) removed
 const Profile = React.lazy(() => import('./pages/Profile'));
-const ProfileEdit = React.lazy(() => import('./pages/ProfileEdit'));
 // WelcomeRole removed — replaced by GatorWelcome
 const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
-const Onboarding = React.lazy(() => import('./pages/Onboarding'));
 const AlumniOnboarding = React.lazy(() => import('./pages/AlumniOnboarding'));
 const ParentOnboarding = React.lazy(() => import('./pages/ParentOnboarding'));
-const ShareExpertise = React.lazy(() => import('./pages/ShareExpertise'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
 // ParentDashboard removed — parents now go to ParentHome
@@ -504,10 +501,10 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
+const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
-const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'WelcomeRole', 'StudentOnboarding', 'StudentInvitedOnboarding', 'Onboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ShareExpertise', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
-const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'ProfileEdit', 'PostRequest', 'PostOpportunity', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
+const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
+const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'PostRequest', 'PostOpportunity', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'StudentInvitedOnboarding'];
 
@@ -534,13 +531,10 @@ const getPageComponent = (pageName) => {
     case 'PostOpportunity': return PostOpportunity;
     case 'PostRequest': return PostRequest;
     case 'Profile': return Profile;
-    case 'ProfileEdit': return ProfileEdit;
     case 'WelcomeRole': return GatorWelcome;
     case 'StudentOnboarding': return StudentOnboarding;
-    case 'Onboarding': return Onboarding;
     case 'AlumniOnboarding': return AlumniOnboarding;
     case 'ParentOnboarding': return ParentOnboarding;
-    case 'ShareExpertise': return ShareExpertise;
     case 'Directory': return Directory;
     case 'MyRequests': return MyRequests;
     case 'MyApplications': return MyApplications;
