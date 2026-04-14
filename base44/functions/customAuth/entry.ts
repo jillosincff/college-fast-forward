@@ -1,14 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
-
-// Simple password hashing function
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+import bcrypt from 'npm:bcryptjs@2.4.3';
 
 async function sendVerificationEmail(base44, email, token, origin) {
   const verificationUrl = `${origin}/#VerifyEmail?token=${token}`;
@@ -76,8 +67,8 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Hash password
-      const passwordHash = await hashPassword(password);
+      // Hash password with bcrypt
+      const passwordHash = await bcrypt.hash(password, 12);
 
       // Create user
       const user = await base44.asServiceRole.entities.User.create({
@@ -133,16 +124,31 @@ Deno.serve(async (req) => {
 
       const user = users[0];
 
-      // Check password
-      const passwordHash = await hashPassword(password);
-      if (user.password_hash !== passwordHash) {
-        return new Response(JSON.stringify({
-          success: false,
-          error: 'Invalid email or password'
-        }), {
-          status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        });
+      // Check password — with transparent migration from SHA-256 to bcrypt
+      const storedHash = user.password_hash;
+      const isSHA256Hash = /^[a-f0-9]{64}$/.test(storedHash);
+      if (isSHA256Hash) {
+        // Legacy SHA-256 hash — verify then silently upgrade to bcrypt
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const sha256Hash = Array.from(new Uint8Array(hashBuffer))
+          .map(b => b.toString(16).padStart(2, '0')).join('');
+        if (sha256Hash !== storedHash) {
+          return new Response(JSON.stringify({ success: false, error: 'Invalid email or password' }), {
+            status: 401, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        // Upgrade hash silently
+        const newHash = await bcrypt.hash(password, 12);
+        await base44.asServiceRole.entities.User.update(user.id, { password_hash: newHash });
+      } else {
+        const isValid = await bcrypt.compare(password, storedHash);
+        if (!isValid) {
+          return new Response(JSON.stringify({ success: false, error: 'Invalid email or password' }), {
+            status: 401, headers: { 'Content-Type': 'application/json' }
+          });
+        }
       }
 
       // Check if email is verified
