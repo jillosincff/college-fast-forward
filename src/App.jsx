@@ -23,6 +23,7 @@ import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
 import MigrationSignIn from '@/pages/MigrationSignIn';
 import ParentWelcome from '@/pages/ParentWelcome';
+import ParentOnboarding from '@/pages/ParentOnboarding';
 import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
+          <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
           <Route path="/ParentAllSet" element={
             <LayoutWrapper currentPageName="ParentAllSet">
