@@ -182,7 +182,7 @@ export default function Directory() {
     }
 
     return users;
-  }, [allUsers, searchTerm, filters]);
+  }, [allUsers, searchTerm, filters, schoolFilter, userSchool]);
 
   // Reset visible count when filters change
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [searchTerm, filters, schoolFilter]);

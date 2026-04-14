@@ -294,18 +294,6 @@ export default function GatorWelcome() {
             
             console.log('✅ [GatorWelcome] AuthContext refreshed, now navigating to onboarding');
             
-            // Skip welcome screen - go directly to role-specific onboarding
-            if (intendedRole === 'gator') {
-              navigate('StudentOnboarding');
-            } else if (intendedRole === 'parent') {
-              navigate('ParentOnboarding');
-            } else if (intendedRole === 'alumni') {
-              navigate('Onboarding');
-            } else {
-              navigate('StudentOnboarding'); // Fallback
-            }
-            return;
-            
             // Non-blocking notifications - fire and forget
             base44.functions.invoke('incrementUserCount', { user_id: user.id }).catch(e => {
               console.log('incrementUserCount failed (non-critical):', e.message);
@@ -318,6 +306,18 @@ export default function GatorWelcome() {
             }).catch(e => {
               console.log('notifyNewUserJoined failed (non-critical):', e.message);
             });
+
+            // Skip welcome screen - go directly to role-specific onboarding
+            if (intendedRole === 'gator') {
+              navigate('StudentOnboarding');
+            } else if (intendedRole === 'parent') {
+              navigate('ParentOnboarding');
+            } else if (intendedRole === 'alumni') {
+              navigate('Onboarding');
+            } else {
+              navigate('StudentOnboarding'); // Fallback
+            }
+            return;
           } else {
             console.error(`❌ [GatorWelcome] FINAL VERIFICATION FAILED after ${MAX_VERIFY_ATTEMPTS} attempts`);
             setError('Failed to save your role. Please refresh and try again.');
