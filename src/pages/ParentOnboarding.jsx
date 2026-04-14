@@ -127,15 +127,6 @@ export default function ParentOnboarding() {
         first_question_shown: true,
       });
 
-      // Award karma (non-blocking)
-      try {
-        base44.functions.invoke('awardKarma', {
-          parentUserId: user.id, parentEmail: user.email, parentName: formData.fullName,
-          actionType: 'onboarding_complete', referenceType: 'onboarding', referenceId: user.id,
-          description: 'Completed parent onboarding',
-        }).catch(() => {});
-      } catch {}
-
       // Send welcome email (non-blocking)
       try {
         base44.functions.invoke('sendWelcomeEmail', {

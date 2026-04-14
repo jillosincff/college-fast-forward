@@ -8,7 +8,6 @@ import { HelpRequest } from '@/entities/HelpRequest';
 import { JobRequest } from '@/entities/JobRequest';
 import { JobAnswer } from '@/entities/JobAnswer';
 import { base44 } from '@/api/base44Client';
-import { showKarmaToast, showTierUpToast } from '@/components/karma/KarmaToast';
 import ReferralSection from './ReferralSection';
 import { checkAndMarkActivation } from '@/components/utils/checkAndMarkActivation';
 import MentionInput, { extractMentions } from './MentionInput';
@@ -113,48 +112,6 @@ export default function AnswerComposer({
       // calculated dynamically by counting JobAnswer/Answer records.
       console.log('Answer created for question:', question.id, 'source:', question._source);
 
-      // Award karma for posting an answer (parents and alumni)
-      // Award karma even without family_group_id - awardKarma will handle finding linked students
-      if (currentUser.persona === 'parent' || currentUser.persona === 'alumni' || currentUser.roles?.includes('parent') || currentUser.roles?.includes('alumni')) {
-        const oldLevel = currentUser.karma_level || 'none';
-        base44.functions.invoke('awardKarma', {
-          familyGroupId: currentUser.family_group_id || null,
-          parentUserId: currentUser.id,
-          parentEmail: currentUser.email,
-          actionType: 'answer',
-          referenceId: newAnswer.id,
-          description: 'Posted an answer'
-        }).then(res => {
-          console.log('Karma awarded for answer:', res?.data);
-          if (res?.data) {
-            showKarmaToast(toast, res.data);
-            // Detect tier-up
-            if (res.data.karma_level && res.data.karma_level !== oldLevel && res.data.karma_level !== 'none') {
-              setTimeout(() => {
-                showTierUpToast(toast, oldLevel, res.data.karma_level, res.data.boost_multiplier);
-              }, 2500);
-            }
-          }
-        }).catch(err => {
-          console.log('Karma award failed (non-critical):', err.message);
-        });
-      }
-
-      // Award student karma for answering a fellow student's question
-      if (currentUser.persona === 'gator' || currentUser.roles?.includes('gator')) {
-        base44.functions.invoke('awardStudentKarma', {
-          userId: currentUser.id,
-          userEmail: currentUser.email,
-          actionType: 'answer_question',
-          referenceId: newAnswer.id,
-          description: 'Answered a fellow student\'s question'
-        }).then(res => {
-          if (res?.data?.success) {
-            toast({ title: `+${res.data.points_awarded} Karma! 🐊`, description: res.data.tier_unlocked ? `Level up: ${res.data.karma_level}!` : `Total: ${res.data.new_total} karma` });
-          }
-        }).catch(err => console.log('Student karma failed (non-critical):', err.message));
-      }
-
       // Send email notification to the question poster
       // Handle cases where created_by is 'anonymous' - use student_email or other fallbacks
       console.log('📧 Attempting to send answer notification');
@@ -219,7 +176,7 @@ export default function AnswerComposer({
 
       toast({
         title: "✅ Answer posted!",
-        description: "Thank you for sharing your wisdom (+15 karma)"
+        description: "Thank you for sharing your wisdom!"
       });
 
       // Mark activation for the answering parent/alumni
