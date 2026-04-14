@@ -33,12 +33,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import PullToRefresh from './components/common/PullToRefresh';
 
 const childPages = [
-  'ProfileEdit', 'MessageComposer', 'PostRequest', 'PostOpportunity',
+  'MessageComposer', 'PostRequest', 'PostOpportunity',
   'CompanyProfile', 'PublicProfile', 'SubmitFeedback', 'Notifications', 'MyMatches', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'
 ];
 
 const childPageTitles = {
-  ProfileEdit: 'Edit Profile',
   MessageComposer: 'New Message',
   PostRequest: 'Post Request',
   PostOpportunity: 'Post Opportunity',
