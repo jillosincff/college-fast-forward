@@ -15,7 +15,7 @@ export default function ParentOnboarding() {
   const [invitedStudents, setInvitedStudents] = useState([]);
 
   const [formData, setFormData] = useState({
-    fullName: '', company: '', industry: '', introWillingness: 'yes', directoryVisible: true,
+    fullName: '', school: '', company: '', industry: '', introWillingness: 'yes', directoryVisible: true,
     studentFirstName: '', studentEmail: '', studentUniversity: '',
   });
 
@@ -43,6 +43,8 @@ export default function ParentOnboarding() {
       persona: 'parent',
       roles: ['parent'],
       full_name: formData.fullName.trim(),
+      school: formData.school.trim(),
+      school_name: formData.school.trim(),
       current_company: formData.company.trim(),
       company: formData.company.trim(),
       career_background: formData.careerBackground?.trim() || '',

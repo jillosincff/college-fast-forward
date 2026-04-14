@@ -150,6 +150,7 @@ export default function ProfileEdit() {
     mentorship_topics: [],
     companies_worked_at: [],
     can_provide_referrals: false,
+    school: '',
     school_name: '',
     major: '',
     graduation_year: '',
@@ -186,6 +187,7 @@ export default function ProfileEdit() {
         mentorship_topics: user.mentorship_topics || [],
         companies_worked_at: user.companies_worked_at || [],
         can_provide_referrals: user.can_provide_referrals || false,
+        school: user.school || user.school_name || '',
         school_name: user.school_name || user.school || '',
         major: user.major || '',
         graduation_year: user.graduation_year || '',
@@ -248,8 +250,8 @@ export default function ProfileEdit() {
         mentorship_topics: formData.mentorship_topics || [],
         companies_worked_at: formData.companies_worked_at || [],
         can_provide_referrals: formData.can_provide_referrals || false,
-        school_name: formData.school_name || '',
-        school: formData.school_name || '',
+        school: formData.school || '',
+        school_name: formData.school_name || formData.school || '',
         major: formData.major || '',
         graduation_year: formData.graduation_year || '',
         gpa: formData.gpa || '',
@@ -477,6 +479,33 @@ export default function ProfileEdit() {
               </div>
             </CardContent>
           </Card>
+
+          {/* School - Parents Only (for network access) */}
+          {isParent && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                  School / University
+                </CardTitle>
+                <CardDescription>This determines which school network you're part of</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="school">School / University</Label>
+                  <Input
+                    id="school"
+                    value={formData.school || ''}
+                    onChange={(e) => handleChange('school', e.target.value)}
+                    placeholder="e.g., University of Florida"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Students from this school will find you in the network
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Professional Information - Parents Only */}
           {isParent && (
