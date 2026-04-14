@@ -73,7 +73,7 @@ export default function ParentAllSet() {
 
         {/* Profile CTAs */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 0 }}>
-          <button onClick={() => navigate('ProfileEdit')} style={{
+          <button onClick={() => navigate('ParentProfileEdit')} style={{
             background: '#E85D20', color: '#fff', border: 'none',
             borderRadius: 12, padding: '14px 32px',
             fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600,
