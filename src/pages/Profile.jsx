@@ -114,7 +114,7 @@ export default function Profile() {
     return (
       <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
         <ParentProfileNav user={currentUser} currentPage="Profile" />
-        <main style={{ flex: 1, maxWidth: 700, margin: '0 auto', width: '100%', padding: '24px 24px 80px', overflowY: 'auto', boxSizing: 'border-box' }}>
+        <main style={{ flex: 1, maxWidth: 700, margin: '0 auto', width: '100%', padding: '24px 12px 80px', overflowY: 'auto', boxSizing: 'border-box' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <ParentProfileHeader user={profileUser} />
             <ParentVisibilityCard user={profileUser} />
