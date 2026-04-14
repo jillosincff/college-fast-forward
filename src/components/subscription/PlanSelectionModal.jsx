@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Check, Loader2, Shield } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
 const FEATURES = [
   'Everything in CFF Membership',
@@ -79,7 +79,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
               {foundingOfferActive ? 'Your Founding Member Rate' : 'Unlock FastIQ'}
             </h2>
             <p style={{ fontSize: 13, color: '#64748B', margin: '4px 0 0' }}>
-              {foundingOfferActive ? `${daysLeft} days left — expires April 15th` : 'Start free for 7 days — cancel anytime'}
+              {foundingOfferActive ? `${daysLeft} days left — expires April 30th` : 'Start free for 7 days — cancel anytime'}
             </p>
           </div>
           <button onClick={onClose} style={{ background: '#F1F5F9', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', minHeight: 'auto' }}>
@@ -103,7 +103,7 @@ export default function PlanSelectionModal({ isOpen, onClose, user, familyId }) 
             <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 8px' }}>⚡ Founding Member Rate</p>
             <p style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', margin: '0 0 2px' }}>$14.50<span style={{ fontSize: 14, fontWeight: 500, color: '#64748B' }}>/month</span></p>
             <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 4px' }}>or $124.50/year — save $50</p>
-            <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 500, margin: '0 0 16px' }}>⏱ {daysLeft} days left — expires April 15th</p>
+            <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 500, margin: '0 0 16px' }}>⏱ {daysLeft} days left — expires April 30th</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button
                 onClick={() => handleSelectPlan('fastiq_founding_monthly')}
