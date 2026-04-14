@@ -3,7 +3,6 @@ import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { Search, Loader2, Linkedin } from 'lucide-react';
-import { getDirectoryUsers } from '@/functions/getDirectoryUsers';
 import ParentMessageComposer from '@/components/free-tier/ParentMessageComposer';
 import FreeTierSidebar from '@/components/free-tier/FreeTierSidebar';
 import FreeTierMobileNav from '@/components/free-tier/FreeTierMobileNav';
