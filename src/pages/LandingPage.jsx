@@ -35,6 +35,37 @@ const FASTIQ_FEATURES = [
   { icon: '⚡', label: 'Daily Briefing', desc: 'Tells your student exactly what to do next in their search' },
 ];
 
+const FAQS = [
+  {
+    q: "How does my kid actually connect with someone?",
+    a: "Students search the network by industry, company, or role. When they find someone relevant, they send a message directly through the platform. You get notified and decide whether and how to respond. It's that simple.",
+  },
+  {
+    q: "Do I have to respond to every student who reaches out?",
+    a: "Absolutely not. You set your own availability and respond only when you want to. There's no obligation, no minimum commitment, and no pressure. Even one conversation can make a real difference.",
+  },
+  {
+    q: "What's the difference between the free network and FastIQ?",
+    a: "The network is the community — parents and alumni making themselves available to students for introductions and advice. FastIQ is an AI career engine that helps students search alumni, tailor their resume, practice interviews, and know exactly what to do next. The network is free. FastIQ is a paid upgrade for students who want to go further.",
+  },
+  {
+    q: "Can I pay for my student's FastIQ?",
+    a: "Yes. Either the student or a parent can unlock FastIQ. It starts with a free 7-day trial — no credit card needed — and then continues at $14.50/month during our founding rate period.",
+  },
+  {
+    q: "Is my contact information visible to everyone?",
+    a: "No. Your email address is never shown publicly. Students can message you through the platform, but your personal contact details stay private unless you choose to share them directly.",
+  },
+  {
+    q: "What school does my kid need to go to?",
+    a: "Any school. When you join, you tell us what school your student attends and you're connected with other parents and alumni from that same school. We're building networks at colleges across the country.",
+  },
+  {
+    q: "I'm an alumni, not a parent — can I still join?",
+    a: "Absolutely. Alumni are a crucial part of the network. Students specifically look for alumni at companies they want to work at. Your experience and connections are exactly what they need.",
+  },
+];
+
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
 function Section({ children, style = {} }) {
@@ -85,6 +116,37 @@ function PricingRow({ label, sublabel, price, highlight, badge }) {
         )}
       </div>
       <p style={{ fontFamily: playfair, fontSize: 22, fontWeight: 700, color: highlight ? '#E85D20' : 'rgba(255,255,255,0.7)', margin: 0, whiteSpace: 'nowrap' }}>{price}</p>
+    </div>
+  );
+}
+
+function FAQItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          width: '100%', textAlign: 'left',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+          padding: '20px 0', background: 'none', border: 'none',
+          cursor: 'pointer', minHeight: 'auto',
+        }}
+      >
+        <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff', lineHeight: 1.4 }}>{q}</span>
+        <span style={{
+          fontFamily: dmSans, fontSize: 20, color: '#E85D20', flexShrink: 0,
+          transition: 'transform 0.2s ease',
+          transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
+          display: 'inline-block',
+        }}>+</span>
+      </button>
+      {open && (
+        <p style={{
+          fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.55)',
+          lineHeight: 1.7, margin: '0 0 20px', maxWidth: 580,
+        }}>{a}</p>
+      )}
     </div>
   );
 }
@@ -259,16 +321,7 @@ export default function LandingPage() {
             Kids need jobs.<br />Personal connections get them hired.
           </h2>
 
-          {/* 70% stat callout */}
-          <div style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderLeft: '3px solid #E85D20',
-            borderRadius: '0 12px 12px 0',
-            padding: '14px 20px',
-            marginBottom: 28,
-            maxWidth: 560,
-          }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderLeft: '3px solid #E85D20', borderRadius: '0 12px 12px 0', padding: '14px 20px', marginBottom: 28, maxWidth: 560 }}>
             <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.55 }}>
               📊 70% of Gen Z students already ask their parents for help finding a job.{' '}
               <span style={{ color: '#E85D20', fontWeight: 600 }}>Now parents can actually do something about it.</span>
@@ -357,7 +410,7 @@ export default function LandingPage() {
             <PricingRow
               label="Parents & Alumni"
               sublabel="Join the network, help students, make introductions."
-              price="Free — always"
+              price="Free to join"
             />
             <PricingRow
               label="Students — FastIQ"
@@ -426,7 +479,22 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 7: FINAL CTA */}
+        {/* SECTION 7: FAQ */}
+        <Section>
+          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>Common questions</p>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 40px' }}>
+            Everything you need to know.
+          </h2>
+          <div>
+            {FAQS.map((faq, i) => (
+              <FAQItem key={i} q={faq.q} a={faq.a} />
+            ))}
+          </div>
+        </Section>
+
+        <Divider />
+
+        {/* SECTION 8: FINAL CTA */}
         <Section style={{ textAlign: 'center', padding: '80px 24px 100px' }}>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
             Your student's next opportunity<br />is one introduction away.
