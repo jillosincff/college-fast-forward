@@ -87,20 +87,8 @@ export default function ParentProfileHeader({ user }) {
         }}>Edit Profile</button>
       </div>
 
-      <div style={{ padding: '0 12px 24px', marginTop: -36 }}>
-        {/* Avatar */}
-        <div style={{
-          width: 72, height: 72, borderRadius: '50%', background: '#0d1117',
-          border: `3px solid ${ORANGE}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          {user?.profile_image_url ? (
-            <img src={user.profile_image_url} alt={name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-          ) : (
-            <span style={{ fontFamily: playfair, fontWeight: 700, fontSize: 22, color: '#fff' }}>{initials}</span>
-          )}
-        </div>
-
-        <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 12, marginBottom: 0, lineHeight: 1.2 }}>{name}</h1>
+      <div style={{ padding: '0 12px 24px', marginTop: 24 }}>
+         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 0, marginBottom: 0, lineHeight: 1.2 }}>{name}</h1>
 
         {/* Two-column details */}
         <div className="pp-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, marginTop: 24 }}>
