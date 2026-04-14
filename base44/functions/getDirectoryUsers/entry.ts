@@ -119,7 +119,6 @@ Deno.serve(async (req) => {
         onboarding_completed: u.onboarding_completed || false,
         profile_image_url: u.profile_image_url || '',
         visible_in_directory: u.visible_in_directory !== false,
-        show_in_directory: u.show_in_directory,
         subscription_status: u.subscription_status || '',
         updated_date: u.updated_date,
       });

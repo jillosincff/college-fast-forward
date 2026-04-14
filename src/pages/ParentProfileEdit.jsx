@@ -57,10 +57,8 @@ export default function ParentProfileEdit() {
       company: form.company.trim(),
       career_background: form.careerBackground.trim(),
       industry: form.industry,
-      industries: form.industry ? [form.industry] : [],
       intro_willingness: form.introWillingness,
       visible_in_directory: form.directoryVisible,
-      directory_consent_given: form.directoryVisible,
     });
     if (refreshUser) await refreshUser();
     // Clear directory cache so updated profile appears immediately
