@@ -255,7 +255,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={() => navigate('GetStarted')} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto' }}>Sign In</button>
-            <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', minHeight: 'auto' }}>Join Free</button>
+            <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', minHeight: 'auto' }}>Get Started</button>
           </div>
         </nav>
 
@@ -306,11 +306,11 @@ export default function LandingPage() {
             <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.35)', transition: 'all 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(232,93,32,0.45)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)'; }}
-            >Join as a Parent or Alumni — Free →</button>
+            >I'm here to help →</button>
             <button onClick={onStudentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
-            >I'm a Student →</button>
+            >I'm looking for a job →</button>
           </div>
 
           <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap', justifyContent: 'center', opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.4s' }}>
@@ -406,7 +406,7 @@ export default function LandingPage() {
             <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#E85D20', background: 'none', border: '1px solid rgba(232,93,32,0.4)', borderRadius: 10, padding: '12px 28px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.1)'; e.currentTarget.style.borderColor = '#E85D20'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'; }}
-            >Help grow the village — join free →</button>
+            >I'm here to help →</button>
           </div>
         </Section>
 
@@ -467,11 +467,11 @@ export default function LandingPage() {
             <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 16px rgba(232,93,32,0.3)', transition: 'opacity 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-            >Join as a Parent — Free →</button>
+            >I'm here to help →</button>
             <button onClick={onStudentJoin} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#E85D20', background: 'none', border: '1px solid rgba(232,93,32,0.35)', borderRadius: 10, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.08)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
-            >Start Student Trial →</button>
+            >I'm looking for a job →</button>
           </div>
         </Section>
 
@@ -524,11 +524,11 @@ export default function LandingPage() {
             <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px 36px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.35)', transition: 'all 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(232,93,32,0.45)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)'; }}
-            >Join as a Parent or Alumni — Free →</button>
+            >I'm here to help →</button>
             <button onClick={onStudentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
-            >I'm a Student →</button>
+            >I'm looking for a job →</button>
           </div>
         </Section>
 
