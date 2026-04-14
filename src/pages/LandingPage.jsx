@@ -280,7 +280,8 @@ export default function LandingPage() {
             Personal connections get them hired.
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 36px', maxWidth: 560 }}>
-            We pool our networks — parents and alumni across every industry — to maximize every student's chances of finding the right person at the right company.
+            We pool our networks — parents and alumni across every industry — to maximize every student's chances of finding the right person at the right company.<br /><br />
+            Whatever school your kid goes to, that's the network you're in.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, margin: '0 0 36px', maxWidth: 520 }}>
