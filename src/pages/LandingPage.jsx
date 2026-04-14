@@ -53,10 +53,7 @@ function Section({ children, style = {} }) {
 function Divider() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px' }}>
-      <div style={{
-        height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)',
-      }} />
+      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)' }} />
     </div>
   );
 }
@@ -64,13 +61,11 @@ function Divider() {
 function PricingRow({ label, sublabel, price, highlight, badge }) {
   return (
     <div style={{
-      display: 'flex', alignItems: 'center',
-      justifyContent: 'space-between',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '20px 24px',
       background: highlight ? 'rgba(232,93,32,0.06)' : 'rgba(255,255,255,0.02)',
       border: `1px solid ${highlight ? 'rgba(232,93,32,0.2)' : 'rgba(255,255,255,0.07)'}`,
-      borderRadius: 14,
-      gap: 16, flexWrap: 'wrap',
+      borderRadius: 14, gap: 16, flexWrap: 'wrap',
     }}>
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -89,11 +84,7 @@ function PricingRow({ label, sublabel, price, highlight, badge }) {
           <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.5 }}>{sublabel}</p>
         )}
       </div>
-      <p style={{
-        fontFamily: playfair, fontSize: 22, fontWeight: 700,
-        color: highlight ? '#E85D20' : 'rgba(255,255,255,0.7)',
-        margin: 0, whiteSpace: 'nowrap',
-      }}>{price}</p>
+      <p style={{ fontFamily: playfair, fontSize: 22, fontWeight: 700, color: highlight ? '#E85D20' : 'rgba(255,255,255,0.7)', margin: 0, whiteSpace: 'nowrap' }}>{price}</p>
     </div>
   );
 }
@@ -261,6 +252,23 @@ export default function LandingPage() {
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(30px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 24px' }}>
             Kids need jobs.<br />Personal connections get them hired.
           </h2>
+
+          {/* 70% stat callout */}
+          <div style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderLeft: '3px solid #E85D20',
+            borderRadius: '0 12px 12px 0',
+            padding: '14px 20px',
+            marginBottom: 28,
+            maxWidth: 560,
+          }}>
+            <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.55 }}>
+              📊 70% of Gen Z students already ask their parents for help finding a job.{' '}
+              <span style={{ color: '#E85D20', fontWeight: 600 }}>Now parents can actually do something about it.</span>
+            </p>
+          </div>
+
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 12px', maxWidth: 560 }}>
             We pool our networks — parents and alumni across every industry — to maximize every student's chances of finding the right person at the right company.
           </p>
@@ -362,17 +370,20 @@ export default function LandingPage() {
               flexWrap: 'wrap', gap: 8, marginBottom: 24,
             }}>
               <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.5 }}>
-                🏅 Founding rate of <strong style={{ color: '#c9a84c' }}>$14.50/mo</strong> locked in forever.
-                Regular price is $29/mo after April 30.
+                🏅 Founding rate of <strong style={{ color: '#c9a84c' }}>$14.50/mo</strong> locked in forever. Regular price is $29/mo after April 30.
                 {timeLeft && <span style={{ color: 'rgba(255,255,255,0.35)', marginLeft: 8 }}>{timeLeft}</span>}
               </p>
             </div>
           )}
 
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 20px', marginBottom: 28 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 4px' }}>✓ 7-day free trial — no credit card needed</p>
-            <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: '0 0 4px' }}>✓ Students can pay — or parents can pay on their student's behalf</p>
-            <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0 }}>✓ Cancel anytime. No contracts.</p>
+            {[
+              '✓ 7-day free trial — no credit card needed',
+              "✓ Students can pay — or parents can pay on their student's behalf",
+              '✓ Cancel anytime. No contracts.',
+            ].map((line, i) => (
+              <p key={i} style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: i < 2 ? '0 0 4px' : 0 }}>{line}</p>
+            ))}
           </div>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
