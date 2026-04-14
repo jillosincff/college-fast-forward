@@ -80,6 +80,7 @@ import Notifications from './pages/Notifications';
 import Opportunities from './pages/Opportunities';
 // ParentDashboard removed — replaced by ParentHome
 import ParentHome from './pages/ParentHome';
+import ParentOnboarding from './pages/ParentOnboarding';
 import ParentPledge from './pages/ParentPledge';
 import PaymentCancel from './pages/PaymentCancel';
 import PaymentSuccess from './pages/PaymentSuccess';
@@ -132,6 +133,7 @@ export const PAGES = {
     "Opportunities": Opportunities,
 
     "ParentHome": ParentHome,
+    "ParentOnboarding": ParentOnboarding,
     "ParentPledge": ParentPledge,
     "PaymentCancel": PaymentCancel,
     "PaymentSuccess": PaymentSuccess,
