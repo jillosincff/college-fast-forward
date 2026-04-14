@@ -109,8 +109,6 @@ Deno.serve(async (req) => {
         school_code: u.school_code || '',
         graduation_year: u.graduation_year || u.grad_year || '',
         major: u.major || '',
-        // Include email only for the linking flow — never exposed to frontend UI
-        email: u.email || '',
       }));
 
     return Response.json({

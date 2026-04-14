@@ -13,10 +13,24 @@ const FOUNDING_OFFER_DEADLINE = new Date('2026-04-30T23:59:59');
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const currentUser = await base44.auth.me();
+    if (!currentUser) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     let { plan, successUrl, cancelUrl, user: clientUser } = await req.json();
 
     if (!clientUser?.id || !clientUser?.email) {
       return Response.json({ error: 'User context required' }, { status: 400 });
+    }
+
+    // Ownership check — prevent one user from creating a checkout for another
+    if (
+      clientUser.id !== currentUser.id &&
+      clientUser.email?.toLowerCase() !== currentUser.email?.toLowerCase()
+    ) {
+      console.error('[Security] Checkout ownership mismatch', { clientUserId: clientUser.id, currentUserId: currentUser.id });
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Auto-apply founding rate if within deadline and plan is not already founding
