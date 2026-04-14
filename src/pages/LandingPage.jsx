@@ -192,14 +192,12 @@ export default function LandingPage() {
 
   const onParentJoin = () => {
     trackEvent('cta_parent_clicked');
-    // Route to GatorWelcome — user picks their path there
     const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };
 
   const onStudentJoin = () => {
     trackEvent('cta_student_clicked');
-    // Route to GatorWelcome — user picks their path there
     const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };
@@ -271,19 +269,35 @@ export default function LandingPage() {
             <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#E85D20', letterSpacing: '0.08em', textTransform: 'uppercase' }}>1,000+ Parents & Alumni Ready to Help</span>
           </div>
 
-          <h1 style={{ fontFamily: playfair, fontSize: 'clamp(38px, 6vw, 74px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 10px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.1s' }}>
+          <h1 style={{
+            fontFamily: playfair, fontSize: 'clamp(36px, 5.5vw, 68px)',
+            fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 10px',
+            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.1s',
+          }}>
             "I've asked everyone I know.
           </h1>
-          <h1 style={{ fontFamily: playfair, fontSize: 'clamp(38px, 6vw, 74px)', fontWeight: 700, color: '#E85D20', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 40px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.15s' }}>
-            My kid still doesn't have a job lead."
+          <h1 style={{
+            fontFamily: playfair, fontSize: 'clamp(36px, 5.5vw, 68px)',
+            fontWeight: 700, color: '#E85D20', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 28px',
+            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.15s',
+          }}>
+            My kid still has no real job leads."
           </h1>
 
-          <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 2.5vw, 20px)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, maxWidth: 540, margin: '0 auto 16px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.2s' }}>
-            You're not alone. College Fast Forward connects you with 1,000+ parents and alumni who are ready to open their networks for your student.
+          <p style={{
+            fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 700, color: '#fff',
+            lineHeight: 1.3, margin: '0 0 12px',
+            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.2s',
+          }}>
+            You're not alone. We're all in the same boat.
           </p>
 
-          <p style={{ fontFamily: playfair, fontSize: 'clamp(18px, 2vw, 22px)', fontWeight: 700, color: '#fff', fontStyle: 'italic', margin: '0 0 52px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.25s' }}>
-            One warm intro changes everything.
+          <p style={{
+            fontFamily: dmSans, fontSize: 'clamp(16px, 2.5vw, 19px)', color: 'rgba(255,255,255,0.55)',
+            lineHeight: 1.7, maxWidth: 580, margin: '0 auto 52px',
+            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.25s',
+          }}>
+            College Fast Forward multiplies your effort — connecting you with 1,000+ parents and alumni who are ready to open their networks for your student.
           </p>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 72, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.3s' }}>
@@ -309,27 +323,59 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 2: HOW IT WORKS */}
+        {/* SECTION 2: PARENT MOTIVATION */}
+        <Section>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 28px' }}>
+            There is no one more motivated<br />than a parent.
+          </h2>
+          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, margin: '0 0 24px', maxWidth: 580 }}>
+            Your kid isn't lazy. They just don't know the right people.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 20px', maxWidth: 580 }}>
+            And here's what makes College Fast Forward different from every other network out there: every single person in it feels exactly the same way you do right now.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 20px', maxWidth: 580 }}>
+            We're not professional networkers doing favors. We're parents. We lie awake at night thinking about our kids' futures. We forward job listings at midnight. We text old colleagues we haven't spoken to in years.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 40px', maxWidth: 580 }}>
+            When you join this community, you're not just adding your network — you're joining thousands of parents who will go out of their way to help your student, because they know you'll do the same for theirs.
+          </p>
+          <div style={{ background: 'rgba(232,93,32,0.05)', border: '1px solid rgba(232,93,32,0.15)', borderRadius: 16, padding: '32px 28px', maxWidth: 580 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, margin: '0 0 16px' }}>
+              You might have deep connections in finance, but your child is passionate about healthcare. Another parent in the network might have strong healthcare connections, but their child wants to break into finance.
+            </p>
+            <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 600, color: '#fff', lineHeight: 1.65, margin: '0 0 16px' }}>
+              When you help their student, they help yours.
+            </p>
+            <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, margin: '0 0 20px' }}>
+              That's the beauty of College Fast Forward. It's not just your network helping your kid — it's thousands of parents collectively opening their networks for each other's children.
+            </p>
+            <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, fontStyle: 'italic', color: '#E85D20', margin: 0 }}>
+              One conversation really can change everything.
+            </p>
+          </div>
+        </Section>
+
+        <Divider />
+
+        {/* SECTION 3: HOW IT WORKS */}
         <Section>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>How it works</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(30px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 24px' }}>
             Kids need jobs.<br />Personal connections get them hired.
           </h2>
-
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderLeft: '3px solid #E85D20', borderRadius: '0 12px 12px 0', padding: '14px 20px', marginBottom: 28, maxWidth: 560 }}>
             <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.55 }}>
               📊 70% of Gen Z students already ask their parents for help finding a job.{' '}
               <span style={{ color: '#E85D20', fontWeight: 600 }}>Now parents can actually do something about it.</span>
             </p>
           </div>
-
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 12px', maxWidth: 560 }}>
             We pool our networks — parents and alumni across every industry — to maximize every student's chances of finding the right person at the right company.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 600, color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, margin: '0 0 36px', maxWidth: 560 }}>
             Whatever school your kid goes to, that's the network you're in.
           </p>
-
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20, margin: '0 0 36px', maxWidth: 520 }}>
             {HOW_IT_WORKS.map(({ step, text }) => (
               <div key={step} style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
@@ -340,7 +386,6 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-
           <p style={{ fontFamily: dmSans, fontSize: 16, fontStyle: 'italic', color: 'rgba(255,255,255,0.35)', lineHeight: 1.75, margin: 0, maxWidth: 520 }}>
             Not a job board. Not an algorithm. Real people who already want to help — because their kid is in the same boat.
           </p>
@@ -348,7 +393,7 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 3: THE VILLAGE */}
+        {/* SECTION 4: THE VILLAGE */}
         <Section style={{ textAlign: 'center' }}>
           <div style={{ background: 'rgba(232,93,32,0.05)', border: '1px solid rgba(232,93,32,0.15)', borderRadius: 20, padding: '52px 40px' }}>
             <h2 style={{ fontFamily: playfair, fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 8px' }}>It takes a village.</h2>
@@ -365,7 +410,7 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 4: FASTIQ */}
+        {/* SECTION 5: FASTIQ */}
         <Section>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>For students who want to go further</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
@@ -377,8 +422,7 @@ export default function LandingPage() {
           <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, fontStyle: 'italic', color: 'rgba(255,255,255,0.8)', margin: '0 0 48px' }}>
             The network opens the door.<br />FastIQ helps them walk through it.
           </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
             {FASTIQ_FEATURES.map((f, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '20px 18px', transition: 'all 0.2s ease' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.background = 'rgba(232,93,32,0.04)'; }}
@@ -394,52 +438,29 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 5: PRICING */}
+        {/* SECTION 6: PRICING */}
         <Section>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>Simple pricing. No surprises.</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 32px' }}>
             What does it cost?
           </h2>
-
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-            <PricingRow
-              label="Parents & Alumni"
-              sublabel="Join the network, help students, make introductions."
-              price="Free to join"
-            />
-            <PricingRow
-              label="Students — FastIQ"
-              sublabel="Full AI career engine. No credit card to start."
-              price={foundingActive ? '$14.50/mo' : '$29/mo'}
-              highlight={true}
-              badge={foundingActive ? 'Founding Rate' : null}
-            />
+            <PricingRow label="Parents & Alumni" sublabel="Join the network, help students, make introductions." price="Free to join" />
+            <PricingRow label="Students — FastIQ" sublabel="Full AI career engine. No credit card to start." price={foundingActive ? '$14.50/mo' : '$29/mo'} highlight={true} badge={foundingActive ? 'Founding Rate' : null} />
           </div>
-
           {foundingActive && (
-            <div style={{
-              background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)',
-              borderRadius: 12, padding: '14px 20px',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              flexWrap: 'wrap', gap: 8, marginBottom: 24,
-            }}>
+            <div style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 12, padding: '14px 20px', marginBottom: 24 }}>
               <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.5 }}>
                 🏅 Founding rate of <strong style={{ color: '#c9a84c' }}>$14.50/mo</strong> locked in forever. Regular price is $29/mo after April 30.
                 {timeLeft && <span style={{ color: 'rgba(255,255,255,0.35)', marginLeft: 8 }}>{timeLeft}</span>}
               </p>
             </div>
           )}
-
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 20px', marginBottom: 28 }}>
-            {[
-              '✓ 7-day free trial — no credit card needed',
-              "✓ Students can pay — or parents can pay on their student's behalf",
-              '✓ Cancel anytime. No contracts.',
-            ].map((line, i) => (
+            {["✓ 7-day free trial — no credit card needed", "✓ Students can pay — or parents can pay on their student's behalf", "✓ Cancel anytime. No contracts."].map((line, i) => (
               <p key={i} style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: i < 2 ? '0 0 4px' : 0 }}>{line}</p>
             ))}
           </div>
-
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 16px rgba(232,93,32,0.3)', transition: 'opacity 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
@@ -454,7 +475,7 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 6: SOCIAL PROOF */}
+        {/* SECTION 7: SOCIAL PROOF */}
         <Section style={{ textAlign: 'center' }}>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 32px' }}>From the network</p>
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid #E85D20', borderRadius: '0 16px 16px 0', padding: '24px 28px', textAlign: 'left', maxWidth: 560, margin: '0 auto 16px' }}>
@@ -474,7 +495,7 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 7: FAQ */}
+        {/* SECTION 8: FAQ */}
         <Section>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>Common questions</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 40px' }}>
@@ -489,7 +510,7 @@ export default function LandingPage() {
 
         <Divider />
 
-        {/* SECTION 8: FINAL CTA */}
+        {/* SECTION 9: FINAL CTA */}
         <Section style={{ textAlign: 'center', padding: '80px 24px 100px' }}>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
             Your student's next opportunity<br />is one introduction away.
