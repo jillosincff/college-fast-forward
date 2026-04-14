@@ -82,34 +82,36 @@ Deno.serve(async (req) => {
           }
         }
 
-        const userData = {
-            id: userToDisplay.id,
-            first_name: userToDisplay.first_name,
-            last_name: userToDisplay.last_name,
-            full_name: userToDisplay.full_name,
-            bio: userToDisplay.bio,
-            persona: userToDisplay.persona,
-            alumni_intent: userToDisplay.alumni_intent,
-            major: userToDisplay.major,
-            graduation_year: userToDisplay.graduation_year,
-            company: userToDisplay.company || userToDisplay.current_company,
-            job_title: userToDisplay.job_title || userToDisplay.current_position,
-            industry: userToDisplay.industry,
-            linkedin_url: userToDisplay.linkedin_url,
-            expertise_areas: userToDisplay.expertise_areas || [],
-            mentorship_topics: userToDisplay.mentorship_topics || [],
-            ways_to_help: userToDisplay.ways_to_help || [],
-            can_provide_referrals: userToDisplay.can_provide_referrals || false,
-            is_founding_member: userToDisplay.is_founding_member || false,
-            created_date: userToDisplay.created_date,
-            karma_level: karmaLevel,
-            karma_points: karmaPoints,
-            students_helped: activityStats.students_helped,
-            answers_given: activityStats.answers_given,
-            intros_made: activityStats.intros_made,
-        };
+        // Explicit allowlist — never return email, password_hash, stripe_*, phone,
+        // family_id, pending_fastiq_gift_emails, trial_start_date, or internal flags.
+        const SAFE_PUBLIC_FIELDS = [
+            'id', 'first_name', 'last_name', 'full_name', 'bio',
+            'persona', 'alumni_intent', 'major', 'graduation_year',
+            'school_name', 'school_code', 'industry', 'linkedin_url',
+            'expertise_areas', 'mentorship_topics', 'ways_to_help',
+            'can_provide_referrals', 'is_founding_member', 'membership_tier',
+            'created_date',
+        ];
 
-        return Response.json(userData);
+        const safeProfile = Object.fromEntries(
+            Object.entries(userToDisplay).filter(([key]) => SAFE_PUBLIC_FIELDS.includes(key))
+        );
+
+        // Augment with normalized/computed fields
+        safeProfile.company = userToDisplay.company || userToDisplay.current_company || null;
+        safeProfile.job_title = userToDisplay.job_title || userToDisplay.current_position || null;
+        safeProfile.expertise_areas = safeProfile.expertise_areas || [];
+        safeProfile.mentorship_topics = safeProfile.mentorship_topics || [];
+        safeProfile.ways_to_help = safeProfile.ways_to_help || [];
+        safeProfile.can_provide_referrals = safeProfile.can_provide_referrals || false;
+        safeProfile.is_founding_member = safeProfile.is_founding_member || false;
+        safeProfile.karma_level = karmaLevel;
+        safeProfile.karma_points = karmaPoints;
+        safeProfile.students_helped = activityStats.students_helped;
+        safeProfile.answers_given = activityStats.answers_given;
+        safeProfile.intros_made = activityStats.intros_made;
+
+        return Response.json({ success: true, data: safeProfile });
 
     } catch (error) {
         console.error('Error in getPublicUserInfo function:', error);
