@@ -93,15 +93,16 @@ Deno.serve(async (req) => {
     
     console.log(`[searchGatorStudents] Found ${results.length} matches for "${searchTerm}"`);
     
-    // Return only safe fields
+    // Strip PII — never return email, full_name, phone, etc.
     const safeResults = results.map(u => ({
       id: u.id,
-      email: u.email,
-      full_name: u.full_name,
-      first_name: u.first_name,
-      last_name: u.last_name,
+      first_name: u.first_name || (u.full_name || '').split(' ')[0] || '',
+      last_name_initial: (u.last_name || (u.full_name || '').split(' ').slice(1).join(' '))?.[0] || '',
       persona: u.persona,
-      roles: u.roles
+      roles: u.roles,
+      school_name: u.school_name || u.school || u.university || '',
+      graduation_year: u.graduation_year || u.grad_year || '',
+      major: u.major || '',
     }));
     
     return Response.json({
