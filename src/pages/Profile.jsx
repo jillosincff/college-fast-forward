@@ -136,7 +136,7 @@ export default function Profile() {
     <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', flexDirection: 'column' }}>
       <DashboardNav user={currentUser} currentPage="Profile" />
 
-      <main style={{ flex: 1, maxWidth: 860, margin: '0 auto', width: '100%', padding: '32px 24px 60px' }}>
+      <main style={{ flex: 1, maxWidth: 860, margin: '0 auto', width: '100%', padding: '32px 20px 60px' }}>
         <ProfileCard user={profileUser} isMyProfile={isMyProfile} />
 
         {showNotifSettings && (
