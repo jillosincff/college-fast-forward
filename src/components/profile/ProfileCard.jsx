@@ -165,6 +165,7 @@ export default function ProfileCard({ user, isMyProfile }) {
           width: 72, height: 72, borderRadius: '50%', background: '#0d1117',
           border: '3px solid #ffffff', display: 'inline-flex',
           alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 1,
+          marginLeft: -28,
         }}>
           {user.profile_image_url ? (
             <img src={user.profile_image_url} alt={displayName}
