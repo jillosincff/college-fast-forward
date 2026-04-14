@@ -255,7 +255,11 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={() => navigate('GetStarted')} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto' }}>Sign In</button>
-            <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', minHeight: 'auto' }}>Get Started</button>
+            <button onClick={() => {
+              trackEvent('cta_getstarted_nav_clicked');
+              localStorage.removeItem('pending_intent');
+              base44.auth.redirectToLogin(window.location.origin + '/#GatorWelcome');
+            }} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', minHeight: 'auto' }}>Get Started</button>
           </div>
         </nav>
 
