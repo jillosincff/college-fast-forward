@@ -56,9 +56,12 @@ export default function ParentWelcome() {
           fontSize: 16, color: 'rgba(255,255,255,0.75)',
           lineHeight: 1.8, margin: '0 0 28px',
         }}>
-          A community of parents who are now able to directly
-          help their own kids — and each other's kids —
-          land real opportunities.
+          You're now part of the{' '}
+          <strong style={{ color: '#E85D20' }}>
+            {user?.school_name || 'College Fast Forward'}
+          </strong>{' '}
+          network — a community of parents who are able to directly
+          help their own kids — and each other's kids — land real opportunities.
         </p>
 
         <div style={{
