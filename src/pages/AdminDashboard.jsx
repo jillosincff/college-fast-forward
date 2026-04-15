@@ -719,6 +719,13 @@ const AdminDashboard = () => {
               <Trophy className="w-4 h-4 mr-1" />
               Top Students
             </TabsTrigger>
+            <TabsTrigger 
+              value="schools" 
+              className="text-sm sm:text-base px-3 py-2 data-[state=active]:bg-cyan-600 data-[state=active]:text-white whitespace-nowrap flex-shrink-0"
+            >
+              <Users className="w-4 h-4 mr-1" />
+              Schools
+            </TabsTrigger>
           </TabsList>
 
             {/* User Growth Tab */}
@@ -1154,6 +1161,11 @@ const AdminDashboard = () => {
             <TabsContent value="top-students" className="space-y-6">
               <TopStudentsSection />
             </TabsContent>
+
+            {/* Schools Tab */}
+            <TabsContent value="schools" className="space-y-6">
+              <SchoolBreakdownSection />
+            </TabsContent>
           </Tabs>
       </div>
     </div>
@@ -1194,5 +1206,61 @@ const PersonaAuditSection = React.lazy(() => import('@/components/admin/PersonaA
 const OpportunitiesManagement = React.lazy(() => import('@/components/admin/OpportunitiesManagementTab'));
 const EngagementAnalytics = React.lazy(() => import('@/components/admin/EngagementAnalyticsTab'));
 const TopStudentsSection = React.lazy(() => import('@/components/admin/TopStudentsTab'));
+
+const SchoolBreakdownSection = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    base44.functions.invoke('getSchoolBreakdown', {})
+      .then(res => setData(res.data))
+      .catch(err => console.error('Failed to load school breakdown:', err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">User Breakdown by School</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="text-center py-8"><div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div></div>
+        ) : !data?.data?.length ? (
+          <p className="text-slate-600">No data available</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-2 px-3 font-semibold">School</th>
+                  <th className="text-right py-2 px-3 font-semibold">Total</th>
+                  <th className="text-right py-2 px-3 font-semibold">Gator</th>
+                  <th className="text-right py-2 px-3 font-semibold">Parent</th>
+                  <th className="text-right py-2 px-3 font-semibold">Alumni</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.data.map((school, idx) => (
+                  <tr key={idx} className="border-b hover:bg-slate-50">
+                    <td className="py-3 px-3 font-medium text-slate-900">{school.school}</td>
+                    <td className="py-3 px-3 text-right font-bold text-slate-900">{school.count}</td>
+                    <td className="py-3 px-3 text-right text-slate-600">{school.personas.gator + school.personas.student}</td>
+                    <td className="py-3 px-3 text-right text-slate-600">{school.personas.parent}</td>
+                    <td className="py-3 px-3 text-right text-slate-600">{school.personas.alumni}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-4 text-sm text-slate-500">
+              <p>Total: <strong>{data.total}</strong> users across <strong>{data.schoolCount}</strong> schools</p>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 export default AdminDashboard;
