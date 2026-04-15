@@ -72,28 +72,31 @@ Deno.serve(async (req) => {
     console.log('=======================');
 
     const directoryUsers = [];
+    
+    // DEBUG: Track filtering
+    let filtered = { rejected: 0, noPersona: 0, wrongSchool: 0, hidden: 0, noName: 0, testAccount: 0, noMinData: 0 };
 
     for (const u of (allUsers || [])) {
       const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
       const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
       const isStudent = u.persona === 'gator' || u.persona === 'student' || (Array.isArray(u.roles) && (u.roles.includes('gator') || u.roles.includes('student')));
-      if (!isParent && !isAlumni && !isStudent) continue;
+      if (!isParent && !isAlumni && !isStudent) { filtered.noPersona++; continue; }
 
       // School isolation: only show users from the same school (admins see all)
       if (!isAdmin) {
         const uSchool = u.school_name || u.school || u.university || u.school_code || '';
-        if (!uSchool || uSchool.toLowerCase() !== schoolCode.toLowerCase()) continue;
+        if (!uSchool || uSchool.toLowerCase() !== schoolCode.toLowerCase()) { filtered.wrongSchool++; continue; }
       }
 
       // Respect visibility setting — hidden profiles are excluded (except the viewer's own)
-      if (u.visible_in_directory === false && u.id !== user.id) continue;
+      if (u.visible_in_directory === false && u.id !== user.id) { filtered.hidden++; continue; }
 
       const hasName = !!(u.full_name || u.first_name);
-      if (!hasName) continue;
+      if (!hasName) { filtered.noName++; continue; }
 
-      if (isTestAccount(u)) continue;
+      if (isTestAccount(u)) { filtered.testAccount++; continue; }
 
-      if (!hasMinimumData(u)) continue;
+      if (!hasMinimumData(u)) { filtered.noMinData++; continue; }
 
       const company = getCompany(u);
       const industry = getIndustry(u);
@@ -151,6 +154,7 @@ Deno.serve(async (req) => {
     }
 
     console.log(`Directory: returning ${directoryUsers.length} members for school: ${schoolCode || 'ALL (admin)'}`);
+    console.log('Filter breakdown:', filtered);
 
     return Response.json({
       success: true,
