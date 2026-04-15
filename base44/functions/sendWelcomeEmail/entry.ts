@@ -109,24 +109,25 @@ Deno.serve(async (req) => {
 
     if (isAlumniHelper) {
       const networkName = escapeHtml(schoolName || 'the network');
-      subject = `You're now live in the ${schoolName || 'CFF'} network`;
+      subject = `Welcome to the ${schoolName || 'CFF'} alumni mentorship network`;
       html = emailWrapper(`
         ${darkHero(
-          '✅ YOU\'RE IN THE NETWORK',
-          `You're live, ${escapeHtml(firstName)}.`,
-          `Students from ${networkName} can now find you and reach out directly.`
+          '🎯 WELCOME TO THE NETWORK',
+          `Thank you, ${escapeHtml(firstName)}.`,
+          `You just joined a community of alumni committed to opening doors for the next generation.`
         )}
         ${bodySection(`
-          ${bodyText(`Your profile is active in the ${networkName} alumni directory. Any student from your school can now see your background and send you a message.`)}
-          ${bodyText(`Every alumni who shows up makes the network stronger for every student behind them.`)}
+          ${bodyText(`One conversation can change a career. That's why we built this network — to connect students with alumni like you who are willing to give back.`)}
+          ${bodyText(`You're now visible to every student from ${networkName} looking for guidance, introductions, or industry insights.`)}
           ${featureList([
-            '👋 Students can message you directly for advice or intros',
-            '🔗 Make introductions to people in your network',
-            '💬 Answer questions about your field or company',
-            '🎯 Help a student land their first real opportunity',
+            '💬 Students can ask you for career advice',
+            '🤝 Make warm introductions to your network',
+            '📊 Share your experience in your field',
+            '🚀 Help a student land their breakthrough opportunity',
           ])}
+          ${bodyText(`<strong>What happens next?</strong> When a student reaches out, we'll send you a notification. You decide who to help and how — no pressure, full control.`)}
           ${ctaButton('View My Profile', 'https://collegefastforward.com/#Profile')}
-          ${bodyText(`Questions? Just reply to this email — we read every message.`)}
+          ${bodyText(`Questions? Reply to this email — we're here to help you help others.`)}
         `)}
       `);
     } else {
