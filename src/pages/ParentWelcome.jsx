@@ -75,9 +75,12 @@ export default function ParentWelcome() {
             color: '#fff', lineHeight: 1.7,
             margin: 0, fontStyle: 'italic',
           }}>
-            You're part of the first network where your lifetime
-            of connections is combined with AI to create warm
-            introductions and actual momentum for students.
+            <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, margin: '0 0 12px' }}>
+              Every parent in this network made the same choice you just made. To show up. To open their contacts. To say — I'll help.
+            </p>
+            <p style={{ fontWeight: 600, color: '#fff', margin: 0 }}>
+              That's what makes this work.
+            </p>
           </p>
         </div>
 
