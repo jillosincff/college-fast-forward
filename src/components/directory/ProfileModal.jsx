@@ -323,7 +323,7 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
 
                 <div style={{ marginBottom: 20 }}>
                   <InfoRow icon={Briefcase} label="Role / Company" value={companyDisplay} />
-                  <InfoRow icon={GraduationCap} label="Education" value={schoolDisplay} />
+                  <InfoRow icon={GraduationCap} label="Network" value={schoolDisplay} />
                   <InfoRow icon={MapPin} label="Location" value={locationDisplay} />
                   <InfoRow icon={Linkedin} label="LinkedIn" value={profileUser.linkedin_url} link={true} />
                   {profileUser.industry && (
