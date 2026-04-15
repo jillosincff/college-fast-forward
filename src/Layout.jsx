@@ -878,6 +878,7 @@ function AppContent() {
     resolvedPage !== 'LandingPage' &&
     resolvedPage !== 'AdminSetup' &&
     resolvedPage !== 'AlumniAllSet' &&
+    resolvedPage !== 'Profile' &&
     !onboardingPages.includes(resolvedPage) &&
     !newUserFlowPages.includes(resolvedPage) &&
     !hasOwnNav;
