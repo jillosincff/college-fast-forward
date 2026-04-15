@@ -40,14 +40,23 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Execute backfill
+    // Execute backfill one at a time with delay to avoid rate limit
     let updated = 0;
     for (const u of ufUsers) {
-      await base44.asServiceRole.entities.User.update(u.id, {
-        school_code: 'ufl',
-        school_name: 'University of Florida',
-      });
-      updated++;
+      try {
+        await base44.asServiceRole.entities.User.update(u.id, {
+          school_code: 'ufl',
+          school_name: 'University of Florida',
+        });
+        updated++;
+        if (updated % 5 === 0) {
+          console.log(`Progress: ${updated}/${ufUsers.length}`);
+          // Small delay every 5 updates
+          await new Promise(r => setTimeout(r, 200));
+        }
+      } catch (e) {
+        console.error(`Failed to update ${u.email}:`, e.message);
+      }
     }
 
     console.log(`✓ Backfilled ${updated} users`);
