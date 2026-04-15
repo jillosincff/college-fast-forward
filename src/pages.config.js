@@ -48,6 +48,8 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AIAdvisor from './pages/AIAdvisor';
+import AlumniOnboarding from './pages/AlumniOnboarding';
+import AlumniAllSet from './pages/AlumniAllSet';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEmail from './pages/AdminEmail';
 import AdminReferrals from './pages/AdminReferrals';
@@ -101,6 +103,8 @@ import __Layout from './Layout.jsx';
 
 export const PAGES = {
     "AIAdvisor": AIAdvisor,
+    "AlumniOnboarding": AlumniOnboarding,
+    "AlumniAllSet": AlumniAllSet,
     "AdminDashboard": AdminDashboard,
     "AdminEmail": AdminEmail,
     "AdminReferrals": AdminReferrals,

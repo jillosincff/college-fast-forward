@@ -10,6 +10,8 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
+import AlumniOnboarding from '@/pages/AlumniOnboarding';
+import AlumniAllSet from '@/pages/AlumniAllSet';
 import Directory from '@/pages/Directory';
 import FastIQAssessment from '@/pages/FastIQAssessment';
 import StudentOnboarding from '@/pages/StudentOnboarding';
@@ -74,6 +76,8 @@ const AuthenticatedApp = () => {
           <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
+          <Route path="/AlumniOnboarding" element={<AlumniOnboarding />} />
+          <Route path="/AlumniAllSet" element={<LayoutWrapper currentPageName="AlumniAllSet"><AlumniAllSet /></LayoutWrapper>} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />

@@ -167,6 +167,11 @@ export default function AlumniOnboarding() {
   };
 
   const goToDashboard = () => {
+    // Helper alumni (came from GatorWelcome helper path) → AlumniAllSet confirmation
+    if (formData.intent === 'giving_help' || formData.intent === 'help_students') {
+      navigate('AlumniAllSet');
+      return;
+    }
     if (isRecentGrad) {
       navigate('RecentGradDashboard');
     } else {
