@@ -3,7 +3,7 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { base44 } from '@/api/base44Client';
 import { logAnalyticsEvent } from '@/functions/logAnalyticsEvent';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
 export default function TrialBanner({ user }) {
   const [daysLeft, setDaysLeft] = useState(null);
@@ -64,7 +64,7 @@ export default function TrialBanner({ user }) {
         ⚡ FastIQ Trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
         {foundingActive && (
           <span style={{ fontWeight: 400, opacity: 0.9 }}>
-            {' '}| Lock in $14.50/mo before April 15
+            {' '}| Lock in $14.50/mo before April 30
           </span>
         )}
       </p>
