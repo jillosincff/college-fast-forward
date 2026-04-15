@@ -77,7 +77,7 @@ function getDashboardForUser(user) {
 
   // Alumni helpers (intent-based or default alumni) go to ParentHome
   if (persona === 'alumni' || user.roles?.includes('alumni')) {
-    if (user.alumni_intent === 'seeking_help') return 'FreeTierDashboard';
+    if (user.alumni_intent === 'seeking_help' || user.alumni_seniority === 'recent_grad') return 'FreeTierDashboard';
     return 'ParentHome';
   }
 
