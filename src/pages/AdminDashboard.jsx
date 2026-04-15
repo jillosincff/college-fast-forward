@@ -127,12 +127,14 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (user?.roles?.includes('admin')) {
-      loadAnalytics(false); // Auto-load once on mount, not a manual refresh
-      // Auto-refresh every 15 minutes
-      const interval = setInterval(() => loadAnalytics(false), 15 * 60 * 1000); 
+      // Don't auto-load on mount—user must click "Refresh Data"
+      // Auto-refresh every 15 minutes (if loaded once)
+      const interval = setInterval(() => {
+        if (analytics) loadAnalytics(false);
+      }, 15 * 60 * 1000); 
       return () => clearInterval(interval);
     }
-  }, [user]);
+  }, [user, analytics]);
 
   const testDirectoryFunction = async () => {
     setLoadingDirectory(true);
