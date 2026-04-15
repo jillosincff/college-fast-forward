@@ -186,6 +186,8 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
     if (!user?.email) { setUnreadCount(0); return; }
 
     let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 2;
     const loadUnreadCount = async () => {
       if (!user?.email || hasError) { if (isMounted) setUnreadCount(0); return; }
       try {
@@ -196,6 +198,13 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
           messages = await Message.filter({ recipient_email: user.email, is_read: false }, undefined, 5, { signal: controller.signal });
         } catch (fetchError) {
           messages = [];
+          const isRateLimit = fetchError?.response?.status === 429;
+          if (isRateLimit && retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(loadUnreadCount, 2000 * retryCount);
+            clearTimeout(timeoutId);
+            return;
+          }
           if (isMounted) { setHasError(true); setUnreadCount(0); }
           clearTimeout(timeoutId);
           return;
@@ -209,11 +218,13 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
       }
     };
 
-    const initialLoadTimeout = setTimeout(() => { if (isMounted && user?.email) loadUnreadCount(); }, 1000);
+    const initialLoadTimeout = setTimeout(() => { if (isMounted && user?.email) loadUnreadCount(); }, 1500);
     const interval = setInterval(() => {
-      if (!hasError && user?.email && !['LandingPage','AdminSetup','Privacy','Terms','CookiePolicy','InviteRequired','RequestInvite','Pricing','PublicProfile','AdminDashboard','TestingDashboard'].includes(currentPage))
+      if (!hasError && user?.email && !['LandingPage','AdminSetup','Privacy','Terms','CookiePolicy','InviteRequired','RequestInvite','Pricing','PublicProfile','AdminDashboard','TestingDashboard'].includes(currentPage)) {
+        retryCount = 0;
         loadUnreadCount();
-    }, 300000);
+      }
+    }, 600000);
     return () => { isMounted = false; clearTimeout(initialLoadTimeout); clearInterval(interval); };
   }, [user?.email, hasError, currentPage]);
 
@@ -231,10 +242,21 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
         if (user.persona === 'parent' || user.roles?.includes('parent')) {
           pifNotifications = await PayItForwardNotification.filter({ recipient_parent_email: user.email, is_read: false }, '-created_date', 3);
         }
-      } catch { messages = []; pifNotifications = []; } finally { clearTimeout(timeoutId); }
+      } catch (err) {
+        messages = [];
+        pifNotifications = [];
+        if (err?.response?.status === 429) {
+          console.warn('Rate limited loading recent messages');
+        }
+      } finally { clearTimeout(timeoutId); }
       setRecentMessages(messages || []);
       setPayItForwardNotifications(pifNotifications || []);
-    } catch { setRecentMessages([]); setPayItForwardNotifications([]); } finally { setLoadingMessages(false); }
+    } catch (err) {
+      setRecentMessages([]);
+      setPayItForwardNotifications([]);
+    } finally {
+      setLoadingMessages(false);
+    }
   };
 
   const handleBellClick = () => {
