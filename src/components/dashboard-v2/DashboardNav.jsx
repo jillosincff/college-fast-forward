@@ -48,8 +48,9 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
 
   if (isParentOrAlumni) {
     // Render a simplified nav for parents/alumni helpers
+    const dashboardPage = isAlumniHelper ? 'AlumniHome' : 'ParentHome';
     const helperNavLinks = [
-      { label: 'Dashboard', page: 'ParentHome' },
+      { label: 'Dashboard', page: dashboardPage },
       { label: 'Directory', page: 'Directory' },
       { label: 'Messages', page: 'MyMessages' },
     ];
@@ -63,7 +64,7 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
         borderBottom: '0.5px solid rgba(255,255,255,0.06)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          <button onClick={() => navigate('ParentHome')} style={{
+          <button onClick={() => navigate(dashboardPage)} style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
             fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#f4f0e8',
             letterSpacing: '-0.01em', display: 'flex', alignItems: 'center',

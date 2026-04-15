@@ -104,9 +104,12 @@ export default function GatorWelcome() {
     // Already onboarded — send to the right dashboard
     if (user.onboarding_completed === true) {
       localStorage.removeItem('pending_intent');
-      const dest = (user.alumni_intent === 'help_students' || user.persona === 'parent')
-        ? 'ParentHome'
-        : 'FreeTierDashboard';
+      let dest = 'FreeTierDashboard';
+      if (user.persona === 'parent') {
+        dest = 'ParentHome';
+      } else if (user.persona === 'alumni' && user.alumni_intent === 'giving_help') {
+        dest = 'AlumniHome';
+      }
       navigate(dest);
       return;
     }

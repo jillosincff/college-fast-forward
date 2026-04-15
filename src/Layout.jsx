@@ -60,12 +60,10 @@ const APP_VERSION = 'v1.3.0';
  * SINGLE SOURCE OF TRUTH for dashboard routing.
  * Rules:
  *   admin → AdminDashboard
- *   gator/student + FastIQ active → FastIQ
- *   gator/student + no FastIQ → FreeTierDashboard
  *   parent → ParentHome
- *   alumni + graduation_year >= 2025 (recent_grad) → RecentGradDashboard
- *   alumni + graduation_year <= 2024 (established) → AlumniDashboard
- *   alumni fallback → AlumniDashboard
+ *   alumni + alumni_intent === 'giving_help' → AlumniHome
+ *   alumni + alumni_intent === 'seeking_help' → FreeTierDashboard
+ *   gator/student → FreeTierDashboard
  */
 function getDashboardForUser(user) {
   if (!user) return 'LandingPage';
@@ -75,10 +73,9 @@ function getDashboardForUser(user) {
 
   if (persona === 'parent' || user.roles?.includes('parent')) return 'ParentHome';
 
-  // Alumni helpers (intent-based or default alumni) go to ParentHome
   if (persona === 'alumni' || user.roles?.includes('alumni')) {
-    if (user.alumni_intent === 'seeking_help' || user.alumni_seniority === 'recent_grad') return 'FreeTierDashboard';
-    return 'ParentHome';
+    if (user.alumni_intent === 'giving_help') return 'AlumniHome';
+    return 'FreeTierDashboard';
   }
 
   // Students/Gators — use FreeTierDashboard
@@ -777,7 +774,7 @@ function AppContent() {
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard', 'AlumniHome'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
@@ -867,12 +864,15 @@ function AppContent() {
   // Pages where specific personas render their own nav bar — hide global header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard', 'FastIQDashboard'];
   const parentOwnNavPages = ['Profile', 'ParentHome', 'ParentProfileEdit', 'Directory'];
+  const alumniOwnNavPages = ['Profile', 'AlumniHome', 'Directory'];
   const isStudentUser = user?.persona === 'gator' || user?.persona === 'student' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isHelperUser = user?.persona === 'parent' || user?.roles?.includes('parent') || user?.alumni_intent === 'help_students';
+  const isAlumniHelper = user?.persona === 'alumni' && user?.alumni_intent === 'giving_help';
   const hasOwnNav =
     resolvedPage === 'FreeTierDashboard' ||
     (isStudentUser && studentOwnNavPages.includes(resolvedPage)) ||
-    (isHelperUser && parentOwnNavPages.includes(resolvedPage));
+    (isAlumniHelper && alumniOwnNavPages.includes(resolvedPage)) ||
+    (isHelperUser && !isAlumniHelper && parentOwnNavPages.includes(resolvedPage));
 
   const showHeader = user &&
     resolvedPage !== 'LandingPage' &&

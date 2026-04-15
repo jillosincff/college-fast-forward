@@ -12,6 +12,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
 import AlumniOnboarding from '@/pages/AlumniOnboarding';
 import AlumniAllSet from '@/pages/AlumniAllSet';
+import AlumniHome from '@/pages/AlumniHome';
 import Directory from '@/pages/Directory';
 import FastIQAssessment from '@/pages/FastIQAssessment';
 import StudentOnboarding from '@/pages/StudentOnboarding';
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
           <Route path="/AlumniOnboarding" element={<AlumniOnboarding />} />
           <Route path="AlumniAllSet" element={<AlumniAllSet />} />
+          <Route path="/AlumniHome" element={<LayoutWrapper currentPageName="AlumniHome"><AlumniHome /></LayoutWrapper>} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
