@@ -78,7 +78,7 @@ const AuthenticatedApp = () => {
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
           <Route path="/AlumniOnboarding" element={<AlumniOnboarding />} />
-          <Route path="/AlumniAllSet" element={<LayoutWrapper currentPageName="AlumniAllSet"><AlumniAllSet /></LayoutWrapper>} />
+          <Route path="/AlumniAllSet" element={<AlumniAllSet />} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
