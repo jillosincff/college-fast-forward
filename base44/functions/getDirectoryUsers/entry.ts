@@ -84,8 +84,16 @@ Deno.serve(async (req) => {
 
       // School isolation: only show users from the same school (admins see all)
       if (!isAdmin) {
-        const uSchool = u.school_name || u.school || u.university || u.school_code || '';
-        if (!uSchool || uSchool.toLowerCase() !== schoolCode.toLowerCase()) { filtered.wrongSchool++; continue; }
+        const userSchoolCode = u.school_code || '';
+        const userSchoolName = u.school_name || u.school || u.university || '';
+        const viewerSchoolCode = schoolCode || '';
+        const viewerSchoolName = user.school_name || user.school || user.university || '';
+
+        // Match by school_code, OR fall back to school_name if code is missing
+        const codeMatch = userSchoolCode.toLowerCase() === viewerSchoolCode.toLowerCase();
+        const nameMatch = userSchoolName.toLowerCase() === viewerSchoolName.toLowerCase() && userSchoolName;
+
+        if (!codeMatch && !nameMatch) { filtered.wrongSchool++; continue; }
       }
 
       // Respect visibility setting — hidden profiles are excluded (except the viewer's own)
