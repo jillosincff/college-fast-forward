@@ -15,10 +15,11 @@ const NAV_LINKS = [
 ];
 
 export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
-  // Only render for student/gator users — parents and alumni use the layout header
   const isStudent = user?.persona === 'gator' || user?.email?.toLowerCase().endsWith('@ufl.edu');
-  const isParentOrAlumni = user?.persona === 'parent' || user?.persona === 'alumni' ||
-    user?.roles?.includes('parent') || user?.roles?.includes('alumni');
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+  const isAlumniHelper = (user?.persona === 'alumni' || user?.roles?.includes('alumni')) &&
+    user?.alumni_intent !== 'seeking_help';
+  const isParentOrAlumni = isParent || isAlumniHelper;
 
   const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -45,8 +46,89 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
-  if (isParentOrAlumni && !isStudent) return null;
+  if (isParentOrAlumni) {
+    // Render a simplified nav for parents/alumni helpers
+    const helperNavLinks = [
+      { label: 'Dashboard', page: 'ParentHome' },
+      { label: 'Directory', page: 'Directory' },
+      { label: 'Messages', page: 'MyMessages' },
+    ];
 
+    return (
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: '#0d1117', height: 56,
+        padding: '0 32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+          <button onClick={() => navigate('ParentHome')} style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#f4f0e8',
+            letterSpacing: '-0.01em', display: 'flex', alignItems: 'center',
+            minHeight: 'auto', width: 'auto',
+          }}>
+            <span style={{ color: '#f4f0e8' }}>C</span>
+            <span style={{ color: '#E85D20' }}>FF</span>
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            {helperNavLinks.map(l => {
+              const active = l.page === currentPage || l.label === currentPage;
+              return (
+                <button key={l.page} onClick={() => navigate(l.page)} style={{
+                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  fontFamily: dmSans, fontSize: 13, fontWeight: active ? 500 : 400,
+                  color: active ? '#f4f0e8' : 'rgba(244,240,232,0.45)',
+                  minHeight: 'auto', width: 'auto', transition: 'color 0.15s',
+                }}
+                  onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'rgba(244,240,232,0.8)'; }}
+                  onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'rgba(244,240,232,0.45)'; }}
+                >
+                  {l.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div ref={menuRef} style={{ position: 'relative' }}>
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{
+            width: 32, height: 32, borderRadius: '50%', background: '#E85D20',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#fff',
+            border: 'none', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
+          }}>
+            {initials}
+          </button>
+          {menuOpen && (
+            <div style={{
+              position: 'absolute', top: 40, right: 0, zIndex: 200,
+              background: '#fff', borderRadius: 12, padding: '6px 0',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.15)', border: '1px solid rgba(0,0,0,0.08)',
+              minWidth: 180,
+            }}>
+              <div style={{ padding: '10px 16px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#1a1a1a', display: 'block' }}>{fullName}</span>
+                <span style={{ fontFamily: dmSans, fontSize: 11, color: '#aaa' }}>{user?.email}</span>
+              </div>
+              <button onClick={() => { navigate('Profile'); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: '#1a1a1a', minHeight: 'auto', textAlign: 'left' }}>
+                <User size={15} style={{ color: '#888' }} /> Profile
+              </button>
+              <button onClick={() => { navigate('MyMessages'); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: '#1a1a1a', minHeight: 'auto', textAlign: 'left' }}>
+                <MessageSquare size={15} style={{ color: '#888' }} /> Messages
+              </button>
+              <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+              <button onClick={() => { logout(); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: '#e53935', minHeight: 'auto', textAlign: 'left' }}>
+                <LogOut size={15} /> Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </nav>
+    );
+  }
+
+  // ── Student nav ──
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
