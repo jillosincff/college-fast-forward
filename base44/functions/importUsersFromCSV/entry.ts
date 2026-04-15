@@ -1,205 +1,153 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// Known valid school codes
-const VALID_SCHOOL_CODES = new Set([
-  'ufl', 'udel', 'umd', 'umich', 'utexas', 'ucf', 'tulane', 'fau',
-  'psu', 'osu', 'usc', 'uga', 'fsu', 'jmu', 'uky', 'miami', 'jmu',
-  'cornell', 'yale', 'columbia', 'nyu', 'bu', 'neu', 'bc', 'tufts',
-]);
+const SKIP_EMAIL = 'josinoff@gmail.com';
 
-// Subscription tier mapping
-function mapSubscriptionTier(tier) {
-  if (!tier) return { membership_tier: 'free', subscription_status: 'inactive' };
-  switch (tier.toLowerCase().trim()) {
-    case 'trial_expired':
-      return { membership_tier: 'free', subscription_status: 'inactive' };
-    case 'trial':
-      return { membership_tier: 'free', trial_status: 'active' };
-    case 'free_forever':
-      return { membership_tier: 'free_forever', subscription_status: 'active' };
-    case 'linked_free_access':
-      return { membership_tier: 'linked_free_access' }; // leave as-is
-    case 'linked_trial_access':
-      return { membership_tier: 'linked_trial_access' }; // leave as-is
-    default:
-      return { membership_tier: tier };
-  }
+function parseBoolean(val) {
+  if (!val) return false;
+  return val.toString().trim().toLowerCase() === 'yes' || val === true;
 }
 
-// Parse simple CSV (handles quoted fields with commas/newlines)
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let field = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const next = text[i + 1];
-
-    if (inQuotes) {
-      if (ch === '"' && next === '"') { field += '"'; i++; }
-      else if (ch === '"') { inQuotes = false; }
-      else { field += ch; }
-    } else {
-      if (ch === '"') { inQuotes = true; }
-      else if (ch === ',') { row.push(field.trim()); field = ''; }
-      else if (ch === '\n') {
-        row.push(field.trim());
-        rows.push(row);
-        row = [];
-        field = '';
-      } else if (ch === '\r') { /* skip */ }
-      else { field += ch; }
-    }
-  }
-  if (field || row.length) { row.push(field.trim()); rows.push(row); }
-  return rows;
+function parseArray(val) {
+  if (!val || !val.toString().trim()) return [];
+  return val.toString().split(',').map(s => s.trim()).filter(Boolean);
 }
 
 Deno.serve(async (req) => {
-  const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me();
-  if (!user || user.role !== 'admin') {
-    return Response.json({ error: 'Admin only' }, { status: 403 });
-  }
-
-  const body = await req.json().catch(() => ({}));
-  const { csv_url, dry_run = false, offset = 0, limit = 9999 } = body;
-
-  if (!csv_url) return Response.json({ error: 'csv_url required' }, { status: 400 });
-
-  // Fetch CSV
-  const csvRes = await fetch(csv_url);
-  if (!csvRes.ok) return Response.json({ error: `Failed to fetch CSV: ${csvRes.status}` }, { status: 500 });
-  const csvText = await csvRes.text();
-
-  const rows = parseCSV(csvText);
-  if (rows.length < 2) return Response.json({ error: 'CSV appears empty' }, { status: 400 });
-
-  const headers = rows[0].map(h => h.trim());
-  const col = (row, name) => {
-    const idx = headers.indexOf(name);
-    return idx >= 0 ? (row[idx] || '').trim() : '';
-  };
-
-  // Load all existing users for duplicate check (by email)
-  const existingUsers = await base44.asServiceRole.entities.User.filter({});
-  const existingEmails = new Set(existingUsers.map(u => u.email?.toLowerCase()));
-
-  const results = { imported: 0, skipped_no_persona: 0, skipped_no_school: 0, skipped_existing: 0, skipped_invalid_school: 0, errors: 0, offset, limit };
-  const duplicateLog = []; // { email, full_name, school, reason }
-
-  for (let i = 1 + offset; i < Math.min(rows.length, 1 + offset + limit); i++) {
-    const row = rows[i];
-    if (row.length < 2) continue;
-
-    const email = col(row, 'Email')?.toLowerCase();
-    if (!email) continue;
-
-    const fullName = col(row, 'Full Name');
-    const persona = col(row, 'Persona')?.toLowerCase();
-    const school = col(row, 'School')?.toLowerCase();
-
-    // Rule 1: Skip if no persona
-    if (!persona) {
-      results.skipped_no_persona++;
-      continue;
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+    if (user?.role !== 'admin' && !user?.roles?.includes('admin')) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Rule 2: Validate school_code
-    if (!school) {
-      results.skipped_no_school++;
-      duplicateLog.push({ email, full_name: fullName, school: school || '', reason: 'missing_school_code' });
-      continue;
-    }
-    if (!VALID_SCHOOL_CODES.has(school)) {
-      results.skipped_invalid_school++;
-      duplicateLog.push({ email, full_name: fullName, school, reason: `unrecognized_school_code: ${school}` });
-      continue;
+    const { rows, dryRun = true } = await req.json();
+
+    if (!rows || !Array.isArray(rows)) {
+      return Response.json({ error: 'rows array required' }, { status: 400 });
     }
 
-    // Rule 3/4: Skip if already exists
-    if (existingEmails.has(email)) {
-      results.skipped_existing++;
-      duplicateLog.push({ email, full_name: fullName, school, reason: 'already_exists_in_system' });
-      continue;
-    }
+    // Fetch all existing users to detect duplicates
+    const existingUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
+    const existingEmails = new Set((existingUsers || []).map(u => (u.email || '').toLowerCase().trim()));
 
-    // Map subscription tier
-    const tierRaw = col(row, 'Subscription Tier');
-    const tierFields = mapSubscriptionTier(tierRaw);
-
-    // Build user record
-    const isFoundingMember = col(row, 'Is Founding Member') === 'Yes';
-    const onboardingCompleted = col(row, 'Onboarding Completed') === 'Yes';
-    const pledgeTaken = col(row, 'Pledge Taken') === 'Yes';
-    const visibleInDirectory = col(row, 'Visible In Directory') !== 'No';
-
-    const userData = {
-      email,
-      full_name: fullName || email.split('@')[0], // fallback to email prefix if no name
-      school_name: school,
-      persona,
-      is_founding_member: isFoundingMember,
-      onboarding_completed: onboardingCompleted,
-      pledge_taken: pledgeTaken,
-      visible_in_directory: visibleInDirectory,
-      invite_code_used: col(row, 'Invite Code Used') || null,
-      graduation_year: col(row, 'Graduation Year') || null,
-      major: col(row, 'Major') || null,
-      minor: col(row, 'Minor') || null,
-      current_company: col(row, 'Current Company') || null,
-      current_position: col(row, 'Current Position') || null,
-      industry: col(row, 'Industry') || null,
-      industries: col(row, 'Industries') ? col(row, 'Industries').split(';').map(s => s.trim()).filter(Boolean) : [],
-      linkedin_url: col(row, 'LinkedIn URL') || null,
-      bio: col(row, 'Bio') || null,
-      expertise_areas: col(row, 'Expertise Areas') ? col(row, 'Expertise Areas').split(';').map(s => s.trim()).filter(Boolean) : [],
-      help_types: col(row, 'Help Types') ? col(row, 'Help Types').split(';').map(s => s.trim()).filter(Boolean) : [],
-      location_city: col(row, 'Location City') || null,
-      location_state: col(row, 'Location State') || null,
-      alumni_intent: col(row, 'Alumni Intent') || null,
-      alumni_goals: col(row, 'Alumni Goals') || null,
-      needs_help_with: col(row, 'Needs Help With') ? col(row, 'Needs Help With').split(';').map(s => s.trim()).filter(Boolean) : [],
-      ...tierFields,
-      _imported_from_csv: true,
+    const report = {
+      total: rows.length,
+      willCreate: 0,
+      skippedDuplicates: 0,
+      skippedFounder: 0,
+      missingSchool: 0,
+      appleRelay: 0,
+      blankNames: 0,
+      foundingMembers: 0,
+      errors: [],
     };
 
-    // Remove null/empty values to avoid polluting records
-    Object.keys(userData).forEach(k => { if (userData[k] === null || userData[k] === '') delete userData[k]; });
+    const toCreate = [];
 
-    if (dry_run) {
-      results.imported++;
-      continue;
+    for (const row of rows) {
+      const email = (row['Email'] || '').toString().trim().toLowerCase();
+      if (!email) { report.errors.push('Row missing email, skipped'); continue; }
+
+      // Skip founder
+      if (email === SKIP_EMAIL.toLowerCase()) { report.skippedFounder++; continue; }
+
+      // Skip duplicates
+      if (existingEmails.has(email)) { report.skippedDuplicates++; continue; }
+
+      const isFoundingMember = parseBoolean(row['Is Founding Member']);
+      const rawName = (row['Full Name'] || '').toString().trim();
+      const schoolCode = (row['School'] || '').toString().trim();
+      const isAppleRelay = email.includes('@privaterelay.appleid.com');
+      const isBlankName = !rawName;
+
+      if (isAppleRelay) report.appleRelay++;
+      if (isBlankName) report.blankNames++;
+      if (!schoolCode) report.missingSchool++;
+      if (isFoundingMember) report.foundingMembers++;
+
+      // Build user record
+      const membershipTier = isFoundingMember ? 'founding_gator' : (row['Subscription Tier'] || '').toString().trim() || undefined;
+
+      const record = {
+        email,
+        full_name: rawName || email,
+        school_code: schoolCode || undefined,
+        school: schoolCode || undefined,
+        school_name: schoolCode || undefined,
+        persona: (row['Persona'] || '').toString().trim() || undefined,
+        membership_tier: membershipTier,
+        is_founding_member: isFoundingMember,
+        founding_offer_redeemed: isFoundingMember ? true : undefined,
+        onboarding_completed: parseBoolean(row['Onboarding Completed']),
+        graduation_year: (row['Graduation Year'] || '').toString().trim() || undefined,
+        major: (row['Major'] || '').toString().trim() || undefined,
+        minor: (row['Minor'] || '').toString().trim() || undefined,
+        company: (row['Current Company'] || '').toString().trim() || undefined,
+        current_company: (row['Current Company'] || '').toString().trim() || undefined,
+        job_title: (row['Current Position'] || '').toString().trim() || undefined,
+        industry: (row['Industry'] || '').toString().trim() || undefined,
+        linkedin_url: (row['LinkedIn URL'] || '').toString().trim() || undefined,
+        bio: (row['Bio'] || '').toString().trim() || undefined,
+        expertise_areas: parseArray(row['Expertise Areas']),
+        ways_to_help: parseArray(row['Help Types']),
+        location_city: (row['Location City'] || '').toString().trim() || undefined,
+        location_state: (row['Location State'] || '').toString().trim() || undefined,
+        alumni_intent: (row['Alumni Intent'] || '').toString().trim() || undefined,
+        visible_in_directory: parseBoolean(row['Visible In Directory']),
+        needs_school_assignment: !schoolCode ? true : undefined,
+        // Never trigger emails
+        skip_welcome_email: true,
+      };
+
+      // Clean up undefined values
+      Object.keys(record).forEach(k => record[k] === undefined && delete record[k]);
+
+      toCreate.push(record);
+      report.willCreate++;
     }
 
-    try {
-      await base44.asServiceRole.entities.User.create(userData);
-      results.imported++;
-      existingEmails.add(email); // prevent same-batch dupes
-    } catch (e) {
-      results.errors++;
-      duplicateLog.push({ email, full_name: fullName, school, reason: `import_error: ${e.message}` });
+    if (dryRun) {
+      return Response.json({
+        dryRun: true,
+        report,
+        message: 'Dry run complete. Call again with dryRun: false to execute.',
+      });
     }
 
-    // Throttle to avoid rate limiting — 1 write per 250ms
-    await new Promise(r => setTimeout(r, 250));
+    // Execute import in batches of 50
+    const batchSize = 50;
+    let created = 0;
+    const importErrors = [];
+
+    for (let i = 0; i < toCreate.length; i += batchSize) {
+      const batch = toCreate.slice(i, i + batchSize);
+      try {
+        await base44.asServiceRole.entities.User.bulkCreate(batch);
+        created += batch.length;
+      } catch (err) {
+        importErrors.push(`Batch ${i}-${i + batchSize}: ${err.message}`);
+        // Try one-by-one as fallback
+        for (const rec of batch) {
+          try {
+            await base44.asServiceRole.entities.User.create(rec);
+            created++;
+          } catch (e2) {
+            importErrors.push(`Failed to create ${rec.email}: ${e2.message}`);
+          }
+        }
+      }
+    }
+
+    return Response.json({
+      dryRun: false,
+      report,
+      created,
+      importErrors,
+      message: `Import complete. ${created} users created.`,
+    });
+
+  } catch (error) {
+    console.error('importUsersFromCSV error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
   }
-
-  // Generate duplicate log CSV
-  const logCsvHeader = 'email,full_name,school,reason\n';
-  const logCsvRows = duplicateLog.map(d =>
-    `"${d.email}","${(d.full_name || '').replace(/"/g, '""')}","${d.school}","${d.reason}"`
-  ).join('\n');
-  const duplicateLogCsv = logCsvHeader + logCsvRows;
-
-  return Response.json({
-    success: true,
-    dry_run,
-    results,
-    total_csv_rows: rows.length - 1,
-    duplicate_log: duplicateLog,
-    duplicate_log_csv: duplicateLogCsv,
-  });
 });
