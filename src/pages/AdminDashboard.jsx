@@ -61,23 +61,28 @@ const AdminDashboard = () => {
     setError(null);
     
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      // Hard timeout: force completion after 20 seconds
+      const hardTimeoutId = setTimeout(() => {
+        setLoading(false);
+        setError('Analytics request timed out');
+      }, 20000);
 
       let response;
       try {
-        response = await base44.functions.invoke('getAdminAnalytics', {
-          _cacheBust: Date.now()
-        });
+        response = await Promise.race([
+          base44.functions.invoke('getAdminAnalytics', { _cacheBust: Date.now() }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Analytics request timed out')), 18000)
+          )
+        ]);
+        clearTimeout(hardTimeoutId);
       } catch (err) {
-        clearTimeout(timeoutId);
+        clearTimeout(hardTimeoutId);
         if (err.message?.includes('Network Error') || err.name === 'AbortError' || err.message?.includes('timeout')) {
           throw new Error('SILENT_NETWORK_ERROR');
         }
         throw err;
       }
-
-      clearTimeout(timeoutId);
       const data = response?.data;
       
       if (data?.error) {
