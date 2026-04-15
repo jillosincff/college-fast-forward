@@ -112,10 +112,12 @@ export default function ProfileModal({ isOpen, onClose, userId, onMessage }) {
       setBioExpanded(false);
       base44.functions.invoke('getPublicUserInfo', { userId })
         .then(response => {
-          // Platform V2: response is the function's return body directly: { success, data: profile }
-          const profile = response?.data;
+          // Platform V2: invoke wraps response, so function body is at response.data
+          // Function returns { success, data: profile }, so profile is at response.data.data
+          const body = response?.data || response;
+          const profile = body?.data || body;
           if (profile && profile.id) setProfileUser(profile);
-          else if (response?.error) setError(response.error);
+          else if (body?.error) setError(body.error);
           else setError('Could not load profile.');
         })
         .catch((err) => { console.error('ProfileModal error:', err); setError('Could not load profile.'); })
