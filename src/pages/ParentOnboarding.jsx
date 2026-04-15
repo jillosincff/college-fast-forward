@@ -117,11 +117,14 @@ export default function ParentOnboarding() {
 
   const completeOnboarding = async (didInvite) => {
     try {
+      // Derive the parent's school from whatever university was entered for their student
+      const parentSchool = formData.studentUniversity?.trim() || invitedStudents[0]?.university?.trim() || '';
       await base44.auth.updateMe({
         // Always re-assert persona so user is always in DB with correct role
         persona: 'parent',
         roles: ['parent'],
         onboarding_completed: true,
+        ...(parentSchool ? { school: parentSchool, school_name: parentSchool } : {}),
         onboarding_completed_at: new Date().toISOString(),
         onboarding_flow_type: 'parent_v3',
         pledge_taken: true,
