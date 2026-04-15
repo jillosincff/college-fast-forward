@@ -502,7 +502,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 
 const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'AlumniAllSet', 'ParentOnboarding', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
-const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
+const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'AlumniAllSet', 'ProfileEdit', 'ParentOnboarding', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
 const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'PostRequest', 'PostOpportunity', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
 const authOnlyPages = ['CompanyProfile', 'PublicProfile', 'PreAuth', 'StudentInvitedOnboarding'];
@@ -752,7 +752,7 @@ function AppContent() {
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
