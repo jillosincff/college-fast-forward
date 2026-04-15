@@ -30,6 +30,7 @@ import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
 import PostJoinUpsell from '@/pages/PostJoinUpsell';
+import ProfileEdit from '@/pages/ProfileEdit';
 
 import ResetPassword from '@/pages/ResetPassword';
 import Logout from '@/pages/Logout';
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
           <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
 
+          <Route path="/ProfileEdit" element={<LayoutWrapper currentPageName="ProfileEdit"><ProfileEdit /></LayoutWrapper>} />
           <Route path="/ResetPassword" element={<ResetPassword />} />
           <Route path="/Logout" element={<Logout />} />
 
