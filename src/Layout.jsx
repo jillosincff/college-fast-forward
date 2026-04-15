@@ -777,7 +777,7 @@ function AppContent() {
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
