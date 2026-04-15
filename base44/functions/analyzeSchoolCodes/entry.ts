@@ -10,58 +10,55 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    // Get all users
-    const users = await base44.asServiceRole.entities.User.list();
+    // Use a timeout wrapper
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    // Fix 1: Anyone with school_name 'University of Florida' but no school_code
-    const ufByName = users.filter(u => 
-      u.school_name?.toLowerCase().includes('university of florida') && 
-      !u.school_code
-    );
+    try {
+      // Get all users with pagination
+      const users = await base44.asServiceRole.entities.User.list();
 
-    // Fix 2: Anyone with school_code 'ufl' but no school_name
-    const ufByCode = users.filter(u => 
-      u.school_code === 'ufl' && !u.school_name
-    );
+      clearTimeout(timeoutId);
 
-    // Fix 3: The unknown users with UF signals
-    const ufUnknown = users.filter(u =>
-      !u.school_code && !u.school_name && (
-        u.email?.toLowerCase().includes('@ufl.edu') ||
-        u.invite_code_used?.toUpperCase?.().includes('UF') ||
-        u.invite_code_used?.toUpperCase?.().includes('GATOR')
-      )
-    );
+      // Fix 1: Anyone with school_name 'University of Florida' but no school_code
+      const ufByName = (users || []).filter(u => 
+        u.school_name?.toLowerCase().includes('university of florida') && 
+        !u.school_code
+      );
 
-    // Total unknown with no UF signal
-    const unknownNoSignal = users.filter(u => 
-      !u.school_code && !u.school_name && 
-      !u.email?.includes('@ufl.edu') && 
-      !u.invite_code_used?.toUpperCase?.().includes('UF') &&
-      !u.invite_code_used?.toUpperCase?.().includes('GATOR')
-    );
+      // Fix 2: Anyone with school_code 'ufl' but no school_name
+      const ufByCode = (users || []).filter(u => 
+        u.school_code === 'ufl' && !u.school_name
+      );
 
-    console.log('=== SCHOOL CODE ANALYSIS ===');
-    console.log('UF by name (need school_code):', ufByName.length);
-    console.log('UF by code (need school_name):', ufByCode.length);
-    console.log('UF unknown (need both):', ufUnknown.length);
-    console.log('Total unknown with no UF signal:', unknownNoSignal.length);
+      // Fix 3: The unknown users with UF signals
+      const ufUnknown = (users || []).filter(u =>
+        !u.school_code && !u.school_name && (
+          u.email?.toLowerCase?.().includes('@ufl.edu') ||
+          u.invite_code_used?.toUpperCase?.().includes('UF') ||
+          u.invite_code_used?.toUpperCase?.().includes('GATOR')
+        )
+      );
 
-    return Response.json({
-      success: true,
-      analysis: {
-        ufByNameCount: ufByName.length,
-        ufByCodeCount: ufByCode.length,
-        ufUnknownCount: ufUnknown.length,
-        unknownNoSignalCount: unknownNoSignal.length,
-        totalUsers: users.length,
-        totalWithSchoolCode: users.filter(u => u.school_code).length,
-        totalWithSchoolName: users.filter(u => u.school_name).length,
-        totalUnknown: users.filter(u => !u.school_code && !u.school_name).length,
+      console.log('Analysis complete');
+      return Response.json({
+        success: true,
+        analysis: {
+          ufByNameCount: ufByName.length,
+          ufByCodeCount: ufByCode.length,
+          ufUnknownCount: ufUnknown.length,
+          totalUsers: (users || []).length,
+        }
+      });
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        return Response.json({ error: 'Request timed out after 15s' }, { status: 408 });
       }
-    });
+      throw error;
+    }
   } catch (error) {
     console.error('Analysis error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: error.message || 'Analysis failed' }, { status: 500 });
   }
 });
