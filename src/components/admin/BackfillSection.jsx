@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Database, RefreshCw, Mail } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { base44 } from '@/api/base44Client';
 import { backfillStudentRequests } from '@/functions/backfillStudentRequests';
 import { cleanupDraftNames } from '@/functions/cleanupDraftNames';
 import { backfillPosterEmails } from '@/functions/backfillPosterEmails';
@@ -42,6 +43,40 @@ function CleanupDraftNames() {
               {result.fixed.map((item, idx) => <div key={idx} className="text-xs text-slate-600 py-1 border-b last:border-0">✅ {item.originalName} → {item.newName}</div>)}
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BackfillSchoolCodes() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleBackfill = async () => {
+    if (!confirm('Backfill school_code=ufl for all UF users? This may take a few minutes.')) return;
+    setLoading(true); setResult(null);
+    try {
+      const response = await base44.functions.invoke('backfillSchoolCodes', { dryRun: false });
+      if (response.data?.success !== false) {
+        setResult({ updated: response.data?.updated || 0, total: response.data?.count || 0 });
+        toast({ title: "✅ Backfill Complete!", description: `Updated ${response.data?.updated || 0} UF users` });
+      } else throw new Error(response.data?.error || 'Backfill failed');
+    } catch (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="border-t pt-6 mt-6">
+      <h4 className="font-semibold text-slate-900 mb-2">🐊 Backfill School Codes</h4>
+      <p className="text-sm text-slate-600 mb-4">Populate school_code=ufl for University of Florida users. This enables proper directory isolation.</p>
+      <Button onClick={handleBackfill} disabled={loading} variant="outline" className="w-full border-orange-300 bg-orange-50 hover:bg-orange-100">
+        {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Running...</> : <><Database className="w-4 h-4 mr-2" />Backfill School Codes</>}
+      </Button>
+      {result && (
+        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-sm text-green-700"><strong>{result.updated}</strong> users updated with school_code=ufl</p>
         </div>
       )}
     </div>
@@ -139,6 +174,7 @@ export default function BackfillSection() {
             </div>
           </div>
         )}
+        <BackfillSchoolCodes />
         <CleanupDraftNames />
         <BackfillPosterEmails />
       </CardContent>
