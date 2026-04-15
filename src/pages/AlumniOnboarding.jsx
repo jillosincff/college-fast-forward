@@ -87,16 +87,20 @@ export default function AlumniOnboarding() {
         directory_consent_given: true,
       });
 
-      // Non-blocking side effects
-      base44.functions.invoke('sendWelcomeEmail', {
-        userId: user?.id,
-        userEmail: user?.email,
-        userName: user?.full_name,
-        firstName: user?.full_name?.split(' ')[0] || '',
-        persona: 'alumni',
-        alumniIntent: user?.alumni_intent || 'giving_help',
-        schoolName: school.trim(),
-      }).catch((err) => console.error('sendWelcomeEmail failed:', err));
+      // Send welcome email
+      try {
+        await base44.functions.invoke('sendWelcomeEmail', {
+          userId: user?.id,
+          userEmail: user?.email,
+          userName: user?.full_name,
+          firstName: user?.full_name?.split(' ')[0] || '',
+          persona: 'alumni',
+          alumniIntent: user?.alumni_intent || 'giving_help',
+          schoolName: school.trim(),
+        });
+      } catch (err) {
+        console.error('sendWelcomeEmail error:', err);
+      }
 
       if (refreshUser) {
         try { await refreshUser(); } catch (e) { /* non-blocking */ }
