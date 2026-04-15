@@ -855,6 +855,7 @@ function AppContent() {
   const showHeader = user &&
     resolvedPage !== 'LandingPage' &&
     resolvedPage !== 'AdminSetup' &&
+    resolvedPage !== 'AlumniAllSet' &&
     !onboardingPages.includes(resolvedPage) &&
     !newUserFlowPages.includes(resolvedPage) &&
     !hasOwnNav;
