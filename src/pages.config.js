@@ -48,7 +48,7 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AIAdvisor from './pages/AIAdvisor';
-import AlumniOnboarding from './pages/AlumniOnboarding';
+import AlumniOnboarding from './pages/AlumniOnboarding.jsx';
 import AlumniAllSet from './pages/AlumniAllSet';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEmail from './pages/AdminEmail';
