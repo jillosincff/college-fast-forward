@@ -500,7 +500,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
   );
 }
 
-const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
+const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'AlumniAllSet', 'ParentOnboarding', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
 const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'ParentOnboarding', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
 const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'PostRequest', 'PostOpportunity', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
@@ -571,6 +571,8 @@ const getPageComponent = (pageName) => {
     case 'FreeTierDashboard': return FreeTierDashboard;
     case 'FastIQDashboard': return FastIQDashboard;
     case 'ParentProfileEdit': return ParentProfileEdit;
+    case 'AlumniAllSet': return React.lazy(() => import('./pages/AlumniAllSet'));
+    case 'ProfileEdit': return React.lazy(() => import('./pages/ProfileEdit'));
     case 'OutreachDrafts': return React.lazy(() => import('./pages/OutreachDrafts'));
     case 'Logout': return React.lazy(() => import('./pages/Logout'));
     case 'PostJoinUpsell': return React.lazy(() => import('./pages/PostJoinUpsell'));
