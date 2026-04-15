@@ -21,8 +21,11 @@ function getIndustry(u) {
 function hasMinimumData(u) {
   const name = u.full_name || u.first_name;
   const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+  const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
   // Parents only need a name + completed onboarding (company/industry optional)
   if (isParent) return !!(name && u.onboarding_completed);
+  // Alumni helpers need name + onboarding complete (company/industry optional) — we want to surface them even if sparse
+  if (isAlumni) return !!(name && u.onboarding_completed);
   return !!(name && (getCompany(u) || getIndustry(u) || u.onboarding_completed));
 }
 
@@ -52,7 +55,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
+    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
 
     const directoryUsers = [];
 
