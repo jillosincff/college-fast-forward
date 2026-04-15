@@ -20,6 +20,9 @@ function getIndustry(u) {
 
 function hasMinimumData(u) {
   const name = u.full_name || u.first_name;
+  const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+  // Parents only need a name + completed onboarding (company/industry optional)
+  if (isParent) return !!(name && u.onboarding_completed);
   return !!(name && (getCompany(u) || getIndustry(u) || u.onboarding_completed));
 }
 
@@ -33,6 +36,7 @@ Deno.serve(async (req) => {
     }
 
     const isAdmin = user.roles?.includes('admin') || user.role === 'admin';
+    const isParentUser = user.persona === 'parent' || (Array.isArray(user.roles) && user.roles.includes('parent'));
 
     // School isolation — derive from session, never trust client
     const schoolCode = user.school_name || user.school || user.university || user.school_code || '';
@@ -40,8 +44,10 @@ Deno.serve(async (req) => {
       return Response.json({
         success: false,
         error: 'incomplete_profile',
-        message: 'Please complete your profile to see your network.',
-        cta: 'CompleteProfile',
+        message: isParentUser
+          ? "Please add your student's school to your profile to see your network."
+          : 'Please complete your profile to see your network.',
+        cta: isParentUser ? 'ParentProfileEdit' : 'CompleteProfile',
         data: [],
       });
     }
@@ -61,6 +67,9 @@ Deno.serve(async (req) => {
         const uSchool = u.school_name || u.school || u.university || u.school_code || '';
         if (!uSchool || uSchool.toLowerCase() !== schoolCode.toLowerCase()) continue;
       }
+
+      // Respect visibility setting — hidden profiles are excluded (except the viewer's own)
+      if (u.visible_in_directory === false && u.id !== user.id) continue;
 
       const hasName = !!(u.full_name || u.first_name);
       if (!hasName) continue;

@@ -56,7 +56,7 @@ export default function Directory() {
       const response = await base44.functions.invoke('getDirectoryUsers', {});
       const result = response?.data || response;
       if (result?.error === 'incomplete_profile') {
-        setIncompleteProfile(true);
+        setIncompleteProfile({ cta: result.cta || 'ParentProfileEdit', message: result.message });
         setLoading(false);
         return;
       }
@@ -127,8 +127,7 @@ export default function Directory() {
   const filteredUsers = useMemo(() => {
     let users = [...allUsers];
 
-    // Filter out hidden profiles (unless viewing own profile)
-    users = users.filter(u => u.visible_in_directory !== false || u.id === user?.id);
+    // visible_in_directory filtering is now done server-side; no client filter needed
 
     // School filter
     if (schoolFilter === 'my_school' && userSchool) {
@@ -206,9 +205,9 @@ export default function Directory() {
             Almost there
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 15, color: isParent ? 'rgba(255,255,255,0.5)' : '#666', marginBottom: 24 }}>
-            Add your school to your profile to see your network.
+            {incompleteProfile.message || 'Add your school to your profile to see your network.'}
           </p>
-          <button onClick={() => navigate('ParentProfileEdit')} style={{
+          <button onClick={() => navigate(incompleteProfile.cta || 'ParentProfileEdit')} style={{
             background: '#E85D20', color: '#fff', border: 'none',
             borderRadius: 12, padding: '12px 28px',
             fontFamily: dmSans, fontSize: 14, fontWeight: 600,
