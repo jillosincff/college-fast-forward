@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
+import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -25,12 +26,38 @@ const HELP_TYPES = [
   { value: 'industry_insights', label: 'Industry insights' },
 ];
 
+const inputStyle = {
+  width: '100%',
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid #2A2A2A',
+  borderRadius: 10,
+  padding: '12px 14px',
+  fontFamily: dmSans,
+  fontSize: 14,
+  color: '#fff',
+  outline: 'none',
+  boxSizing: 'border-box',
+};
+
+const labelStyle = {
+  display: 'block',
+  fontFamily: dmSans,
+  fontSize: 11,
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.1em',
+  color: ORANGE,
+  marginBottom: 8,
+};
+
 export default function AlumniOnboarding() {
   const { user, refreshUser } = useAuth();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const [gradYear, setGradYear] = useState('');
+  const [school, setSchool] = useState('');
   const [industry, setIndustry] = useState('');
   const [helpTypes, setHelpTypes] = useState([]);
 
@@ -42,6 +69,7 @@ export default function AlumniOnboarding() {
 
   const handleFinish = async () => {
     setSaving(true);
+    setError(null);
     try {
       await base44.auth.updateMe({
         persona: 'alumni',
@@ -49,6 +77,9 @@ export default function AlumniOnboarding() {
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         graduation_year: gradYear,
+        school: school.trim(),
+        school_name: school.trim(),
+        university: school.trim(),
         industry,
         ways_to_help: helpTypes,
         help_types: helpTypes,
@@ -64,49 +95,31 @@ export default function AlumniOnboarding() {
         persona: 'alumni',
       }).catch(() => {});
 
-      if (refreshUser) await refreshUser();
+      if (refreshUser) {
+        try { await refreshUser(); } catch (e) { /* non-blocking */ }
+      }
+
       navigate('AlumniAllSet');
     } catch (err) {
       console.error('AlumniOnboarding save failed:', err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
-  const inputStyle = {
-    width: '100%',
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid #2A2A2A',
-    borderRadius: 10,
-    padding: '12px 14px',
-    fontFamily: dmSans,
-    fontSize: 14,
-    color: '#fff',
-    outline: 'none',
-    boxSizing: 'border-box',
-  };
+  const Dot = ({ active }) => (
+    <div style={{ width: 8, height: 8, borderRadius: '50%', background: active ? ORANGE : 'rgba(255,255,255,0.15)' }} />
+  );
 
-  const labelStyle = {
-    display: 'block',
-    fontFamily: dmSans,
-    fontSize: 11,
-    fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: '0.1em',
-    color: ORANGE,
-    marginBottom: 8,
-  };
-
-  // Step 1: Grad year + industry
+  // ── Step 1: School + Grad Year + Industry ──
   if (step === 1) {
-    const canContinue = gradYear.trim() && industry;
+    const canContinue = gradYear.trim().length === 4 && school.trim() && industry;
     return (
       <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
         <div style={{ maxWidth: 480, width: '100%' }}>
-          {/* Progress */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE }} />
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
+            <Dot active /> <Dot active={false} />
           </div>
 
           <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px' }}>
@@ -122,10 +135,15 @@ export default function AlumniOnboarding() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
+                <label style={labelStyle}>Your School / University</label>
+                <SchoolSearchInput value={school} onChange={setSchool} />
+              </div>
+
+              <div>
                 <label style={labelStyle}>Graduation Year</label>
                 <input
                   value={gradYear}
-                  onChange={e => setGradYear(e.target.value)}
+                  onChange={e => setGradYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
                   placeholder="e.g. 2018"
                   maxLength={4}
                   style={inputStyle}
@@ -167,15 +185,13 @@ export default function AlumniOnboarding() {
     );
   }
 
-  // Step 2: How can you help?
+  // ── Step 2: How can you help? ──
   const canFinish = helpTypes.length > 0;
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
       <div style={{ maxWidth: 480, width: '100%' }}>
-        {/* Progress */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE }} />
+          <Dot active={false} /> <Dot active />
         </div>
 
         <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px' }}>
@@ -195,6 +211,7 @@ export default function AlumniOnboarding() {
               return (
                 <button
                   key={value}
+                  type="button"
                   onClick={() => toggleHelp(value)}
                   style={{
                     width: '100%', padding: '12px 16px', borderRadius: 10,
@@ -212,8 +229,13 @@ export default function AlumniOnboarding() {
             })}
           </div>
 
+          {error && (
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#f87171', marginTop: 16 }}>{error}</p>
+          )}
+
           <div style={{ display: 'flex', gap: 10, marginTop: 32 }}>
             <button
+              type="button"
               onClick={() => setStep(1)}
               style={{
                 padding: '14px 20px', borderRadius: 100, border: '1px solid #2A2A2A',
@@ -224,6 +246,7 @@ export default function AlumniOnboarding() {
               ← Back
             </button>
             <button
+              type="button"
               onClick={handleFinish}
               disabled={!canFinish || saving}
               style={{
