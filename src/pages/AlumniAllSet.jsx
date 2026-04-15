@@ -62,13 +62,13 @@ export default function AlumniAllSet() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 48 }}>
           <button
-            onClick={() => navigate('Profile')}
+            onClick={() => navigate('AlumniHome')}
             style={{ width: '100%', padding: '14px 24px', borderRadius: 100, border: 'none', background: ORANGE, color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
           >
-            View My Profile →
+            Go to Dashboard →
           </button>
           <button
-            onClick={() => navigate('Profile')}
+            onClick={() => navigate('ProfileEdit')}
             style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontFamily: dmSans, fontSize: 13, cursor: 'pointer', minHeight: 'auto' }}
           >
             Edit my profile →
