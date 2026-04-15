@@ -56,6 +56,20 @@ Deno.serve(async (req) => {
     }
 
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
+    
+    // DEBUG: Log current user's school and first 10 returned users' schools
+    console.log('=== DIRECTORY DEBUG ===');
+    console.log('Current user school_code:', schoolCode);
+    console.log('First 10 users school values:');
+    (allUsers || []).slice(0, 10).forEach((u, i) => {
+      console.log(`  ${i}: id=${u.id}, school_code=${u.school_code}, school_name=${u.school_name}, school=${u.school}, university=${u.university}`);
+    });
+    
+    // Check total UF users in database
+    const ufUsers = await base44.asServiceRole.entities.User.filter({ school_code: 'ufl' });
+    console.log('Total UF users (school_code=ufl):', ufUsers.length);
+    console.log('Visible in directory:', ufUsers.filter(u => u.visible_in_directory !== false).length);
+    console.log('=======================');
 
     const directoryUsers = [];
 
