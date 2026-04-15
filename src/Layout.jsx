@@ -774,7 +774,7 @@ function AppContent() {
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard', 'AlumniHome'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
@@ -812,7 +812,7 @@ function AppContent() {
     const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
     const inNewUserFlow = pendingRole && hasNoRole;
 
-    const dashboardPages = ['Dashboard', 'ParentHome', 'RecentGradDashboard', 'AlumniDashboard', 'FreeTierDashboard', 'FastIQ'];
+    const dashboardPages = ['Dashboard', 'ParentHome', 'RecentGradDashboard', 'AlumniDashboard', 'FreeTierDashboard', 'FastIQ', 'AlumniHome'];
     if (user && dashboardPages.includes(currentPage)) {
       let destination = currentPage;
 
@@ -885,7 +885,7 @@ function AppContent() {
 
   const showBottomNav = user && bottomNavPages.includes(resolvedPage);
 
-  const pullRefreshPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'Directory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
+  const pullRefreshPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniHome', 'AlumniDashboard', 'RecentGradDashboard', 'Directory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
 
   return (
