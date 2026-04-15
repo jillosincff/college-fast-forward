@@ -92,7 +92,10 @@ export default function AlumniOnboarding() {
         userId: user?.id,
         userEmail: user?.email,
         userName: user?.full_name,
+        firstName: user?.full_name?.split(' ')[0] || '',
         persona: 'alumni',
+        alumniIntent: user?.alumni_intent || 'giving_help',
+        schoolName: school.trim(),
       }).catch(() => {});
 
       if (refreshUser) {

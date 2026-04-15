@@ -95,28 +95,63 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { userEmail, schoolName } = body;
+    const { userEmail, schoolName, persona, alumniIntent } = body;
     const firstName = body.firstName || body.userName || '';
 
-    const html = emailWrapper(`
-      ${darkHero(
-        '⚡ WELCOME TO CFF',
-        `You're in, ${escapeHtml(firstName)}.`,
-        `The career platform built for ${escapeHtml(schoolName)} students — powered by real connections and AI.`
-      )}
-      ${bodySection(`
-        ${bodyText(`One warm intro beats 100 cold applications. That's why College Fast Forward exists — to connect you with parents and alumni who <em>want</em> to help.`)}
-        ${bodyText(`Here's how to get started in the next 10 minutes:`)}
-        ${featureList([
-          '1️⃣ Set your career goals — takes 3 minutes',
-          '2️⃣ Upload your resume — FastIQ will score it instantly',
-          '3️⃣ Search our network — 455+ parents and professionals ready to help',
-          '4️⃣ Find alumni at your target companies',
-        ])}
-        ${ctaButton('Set My Career Goals', 'https://collegefastforward.com/#CareerGoals')}
-        ${bodyText(`Questions? Just reply to this email — we're real people.`)}
-      `)}
-    `);
+    // Routing logic: alumni helpers get a helper-style email, seekers get student email
+    const isAlumniHelper =
+      persona === 'alumni' && (alumniIntent === 'giving_help' || !alumniIntent);
+    const isSeeker =
+      persona === 'student' ||
+      (persona === 'alumni' && alumniIntent === 'seeking_help');
+
+    let subject, html;
+
+    if (isAlumniHelper) {
+      const networkName = escapeHtml(schoolName || 'the network');
+      subject = `You're now live in the ${schoolName || 'CFF'} network`;
+      html = emailWrapper(`
+        ${darkHero(
+          '✅ YOU\'RE IN THE NETWORK',
+          `You're live, ${escapeHtml(firstName)}.`,
+          `Students from ${networkName} can now find you and reach out directly.`
+        )}
+        ${bodySection(`
+          ${bodyText(`Your profile is active in the ${networkName} alumni directory. Any student from your school can now see your background and send you a message.`)}
+          ${bodyText(`Every alumni who shows up makes the network stronger for every student behind them.`)}
+          ${featureList([
+            '👋 Students can message you directly for advice or intros',
+            '🔗 Make introductions to people in your network',
+            '💬 Answer questions about your field or company',
+            '🎯 Help a student land their first real opportunity',
+          ])}
+          ${ctaButton('View My Profile', 'https://collegefastforward.com/#Profile')}
+          ${bodyText(`Questions? Just reply to this email — we read every message.`)}
+        `)}
+      `);
+    } else {
+      // Student / seeker email (unchanged)
+      subject = `You're in, ${firstName} — let's get you hired 🎯`;
+      html = emailWrapper(`
+        ${darkHero(
+          '⚡ WELCOME TO CFF',
+          `You're in, ${escapeHtml(firstName)}.`,
+          `The career platform built for ${escapeHtml(schoolName || 'you')} — powered by real connections and AI.`
+        )}
+        ${bodySection(`
+          ${bodyText(`One warm intro beats 100 cold applications. That's why College Fast Forward exists — to connect you with parents and alumni who <em>want</em> to help.`)}
+          ${bodyText(`Here's how to get started in the next 10 minutes:`)}
+          ${featureList([
+            '1️⃣ Set your career goals — takes 3 minutes',
+            '2️⃣ Upload your resume — FastIQ will score it instantly',
+            '3️⃣ Search our network — 455+ parents and professionals ready to help',
+            '4️⃣ Find alumni at your target companies',
+          ])}
+          ${ctaButton('Set My Career Goals', 'https://collegefastforward.com/#CareerGoals')}
+          ${bodyText(`Questions? Just reply to this email — we're real people.`)}
+        `)}
+      `);
+    }
 
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
@@ -127,7 +162,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         personalizations: [{ to: [{ email: userEmail }] }],
         from: { email: 'support@collegefastforward.com', name: 'College Fast Forward' },
-        subject: `You're in, ${firstName} — let's get you hired 🎯`,
+        subject,
         content: [{ type: 'text/html', value: html }],
       }),
     });
