@@ -2,20 +2,257 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
-import logger from '@/components/utils/logger';
-
-import DirectoryHero from '../components/directory/DirectoryHero';
-import ParentProfileNav from '@/components/profile/parent/ParentProfileNav';
-import DirectorySearchBar from '../components/directory/DirectorySearchBar';
-import DirectoryMemberCard from '../components/directory/DirectoryMemberCard';
-import DirectoryEmptyState from '../components/directory/DirectoryEmptyState';
-import DirectoryLoadMore from '../components/directory/DirectoryLoadMore';
+import DashboardNav from '@/components/dashboard-v2/DashboardNav';
 import MessageUserModal from '../components/directory/MessageUserModal';
 import ProfileModal from '../components/directory/ProfileModal';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
-const PAGE_SIZE = 24;
 const dmSans = "'DM Sans', system-ui, sans-serif";
+const playfair = "'Playfair Display', Georgia, serif";
+const PAGE_SIZE = 24;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(' ').filter(Boolean);
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function normalizeHelpTag(help) {
+  const h = (help || '').toLowerCase().replace(/_/g, ' ');
+  if (h.includes('introduction') || h.includes('intro') || h.includes('network')) return 'Introductions';
+  if (h.includes('resume') || h.includes('linkedin')) return 'Resume Review';
+  if (h.includes('career') || h.includes('advice') || h.includes('guidance')) return 'Career Advice';
+  if (h.includes('interview') || h.includes('mock')) return 'Interview Prep';
+  if (h.includes('job') && (h.includes('lead') || h.includes('referral'))) return 'Job Referrals';
+  if (h.includes('industry') || h.includes('insight')) return 'Industry Insights';
+  if (h.includes('mentor')) return 'Mentorship';
+  return null;
+}
+
+function getHelpTags(user) {
+  const raw = [...(user.ways_to_help || []), ...(user.help_types || [])];
+  const tags = [...new Set(raw.map(normalizeHelpTag).filter(Boolean))];
+  return tags.slice(0, 3);
+}
+
+const AVATAR_COLORS = [
+  ['#E85D20', '#c9471a'],
+  ['#0821A5', '#061680'],
+  ['#c9a84c', '#a8872e'],
+  ['#2d6a4f', '#1b4332'],
+  ['#6b21a8', '#4c1d95'],
+];
+
+function getAvatarColor(name) {
+  if (!name) return AVATAR_COLORS[0];
+  const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[idx];
+}
+
+// ── Member Card ───────────────────────────────────────────────────────────────
+
+function MemberCard({ user, onMessage, onViewProfile }) {
+  const [hovered, setHovered] = useState(false);
+  const initials = getInitials(user.full_name);
+  const [avatarFrom, avatarTo] = getAvatarColor(user.full_name);
+  const helpTags = getHelpTags(user);
+  const isParent = user.persona === 'parent';
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: hovered ? 'rgba(232,93,32,0.06)' : 'rgba(255,255,255,0.03)',
+        border: `1px solid ${hovered ? 'rgba(232,93,32,0.3)' : 'rgba(255,255,255,0.07)'}`,
+        borderRadius: 16,
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        transition: 'all 0.2s ease',
+        cursor: 'default',
+      }}
+    >
+      {/* Top row — avatar + name + badge */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        {/* Avatar */}
+        <div style={{
+          width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+          background: `linear-gradient(135deg, ${avatarFrom}, ${avatarTo})`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff',
+          boxShadow: `0 4px 12px ${avatarFrom}40`,
+        }}>
+          {initials}
+        </div>
+
+        {/* Name + school */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+            color: '#fff', margin: '0 0 4px',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>
+            {user.full_name || 'Anonymous'}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            {/* Persona badge */}
+            <span style={{
+              fontFamily: dmSans, fontSize: 10, fontWeight: 700,
+              color: isParent ? '#E85D20' : '#c9a84c',
+              background: isParent ? 'rgba(232,93,32,0.12)' : 'rgba(201,168,76,0.12)',
+              border: `1px solid ${isParent ? 'rgba(232,93,32,0.25)' : 'rgba(201,168,76,0.25)'}`,
+              borderRadius: 100, padding: '2px 8px',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>
+              {isParent ? 'Parent' : 'Alumni'}
+            </span>
+            {/* School */}
+            {user.school_name && (
+              <span style={{
+                fontFamily: dmSans, fontSize: 10,
+                color: 'rgba(255,255,255,0.3)',
+                letterSpacing: '0.04em',
+              }}>
+                {user.school_name}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Company + role */}
+      {(user.company || user.job_title) && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '8px 12px',
+          background: 'rgba(255,255,255,0.03)',
+          borderRadius: 8,
+        }}>
+          <span style={{ fontSize: 14 }}>💼</span>
+          <p style={{
+            fontFamily: dmSans, fontSize: 13,
+            color: 'rgba(255,255,255,0.65)', margin: 0,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>
+            {[user.job_title, user.company].filter(Boolean).join(' · ')}
+          </p>
+        </div>
+      )}
+
+      {/* Industry */}
+      {user.industry && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 12 }}>🏷</span>
+          <p style={{
+            fontFamily: dmSans, fontSize: 12, fontWeight: 500,
+            color: 'rgba(255,255,255,0.4)', margin: 0,
+            textTransform: 'capitalize',
+          }}>
+            {user.industry}
+          </p>
+        </div>
+      )}
+
+      {/* Help tags */}
+      {helpTags.length > 0 && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {helpTags.map((tag, i) => (
+            <span key={i} style={{
+              fontFamily: dmSans, fontSize: 10, fontWeight: 600,
+              color: 'rgba(255,255,255,0.5)',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 100, padding: '3px 10px',
+              letterSpacing: '0.04em',
+            }}>{tag}</span>
+          ))}
+        </div>
+      )}
+
+      {/* Founding badge */}
+      {user.is_founding_member && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 11 }}>🏅</span>
+          <span style={{
+            fontFamily: dmSans, fontSize: 10, fontWeight: 600,
+            color: '#c9a84c', letterSpacing: '0.06em',
+          }}>Founding Member</span>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+        <button
+          onClick={() => onMessage(user)}
+          style={{
+            flex: 1, fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+            color: '#fff', background: '#E85D20', border: 'none',
+            borderRadius: 8, padding: '9px 0', cursor: 'pointer',
+            minHeight: 'auto', transition: 'opacity 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+        >
+          Message
+        </button>
+        <button
+          onClick={() => onViewProfile(user.id)}
+          style={{
+            flex: 1, fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+            color: 'rgba(255,255,255,0.6)',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 8, padding: '9px 0', cursor: 'pointer',
+            minHeight: 'auto', transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+        >
+          View Profile
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Stat Pill ─────────────────────────────────────────────────────────────────
+
+function StatPill({ count, label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: 2, padding: '12px 24px',
+        background: active ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.05)',
+        border: `1px solid ${active ? 'rgba(232,93,32,0.4)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius: 100, cursor: 'pointer', minHeight: 'auto',
+        transition: 'all 0.2s ease',
+      }}
+    >
+      <span style={{
+        fontFamily: playfair, fontSize: 22, fontWeight: 700,
+        color: active ? '#E85D20' : '#fff', lineHeight: 1,
+      }}>
+        {count === null ? '—' : count.toLocaleString()}
+      </span>
+      <span style={{
+        fontFamily: dmSans, fontSize: 10, fontWeight: 600,
+        color: active ? '#E85D20' : 'rgba(255,255,255,0.4)',
+        letterSpacing: '0.1em', textTransform: 'uppercase',
+      }}>
+        {label}
+      </span>
+    </button>
+  );
+}
+
+// ── Main Directory ────────────────────────────────────────────────────────────
 
 export default function Directory() {
   const { user } = useAuth();
@@ -23,336 +260,437 @@ export default function Directory() {
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stats, setStats] = useState({ members: 0, parents: 0, alumni: 0, students: 0 });
+  const [incompleteProfile, setIncompleteProfile] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({ persona: 'all', industry: 'all', helpType: 'all' });
-  const [schoolFilter, setSchoolFilter] = useState('my_school');
-  const [viewMode, setViewMode] = useState('grid');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [industryFilter, setIndustryFilter] = useState('all');
+  const [helpFilter, setHelpFilter] = useState('all');
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-  const [incompleteProfile, setIncompleteProfile] = useState(false);
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [isMessageModalOpen, setMessageModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
 
+  const isFastIQ = !!(
+    user?.fastiq_setup_complete ||
+    user?.subscription_status === 'active' ||
+    user?.membership_tier === 'fastiq' ||
+    user?.trial_status === 'active' ||
+    user?.fastiq_trial_active === true ||
+    user?.is_founding_member === true
+  );
+
   // Load fonts
   useEffect(() => {
-    if (!document.getElementById('directory-fonts')) {
+    if (!document.getElementById('dir-fonts')) {
       const link = document.createElement('link');
-      link.id = 'directory-fonts';
+      link.id = 'dir-fonts';
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap';
       document.head.appendChild(link);
     }
   }, []);
 
-  const loadDirectoryData = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await base44.functions.invoke('getDirectoryUsers', {});
       const result = response?.data || response;
+
       if (result?.error === 'incomplete_profile') {
-        setIncompleteProfile({ cta: result.cta || 'ParentProfileEdit', message: result.message });
+        setIncompleteProfile(result);
         setLoading(false);
         return;
       }
       if (result?.error) throw new Error(result.error);
-      const rawUsers = result?.data || [];
 
-      const validUsers = rawUsers.map(u => {
-        let displayPersona = u.persona;
-        if (displayPersona === 'gator') displayPersona = 'student';
-        return {
-          ...u,
-          persona: displayPersona || 'alumni',
-        };
+      const raw = result?.data || [];
+
+      // Filter to helpers only — exclude students and seekers
+      const helpers = raw.filter(u => {
+        if (u.persona === 'student' || u.persona === 'gator') return false;
+        if (u.persona === 'alumni' && u.alumni_intent === 'seeking_help') return false;
+        return true;
       });
 
-      setAllUsers(validUsers);
-
-      const studentCount = validUsers.filter(u =>
-        u.persona === 'student' || u.persona === 'gator' ||
-        (u.roles && (u.roles.includes('student') || u.roles.includes('gator'))) ||
-        (u.email && u.email.toLowerCase().endsWith('@ufl.edu'))
-      ).length;
-      const alumniCount = validUsers.filter(u => u.persona === 'alumni' || (u.roles && u.roles.includes('alumni'))).length;
-      const parentCount = validUsers.filter(u => u.persona === 'parent' || (u.roles && u.roles.includes('parent'))).length;
-
-      setStats({ members: validUsers.length, students: studentCount, alumni: alumniCount, parents: parentCount });
-      logger.info(`[Directory] Loaded ${validUsers.length} users.`);
+      setAllUsers(helpers);
     } catch (err) {
-      console.error('[Directory] Failed to load users:', err);
-      setError(err.message || 'Please try again in a few minutes.');
+      console.error('[Directory] Error:', err);
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { loadDirectoryData(); }, [loadDirectoryData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
-  // Listen for pull-to-refresh
   useEffect(() => {
-    const handler = () => loadDirectoryData();
+    const handler = () => loadData();
     document.addEventListener('cff:pull-refresh', handler);
     return () => document.removeEventListener('cff:pull-refresh', handler);
-  }, [loadDirectoryData]);
+  }, [loadData]);
 
-  // Derive industries from data
+  // Stats
+  const stats = useMemo(() => ({
+    total: allUsers.length,
+    parents: allUsers.filter(u => u.persona === 'parent').length,
+    alumni: allUsers.filter(u => u.persona === 'alumni').length,
+  }), [allUsers]);
+
+  // Industries
   const industries = useMemo(() => {
-    const unique = [...new Set(allUsers.map(u => u.industry).filter(Boolean))];
-    return unique.sort();
+    return [...new Set(allUsers.map(u => u.industry).filter(Boolean))].sort();
   }, [allUsers]);
 
-  // Normalize help tag for matching
-  const normalizeHelpTag = (help) => {
-    const h = (help || '').toLowerCase().replace(/_/g, ' ');
-    if (h.includes('introduction') || h.includes('intro') || h.includes('networking')) return 'Intros';
-    if (h.includes('resume') || h.includes('linkedin')) return 'Resume Review';
-    if (h.includes('career') || h.includes('advice')) return 'Career Advice';
-    if (h.includes('interview') || h.includes('mock')) return 'Interview Prep';
-    if (h.includes('job') && (h.includes('lead') || h.includes('referral'))) return 'Job Referrals';
-    if (h.includes('industry') || h.includes('insight')) return 'Industry Insights';
-    return null;
-  };
+  const helpTypes = ['Introductions', 'Resume Review', 'Career Advice', 'Interview Prep', 'Job Referrals', 'Industry Insights', 'Mentorship'];
 
-  const userSchool = user?.school || user?.university || '';
-  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
-
-  // Filtered & sorted users
+  // Filtered users
   const filteredUsers = useMemo(() => {
     let users = [...allUsers];
 
-    // visible_in_directory filtering is now done server-side; no client filter needed
-
-    // School filter
-    if (schoolFilter === 'my_school' && userSchool) {
-      users = users.filter(u => {
-        const uSchool = u.school || u.university || '';
-        return uSchool.toLowerCase().trim() === userSchool.toLowerCase().trim();
-      });
+    if (roleFilter !== 'all') {
+      users = users.filter(u => u.persona === roleFilter);
     }
-
-    // Sort: premium/founding first, then parents, then rest
-    users.sort((a, b) => {
-      const aP = a.is_founding_member || a.subscription_status === 'active' || a.persona === 'parent';
-      const bP = b.is_founding_member || b.subscription_status === 'active' || b.persona === 'parent';
-      if (aP && !bP) return -1;
-      if (!aP && bP) return 1;
-      if (a.is_founding_member && !b.is_founding_member) return -1;
-      if (!a.is_founding_member && b.is_founding_member) return 1;
-      return 0;
-    });
-
-    // Search
-    if (searchTerm) {
+    if (industryFilter !== 'all') {
+      users = users.filter(u => u.industry === industryFilter);
+    }
+    if (helpFilter !== 'all') {
+      users = users.filter(u => getHelpTags(u).includes(helpFilter));
+    }
+    if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       users = users.filter(u =>
         u.full_name?.toLowerCase().includes(term) ||
         u.company?.toLowerCase().includes(term) ||
         u.job_title?.toLowerCase().includes(term) ||
         u.industry?.toLowerCase().includes(term) ||
-        u.major?.toLowerCase().includes(term) ||
-        u.expertise_areas?.some(e => e.toLowerCase().includes(term))
+        u.bio?.toLowerCase().includes(term)
       );
     }
 
-    // Role filter
-    if (filters.persona !== 'all') {
-      users = users.filter(u => {
-        if (filters.persona === 'student') return u.persona === 'student' || u.persona === 'gator';
-        return u.persona === filters.persona;
-      });
-    }
-
-    // Industry filter
-    if (filters.industry !== 'all') {
-      users = users.filter(u => u.industry === filters.industry);
-    }
-
-    // Help type filter
-    if (filters.helpType !== 'all') {
-      users = users.filter(u => {
-        const allHelps = [...(u.ways_to_help || []), ...(u.primary_goal || [])];
-        if (u.can_provide_referrals) allHelps.push('job_referral');
-        return allHelps.some(h => normalizeHelpTag(h) === filters.helpType);
-      });
-    }
+    users.sort((a, b) => {
+      if (a.is_founding_member && !b.is_founding_member) return -1;
+      if (!a.is_founding_member && b.is_founding_member) return 1;
+      const aScore = [a.company, a.job_title, a.bio, a.industry].filter(Boolean).length;
+      const bScore = [b.company, b.job_title, b.bio, b.industry].filter(Boolean).length;
+      return bScore - aScore;
+    });
 
     return users;
-  }, [allUsers, searchTerm, filters, schoolFilter, userSchool]);
+  }, [allUsers, roleFilter, industryFilter, helpFilter, searchTerm]);
 
-  // Reset visible count when filters change
-  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [searchTerm, filters, schoolFilter]);
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [searchTerm, roleFilter, industryFilter, helpFilter]);
 
   const visibleUsers = filteredUsers.slice(0, visibleCount);
 
   const handleMessage = (u) => { setSelectedUser(u); setMessageModalOpen(true); };
-  const handleViewProfile = (userId) => { setSelectedProfileId(userId); setProfileModalOpen(true); };
-  const resetFilters = () => { setSearchTerm(''); setFilters({ persona: 'all', industry: 'all', helpType: 'all' }); setSchoolFilter('my_school'); };
+  const handleViewProfile = (id) => { setSelectedProfileId(id); setProfileModalOpen(true); };
+  const clearFilters = () => { setSearchTerm(''); setRoleFilter('all'); setIndustryFilter('all'); setHelpFilter('all'); };
 
-  const playfair = "'Playfair Display', Georgia, serif";
-
+  // ── Incomplete profile state ──
   if (incompleteProfile) {
     return (
-      <div style={{ minHeight: '100vh', background: isParent ? '#0A0A0A' : '#f4f2ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', padding: 48 }}>
-          <p style={{ fontFamily: playfair, fontSize: 22, color: isParent ? '#fff' : '#1a1a1a', marginBottom: 12 }}>
-            Almost there
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 15, color: isParent ? 'rgba(255,255,255,0.5)' : '#666', marginBottom: 24 }}>
-            {incompleteProfile.message || 'Add your school to your profile to see your network.'}
-          </p>
-          <button onClick={() => navigate(incompleteProfile.cta || 'ParentProfileEdit')} style={{
-            background: '#E85D20', color: '#fff', border: 'none',
-            borderRadius: 12, padding: '12px 28px',
-            fontFamily: dmSans, fontSize: 14, fontWeight: 600,
-            cursor: 'pointer', minHeight: 'auto'
-          }}>
-            Complete My Profile →
-          </button>
+      <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', flexDirection: 'column' }}>
+        <DashboardNav user={user} currentPage="Directory" />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <div style={{ textAlign: 'center', maxWidth: 400 }}>
+            <p style={{ fontFamily: playfair, fontSize: 26, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
+              Almost there
+            </p>
+            <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', marginBottom: 28, lineHeight: 1.6 }}>
+              Add your school to your profile to see your network.
+            </p>
+            <button onClick={() => navigate('ProfileEdit')} style={{
+              background: '#E85D20', color: '#fff', border: 'none',
+              borderRadius: 12, padding: '14px 32px',
+              fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+              cursor: 'pointer', minHeight: 'auto',
+            }}>
+              Complete My Profile →
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  // ── Loading state ──
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{
-          width: 32, height: 32, border: '3px solid #E85D20',
-          borderTop: '3px solid transparent', borderRadius: '50%',
-          animation: 'dirSpin 0.8s linear infinite',
-        }} />
-        <style>{`@keyframes dirSpin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', flexDirection: 'column' }}>
+        <DashboardNav user={user} currentPage="Directory" />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{
+            width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)',
+            borderTop: '3px solid #E85D20', borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
       </div>
     );
   }
 
+  // ── Error state ──
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f4f2ee', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, padding: 24 }}>
-        <p style={{ fontFamily: dmSans, fontSize: 16, color: '#333', textAlign: 'center' }}>
-          Something went wrong loading the directory.
-        </p>
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: '#888', textAlign: 'center' }}>{error}</p>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button onClick={loadDirectoryData} style={{
-            fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff',
-            background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px 24px',
+      <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', flexDirection: 'column' }}>
+        <DashboardNav user={user} currentPage="Directory" />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, flexDirection: 'column', gap: 16 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>
+            Something went wrong loading the directory.
+          </p>
+          <button onClick={loadData} style={{
+            background: '#E85D20', color: '#fff', border: 'none',
+            borderRadius: 10, padding: '12px 28px',
+            fontFamily: dmSans, fontSize: 14, fontWeight: 600,
             cursor: 'pointer', minHeight: 'auto',
           }}>Try Again</button>
-          <button onClick={() => navigate('Dashboard')} style={{
-            fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#333',
-            background: '#fff', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 8,
-            padding: '10px 24px', cursor: 'pointer', minHeight: 'auto',
-          }}>Go to Dashboard</button>
         </div>
       </div>
     );
   }
 
+  // ── Main render ──
   return (
-    <div style={{ minHeight: '100vh', background: isParent ? '#0A0A0A' : '#f4f2ee', display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden' }}>
-      {isParent && <ParentProfileNav user={user} currentPage="Directory" />}
+    <div style={{ minHeight: '100vh', background: '#0d1117', display: 'flex', flexDirection: 'column' }}>
 
-      {/* Banner at top */}
-      {!isParent && (
-        <div style={{ background: '#f4f2ee', padding: '16px 24px 0', maxWidth: 900, margin: '0 auto', width: '100%' }}>
-          <FoundingMemberBanner
-            show={showBanner && !isFastIQ}
-            onUpgrade={() => navigate('FastIQDashboard')}
-            onDismiss={() => setShowBanner(false)}
-          />
+      {/* Background glow */}
+      <div style={{
+        position: 'fixed', inset: 0,
+        backgroundImage: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(232,93,32,0.07) 0%, transparent 60%)`,
+        pointerEvents: 'none', zIndex: 0,
+      }} />
+
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
+
+        <DashboardNav user={user} currentPage="Directory" />
+
+        {/* Founding banner */}
+        {!isFastIQ && showBanner && (
+          <div style={{ padding: '12px 24px 0', maxWidth: 960, margin: '0 auto', width: '100%' }}>
+            <FoundingMemberBanner
+              show={true}
+              onUpgrade={() => navigate('FastIQDashboard')}
+              onDismiss={() => setShowBanner(false)}
+            />
+          </div>
+        )}
+
+        {/* ── HERO ── */}
+        <div style={{
+          maxWidth: 960, margin: '0 auto', width: '100%',
+          padding: '48px 24px 32px', textAlign: 'center',
+        }}>
+          <p style={{
+            fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+            color: '#E85D20', letterSpacing: '0.14em',
+            textTransform: 'uppercase', margin: '0 0 16px',
+          }}>
+            Your Network
+          </p>
+          <h1 style={{
+            fontFamily: playfair,
+            fontSize: 'clamp(28px, 4vw, 48px)',
+            fontWeight: 700, color: '#fff',
+            lineHeight: 1.15, letterSpacing: '-0.02em',
+            margin: '0 0 12px',
+          }}>
+            Every door starts with a conversation.
+          </h1>
+          <p style={{
+            fontFamily: dmSans, fontSize: 16,
+            color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
+            margin: '0 0 32px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto',
+          }}>
+            Parents and alumni — here to open their networks for your student.
+          </p>
+
+          {/* Stat pills */}
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <StatPill count={stats.total} label="Total Helpers" active={roleFilter === 'all'} onClick={() => setRoleFilter('all')} />
+            <StatPill count={stats.parents} label="Parents" active={roleFilter === 'parent'} onClick={() => setRoleFilter('parent')} />
+            <StatPill count={stats.alumni} label="Alumni" active={roleFilter === 'alumni'} onClick={() => setRoleFilter('alumni')} />
+          </div>
         </div>
-      )}
 
-      {/* Hero — hidden for parents who have their own nav */}
-      {!isParent && <DirectoryHero stats={stats} loading={loading} />}
+        {/* ── SEARCH + FILTERS ── */}
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 10,
+          background: 'rgba(13,17,23,0.95)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          padding: '16px 24px',
+        }}>
+          <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
 
-
-      {/* Sticky search + filters */}
-      <DirectorySearchBar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        filters={filters}
-        onFilterChange={setFilters}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        industries={industries}
-        resultCount={filteredUsers.length}
-        visibleCount={Math.min(visibleCount, filteredUsers.length)}
-      />
-
-      {/* Cards */}
-      <div style={{ maxWidth: 900, margin: '0 auto', width: '100%', padding: '24px 24px 60px' }}>
-        {filteredUsers.length === 0 ? (
-          <DirectoryEmptyState onClearFilters={resetFilters} />
-        ) : viewMode === 'grid' ? (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 16,
-          }}
-            className="directory-grid"
-          >
-            {visibleUsers.map(u => (
-              <DirectoryMemberCard
-                key={u.id}
-                user={u}
-                onMessage={handleMessage}
-                onViewProfile={handleViewProfile}
-                viewMode="grid"
+            {/* Search */}
+            <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
+              <span style={{
+                position: 'absolute', left: 12, top: '50%',
+                transform: 'translateY(-50%)', fontSize: 14,
+                color: 'rgba(255,255,255,0.3)', pointerEvents: 'none',
+              }}>🔍</span>
+              <input
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Search by name, company, or industry..."
+                style={{
+                  width: '100%', fontFamily: dmSans, fontSize: 14,
+                  color: '#fff', background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 10, padding: '10px 12px 10px 36px',
+                  outline: 'none', boxSizing: 'border-box',
+                }}
               />
-            ))}
-          </div>
-        ) : (
-          <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}>
-            {visibleUsers.map(u => (
-              <DirectoryMemberCard
-                key={u.id}
-                user={u}
-                onMessage={handleMessage}
-                onViewProfile={handleViewProfile}
-                viewMode="list"
-              />
-            ))}
-          </div>
-        )}
+            </div>
 
-        {filteredUsers.length > 0 && (
-          <DirectoryLoadMore
-            visibleCount={visibleCount}
-            totalCount={filteredUsers.length}
-            onLoadMore={() => setVisibleCount(prev => prev + PAGE_SIZE)}
-          />
-        )}
+            {/* Industry filter */}
+            <select
+              value={industryFilter}
+              onChange={e => setIndustryFilter(e.target.value)}
+              style={{
+                fontFamily: dmSans, fontSize: 13,
+                color: industryFilter === 'all' ? 'rgba(255,255,255,0.5)' : '#fff',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 10, padding: '10px 14px',
+                outline: 'none', cursor: 'pointer',
+                flex: '0 1 160px',
+              }}
+            >
+              <option value="all">All Industries</option>
+              {industries.map(ind => (
+                <option key={ind} value={ind} style={{ background: '#1a1a2e' }}>
+                  {ind.charAt(0).toUpperCase() + ind.slice(1)}
+                </option>
+              ))}
+            </select>
+
+            {/* Help type filter */}
+            <select
+              value={helpFilter}
+              onChange={e => setHelpFilter(e.target.value)}
+              style={{
+                fontFamily: dmSans, fontSize: 13,
+                color: helpFilter === 'all' ? 'rgba(255,255,255,0.5)' : '#fff',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 10, padding: '10px 14px',
+                outline: 'none', cursor: 'pointer',
+                flex: '0 1 160px',
+              }}
+            >
+              <option value="all">All Help Types</option>
+              {helpTypes.map(h => (
+                <option key={h} value={h} style={{ background: '#1a1a2e' }}>{h}</option>
+              ))}
+            </select>
+
+            {/* Result count */}
+            <p style={{
+              fontFamily: dmSans, fontSize: 12,
+              color: 'rgba(255,255,255,0.3)', margin: 0,
+              whiteSpace: 'nowrap', flex: '0 0 auto',
+            }}>
+              {filteredUsers.length} {filteredUsers.length === 1 ? 'helper' : 'helpers'}
+            </p>
+
+            {/* Clear filters */}
+            {(searchTerm || roleFilter !== 'all' || industryFilter !== 'all' || helpFilter !== 'all') && (
+              <button
+                onClick={clearFilters}
+                style={{
+                  fontFamily: dmSans, fontSize: 12, fontWeight: 600,
+                  color: '#E85D20', background: 'none', border: 'none',
+                  cursor: 'pointer', minHeight: 'auto', padding: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Clear filters ×
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── CARDS ── */}
+        <div style={{ maxWidth: 960, margin: '0 auto', width: '100%', padding: '28px 24px 80px' }}>
+
+          {filteredUsers.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '64px 24px' }}>
+              <p style={{ fontFamily: playfair, fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
+                No helpers found
+              </p>
+              <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>
+                Try adjusting your filters or search terms.
+              </p>
+              <button
+                onClick={clearFilters}
+                style={{
+                  background: 'rgba(232,93,32,0.15)', color: '#E85D20',
+                  border: '1px solid rgba(232,93,32,0.3)',
+                  borderRadius: 10, padding: '12px 24px',
+                  fontFamily: dmSans, fontSize: 14, fontWeight: 600,
+                  cursor: 'pointer', minHeight: 'auto',
+                }}
+              >
+                Clear all filters
+              </button>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }} className="dir-grid">
+                {visibleUsers.map(u => (
+                  <MemberCard key={u.id} user={u} onMessage={handleMessage} onViewProfile={handleViewProfile} />
+                ))}
+              </div>
+
+              {visibleCount < filteredUsers.length && (
+                <div style={{ textAlign: 'center', marginTop: 40 }}>
+                  <button
+                    onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
+                    style={{
+                      fontFamily: dmSans, fontSize: 14, fontWeight: 600,
+                      color: '#fff', background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 10, padding: '12px 32px',
+                      cursor: 'pointer', minHeight: 'auto',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+                  >
+                    Load more · {filteredUsers.length - visibleCount} remaining
+                  </button>
+                </div>
+              )}
+
+              {visibleCount >= filteredUsers.length && filteredUsers.length > 0 && (
+                <p style={{
+                  textAlign: 'center', marginTop: 40,
+                  fontFamily: dmSans, fontSize: 13,
+                  color: 'rgba(255,255,255,0.2)', fontStyle: 'italic',
+                }}>
+                  You've seen everyone in your network.
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Footer handled by layout — no duplicate here */}
-
-      {/* Responsive grid styles */}
+      {/* Responsive grid */}
       <style>{`
-        .directory-grid {
-          grid-template-columns: repeat(3, 1fr) !important;
-        }
-        @media (max-width: 768px) {
-          .directory-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-        @media (max-width: 480px) {
-          .directory-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
+        .dir-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        @media (max-width: 768px) { .dir-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+        @media (max-width: 480px) { .dir-grid { grid-template-columns: 1fr !important; } }
+        select option { background: #1a1a2e; color: #fff; }
+        input::placeholder { color: rgba(255,255,255,0.3); }
+        input:focus { border-color: rgba(232,93,32,0.4) !important; }
       `}</style>
 
-      {/* Modals */}
       {selectedUser && (
         <MessageUserModal
           isOpen={isMessageModalOpen}
