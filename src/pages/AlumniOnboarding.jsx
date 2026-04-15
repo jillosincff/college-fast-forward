@@ -89,15 +89,13 @@ export default function AlumniOnboarding() {
 
       // Non-blocking side effects
       base44.functions.invoke('sendWelcomeEmail', {
-        userId: user?.id,
         userEmail: user?.email,
-        userName: user?.full_name,
         firstName: user?.full_name?.split(' ')[0] || '',
         persona: 'alumni',
         alumniIntent: user?.alumni_intent || 'giving_help',
         schoolName: school.trim(),
-      }).then(() => {
-        console.log('✓ Welcome email sent successfully');
+      }).then((res) => {
+        console.log('✓ Welcome email sent:', res);
       }).catch((err) => {
         console.error('✗ sendWelcomeEmail failed:', err?.response?.data || err.message || err);
       });
