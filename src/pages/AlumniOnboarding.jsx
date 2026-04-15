@@ -96,7 +96,7 @@ export default function AlumniOnboarding() {
         persona: 'alumni',
         alumniIntent: user?.alumni_intent || 'giving_help',
         schoolName: school.trim(),
-      }).catch(() => {});
+      }).catch((err) => console.error('sendWelcomeEmail failed:', err));
 
       if (refreshUser) {
         try { await refreshUser(); } catch (e) { /* non-blocking */ }
