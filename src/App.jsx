@@ -10,7 +10,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
-import AlumniOnboarding from '@/pages/AlumniOnboarding.jsx';
+import AlumniOnboarding from '@/pages/AlumniOnboarding';
 import AlumniAllSet from '@/pages/AlumniAllSet';
 import Directory from '@/pages/Directory';
 import FastIQAssessment from '@/pages/FastIQAssessment';

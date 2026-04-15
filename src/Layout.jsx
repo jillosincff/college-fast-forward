@@ -114,7 +114,7 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Profile = React.lazy(() => import('./pages/Profile'));
 // WelcomeRole removed — replaced by GatorWelcome
 const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
-const AlumniOnboarding = React.lazy(() => import('./pages/AlumniOnboarding.jsx'));
+const AlumniOnboarding = React.lazy(() => import('./pages/AlumniOnboarding'));
 const ParentOnboarding = React.lazy(() => import('./pages/ParentOnboarding'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
