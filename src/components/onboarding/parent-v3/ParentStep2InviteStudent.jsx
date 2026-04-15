@@ -91,12 +91,20 @@ export default function ParentStep2InviteStudent({
     setErrors(p => ({ ...p, studentUniversity: null }));
   };
 
+  const validateSchool = () => {
+    if (!universitySearch.trim()) {
+      setErrors(p => ({ ...p, studentUniversity: "Please enter your student's school first" }));
+      return false;
+    }
+    return true;
+  };
+
   const validate = () => {
     const e = {};
     if (!formData.studentFirstName?.trim()) e.studentFirstName = 'Student first name is required';
     if (!formData.studentEmail?.trim()) e.studentEmail = 'Student email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.studentEmail.trim())) e.studentEmail = 'Please enter a valid email';
-    if (!universitySearch.trim()) e.studentUniversity = 'University is required';
+    if (!universitySearch.trim()) e.studentUniversity = "Please enter your student's school";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -105,6 +113,12 @@ export default function ParentStep2InviteStudent({
     if (!validate()) return;
     if (!formData.studentUniversity) onUpdate({ studentUniversity: universitySearch.trim() });
     onInvite();
+  };
+
+  const handleSkip = () => {
+    if (!validateSchool()) return;
+    onUpdate({ studentUniversity: universitySearch.trim() });
+    onSkip();
   };
 
   // Determine view: confirmation (post-invite) vs form
@@ -221,7 +235,7 @@ export default function ParentStep2InviteStudent({
 
           {/* University */}
           <div style={{ marginBottom: 28, position: 'relative' }} ref={dropdownRef}>
-            <FieldLabel required>Where do they go to school?</FieldLabel>
+            <FieldLabel required>Where does your student go to school?</FieldLabel>
             <input
               className="po3-field"
               value={universitySearch}
@@ -239,7 +253,10 @@ export default function ParentStep2InviteStudent({
                 color: '#f4f0e8', boxSizing: 'border-box', transition: 'border-color 0.2s',
               }}
             />
-            {errors.studentUniversity && <HelperText error>{errors.studentUniversity}</HelperText>}
+            {errors.studentUniversity
+              ? <HelperText error>{errors.studentUniversity}</HelperText>
+              : <HelperText>Required — this connects you to the right school network.</HelperText>
+            }
 
             {showDropdown && (
               <div style={{
@@ -278,7 +295,7 @@ export default function ParentStep2InviteStudent({
           {/* Skip / back */}
           <button
             type="button"
-            onClick={totalInvited > 0 ? () => setShowInviteForm(false) : onSkip}
+            onClick={totalInvited > 0 ? () => setShowInviteForm(false) : handleSkip}
             style={{
               display: 'block', width: '100%', marginTop: 14, textAlign: 'center',
               background: 'none', border: 'none',
