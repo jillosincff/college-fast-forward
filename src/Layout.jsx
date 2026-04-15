@@ -75,10 +75,13 @@ function getDashboardForUser(user) {
 
   if (persona === 'parent' || user.roles?.includes('parent')) return 'ParentHome';
 
-  // Intent-based routing: helpers go to ParentHome, seekers go to FreeTierDashboard
-  if (user.alumni_intent === 'help_students') return 'ParentHome';
+  // Alumni helpers (intent-based or default alumni) go to ParentHome
+  if (persona === 'alumni' || user.roles?.includes('alumni')) {
+    if (user.alumni_intent === 'seeking_help') return 'FreeTierDashboard';
+    return 'ParentHome';
+  }
 
-  // Students/Gators/Alumni seeking — all use FreeTierDashboard
+  // Students/Gators — use FreeTierDashboard
   return 'FreeTierDashboard';
 }
 
