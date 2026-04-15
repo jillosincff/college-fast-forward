@@ -51,21 +51,23 @@ export default function ParentProfileEdit() {
 
   const handleSave = async () => {
     setSaving(true);
-    await base44.auth.updateMe({
-      full_name: form.fullName.trim(),
-      current_company: form.company.trim(),
-      company: form.company.trim(),
-      career_background: form.careerBackground.trim(),
-      industry: form.industry,
-      intro_willingness: form.introWillingness,
-      visible_in_directory: form.directoryVisible,
-    });
-    if (refreshUser) await refreshUser();
-    // Clear directory cache so updated profile appears immediately
-    try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => { setSaved(false); navigate('Profile'); }, 1200);
+    try {
+      await base44.auth.updateMe({
+        full_name: form.fullName.trim(),
+        current_company: form.company.trim(),
+        company: form.company.trim(),
+        career_background: form.careerBackground.trim(),
+        industry: form.industry,
+        intro_willingness: form.introWillingness,
+        visible_in_directory: form.directoryVisible,
+      });
+      if (refreshUser) refreshUser().catch(() => {});
+      try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
+      setSaved(true);
+      setTimeout(() => { setSaved(false); navigate('Profile'); }, 1200);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
