@@ -13,10 +13,20 @@ Deno.serve(async (req) => {
     // Get all users
     const allUsers = await base44.asServiceRole.entities.User.list();
 
+    const schoolDisplayNames = {
+      'ufl': 'University of Florida',
+      'fsu': 'Florida State University',
+      'usf': 'University of South Florida',
+      'ucf': 'University of Central Florida',
+      'um': 'University of Miami',
+      'fiu': 'Florida International University',
+    };
+
     // Group by school
     const schoolMap = {};
     (allUsers || []).forEach(u => {
-      const school = u.school_code || u.school_name || u.school || u.university || 'Unknown';
+      const rawSchool = u.school_code || u.school_name || u.school || u.university || 'Unknown';
+      const school = schoolDisplayNames[rawSchool] || rawSchool;
       if (!schoolMap[school]) {
         schoolMap[school] = { count: 0, personas: { gator: 0, student: 0, parent: 0, alumni: 0, unknown: 0 } };
       }

@@ -1217,55 +1217,105 @@ const SchoolBreakdownSection = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
     base44.functions.invoke('getSchoolBreakdown', {})
       .then(res => setData(res.data))
       .catch(err => console.error('Failed to load school breakdown:', err))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">User Breakdown by School</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="text-center py-8"><div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div></div>
-        ) : !data?.data?.length ? (
-          <p className="text-slate-600">No data available</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 px-3 font-semibold">School</th>
-                  <th className="text-right py-2 px-3 font-semibold">Total</th>
-                  <th className="text-right py-2 px-3 font-semibold">Gator</th>
-                  <th className="text-right py-2 px-3 font-semibold">Parent</th>
-                  <th className="text-right py-2 px-3 font-semibold">Alumni</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.data.map((school, idx) => (
-                  <tr key={idx} className="border-b hover:bg-slate-50">
-                    <td className="py-3 px-3 font-medium text-slate-900">{school.school}</td>
-                    <td className="py-3 px-3 text-right font-bold text-slate-900">{school.count}</td>
-                    <td className="py-3 px-3 text-right text-slate-600">{school.personas.gator + school.personas.student}</td>
-                    <td className="py-3 px-3 text-right text-slate-600">{school.personas.parent}</td>
-                    <td className="py-3 px-3 text-right text-slate-600">{school.personas.alumni}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="mt-4 text-sm text-slate-500">
-              <p>Total: <strong>{data.total}</strong> users across <strong>{data.schoolCount}</strong> schools</p>
-            </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-slate-900">User Breakdown by School</h2>
+        <Button onClick={load} disabled={loading} variant="outline" size="sm">
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />Refresh
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12"><div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div></div>
+      ) : !data?.data?.length ? (
+        <p className="text-slate-600">No data available</p>
+      ) : (
+        <>
+          {/* Summary cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="pt-4 pb-4 text-center">
+                <p className="text-3xl font-bold text-blue-700">{data.total}</p>
+                <p className="text-xs text-slate-600 mt-1">Total Users</p>
+              </CardContent>
+            </Card>
+            <Card className="border-slate-200 bg-slate-50">
+              <CardContent className="pt-4 pb-4 text-center">
+                <p className="text-3xl font-bold text-slate-700">{data.schoolCount}</p>
+                <p className="text-xs text-slate-600 mt-1">Schools</p>
+              </CardContent>
+            </Card>
+            <Card className="border-orange-200 bg-orange-50">
+              <CardContent className="pt-4 pb-4 text-center">
+                <p className="text-3xl font-bold text-orange-700">
+                  {data.data.reduce((sum, s) => sum + s.personas.gator + (s.personas.student || 0), 0)}
+                </p>
+                <p className="text-xs text-slate-600 mt-1">Total Students</p>
+              </CardContent>
+            </Card>
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="pt-4 pb-4 text-center">
+                <p className="text-3xl font-bold text-green-700">
+                  {data.data.reduce((sum, s) => sum + s.personas.parent, 0)}
+                </p>
+                <p className="text-xs text-slate-600 mt-1">Total Parents</p>
+              </CardContent>
+            </Card>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Per-school cards */}
+          <div className="space-y-4">
+            {data.data.map((school, idx) => {
+              const students = school.personas.gator + (school.personas.student || 0);
+              const total = school.count;
+              const pct = (n) => total > 0 ? Math.round((n / total) * 100) : 0;
+              return (
+                <Card key={idx}>
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-lg">{school.school}</h3>
+                        <p className="text-sm text-slate-500">{total} total users</p>
+                      </div>
+                      <span className="text-3xl font-bold text-blue-700">{total}</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-3 text-center text-sm">
+                      <div className="bg-orange-50 rounded-lg p-2">
+                        <p className="font-bold text-orange-700">{students}</p>
+                        <p className="text-xs text-slate-500">Students ({pct(students)}%)</p>
+                      </div>
+                      <div className="bg-blue-50 rounded-lg p-2">
+                        <p className="font-bold text-blue-700">{school.personas.parent}</p>
+                        <p className="text-xs text-slate-500">Parents ({pct(school.personas.parent)}%)</p>
+                      </div>
+                      <div className="bg-purple-50 rounded-lg p-2">
+                        <p className="font-bold text-purple-700">{school.personas.alumni}</p>
+                        <p className="text-xs text-slate-500">Alumni ({pct(school.personas.alumni)}%)</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-lg p-2">
+                        <p className="font-bold text-slate-700">{school.personas.unknown}</p>
+                        <p className="text-xs text-slate-500">Unknown ({pct(school.personas.unknown)}%)</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 
