@@ -13,18 +13,26 @@ export default function SchoolCodeAnalysisCard() {
   const [result, setResult] = useState(null);
 
   const runBackfill = async () => {
-    if (!confirm(`This will set school_code=ufl and school_name="University of Florida" for all users without a school_code (~790 users). Continue?`)) return;
+    if (!confirm(`This will set school_code=ufl and school_name="University of Florida" for all users without a school_code. It runs in batches — click OK to start.`)) return;
     setBackfilling(true);
     setBackfillResult(null);
+    let totalUpdated = 0;
     try {
-      const res = await base44.functions.invoke('backfillUFUsers', {});
-      setBackfillResult(res.data);
+      while (true) {
+        const res = await base44.functions.invoke('backfillUFUsers', {});
+        const data = res.data;
+        if (data.error) throw new Error(data.error);
+        totalUpdated += data.updated || 0;
+        setBackfillResult({ updated: totalUpdated, done: data.done });
+        if (data.done || data.remaining === 0) break;
+        // Small pause between batches
+        await new Promise(r => setTimeout(r, 1000));
+      }
       toast({
         title: "✅ Backfill Complete!",
-        description: `Updated ${res.data.updated} users as University of Florida.`,
+        description: `Updated ${totalUpdated} users as University of Florida.`,
         duration: 8000,
       });
-      // Re-run analysis to show updated counts
       setResult(null);
     } catch (err) {
       toast({ title: "Backfill Failed", description: err.message, variant: "destructive" });
