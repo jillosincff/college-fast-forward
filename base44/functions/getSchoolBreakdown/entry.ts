@@ -22,10 +22,21 @@ Deno.serve(async (req) => {
       'fiu': 'Florida International University',
     };
 
-    // Group by school
+    // Group by school — prefer university field (most accurate), fall back to school_code
     const schoolMap = {};
     (allUsers || []).forEach(u => {
-      const rawSchool = u.school_code || u.school_name || u.school || u.university || 'Unknown';
+      // Use `university` as the most reliable field (set during onboarding from user input)
+      // Fall back to school_code display name, then school_name, then unknown
+      let rawSchool;
+      if (u.university && u.university.trim()) {
+        rawSchool = u.university.trim();
+      } else if (u.school_code) {
+        rawSchool = schoolDisplayNames[u.school_code] || u.school_code;
+      } else if (u.school_name && u.school_name.trim()) {
+        rawSchool = u.school_name.trim();
+      } else {
+        rawSchool = 'Unknown';
+      }
       const school = schoolDisplayNames[rawSchool] || rawSchool;
       if (!schoolMap[school]) {
         schoolMap[school] = { count: 0, personas: { gator: 0, student: 0, parent: 0, alumni: 0, unknown: 0 } };
