@@ -460,9 +460,11 @@ Deno.serve(async (req) => {
     }
 
     // --- FULL SEND ---
+    const startIndex = body.start_index || 0;
     const existingUsers = await base44.asServiceRole.entities.User.list();
     const existingEmails = new Set((existingUsers || []).map(u => u.email?.toLowerCase().trim()));
-    const toSend = eligible.filter(u => !existingEmails.has(u.email.toLowerCase().trim()));
+    const allToSend = eligible.filter(u => !existingEmails.has(u.email.toLowerCase().trim()));
+    const toSend = allToSend.slice(startIndex);
 
     console.log(`📧 Sending parent migration email to ${toSend.length} recipients`);
 
