@@ -31,6 +31,7 @@ import FoundingCircleApplicationsManager from '@/components/admin/FoundingCircle
 import ReengagementSettings from '@/components/admin/ReengagementSettings';
 import AmbassadorManager from '@/components/admin/AmbassadorManager';
 import EmailTestPanel from '@/components/admin/EmailTestPanel';
+import SchoolCodeAnalysisCard from '@/components/admin/SchoolCodeAnalysisCard';
 // backfillStudentRequests, cleanupDraftNames, exportUsers, backfillPosterEmails — now in extracted components
 import { Trash2, BarChart3, Trophy } from 'lucide-react';
 
@@ -459,42 +460,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* School Code Analysis Tool */}
-        <Card className="mb-6 border-cyan-200 bg-cyan-50">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              🔧 School Code Analysis
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-slate-600 mb-4">Analyze UF school code issues and prepare for bulk fix.</p>
-            <Button 
-              onClick={async () => {
-                try {
-                  setLoading(true);
-                  const result = await base44.functions.invoke('analyzeSchoolCodes', {});
-                  console.log('Analysis:', result.data.analysis);
-                  toast({
-                    title: "Analysis Complete",
-                    description: `UF by name: ${result.data.analysis.ufByNameCount} | UF by code: ${result.data.analysis.ufByCodeCount} | UF unknown: ${result.data.analysis.ufUnknownCount} | Unknown no signal: ${result.data.analysis.unknownNoSignalCount}`,
-                    duration: 10000,
-                  });
-                } catch (err) {
-                  toast({
-                    title: "Analysis Failed",
-                    description: err.message,
-                    variant: "destructive"
-                  });
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              disabled={loading}
-              className="bg-cyan-600 hover:bg-cyan-700"
-            >
-              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : '📊 Run Analysis'}
-            </Button>
-          </CardContent>
-        </Card>
+        <SchoolCodeAnalysisCard />
 
         {/* User Search Tool */}
         <Card className="mb-6 border-purple-200 bg-purple-50">
