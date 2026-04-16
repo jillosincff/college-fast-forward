@@ -8,7 +8,30 @@ import { base44 } from '@/api/base44Client';
 export default function SchoolCodeAnalysisCard() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillResult, setBackfillResult] = useState(null);
   const [result, setResult] = useState(null);
+
+  const runBackfill = async () => {
+    if (!confirm(`This will set school_code=ufl and school_name="University of Florida" for all users without a school_code (~790 users). Continue?`)) return;
+    setBackfilling(true);
+    setBackfillResult(null);
+    try {
+      const res = await base44.functions.invoke('backfillUFUsers', {});
+      setBackfillResult(res.data);
+      toast({
+        title: "✅ Backfill Complete!",
+        description: `Updated ${res.data.updated} users as University of Florida.`,
+        duration: 8000,
+      });
+      // Re-run analysis to show updated counts
+      setResult(null);
+    } catch (err) {
+      toast({ title: "Backfill Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setBackfilling(false);
+    }
+  };
 
   const runAnalysis = async () => {
     setLoading(true);
@@ -35,9 +58,19 @@ export default function SchoolCodeAnalysisCard() {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-slate-600 mb-4">Analyze UF school code issues and prepare for bulk fix.</p>
-        <Button onClick={runAnalysis} disabled={loading} className="bg-cyan-600 hover:bg-cyan-700">
-          {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Running...</> : '📊 Run Analysis'}
-        </Button>
+        <div className="flex gap-3 flex-wrap">
+          <Button onClick={runAnalysis} disabled={loading || backfilling} className="bg-cyan-600 hover:bg-cyan-700">
+            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Running...</> : '📊 Run Analysis'}
+          </Button>
+          <Button onClick={runBackfill} disabled={backfilling || loading} className="bg-orange-600 hover:bg-orange-700">
+            {backfilling ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Backfilling...</> : '🐊 Backfill UF Users'}
+          </Button>
+        </div>
+        {backfillResult && (
+          <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
+            ✅ Backfill complete: <strong>{backfillResult.updated}</strong> users updated as University of Florida.
+          </div>
+        )}
         {result && (
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white rounded-lg p-3 border text-center">
