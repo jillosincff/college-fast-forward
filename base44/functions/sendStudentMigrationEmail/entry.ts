@@ -1,23 +1,21 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const SCHOOL_NAMES = {
+  usc: 'University of South Carolina',
+  osu: 'Ohio State',
   ucf: 'University of Central Florida',
-  ufl: 'University of Florida',
-  fsu: 'Florida State University',
-  fau: 'Florida Atlantic University',
-  usf: 'University of South Florida',
-  usc: 'University of Southern California',
   umich: 'University of Michigan',
-  osu: 'Ohio State University',
-  psu: 'Penn State University',
-  umd: 'University of Maryland',
   udel: 'University of Delaware',
   uga: 'University of Georgia',
-  tulane: 'Tulane University',
-  uky: 'University of Kentucky',
-  jmu: 'James Madison University',
-  utexas: 'University of Texas',
+  psu: 'Pennsylvania State',
+  tulane: 'Tulane',
+  umd: 'University of Maryland',
+  fau: 'Florida Atlantic',
+  fsu: 'Florida State',
+  jmu: 'James Madison',
   miami: 'University of Miami',
+  utexas: 'University of Texas',
+  uky: 'University of Kentucky',
 };
 
 // Full student CSV list (162 rows from uploaded file, Apple relay emails excluded)
