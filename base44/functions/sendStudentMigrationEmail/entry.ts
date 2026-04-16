@@ -149,11 +149,11 @@ function buildStudentEmailHtml(firstName, schoolName) {
 
 <p style="font-size:16px;margin:0 0 20px;">It's April. Internship and job offers are going out. If you don't have something lined up yet, you're not alone — but you're also running out of runway.</p>
 
-<p style="font-size:16px;margin:0 0 24px;">We rebuilt CFF for exactly this moment. New site: <strong>collegefastforward.com</strong>. Come over and sign up with this same email — takes a minute.</p>
+<p style="font-size:16px;margin:0 0 24px;">We rebuilt College Fast Forward for exactly this moment. New site: <strong>collegefastforward.com</strong>. Come over and sign up with this same email — takes a minute.</p>
 
 <p style="font-size:16px;margin:0 0 12px;"><strong>A ${schoolName} network that actually responds.</strong> Parents, alumni, and recent grads — all opted in to help students like you. Not LinkedIn. Not a Facebook group. People who said "yes, reach out" and mean it. One warm intro beats a hundred cold applications, and right now, warm intros are the only thing moving fast enough.</p>
 
-<p style="font-size:16px;margin:24px 0 12px;"><strong>FastIQ — so you show up ready.</strong> Mock interviews with real feedback. LinkedIn review with a score. Resume tailored to any job description in 30 seconds. Outreach messages drafted so you're not staring at a blank email. $29/month, and it's the difference between a conversation that lands and one that doesn't.</p>
+<p style="font-size:16px;margin:24px 0 12px;"><strong>FastIQ — so you show up ready.</strong> Mock interviews with real feedback. LinkedIn review with a score. Resume tailored to any job description in 30 seconds. Outreach messages drafted so you're not staring at a blank email. <strong>Introductory offer: $14.50/month through April 30th</strong> (half off). After that it's $29/month.</p>
 
 <p style="font-size:16px;margin:24px 0;">The network gets you the meeting. FastIQ makes sure the meeting goes well.</p>
 
