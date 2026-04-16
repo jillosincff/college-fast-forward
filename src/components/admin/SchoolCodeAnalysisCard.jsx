@@ -10,22 +10,27 @@ export default function SchoolCodeAnalysisCard() {
   const [loading, setLoading] = useState(false);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillResult, setBackfillResult] = useState(null);
+  const [backfillStatus, setBackfillStatus] = useState('');
   const [result, setResult] = useState(null);
 
   const runBackfill = async () => {
     if (!confirm(`This will set school_code=ufl and school_name="University of Florida" for all users without a school_code. It runs in batches — click OK to start.`)) return;
     setBackfilling(true);
     setBackfillResult(null);
+    setBackfillStatus('Starting...');
     let totalUpdated = 0;
+    let batch = 1;
     try {
       while (true) {
+        setBackfillStatus(`Running batch ${batch}... (${totalUpdated} updated so far)`);
         const res = await base44.functions.invoke('backfillUFUsers', {});
         const data = res.data;
         if (data.error) throw new Error(data.error);
         totalUpdated += data.updated || 0;
+        batch++;
+        setBackfillStatus(`Batch done — ${totalUpdated} updated so far...`);
         setBackfillResult({ updated: totalUpdated, done: data.done });
         if (data.done || data.remaining === 0) break;
-        // Small pause between batches
         await new Promise(r => setTimeout(r, 1000));
       }
       toast({
@@ -74,7 +79,13 @@ export default function SchoolCodeAnalysisCard() {
             {backfilling ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Backfilling...</> : '🐊 Backfill UF Users'}
           </Button>
         </div>
-        {backfillResult && (
+        {backfilling && backfillStatus && (
+          <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-800 flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+            {backfillStatus}
+          </div>
+        )}
+        {!backfilling && backfillResult?.done && (
           <div className="mt-3 bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
             ✅ Backfill complete: <strong>{backfillResult.updated}</strong> users updated as University of Florida.
           </div>
