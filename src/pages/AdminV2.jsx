@@ -6,6 +6,7 @@ import SchoolTable from '@/components/adminv2/SchoolTable';
 import EngagementPanel from '@/components/adminv2/EngagementPanel';
 import WeeklyLog from '@/components/adminv2/WeeklyLog';
 import Phase2Placeholders from '@/components/adminv2/Phase2Placeholders';
+import AdminUtilities from '@/components/adminv2/AdminUtilities';
 
 export default function AdminV2() {
   const [user, setUser] = useState(null);
@@ -80,6 +81,7 @@ export default function AdminV2() {
           <EngagementPanel data={data.engagement} />
           <Phase2Placeholders />
           <WeeklyLog />
+          <AdminUtilities />
         </>
       )}
     </div>
