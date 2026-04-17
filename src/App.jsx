@@ -80,7 +80,7 @@ const AuthenticatedApp = () => {
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
           <Route path="/AlumniOnboarding" element={<AlumniOnboarding />} />
-          <Route path="AlumniAllSet" element={<AlumniAllSet />} />
+          <Route path="/AlumniAllSet" element={<AlumniAllSet />} />
           <Route path="/AlumniHome" element={<LayoutWrapper currentPageName="AlumniHome"><AlumniHome /></LayoutWrapper>} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
