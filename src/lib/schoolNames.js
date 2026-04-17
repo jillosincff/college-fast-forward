@@ -15,6 +15,7 @@ export const SCHOOL_NAMES = {
   'miami': 'University of Miami',
   'utexas': 'University of Texas',
   'uky': 'University of Kentucky',
+  'ucb': 'University of California, Berkeley',
 };
 
 // Reverse map: normalized school name / alias → code
@@ -60,6 +61,11 @@ const NAME_TO_CODE = {
   'ut austin': 'utexas',
   'uky': 'uky',
   'uk': 'uky',
+  'university of california, berkeley': 'ucb',
+  'university of california berkeley': 'ucb',
+  'uc berkeley': 'ucb',
+  'berkeley': 'ucb',
+  'ucb': 'ucb',
 };
 
 /**
