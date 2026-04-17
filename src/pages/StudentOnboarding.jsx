@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import GoogleSignInButton from '@/components/onboarding/student/GoogleSignInButton';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
 import StudentWelcomeScreen from '@/components/onboarding/student/StudentWelcomeScreen';
+import { deriveSchoolCode } from '@/lib/schoolNames';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -82,6 +83,8 @@ export default function StudentOnboarding() {
     let referralCode = null;
     try { referralCode = sessionStorage.getItem('pending_referral_code'); } catch (e) { /* ok */ }
 
+    const schoolCode = deriveSchoolCode(school);
+
     const updateData = {
       persona: 'student',
       roles: ['student'],
@@ -92,6 +95,7 @@ export default function StudentOnboarding() {
       school: school.trim(),
       school_name: school.trim(),
       university: school.trim(),
+      ...(schoolCode ? { school_code: schoolCode } : {}),
       first_name: firstName.trim(),
     };
 
