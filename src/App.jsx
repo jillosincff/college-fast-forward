@@ -35,6 +35,7 @@ import ProfileEdit from '@/pages/ProfileEdit';
 
 import ResetPassword from '@/pages/ResetPassword';
 import Logout from '@/pages/Logout';
+import AdminV2 from '@/pages/AdminV2';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -95,6 +96,7 @@ const AuthenticatedApp = () => {
           <Route path="/ProfileEdit" element={<LayoutWrapper currentPageName="ProfileEdit"><ProfileEdit /></LayoutWrapper>} />
           <Route path="/ResetPassword" element={<ResetPassword />} />
           <Route path="/Logout" element={<Logout />} />
+          <Route path="/admin" element={<AdminV2 />} />
 
           {/* Main routes */}
           <Route path="/" element={

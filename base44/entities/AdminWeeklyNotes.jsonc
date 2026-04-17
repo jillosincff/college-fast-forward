@@ -1,0 +1,30 @@
+{
+  "name": "AdminWeeklyNotes",
+  "type": "object",
+  "properties": {
+    "week_starting": {
+      "type": "string",
+      "format": "date",
+      "description": "The Monday date that starts this week (YYYY-MM-DD)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Markdown-supported admin notes for this week"
+    }
+  },
+  "required": [
+    "week_starting"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
