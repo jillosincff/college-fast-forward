@@ -1,15 +1,18 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// Same mapping as lib/schoolNames.js
-const SCHOOL_NAMES = {
+// Canonical map: full lower-cased name → school_code
+const NAME_TO_CODE = {
   'university of florida': 'uf',
   'university of southern california': 'usc',
   'ohio state university': 'osu',
+  'ohio state': 'osu',
   'university of central florida': 'ucf',
   'university of michigan': 'umich',
   'university of delaware': 'udel',
   'university of georgia': 'uga',
   'penn state university': 'psu',
+  'pennsylvania state university': 'psu',
+  'penn state': 'psu',
   'tulane university': 'tulane',
   'university of maryland': 'umd',
   'florida atlantic university': 'fau',
@@ -17,15 +20,41 @@ const SCHOOL_NAMES = {
   'james madison university': 'jmu',
   'university of miami': 'miami',
   'university of texas': 'utexas',
+  'university of texas at austin': 'utexas',
   'university of kentucky': 'uky',
 };
 
-function inferSchoolCode(user) {
-  // Try school_name, school, university fields in order
+// Common abbreviation/alias map → school_code
+const ALIAS_TO_CODE = {
+  'uf': 'uf',
+  'ufl': 'uf',
+  'usc': 'usc',
+  'osu': 'osu',
+  'ucf': 'ucf',
+  'umich': 'umich',
+  'udel': 'udel',
+  'uga': 'uga',
+  'psu': 'psu',
+  'tulane': 'tulane',
+  'umd': 'umd',
+  'fau': 'fau',
+  'fsu': 'fsu',
+  'jmu': 'jmu',
+  'miami': 'miami',
+  'utexas': 'utexas',
+  'ut austin': 'utexas',
+  'uky': 'uky',
+  'uk': 'uky',
+};
+
+function resolveSchoolCode(user) {
   const candidates = [user.school_name, user.school, user.university].filter(Boolean);
-  for (const name of candidates) {
-    const code = SCHOOL_NAMES[name.toLowerCase().trim()];
-    if (code) return code;
+  for (const raw of candidates) {
+    const normalized = raw.toLowerCase().trim();
+    // Try exact full name first
+    if (NAME_TO_CODE[normalized]) return NAME_TO_CODE[normalized];
+    // Try alias/abbreviation
+    if (ALIAS_TO_CODE[normalized]) return ALIAS_TO_CODE[normalized];
   }
   return null;
 }
@@ -42,37 +71,88 @@ Deno.serve(async (req) => {
     const dryRun = body.dry_run !== false; // default true
 
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
-    const alumni = allUsers.filter(u => u.persona === 'alumni' && !u.school_code);
 
-    const updates = [];
-    const unresolvable = [];
+    // Only process users missing school_code
+    const missing = allUsers.filter(u => !u.school_code?.trim());
 
-    for (const u of alumni) {
-      const code = inferSchoolCode(u);
-      if (code) {
-        updates.push({ id: u.id, email: u.email, school_name: u.school_name || u.school, school_code: code });
+    const categoryA = []; // Has school name, maps via alias (needs verification)
+    const categoryB = []; // Has school name, maps cleanly via canonical name
+    const categoryC = []; // No school data at all — do not touch
+
+    for (const u of missing) {
+      const hasSchoolData = !!(u.school_name || u.school || u.university)?.trim();
+
+      if (!hasSchoolData) {
+        // Category C: nothing to work with
+        categoryC.push({
+          id: u.id,
+          email: u.email,
+          persona: u.persona || null,
+          created_date: u.created_date,
+        });
+        continue;
+      }
+
+      const candidates = [u.school_name, u.school, u.university].filter(Boolean);
+      const rawValue = candidates[0]; // best available value
+      const normalized = rawValue.toLowerCase().trim();
+
+      const isCanonical = !!NAME_TO_CODE[normalized];
+      const resolvedCode = resolveSchoolCode(u);
+
+      if (!resolvedCode) {
+        // Has school name but it doesn't match any known name or alias → manual review
+        categoryA.push({
+          id: u.id,
+          email: u.email,
+          persona: u.persona || null,
+          raw_school_value: rawValue,
+          action: 'FLAG_FOR_MANUAL_REVIEW',
+        });
+      } else if (isCanonical) {
+        // Clean reverse-map from canonical name → safe to auto-backfill
+        categoryB.push({
+          id: u.id,
+          email: u.email,
+          persona: u.persona || null,
+          raw_school_value: rawValue,
+          resolved_code: resolvedCode,
+          action: 'SAFE_TO_BACKFILL',
+        });
       } else {
-        unresolvable.push({ id: u.id, email: u.email, school_name: u.school_name || u.school || u.university || null });
+        // Matched via alias — treat same as Category A for safety, flag for review
+        categoryA.push({
+          id: u.id,
+          email: u.email,
+          persona: u.persona || null,
+          raw_school_value: rawValue,
+          resolved_code: resolvedCode,
+          action: 'ALIAS_MATCH_NEEDS_CONFIRMATION',
+        });
       }
     }
 
     if (dryRun) {
       return Response.json({
         mode: 'dry_run',
-        total_alumni: alumni.length,
-        will_update: updates.length,
-        unresolvable: unresolvable.length,
-        updates_preview: updates.slice(0, 10),
-        unresolvable_preview: unresolvable.slice(0, 10),
+        summary: {
+          total_missing_school_code: missing.length,
+          category_b_safe_to_backfill: categoryB.length,
+          category_a_needs_review: categoryA.length,
+          category_c_no_data_do_not_touch: categoryC.length,
+        },
+        category_b_safe_to_backfill: categoryB,
+        category_a_needs_manual_review: categoryA,
+        category_c_no_school_data: categoryC,
       });
     }
 
-    // Full update
+    // Full update — only apply Category B (safe, canonical matches)
     let updated = 0, failed = 0;
     const errors = [];
-    for (const u of updates) {
+    for (const u of categoryB) {
       try {
-        await base44.asServiceRole.entities.User.update(u.id, { school_code: u.school_code });
+        await base44.asServiceRole.entities.User.update(u.id, { school_code: u.resolved_code });
         updated++;
       } catch (e) {
         failed++;
@@ -82,11 +162,15 @@ Deno.serve(async (req) => {
 
     return Response.json({
       mode: 'full_update',
-      total_alumni_missing_school_code: alumni.length,
-      updated,
-      failed,
-      unresolvable: unresolvable.length,
-      unresolvable_list: unresolvable,
+      summary: {
+        total_missing_school_code: missing.length,
+        updated,
+        failed,
+        category_a_skipped_needs_review: categoryA.length,
+        category_c_skipped_no_data: categoryC.length,
+      },
+      category_a_needs_manual_review: categoryA,
+      category_c_no_school_data: categoryC,
       errors,
     });
 
