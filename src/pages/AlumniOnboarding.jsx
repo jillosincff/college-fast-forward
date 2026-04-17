@@ -3,6 +3,12 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
+import { SCHOOL_NAMES } from '@/lib/schoolNames';
+
+// Reverse map: full school name → code (for school_code lookup)
+const SCHOOL_NAME_TO_CODE = Object.fromEntries(
+  Object.entries(SCHOOL_NAMES).map(([code, name]) => [name.toLowerCase(), code])
+);
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -51,7 +57,7 @@ const labelStyle = {
 };
 
 export default function AlumniOnboarding() {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, isLoadingAuth } = useAuth();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -71,15 +77,19 @@ export default function AlumniOnboarding() {
     setSaving(true);
     setError(null);
     try {
+      const schoolTrimmed = school.trim();
+      const schoolCode = SCHOOL_NAME_TO_CODE[schoolTrimmed.toLowerCase()] || null;
+
       await base44.auth.updateMe({
         persona: 'alumni',
         roles: ['alumni'],
         onboarding_completed: true,
         onboarding_completed_at: new Date().toISOString(),
         graduation_year: gradYear,
-        school: school.trim(),
-        school_name: school.trim(),
-        university: school.trim(),
+        school: schoolTrimmed,
+        school_name: schoolTrimmed,
+        school_code: schoolCode,
+        university: schoolTrimmed,
         industry,
         ways_to_help: helpTypes,
         help_types: helpTypes,
@@ -112,6 +122,15 @@ export default function AlumniOnboarding() {
       setSaving(false);
     }
   };
+
+  if (isLoadingAuth || !user) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTop: '3px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   const Dot = ({ active }) => (
     <div style={{ width: 8, height: 8, borderRadius: '50%', background: active ? ORANGE : 'rgba(255,255,255,0.15)' }} />

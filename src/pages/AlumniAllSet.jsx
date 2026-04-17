@@ -62,7 +62,10 @@ export default function AlumniAllSet() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 48 }}>
           <button
-            onClick={() => navigate('AlumniHome')}
+            onClick={() => {
+              if (user?.alumni_intent === 'giving_help') navigate('AlumniHome');
+              else navigate('FreeTierDashboard');
+            }}
             style={{ width: '100%', padding: '14px 24px', borderRadius: 100, border: 'none', background: ORANGE, color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 'auto' }}
           >
             Go to Dashboard →
