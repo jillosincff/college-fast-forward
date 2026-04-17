@@ -55,20 +55,11 @@ Deno.serve(async (req) => {
     const prevStudents    = newLastWeek.filter(u => ['student','gator'].includes(u.persona));
 
     // ── School breakdown ──────────────────────────────────────────────────────
-    // Reverse map: full school name → code (for users who have school_name but no school_code)
-    const NAME_TO_CODE = Object.fromEntries(
-      Object.entries(SCHOOL_NAMES).map(([code, name]) => [name.toLowerCase(), code])
-    );
-
     const schoolMap = {};
     const grandTotal = allUsers.length;
     for (const u of allUsers) {
-      let code = u.school_code?.toLowerCase();
-      // Fallback: try to infer code from school_name or school field
-      if (!code) {
-        const nameField = (u.school_name || u.school || '').toLowerCase().trim();
-        code = nameField ? (NAME_TO_CODE[nameField] || nameField) : 'unassigned';
-      }
+      const code = u.school_code?.toLowerCase();
+      if (!code) continue; // skip users without a school_code
       if (!schoolMap[code]) schoolMap[code] = { parents: 0, alumni: 0, students: 0, total: 0, newThisWeek: 0 };
       schoolMap[code].total++;
       if (u.persona === 'parent') schoolMap[code].parents++;
@@ -79,16 +70,11 @@ Deno.serve(async (req) => {
     const schools = Object.entries(schoolMap)
       .map(([code, data]) => ({
         code,
-        name: code === 'unassigned' ? 'Unassigned' : (SCHOOL_NAMES[code] || code),
+        name: SCHOOL_NAMES[code] || code,
         ...data,
         pct: grandTotal > 0 ? Math.round((data.total / grandTotal) * 100) : 0,
       }))
-      .sort((a, b) => {
-        // Always push 'unassigned' to the bottom
-        if (a.code === 'unassigned') return 1;
-        if (b.code === 'unassigned') return -1;
-        return b.total - a.total;
-      });
+      .sort((a, b) => b.total - a.total);
 
     // ── Outreach engagement ───────────────────────────────────────────────────
     // Fetch outreach drafts
