@@ -1,24 +1,29 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const SCHOOL_NAMES = {
-  usc: 'University of South Carolina',
-  osu: 'Ohio State',
-  ucf: 'University of Central Florida',
-  umich: 'University of Michigan',
-  udel: 'University of Delaware',
-  uga: 'University of Georgia',
-  psu: 'Pennsylvania State',
-  tulane: 'Tulane',
-  umd: 'University of Maryland',
-  fau: 'Florida Atlantic',
-  fsu: 'Florida State',
-  jmu: 'James Madison',
-  miami: 'University of Miami',
+  uf:     'University of Florida',
+  ufl:    'University of Florida',
+  usc:    'University of Southern California',
+  osu:    'Ohio State University',
+  ucf:    'University of Central Florida',
+  umich:  'University of Michigan',
+  udel:   'University of Delaware',
+  uga:    'University of Georgia',
+  psu:    'Penn State University',
+  tulane: 'Tulane University',
+  umd:    'University of Maryland',
+  fau:    'Florida Atlantic University',
+  fsu:    'Florida State University',
+  jmu:    'James Madison University',
+  miami:  'University of Miami',
   utexas: 'University of Texas',
-  uky: 'University of Kentucky',
-  uf: 'University of Florida',
-  ufl: 'University of Florida',
+  uky:    'University of Kentucky',
+  ucb:    'University of California, Berkeley',
 };
+
+// Normalize codes so aliases collapse into canonical keys
+const CODE_ALIASES = { ufl: 'uf' };
+function canonicalize(code) { return CODE_ALIASES[code] || code; }
 
 function startOf(daysAgo) {
   const d = new Date();
@@ -58,8 +63,9 @@ Deno.serve(async (req) => {
     const schoolMap = {};
     const grandTotal = allUsers.length;
     for (const u of allUsers) {
-      const code = u.school_code?.toLowerCase();
-      if (!code) continue; // skip users without a school_code
+      const rawCode = u.school_code?.toLowerCase();
+      if (!rawCode) continue;
+      const code = canonicalize(rawCode);
       if (!schoolMap[code]) schoolMap[code] = { parents: 0, alumni: 0, students: 0, total: 0, newThisWeek: 0 };
       schoolMap[code].total++;
       if (u.persona === 'parent') schoolMap[code].parents++;
