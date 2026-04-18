@@ -19,7 +19,7 @@ const SCHOOL_MAP = {
   ucb:    { name: 'University of California, Berkeley' },
 };
 
-const UF_CODES = new Set(['ufl', 'uf', '']);
+const UF_CODES = new Set(['ufl', 'uf', '', 'process improvement']);
 
 function parseCSV(text) {
   const lines = text.split('\n');
@@ -112,52 +112,68 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Full run — create users
-    const batchSize = 20;
+    // Full run — create users one at a time, with offset/limit support for chunked runs
+    const offset = body.offset || 0;
+    const limit = body.limit || 100;
+    const chunk = willCreate.slice(offset, offset + limit);
+
     let created = 0;
+    let skipped = 0;
     let errors = [];
 
-    for (let i = 0; i < willCreate.length; i += batchSize) {
-      const batch = willCreate.slice(i, i + batchSize);
-      await Promise.all(batch.map(async (row) => {
-        const school = (row['School'] || '').toLowerCase().trim();
-        try {
-          await base44.asServiceRole.entities.User.create({
-            full_name: row['Full Name'] || '',
-            email: row['Email'].toLowerCase().trim(),
-            school: school,
-            school_code: school,
-            school_name: SCHOOL_MAP[school]?.name || school,
-            persona: row['Persona'] || 'alumni',
-            membership_tier: 'founding_gator',
-            is_founding_member: true,
-            founding_offer_redeemed: true,
-            onboarding_complete: row['Onboarding Completed'] === 'Yes',
-            graduation_year: row['Graduation Year'] || null,
-            major: row['Major'] || null,
-            company: row['Current Company'] || null,
-            job_title: row['Current Position'] || null,
-            industry: row['Industry'] || null,
-            linkedin_url: row['LinkedIn URL'] || null,
-            bio: row['Bio'] || null,
-            ways_to_help: row['Help Types'] ? row['Help Types'].split(';').map(s => s.trim()).filter(Boolean) : [],
-            alumni_intent: row['Alumni Intent'] || null,
-            visible_in_directory: row['Visible In Directory'] === 'Yes',
-          });
-          created++;
-        } catch (e) {
-          errors.push({ email: row['Email'], error: e.message });
-        }
-      }));
-      await new Promise(r => setTimeout(r, 300));
-      console.log(`Progress: ${Math.min(i + batchSize, willCreate.length)}/${willCreate.length}`);
+    for (let i = 0; i < chunk.length; i++) {
+      const row = chunk[i];
+      const email = row['Email'].toLowerCase().trim();
+      const school = (row['School'] || '').toLowerCase().trim();
+
+      // Re-check in case this record was already created in a prior run
+      if (existingEmails.has(email)) { skipped++; continue; }
+
+      try {
+        await base44.asServiceRole.entities.User.create({
+          full_name: row['Full Name'] || '',
+          email: email,
+          school: school,
+          school_code: school,
+          school_name: SCHOOL_MAP[school]?.name || school,
+          persona: row['Persona'] || 'alumni',
+          membership_tier: 'founding_gator',
+          is_founding_member: true,
+          founding_offer_redeemed: true,
+          onboarding_completed: row['Onboarding Completed'] === 'Yes',
+          graduation_year: row['Graduation Year'] || null,
+          major: row['Major'] || null,
+          company: row['Current Company'] || null,
+          job_title: row['Current Position'] || null,
+          industry: row['Industry'] || null,
+          linkedin_url: row['LinkedIn URL'] || null,
+          bio: row['Bio'] || null,
+          ways_to_help: row['Help Types'] ? row['Help Types'].split(';').map(s => s.trim()).filter(Boolean) : [],
+          alumni_intent: row['Alumni Intent'] || null,
+          visible_in_directory: row['Visible In Directory'] === 'Yes',
+        });
+        existingEmails.add(email);
+        created++;
+      } catch (e) {
+        errors.push({ email, error: e.message });
+      }
+
+      // Throttle: 800ms between each create to stay under rate limits
+      await new Promise(r => setTimeout(r, 800));
+      if ((i + 1) % 25 === 0) console.log(`Chunk progress: ${i + 1}/${chunk.length} — created: ${created}`);
     }
 
     return Response.json({
       mode: 'full_run',
+      offset,
+      limit,
+      chunk_size: chunk.length,
+      total_eligible: willCreate.length,
       created,
+      skipped_already_existed: skipped,
       errors,
-      school_breakdown: schoolBreakdown,
+      error_count: errors.length,
+      next_offset: offset + limit < willCreate.length ? offset + limit : null,
     });
 
   } catch (e) {
