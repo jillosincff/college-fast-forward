@@ -412,6 +412,12 @@ const AdminDashboard = () => {
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button 
+              onClick={() => window.location.hash = '#/admin'}
+              className="w-full sm:w-auto bg-slate-900 hover:bg-slate-700 text-white border-slate-700"
+            >
+              📊 New Admin Dashboard
+            </Button>
+            <Button 
               onClick={() => navigate('GatorAuth')} 
               variant="outline"
               className="w-full sm:w-auto bg-green-50 hover:bg-green-100 border-green-300"
