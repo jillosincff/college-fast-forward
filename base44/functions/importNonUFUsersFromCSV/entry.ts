@@ -56,8 +56,10 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const dry_run = body.dry_run !== false;
 
-    // Read CSV from local filesystem
-    const csvText = await Deno.readTextFile('/mnt/user-data/uploads/users_everyone_2026-04-15.csv');
+    // Fetch CSV from uploaded URL
+    const csvResp = await fetch('https://media.base44.com/files/public/684474c5723dc90efce23588/e9af70470_8222baad1_users_everyone_2026-04-16.csv');
+    if (!csvResp.ok) throw new Error(`Failed to fetch CSV: ${csvResp.status}`);
+    const csvText = await csvResp.text();
     const rows = parseCSV(csvText);
 
     // Fetch all existing emails
