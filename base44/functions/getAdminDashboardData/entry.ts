@@ -3,7 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 const SCHOOL_NAMES = {
   uf:     'University of Florida',
   ufl:    'University of Florida',
-  usc:    'University of South Carolina',
+  usc:    'University of Southern California',
   osu:    'Ohio State University',
   ucf:    'University of Central Florida',
   umich:  'University of Michigan',
