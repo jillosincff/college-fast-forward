@@ -17,7 +17,7 @@ export default function AdminV2() {
   useEffect(() => {
     base44.auth.me().then(u => {
       setUser(u);
-      if (u?.role !== 'admin') { setLoading(false); return; }
+      if (u?.role !== 'admin' && u?.data?.role !== 'admin') { setLoading(false); return; }
       loadData();
     }).catch(() => setLoading(false));
   }, []);
@@ -44,7 +44,7 @@ export default function AdminV2() {
     </div>
   );
 
-  if (!user || user.role !== 'admin') return (
+  if (!user || (user.role !== 'admin' && user?.data?.role !== 'admin')) return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <p className="text-red-400 text-lg font-semibold">Access denied — admins only.</p>
     </div>
