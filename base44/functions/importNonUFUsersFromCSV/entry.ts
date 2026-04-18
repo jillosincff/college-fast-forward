@@ -1,7 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const SCHOOL_MAP = {
-  usc:    { name: 'University of South Carolina' },
+  usc:    { name: 'University of Southern California' },
   osu:    { name: 'Ohio State University' },
   ucf:    { name: 'University of Central Florida' },
   umich:  { name: 'University of Michigan' },
@@ -29,7 +29,6 @@ function parseCSV(text) {
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    // Simple CSV parse — handle quoted fields
     const values = [];
     let cur = '';
     let inQuote = false;
@@ -56,7 +55,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const dry_run = body.dry_run !== false;
 
-    // Fetch CSV from uploaded URL
+    // Fetch CSV
     const csvResp = await fetch('https://media.base44.com/files/public/684474c5723dc90efce23588/e9af70470_8222baad1_users_everyone_2026-04-16.csv');
     if (!csvResp.ok) throw new Error(`Failed to fetch CSV: ${csvResp.status}`);
     const csvText = await csvResp.text();
@@ -66,25 +65,20 @@ Deno.serve(async (req) => {
     const existingUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
     const existingEmails = new Set(existingUsers.map(u => (u.email || '').toLowerCase().trim()));
 
-    // Categorize
     let willCreate = [];
     let skipUF = [];
     let skipDuplicate = [];
     let skipEmptyEmail = [];
-    let skipEmptySchool = [];
 
     for (const row of rows) {
       const email = (row['Email'] || '').toLowerCase().trim();
       const school = (row['School'] || '').toLowerCase().trim();
-
       if (!email) { skipEmptyEmail.push(row); continue; }
       if (!school || UF_CODES.has(school)) { skipUF.push(row); continue; }
       if (existingEmails.has(email)) { skipDuplicate.push(row); continue; }
-
       willCreate.push(row);
     }
 
-    // School breakdown of willCreate
     const schoolBreakdown = {};
     for (const row of willCreate) {
       const s = (row['School'] || '').toLowerCase().trim();
@@ -99,9 +93,7 @@ Deno.serve(async (req) => {
         skip_uf_school: skipUF.length,
         skip_duplicate_email: skipDuplicate.length,
         skip_empty_email: skipEmptyEmail.length,
-        skip_empty_school: skipEmptySchool.length,
         school_breakdown: schoolBreakdown,
-        duplicate_emails: skipDuplicate.map(r => r['Email']),
         sample_will_create: willCreate.slice(0, 5).map(r => ({
           name: r['Full Name'],
           email: r['Email'],
@@ -111,9 +103,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Full run — create users one at a time, with offset/limit support for chunked runs
+    // Full run
     const offset = body.offset || 0;
-    const limit = body.limit || 100;
+    const limit = body.limit || 50;
     const chunk = willCreate.slice(offset, offset + limit);
 
     let created = 0;
@@ -124,22 +116,26 @@ Deno.serve(async (req) => {
       const row = chunk[i];
       const email = row['Email'].toLowerCase().trim();
       const school = (row['School'] || '').toLowerCase().trim();
+      const schoolName = SCHOOL_MAP[school]?.name || school;
+      const persona = (row['Persona'] || 'alumni').toLowerCase().trim();
 
-      // Re-check in case this record was already created in a prior run
       if (existingEmails.has(email)) { skipped++; continue; }
 
       try {
-        await base44.asServiceRole.entities.User.create({
+        const newUser = await base44.asServiceRole.entities.User.create({
+          email,
           full_name: row['Full Name'] || '',
-          email: email,
-          school: school,
+          email_verified: true,
+          onboarding_completed: row['Onboarding Completed'] === 'Yes',
+          // Profile fields
+          persona,
+          roles: [persona],
+          school: schoolName,
           school_code: school,
-          school_name: SCHOOL_MAP[school]?.name || school,
-          persona: row['Persona'] || 'alumni',
+          school_name: schoolName,
           membership_tier: 'founding_gator',
           is_founding_member: true,
           founding_offer_redeemed: true,
-          onboarding_completed: row['Onboarding Completed'] === 'Yes',
           graduation_year: row['Graduation Year'] || null,
           major: row['Major'] || null,
           company: row['Current Company'] || null,
@@ -147,19 +143,20 @@ Deno.serve(async (req) => {
           industry: row['Industry'] || null,
           linkedin_url: row['LinkedIn URL'] || null,
           bio: row['Bio'] || null,
-          ways_to_help: row['Help Types'] ? row['Help Types'].split(';').map(s => s.trim()).filter(Boolean) : [],
           alumni_intent: row['Alumni Intent'] || null,
           visible_in_directory: row['Visible In Directory'] === 'Yes',
+          ways_to_help: row['Help Types'] ? row['Help Types'].split(';').map(s => s.trim()).filter(Boolean) : [],
+          role: 'user',
         });
+
         existingEmails.add(email);
         created++;
       } catch (e) {
         errors.push({ email, error: e.message });
       }
 
-      // Throttle: 800ms between each create to stay under rate limits
-      await new Promise(r => setTimeout(r, 800));
-      if ((i + 1) % 25 === 0) console.log(`Chunk progress: ${i + 1}/${chunk.length} — created: ${created}`);
+      await new Promise(r => setTimeout(r, 500));
+      if ((i + 1) % 10 === 0) console.log(`Chunk progress: ${i + 1}/${chunk.length} — created: ${created}`);
     }
 
     return Response.json({
