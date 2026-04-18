@@ -10,6 +10,8 @@ Deno.serve(async (req) => {
       { name: 'Jamie Twersky (udel parent)', email: 'jetwersky@gmail.com' },
       { name: 'Brandon Schops (OSU parent)', email: 'cffosu@gmail.com' },
       { name: 'Arleen Goldenberg (FSU parent)', email: 'arleengoldenberg@gmail.com' },
+      { name: 'Abby K (Tulane student)', email: 'abbyk6@yahoo.com' },
+      { name: 'Lisa Lucci (UDEL parent)', email: 'lisaromanlucci@gmail.com' },
     ];
 
     const results = await Promise.all(checks.map(async ({ name, email }) => {
