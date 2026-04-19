@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
             <a href="${portalUrl}" style="display:inline-block;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:10px;">Add Payment Method →</a>
           </td></tr>
         </table>
-        <p style="font-size:13px;color:rgba(255,255,255,0.4);margin:20px 0 0;line-height:1.6;">If you don't add a card, your access will end when the trial expires. You can always rejoin later at the regular $29/month rate — but the founding rate disappears on April 15th.</p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.4);margin:20px 0 0;line-height:1.6;">If you don't add a card, your access will end when the trial expires. You can always rejoin later at the regular $29/month rate — but the founding rate disappears on April 30.</p>
       </td></tr>
       <tr><td style="height:24px;"></td></tr>
       <tr><td align="center"><p style="font-size:12px;color:#aaaaaa;margin:0;">College Fast Forward · collegefastforward.com</p></td></tr>

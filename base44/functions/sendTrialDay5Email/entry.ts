@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
   </p>
 
   <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 28px;">
-    Lock in the Founding Rate of just <strong>$14.50/month</strong> before April 15th — regular price is $29.
+    Lock in the Founding Rate of just <strong>$14.50/month</strong> before April 30 — regular price is $29.
   </p>
 
   <div style="margin:0 0 32px;">
@@ -123,8 +123,8 @@ Deno.serve(async (req) => {
 
       <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 20px;">
         ${isParent
-          ? `Your student's trial ends on <strong>${trialEndDate}</strong>. Lock in the Founding Rate of <strong>$14.50/month forever</strong> before April 15 — 50% off the regular price, locked in permanently.`
-          : `Your trial ends on <strong>${trialEndDate}</strong>. Lock in the Founding Rate of <strong>$14.50/month forever</strong> before April 15 — 50% off the regular price, locked in permanently.`}
+          ? `Your student's trial ends on <strong>${trialEndDate}</strong>. Lock in the Founding Rate of <strong>$14.50/month forever</strong> before April 30 — 50% off the regular price, locked in permanently.`
+          : `Your trial ends on <strong>${trialEndDate}</strong>. Lock in the Founding Rate of <strong>$14.50/month forever</strong> before April 30 — 50% off the regular price, locked in permanently.`}
       </p>
 
       <div style="text-align:center;margin:24px 0;">
