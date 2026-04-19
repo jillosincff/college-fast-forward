@@ -50,15 +50,15 @@ const FAQS = [
   },
   {
     q: "Can I pay for my student's FastIQ?",
-    a: "Yes. Either the student or a parent can unlock FastIQ. It starts with a free 7-day trial — no credit card needed — and then continues at $14.50/month during our founding rate period.",
+    a: "Yes. Either the student or a parent can unlock FastIQ. It starts with a free 7-day trial — no credit card needed — and then continues at $14.50/month (Founding Rate through April 30, then $29/month).",
   },
   {
     q: "Is my contact information visible to everyone?",
     a: "No. Your email address is never shown publicly. Students can message you through the platform, but your personal contact details stay private unless you choose to share them directly.",
   },
   {
-    q: "What school does my kid need to go to?",
-    a: "Any school. When you join, you tell us what school your student attends and you're connected with other parents and alumni from that same school. We're building networks at colleges across the country.",
+    q: "What school does my student need to go to?",
+    a: "Any participating school. We currently support 15+ universities and are growing. When you join, you tell us which school your student attends and you're connected with other parents and alumni from that same school.",
   },
   {
     q: "I'm an alumni, not a parent — can I still join?",
@@ -276,37 +276,29 @@ export default function LandingPage() {
           </div>
 
           <h1 style={{
-            fontFamily: playfair, fontSize: 'clamp(36px, 5.5vw, 68px)',
-            fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 10px',
+            fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 60px)',
+            fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px',
             opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.1s',
           }}>
-            "I've asked everyone I know.
+            Free Parent & Alumni Network
           </h1>
           <h1 style={{
-            fontFamily: playfair, fontSize: 'clamp(36px, 5.5vw, 68px)',
-            fontWeight: 700, color: '#E85D20', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 28px',
+            fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 60px)',
+            fontWeight: 700, color: '#E85D20', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 24px',
             opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.15s',
           }}>
-            My kid still has no real job leads."
+            + Optional FastIQ AI
           </h1>
 
           <p style={{
-            fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 700, color: '#fff',
-            lineHeight: 1.3, margin: '0 0 12px',
+            fontFamily: dmSans, fontSize: 'clamp(16px, 2.5vw, 19px)', color: 'rgba(255,255,255,0.65)',
+            lineHeight: 1.7, maxWidth: 560, margin: '0 auto 28px',
             opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.2s',
           }}>
-            You're not alone. We're all in the same boat.
+            The warm network at your school is free. FastIQ helps students turn those real connections into conversations and opportunities faster.
           </p>
 
-          <p style={{
-            fontFamily: dmSans, fontSize: 'clamp(16px, 2.5vw, 19px)', color: 'rgba(255,255,255,0.55)',
-            lineHeight: 1.7, maxWidth: 580, margin: '0 auto 52px',
-            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.25s',
-          }}>
-            College Fast Forward multiplies your effort — connecting you with 1,000+ parents and alumni who are ready to open their networks for your student.
-          </p>
-
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 72, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.3s' }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.3s' }}>
             <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.35)', transition: 'all 0.2s ease' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(232,93,32,0.45)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)'; }}
@@ -317,7 +309,32 @@ export default function LandingPage() {
             >I'm looking for a job →</button>
           </div>
 
-          <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap', justifyContent: 'center', opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.4s' }}>
+          {/* Hero clarifier line */}
+          <p style={{
+            fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)',
+            lineHeight: 1.6, margin: '0 auto 28px', maxWidth: 540,
+            opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.35s',
+          }}>
+            <strong style={{ color: 'rgba(255,255,255,0.65)' }}>Parents & Alumni:</strong> Join free.&nbsp;&nbsp;
+            <strong style={{ color: 'rgba(255,255,255,0.65)' }}>Students at any school:</strong> Try FastIQ free for 7 days — no credit card needed.
+          </p>
+
+          {/* Founding rate badge */}
+          {foundingActive && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
+              borderRadius: 100, padding: '6px 18px', marginBottom: 44,
+              opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.4s',
+            }}>
+              <span style={{ fontFamily: dmSans, fontSize: 13, color: '#c9a84c', fontWeight: 600 }}>
+                🏅 FastIQ Founding Rate — lock in $14.50/mo (ends April 30)
+                {timeLeft && <span style={{ color: 'rgba(201,168,76,0.6)', marginLeft: 8, fontWeight: 400 }}>{timeLeft}</span>}
+              </span>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap', justifyContent: 'center', opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.5s' }}>
             {STATS.map((stat, i) => (
               <div key={i} style={{ textAlign: 'center' }}>
                 <p style={{ fontFamily: playfair, fontSize: 34, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', lineHeight: 1 }}>{stat.number}</p>
@@ -337,8 +354,11 @@ export default function LandingPage() {
           <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, margin: '0 0 24px', maxWidth: 580 }}>
             Your kid isn't lazy. They just don't know the right people.
           </p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 14px', marginBottom: 20 }}>
+            <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff' }}>Join the network for free — no membership fee.</span>
+          </div>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 20px', maxWidth: 580 }}>
-            And here's what makes College Fast Forward different from every other network out there: every single person in it feels exactly the same way you do right now.
+            Connect with thousands of parents and alumni across 15+ universities who are ready to help each other's students with real intros and advice.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 20px', maxWidth: 580 }}>
             We're not professional networkers doing favors. We're parents. We lie awake at night thinking about our kids' futures. We forward job listings at midnight. We text old colleagues we haven't spoken to in years.
@@ -420,10 +440,10 @@ export default function LandingPage() {
         <Section>
           <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>For students who want to go further</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
-            A warm network alone isn't always enough.<br />So we built FastIQ.
+            A warm network alone isn't always enough.
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 16px', maxWidth: 560 }}>
-            FastIQ is an AI career engine that helps students activate their connections faster, craft better outreach, tailor their resume, and know exactly what to do next.
+            FastIQ is the optional AI upgrade that works alongside the free parent & alumni network at your school.
           </p>
           <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, fontStyle: 'italic', color: 'rgba(255,255,255,0.8)', margin: '0 0 48px' }}>
             The network opens the door.<br />FastIQ helps them walk through it.
@@ -450,18 +470,35 @@ export default function LandingPage() {
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 32px' }}>
             What does it cost?
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
-            <PricingRow label="Parents & Alumni" sublabel="Join the network, help students, make introductions." price="Free to join" />
-            <PricingRow label="Students — FastIQ" sublabel="Full AI career engine. No credit card to start." price={foundingActive ? '$14.50/mo' : '$29/mo'} highlight={true} badge={foundingActive ? 'Founding Rate' : null} />
-          </div>
-          {foundingActive && (
-            <div style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 12, padding: '14px 20px', marginBottom: 24 }}>
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.5 }}>
-                🏅 Founding rate of <strong style={{ color: '#c9a84c' }}>$14.50/mo</strong> locked in forever. Regular price is $29/mo after April 30.
-                {timeLeft && <span style={{ color: 'rgba(255,255,255,0.35)', marginLeft: 8 }}>{timeLeft}</span>}
-              </p>
+          {/* Two-column pricing split */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 20 }}>
+            {/* Parents & Alumni */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '28px 24px' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Parents & Alumni</p>
+              <p style={{ fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Free</p>
+              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, margin: '0 0 20px' }}>Join the network at your school, help students, make introductions.</p>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.6)', margin: 0 }}>No membership fee. No credit card.</p>
             </div>
-          )}
+            {/* Students FastIQ */}
+            <div style={{ background: 'rgba(232,93,32,0.05)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '28px 24px', position: 'relative' }}>
+              {foundingActive && (
+                <div style={{ position: 'absolute', top: -12, left: 20 }}>
+                  <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#c9a84c', background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 100, padding: '3px 12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>🏅 Founding Rate</span>
+                </div>
+              )}
+              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Students — FastIQ AI</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
+                <p style={{ fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#E85D20', margin: 0 }}>{foundingActive ? '$14.50' : '$29'}</p>
+                <span style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mo</span>
+              </div>
+              {foundingActive && <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 8px' }}>Regular price after April 30: $29/mo</p>}
+              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, margin: '0 0 12px' }}>AI tools that supercharge the free network at your school.</p>
+              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.6)', margin: 0 }}>7-day free trial — no credit card needed.</p>
+            </div>
+          </div>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.65, margin: '0 0 20px', fontStyle: 'italic' }}>
+            The parent & alumni network is free for everyone at every participating school. FastIQ is the optional AI upgrade that helps students activate those warm connections.
+          </p>
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 20px', marginBottom: 28 }}>
             {["✓ 7-day free trial — no credit card needed", "✓ Students can pay — or parents can pay on their student's behalf", "✓ Cancel anytime. No contracts."].map((line, i) => (
               <p key={i} style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: i < 2 ? '0 0 4px' : 0 }}>{line}</p>
@@ -539,7 +576,7 @@ export default function LandingPage() {
         {/* FOOTER */}
         <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>© 2026 College Fast Forward</span>
-          <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>Building parent networks at colleges across the country</span>
+          <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>The parent & alumni network is free at every participating school. FastIQ is available as a paid upgrade for students.</span>
         </div>
 
       </div>
