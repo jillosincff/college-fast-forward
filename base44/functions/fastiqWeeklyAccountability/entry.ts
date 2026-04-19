@@ -6,7 +6,9 @@ Deno.serve(async (req) => {
   const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
 
   try {
-    // Called by trusted scheduled automation — no user auth required
+    // Weekly accountability emails disabled — no longer relevant (Karma removed)
+    console.log('fastiqWeeklyAccountability: disabled, returning early');
+    return Response.json({ success: true, skipped: true, reason: 'Weekly recap emails disabled' });
 
     // Get all FASTIQ profiles with active users
     const profiles = await base44.asServiceRole.entities.FastTrackProProfile.filter({}, '-updated_date', 500);

@@ -116,6 +116,10 @@ Deno.serve(async (req) => {
     
     // Called by trusted scheduled automation — no user auth required
     
+    // Weekly recap/reengagement emails disabled — no longer relevant
+    console.log('runReengagementJob: disabled, returning early');
+    return Response.json({ success: true, skipped: true, reason: 'Weekly reengagement emails disabled' });
+
     const { dryRun = false, limit = 50 } = await req.json().catch(() => ({}));
     
     console.log(`🔄 Starting re-engagement job (dryRun: ${dryRun}, limit: ${limit})`);

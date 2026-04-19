@@ -64,6 +64,10 @@ function html({ firstName, outreachSent, outreachReplied, alumniFound, pendingFo
 }
 
 Deno.serve(async (req) => {
+  // Weekly digest emails disabled — no longer relevant (Karma removed)
+  console.log('sendWeeklyDigestEmail: disabled, returning early');
+  return Response.json({ success: true, skipped: true, reason: 'Weekly digest emails disabled' });
+
   const base44 = createClientFromRequest(req);
   const user = await base44.auth.me();
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
