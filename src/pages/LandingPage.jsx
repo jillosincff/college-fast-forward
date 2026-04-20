@@ -221,7 +221,7 @@ function FAQItem({ q, a }) {
 
 function RoleToggle({ mode, onChange }) {
   return (
-    <div style={{ position: 'sticky', top: 53, zIndex: 90, padding: '10px 16px', background: 'rgba(236,233,227,0.96)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.10)' }}>
+    <div style={{ position: 'sticky', top: 53, zIndex: 90, padding: '10px 16px', background: 'rgba(224,242,254,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(34,211,238,0.18)' }}>
       <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 100, padding: 4 }}>
         <button
           onClick={() => onChange('student')}
@@ -356,13 +356,13 @@ export default function LandingPage() {
         url="https://www.collegefastforward.com"
       />
 
-      <div style={{ minHeight: '100vh', background: '#f0ede8', fontFamily: dm, overflowX: 'hidden' }}>
+      <div style={{ minHeight: '100vh', background: '#f0f9ff', fontFamily: dm, overflowX: 'hidden' }}>
 
-        {/* Ambient color blobs — stronger for depth */}
+        {/* Ambient color blobs — electric energy */}
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
           background: isStudent
-            ? 'radial-gradient(ellipse 90% 50% at 50% -5%, rgba(140,255,30,0.28) 0%, transparent 52%), radial-gradient(ellipse 55% 38% at 92% 18%, rgba(232,93,32,0.16) 0%, transparent 50%), radial-gradient(ellipse 45% 32% at 8% 72%, rgba(59,122,245,0.10) 0%, transparent 50%)'
-            : 'radial-gradient(ellipse 90% 50% at 50% -5%, rgba(59,122,245,0.22) 0%, transparent 52%), radial-gradient(ellipse 45% 32% at 92% 22%, rgba(124,58,237,0.12) 0%, transparent 50%)',
+            ? 'radial-gradient(ellipse 100% 55% at 50% -8%, rgba(34,211,238,0.22) 0%, transparent 55%), radial-gradient(ellipse 60% 40% at 92% 20%, rgba(168,255,62,0.20) 0%, transparent 50%), radial-gradient(ellipse 45% 35% at 5% 70%, rgba(232,93,32,0.10) 0%, transparent 50%)'
+            : 'radial-gradient(ellipse 100% 55% at 50% -8%, rgba(59,122,245,0.22) 0%, transparent 55%), radial-gradient(ellipse 45% 32% at 92% 22%, rgba(124,58,237,0.14) 0%, transparent 50%), radial-gradient(ellipse 40% 30% at 5% 65%, rgba(34,211,238,0.10) 0%, transparent 50%)',
           transition: 'background 0.8s ease',
         }} />
         {/* Subtle paper texture */}
@@ -386,17 +386,17 @@ export default function LandingPage() {
         <RoleToggle mode={mode} onChange={handleModeChange} />
 
         {/* ── HERO GRADIENT BAND ── */}
-        <div style={{ position: 'absolute', top: 96, left: 0, right: 0, height: 420, pointerEvents: 'none', zIndex: 1,
+        <div style={{ position: 'absolute', top: 96, left: 0, right: 0, height: 480, pointerEvents: 'none', zIndex: 1,
           background: isStudent
-            ? 'linear-gradient(180deg, rgba(140,255,30,0.13) 0%, rgba(240,237,232,0) 100%)'
-            : 'linear-gradient(180deg, rgba(59,122,245,0.12) 0%, rgba(240,237,232,0) 100%)',
+            ? 'linear-gradient(180deg, rgba(34,211,238,0.14) 0%, rgba(168,255,62,0.08) 50%, rgba(240,249,255,0) 100%)'
+            : 'linear-gradient(180deg, rgba(59,122,245,0.14) 0%, rgba(124,58,237,0.06) 50%, rgba(240,249,255,0) 100%)',
           transition: 'background 0.7s ease',
         }} />
 
         {/* ── HERO ── */}
         <div key={mode} style={{ position: 'relative', zIndex: 2, padding: '44px 20px 24px', maxWidth: 640, margin: '0 auto', textAlign: 'center', ...modeAnim }}>
           {/* Color block behind headline */}
-          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 520, height: 380, borderRadius: '50%', background: isStudent ? 'radial-gradient(circle, rgba(140,255,30,0.30) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(59,122,245,0.22) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(52px)', animation: 'heroPulse 5s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 560, height: 420, borderRadius: '50%', background: isStudent ? 'radial-gradient(circle, rgba(34,211,238,0.22) 0%, rgba(168,255,62,0.18) 40%, transparent 70%)' : 'radial-gradient(circle, rgba(59,122,245,0.24) 0%, rgba(124,58,237,0.12) 50%, transparent 70%)', pointerEvents: 'none', filter: 'blur(56px)', animation: 'heroPulse 5s ease-in-out infinite' }} />
 
           {/* Live badge */}
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
@@ -517,7 +517,7 @@ export default function LandingPage() {
                 { icon: '🔄', title: 'Pay it forward', desc: 'You help students → their network later helps yours.' },
                 { icon: '🏫', title: '15+ universities', desc: 'Real community across schools and industries.' },
               ].map((b, i) => (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.85)', border: '1.5px solid rgba(37,99,235,0.18)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.07}s both` : 'none', boxShadow: '0 4px 18px rgba(0,0,0,0.09)' }}>
+                <div key={i} style={{ background: '#fff', border: '1.5px solid rgba(34,211,238,0.25)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.07}s both` : 'none', boxShadow: '0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05)' }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9 }}>{b.icon}</span>
                   <p style={{ fontSize: 13, fontWeight: 800, color: '#0d0d0d', margin: '0 0 5px' }}>{b.title}</p>
                   <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.5 }}>{b.desc}</p>
@@ -598,10 +598,10 @@ export default function LandingPage() {
 
         {/* ── STATS BAR ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 56px', maxWidth: 640, margin: '0 auto' }}>
-          <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1.5px solid rgba(22,163,74,0.3)', background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6))', boxShadow: '0 6px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.9)' }}>
+          <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1.5px solid rgba(34,211,238,0.35)', background: 'linear-gradient(135deg, #fff 0%, rgba(240,249,255,0.8) 100%)', boxShadow: '0 8px 32px rgba(34,211,238,0.12), 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)' }}>
             {[['1,000+', 'helpers in the network'], ['15+', 'universities'], ['50+', 'industries']].map(([n, l], i) => (
-              <div key={l} style={{ textAlign: 'center', flex: 1, padding: '22px 8px', borderLeft: i > 0 ? '1.5px solid rgba(0,0,0,0.07)' : 'none' }}>
-                <div style={{ fontSize: 28, fontWeight: 900, color: '#15803d', letterSpacing: '-0.03em', lineHeight: 1 }}>{n}</div>
+              <div key={l} style={{ textAlign: 'center', flex: 1, padding: '22px 8px', borderLeft: i > 0 ? '1.5px solid rgba(0,0,0,0.06)' : 'none' }}>
+                <div style={{ fontSize: 28, fontWeight: 900, color: '#0891b2', letterSpacing: '-0.03em', lineHeight: 1 }}>{n}</div>
                 <div style={{ fontSize: 10.5, color: 'rgba(0,0,0,0.52)', marginTop: 5, lineHeight: 1.35 }}>{l}</div>
               </div>
             ))}
@@ -619,7 +619,7 @@ export default function LandingPage() {
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {steps.map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: (isStudent && i === 3) ? 'rgba(232,93,32,0.07)' : 'rgba(255,255,255,0.82)', border: `1px solid ${(isStudent && i === 3) ? 'rgba(232,93,32,0.3)' : 'rgba(0,0,0,0.10)'}`, borderRadius: 18, padding: '18px 16px', borderLeft: `3px solid ${(isStudent && i === 3) ? '#E85D20' : 'rgba(0,0,0,0.12)'}`, boxShadow: '0 3px 16px rgba(0,0,0,0.08)' }}>
+              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: (isStudent && i === 3) ? 'rgba(255,237,225,0.9)' : '#fff', border: `1px solid ${(isStudent && i === 3) ? 'rgba(232,93,32,0.35)' : 'rgba(0,0,0,0.08)'}`, borderRadius: 18, padding: '18px 16px', borderLeft: `4px solid ${(isStudent && i === 3) ? '#E85D20' : 'rgba(34,211,238,0.6)'}`, boxShadow: '0 4px 20px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06)' }}>
                 <span style={{ fontSize: 28, flexShrink: 0, lineHeight: 1 }}>{s.icon}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -642,7 +642,7 @@ export default function LandingPage() {
             <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FASTIQ_FEATURES.map((f, i) => (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `2.5px solid rgba(232,93,32,${0.35 + i * 0.04})`, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+                <div key={i} style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `3px solid ${i % 2 === 0 ? '#22d3ee' : '#E85D20'}`, boxShadow: '0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05)' }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9, lineHeight: 1 }}>{f.icon}</span>
                   <p style={{ fontSize: 12.5, fontWeight: 800, color: '#111', margin: '0 0 4px', lineHeight: 1.2 }}>{f.label}</p>
                   <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.52)', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
@@ -664,7 +664,7 @@ export default function LandingPage() {
             Free for helpers.<br /><span style={{ color: '#E85D20' }}>Turbo for students.</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div style={{ background: 'rgba(255,255,255,0.88)', border: '1.5px solid rgba(0,0,0,0.11)', borderRadius: 22, padding: '24px 16px', display: 'flex', flexDirection: 'column', boxShadow: '0 6px 28px rgba(0,0,0,0.10)' }}>
+            <div style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 22, padding: '24px 16px', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05)' }}>
               <span style={{ fontSize: 30, marginBottom: 12 }}>🏫</span>
               <p style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>Free Network</p>
               <p style={{ fontSize: 34, fontWeight: 900, color: '#0d0d0d', margin: '0 0 2px', letterSpacing: '-0.04em' }}>$0</p>
@@ -711,7 +711,7 @@ export default function LandingPage() {
         </div>
 
         {/* ── FAQ ── */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '48px 20px 64px', maxWidth: 640, margin: '0 auto', background: 'rgba(255,255,255,0.45)', borderRadius: 24 }}>
+        <div style={{ position: 'relative', zIndex: 2, padding: '48px 20px 64px', maxWidth: 640, margin: '0 auto', background: '#fff', borderRadius: 24, boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)' }}>
           <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FAQs</p>
           <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', margin: '0 0 22px' }}>Got questions? Fair.</h2>
           {FAQS.map((faq, i) => <FAQItem key={i} {...faq} />)}

@@ -236,7 +236,7 @@ export default function PromptsToTry({ onStudentJoin }) {
 
       {/* Bottom CTA line */}
       <div style={{ padding: '18px 20px 0', textAlign: 'center' }}>
-        <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: '0 0 14px', lineHeight: 1.6 }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(0,0,0,0.52)', margin: '0 0 14px', lineHeight: 1.6 }}>
           These are real prompts students are using right now. Try them free for 7 days — no card needed.
         </p>
         <button
