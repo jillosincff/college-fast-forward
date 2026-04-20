@@ -132,9 +132,9 @@ export default function RawVideoTestimonials() {
     <div style={{ position: 'relative', zIndex: 2, padding: '0 0 60px', maxWidth: 640, margin: '0 auto' }}>
       {/* Header */}
       <div style={{ padding: '0 20px', marginBottom: 20 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(255,68,68,0.08)', border: '1px solid rgba(255,68,68,0.22)', borderRadius: 100, padding: '6px 16px', marginBottom: 12 }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff4444', boxShadow: '0 0 8px #ff4444' }} />
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#ff7070', letterSpacing: '0.05em' }}>RAW. UNFILTERED. REAL.</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(185,28,28,0.10)', border: '1.5px solid rgba(185,28,28,0.32)', borderRadius: 100, padding: '6px 16px', marginBottom: 12, boxShadow: '0 2px 10px rgba(185,28,28,0.10)' }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#dc2626', boxShadow: '0 0 8px #dc2626' }} />
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#991b1b', letterSpacing: '0.05em' }}>RAW. UNFILTERED. REAL.</span>
         </div>
         <h2 style={{
           fontFamily: dm, fontSize: 'clamp(22px, 5.5vw, 32px)', fontWeight: 900,

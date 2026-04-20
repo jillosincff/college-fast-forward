@@ -189,8 +189,8 @@ export default function PromptsToTry({ onStudentJoin }) {
     <div style={{ position: 'relative', zIndex: 2, padding: '0 0 64px', maxWidth: 640, margin: '0 auto' }}>
       {/* Section header */}
       <div style={{ padding: '0 20px', marginBottom: 22 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(168,255,62,0.07)', border: '1px solid rgba(168,255,62,0.22)', borderRadius: 100, padding: '6px 16px', marginBottom: 13 }}>
-          <span style={{ fontSize: 11, fontWeight: 800, color: '#a8ff3e', letterSpacing: '0.05em', fontFamily: dm }}>⚡ FastIQ IN ACTION</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(232,93,32,0.10)', border: '1.5px solid rgba(232,93,32,0.35)', borderRadius: 100, padding: '6px 16px', marginBottom: 13, boxShadow: '0 2px 10px rgba(232,93,32,0.12)' }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#c2410c', letterSpacing: '0.05em', fontFamily: dm }}>⚡ FastIQ IN ACTION</span>
         </div>
         <h2 style={{
           fontSize: 'clamp(24px, 6vw, 36px)',
