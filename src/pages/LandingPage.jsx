@@ -15,8 +15,8 @@ const STUDENT_STORIES = [
     name: 'Kayla M.',
     school: 'UF · Finance · Junior',
     quote: 'I sent 40 applications and heard nothing. FastIQ wrote one message to a UF alum at Goldman. She replied in 2 days. TWO DAYS.',
-    win: '☕ Coffee chat → offer',
-    color: '#E85D20',
+    win: '☕ Reply in 48h → offer',
+    color: '#a8ff3e',
     rotate: '-1.5deg',
     photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=160&q=75&auto=format&fit=crop&crop=face',
     bg: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&q=60&auto=format&fit=crop',
@@ -27,7 +27,7 @@ const STUDENT_STORIES = [
     school: 'OSU · Marketing · Senior',
     quote: 'A parent in the network literally forwarded my resume to their friend at P&G. I had zero connection to that person. This is real.',
     win: '🚀 Referral → interview',
-    color: '#7c3aed',
+    color: '#818cf8',
     rotate: '1deg',
     photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&q=75&auto=format&fit=crop&crop=face',
     bg: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=60&auto=format&fit=crop',
@@ -38,7 +38,7 @@ const STUDENT_STORIES = [
     school: 'USC · Tech · Junior',
     quote: 'OK so I booked 3 coffee chats in my first week. My roommate still has zero interviews. I feel kind of guilty lol',
     win: '🎉 3 chats in week 1',
-    color: '#0891b2',
+    color: '#38bdf8',
     rotate: '-0.8deg',
     photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&q=75&auto=format&fit=crop&crop=face',
     bg: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&q=60&auto=format&fit=crop',
@@ -49,7 +49,7 @@ const STUDENT_STORIES = [
     school: 'UGA · Consulting · Sophomore',
     quote: 'The AI literally wrote a better message than anything I could have come up with. 60% reply rate. I want to cry.',
     win: '✉️ 60% reply rate',
-    color: '#059669',
+    color: '#fb923c',
     rotate: '1.2deg',
     photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&q=75&auto=format&fit=crop&crop=face',
     bg: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&q=60&auto=format&fit=crop',
@@ -149,43 +149,46 @@ function PhoneMockup() {
 
 // ── Imperfect student testimonial card ──
 function StudentCard({ story }) {
+  const accentIsLight = story.color === '#a8ff3e' || story.color === '#78ff44';
   return (
     <div style={{
-      width: 250, flexShrink: 0,
+      width: 252, flexShrink: 0,
       borderRadius: 24,
       overflow: 'hidden',
       transform: `rotate(${story.rotate})`,
-      boxShadow: `0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)`,
+      boxShadow: `0 20px 56px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07), 0 0 40px ${story.color}18`,
       scrollSnapAlign: 'start',
       position: 'relative',
     }}>
       {/* Blurred background photo */}
       <div style={{ position: 'absolute', inset: 0 }}>
-        <img src={story.bg} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(18px) brightness(0.25) saturate(0.7)', transform: 'scale(1.1)' }} />
+        <img src={story.bg} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(20px) brightness(0.22) saturate(0.65)', transform: 'scale(1.12)' }} />
       </div>
+      {/* Color top accent bar — thicker + glowing */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${story.color}, ${story.color}88, transparent)`, boxShadow: `0 0 16px ${story.color}99` }} />
       {/* Content */}
-      <div style={{ position: 'relative', zIndex: 1, padding: '18px 16px 16px' }}>
-        {/* Color top accent line */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${story.color}, transparent)` }} />
+      <div style={{ position: 'relative', zIndex: 1, padding: '20px 16px 17px' }}>
         {/* Avatar + name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 13 }}>
-          <div style={{ width: 42, height: 42, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2.5px solid ${story.color}`, boxShadow: `0 0 16px ${story.color}55` }}>
-            <img src={story.photo} alt={story.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display='none'; e.target.parentNode.style.background=story.color; e.target.parentNode.innerHTML=`<span style="font-size:15px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;height:100%">${story.initials}</span>`; }} />
+          <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2.5px solid ${story.color}`, boxShadow: `0 0 18px ${story.color}66` }}>
+            <img src={story.photo} alt={story.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display='none'; e.target.parentNode.style.background=story.color; e.target.parentNode.innerHTML=`<span style="font-size:15px;font-weight:900;color:#000;display:flex;align-items:center;justify-content:center;height:100%">${story.initials}</span>`; }} />
           </div>
           <div>
             <div style={{ fontSize: 12.5, fontWeight: 800, color: '#fff', fontFamily: dm, lineHeight: 1.2 }}>{story.name}</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', fontFamily: dm, marginTop: 1 }}>{story.school}</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.42)', fontFamily: dm, marginTop: 1 }}>{story.school}</div>
           </div>
-          {/* Verified dot */}
-          <div style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80', flexShrink: 0 }} />
+          {/* Live green dot */}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#a8ff3e', boxShadow: '0 0 10px #a8ff3e', flexShrink: 0, animation: 'glowPulse 2s ease infinite' }} />
+          </div>
         </div>
         {/* Quote */}
-        <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.82)', lineHeight: 1.62, margin: '0 0 14px', fontStyle: 'italic', letterSpacing: '-0.01em' }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.65, margin: '0 0 15px', fontStyle: 'italic', letterSpacing: '-0.01em' }}>
           "{story.quote}"
         </p>
-        {/* Win pill */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${story.color}20`, border: `1.5px solid ${story.color}55`, borderRadius: 100, padding: '6px 13px', backdropFilter: 'blur(8px)' }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: story.color, fontFamily: dm }}>{story.win}</span>
+        {/* Win pill — electric accent */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${story.color}22`, border: `1.5px solid ${story.color}66`, borderRadius: 100, padding: '6px 14px', backdropFilter: 'blur(10px)', boxShadow: `0 0 12px ${story.color}33` }}>
+          <span style={{ fontSize: 11.5, fontWeight: 800, color: story.color, fontFamily: dm, textShadow: `0 0 12px ${story.color}88` }}>{story.win}</span>
         </div>
       </div>
     </div>
@@ -299,6 +302,7 @@ export default function LandingPage() {
         @keyframes grainAnim { 0%,100% { transform:translate(0,0); } 25% { transform:translate(-1%,1%); } 50% { transform:translate(1%,-1%); } 75% { transform:translate(-0.5%,0.5%); } }
         @keyframes ctaPop { 0%,100% { transform:scale(1); } 50% { transform:scale(1.015); } }
         @keyframes tickerSlide { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:none; } }
+        @keyframes limeGlow { 0%,100% { box-shadow:0 0 0 0 rgba(168,255,62,0.5); } 50% { box-shadow:0 0 0 10px rgba(168,255,62,0); } }
       `;
       document.head.appendChild(s);
     }
@@ -355,7 +359,7 @@ export default function LandingPage() {
         {/* Ambient warm glow */}
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
           background: isStudent
-            ? 'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(232,93,32,0.22) 0%, transparent 58%), radial-gradient(ellipse 40% 30% at 85% 35%, rgba(0,33,165,0.07) 0%, transparent 50%)'
+            ? 'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(232,93,32,0.2) 0%, transparent 55%), radial-gradient(ellipse 50% 35% at 15% 60%, rgba(168,255,62,0.07) 0%, transparent 50%), radial-gradient(ellipse 40% 30% at 85% 35%, rgba(0,33,165,0.06) 0%, transparent 50%)'
             : 'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(79,140,255,0.16) 0%, transparent 58%), radial-gradient(ellipse 40% 30% at 15% 35%, rgba(74,222,128,0.05) 0%, transparent 50%)',
           transition: 'background 0.8s ease',
         }} />
@@ -370,7 +374,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <button onClick={() => navigate('GetStarted')} style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.36)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 4px' }}>Sign in</button>
-            <button onClick={isStudent ? onStudentJoin : onParentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#fff', background: isStudent ? 'linear-gradient(135deg,#E85D20,#ff7340)' : 'rgba(79,140,255,0.28)', border: isStudent ? 'none' : '1px solid rgba(79,140,255,0.45)', borderRadius: 11, padding: '9px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: isStudent ? '0 4px 18px rgba(232,93,32,0.42)' : 'none' }}>
+            <button onClick={isStudent ? onStudentJoin : onParentJoin} style={{ fontSize: 13, fontWeight: 800, color: isStudent ? '#0a0a0a' : '#fff', background: isStudent ? 'linear-gradient(135deg,#a8ff3e,#78ff44)' : 'rgba(79,140,255,0.28)', border: isStudent ? 'none' : '1px solid rgba(79,140,255,0.45)', borderRadius: 11, padding: '9px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: isStudent ? '0 4px 20px rgba(168,255,62,0.5)' : 'none' }}>
               {isStudent ? 'Try free →' : 'Join free →'}
             </button>
           </div>
@@ -420,21 +424,21 @@ export default function LandingPage() {
             )}
           </p>
 
-          {/* ── MAIN CTA — big, warm, unmissable ── */}
+          {/* ── MAIN CTA — big, electric, unmissable ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', marginBottom: 18 }}>
             {isStudent ? (
               <>
                 <button
                   onClick={onStudentJoin}
                   style={{
-                    fontSize: 20, fontWeight: 900, color: '#fff',
-                    background: 'linear-gradient(108deg, #c94410 0%, #E85D20 30%, #ff7340 62%, #ffab40 100%)',
+                    fontSize: 20, fontWeight: 900, color: '#0a0a0a',
+                    background: 'linear-gradient(108deg, #a8ff3e 0%, #78ff44 40%, #39e500 100%)',
                     backgroundSize: '220% auto',
                     border: 'none', borderRadius: 22,
                     padding: '26px 36px',
                     cursor: 'pointer', width: '100%', maxWidth: 480,
                     minHeight: 'auto',
-                    boxShadow: '0 16px 64px rgba(232,93,32,0.65), 0 2px 0 rgba(255,255,255,0.18) inset, 0 -2px 0 rgba(0,0,0,0.25) inset',
+                    boxShadow: '0 16px 64px rgba(120,255,68,0.45), 0 0 0 2px rgba(168,255,62,0.3), 0 2px 0 rgba(255,255,255,0.3) inset',
                     letterSpacing: '-0.02em', lineHeight: 1.2,
                     animation: 'ctaShine 3.5s linear infinite, ctaPop 4s ease-in-out infinite',
                   }}
@@ -459,7 +463,7 @@ export default function LandingPage() {
 
           {/* Social proof line */}
           <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.28)', margin: '0 0 12px', textAlign: 'center' }}>
-            <span style={{ color: isStudent ? '#4ade80' : '#4f8cff', fontWeight: 700 }}>● Real students getting replies right now</span>
+            <span style={{ color: isStudent ? '#a8ff3e' : '#4f8cff', fontWeight: 700 }}>● Real students getting replies right now</span>
             {' · '}1,000+ helpers across 15+ schools
           </p>
 
@@ -518,9 +522,9 @@ export default function LandingPage() {
           <div style={{ position: 'relative', zIndex: 2, padding: '0 0 60px', maxWidth: 640, margin: '0 auto' }}>
             {/* Section header */}
             <div style={{ padding: '0 20px', marginBottom: 22 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(232,93,32,0.09)', border: '1px solid rgba(232,93,32,0.24)', borderRadius: 100, padding: '6px 16px', marginBottom: 13 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 9px #E85D20' }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.04em' }}>Real students. Real results.</span>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(168,255,62,0.08)', border: '1px solid rgba(168,255,62,0.3)', borderRadius: 100, padding: '6px 16px', marginBottom: 13, boxShadow: '0 0 20px rgba(168,255,62,0.12)' }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#a8ff3e', boxShadow: '0 0 10px #a8ff3e', animation: 'glowPulse 2s ease infinite' }} />
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#a8ff3e', letterSpacing: '0.04em' }}>Real students. Real results.</span>
               </div>
               <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 38px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.032em', lineHeight: 1.1, margin: '0 0 9px' }}>
                 They stopped applying cold.<br />
@@ -560,11 +564,11 @@ export default function LandingPage() {
 
             {/* Rotating win ticker */}
             <div style={{ padding: '0 20px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14, minHeight: 74 }}>
-                <span style={{ fontSize: 30, flexShrink: 0 }}>{WINS[activeWin].emoji}</span>
+              <div style={{ background: 'rgba(168,255,62,0.04)', border: '1px solid rgba(168,255,62,0.15)', borderRadius: 16, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14, minHeight: 74 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(168,255,62,0.1)', border: '1px solid rgba(168,255,62,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>{WINS[activeWin].emoji}</div>
                 <div style={{ flex: 1 }}>
                   <p key={activeWin} style={{ fontSize: 13.5, fontWeight: 700, color: '#fff', margin: '0 0 3px', lineHeight: 1.35, animation: 'tickerSlide 0.3s ease' }}>"{WINS[activeWin].text}"</p>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: 0 }}>{WINS[activeWin].school}</p>
+                  <p style={{ fontSize: 11, color: '#a8ff3e', margin: 0, fontWeight: 600, opacity: 0.7 }}>{WINS[activeWin].school}</p>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 10 }}>
@@ -581,7 +585,7 @@ export default function LandingPage() {
           <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.015)' }}>
             {[['1,000+', 'helpers in the network'], ['15+', 'universities'], ['50+', 'industries']].map(([n, l], i) => (
               <div key={l} style={{ textAlign: 'center', flex: 1, padding: '20px 8px', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
-                <div style={{ fontSize: 26, fontWeight: 900, color: '#E85D20', letterSpacing: '-0.03em', lineHeight: 1 }}>{n}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: '#a8ff3e', letterSpacing: '-0.03em', lineHeight: 1, textShadow: '0 0 20px rgba(168,255,62,0.4)' }}>{n}</div>
                 <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.26)', marginTop: 5, lineHeight: 1.35 }}>{l}</div>
               </div>
             ))}
@@ -630,7 +634,7 @@ export default function LandingPage() {
               ))}
             </div>
             <div style={{ marginTop: 18, textAlign: 'center' }}>
-              <button onClick={onStudentJoin} style={{ fontSize: 13.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.28)', borderRadius: 13, padding: '14px 30px', cursor: 'pointer', minHeight: 'auto' }}>
+              <button onClick={onStudentJoin} style={{ fontSize: 13.5, fontWeight: 800, color: '#0a0a0a', background: 'linear-gradient(108deg, #a8ff3e, #78ff44)', border: 'none', borderRadius: 13, padding: '14px 30px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 24px rgba(168,255,62,0.38)' }}>
                 Get all of this free for 7 days →
               </button>
             </div>
@@ -713,7 +717,7 @@ export default function LandingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', position: 'relative' }}>
               {isStudent ? (
                 <>
-                  <button onClick={onStudentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #E85D20 0%, #ff6b35 100%)', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 12px 48px rgba(232,93,32,0.5)' }}>
+                  <button onClick={onStudentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#0a0a0a', background: 'linear-gradient(108deg, #a8ff3e 0%, #78ff44 50%, #39e500 100%)', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 12px 56px rgba(120,255,68,0.45), 0 0 0 2px rgba(168,255,62,0.25)' }}>
                     🎓 Try FastIQ free — 7 days
                   </button>
                   <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>
