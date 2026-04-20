@@ -225,7 +225,7 @@ function RoleToggle({ mode, onChange }) {
       <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 100, padding: 4 }}>
         <button
           onClick={() => onChange('student')}
-          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'student' ? '#0a0a0a' : 'rgba(0,0,0,0.38)', background: mode === 'student' ? 'linear-gradient(135deg,#a8ff3e,#78ff44)' : 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: mode === 'student' ? '0 4px 22px rgba(168,255,62,0.5)' : 'none', transition: 'all 0.25s ease' }}
+          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'student' ? '#0f172a' : 'rgba(0,0,0,0.38)', background: mode === 'student' ? '#22d3ee' : 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: mode === 'student' ? '0 4px 22px rgba(34,211,238,0.5)' : 'none', transition: 'all 0.25s ease' }}
         >
           🎓 I need help
         </button>
@@ -388,8 +388,8 @@ export default function LandingPage() {
         {/* ── HERO GRADIENT BAND ── */}
         <div style={{ position: 'absolute', top: 96, left: 0, right: 0, height: 480, pointerEvents: 'none', zIndex: 1,
           background: isStudent
-            ? 'linear-gradient(180deg, rgba(34,211,238,0.18) 0%, rgba(34,211,238,0.06) 50%, rgba(248,249,250,0) 100%)'
-            : 'linear-gradient(180deg, rgba(59,122,245,0.16) 0%, rgba(124,58,237,0.06) 50%, rgba(248,249,250,0) 100%)',
+            ? 'linear-gradient(180deg, rgba(34,211,238,0.28) 0%, rgba(34,211,238,0.10) 50%, rgba(248,249,250,0) 100%)'
+            : 'linear-gradient(180deg, rgba(59,122,245,0.22) 0%, rgba(124,58,237,0.08) 50%, rgba(248,249,250,0) 100%)',
           transition: 'background 0.7s ease',
         }} />
 
@@ -604,8 +604,8 @@ export default function LandingPage() {
           <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1.5px solid rgba(34,211,238,0.35)', background: 'linear-gradient(135deg, #fff 0%, rgba(240,249,255,0.8) 100%)', boxShadow: '0 8px 32px rgba(34,211,238,0.12), 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,1)' }}>
             {[['1,000+', 'helpers in the network'], ['15+', 'universities'], ['50+', 'industries']].map(([n, l], i) => (
               <div key={l} style={{ textAlign: 'center', flex: 1, padding: '22px 8px', borderLeft: i > 0 ? '1.5px solid rgba(0,0,0,0.06)' : 'none' }}>
-                <div style={{ fontSize: 28, fontWeight: 900, color: '#0891b2', letterSpacing: '-0.03em', lineHeight: 1 }}>{n}</div>
-                <div style={{ fontSize: 10.5, color: 'rgba(0,0,0,0.52)', marginTop: 5, lineHeight: 1.35 }}>{l}</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: '#0e7490', letterSpacing: '-0.03em', lineHeight: 1 }}>{n}</div>
+                <div style={{ fontSize: 10.5, color: '#334155', marginTop: 5, lineHeight: 1.35 }}>{l}</div>
               </div>
             ))}
           </div>
@@ -722,9 +722,9 @@ export default function LandingPage() {
 
         {/* ── FINAL CTA ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 84px', maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ background: isStudent ? 'linear-gradient(155deg, rgba(255,255,255,0.95) 0%, rgba(140,255,30,0.18) 100%)' : 'linear-gradient(155deg, rgba(255,255,255,0.95) 0%, rgba(59,122,245,0.15) 100%)', border: `2px solid ${isStudent ? 'rgba(100,220,0,0.45)' : 'rgba(59,122,245,0.3)'}`, borderRadius: 26, padding: '52px 24px 48px', position: 'relative', overflow: 'hidden', boxShadow: isStudent ? '0 12px 56px rgba(100,220,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8)' : '0 12px 56px rgba(59,122,245,0.16), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+          <div style={{ background: isStudent ? 'linear-gradient(155deg, rgba(255,255,255,0.95) 0%, rgba(34,211,238,0.12) 100%)' : 'linear-gradient(155deg, rgba(255,255,255,0.95) 0%, rgba(59,122,245,0.15) 100%)', border: `2px solid ${isStudent ? 'rgba(34,211,238,0.45)' : 'rgba(59,122,245,0.3)'}`, borderRadius: 26, padding: '52px 24px 48px', position: 'relative', overflow: 'hidden', boxShadow: isStudent ? '0 12px 56px rgba(34,211,238,0.18), inset 0 1px 0 rgba(255,255,255,0.8)' : '0 12px 56px rgba(59,122,245,0.16), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
             {/* Organic shape accent */}
-            <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%', background: isStudent ? 'rgba(168,255,62,0.12)' : 'rgba(79,140,255,0.08)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%', background: isStudent ? 'rgba(34,211,238,0.12)' : 'rgba(79,140,255,0.08)', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, borderRadius: '40% 60% 30% 70% / 60% 40% 60% 40%', background: isStudent ? 'rgba(232,93,32,0.07)' : 'rgba(124,58,237,0.06)', pointerEvents: 'none' }} />
             <div style={{ fontSize: 46, marginBottom: 16, position: 'relative' }}>{isStudent ? '🚀' : '🤝'}</div>
             <h2 style={{ fontSize: 'clamp(27px, 6.5vw, 46px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.035em', lineHeight: 1.08, margin: '0 0 14px', position: 'relative' }}>
