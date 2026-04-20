@@ -251,7 +251,7 @@ function HeroPhotoStrip() {
     <div style={{ display: 'flex', gap: 8, height: 138, marginBottom: 18 }}>
       {photos.map((p, i) => (
         <div key={i} style={{ flex: p.flex, position: 'relative', borderRadius: 20, overflow: 'hidden', boxShadow: '0 12px 36px rgba(0,0,0,0.55)', transform: `rotate(${p.rotate})`, flexShrink: 0 }}>
-          <img src={p.src} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: p.pos || 'center', filter: 'saturate(0.95) brightness(0.8)' }} />
+          <img src={p.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: p.pos || 'center', filter: 'saturate(0.95) brightness(0.8)' }} />
           {/* Grain overlay */}
           <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '32px', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
