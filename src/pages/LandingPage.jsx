@@ -535,6 +535,70 @@ export default function LandingPage() {
           </div>
         )}
 
+        {/* ── PARENT SCHOOL TRUST STRIP ── */}
+        {!isStudent && (
+          <div style={{ position: 'relative', zIndex: 2, padding: '0 0 48px', maxWidth: 640, margin: '0 auto', animation: 'modeFade 0.32s ease both' }}>
+            <div style={{ padding: '0 20px', marginBottom: 16, textAlign: 'center' }}>
+              <p style={{ fontSize: 11, fontWeight: 800, color: 'rgba(0,0,0,0.32)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>Trusted by parents &amp; alumni from</p>
+            </div>
+            {/* Horizontal scroll badges */}
+            <div style={{
+              display: 'flex', gap: 10,
+              paddingLeft: 20, paddingRight: 20, paddingBottom: 4,
+              overflowX: 'auto', scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none', msOverflowStyle: 'none',
+            }}>
+              {[
+                { abbr: 'UF', name: 'University of Florida', color: '#0021A5', accent: '#FA4616' },
+                { abbr: 'OSU', name: 'Ohio State University', color: '#BA0C2F', accent: '#666' },
+                { abbr: 'PSU', name: 'Penn State', color: '#1E407C', accent: '#fff' },
+                { abbr: 'UGA', name: 'University of Georgia', color: '#BA0C2F', accent: '#000' },
+                { abbr: 'USC', name: 'Univ. of South Carolina', color: '#73000A', accent: '#fff' },
+                { abbr: 'UM', name: 'University of Miami', color: '#005030', accent: '#F47321' },
+                { abbr: 'FSU', name: 'Florida State', color: '#782F40', accent: '#CEB888' },
+              ].map((s) => (
+                <div key={s.abbr} style={{
+                  flexShrink: 0, scrollSnapAlign: 'start',
+                  background: '#fff',
+                  border: '1.5px solid rgba(0,0,0,0.09)',
+                  borderTop: `3px solid ${s.color}`,
+                  borderRadius: 14,
+                  padding: '12px 16px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                  minWidth: 100,
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    background: s.color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 10, fontWeight: 900, color: '#fff',
+                    letterSpacing: '-0.02em',
+                  }}>{s.abbr}</div>
+                  <p style={{ fontSize: 9.5, fontWeight: 600, color: '#334155', margin: 0, textAlign: 'center', lineHeight: 1.35 }}>{s.name}</p>
+                </div>
+              ))}
+              {/* More coming placeholder */}
+              <div style={{
+                flexShrink: 0, scrollSnapAlign: 'start',
+                background: 'rgba(0,0,0,0.03)',
+                border: '1.5px dashed rgba(0,0,0,0.12)',
+                borderRadius: 14,
+                padding: '12px 16px',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+                minWidth: 100,
+              }}>
+                <p style={{ fontSize: 18, margin: 0 }}>+</p>
+                <p style={{ fontSize: 9, fontWeight: 600, color: 'rgba(0,0,0,0.3)', margin: 0, textAlign: 'center', lineHeight: 1.4 }}>More schools joining</p>
+              </div>
+            </div>
+            <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', textAlign: 'center', margin: '14px 20px 0', lineHeight: 1.5 }}>
+              1,000+ parents &amp; alumni helping students across 15+ universities
+            </p>
+          </div>
+        )}
+
         {/* ── PROMPTS TO TRY ── */}
         {isStudent && <PromptsToTry onStudentJoin={onStudentJoin} />}
 
