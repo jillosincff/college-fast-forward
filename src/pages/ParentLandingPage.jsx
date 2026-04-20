@@ -112,7 +112,7 @@ export default function ParentLandingPage({ onStudentClick }) {
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
   const handleJoin = () => navigate('GetStarted');
-  const handleStudent = () => { if (onStudentClick) onStudentClick(); else navigate('GetStarted'); };
+  const handleStudent = () => navigate('LandingPage');
 
   return (
     <div style={{ background: '#0a0a0a', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
