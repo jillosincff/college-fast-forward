@@ -389,27 +389,32 @@ export default function LandingPage() {
           </p>
 
           {/* CTAs */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 11, alignItems: 'center', marginBottom: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 11, alignItems: 'center', marginBottom: 16 }}>
             {isStudent ? (
               <>
-                <button onClick={onStudentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#fff', background: 'linear-gradient(105deg, #E85D20 0%, #ff6b35 50%, #ffab40 100%)', backgroundSize: '200% auto', border: 'none', borderRadius: 18, padding: '20px 32px', cursor: 'pointer', width: '100%', maxWidth: 440, minHeight: 'auto', boxShadow: '0 10px 48px rgba(232,93,32,0.5), 0 2px 0 rgba(255,255,255,0.12) inset', letterSpacing: '-0.01em', lineHeight: 1.25, animation: 'ctaShine 3.5s linear infinite' }}>
-                  🎓 Try FastIQ free — 7 days, no card needed
+                <button onClick={onStudentJoin} style={{ fontSize: 19, fontWeight: 900, color: '#fff', background: 'linear-gradient(105deg, #d44e12 0%, #E85D20 35%, #ff7340 65%, #ffab40 100%)', backgroundSize: '200% auto', border: 'none', borderRadius: 20, padding: '24px 36px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto', boxShadow: '0 14px 56px rgba(232,93,32,0.6), 0 2px 0 rgba(255,255,255,0.15) inset', letterSpacing: '-0.02em', lineHeight: 1.2, animation: 'ctaShine 3s linear infinite', transform: 'scale(1)', transition: 'transform 0.15s ease' }}>
+                  🎓 I&apos;m a student — Try FastIQ free (7 days)
                 </button>
-                <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.55)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 440, minHeight: 'auto' }}>
+                <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto' }}>
                   🤝 I&apos;m a parent/alumni — Join free to help
                 </button>
               </>
             ) : (
               <>
-                <button onClick={onParentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #4f8cff 0%, #7c3aed 100%)', border: 'none', borderRadius: 18, padding: '20px 32px', cursor: 'pointer', width: '100%', maxWidth: 440, minHeight: 'auto', boxShadow: '0 10px 44px rgba(79,140,255,0.38)', letterSpacing: '-0.01em', lineHeight: 1.25 }}>
+                <button onClick={onParentJoin} style={{ fontSize: 19, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #3b7af5 0%, #4f8cff 50%, #7c3aed 100%)', border: 'none', borderRadius: 20, padding: '24px 36px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto', boxShadow: '0 14px 52px rgba(79,140,255,0.45)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
                   🤝 Join free — 2 minutes, zero obligation
                 </button>
-                <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.55)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 440, minHeight: 'auto' }}>
+                <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto' }}>
                   🎓 I&apos;m a student — Try FastIQ free
                 </button>
               </>
             )}
           </div>
+          {/* Social proof line */}
+          <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)', margin: '0 0 12px', textAlign: 'center', fontFamily: dm }}>
+            <span style={{ color: isStudent ? '#4ade80' : '#4f8cff', fontWeight: 700 }}>● Real students getting replies right now</span>
+            {' · '}1,000+ helpers across 15+ schools
+          </p>
 
           {/* Trust signals */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
@@ -428,13 +433,32 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* ── PHONE MOCKUP (student only) ── */}
+        {/* ── HERO VISUAL + PHONE (student only) ── */}
         {isStudent && (
-          <div style={{ position: 'relative', zIndex: 2, padding: '8px 20px 44px', maxWidth: 640, margin: '0 auto', textAlign: 'center', ...modeAnim }}>
-            <div style={{ display: 'inline-block', animation: mounted ? 'floatPhone 5s ease-in-out infinite' : 'none' }}>
-              <PhoneMockup />
+          <div style={{ position: 'relative', zIndex: 2, padding: '4px 20px 40px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
+            {/* Split layout: lifestyle photo + phone */}
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', justifyContent: 'center' }}>
+              {/* Lifestyle image */}
+              <div style={{ flex: '0 0 auto', position: 'relative', borderRadius: 24, overflow: 'hidden', width: 148, height: 220, boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08)', transform: 'rotate(-2deg)' }}>
+                <img
+                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&q=75&auto=format&fit=crop"
+                  alt="Students collaborating"
+                  loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.1) brightness(0.88)' }}
+                />
+                {/* Grain overlay */}
+                <div style={{ position: 'absolute', inset: 0, opacity: 0.08, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '64px', pointerEvents: 'none' }} />
+                {/* Caption sticker */}
+                <div style={{ position: 'absolute', bottom: 10, left: 8, right: 8, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '5px 8px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: '#4ade80', fontFamily: dm, letterSpacing: '0.04em' }}>got a reply in 48h 🎉</span>
+                </div>
+              </div>
+              {/* Phone mockup */}
+              <div style={{ flex: '0 0 auto', animation: mounted ? 'floatPhone 5s ease-in-out infinite' : 'none', transform: 'rotate(1.5deg)' }}>
+                <PhoneMockup />
+              </div>
             </div>
-            <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.2)', margin: '12px 0 0', fontStyle: 'italic' }}>↑ FastIQ just wrote that outreach for you. For real.</p>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', margin: '12px 0 0', fontStyle: 'italic', textAlign: 'center', fontFamily: dm }}>↑ FastIQ found the alum, wrote the message, she replied. Real story.</p>
           </div>
         )}
 
@@ -462,15 +486,24 @@ export default function LandingPage() {
         {isStudent && (
           <div style={{ position: 'relative', zIndex: 2, padding: '0 0 56px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
             <div style={{ padding: '0 20px', marginBottom: 20 }}>
-              <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: dm }}>Real students. Real results.</p>
+              <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: dm }}>📱 Real students. Real results.</p>
               <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 6px' }}>
                 In their own words.{' '}
-                <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 400, fontSize: '0.82em' }}>(no PR polish here)</span>
+                <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 400, fontSize: '0.82em' }}>(no PR polish)</span>
               </h2>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0, fontFamily: dm }}>Video testimonials coming soon — for now, the quotes are real.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 6px #4ade80', flexShrink: 0 }} />
+                <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.38)', margin: 0, fontFamily: dm }}>Raw iPhone videos coming — quotes below are real</p>
+              </div>
             </div>
-            {/* Horizontal scroll cards */}
+            {/* Video placeholder cards + quote cards */}
             <div style={{ display: 'flex', gap: 14, paddingLeft: 20, paddingBottom: 16, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', alignItems: 'flex-start' }}>
+              {/* Video coming soon card */}
+              <div style={{ width: 148, flexShrink: 0, borderRadius: 20, overflow: 'hidden', aspectRatio: '9/16', background: 'linear-gradient(170deg, #1a1a2e 0%, #0d0d18 100%)', border: '1.5px dashed rgba(232,93,32,0.35)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px 12px', scrollSnapAlign: 'start', gap: 10 }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '2px dashed rgba(232,93,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>📹</div>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', textAlign: 'center', lineHeight: 1.4, margin: 0 }}>Raw student video<br />coming soon</p>
+                <p style={{ fontFamily: dm, fontSize: 9.5, color: 'rgba(255,255,255,0.28)', textAlign: 'center', margin: 0, lineHeight: 1.4 }}>Real faces, messy backgrounds, real results</p>
+              </div>
               {STUDENT_STORIES.map((story, i) => (
                 <StudentCard key={i} story={story} />
               ))}
