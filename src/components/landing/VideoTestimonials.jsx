@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 
 const dm = "'DM Sans', system-ui, -apple-system, sans-serif";
 
@@ -7,151 +7,213 @@ const VIDEOS = [
     id: 0,
     name: 'Kayla M.',
     school: 'UF · Finance · Junior',
-    quote: 'The AI draft got me a reply in 48 hours. Game changer.',
-    result: '☕ Coffee chat → offer',
+    quote: 'I sent 40 cold apps. Heard nothing. FastIQ wrote one message to a Goldman alum. She replied in 2 DAYS.',
+    result: '☕ Reply in 48h → offer',
     accentColor: '#22d3ee',
-    thumbnail: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&q=80&auto=format&fit=crop&crop=face',
-    bg: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&q=70&auto=format&fit=crop',
+    avatar: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=200&q=80&auto=format&fit=crop&crop=face',
+    bg: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=900&q=75&auto=format&fit=crop',
+    duration: '0:28',
   },
   {
     id: 1,
     name: 'Jake R.',
     school: 'OSU · Marketing · Senior',
-    quote: 'A parent literally forwarded my resume to their friend at P&G. Zero connection before this.',
+    quote: 'A parent literally forwarded my resume to their P&G contact. Zero connection before CFF. This is actually real.',
     result: '🚀 Referral → interview',
     accentColor: '#a8ff3e',
-    thumbnail: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80&auto=format&fit=crop&crop=face',
-    bg: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=70&auto=format&fit=crop',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80&auto=format&fit=crop&crop=face',
+    bg: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&q=75&auto=format&fit=crop',
+    duration: '0:19',
   },
   {
     id: 2,
     name: 'Alyssa L.',
     school: 'USC · Tech · Junior',
-    quote: '3 coffee chats booked in my first week. My roommate still has zero interviews.',
+    quote: '3 coffee chats booked my first week. My roommate still has zero interviews. I feel kinda guilty lol.',
     result: '🎉 3 chats in week 1',
     accentColor: '#fb923c',
-    thumbnail: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80&auto=format&fit=crop&crop=face',
-    bg: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=70&auto=format&fit=crop',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80&auto=format&fit=crop&crop=face',
+    bg: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=900&q=75&auto=format&fit=crop',
+    duration: '0:24',
   },
 ];
 
-function PlayButton({ size = 56, color = '#22d3ee' }) {
+function BigPlayButton({ size = 64, color = '#22d3ee', onClick }) {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
-      width: size, height: size, borderRadius: '50%',
-      background: color,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: `0 0 0 8px ${color}30, 0 8px 24px ${color}60`,
-      flexShrink: 0,
-    }}>
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: size, height: size, borderRadius: '50%',
+        background: hovered ? color : 'rgba(255,255,255,0.18)',
+        border: `2.5px solid ${color}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer',
+        boxShadow: hovered
+          ? `0 0 0 12px ${color}25, 0 12px 36px ${color}60`
+          : `0 0 0 6px ${color}18, 0 8px 24px rgba(0,0,0,0.4)`,
+        transition: 'all 0.2s ease',
+        backdropFilter: 'blur(8px)',
+        minHeight: 'auto', minWidth: 'auto',
+        padding: 0, flexShrink: 0,
+        transform: hovered ? 'scale(1.08)' : 'scale(1)',
+      }}
+    >
       <div style={{
         width: 0, height: 0,
-        borderTop: `${size * 0.22}px solid transparent`,
-        borderBottom: `${size * 0.22}px solid transparent`,
-        borderLeft: `${size * 0.34}px solid #0f172a`,
-        marginLeft: size * 0.06,
+        borderTop: `${size * 0.2}px solid transparent`,
+        borderBottom: `${size * 0.2}px solid transparent`,
+        borderLeft: `${size * 0.32}px solid ${hovered ? '#0f172a' : '#fff'}`,
+        marginLeft: size * 0.07,
+        transition: 'border-color 0.2s',
       }} />
-    </div>
+    </button>
   );
 }
 
-function FeaturedVideoCard({ video }) {
+function FeaturedVideo({ video, onStudentJoin }) {
   const [playing, setPlaying] = useState(false);
 
   return (
-    <div style={{ width: '100%', borderRadius: 20, overflow: 'hidden', position: 'relative', background: '#0a0a12', boxShadow: `0 24px 64px rgba(0,0,0,0.55), 0 0 0 1.5px ${video.accentColor}40` }}>
-      {/* Top accent line */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${video.accentColor}, ${video.accentColor}55, transparent)`, zIndex: 3, boxShadow: `0 0 16px ${video.accentColor}` }} />
+    <div style={{
+      width: '100%',
+      borderRadius: 22,
+      overflow: 'hidden',
+      background: '#08090f',
+      boxShadow: `0 32px 80px rgba(0,0,0,0.6), 0 0 0 1.5px ${video.accentColor}35`,
+      position: 'relative',
+    }}>
+      {/* Glowing top border */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 3, zIndex: 3,
+        background: `linear-gradient(90deg, ${video.accentColor} 0%, ${video.accentColor}80 60%, transparent 100%)`,
+        boxShadow: `0 0 20px ${video.accentColor}99`,
+      }} />
 
-      {/* Video / thumbnail area */}
-      <div
-        onClick={() => setPlaying(p => !p)}
-        style={{ position: 'relative', aspectRatio: '16/9', cursor: 'pointer', overflow: 'hidden' }}
-      >
-        {/* Background photo */}
+      {/* Main video frame — 16:9 */}
+      <div style={{ position: 'relative', aspectRatio: '16/9', cursor: 'pointer' }} onClick={() => setPlaying(p => !p)}>
+        {/* BG photo */}
         <img
           src={video.bg}
           alt=""
           loading="lazy"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.35) saturate(0.7)', transform: 'scale(1.04)' }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.3) saturate(0.65)', transform: 'scale(1.03)' }}
         />
-
-        {/* Student face */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, top: 0, width: '42%', display: 'flex', alignItems: 'flex-end', padding: '0 0 20px 20px' }}>
-          <img
-            src={video.thumbnail}
-            alt={video.name}
-            loading="lazy"
-            style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${video.accentColor}`, boxShadow: `0 0 24px ${video.accentColor}66` }}
-          />
-        </div>
-
-        {/* Center play */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'opacity 0.2s' }}>
-          <div style={{ transform: playing ? 'scale(0.9)' : 'scale(1)', transition: 'transform 0.2s' }}>
-            <PlayButton size={64} color={video.accentColor} />
-          </div>
-        </div>
+        {/* Cinematic vignette */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%)', pointerEvents: 'none' }} />
+        {/* Bottom gradient for caption */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)', pointerEvents: 'none' }} />
 
         {/* REC badge */}
-        <div style={{ position: 'absolute', top: 14, left: 14, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 100, padding: '5px 12px' }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff4444', boxShadow: '0 0 8px #ff4444', animation: 'glowPulse 1.5s ease infinite' }} />
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#fff', letterSpacing: '0.1em' }}>REAL STUDENT</span>
+        <div style={{ position: 'absolute', top: 16, left: 16, display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 100, padding: '5px 13px' }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff3333', boxShadow: '0 0 8px #ff3333', animation: 'glowPulse 1.5s ease infinite' }} />
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#fff', letterSpacing: '0.12em' }}>STUDENT VIDEO</span>
         </div>
 
-        {/* Duration pill */}
-        <div style={{ position: 'absolute', bottom: 14, right: 14, background: 'rgba(0,0,0,0.7)', borderRadius: 6, padding: '3px 8px' }}>
-          <span style={{ fontFamily: dm, fontSize: 10, color: '#fff', fontWeight: 600 }}>0:24</span>
+        {/* Duration */}
+        <div style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(0,0,0,0.65)', borderRadius: 8, padding: '4px 9px' }}>
+          <span style={{ fontFamily: dm, fontSize: 10.5, color: '#fff', fontWeight: 600 }}>{video.duration}</span>
         </div>
 
-        {/* Bottom gradient */}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
+        {/* Center play button */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BigPlayButton size={72} color={video.accentColor} onClick={() => setPlaying(p => !p)} />
+        </div>
 
-        {/* Quote overlay at bottom */}
-        <div style={{ position: 'absolute', bottom: 14, left: 14, right: 60 }}>
-          <p style={{ fontFamily: dm, fontSize: 12.5, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.45, fontStyle: 'italic' }}>
-            "{video.quote}"
-          </p>
+        {/* Bottom — avatar + quote */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 18px', display: 'flex', alignItems: 'flex-end', gap: 12 }}>
+          <img
+            src={video.avatar}
+            alt={video.name}
+            loading="lazy"
+            style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2.5px solid ${video.accentColor}`, boxShadow: `0 0 16px ${video.accentColor}66`, flexShrink: 0 }}
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontFamily: dm, fontSize: 13.5, color: 'rgba(255,255,255,0.9)', margin: '0 0 5px', lineHeight: 1.45, fontStyle: 'italic', fontWeight: 500 }}>
+              "{video.quote}"
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff' }}>{video.name}</span>
+              <span style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>·</span>
+              <span style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{video.school}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Caption bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div>
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#fff', margin: '0 0 2px' }}>{video.name}</p>
-          <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: 0 }}>{video.school}</p>
+      {/* Result + CTA bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderTop: '1px solid rgba(255,255,255,0.06)', gap: 12 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${video.accentColor}15`, border: `1px solid ${video.accentColor}45`, borderRadius: 100, padding: '6px 14px' }}>
+          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: video.accentColor }}>{video.result}</span>
         </div>
-        <div style={{ display: 'inline-flex', alignItems: 'center', background: `${video.accentColor}18`, border: `1px solid ${video.accentColor}50`, borderRadius: 100, padding: '5px 12px' }}>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: video.accentColor }}>{video.result}</span>
-        </div>
+        <button
+          onClick={onStudentJoin}
+          style={{ fontFamily: dm, fontSize: 12.5, fontWeight: 800, color: '#0f172a', background: video.accentColor, border: 'none', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap', boxShadow: `0 4px 16px ${video.accentColor}50` }}
+        >
+          Get results like this →
+        </button>
       </div>
     </div>
   );
 }
 
-function ThumbCard({ video, isActive, onClick }) {
+function ThumbVideo({ video, isActive, onClick }) {
   return (
     <div
       onClick={onClick}
+      role="button"
       style={{
-        width: 140, flexShrink: 0, borderRadius: 14, overflow: 'hidden',
+        width: 130, flexShrink: 0, borderRadius: 16, overflow: 'hidden',
         cursor: 'pointer', position: 'relative',
-        border: isActive ? `2px solid ${video.accentColor}` : '2px solid rgba(255,255,255,0.08)',
-        boxShadow: isActive ? `0 0 20px ${video.accentColor}55` : '0 4px 16px rgba(0,0,0,0.4)',
-        transition: 'all 0.2s ease',
-        transform: isActive ? 'scale(1.04)' : 'scale(1)',
+        border: isActive ? `2.5px solid ${video.accentColor}` : '2px solid rgba(255,255,255,0.09)',
+        boxShadow: isActive
+          ? `0 0 0 4px ${video.accentColor}20, 0 12px 32px rgba(0,0,0,0.5)`
+          : '0 6px 20px rgba(0,0,0,0.35)',
+        transition: 'all 0.22s ease',
+        transform: isActive ? 'scale(1.05)' : 'scale(1)',
       }}
     >
       <div style={{ position: 'relative', aspectRatio: '9/14' }}>
-        <img src={video.bg} alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.32) saturate(0.6)' }} />
-        <img src={video.thumbnail} alt={video.name} loading="lazy" style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${video.accentColor}` }} />
-        <div style={{ position: 'absolute', top: '35%', left: '50%', transform: 'translate(-50%,-50%)' }}>
-          <PlayButton size={28} color={video.accentColor} />
+        <img
+          src={video.bg}
+          alt=""
+          loading="lazy"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.28) saturate(0.55)' }}
+        />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '65%', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)', pointerEvents: 'none' }} />
+
+        {/* Active indicator */}
+        {isActive && (
+          <div style={{ position: 'absolute', top: 9, left: 9, width: 8, height: 8, borderRadius: '50%', background: video.accentColor, boxShadow: `0 0 10px ${video.accentColor}` }} />
+        )}
+
+        {/* Mini play */}
+        <div style={{ position: 'absolute', top: '38%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <div style={{
+            width: 30, height: 30, borderRadius: '50%',
+            background: isActive ? video.accentColor : 'rgba(255,255,255,0.15)',
+            border: `1.5px solid ${isActive ? video.accentColor : 'rgba(255,255,255,0.4)'}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s',
+          }}>
+            <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: `8px solid ${isActive ? '#0f172a' : '#fff'}`, marginLeft: 2 }} />
+          </div>
         </div>
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: 50, left: 8, right: 8 }}>
-          <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#fff', margin: 0, textAlign: 'center', lineHeight: 1.3 }}>{video.name}</p>
-          <p style={{ fontFamily: dm, fontSize: 8, color: 'rgba(255,255,255,0.45)', margin: '1px 0 0', textAlign: 'center' }}>{video.school.split(' · ')[0]}</p>
+
+        {/* Name + avatar at bottom */}
+        <div style={{ position: 'absolute', bottom: 8, left: 8, right: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+          <img
+            src={video.avatar}
+            alt={video.name}
+            loading="lazy"
+            style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${video.accentColor}`, flexShrink: 0 }}
+          />
+          <div>
+            <p style={{ fontFamily: dm, fontSize: 8.5, fontWeight: 800, color: '#fff', margin: 0, lineHeight: 1.2 }}>{video.name}</p>
+            <p style={{ fontFamily: dm, fontSize: 7.5, color: 'rgba(255,255,255,0.4)', margin: 0 }}>{video.school.split(' · ')[0]}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -162,52 +224,67 @@ export default function VideoTestimonials({ onStudentJoin }) {
   const [activeIdx, setActiveIdx] = useState(0);
 
   return (
-    <div style={{ position: 'relative', zIndex: 2, padding: '0 0 60px', maxWidth: 640, margin: '0 auto' }}>
+    <div style={{ position: 'relative', zIndex: 2, padding: '0 0 52px', maxWidth: 640, margin: '0 auto' }}>
       {/* Section header */}
-      <div style={{ padding: '0 20px', marginBottom: 20 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(34,211,238,0.10)', border: '1.5px solid rgba(34,211,238,0.35)', borderRadius: 100, padding: '6px 16px', marginBottom: 12 }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 8px #22d3ee', animation: 'glowPulse 2s ease infinite' }} />
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#0e7490', letterSpacing: '0.05em' }}>STUDENTS GETTING REPLIES RIGHT NOW</span>
+      <div style={{ padding: '0 20px', marginBottom: 18 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(34,211,238,0.10)', border: '1.5px solid rgba(34,211,238,0.38)', borderRadius: 100, padding: '6px 16px', marginBottom: 11, boxShadow: '0 2px 14px rgba(34,211,238,0.14)' }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 10px #22d3ee', animation: 'glowPulse 2s ease infinite' }} />
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#0891b2', letterSpacing: '0.06em' }}>STUDENTS GETTING RESULTS RIGHT NOW</span>
         </div>
-        <h2 style={{ fontFamily: dm, fontSize: 'clamp(24px, 6vw, 34px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 6px' }}>
+        <h2 style={{ fontFamily: dm, fontSize: 'clamp(26px, 7vw, 38px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.032em', lineHeight: 1.08, margin: '0 0 6px' }}>
           Real students.<br />
-          <span style={{ color: '#0891b2' }}>Real results.</span>
+          <span style={{ color: '#0891b2' }}>Real proof.</span>
         </h2>
         <p style={{ fontFamily: dm, fontSize: 13.5, color: '#334155', margin: 0, lineHeight: 1.6 }}>
-          Don't take our word for it — hear it from them.
+          Not actors. Not fake screenshots. Just people your age, getting replies.
         </p>
       </div>
 
-      {/* Featured video */}
-      <div style={{ padding: '0 20px', marginBottom: 14 }}>
-        <FeaturedVideoCard video={VIDEOS[activeIdx]} />
+      {/* Featured large video */}
+      <div style={{ padding: '0 20px', marginBottom: 16 }}>
+        <FeaturedVideo video={VIDEOS[activeIdx]} onStudentJoin={onStudentJoin} />
       </div>
 
-      {/* Thumbnail row */}
-      <div style={{ paddingLeft: 20, paddingRight: 20, marginBottom: 18 }}>
-        <p style={{ fontFamily: dm, fontSize: 10.5, color: 'rgba(0,0,0,0.35)', margin: '0 0 10px', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 700 }}>Watch more →</p>
-        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', paddingBottom: 4 }}>
+      {/* Thumb switcher row */}
+      <div style={{ padding: '0 20px', marginBottom: 18 }}>
+        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: 'rgba(0,0,0,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 10px' }}>More stories →</p>
+        <div style={{
+          display: 'flex', gap: 10,
+          overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none', msOverflowStyle: 'none',
+          paddingBottom: 4,
+        }}>
           {VIDEOS.map((v, i) => (
-            <ThumbCard key={v.id} video={v} isActive={i === activeIdx} onClick={() => setActiveIdx(i)} />
+            <ThumbVideo key={v.id} video={v} isActive={i === activeIdx} onClick={() => setActiveIdx(i)} />
           ))}
-          {/* "More coming" placeholder */}
-          <div style={{ width: 140, flexShrink: 0, borderRadius: 14, overflow: 'hidden', border: '2px dashed rgba(34,211,238,0.25)', background: 'rgba(34,211,238,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, aspectRatio: '9/14', cursor: 'default' }}>
-            <span style={{ fontSize: 22 }}>📱</span>
-            <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: 'rgba(0,0,0,0.35)', textAlign: 'center', margin: 0, lineHeight: 1.4, padding: '0 8px' }}>More dropping soon</p>
+          {/* "More dropping" placeholder */}
+          <div style={{
+            width: 130, flexShrink: 0, borderRadius: 16, overflow: 'hidden',
+            border: '2px dashed rgba(34,211,238,0.22)', background: 'rgba(34,211,238,0.04)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            gap: 7, padding: '0 10px', cursor: 'default', aspectRatio: '9/14',
+          }}>
+            <span style={{ fontSize: 24 }}>📱</span>
+            <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: 'rgba(0,0,0,0.32)', textAlign: 'center', margin: 0, lineHeight: 1.45 }}>More dropping soon</p>
           </div>
         </div>
       </div>
 
-      {/* CTA */}
-      <div style={{ padding: '0 20px', textAlign: 'center' }}>
-        <button
-          onClick={onStudentJoin}
-          style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', background: '#22d3ee', border: 'none', borderRadius: 13, padding: '14px 30px', cursor: 'pointer', minHeight: 'auto', fontFamily: dm, boxShadow: '0 10px 15px -3px rgba(34,211,238,0.3)' }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#67e8f9'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = '#22d3ee'; }}
-        >
-          I want results like this → Try free 7 days
-        </button>
+      {/* Dot nav */}
+      <div style={{ display: 'flex', gap: 7, justifyContent: 'center', padding: '0 20px' }}>
+        {VIDEOS.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveIdx(i)}
+            style={{
+              width: i === activeIdx ? 22 : 7, height: 7, borderRadius: 4,
+              background: i === activeIdx ? '#22d3ee' : 'rgba(0,0,0,0.14)',
+              border: 'none', padding: 0, cursor: 'pointer', minHeight: 'auto',
+              transition: 'all 0.25s ease',
+              boxShadow: i === activeIdx ? '0 2px 8px rgba(34,211,238,0.5)' : 'none',
+            }}
+          />
+        ))}
       </div>
     </div>
   );
