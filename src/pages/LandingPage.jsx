@@ -418,9 +418,9 @@ export default function LandingPage() {
               </>
             ) : (
               <>
-                One intro from you<br />
-                <span style={{ color: '#2563eb' }}>can actually change</span>{' '}
-                <span style={{ color: 'rgba(0,0,0,0.5)', fontWeight: 700 }}>a student's whole path.</span>
+                Join the free parent &amp; alumni network —{' '}
+                <span style={{ color: '#2563eb' }}>real people who actually care</span>{' '}
+                <span style={{ color: 'rgba(0,0,0,0.5)', fontWeight: 700 }}>about helping our kids succeed.</span>
               </>
             )}
           </h1>
@@ -435,7 +435,8 @@ export default function LandingPage() {
             {isStudent ? (
               <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(0,0,0,0.75)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
             ) : (
-              <>Free to join, zero obligation. The more parents and alumni connect, the stronger the whole community gets — including for your own kids.</>
+              <>We're not LinkedIn. We're parents and alumni opening our networks because we want to see the next generation win. The more of us who join, the stronger the opportunities become for every student — including your own.</>
+            
             )}
           </p>
 
@@ -520,10 +521,10 @@ export default function LandingPage() {
           <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 52px', maxWidth: 640, margin: '0 auto', animation: 'modeFade 0.32s ease both' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
-                { icon: '⏱', title: '15 min/month', desc: "That's genuinely all it takes. One call can change someone's direction." },
-                { icon: '🔒', title: 'You control everything', desc: 'Reply to who you want. No pressure, no spam, ever.' },
-                { icon: '🔄', title: 'Pay it forward', desc: 'You help students → their network later helps yours.' },
-                { icon: '🏫', title: '15+ universities', desc: 'Real community across schools and industries.' },
+                { icon: '❤️', title: 'Real people who care', desc: 'Real parents and alumni who actually want to help — not just another cold connection.' },
+                { icon: '🚪', title: 'Warm intros change everything', desc: 'One warm introduction from someone who genuinely cares can open doors that cold applications never will.' },
+                { icon: '🔄', title: 'The network pays it forward', desc: 'You help one student today. The network helps yours tomorrow.' },
+                { icon: '🏫', title: '15+ universities & growing', desc: 'Trusted by parents & alumni from UF, Ohio State, Penn State, and growing across 15+ schools.' },
               ].map((b, i) => (
                 <div key={i} style={{ background: '#fff', border: '1.5px solid rgba(34,211,238,0.25)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.07}s both` : 'none', boxShadow: '0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05)' }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9 }}>{b.icon}</span>
@@ -539,7 +540,7 @@ export default function LandingPage() {
         {!isStudent && (
           <div style={{ position: 'relative', zIndex: 2, padding: '0 0 48px', maxWidth: 640, margin: '0 auto', animation: 'modeFade 0.32s ease both' }}>
             <div style={{ padding: '0 20px', marginBottom: 16, textAlign: 'center' }}>
-              <p style={{ fontSize: 11, fontWeight: 800, color: 'rgba(0,0,0,0.32)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>Trusted by parents &amp; alumni from</p>
+              <p style={{ fontSize: 11, fontWeight: 800, color: 'rgba(0,0,0,0.32)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>Trusted by parents &amp; alumni from University of Florida, Ohio State, Penn State, and growing across 15+ universities</p>
             </div>
             {/* Horizontal scroll badges */}
             <div style={{
