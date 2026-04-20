@@ -28,7 +28,7 @@ const FASTIQ_FEATURES = [
   { icon: '✉️', label: 'Smart Outreach', desc: 'AI drafts messages that actually get replies' },
   { icon: '📄', label: 'Resume Tailoring', desc: 'Rewrite for any role in 30 seconds' },
   { icon: '🎤', label: 'Mock Interviews', desc: 'Practice with real AI feedback' },
-  { icon: '📊', label: 'Company Intel', desc: 'Know who's actually hiring right now' },
+  { icon: '📊', label: 'Company Intel', desc: "Know who's actually hiring right now" },
   { icon: '🗺️', label: 'Daily Action Plan', desc: 'AI tells you exactly what to do next' },
 ];
 
