@@ -470,60 +470,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
       </div>
 
-      {/* ── VILLAGE ── */}
-      <div style={{
-        background: '#fff9f6',
-        borderTop: '1px solid rgba(232,93,32,0.1)',
-        borderBottom: '1px solid rgba(232,93,32,0.1)',
-        padding: '64px 24px',
-        textAlign: 'center',
-      }}>
-        <div style={{ maxWidth: 560, margin: '0 auto' }}>
-          <h2 style={{
-            fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 48px)',
-            fontWeight: 700, color: '#111827',
-            lineHeight: 1.2, letterSpacing: '-0.02em',
-            margin: '0 0 8px',
-          }}>
-            It takes a village.
-          </h2>
-          <h2 style={{
-            fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 48px)',
-            fontWeight: 700, color: '#E85D20', fontStyle: 'italic',
-            lineHeight: 1.2, letterSpacing: '-0.02em',
-            margin: '0 0 24px',
-          }}>
-            And you're a big part of it.
-          </h2>
-          <p style={{
-            fontFamily: dmSans, fontSize: 17,
-            color: '#6b7280', lineHeight: 1.7,
-            margin: '0 auto 32px',
-          }}>
-            Every parent who joins makes the network stronger — not just for their own student, but for every student in it. The more of us who show up, the more doors get opened.
-          </p>
-          <p style={{
-            fontFamily: dmSans, fontSize: 13, fontWeight: 600,
-            color: '#9ca3af', letterSpacing: '0.06em',
-            textTransform: 'uppercase', margin: '0 0 20px',
-          }}>
-            Whatever school your kid goes to, that's the network you're in.
-          </p>
-          <button onClick={handleJoin} style={{
-            fontFamily: dmSans, fontSize: 14, fontWeight: 600,
-            color: '#E85D20', background: 'none',
-            border: '1px solid rgba(232,93,32,0.35)',
-            borderRadius: 10, padding: '12px 28px',
-            cursor: 'pointer', minHeight: 'auto',
-            transition: 'all 0.15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; e.currentTarget.style.borderColor = '#E85D20'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.35)'; }}
-          >
-            Help grow the village — join free →
-          </button>
-        </div>
-      </div>
+
 
       {/* ── PRICING ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
