@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { trackEvent } from '@/components/utils/analytics';
 import { base44 } from '@/api/base44Client';
@@ -6,577 +6,462 @@ import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { toast } from 'sonner';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
-const dmSans = "'DM Sans', system-ui, sans-serif";
-const playfair = "'Playfair Display', Georgia, serif";
+const dm = "'DM Sans', system-ui, sans-serif";
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
-const STATS = [
-  { number: '1,000+', label: 'Parents & Alumni' },
-  { number: '15+', label: 'Universities' },
-  { number: '50+', label: 'Industries' },
+const WINS = [
+  { emoji: '🎉', text: 'Got a reply from a Goldman alum in 2 days', school: 'UF · Finance' },
+  { emoji: '💼', text: 'Landed my internship through a parent intro', school: 'OSU · Marketing' },
+  { emoji: '🚀', text: 'Had 3 coffee chats set up in my first week', school: 'USC · Tech' },
+  { emoji: '✉️', text: 'FastIQ wrote my outreach — got a 60% reply rate', school: 'UGA · Consulting' },
 ];
 
-const HOW_IT_WORKS = [
-  { step: '1', text: "Fill out a short profile — your industry, company, and how you're willing to help." },
-  { step: '2', text: 'Students in the network find you and reach out when they need guidance.' },
-  { step: '3', text: 'You decide if and how you want to help. No commitment, no obligation.' },
-];
-
-const SOCIAL_PROOF = [
-  { quote: "A conversation through CFF changed the trajectory of my son's career.", author: 'UF Parent' },
-  { quote: 'My daughter landed her internship through a connection she never would have found alone.', author: 'CFF Member' },
-  { quote: 'One warm intro did more than 50 applications.', author: 'Student, Class of 2025' },
+const STEPS = [
+  { icon: '🏫', title: 'Free network at your school', desc: 'Parents & alumni who actually want to help — not a cold job board.' },
+  { icon: '📝', title: 'Post what you need', desc: 'Looking for a referral, mock interview, or just advice? Say it.' },
+  { icon: '🤝', title: 'Get warm intros', desc: 'Real humans reach out. Skip the applicant pile.' },
+  { icon: '⚡', title: 'FastIQ turbocharges it', desc: 'AI finds alumni, writes your outreach, preps you for the interview.' },
 ];
 
 const FASTIQ_FEATURES = [
-  { icon: '🔍', label: 'Alumni Search', desc: 'Find alumni at target companies and get AI-drafted outreach that sounds human' },
-  { icon: '📄', label: 'Resume Tailoring', desc: 'Score and rewrite your resume for specific roles and companies' },
-  { icon: '🎤', label: 'Mock Interviews', desc: 'Practice with AI feedback tailored to the role and company' },
-  { icon: '📊', label: 'Company Intel', desc: 'Real-time hiring signals so you know who is actually hiring' },
-  { icon: '⚡', label: 'Daily Briefing', desc: 'Tells your student exactly what to do next in their search' },
+  { icon: '🔍', label: 'Alumni Search', desc: 'Find anyone at your target companies' },
+  { icon: '✉️', label: 'Smart Outreach', desc: 'AI drafts messages that actually get replies' },
+  { icon: '📄', label: 'Resume Tailoring', desc: 'Rewrite for any role in 30 seconds' },
+  { icon: '🎤', label: 'Mock Interviews', desc: 'Practice with real AI feedback' },
+  { icon: '📊', label: 'Company Intel', desc: 'Know who's actually hiring right now' },
+  { icon: '🗺️', label: 'Daily Action Plan', desc: 'AI tells you exactly what to do next' },
 ];
 
 const FAQS = [
-  {
-    q: "How does my kid actually connect with someone?",
-    a: "Students search the network by industry, company, or role. When they find someone relevant, they send a message directly through the platform. You get notified and decide whether and how to respond. It's that simple.",
-  },
-  {
-    q: "Do I have to respond to every student who reaches out?",
-    a: "Absolutely not. You set your own availability and respond only when you want to. There's no obligation, no minimum commitment, and no pressure. Even one conversation can make a real difference.",
-  },
-  {
-    q: "What's the difference between the free network and FastIQ?",
-    a: "The network is the community — parents and alumni making themselves available to students for introductions and advice. FastIQ is an AI career engine that helps students search alumni, tailor their resume, practice interviews, and know exactly what to do next. The network is free. FastIQ is a paid upgrade for students who want to go further.",
-  },
-  {
-    q: "Can I pay for my student's FastIQ?",
-    a: "Yes. Either the student or a parent can unlock FastIQ. It starts with a free 7-day trial — no credit card needed — and then continues at $14.50/month (Founding Rate through April 30, then $29/month).",
-  },
-  {
-    q: "Is my contact information visible to everyone?",
-    a: "No. Your email address is never shown publicly. Students can message you through the platform, but your personal contact details stay private unless you choose to share them directly.",
-  },
-  {
-    q: "What school does my student need to go to?",
-    a: "Any participating school. We currently support 15+ universities and are growing. When you join, you tell us which school your student attends and you're connected with other parents and alumni from that same school.",
-  },
-  {
-    q: "I'm an alumni, not a parent — can I still join?",
-    a: "Absolutely. Alumni are a crucial part of the network. Students specifically look for alumni at companies they want to work at. Your experience and connections are exactly what they need.",
-  },
+  { q: "Is the network actually free?", a: "Yes — 100% free for parents and alumni, forever. No membership fee, no catch. FastIQ is the optional AI upgrade for students." },
+  { q: "What's FastIQ?", a: "FastIQ is AI that searches alumni at your target companies, drafts personalized outreach, tailors your resume, runs mock interviews, and tells you exactly what to do next. It supercharges the free network." },
+  { q: "How does the 7-day trial work?", a: "Sign up, start using FastIQ — no credit card needed. After 7 days, it's $14.50/mo (Founding Rate until April 30, then $29/mo). Cancel anytime." },
+  { q: "Can my parents pay for FastIQ?", a: "Yes. Either you or a parent can unlock it. Parents can gift FastIQ directly from their account." },
+  { q: "What schools are in the network?", a: "15+ universities and growing. UF, Ohio State, USC, UGA, Penn State, and more. Any school can join." },
+  { q: "I'm alumni — can I join to help?", a: "Absolutely. Alumni are a huge part of the network. Students specifically search for alumni at their target companies." },
 ];
 
-const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
-
-function Section({ children, style = {} }) {
+function Countdown({ timeLeft }) {
+  if (!timeLeft) return null;
   return (
-    <div style={{
-      position: 'relative', zIndex: 2,
-      padding: '80px 24px',
-      maxWidth: 720, margin: '0 auto',
-      ...style,
-    }}>
-      {children}
-    </div>
-  );
-}
-
-function Divider() {
-  return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px' }}>
-      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)' }} />
-    </div>
-  );
-}
-
-function PricingRow({ label, sublabel, price, highlight, badge }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '20px 24px',
-      background: highlight ? 'rgba(232,93,32,0.06)' : 'rgba(255,255,255,0.02)',
-      border: `1px solid ${highlight ? 'rgba(232,93,32,0.2)' : 'rgba(255,255,255,0.07)'}`,
-      borderRadius: 14, gap: 16, flexWrap: 'wrap',
-    }}>
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff', margin: 0 }}>{label}</p>
-          {badge && (
-            <span style={{
-              fontFamily: dmSans, fontSize: 10, fontWeight: 700,
-              color: '#E85D20', background: 'rgba(232,93,32,0.12)',
-              border: '1px solid rgba(232,93,32,0.3)',
-              borderRadius: 100, padding: '2px 10px',
-              letterSpacing: '0.06em', textTransform: 'uppercase',
-            }}>{badge}</span>
-          )}
-        </div>
-        {sublabel && (
-          <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.5 }}>{sublabel}</p>
-        )}
-      </div>
-      <p style={{ fontFamily: playfair, fontSize: 22, fontWeight: 700, color: highlight ? '#E85D20' : 'rgba(255,255,255,0.7)', margin: 0, whiteSpace: 'nowrap' }}>{price}</p>
-    </div>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 100, padding: '4px 12px', fontSize: 12, fontWeight: 600, color: '#c9a84c', fontFamily: dm }}>
+      ⏱ {timeLeft} left at this price
+    </span>
   );
 }
 
 function FAQItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', overflow: 'hidden' }}>
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          width: '100%', textAlign: 'left',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-          padding: '20px 0', background: 'none', border: 'none',
-          cursor: 'pointer', minHeight: 'auto',
-        }}
-      >
-        <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff', lineHeight: 1.4 }}>{q}</span>
-        <span style={{
-          fontFamily: dmSans, fontSize: 20, color: '#E85D20', flexShrink: 0,
-          transition: 'transform 0.2s ease',
-          transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
-          display: 'inline-block',
-        }}>+</span>
+    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '18px 0', background: 'none', border: 'none', cursor: 'pointer', gap: 12, minHeight: 'auto',
+      }}>
+        <span style={{ fontFamily: dm, fontSize: 16, fontWeight: 600, color: '#fff', lineHeight: 1.4 }}>{q}</span>
+        <span style={{ fontSize: 18, color: '#E85D20', flexShrink: 0, transform: open ? 'rotate(45deg)' : 'none', display: 'inline-block', transition: 'transform 0.2s' }}>+</span>
       </button>
-      {open && (
-        <p style={{
-          fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.55)',
-          lineHeight: 1.7, margin: '0 0 20px', maxWidth: 580,
-        }}>{a}</p>
-      )}
+      {open && <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: '0 0 18px', paddingRight: 24 }}>{a}</p>}
+    </div>
+  );
+}
+
+// Animated typing effect for the hero
+function TypingDemo() {
+  const messages = [
+    "Hey [Alumni Name], I'm a junior at UF studying finance...",
+    "I saw you worked at Goldman — I'd love 15 minutes...",
+    "FastIQ drafted this. Sent. ✓ Reply in 18 hours.",
+  ];
+  const [lineIdx, setLineIdx] = useState(0);
+  const [text, setText] = useState('');
+  const [typing, setTyping] = useState(true);
+
+  useEffect(() => {
+    let timeout;
+    const full = messages[lineIdx];
+    if (typing) {
+      if (text.length < full.length) {
+        timeout = setTimeout(() => setText(full.slice(0, text.length + 1)), 28);
+      } else {
+        timeout = setTimeout(() => setTyping(false), 1400);
+      }
+    } else {
+      timeout = setTimeout(() => {
+        setText('');
+        setLineIdx((lineIdx + 1) % messages.length);
+        setTyping(true);
+      }, 500);
+    }
+    return () => clearTimeout(timeout);
+  }, [text, typing, lineIdx]);
+
+  const colors = ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.7)', '#4ade80'];
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+      borderRadius: 16, padding: '20px 20px', maxWidth: 400, margin: '0 auto',
+      fontFamily: dm, fontSize: 14, lineHeight: 1.6,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>FastIQ live</span>
+      </div>
+      <p style={{ color: colors[lineIdx], margin: 0, minHeight: 44, lineHeight: 1.55 }}>
+        {text}<span style={{ opacity: typing ? 1 : 0, color: '#E85D20' }}>|</span>
+      </p>
     </div>
   );
 }
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
-  const [activeQuote, setActiveQuote] = useState(0);
   const [timeLeft, setTimeLeft] = useState('');
   const [showFoundingBanner, setShowFoundingBanner] = useState(true);
+  const [activeWin, setActiveWin] = useState(0);
 
   useEffect(() => {
     if (!document.getElementById('lp-fonts')) {
       const link = document.createElement('link');
       link.id = 'lp-fonts';
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap';
       document.head.appendChild(link);
     }
     sessionStorage.removeItem('oauth_redirect_in_progress');
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('auth_error') === 'timeout') {
-      toast.error('Sign-in timed out. Please try again or use Magic Link.', { duration: 6000 });
+      toast.error('Sign-in timed out. Please try again.', { duration: 6000 });
       window.history.replaceState({}, '', window.location.pathname + window.location.hash);
     }
     setMounted(true);
 
     const updateCountdown = () => {
-      const now = new Date();
-      const diff = FOUNDING_DEADLINE - now;
+      const diff = FOUNDING_DEADLINE - new Date();
       if (diff <= 0) { setTimeLeft(''); return; }
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      setTimeLeft(`${days}d ${hours}h remaining`);
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      if (days > 0) setTimeLeft(`${days}d ${hours}h`);
+      else setTimeLeft(`${hours}h ${mins}m`);
     };
-
     updateCountdown();
-    const countdown = setInterval(updateCountdown, 60000);
-    const quotes = setInterval(() => setActiveQuote(q => (q + 1) % SOCIAL_PROOF.length), 4000);
-    return () => { clearInterval(countdown); clearInterval(quotes); };
+    const t1 = setInterval(updateCountdown, 30000);
+    const t2 = setInterval(() => setActiveWin(w => (w + 1) % WINS.length), 3000);
+    return () => { clearInterval(t1); clearInterval(t2); };
   }, []);
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
 
-  const onParentJoin = () => {
-    trackEvent('cta_parent_clicked');
-    localStorage.setItem('pending_intent', 'helper');
-    const callbackUrl = window.location.origin + '/#GatorWelcome';
-    base44.auth.redirectToLogin(callbackUrl);
-  };
-
   const onStudentJoin = () => {
     trackEvent('cta_student_clicked');
     localStorage.setItem('pending_intent', 'seeker');
-    const callbackUrl = window.location.origin + '/#GatorWelcome';
-    base44.auth.redirectToLogin(callbackUrl);
+    base44.auth.redirectToLogin(window.location.origin + '/#GatorWelcome');
   };
+
+  const onParentJoin = () => {
+    trackEvent('cta_parent_clicked');
+    localStorage.setItem('pending_intent', 'helper');
+    base44.auth.redirectToLogin(window.location.origin + '/#GatorWelcome');
+  };
+
+  const fade = { opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' };
 
   return (
     <>
-      <FoundingMemberBanner
-        show={showFoundingBanner}
-        onUpgrade={() => navigate('GetStarted')}
-        onDismiss={() => setShowFoundingBanner(false)}
-      />
-
+      <FoundingMemberBanner show={showFoundingBanner} onUpgrade={() => navigate('GetStarted')} onDismiss={() => setShowFoundingBanner(false)} />
       <SocialMetaTags
-        title="College Fast Forward — FastIQ: Direction, Action, and Real Progress for Your Student"
-        description="College Fast Forward connects students with parents and alumni who want to help. Free to join. FastIQ AI upgrade from $29/month."
+        title="College Fast Forward — Stop cold-applying. Get warm intros + FastIQ AI."
+        description="Free parent & alumni network at your school. FastIQ AI turns connections into interviews and jobs. 7-day free trial, no credit card needed."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />
 
-      <div style={{ minHeight: '100vh', background: '#0d1117', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ minHeight: '100vh', background: '#0a0a0f', fontFamily: dm, position: 'relative', overflowX: 'hidden' }}>
 
-        {/* Background glow */}
-        <div style={{
-          position: 'fixed', inset: 0,
-          backgroundImage: `
-            radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,93,32,0.1) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 40% at 85% 70%, rgba(8,33,165,0.06) 0%, transparent 50%)
-          `,
-          pointerEvents: 'none', zIndex: 0,
-        }} />
+        {/* Ambient gradients */}
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+          background: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(232,93,32,0.12) 0%, transparent 60%),
+                       radial-gradient(ellipse 40% 30% at 80% 60%, rgba(0,33,165,0.08) 0%, transparent 50%)` }} />
 
-        {/* Grid texture */}
-        <div style={{
-          position: 'fixed', inset: 0,
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px',
-          pointerEvents: 'none', zIndex: 0,
-        }} />
-
-        {/* NAV */}
+        {/* ── NAV ── */}
         <nav style={{
-          position: 'relative', zIndex: 10,
+          position: 'sticky', top: 0, zIndex: 100,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '20px 32px',
+          padding: '14px 20px',
+          background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(12px)',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 12px rgba(232,93,32,0.6)' }} />
-            <span style={{ fontFamily: playfair, fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '0.02em' }}>College Fast Forward</span>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 10px rgba(232,93,32,0.7)' }} />
+            <span style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>CFF</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={() => navigate('GetStarted')} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto' }}>Sign In</button>
-            <button onClick={() => {
-              trackEvent('cta_getstarted_nav_clicked');
-              localStorage.removeItem('pending_intent');
-              base44.auth.redirectToLogin(window.location.origin + '/#GatorWelcome');
-            }} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', minHeight: 'auto' }}>Get Started</button>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <button onClick={() => navigate('GetStarted')} style={{ fontFamily: dm, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 4px' }}>Sign in</button>
+            <button onClick={onStudentJoin} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto' }}>
+              Try free →
+            </button>
           </div>
         </nav>
 
-        {/* SECTION 1: HERO */}
-        <Section style={{ padding: '100px 24px 80px', textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)',
-            borderRadius: 100, padding: '6px 16px', marginBottom: 40,
-            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(8px)', transition: 'all 0.6s ease',
-          }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20' }} />
-            <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#E85D20', letterSpacing: '0.08em', textTransform: 'uppercase' }}>1,000+ Parents & Alumni Ready to Help</span>
+        {/* ── HERO ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '60px 20px 48px', maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
+
+          {/* Social proof pill */}
+          <div style={{ ...fade, display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 100, padding: '6px 16px', marginBottom: 28 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80' }} />
+            <span style={{ fontSize: 12, fontWeight: 600, color: '#4ade80', letterSpacing: '0.06em' }}>1,000+ parents & alumni ready to help</span>
           </div>
 
+          {/* Main headline */}
           <h1 style={{
-            fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 60px)',
-            fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px',
-            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.1s',
+            ...fade, transition: 'all 0.6s ease 0.1s',
+            fontSize: 'clamp(30px, 7vw, 52px)', fontWeight: 800,
+            lineHeight: 1.1, letterSpacing: '-0.03em', color: '#fff', margin: '0 0 16px',
           }}>
-            Free Parent & Alumni Network
-          </h1>
-          <h1 style={{
-            fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 60px)',
-            fontWeight: 700, color: '#E85D20', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 24px',
-            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.15s',
-          }}>
-            + Optional FastIQ AI
+            Stop cold-applying.<br />
+            <span style={{ color: '#E85D20' }}>Get warm intros</span> from<br />
+            real people at your school.
           </h1>
 
           <p style={{
-            fontFamily: dmSans, fontSize: 'clamp(16px, 2.5vw, 19px)', color: 'rgba(255,255,255,0.65)',
-            lineHeight: 1.7, maxWidth: 560, margin: '0 auto 28px',
-            opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.2s',
+            ...fade, transition: 'all 0.6s ease 0.2s',
+            fontSize: 17, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, maxWidth: 460, margin: '0 auto 32px',
           }}>
-            The warm network at your school is free. FastIQ helps students turn those real connections into conversations and opportunities faster.
+            Free parent & alumni network + FastIQ AI that turns connections into interviews. No BS.
           </p>
 
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.7s ease 0.3s' }}>
-            <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.35)', transition: 'all 0.2s ease' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(232,93,32,0.45)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)'; }}
-            >I'm here to help →</button>
-            <button onClick={onStudentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
-            >I'm looking for a job →</button>
-          </div>
-
-          {/* Hero clarifier line */}
-          <p style={{
-            fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)',
-            lineHeight: 1.6, margin: '0 auto 28px', maxWidth: 540,
-            opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.35s',
-          }}>
-            <strong style={{ color: 'rgba(255,255,255,0.65)' }}>Parents & Alumni:</strong> Join free.&nbsp;&nbsp;
-            <strong style={{ color: 'rgba(255,255,255,0.65)' }}>Students at any school:</strong> Try FastIQ free for 7 days — no credit card needed.
-          </p>
-
-          {/* Founding rate badge */}
-          {foundingActive && (
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
-              borderRadius: 100, padding: '6px 18px', marginBottom: 44,
-              opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.4s',
+          {/* CTAs */}
+          <div style={{ ...fade, transition: 'all 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+            <button onClick={onStudentJoin} style={{
+              fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff',
+              background: 'linear-gradient(135deg, #E85D20, #ff7b42)',
+              border: 'none', borderRadius: 14, padding: '17px 32px', cursor: 'pointer',
+              width: '100%', maxWidth: 380, minHeight: 'auto',
+              boxShadow: '0 8px 32px rgba(232,93,32,0.4)',
+              letterSpacing: '-0.01em',
             }}>
-              <span style={{ fontFamily: dmSans, fontSize: 13, color: '#c9a84c', fontWeight: 600 }}>
-                🏅 FastIQ Founding Rate — lock in $14.50/mo (ends April 30)
-                {timeLeft && <span style={{ color: 'rgba(201,168,76,0.6)', marginLeft: 8, fontWeight: 400 }}>{timeLeft}</span>}
-              </span>
-            </div>
-          )}
+              🎓 I'm a student — Try FastIQ free (7 days)
+            </button>
+            <button onClick={onParentJoin} style={{
+              fontFamily: dm, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.7)',
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 14, padding: '15px 32px', cursor: 'pointer',
+              width: '100%', maxWidth: 380, minHeight: 'auto',
+            }}>
+              🤝 I'm a parent/alumni — Join free to help
+            </button>
+          </div>
 
-          <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap', justifyContent: 'center', opacity: mounted ? 1 : 0, transition: 'all 0.7s ease 0.5s' }}>
-            {STATS.map((stat, i) => (
-              <div key={i} style={{ textAlign: 'center' }}>
-                <p style={{ fontFamily: playfair, fontSize: 34, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', lineHeight: 1 }}>{stat.number}</p>
-                <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{stat.label}</p>
+          {/* Urgency + no CC */}
+          <div style={{ ...fade, transition: 'all 0.6s ease 0.4s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            {foundingActive && <Countdown timeLeft={timeLeft} />}
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>No credit card needed · Cancel anytime</span>
+            {foundingActive && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>Founding Rate $14.50/mo → goes to $29 after April 30</span>}
+          </div>
+
+          {/* Typing demo */}
+          <div style={{ ...fade, transition: 'all 0.6s ease 0.5s', marginTop: 40 }}>
+            <TypingDemo />
+          </div>
+
+          {/* Stats row */}
+          <div style={{ ...fade, transition: 'all 0.6s ease 0.6s', display: 'flex', justifyContent: 'center', gap: 32, marginTop: 36, flexWrap: 'wrap' }}>
+            {[['1,000+', 'helpers'], ['15+', 'schools'], ['50+', 'industries']].map(([n, l]) => (
+              <div key={l} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 24, fontWeight: 800, color: '#E85D20', letterSpacing: '-0.02em' }}>{n}</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>{l}</div>
               </div>
             ))}
           </div>
-        </Section>
+        </div>
 
-        <Divider />
+        {/* ── WINS TICKER ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 56px', maxWidth: 600, margin: '0 auto' }}>
+          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '20px 20px', minHeight: 80, display: 'flex', alignItems: 'center', gap: 16 }}>
+            <span style={{ fontSize: 32, flexShrink: 0 }}>{WINS[activeWin].emoji}</span>
+            <div>
+              <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 600, color: '#fff', margin: '0 0 4px', lineHeight: 1.3 }}>"{WINS[activeWin].text}"</p>
+              <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>{WINS[activeWin].school}</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 12 }}>
+            {WINS.map((_, i) => (
+              <button key={i} onClick={() => setActiveWin(i)} style={{
+                width: i === activeWin ? 20 : 6, height: 6, borderRadius: 3,
+                background: i === activeWin ? '#E85D20' : 'rgba(255,255,255,0.15)',
+                border: 'none', padding: 0, cursor: 'pointer', minHeight: 'auto',
+                transition: 'all 0.3s ease',
+              }} />
+            ))}
+          </div>
+        </div>
 
-        {/* SECTION 2: PARENT MOTIVATION */}
-        <Section>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 28px' }}>
-            There is no one more motivated<br />than a parent.
+        {/* ── HOW IT WORKS ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 600, margin: '0 auto' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 16px' }}>How it works</p>
+          <h2 style={{ fontSize: 'clamp(26px, 6vw, 38px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.15, margin: '0 0 28px' }}>
+            From zero to interview<br />in days, not months.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 600, color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, margin: '0 0 24px', maxWidth: 580 }}>
-            Your kid isn't lazy. They just don't know the right people.
-          </p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 14px', marginBottom: 20 }}>
-            <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff' }}>Join the network for free — no membership fee.</span>
-          </div>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 20px', maxWidth: 580 }}>
-            Connect with thousands of parents and alumni across 15+ universities who are ready to help each other's students with real intros and advice.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 20px', maxWidth: 580 }}>
-            We're not professional networkers doing favors. We're parents. We lie awake at night thinking about our kids' futures. We forward job listings at midnight. We text old colleagues we haven't spoken to in years.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 40px', maxWidth: 580 }}>
-            When you join this community, you're not just adding your network — you're joining thousands of parents who will go out of their way to help your student, because they know you'll do the same for theirs.
-          </p>
-          <div style={{ background: 'rgba(232,93,32,0.05)', border: '1px solid rgba(232,93,32,0.15)', borderRadius: 16, padding: '32px 28px', maxWidth: 580 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, margin: '0 0 16px' }}>
-              You might have deep connections in finance, but your child is passionate about healthcare. Another parent in the network might have strong healthcare connections, but their child wants to break into finance.
-            </p>
-            <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 600, color: '#fff', lineHeight: 1.65, margin: '0 0 16px' }}>
-              When you help their student, they help yours.
-            </p>
-            <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, margin: '0 0 20px' }}>
-              That's the beauty of College Fast Forward. It's not just your network helping your kid — it's thousands of parents collectively opening their networks for each other's children.
-            </p>
-            <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, fontStyle: 'italic', color: '#E85D20', margin: 0 }}>
-              One conversation really can change everything.
-            </p>
-          </div>
-        </Section>
-
-        <Divider />
-
-        {/* SECTION 3: HOW IT WORKS */}
-        <Section>
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>How it works</p>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(30px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 24px' }}>
-            Kids need jobs.<br />Personal connections get them hired.
-          </h2>
-          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderLeft: '3px solid #E85D20', borderRadius: '0 12px 12px 0', padding: '14px 20px', marginBottom: 28, maxWidth: 560 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.55 }}>
-              📊 70% of Gen Z students already ask their parents for help finding a job.{' '}
-              <span style={{ color: '#E85D20', fontWeight: 600 }}>Now parents can actually do something about it.</span>
-            </p>
-          </div>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 12px', maxWidth: 560 }}>
-            We pool our networks — parents and alumni across every industry — to maximize every student's chances of finding the right person at the right company.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 600, color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, margin: '0 0 36px', maxWidth: 560 }}>
-            Whatever school your kid goes to, that's the network you're in.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, margin: '0 0 36px', maxWidth: 520 }}>
-            {HOW_IT_WORKS.map(({ step, text }) => (
-              <div key={step} style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                  <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#E85D20' }}>{step}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {STEPS.map((s, i) => (
+              <div key={i} style={{
+                display: 'flex', gap: 16, alignItems: 'flex-start',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 16, padding: '18px 20px',
+              }}>
+                <div style={{ fontSize: 28, flexShrink: 0, marginTop: 2 }}>{s.icon}</div>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>{s.title}</p>
+                  <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.5 }}>{s.desc}</p>
                 </div>
-                <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.65)', lineHeight: 1.65, margin: 0 }}>{text}</p>
+                <div style={{
+                  marginLeft: 'auto', flexShrink: 0,
+                  width: 26, height: 26, borderRadius: '50%',
+                  background: 'rgba(232,93,32,0.12)', border: '1px solid rgba(232,93,32,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, fontWeight: 700, color: '#E85D20',
+                }}>{i + 1}</div>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: dmSans, fontSize: 16, fontStyle: 'italic', color: 'rgba(255,255,255,0.35)', lineHeight: 1.75, margin: 0, maxWidth: 520 }}>
-            Not a job board. Not an algorithm. Real people who already want to help — because their kid is in the same boat.
-          </p>
-        </Section>
+        </div>
 
-        <Divider />
-
-        {/* SECTION 4: THE VILLAGE */}
-        <Section style={{ textAlign: 'center' }}>
-          <div style={{ background: 'rgba(232,93,32,0.05)', border: '1px solid rgba(232,93,32,0.15)', borderRadius: 20, padding: '52px 40px' }}>
-            <h2 style={{ fontFamily: playfair, fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 8px' }}>It takes a village.</h2>
-            <h2 style={{ fontFamily: playfair, fontSize: 'clamp(30px, 4vw, 52px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 28px' }}>And you're a big part of it.</h2>
-            <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, margin: '0 auto 36px', maxWidth: 480 }}>
-              Every parent who joins makes the network stronger — not just for their own student, but for every student in it. The more of us who show up, the more doors get opened.
-            </p>
-            <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#E85D20', background: 'none', border: '1px solid rgba(232,93,32,0.4)', borderRadius: 10, padding: '12px 28px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.1)'; e.currentTarget.style.borderColor = '#E85D20'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.4)'; }}
-            >I'm here to help →</button>
-          </div>
-        </Section>
-
-        <Divider />
-
-        {/* SECTION 5: FASTIQ */}
-        <Section>
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>For students who want to go further</p>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
-            A warm network alone isn't always enough.
+        {/* ── FREE vs FASTIQ ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 600, margin: '0 auto' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 16px' }}>Pricing</p>
+          <h2 style={{ fontSize: 'clamp(26px, 6vw, 36px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.15, margin: '0 0 24px' }}>
+            Free for helpers.<br />Turbo for students.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 16px', maxWidth: 560 }}>
-            FastIQ is the optional AI upgrade that works alongside the free parent & alumni network at your school.
-          </p>
-          <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, fontStyle: 'italic', color: 'rgba(255,255,255,0.8)', margin: '0 0 48px' }}>
-            The network opens the door.<br />FastIQ helps them walk through it.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
-            {FASTIQ_FEATURES.map((f, i) => (
-              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '20px 18px', transition: 'all 0.2s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; e.currentTarget.style.background = 'rgba(232,93,32,0.04)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-              >
-                <p style={{ fontSize: 24, margin: '0 0 10px' }}>{f.icon}</p>
-                <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 6px' }}>{f.label}</p>
-                <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5, margin: 0 }}>{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        <Divider />
-
-        {/* SECTION 6: PRICING */}
-        <Section>
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>Simple pricing. No surprises.</p>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 32px' }}>
-            What does it cost?
-          </h2>
-          {/* Two-column pricing split */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 20 }}>
-            {/* Parents & Alumni */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '28px 24px' }}>
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Parents & Alumni</p>
-              <p style={{ fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Free</p>
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, margin: '0 0 20px' }}>Join the network at your school, help students, make introductions.</p>
-              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.6)', margin: 0 }}>No membership fee. No credit card.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {/* Free */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, padding: '24px 20px' }}>
+              <div style={{ fontSize: 24, marginBottom: 10 }}>🏫</div>
+              <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>Free Network</p>
+              <p style={{ fontFamily: dm, fontSize: 30, fontWeight: 800, color: '#fff', margin: '0 0 10px' }}>$0</p>
+              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5, margin: '0 0 16px' }}>Parents & alumni join free. Help students at your school.</p>
+              <button onClick={onParentJoin} style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: '10px 16px', cursor: 'pointer', width: '100%', minHeight: 'auto' }}>
+                Join free →
+              </button>
             </div>
-            {/* Students FastIQ */}
-            <div style={{ background: 'rgba(232,93,32,0.05)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '28px 24px', position: 'relative' }}>
+            {/* FastIQ */}
+            <div style={{ background: 'rgba(232,93,32,0.06)', border: '2px solid rgba(232,93,32,0.3)', borderRadius: 18, padding: '24px 20px', position: 'relative' }}>
               {foundingActive && (
-                <div style={{ position: 'absolute', top: -12, left: 20 }}>
-                  <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#c9a84c', background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 100, padding: '3px 12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>🏅 Founding Rate</span>
+                <div style={{ position: 'absolute', top: -10, right: 12 }}>
+                  <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#c9a84c', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 100, padding: '3px 10px', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>🏅 Founding</span>
                 </div>
               )}
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>Students — FastIQ AI</p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
-                <p style={{ fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#E85D20', margin: 0 }}>{foundingActive ? '$14.50' : '$29'}</p>
-                <span style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>/mo</span>
+              <div style={{ fontSize: 24, marginBottom: 10 }}>⚡</div>
+              <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>FastIQ AI</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 2 }}>
+                <p style={{ fontFamily: dm, fontSize: 30, fontWeight: 800, color: '#E85D20', margin: 0 }}>{foundingActive ? '$14.50' : '$29'}</p>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>/mo</span>
               </div>
-              {foundingActive && <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 8px' }}>Regular price after April 30: $29/mo</p>}
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, margin: '0 0 12px' }}>AI tools that supercharge the free network at your school.</p>
-              <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.6)', margin: 0 }}>7-day free trial — no credit card needed.</p>
+              {foundingActive && <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '0 0 10px' }}>$29 after April 30</p>}
+              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5, margin: '0 0 16px' }}>AI that finds intros, writes outreach, and preps you to win.</p>
+              <button onClick={onStudentJoin} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 10, padding: '10px 16px', cursor: 'pointer', width: '100%', minHeight: 'auto', boxShadow: '0 4px 16px rgba(232,93,32,0.3)' }}>
+                Try 7 days free →
+              </button>
             </div>
           </div>
-          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.65, margin: '0 0 20px', fontStyle: 'italic' }}>
-            The parent & alumni network is free for everyone at every participating school. FastIQ is the optional AI upgrade that helps students activate those warm connections.
+          <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: '14px 0 0' }}>
+            No credit card for trial · Cancel anytime
           </p>
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 20px', marginBottom: 28 }}>
-            {["✓ 7-day free trial — no credit card needed", "✓ Students can pay — or parents can pay on their student's behalf", "✓ Cancel anytime. No contracts."].map((line, i) => (
-              <p key={i} style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: i < 2 ? '0 0 4px' : 0 }}>{line}</p>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 16px rgba(232,93,32,0.3)', transition: 'opacity 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-            >I'm here to help →</button>
-            <button onClick={onStudentJoin} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#E85D20', background: 'none', border: '1px solid rgba(232,93,32,0.35)', borderRadius: 10, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.08)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
-            >I'm looking for a job →</button>
-          </div>
-        </Section>
+        </div>
 
-        <Divider />
-
-        {/* SECTION 7: SOCIAL PROOF */}
-        <Section style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 32px' }}>From the network</p>
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderLeft: '3px solid #E85D20', borderRadius: '0 16px 16px 0', padding: '24px 28px', textAlign: 'left', maxWidth: 560, margin: '0 auto 16px' }}>
-            <p style={{ fontFamily: playfair, fontSize: 19, fontStyle: 'italic', color: 'rgba(255,255,255,0.85)', margin: '0 0 12px', lineHeight: 1.55 }}>
-              "{SOCIAL_PROOF[activeQuote].quote}"
-            </p>
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              — {SOCIAL_PROOF[activeQuote].author}
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-            {SOCIAL_PROOF.map((_, i) => (
-              <button key={i} onClick={() => setActiveQuote(i)} style={{ width: i === activeQuote ? 20 : 6, height: 6, borderRadius: 3, background: i === activeQuote ? '#E85D20' : 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', transition: 'all 0.3s ease' }} />
-            ))}
-          </div>
-        </Section>
-
-        <Divider />
-
-        {/* SECTION 8: FAQ */}
-        <Section>
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>Common questions</p>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 40px' }}>
-            Everything you need to know.
+        {/* ── FASTIQ FEATURES ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 600, margin: '0 auto' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 16px' }}>FastIQ unlocks</p>
+          <h2 style={{ fontSize: 'clamp(24px, 6vw, 34px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.15, margin: '0 0 24px' }}>
+            Everything your job search<br />is missing.
           </h2>
-          <div>
-            {FAQS.map((faq, i) => (
-              <FAQItem key={i} q={faq.q} a={faq.a} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {FASTIQ_FEATURES.map((f, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '16px 16px' }}>
+                <span style={{ fontSize: 22 }}>{f.icon}</span>
+                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', margin: '8px 0 4px' }}>{f.label}</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.4 }}>{f.desc}</p>
+              </div>
             ))}
           </div>
-        </Section>
+        </div>
 
-        <Divider />
-
-        {/* SECTION 9: FINAL CTA */}
-        <Section style={{ textAlign: 'center', padding: '80px 24px 100px' }}>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
-            Your student's next opportunity<br />is one introduction away.
-          </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, margin: '0 auto 40px', maxWidth: 440 }}>
-            Join the network. Add your connections. Help a student get hired — maybe even your own.
-          </p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button onClick={onParentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px 36px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.35)', transition: 'all 0.2s ease' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(232,93,32,0.45)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)'; }}
-            >I'm here to help →</button>
-            <button onClick={onStudentJoin} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: 'rgba(255,255,255,0.6)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
-            >I'm looking for a job →</button>
+        {/* ── PARENT / ALUMNI SECTION ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 600, margin: '0 auto' }}>
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '32px 24px' }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 12px' }}>Parents & Alumni</p>
+            <h2 style={{ fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 14px' }}>
+              One intro from you<br />can change everything.
+            </h2>
+            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, margin: '0 0 8px' }}>
+              You've built a network. Students at your school are looking for exactly what you know. Joining is free and takes 2 minutes.
+            </p>
+            <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, margin: '0 0 24px' }}>
+              You help one student → their parents help yours. That's the whole thing.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button onClick={onParentJoin} style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '13px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 16px rgba(232,93,32,0.3)' }}>
+                Join free →
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                {['No fee ever', 'No obligation', '2 min setup'].map(t => (
+                  <span key={t} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>✓ {t}</span>
+                ))}
+              </div>
+            </div>
           </div>
-        </Section>
+        </div>
 
-        {/* FOOTER */}
-        <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>© 2026 College Fast Forward</span>
-          <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>The parent & alumni network is free at every participating school. FastIQ is available as a paid upgrade for students.</span>
+        {/* ── FAQ ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 600, margin: '0 auto' }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 16px' }}>FAQs</p>
+          <h2 style={{ fontSize: 'clamp(24px, 6vw, 34px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', margin: '0 0 24px' }}>Got questions?</h2>
+          {FAQS.map((faq, i) => <FAQItem key={i} {...faq} />)}
+        </div>
+
+        {/* ── FINAL CTA ── */}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 80px', maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.12) 0%, rgba(0,33,165,0.08) 100%)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 24, padding: '48px 24px' }}>
+            <h2 style={{ fontSize: 'clamp(26px, 7vw, 40px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.15, margin: '0 0 14px' }}>
+              Your next opportunity<br />is one intro away.
+            </h2>
+            <p style={{ fontFamily: dm, fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: '0 auto 32px', maxWidth: 380 }}>
+              Students: start your free trial. Parents & alumni: join the network. No credit card. No BS.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+              <button onClick={onStudentJoin} style={{
+                fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff',
+                background: 'linear-gradient(135deg, #E85D20, #ff7b42)',
+                border: 'none', borderRadius: 14, padding: '17px 36px', cursor: 'pointer',
+                width: '100%', maxWidth: 360, minHeight: 'auto',
+                boxShadow: '0 8px 32px rgba(232,93,32,0.4)',
+              }}>
+                🎓 Try FastIQ free — 7 days
+              </button>
+              <button onClick={onParentJoin} style={{
+                fontFamily: dm, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.65)',
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 14, padding: '15px 36px', cursor: 'pointer',
+                width: '100%', maxWidth: 360, minHeight: 'auto',
+              }}>
+                🤝 Join as parent/alumni — free
+              </button>
+              {foundingActive && (
+                <div style={{ marginTop: 4 }}>
+                  <Countdown timeLeft={timeLeft} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ── FOOTER ── */}
+        <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <span style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>© 2026 College Fast Forward</span>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <a href="#Terms" style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', textDecoration: 'none' }}>Terms</a>
+            <a href="#Privacy" style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', textDecoration: 'none' }}>Privacy</a>
+          </div>
         </div>
 
       </div>
