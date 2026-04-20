@@ -6,6 +6,7 @@ import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { toast } from 'sonner';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 import PromptsToTry from '@/components/landing/PromptsToTry';
+import RawVideoTestimonials from '@/components/landing/RawVideoTestimonials';
 
 const dm = "'DM Sans', system-ui, -apple-system, sans-serif";
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
@@ -520,6 +521,9 @@ export default function LandingPage() {
 
         {/* ── PROMPTS TO TRY ── */}
         {isStudent && <PromptsToTry onStudentJoin={onStudentJoin} />}
+
+        {/* ── RAW VIDEO TESTIMONIALS ── */}
+        {isStudent && <RawVideoTestimonials />}
 
         {/* ── REAL STUDENT RESULTS (redesigned — raw + warm) ── */}
         {isStudent && (
