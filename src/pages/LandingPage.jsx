@@ -211,10 +211,10 @@ function FAQItem({ q, a }) {
   return (
     <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
       <button onClick={() => setOpen(!open)} style={{ width: '100%', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', background: 'none', border: 'none', cursor: 'pointer', gap: 12, minHeight: 'auto' }}>
-        <span style={{ fontFamily: dm, fontSize: 15, fontWeight: 600, color: 'rgba(0,0,0,0.82)', lineHeight: 1.4 }}>{q}</span>
+        <span style={{ fontFamily: dm, fontSize: 15, fontWeight: 600, color: '#1f2937', lineHeight: 1.4 }}>{q}</span>
         <span style={{ fontSize: 20, color: '#E85D20', flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: open ? 'rotate(45deg)' : 'none' }}>+</span>
       </button>
-      {open && <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(0,0,0,0.52)', lineHeight: 1.75, margin: '0 0 18px', paddingRight: 20 }}>{a}</p>}
+      {open && <p style={{ fontFamily: dm, fontSize: 14, color: '#334155', lineHeight: 1.75, margin: '0 0 18px', paddingRight: 20 }}>{a}</p>}
     </div>
   );
 }
@@ -356,7 +356,7 @@ export default function LandingPage() {
         url="https://www.collegefastforward.com"
       />
 
-      <div style={{ minHeight: '100vh', background: '#f0f9ff', fontFamily: dm, overflowX: 'hidden' }}>
+      <div style={{ minHeight: '100vh', background: '#f8f9fa', fontFamily: dm, overflowX: 'hidden' }}>
 
         {/* Ambient color blobs — electric energy */}
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
@@ -376,7 +376,7 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <button onClick={() => navigate('GetStarted')} style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.36)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 4px' }}>Sign in</button>
-            <button onClick={isStudent ? onStudentJoin : onParentJoin} style={{ fontSize: 13, fontWeight: 800, color: isStudent ? '#0a0a0a' : '#fff', background: isStudent ? 'linear-gradient(135deg,#a8ff3e,#78ff44)' : 'rgba(79,140,255,0.28)', border: isStudent ? 'none' : '1px solid rgba(79,140,255,0.45)', borderRadius: 11, padding: '9px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: isStudent ? '0 4px 20px rgba(168,255,62,0.5)' : 'none' }}>
+            <button onClick={isStudent ? onStudentJoin : onParentJoin} style={{ fontSize: 13, fontWeight: 800, color: isStudent ? '#0f172a' : '#fff', background: isStudent ? '#22d3ee' : 'rgba(79,140,255,0.28)', border: isStudent ? 'none' : '1px solid rgba(79,140,255,0.45)', borderRadius: 11, padding: '9px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: isStudent ? '0 4px 20px rgba(34,211,238,0.4)' : 'none' }}>
               {isStudent ? 'Try free →' : 'Join free →'}
             </button>
           </div>
@@ -388,8 +388,8 @@ export default function LandingPage() {
         {/* ── HERO GRADIENT BAND ── */}
         <div style={{ position: 'absolute', top: 96, left: 0, right: 0, height: 480, pointerEvents: 'none', zIndex: 1,
           background: isStudent
-            ? 'linear-gradient(180deg, rgba(34,211,238,0.14) 0%, rgba(168,255,62,0.08) 50%, rgba(240,249,255,0) 100%)'
-            : 'linear-gradient(180deg, rgba(59,122,245,0.14) 0%, rgba(124,58,237,0.06) 50%, rgba(240,249,255,0) 100%)',
+            ? 'linear-gradient(180deg, rgba(34,211,238,0.18) 0%, rgba(34,211,238,0.06) 50%, rgba(248,249,250,0) 100%)'
+            : 'linear-gradient(180deg, rgba(59,122,245,0.16) 0%, rgba(124,58,237,0.06) 50%, rgba(248,249,250,0) 100%)',
           transition: 'background 0.7s ease',
         }} />
 
@@ -409,7 +409,7 @@ export default function LandingPage() {
           </div>
 
           {/* Main headline */}
-          <h1 style={{ fontSize: 'clamp(32px, 8.5vw, 58px)', fontWeight: 900, lineHeight: 1.04, letterSpacing: '-0.038em', color: '#0d0d0d', margin: '0 0 17px', position: 'relative' }}>
+          <h1 style={{ fontSize: 'clamp(32px, 8.5vw, 58px)', fontWeight: 900, lineHeight: 1.04, letterSpacing: '-0.038em', color: '#1f2937', margin: '0 0 17px', position: 'relative' }}>
             {isStudent ? (
               <>
                 Tired of ghosted<br />applications?<br />
@@ -426,7 +426,7 @@ export default function LandingPage() {
           </h1>
 
           {/* Sub */}
-          <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.48)', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 30px', textAlign: 'center' }}>
+          <p style={{ fontSize: 16, color: '#334155', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 30px', textAlign: 'center' }}>
             {isStudent ? (
               <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(0,0,0,0.75)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
             ) : (
@@ -441,17 +441,20 @@ export default function LandingPage() {
                 <button
                   onClick={onStudentJoin}
                   style={{
-                    fontSize: 20, fontWeight: 900, color: '#0a0a0a',
-                    background: 'linear-gradient(108deg, #a8ff3e 0%, #78ff44 40%, #39e500 100%)',
+                    fontSize: 20, fontWeight: 900, color: '#0f172a',
+                    background: '#22d3ee',
                     backgroundSize: '220% auto',
                     border: 'none', borderRadius: 22,
                     padding: '26px 36px',
                     cursor: 'pointer', width: '100%', maxWidth: 480,
                     minHeight: 'auto',
-                    boxShadow: '0 16px 64px rgba(120,255,68,0.45), 0 0 0 2px rgba(168,255,62,0.3), 0 2px 0 rgba(255,255,255,0.3) inset',
+                    boxShadow: '0 10px 15px -3px rgba(34,211,238,0.3), 0 20px 40px rgba(34,211,238,0.2), 0 2px 0 rgba(255,255,255,0.3) inset',
                     letterSpacing: '-0.02em', lineHeight: 1.2,
-                    animation: 'ctaShine 3.5s linear infinite, ctaPop 4s ease-in-out infinite',
+                    animation: 'ctaPop 4s ease-in-out infinite',
+                    transition: 'background 0.2s ease, box-shadow 0.2s ease',
                   }}
+                  onMouseEnter={e => { e.currentTarget.style.background='#67e8f9'; e.currentTarget.style.boxShadow='0 20px 25px -5px rgba(34,211,238,0.4)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background='#22d3ee'; e.currentTarget.style.boxShadow='0 10px 15px -3px rgba(34,211,238,0.3), 0 20px 40px rgba(34,211,238,0.2)'; }}
                 >
                   🎓 I'm a student — Try FastIQ free (7 days)
                 </button>
@@ -519,8 +522,8 @@ export default function LandingPage() {
               ].map((b, i) => (
                 <div key={i} style={{ background: '#fff', border: '1.5px solid rgba(34,211,238,0.25)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.07}s both` : 'none', boxShadow: '0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05)' }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9 }}>{b.icon}</span>
-                  <p style={{ fontSize: 13, fontWeight: 800, color: '#0d0d0d', margin: '0 0 5px' }}>{b.title}</p>
-                  <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.5 }}>{b.desc}</p>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: '#1f2937', margin: '0 0 5px' }}>{b.title}</p>
+                  <p style={{ fontSize: 11.5, color: '#334155', margin: 0, lineHeight: 1.5 }}>{b.desc}</p>
                 </div>
               ))}
             </div>
@@ -542,7 +545,7 @@ export default function LandingPage() {
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#15803d', boxShadow: '0 0 8px #15803d', animation: 'glowPulse 2s ease infinite' }} />
                 <span style={{ fontSize: 11, fontWeight: 800, color: '#14532d', letterSpacing: '0.04em' }}>Real students. Real results.</span>
               </div>
-              <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 38px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.032em', lineHeight: 1.1, margin: '0 0 9px' }}>
+              <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 38px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.032em', lineHeight: 1.1, margin: '0 0 9px' }}>
                 They stopped applying cold.<br />
                 <span style={{ color: 'rgba(0,0,0,0.38)', fontWeight: 400, fontSize: '0.9em' }}>Here's what happened instead.</span>
               </h2>
@@ -611,7 +614,7 @@ export default function LandingPage() {
         {/* ── HOW IT WORKS ── */}
         <div key={`steps-${mode}`} style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto', animation: 'modeFade 0.32s ease both' }}>
           <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>How it works</p>
-          <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 40px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 24px' }}>
+          <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 40px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 24px' }}>
             {isStudent
               ? <>From zero to interview.<br /><span style={{ color: 'rgba(0,0,0,0.35)', fontWeight: 400, fontSize: '0.84em' }}>Days, not months. Seriously.</span></>
               : <>Simple, on your terms.<br /><span style={{ color: 'rgba(0,0,0,0.35)', fontWeight: 400, fontSize: '0.84em' }}>No commitments. Just helping.</span></>
@@ -624,10 +627,10 @@ export default function LandingPage() {
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <span style={{ fontSize: 9.5, fontWeight: 900, color: 'rgba(232,93,32,0.8)', letterSpacing: '0.1em' }}>{s.num}</span>
-                    <p style={{ fontSize: 14, fontWeight: 800, color: '#111', margin: 0 }}>{s.title}</p>
+                    <p style={{ fontSize: 14, fontWeight: 800, color: '#1f2937', margin: 0 }}>{s.title}</p>
                     {s.ai && <span style={{ fontSize: 8.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.12)', borderRadius: 100, padding: '2px 8px', border: '1px solid rgba(232,93,32,0.3)', whiteSpace: 'nowrap' }}>AI POWERED</span>}
                   </div>
-                  <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.52)', margin: 0, lineHeight: 1.55 }}>{s.desc}</p>
+                  <p style={{ fontSize: 12.5, color: '#334155', margin: 0, lineHeight: 1.55 }}>{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -638,19 +641,19 @@ export default function LandingPage() {
         {isStudent && (
           <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
             <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FastIQ unlocks</p>
-            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 4px' }}>Everything your job search is missing.</h2>
-            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
+            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 4px' }}>Everything your job search is missing.</h2>
+            <p style={{ fontSize: 14, color: '#334155', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FASTIQ_FEATURES.map((f, i) => (
                 <div key={i} style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `3px solid ${i % 2 === 0 ? '#22d3ee' : '#E85D20'}`, boxShadow: '0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05)' }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9, lineHeight: 1 }}>{f.icon}</span>
-                  <p style={{ fontSize: 12.5, fontWeight: 800, color: '#111', margin: '0 0 4px', lineHeight: 1.2 }}>{f.label}</p>
-                  <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.52)', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
+                  <p style={{ fontSize: 12.5, fontWeight: 800, color: '#1f2937', margin: '0 0 4px', lineHeight: 1.2 }}>{f.label}</p>
+                  <p style={{ fontSize: 11, color: '#334155', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
                 </div>
               ))}
             </div>
             <div style={{ marginTop: 18, textAlign: 'center' }}>
-              <button onClick={onStudentJoin} style={{ fontSize: 13.5, fontWeight: 800, color: '#0a0a0a', background: 'linear-gradient(108deg, #a8ff3e, #78ff44)', border: 'none', borderRadius: 13, padding: '14px 30px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 24px rgba(168,255,62,0.38)' }}>
+              <button onClick={onStudentJoin} style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a', background: '#22d3ee', border: 'none', borderRadius: 13, padding: '14px 30px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 15px -3px rgba(34,211,238,0.3)' }}>
                 Get all of this free for 7 days →
               </button>
             </div>
@@ -660,14 +663,14 @@ export default function LandingPage() {
         {/* ── PRICING ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
           <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>Pricing</p>
-          <h2 style={{ fontSize: 'clamp(25px, 5.5vw, 38px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 22px' }}>
+          <h2 style={{ fontSize: 'clamp(25px, 5.5vw, 38px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 22px' }}>
             Free for helpers.<br /><span style={{ color: '#E85D20' }}>Turbo for students.</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.08)', borderRadius: 22, padding: '24px 16px', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 32px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.05)' }}>
               <span style={{ fontSize: 30, marginBottom: 12 }}>🏫</span>
               <p style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>Free Network</p>
-              <p style={{ fontSize: 34, fontWeight: 900, color: '#0d0d0d', margin: '0 0 2px', letterSpacing: '-0.04em' }}>$0</p>
+              <p style={{ fontSize: 34, fontWeight: 900, color: '#1f2937', margin: '0 0 2px', letterSpacing: '-0.04em' }}>$0</p>
               <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', margin: '0 0 16px' }}>Forever free</p>
               <div style={{ flex: 1, marginBottom: 18 }}>
                 {['Join as parent or alumni', 'Help students at your school', 'No fee, no obligation, ever'].map(b => (
@@ -702,7 +705,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <button onClick={onStudentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#0a0a0a', background: 'linear-gradient(135deg,#a8ff3e,#78ff44)', border: 'none', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto', boxShadow: '0 4px 20px rgba(168,255,62,0.45)' }}>
+              <button onClick={onStudentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', background: '#22d3ee', border: 'none', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto', boxShadow: '0 10px 15px -3px rgba(34,211,238,0.3)' }}>
                 Try 7 days free →
               </button>
             </div>
@@ -713,7 +716,7 @@ export default function LandingPage() {
         {/* ── FAQ ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '48px 20px 64px', maxWidth: 640, margin: '0 auto', background: '#fff', borderRadius: 24, boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)' }}>
           <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FAQs</p>
-          <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', margin: '0 0 22px' }}>Got questions? Fair.</h2>
+          <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', margin: '0 0 22px' }}>Got questions? Fair.</h2>
           {FAQS.map((faq, i) => <FAQItem key={i} {...faq} />)}
         </div>
 
@@ -724,7 +727,7 @@ export default function LandingPage() {
             <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%', background: isStudent ? 'rgba(168,255,62,0.12)' : 'rgba(79,140,255,0.08)', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, borderRadius: '40% 60% 30% 70% / 60% 40% 60% 40%', background: isStudent ? 'rgba(232,93,32,0.07)' : 'rgba(124,58,237,0.06)', pointerEvents: 'none' }} />
             <div style={{ fontSize: 46, marginBottom: 16, position: 'relative' }}>{isStudent ? '🚀' : '🤝'}</div>
-            <h2 style={{ fontSize: 'clamp(27px, 6.5vw, 46px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.035em', lineHeight: 1.08, margin: '0 0 14px', position: 'relative' }}>
+            <h2 style={{ fontSize: 'clamp(27px, 6.5vw, 46px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.035em', lineHeight: 1.08, margin: '0 0 14px', position: 'relative' }}>
               {isStudent ? <>Your next opportunity is<br />literally one intro away.</> : <>One intro from you can<br />change everything.</>}
             </h2>
             <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.68, margin: '0 auto 30px', maxWidth: 340, position: 'relative' }}>
@@ -733,7 +736,7 @@ export default function LandingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', position: 'relative' }}>
               {isStudent ? (
                 <>
-                  <button onClick={onStudentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#0a0a0a', background: 'linear-gradient(108deg, #a8ff3e 0%, #78ff44 50%, #39e500 100%)', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 12px 56px rgba(120,255,68,0.45), 0 0 0 2px rgba(168,255,62,0.25)' }}>
+                  <button onClick={onStudentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#0f172a', background: '#22d3ee', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 10px 15px -3px rgba(34,211,238,0.3), 0 20px 25px -5px rgba(34,211,238,0.2)' }}>
                     🎓 Try FastIQ free — 7 days
                   </button>
                   <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>

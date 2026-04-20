@@ -244,14 +244,14 @@ export default function PromptsToTry({ onStudentJoin }) {
           style={{
             fontSize: 14,
             fontWeight: 800,
-            color: '#0a0a0a',
-            background: 'linear-gradient(108deg, #a8ff3e, #78ff44)',
+            color: '#0f172a',
+            background: '#22d3ee',
             border: 'none',
             borderRadius: 13,
             padding: '14px 30px',
             cursor: 'pointer',
             minHeight: 'auto',
-            boxShadow: '0 4px 24px rgba(168,255,62,0.38)',
+            boxShadow: '0 10px 15px -3px rgba(34,211,238,0.3)',
             fontFamily: dm,
           }}
         >
