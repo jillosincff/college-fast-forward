@@ -34,7 +34,7 @@ const STEPS_HELPER = [
   { icon: '✍️', num: '01', title: 'Create your free profile', desc: 'Tell students your industry, company, and what kind of help you can offer. 2 minutes.' },
   { icon: '📬', num: '02', title: 'Students reach out to you', desc: 'Only the ones whose needs match your background. No spam.' },
   { icon: '☕', num: '03', title: 'Help how you want', desc: 'A 15-minute call, a LinkedIn reply, a referral — you decide.' },
-  { icon: '🔄', num: '04', title: 'The network pays it forward', desc: 'You help one student → their network helps yours. That's the whole thing.' },
+  { icon: '🔄', num: '04', title: 'The network pays it forward', desc: 'You help one student → their network helps yours. That&apos;s the whole thing.' },
 ];
 
 const FASTIQ_FEATURES = [
