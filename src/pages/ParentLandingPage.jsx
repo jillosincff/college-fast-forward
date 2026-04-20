@@ -117,6 +117,23 @@ export default function ParentLandingPage({ onStudentClick }) {
   return (
     <div style={{ background: '#0a0a0a', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
 
+      {/* ── ROLE TOGGLE ── */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 90, padding: '10px 16px', background: 'rgba(10,10,10,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 100, padding: 4 }}>
+          <button
+            onClick={handleStudent}
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
+          >
+            🎓 I need help
+          </button>
+          <button
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg,#E85D20,#ff7a3d)', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 22px rgba(232,93,32,0.45)', transition: 'all 0.25s ease' }}
+          >
+            🤝 I want to help
+          </button>
+        </div>
+      </div>
+
       {/* ── HERO ── */}
       <div style={{
         position: 'relative',
