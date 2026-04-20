@@ -243,7 +243,7 @@ function RoleToggle({ mode, onChange }) {
 // ── Hero photo collage (casual, warm, real) ──
 function HeroPhotoStrip() {
   const photos = [
-    { src: 'https://media.base44.com/images/public/684474c5723dc90efce23588/a6cbf8906_image.png', label: 'got the reply 🎉', rotate: '-2deg', flex: '1.15', pos: 'center top' },
+    { src: 'https://media.base44.com/images/public/684474c5723dc90efce23588/a6cbf8906_image.png', label: 'got the reply 🎉', rotate: '-2deg', flex: '1.15', pos: 'center 15%' },
     { src: 'https://media.base44.com/images/public/684474c5723dc90efce23588/ef8274082_IMG_0004.jpg', label: '48h turnaround ✅', rotate: '1deg', flex: '1', pos: 'center center' },
     { src: 'https://media.base44.com/images/public/684474c5723dc90efce23588/ff60a3dee_image.png', label: '3 chats booked 🚀', rotate: '2.5deg', flex: '1.1', pos: 'center top' },
   ];
