@@ -4,87 +4,72 @@ import { navigate } from '@/components/utils/navigation';
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
+// ── Color system matching student page ──────────────────────────────────────
+const C = {
+  bg: '#f8f9fa',
+  bgWhite: '#ffffff',
+  orange: '#E85D20',
+  orangeLight: 'rgba(232,93,32,0.08)',
+  orangeBorder: 'rgba(232,93,32,0.2)',
+  cyan: '#22d3ee',
+  cyanLight: 'rgba(34,211,238,0.1)',
+  dark: '#1f2937',
+  body: '#334155',
+  muted: '#6b7280',
+  hint: '#9ca3af',
+  border: 'rgba(0,0,0,0.08)',
+};
+
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
+const STATS = [
+  { number: '1,000+', label: 'Parents & Alumni' },
+  { number: '15+', label: 'Universities' },
+  { number: '50+', label: 'Industries' },
+];
+
 const TESTIMONIALS = [
-  {
-    quote: "A conversation through CFF changed the trajectory of my son's career.",
-    author: "Lisa M.",
-    role: "UF Parent",
-    initials: "LM",
-  },
-  {
-    quote: "I felt so helpless watching my kid apply and hear nothing back. This gave me something real to do.",
-    author: "David K.",
-    role: "OSU Parent",
-    initials: "DK",
-  },
-  {
-    quote: "My daughter landed her internship through a connection she never would have found alone.",
-    author: "Jennifer S.",
-    role: "Penn State Parent",
-    initials: "JS",
-  },
+  { quote: "A conversation through CFF changed the trajectory of my son's career.", author: "Lisa M.", role: "UF Parent", initials: "LM" },
+  { quote: "I felt so helpless watching my kid apply and hear nothing back. This gave me something real to do.", author: "David K.", role: "OSU Parent", initials: "DK" },
+  { quote: "My daughter landed her internship through a connection she never would have found alone.", author: "Jennifer S.", role: "Penn State Parent", initials: "JS" },
+];
+
+const HOW_IT_WORKS = [
+  { number: "01", title: "Fill out a quick profile", desc: "Your industry, company, and how you're willing to help. Takes 2 minutes. Seriously." },
+  { number: "02", title: "Students reach out to you", desc: "Only students from your school's network — no spam, no cold outreach from strangers." },
+  { number: "03", title: "You respond and help how you want", desc: "A 15-minute call. A LinkedIn intro. A referral. You decide. No pressure ever." },
 ];
 
 const FAQS = [
-  {
-    q: "Is the parent & alumni network really free?",
-    a: "Yes, completely. Parents and alumni join free and stay free. FastIQ is an optional paid upgrade for students only.",
-  },
-  {
-    q: "What does 'agreeing to respond' mean?",
-    a: "When you join, you're committing to be an active member — if a student reaches out, you'll do your best to respond. Even a quick reply makes a difference. No minimums, no hard obligations.",
-  },
-  {
-    q: "What exactly does FastIQ do?",
-    a: "FastIQ is an AI career engine for students — resume tailoring, alumni search, mock interviews, company intel, and a daily action plan. The AI layer on top of the human network.",
-  },
-  {
-    q: "Can parents pay FastIQ for their student?",
-    a: "Yes. Parents can gift FastIQ to their student directly from their dashboard.",
-  },
-  {
-    q: "What schools are in the network?",
-    a: "We're building networks at colleges across the country. Whatever school your student attends, that's the network you join.",
-  },
-  {
-    q: "I'm an alumni — can I join to help?",
-    a: "Absolutely. Students specifically look for alumni at their target companies. Your career path is exactly what they need.",
-  },
+  { q: "Is the parent & alumni network really free?", a: "Yes, completely. Parents and alumni join free and stay free. FastIQ is an optional paid upgrade for students only." },
+  { q: "What does 'agreeing to respond' mean?", a: "When you join, you're committing to be an active member — if a student reaches out, you'll do your best to respond. Even a quick reply makes a difference. No minimums, no hard obligations." },
+  { q: "What exactly does FastIQ do?", a: "FastIQ is an AI career engine for students — resume tailoring, alumni search, mock interviews, company intel, and a daily action plan. It's the AI layer on top of the human network." },
+  { q: "Can my parents pay FastIQ for me?", a: "Yes. Parents can gift FastIQ to their student directly from their dashboard." },
+  { q: "What schools are in the network?", a: "We're building networks at colleges across the country. Whatever school your student attends, that's the network you join." },
+  { q: "I'm an alumni — can I join to help?", a: "Absolutely. Alumni are a crucial part of the network. Students specifically look for alumni at their target companies." },
 ];
 
 function FAQItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          width: '100%', textAlign: 'left',
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', gap: 16,
-          padding: '20px 0', background: 'none', border: 'none',
-          cursor: 'pointer', minHeight: 'auto',
-        }}
-      >
+    <div style={{ borderBottom: `1px solid ${C.border}` }}>
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', textAlign: 'left',
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', gap: 16,
+        padding: '18px 0', background: 'none', border: 'none',
+        cursor: 'pointer', minHeight: 'auto',
+      }}>
+        <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: C.dark, lineHeight: 1.4 }}>{q}</span>
         <span style={{
-          fontFamily: dmSans, fontSize: 16, fontWeight: 600,
-          color: '#fff', lineHeight: 1.4,
-        }}>{q}</span>
-        <span style={{
-          fontSize: 22, color: '#E85D20', flexShrink: 0,
+          fontSize: 22, color: C.orange, flexShrink: 0,
           transform: open ? 'rotate(45deg)' : 'rotate(0deg)',
-          transition: 'transform 0.2s ease',
-          display: 'inline-block', lineHeight: 1,
+          transition: 'transform 0.2s ease', display: 'inline-block',
+          fontFamily: dmSans, lineHeight: 1,
         }}>+</span>
       </button>
       {open && (
-        <p style={{
-          fontFamily: dmSans, fontSize: 15,
-          color: 'rgba(255,255,255,0.55)', lineHeight: 1.7,
-          margin: '0 0 20px',
-        }}>{a}</p>
+        <p style={{ fontFamily: dmSans, fontSize: 15, color: C.muted, lineHeight: 1.7, margin: '0 0 18px' }}>{a}</p>
       )}
     </div>
   );
@@ -97,6 +82,13 @@ export default function ParentLandingPage({ onStudentClick }) {
 
   useEffect(() => {
     setMounted(true);
+    if (!document.getElementById('parent-lp-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'parent-lp-fonts';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap';
+      document.head.appendChild(link);
+    }
     const updateCountdown = () => {
       const diff = FOUNDING_DEADLINE - new Date();
       if (diff <= 0) { setTimeLeft(''); return; }
@@ -115,19 +107,19 @@ export default function ParentLandingPage({ onStudentClick }) {
   const handleStudent = () => navigate('LandingPage');
 
   return (
-    <div style={{ background: '#0a0a0a', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
+    <div style={{ background: C.bg, fontFamily: dmSans, color: C.dark, overflowX: 'hidden' }}>
 
       {/* ── ROLE TOGGLE ── */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 90, padding: '10px 16px', background: 'rgba(10,10,10,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 100, padding: 4 }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 90, padding: '10px 16px', background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: C.bgWhite, borderRadius: 100, padding: 4, border: `1px solid ${C.border}` }}>
           <button
             onClick={handleStudent}
-            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: C.muted, background: 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
           >
             🎓 I need help
           </button>
           <button
-            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg,#E85D20,#ff7a3d)', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 22px rgba(232,93,32,0.45)', transition: 'all 0.25s ease' }}
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: C.orange, border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 12px rgba(232,93,32,0.3)`, transition: 'all 0.25s ease' }}
           >
             🤝 I want to help
           </button>
@@ -136,288 +128,273 @@ export default function ParentLandingPage({ onStudentClick }) {
 
       {/* ── HERO ── */}
       <div style={{
-        position: 'relative',
+        background: C.bgWhite,
         padding: '80px 24px 72px',
         textAlign: 'center',
+        borderBottom: `1px solid ${C.border}`,
+        position: 'relative',
         overflow: 'hidden',
       }}>
 
-        {/* Background effects */}
+        {/* Subtle background accent */}
         <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,93,32,0.15) 0%, transparent 65%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-          backgroundSize: '40px 40px',
+          position: 'absolute', top: -100, left: '50%',
+          transform: 'translateX(-50%)',
+          width: 600, height: 400,
+          background: `radial-gradient(ellipse, ${C.orangeLight} 0%, transparent 70%)`,
           pointerEvents: 'none',
         }} />
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
-
-          {/* Provocation */}
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(232,93,32,0.12)',
-            border: '1px solid rgba(232,93,32,0.3)',
-            borderRadius: 6,
-            padding: '6px 14px',
-            marginBottom: 32,
-            opacity: mounted ? 1 : 0,
-            transition: 'opacity 0.6s ease',
+        {/* Eyebrow */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: C.orangeLight,
+          border: `1px solid ${C.orangeBorder}`,
+          borderRadius: 100, padding: '6px 16px',
+          marginBottom: 32,
+          opacity: mounted ? 1 : 0,
+          transition: 'opacity 0.6s ease',
+        }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.orange }} />
+          <span style={{
+            fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+            color: C.orange, letterSpacing: '0.1em', textTransform: 'uppercase',
           }}>
-            <span style={{
-              fontFamily: dmSans, fontSize: 12, fontWeight: 700,
-              color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase',
+            This has never been done before
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h1 style={{
+          fontFamily: playfair,
+          fontSize: 'clamp(36px, 6vw, 68px)',
+          fontWeight: 700, color: C.dark,
+          lineHeight: 1.1, letterSpacing: '-0.03em',
+          margin: '0 0 8px', maxWidth: 740,
+          marginLeft: 'auto', marginRight: 'auto',
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(12px)',
+          transition: 'all 0.7s ease 0.1s',
+          position: 'relative',
+        }}>
+          The people who care most
+        </h1>
+        <h1 style={{
+          fontFamily: playfair,
+          fontSize: 'clamp(36px, 6vw, 68px)',
+          fontWeight: 700, color: C.orange,
+          fontStyle: 'italic',
+          lineHeight: 1.1, letterSpacing: '-0.03em',
+          margin: '0 0 28px', maxWidth: 740,
+          marginLeft: 'auto', marginRight: 'auto',
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(12px)',
+          transition: 'all 0.7s ease 0.15s',
+          position: 'relative',
+        }}>
+          have been left out.
+        </h1>
+
+        {/* Sub */}
+        <p style={{
+          fontFamily: dmSans, fontSize: 'clamp(15px, 2vw, 18px)',
+          color: C.body, lineHeight: 1.75,
+          maxWidth: 520, margin: '0 auto 12px',
+          opacity: mounted ? 1 : 0,
+          transition: 'opacity 0.7s ease 0.2s',
+          position: 'relative',
+        }}>
+          Every career platform was built for recruiters and job seekers. Nobody built one for parents — the most motivated people on earth when it comes to their kids' success.
+        </p>
+
+        <p style={{
+          fontFamily: dmSans, fontSize: 'clamp(16px, 1.8vw, 19px)',
+          fontWeight: 700, color: C.orange,
+          margin: '0 auto 44px',
+          opacity: mounted ? 1 : 0,
+          transition: 'opacity 0.7s ease 0.25s',
+          position: 'relative',
+        }}>
+          We're changing that.
+        </p>
+
+        {/* CTAs */}
+        <div style={{
+          display: 'flex', gap: 12, flexWrap: 'wrap',
+          justifyContent: 'center', marginBottom: 14,
+          opacity: mounted ? 1 : 0,
+          transition: 'opacity 0.7s ease 0.3s',
+          position: 'relative',
+        }}>
+          <button onClick={handleJoin} style={{
+            fontFamily: dmSans, fontSize: 15, fontWeight: 700,
+            color: '#fff', background: C.orange, border: 'none',
+            borderRadius: 12, padding: '16px 32px', cursor: 'pointer',
+            minHeight: 'auto', boxShadow: `0 8px 24px ${C.orangeLight}`,
+            transition: 'all 0.2s ease',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(232,93,32,0.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 8px 24px ${C.orangeLight}`; }}
+          >
+            Join free — add your network →
+          </button>
+          <button onClick={handleStudent} style={{
+            fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+            color: C.muted, background: C.bgWhite,
+            border: `1px solid ${C.border}`,
+            borderRadius: 12, padding: '16px 28px', cursor: 'pointer',
+            minHeight: 'auto', transition: 'all 0.2s ease',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = C.orange; e.currentTarget.style.color = C.orange; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
+          >
+            I'm a student →
+          </button>
+        </div>
+
+        <p style={{
+          fontFamily: dmSans, fontSize: 13, color: C.hint, margin: 0,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.35s',
+          position: 'relative',
+        }}>
+          Free to join. No credit card. No obligation.
+        </p>
+
+        {/* Stats */}
+        <div style={{
+          display: 'flex', gap: 0, flexWrap: 'wrap',
+          justifyContent: 'center', marginTop: 56,
+          paddingTop: 40, borderTop: `1px solid ${C.border}`,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s',
+          position: 'relative',
+        }}>
+          {STATS.map((s, i) => (
+            <div key={i} style={{
+              textAlign: 'center', padding: '0 40px',
+              borderRight: i < STATS.length - 1 ? `1px solid ${C.border}` : 'none',
             }}>
-              This has never been done before
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 style={{
-            fontFamily: dmSans,
-            fontSize: 'clamp(38px, 7vw, 80px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.0, letterSpacing: '-0.04em',
-            margin: '0 0 16px',
-            opacity: mounted ? 1 : 0,
-            transform: mounted ? 'translateY(0)' : 'translateY(16px)',
-            transition: 'all 0.7s ease 0.1s',
-          }}>
-            The people who care most<br />
-            <span style={{
-              color: 'transparent',
-              WebkitTextStroke: '2px #E85D20',
-            }}>
-              have been left out.
-            </span>
-          </h1>
-
-          {/* Sub */}
-          <p style={{
-            fontFamily: dmSans, fontSize: 'clamp(16px, 2.2vw, 20px)',
-            color: 'rgba(255,255,255,0.55)', lineHeight: 1.7,
-            maxWidth: 560, margin: '0 auto 8px',
-            opacity: mounted ? 1 : 0,
-            transition: 'opacity 0.7s ease 0.2s',
-          }}>
-            Every career platform was built for recruiters and job seekers. Nobody built one for parents — the most motivated people on earth when it comes to their kids' success.
-          </p>
-
-          <p style={{
-            fontFamily: dmSans, fontSize: 'clamp(18px, 2.5vw, 24px)',
-            fontWeight: 700, color: '#E85D20',
-            margin: '0 auto 44px',
-            opacity: mounted ? 1 : 0,
-            transition: 'opacity 0.7s ease 0.25s',
-          }}>
-            We're changing that.
-          </p>
-
-          {/* CTAs */}
-          <div style={{
-            display: 'flex', gap: 12, flexWrap: 'wrap',
-            justifyContent: 'center', marginBottom: 16,
-            opacity: mounted ? 1 : 0,
-            transition: 'opacity 0.7s ease 0.3s',
-          }}>
-            <button onClick={handleJoin} style={{
-              fontFamily: dmSans, fontSize: 15, fontWeight: 700,
-              color: '#fff', background: '#E85D20', border: 'none',
-              borderRadius: 8, padding: '16px 32px', cursor: 'pointer',
-              minHeight: 'auto', boxShadow: '0 0 40px rgba(232,93,32,0.4)',
-              transition: 'all 0.2s ease',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(232,93,32,0.5)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(232,93,32,0.4)'; }}
-            >
-              Join free — add your network →
-            </button>
-            <button onClick={handleStudent} style={{
-              fontFamily: dmSans, fontSize: 15, fontWeight: 500,
-              color: 'rgba(255,255,255,0.6)',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 8, padding: '16px 28px', cursor: 'pointer',
-              minHeight: 'auto', transition: 'all 0.2s ease',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
-            >
-              I'm a student →
-            </button>
-          </div>
-
-          <p style={{
-            fontFamily: dmSans, fontSize: 13,
-            color: 'rgba(255,255,255,0.3)', margin: 0,
-            opacity: mounted ? 1 : 0,
-            transition: 'opacity 0.7s ease 0.35s',
-          }}>
-            Free to join. No credit card. No obligation.
-          </p>
-
-          {/* Stats */}
-          <div style={{
-            display: 'flex', gap: 0, flexWrap: 'wrap',
-            justifyContent: 'center', marginTop: 56,
-            borderTop: '1px solid rgba(255,255,255,0.08)',
-            paddingTop: 40,
-            opacity: mounted ? 1 : 0,
-            transition: 'opacity 0.7s ease 0.4s',
-          }}>
-            {[
-              { number: '1,000+', label: 'Parents & Alumni' },
-              { number: '15+', label: 'Universities' },
-              { number: '50+', label: 'Industries' },
-            ].map((s, i) => (
-              <div key={i} style={{
-                textAlign: 'center', flex: '1 1 120px',
-                padding: '0 24px',
-                borderRight: i < 2 ? '1px solid rgba(255,255,255,0.08)' : 'none',
-              }}>
-                <p style={{
-                  fontFamily: dmSans, fontSize: 'clamp(28px, 4vw, 42px)',
-                  fontWeight: 700, color: '#E85D20',
-                  margin: '0 0 4px', lineHeight: 1, letterSpacing: '-0.02em',
-                }}>{s.number}</p>
-                <p style={{
-                  fontFamily: dmSans, fontSize: 11, fontWeight: 600,
-                  color: 'rgba(255,255,255,0.3)', margin: 0,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                }}>{s.label}</p>
-              </div>
-            ))}
-          </div>
+              <p style={{ fontFamily: playfair, fontSize: 32, fontWeight: 700, color: C.orange, margin: '0 0 4px', lineHeight: 1 }}>
+                {s.number}
+              </p>
+              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, color: C.hint, margin: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                {s.label}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* ── THE IDEA ── */}
-      <div style={{
-        background: '#111',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '72px 24px',
-      }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+      {/* ── THE PREMISE ── */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
 
+        {/* Trade card */}
+        <div style={{
+          background: C.bgWhite,
+          border: `1px solid ${C.border}`,
+          borderLeft: `4px solid ${C.orange}`,
+          borderRadius: '0 16px 16px 0',
+          padding: '28px 32px',
+          marginBottom: 40,
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}>
           <p style={{
-            fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            color: '#E85D20', letterSpacing: '0.14em',
-            textTransform: 'uppercase', margin: '0 0 20px',
-          }}>The idea</p>
-
-          <h2 style={{
-            fontFamily: dmSans,
-            fontSize: 'clamp(28px, 4vw, 52px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.1, letterSpacing: '-0.03em',
-            margin: '0 0 32px',
+            fontFamily: dmSans, fontSize: 15, color: C.body,
+            lineHeight: 1.75, margin: '0 0 16px',
           }}>
-            We all want the same thing.<br />
-            <span style={{ color: '#E85D20' }}>Our kids to succeed.</span>
-          </h2>
-
-          <p style={{
-            fontFamily: dmSans, fontSize: 18,
-            color: 'rgba(255,255,255,0.6)', lineHeight: 1.75,
-            margin: '0 0 24px',
-          }}>
-            College Fast Forward is a network of parents and alumni who've agreed to open their connections for each other's students.
+            You have finance connections. Your kid wants healthcare.<br />
+            Another parent has healthcare connections. Their kid wants finance.
           </p>
-
-          {/* The trade */}
-          <div style={{
-            background: 'rgba(232,93,32,0.08)',
-            border: '1px solid rgba(232,93,32,0.2)',
-            borderRadius: 12, padding: '24px 28px',
-            marginBottom: 24,
-          }}>
-            <p style={{
-              fontFamily: dmSans, fontSize: 16,
-              color: 'rgba(255,255,255,0.7)', lineHeight: 1.7,
-              margin: '0 0 14px',
-            }}>
-              You have finance connections. Your kid wants healthcare.<br />
-              Another parent has healthcare connections. Their kid wants finance.
-            </p>
-            <p style={{
-              fontFamily: dmSans, fontSize: 18, fontWeight: 700,
-              color: '#fff', margin: '0 0 4px',
-            }}>
-              When you help their student, they help yours.
-            </p>
-            <p style={{
-              fontFamily: dmSans, fontSize: 14, fontWeight: 600,
-              color: '#E85D20', margin: 0,
-            }}>
-              The larger the network, the better the chances.
-            </p>
-          </div>
-
-          <p style={{
-            fontFamily: dmSans, fontSize: 17,
-            color: 'rgba(255,255,255,0.5)', lineHeight: 1.75,
-            margin: 0,
-          }}>
-            70% of Gen Z students already ask their parents for help finding a job. The problem isn't motivation — it's access. Your connections open doors that no resume can.
+          <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: C.dark, margin: '0 0 6px' }}>
+            When you help their student, they help yours.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: C.orange, margin: 0 }}>
+            The larger the network, the better the chances.
           </p>
         </div>
+
+        <h2 style={{
+          fontFamily: playfair, fontSize: 'clamp(26px, 3.5vw, 44px)',
+          fontWeight: 700, color: C.dark,
+          lineHeight: 1.15, letterSpacing: '-0.02em',
+          margin: '0 0 8px',
+        }}>
+          Your kid isn't lazy.
+        </h2>
+        <h2 style={{
+          fontFamily: playfair, fontSize: 'clamp(26px, 3.5vw, 44px)',
+          fontWeight: 700, color: C.orange, fontStyle: 'italic',
+          lineHeight: 1.15, letterSpacing: '-0.02em',
+          margin: '0 0 24px',
+        }}>
+          They just don't know the right people yet.
+        </h2>
+
+        <p style={{ fontFamily: dmSans, fontSize: 17, color: C.body, lineHeight: 1.75, margin: '0 0 16px' }}>
+          70% of Gen Z students already ask their parents for help finding a job. The problem isn't motivation — it's access. Your connections open doors that no resume can.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 17, color: C.body, lineHeight: 1.75, margin: 0 }}>
+          College Fast Forward gives every parent a way to actually do something — not just worry.
+        </p>
       </div>
 
-      {/* ── VIDEO PLACEHOLDER ── */}
+      {/* ── VIDEO SECTION ── */}
       <div style={{
-        background: '#0a0a0a',
-        padding: '72px 24px',
-        textAlign: 'center',
+        background: C.bgWhite,
+        borderTop: `1px solid ${C.border}`,
+        borderBottom: `1px solid ${C.border}`,
+        padding: '64px 24px',
       }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <p style={{
             fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            color: '#E85D20', letterSpacing: '0.14em',
-            textTransform: 'uppercase', margin: '0 0 20px',
+            color: C.cyan, letterSpacing: '0.12em',
+            textTransform: 'uppercase', margin: '0 0 16px', textAlign: 'center',
           }}>Real parents. Real results.</p>
           <h2 style={{
-            fontFamily: dmSans, fontSize: 'clamp(24px, 3.5vw, 44px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.1, letterSpacing: '-0.03em',
-            margin: '0 0 32px',
+            fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 42px)',
+            fontWeight: 700, color: C.dark,
+            lineHeight: 1.2, letterSpacing: '-0.02em',
+            margin: '0 0 8px', textAlign: 'center',
           }}>
-            See what happens when parents<br />
-            <span style={{ color: '#E85D20' }}>show up for each other's kids.</span>
+            See what happens when parents
+          </h2>
+          <h2 style={{
+            fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 42px)',
+            fontWeight: 700, color: C.orange, fontStyle: 'italic',
+            lineHeight: 1.2, letterSpacing: '-0.02em',
+            margin: '0 0 32px', textAlign: 'center',
+          }}>
+            show up for each other's kids.
           </h2>
 
-          {/* Video embed area */}
+          {/* Video placeholder */}
           <div style={{
-            position: 'relative',
-            width: '100%',
-            paddingBottom: '56.25%',
-            background: '#1a1a1a',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: C.dark,
             borderRadius: 16,
+            aspectRatio: '16/9',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            marginBottom: 24,
+            border: `1px solid ${C.border}`,
             overflow: 'hidden',
-            marginBottom: 32,
+            position: 'relative',
           }}>
             <div style={{
               position: 'absolute', inset: 0,
+              background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)',
+            }} />
+            <div style={{
+              position: 'relative', zIndex: 1,
               display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 16,
+              alignItems: 'center', gap: 16,
             }}>
-              {/* Play button */}
               <div style={{
-                width: 72, height: 72, borderRadius: '50%',
-                background: '#E85D20',
+                width: 64, height: 64, borderRadius: '50%',
+                background: C.orange,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 40px rgba(232,93,32,0.5)',
+                boxShadow: '0 8px 32px rgba(232,93,32,0.4)',
                 cursor: 'pointer',
-                transition: 'transform 0.2s ease',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-              >
+              }}>
                 <div style={{
                   width: 0, height: 0,
                   borderTop: '12px solid transparent',
@@ -427,58 +404,53 @@ export default function ParentLandingPage({ onStudentClick }) {
                 }} />
               </div>
               <p style={{
-                fontFamily: dmSans, fontSize: 14,
-                color: 'rgba(255,255,255,0.4)', margin: 0,
+                fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)',
+                margin: 0, textAlign: 'center',
               }}>
                 Add your video here
               </p>
             </div>
           </div>
 
-          {/* Testimonials */}
+          {/* Testimonial under video */}
           <div style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderLeft: '3px solid #E85D20',
+            background: C.bg,
+            border: `1px solid ${C.border}`,
+            borderLeft: `3px solid ${C.orange}`,
             borderRadius: '0 12px 12px 0',
             padding: '20px 24px',
-            textAlign: 'left',
-            marginBottom: 14,
-            minHeight: 100,
           }}>
             <p style={{
-              fontFamily: playfair, fontSize: 18,
-              fontStyle: 'italic', color: 'rgba(255,255,255,0.85)',
-              margin: '0 0 12px', lineHeight: 1.55,
+              fontFamily: playfair, fontSize: 17, fontStyle: 'italic',
+              color: C.dark, margin: '0 0 12px', lineHeight: 1.55,
             }}>
               "{TESTIMONIALS[activeTestimonial].quote}"
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width: 30, height: 30, borderRadius: '50%',
-                background: 'rgba(232,93,32,0.2)',
+                background: C.orangeLight,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#E85D20',
+                fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: C.orange,
               }}>
                 {TESTIMONIALS[activeTestimonial].initials}
               </div>
               <div>
-                <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>
+                <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: C.dark, margin: 0 }}>
                   {TESTIMONIALS[activeTestimonial].author}
                 </p>
-                <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: 0 }}>
+                <p style={{ fontFamily: dmSans, fontSize: 12, color: C.hint, margin: 0 }}>
                   {TESTIMONIALS[activeTestimonial].role}
                 </p>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 14 }}>
             {TESTIMONIALS.map((_, i) => (
               <button key={i} onClick={() => setActiveTestimonial(i)} style={{
-                width: i === activeTestimonial ? 20 : 6, height: 6,
-                borderRadius: 3,
-                background: i === activeTestimonial ? '#E85D20' : 'rgba(255,255,255,0.2)',
+                width: i === activeTestimonial ? 20 : 6, height: 6, borderRadius: 3,
+                background: i === activeTestimonial ? C.orange : C.border,
                 border: 'none', cursor: 'pointer', padding: 0,
                 minHeight: 'auto', transition: 'all 0.3s ease',
               }} />
@@ -488,95 +460,100 @@ export default function ParentLandingPage({ onStudentClick }) {
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{
-        background: '#111',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: '72px 24px',
-      }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{
-            fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            color: '#E85D20', letterSpacing: '0.14em',
-            textTransform: 'uppercase', margin: '0 0 20px',
-          }}>How it works</p>
-          <h2 style={{
-            fontFamily: dmSans, fontSize: 'clamp(24px, 3.5vw, 44px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.1, letterSpacing: '-0.03em',
-            margin: '0 0 12px',
-          }}>
-            Simple, on your terms.
-          </h2>
-          <p style={{
-            fontFamily: dmSans, fontSize: 17,
-            color: 'rgba(255,255,255,0.4)', margin: '0 0 40px',
-          }}>
-            No commitments. Just helping.
-          </p>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
+        <p style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+          color: C.orange, letterSpacing: '0.12em',
+          textTransform: 'uppercase', margin: '0 0 16px',
+        }}>How it works</p>
+        <h2 style={{
+          fontFamily: playfair, fontSize: 'clamp(24px, 3vw, 40px)',
+          fontWeight: 700, color: C.dark,
+          lineHeight: 1.2, letterSpacing: '-0.02em',
+          margin: '0 0 6px',
+        }}>
+          Simple, on your terms.
+        </h2>
+        <p style={{
+          fontFamily: dmSans, fontSize: 16, fontStyle: 'italic',
+          color: C.hint, margin: '0 0 40px',
+        }}>
+          No commitments. Just helping.
+        </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 40 }}>
-            {[
-              { n: '01', title: 'Fill out a quick profile', desc: 'Your industry, company, and how you\'re willing to help. Takes 2 minutes.' },
-              { n: '02', title: 'Students reach out to you', desc: 'Only students from your school\'s network — no spam, no cold outreach from strangers.' },
-              { n: '03', title: 'You respond and help how you want', desc: 'A 15-minute call. A LinkedIn intro. A referral. You decide. No pressure ever.' },
-            ].map(({ n, title, desc }) => (
-              <div key={n} style={{
-                display: 'flex', alignItems: 'flex-start', gap: 20,
-                padding: '20px 0',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 36 }}>
+          {HOW_IT_WORKS.map(({ number, title, desc }, i) => (
+            <div key={number} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 20,
+              padding: '24px 0',
+              borderBottom: i < HOW_IT_WORKS.length - 1 ? `1px solid ${C.border}` : 'none',
+            }}>
+              <div style={{
+                fontFamily: playfair, fontSize: 28, fontWeight: 700,
+                color: C.orangeLight.replace('0.08', '0.25'),
+                background: C.orangeLight,
+                border: `1px solid ${C.orangeBorder}`,
+                borderRadius: 12,
+                width: 52, height: 52, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: C.orange,
+                fontSize: 14, fontFamily: dmSans, fontWeight: 800,
+                letterSpacing: '0.04em',
               }}>
-                <span style={{
-                  fontFamily: dmSans, fontSize: 13, fontWeight: 700,
-                  color: '#E85D20', flexShrink: 0, marginTop: 2,
-                  letterSpacing: '0.04em',
-                }}>{n}</span>
-                <div>
-                  <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
-                    {title}
-                  </p>
-                  <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.6 }}>
-                    {desc}
-                  </p>
-                </div>
+                {number}
               </div>
-            ))}
-          </div>
-
-          <button onClick={handleJoin} style={{
-            fontFamily: dmSans, fontSize: 14, fontWeight: 700,
-            color: '#fff', background: '#E85D20', border: 'none',
-            borderRadius: 8, padding: '14px 28px', cursor: 'pointer',
-            minHeight: 'auto', boxShadow: '0 0 30px rgba(232,93,32,0.35)',
-            transition: 'all 0.2s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-          >
-            Join free — 2 minutes →
-          </button>
+              <div style={{ paddingTop: 12 }}>
+                <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: C.dark, margin: '0 0 4px' }}>
+                  {title}
+                </p>
+                <p style={{ fontFamily: dmSans, fontSize: 14, color: C.muted, margin: 0, lineHeight: 1.65 }}>
+                  {desc}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
+
+        <button onClick={handleJoin} style={{
+          fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+          color: '#fff', background: C.orange, border: 'none',
+          borderRadius: 10, padding: '14px 28px', cursor: 'pointer',
+          minHeight: 'auto', boxShadow: '0 4px 16px rgba(232,93,32,0.25)',
+          transition: 'opacity 0.15s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+        >
+          Join free — 2 minutes, zero obligation →
+        </button>
       </div>
 
       {/* ── PRICING ── */}
       <div style={{
-        background: '#0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: '72px 24px',
+        background: C.bgWhite,
+        borderTop: `1px solid ${C.border}`,
+        borderBottom: `1px solid ${C.border}`,
+        padding: '64px 24px',
       }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <p style={{
             fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            color: '#E85D20', letterSpacing: '0.14em',
-            textTransform: 'uppercase', margin: '0 0 20px',
+            color: C.orange, letterSpacing: '0.12em',
+            textTransform: 'uppercase', margin: '0 0 16px',
           }}>Pricing</p>
           <h2 style={{
-            fontFamily: dmSans, fontSize: 'clamp(28px, 4vw, 52px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.05, letterSpacing: '-0.03em',
-            margin: '0 0 40px',
+            fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 38px)',
+            fontWeight: 700, color: C.dark,
+            lineHeight: 1.2, margin: '0 0 4px',
           }}>
-            Free for helpers.<br />
-            <span style={{ color: '#E85D20' }}>Turbo for students.</span>
+            Free for helpers.
+          </h2>
+          <h2 style={{
+            fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 38px)',
+            fontWeight: 700, color: C.orange, fontStyle: 'italic',
+            lineHeight: 1.2, margin: '0 0 36px',
+          }}>
+            Turbo for students.
           </h2>
 
           <div style={{
@@ -586,46 +563,52 @@ export default function ParentLandingPage({ onStudentClick }) {
           }}>
             {/* Free */}
             <div style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: C.bg, border: `1px solid ${C.border}`,
               borderRadius: 16, padding: '28px',
             }}>
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.hint, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 Free Network
               </p>
-              <p style={{ fontFamily: dmSans, fontSize: 42, fontWeight: 700, color: '#fff', margin: '0 0 20px', letterSpacing: '-0.03em' }}>
+              <p style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: C.dark, margin: '0 0 20px', lineHeight: 1 }}>
                 $0
               </p>
-              {['Join as a parent or alumni', 'Help students at your school', 'No fees. No obligation. Ever.'].map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#E85D20', flexShrink: 0 }} />
-                  <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: 0 }}>{f}</p>
-                </div>
-              ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                {['Join as a parent or alumni', 'Help students at your school', 'No fees, no obligation. Ever.'].map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: C.orangeLight, border: `1px solid ${C.orangeBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.orange }} />
+                    </div>
+                    <p style={{ fontFamily: dmSans, fontSize: 14, color: C.body, margin: 0 }}>{f}</p>
+                  </div>
+                ))}
+              </div>
               <button onClick={handleJoin} style={{
                 width: '100%', fontFamily: dmSans, fontSize: 13, fontWeight: 600,
-                color: 'rgba(255,255,255,0.7)',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 8, padding: '11px 0', cursor: 'pointer',
-                minHeight: 'auto', marginTop: 20,
-              }}>
+                color: C.dark, background: C.bgWhite,
+                border: `1px solid ${C.border}`, borderRadius: 8,
+                padding: '11px 0', cursor: 'pointer', minHeight: 'auto',
+                transition: 'all 0.15s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = C.orange; e.currentTarget.style.color = C.orange; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.dark; }}
+              >
                 Join free →
               </button>
             </div>
 
             {/* FastIQ */}
             <div style={{
-              background: 'rgba(232,93,32,0.08)',
-              border: '2px solid #E85D20',
+              background: C.bgWhite,
+              border: `2px solid ${C.orange}`,
               borderRadius: 16, padding: '28px',
               position: 'relative',
+              boxShadow: '0 8px 32px rgba(232,93,32,0.1)',
             }}>
               {foundingActive && (
                 <div style={{
                   position: 'absolute', top: -13, left: '50%',
                   transform: 'translateX(-50%)',
-                  background: '#E85D20', color: '#fff',
+                  background: C.orange, color: '#fff',
                   fontFamily: dmSans, fontSize: 10, fontWeight: 700,
                   letterSpacing: '0.06em', textTransform: 'uppercase',
                   padding: '4px 14px', borderRadius: 100,
@@ -634,128 +617,142 @@ export default function ParentLandingPage({ onStudentClick }) {
                   🏅 Founding Rate{timeLeft ? ` · ${timeLeft} left` : ''}
                 </div>
               )}
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.orange, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 FastIQ — For Students
               </p>
-              <p style={{ fontFamily: dmSans, fontSize: 42, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', letterSpacing: '-0.03em' }}>
-                $14.50<span style={{ fontSize: 18, color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>/mo</span>
-              </p>
-              <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: '0 0 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
+                <p style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: C.orange, margin: 0, lineHeight: 1 }}>
+                  $14.50
+                </p>
+                <span style={{ fontFamily: dmSans, fontSize: 14, color: C.hint }}>/mo</span>
+              </div>
+              <p style={{ fontFamily: dmSans, fontSize: 12, color: C.hint, margin: '0 0 20px' }}>
                 $29/mo after April 30
               </p>
-              {['7-day free trial, no credit card', 'Alumni search + AI outreach', 'Resume tailoring + mock interviews', 'Company intel + daily action plan', 'Parents can gift FastIQ too'].map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                  <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#E85D20', flexShrink: 0 }} />
-                  <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0 }}>{f}</p>
-                </div>
-              ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                {[
+                  '7-day free trial, no credit card',
+                  'Alumni search + AI outreach',
+                  'Resume tailoring + mock interviews',
+                  'Company intel + daily action plan',
+                  'Parents can gift FastIQ too',
+                ].map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: C.orangeLight, border: `1px solid ${C.orangeBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.orange }} />
+                    </div>
+                    <p style={{ fontFamily: dmSans, fontSize: 14, color: C.body, margin: 0 }}>{f}</p>
+                  </div>
+                ))}
+              </div>
               <button onClick={handleStudent} style={{
                 width: '100%', fontFamily: dmSans, fontSize: 13, fontWeight: 700,
-                color: '#fff', background: '#E85D20', border: 'none',
+                color: '#fff', background: C.orange, border: 'none',
                 borderRadius: 8, padding: '11px 0', cursor: 'pointer',
-                minHeight: 'auto', boxShadow: '0 0 20px rgba(232,93,32,0.3)',
-                marginTop: 20,
-              }}>
+                minHeight: 'auto', boxShadow: '0 4px 12px rgba(232,93,32,0.3)',
+                transition: 'opacity 0.15s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+              >
                 Try 7 days free →
               </button>
             </div>
           </div>
 
-          <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 13, color: C.hint, textAlign: 'center', margin: 0 }}>
             No credit card to start. Cancel anytime. Parents can pay on their student's behalf.
           </p>
         </div>
       </div>
 
       {/* ── FAQ ── */}
-      <div style={{
-        background: '#111',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: '72px 24px',
-      }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{
-            fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            color: '#E85D20', letterSpacing: '0.14em',
-            textTransform: 'uppercase', margin: '0 0 20px',
-          }}>FAQ</p>
-          <h2 style={{
-            fontFamily: dmSans, fontSize: 'clamp(24px, 3.5vw, 44px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.1, letterSpacing: '-0.03em',
-            margin: '0 0 32px',
-          }}>
-            Got questions? Fair.
-          </h2>
-          {FAQS.map((faq, i) => (
-            <FAQItem key={i} q={faq.q} a={faq.a} />
-          ))}
-        </div>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
+        <p style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+          color: C.orange, letterSpacing: '0.12em',
+          textTransform: 'uppercase', margin: '0 0 16px',
+        }}>FAQ</p>
+        <h2 style={{
+          fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 38px)',
+          fontWeight: 700, color: C.dark,
+          lineHeight: 1.2, margin: '0 0 32px',
+        }}>
+          Got questions? Fair.
+        </h2>
+        {FAQS.map((faq, i) => (
+          <FAQItem key={i} q={faq.q} a={faq.a} />
+        ))}
       </div>
 
       {/* ── FINAL CTA ── */}
       <div style={{
-        background: '#0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        background: C.dark,
         padding: '80px 24px',
         textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
       }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 60% 60% at 50% 100%, rgba(232,93,32,0.12) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 560, margin: '0 auto' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto' }}>
           <p style={{
             fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            color: '#E85D20', letterSpacing: '0.14em',
+            color: C.orange, letterSpacing: '0.14em',
             textTransform: 'uppercase', margin: '0 0 20px',
-          }}>Your next move</p>
-          <h2 style={{
-            fontFamily: dmSans, fontSize: 'clamp(32px, 5vw, 64px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.0, letterSpacing: '-0.04em',
-            margin: '0 0 20px',
           }}>
-            One intro from you<br />
-            <span style={{ color: '#E85D20' }}>can change everything.</span>
+            Your best move
+          </p>
+          <h2 style={{
+            fontFamily: playfair,
+            fontSize: 'clamp(28px, 4vw, 52px)',
+            fontWeight: 700, color: '#fff',
+            lineHeight: 1.15, letterSpacing: '-0.02em',
+            margin: '0 0 8px',
+          }}>
+            One intro from you
+          </h2>
+          <h2 style={{
+            fontFamily: playfair,
+            fontSize: 'clamp(28px, 4vw, 52px)',
+            fontWeight: 700, color: C.orange, fontStyle: 'italic',
+            lineHeight: 1.15, letterSpacing: '-0.02em',
+            margin: '0 0 24px',
+          }}>
+            can change everything.
           </h2>
           <p style={{
             fontFamily: dmSans, fontSize: 16,
-            color: 'rgba(255,255,255,0.45)', lineHeight: 1.7,
-            margin: '0 auto 36px', maxWidth: 400,
+            color: 'rgba(255,255,255,0.6)', lineHeight: 1.7,
+            margin: '0 auto 36px',
           }}>
-            Free. 2 minutes. No obligation.<br />Students at your school genuinely need you.
+            Free. 2 minutes. No obligation.<br />
+            Students at your school genuinely need you.
           </p>
           <button onClick={handleJoin} style={{
-            fontFamily: dmSans, fontSize: 16, fontWeight: 700,
-            color: '#fff', background: '#E85D20', border: 'none',
-            borderRadius: 8, padding: '18px 40px', cursor: 'pointer',
-            minHeight: 'auto', boxShadow: '0 0 60px rgba(232,93,32,0.45)',
-            marginBottom: 16, display: 'block',
+            fontFamily: dmSans, fontSize: 15, fontWeight: 700,
+            color: '#fff', background: C.orange, border: 'none',
+            borderRadius: 12, padding: '16px 36px', cursor: 'pointer',
+            minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.35)',
+            marginBottom: 12, display: 'block',
             marginLeft: 'auto', marginRight: 'auto',
             transition: 'all 0.2s ease',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 0 80px rgba(232,93,32,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(232,93,32,0.45)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(232,93,32,0.5)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.35)'; }}
           >
             Join free — add your network →
           </button>
           <button onClick={handleStudent} style={{
-            fontFamily: dmSans, fontSize: 13,
-            color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none',
+            fontFamily: dmSans, fontSize: 13, fontWeight: 500,
+            color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none',
             cursor: 'pointer', minHeight: 'auto', padding: 0,
             display: 'block', margin: '0 auto',
-          }}>
+            transition: 'color 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; }}
+          >
             I'm a student — Try FastIQ free →
           </button>
           {foundingActive && timeLeft && (
-            <p style={{
-              fontFamily: dmSans, fontSize: 12, color: '#E85D20',
-              marginTop: 20, fontWeight: 600,
-            }}>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: C.orange, marginTop: 16, fontWeight: 600 }}>
               🏅 Founding rate ends April 30 — {timeLeft} remaining
             </p>
           )}
