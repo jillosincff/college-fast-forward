@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { trackEvent } from '@/components/utils/analytics';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -124,7 +125,11 @@ export default function ParentLandingPage({ onStudentClick }) {
   const foundingActive = new Date() < FOUNDING_DEADLINE;
 
   const handleJoin = () => navigate('GetStarted');
-  const handleStudent = () => { if (onStudentClick) onStudentClick(); else navigate('GetStarted'); };
+  const handleStudent = () => {
+    trackEvent('landing_mode_toggle', { mode: 'student' });
+    try { localStorage.setItem('lp_mode', 'student'); } catch {}
+    if (onStudentClick) onStudentClick(); else navigate('LandingPage');
+  };
 
   return (
     <div style={{
@@ -133,6 +138,23 @@ export default function ParentLandingPage({ onStudentClick }) {
       color: '#111827',
       overflowX: 'hidden',
     }}>
+
+      {/* ── ROLE TOGGLE ── */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 90, padding: '10px 16px', background: 'rgba(255,249,246,0.97)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(232,93,32,0.12)' }}>
+        <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 100, padding: 4 }}>
+          <button
+            onClick={handleStudent}
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: 'rgba(0,0,0,0.38)', background: 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
+          >
+            🎓 I need help
+          </button>
+          <button
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg,#3b7af5,#4f8cff)', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 22px rgba(79,140,255,0.45)', transition: 'all 0.25s ease' }}
+          >
+            🤝 I want to help
+          </button>
+        </div>
+      </div>
 
       {/* ── HERO ── */}
       <div style={{

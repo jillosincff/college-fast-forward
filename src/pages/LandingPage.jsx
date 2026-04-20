@@ -277,6 +277,9 @@ export default function LandingPage() {
     setMode(newMode);
     try { localStorage.setItem('lp_mode', newMode); } catch {}
     trackEvent('landing_mode_toggle', { mode: newMode });
+    if (newMode === 'helper') {
+      navigate('ParentLandingPage');
+    }
   };
 
   useEffect(() => {
