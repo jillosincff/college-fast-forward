@@ -243,9 +243,9 @@ function RoleToggle({ mode, onChange }) {
 // ── Hero photo collage (casual, warm, real) ──
 function HeroPhotoStrip() {
   const photos = [
-    { src: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=320&q=70&auto=format&fit=crop', label: 'got the reply 🎉', rotate: '-2deg', flex: '1.15' },
-    { src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=320&q=70&auto=format&fit=crop', label: '48h turnaround ✅', rotate: '1deg', flex: '1' },
-    { src: 'https://images.unsplash.com/photo-1529633742550-a4d6e2a70389?w=320&q=70&auto=format&fit=crop', label: '3 chats booked 🚀', rotate: '2.5deg', flex: '1.1' },
+    { src: 'https://media.base44.com/images/public/684474c5723dc90efce23588/a6cbf8906_image.png', label: 'got the reply 🎉', rotate: '-2deg', flex: '1.15' },
+    { src: 'https://media.base44.com/images/public/684474c5723dc90efce23588/58e169aae_image.png', label: '48h turnaround ✅', rotate: '1deg', flex: '1' },
+    { src: 'https://media.base44.com/images/public/684474c5723dc90efce23588/a6cbf8906_image.png', label: '3 chats booked 🚀', rotate: '2.5deg', flex: '1.1' },
   ];
   return (
     <div style={{ display: 'flex', gap: 8, height: 138, marginBottom: 18 }}>
@@ -633,7 +633,7 @@ export default function LandingPage() {
                 scrollSnapAlign: 'start',
                 boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
               }}>
-                <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=300&q=65&auto=format&fit=crop" alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.4) saturate(0.7)' }} />
+                <img src="https://media.base44.com/images/public/684474c5723dc90efce23588/58e169aae_image.png" alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.4) saturate(0.7)' }} />
                 <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px 12px', gap: 10 }}>
                   <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: '2px solid rgba(255,255,255,0.5)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>▶</div>
                   <div style={{ textAlign: 'center' }}>
