@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import SocialMetaTags from '@/components/common/SocialMetaTags';
 import { toast } from 'sonner';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
+import PromptsToTry from '@/components/landing/PromptsToTry';
 
 const dm = "'DM Sans', system-ui, -apple-system, sans-serif";
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
@@ -516,6 +517,9 @@ export default function LandingPage() {
             </div>
           </div>
         )}
+
+        {/* ── PROMPTS TO TRY ── */}
+        {isStudent && <PromptsToTry onStudentJoin={onStudentJoin} />}
 
         {/* ── REAL STUDENT RESULTS (redesigned — raw + warm) ── */}
         {isStudent && (
