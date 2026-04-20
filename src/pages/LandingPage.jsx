@@ -113,31 +113,34 @@ function PhoneMockup() {
 function VideoCard({ item }) {
   return (
     <div style={{
-      width: 160, flexShrink: 0,
-      background: `linear-gradient(160deg, ${item.color}22 0%, rgba(0,0,0,0.6) 100%)`,
-      border: `1px solid ${item.color}44`,
-      borderRadius: 20, overflow: 'hidden',
+      width: 162, flexShrink: 0,
+      background: `linear-gradient(170deg, ${item.color}30 0%, rgba(10,10,20,0.85) 60%, rgba(0,0,0,0.9) 100%)`,
+      border: `1.5px solid ${item.color}55`,
+      borderRadius: 22, overflow: 'hidden',
       aspectRatio: '9/16', position: 'relative',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
       padding: '16px 14px',
+      boxShadow: `0 8px 32px ${item.color}22`,
     }}>
+      {/* Shimmer overlay */}
+      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, transparent 40%, ${item.color}08 60%, transparent 80%)`, pointerEvents: 'none', backgroundSize: '200% 200%', animation: 'shimmer 3s ease infinite' }} />
       {/* Play icon area */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: '2px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', backdropFilter: 'blur(4px)' }}>
-            <span style={{ fontSize: 18 }}>▶</span>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px', backdropFilter: 'blur(6px)', boxShadow: `0 0 20px ${item.color}44` }}>
+            <span style={{ fontSize: 20, marginLeft: 2 }}>▶</span>
           </div>
-          <div style={{ width: 40, height: 40, borderRadius: '50%', background: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: 14, fontWeight: 800, color: '#fff' }}>{item.initials}</div>
+          <div style={{ width: 44, height: 44, borderRadius: '50%', background: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', fontSize: 15, fontWeight: 900, color: '#fff', boxShadow: `0 4px 16px ${item.color}66` }}>{item.initials}</div>
         </div>
       </div>
       {/* Caption */}
       <div>
-        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', margin: '0 0 3px', lineHeight: 1.3 }}>"{item.win}"</p>
-        <p style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.5)', margin: 0 }}>{item.school}</p>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.35 }}>"{item.win}"</p>
+        <p style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.45)', margin: 0 }}>{item.school}</p>
       </div>
-      {/* Coming soon badge */}
-      <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.5)', borderRadius: 100, padding: '3px 8px', backdropFilter: 'blur(4px)' }}>
-        <span style={{ fontFamily: dm, fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em' }}>SOON</span>
+      {/* Badge */}
+      <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.55)', borderRadius: 100, padding: '3px 9px', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <span style={{ fontFamily: dm, fontSize: 8, fontWeight: 800, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Soon</span>
       </div>
     </div>
   );
@@ -185,10 +188,14 @@ export default function LandingPage() {
       s.textContent = `
         @keyframes msgIn { from { opacity:0; transform:translateY(6px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
         @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-4px); opacity:1; } }
-        @keyframes floatPhone { 0%,100% { transform:translateY(0px) rotate(-1deg); } 50% { transform:translateY(-10px) rotate(1deg); } }
+        @keyframes floatPhone { 0%,100% { transform:translateY(0px) rotate(-1.5deg); } 50% { transform:translateY(-12px) rotate(1.5deg); } }
         @keyframes glowPulse { 0%,100% { box-shadow:0 0 0 0 rgba(232,93,32,0.5); } 50% { box-shadow:0 0 0 10px rgba(232,93,32,0); } }
         @keyframes slideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
         @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+        @keyframes iconPop { 0% { opacity:0; transform:scale(0.5) rotate(-10deg); } 70% { transform:scale(1.15) rotate(3deg); } 100% { opacity:1; transform:scale(1) rotate(0deg); } }
+        @keyframes heroPulse { 0%,100% { opacity:0.7; } 50% { opacity:1; } }
+        @keyframes badgeFloat { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-4px); } }
+        @keyframes ctaShine { 0% { background-position:-200% center; } 100% { background-position:200% center; } }
       `;
       document.head.appendChild(s);
     }
@@ -267,35 +274,44 @@ export default function LandingPage() {
         {/* ── HERO ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '56px 20px 32px', maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
 
-          {/* Live social proof badge */}
-          <div style={{ ...fadeIn(0), display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 100, padding: '7px 18px' }}>
+          {/* Hero background glow orbs */}
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(232,93,32,0.12) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(40px)', animation: 'heroPulse 4s ease-in-out infinite' }} />
+          <div style={{ position: 'absolute', top: 80, left: '20%', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(74,222,128,0.08) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(30px)' }} />
+          <div style={{ position: 'absolute', top: 60, right: '15%', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,140,255,0.1) 0%, transparent 70%)', pointerEvents: 'none', filter: 'blur(24px)' }} />
+
+          {/* Live badge */}
+          <div style={{ ...fadeIn(0), display: 'flex', justifyContent: 'center', marginBottom: 22, position: 'relative' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 100, padding: '7px 18px', animation: 'badgeFloat 3s ease-in-out infinite' }}>
               <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 10px #4ade80' }} />
               <span style={{ fontSize: 12, fontWeight: 700, color: '#4ade80', letterSpacing: '0.03em' }}>Real students landing intros & interviews now</span>
             </div>
           </div>
 
           {/* Headline */}
-          <h1 style={{ ...fadeIn(0.07), fontSize: 'clamp(34px, 9vw, 60px)', fontWeight: 900, lineHeight: 1.03, letterSpacing: '-0.04em', color: '#fff', margin: '0 0 18px' }}>
+          <h1 style={{ ...fadeIn(0.07), fontSize: 'clamp(34px, 9vw, 60px)', fontWeight: 900, lineHeight: 1.03, letterSpacing: '-0.04em', color: '#fff', margin: '0 0 18px', position: 'relative' }}>
             Stop cold-applying.<br />
             <span style={{ color: '#E85D20' }}>Get warm intros</span>{' '}
             <span style={{ color: 'rgba(255,255,255,0.85)' }}>from real people at your school.</span>
           </h1>
 
           {/* Subheadline */}
-          <p style={{ ...fadeIn(0.14), fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, maxWidth: 460, margin: '0 auto 30px' }}>
+          <p style={{ ...fadeIn(0.14), fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.65, maxWidth: 460, margin: '0 auto 32px', position: 'relative' }}>
             Free network at your school. FastIQ AI turns those connections into real replies and interviews. <strong style={{ color: 'rgba(255,255,255,0.8)' }}>No BS.</strong>
           </p>
 
-          {/* Primary CTA */}
-          <div style={{ ...fadeIn(0.2), display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+          {/* CTAs */}
+          <div style={{ ...fadeIn(0.2), display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', marginBottom: 16, position: 'relative' }}>
+            {/* Student CTA — big, bright, shiny */}
             <button onClick={onStudentJoin} style={{
-              fontSize: 17, fontWeight: 900, color: '#fff',
-              background: 'linear-gradient(135deg, #E85D20 0%, #ff6b35 100%)',
-              border: 'none', borderRadius: 18, padding: '20px 32px',
-              cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto',
-              boxShadow: '0 10px 48px rgba(232,93,32,0.5)',
+              fontSize: 18, fontWeight: 900, color: '#fff',
+              background: 'linear-gradient(100deg, #E85D20 0%, #ff6b35 45%, #ffab40 100%)',
+              backgroundSize: '200% auto',
+              border: 'none', borderRadius: 20, padding: '22px 32px',
+              cursor: 'pointer', width: '100%', maxWidth: 440, minHeight: 'auto',
+              boxShadow: '0 12px 56px rgba(232,93,32,0.55), 0 2px 0 rgba(255,255,255,0.15) inset',
               letterSpacing: '-0.01em', lineHeight: 1.2,
+              animation: 'ctaShine 3s linear infinite',
+              position: 'relative', overflow: 'hidden',
             }}>
               🎓 I'm a student — Try FastIQ free (7 days)
             </button>
@@ -303,7 +319,7 @@ export default function LandingPage() {
               fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.65)',
               background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.13)',
               borderRadius: 18, padding: '17px 32px',
-              cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto',
+              cursor: 'pointer', width: '100%', maxWidth: 440, minHeight: 'auto',
             }}>
               🤝 I'm a parent/alumni — Join free to help
             </button>
@@ -311,8 +327,10 @@ export default function LandingPage() {
 
           {/* Social proof micro-line */}
           <div style={{ ...fadeIn(0.25), marginBottom: 14 }}>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0, letterSpacing: '0.02em' }}>
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>1,000+ helpers</span> · <span style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>15+ schools</span> · Real students getting replies
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>
+              <span style={{ color: '#4ade80', fontWeight: 700 }}>✓ Real students getting replies and interviews now</span>{' '}
+              <span style={{ color: 'rgba(255,255,255,0.25)' }}>•</span>{' '}
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>1,000+ helpers</span>
             </p>
           </div>
 
@@ -475,8 +493,12 @@ export default function LandingPage() {
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. Your edge.</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {FASTIQ_FEATURES.map((f, i) => (
-              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '18px 14px' }}>
-                <span style={{ fontSize: 26, display: 'block', marginBottom: 10 }}>{f.icon}</span>
+              <div key={i} style={{
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 16, padding: '18px 14px',
+                animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.07}s both` : 'none',
+              }}>
+                <span style={{ fontSize: 28, display: 'block', marginBottom: 10, lineHeight: 1 }}>{f.icon}</span>
                 <p style={{ fontSize: 13, fontWeight: 800, color: '#fff', margin: '0 0 5px', lineHeight: 1.2 }}>{f.label}</p>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', margin: 0, lineHeight: 1.45 }}>{f.desc}</p>
               </div>
