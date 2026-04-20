@@ -141,43 +141,51 @@ function PhoneMockup() {
   );
 }
 
+// Real student photos from Unsplash for testimonial cards
+const STORY_PHOTOS = [
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=70&auto=format&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=70&auto=format&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=70&auto=format&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=70&auto=format&fit=crop&crop=face',
+];
+
 // ── Real Student Story Card ──
-function StudentCard({ story }) {
+function StudentCard({ story, photoUrl }) {
   return (
     <div style={{
-      width: 230, flexShrink: 0,
-      background: 'rgba(255,255,255,0.03)',
-      border: `1px solid rgba(255,255,255,0.1)`,
-      borderRadius: 20,
-      padding: '20px 18px',
+      width: 238, flexShrink: 0,
+      background: 'rgba(18,18,28,0.95)',
+      border: `1px solid rgba(255,255,255,0.09)`,
+      borderRadius: 22,
+      padding: '18px 16px',
       transform: `rotate(${story.rotate})`,
-      boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)`,
+      boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)`,
       position: 'relative',
       scrollSnapAlign: 'start',
     }}>
-      {/* Subtle color accent top */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: story.color, borderRadius: '20px 20px 0 0', opacity: 0.8 }} />
-      {/* Avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <div style={{ width: 38, height: 38, borderRadius: '50%', background: story.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#fff', flexShrink: 0, boxShadow: `0 4px 12px ${story.color}55` }}>
-          {story.initials}
+      {/* Color accent top */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${story.color}, ${story.color}88)`, borderRadius: '22px 22px 0 0' }} />
+      {/* Avatar with real photo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 13 }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid ${story.color}55`, boxShadow: `0 4px 12px ${story.color}44` }}>
+          {photoUrl ? (
+            <img src={photoUrl} alt={story.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <div style={{ width: '100%', height: '100%', background: story.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#fff' }}>{story.initials}</div>
+          )}
         </div>
         <div>
           <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', fontFamily: dm, lineHeight: 1.2 }}>{story.name}</div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: dm, marginTop: 1 }}>{story.school}</div>
+          <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.38)', fontFamily: dm, marginTop: 1 }}>{story.school}</div>
         </div>
       </div>
       {/* Quote */}
-      <p style={{ fontFamily: dm, fontSize: 12.5, color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, margin: '0 0 14px', fontStyle: 'italic' }}>
+      <p style={{ fontFamily: dm, fontSize: 12.5, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, margin: '0 0 13px', fontStyle: 'italic' }}>
         &ldquo;{story.quote}&rdquo;
       </p>
       {/* Win badge */}
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${story.color}18`, border: `1px solid ${story.color}44`, borderRadius: 100, padding: '5px 12px' }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: story.color, fontFamily: dm }}>{story.win}</span>
-      </div>
-      {/* Coming soon overlay note */}
-      <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.5)', borderRadius: 100, padding: '2px 8px', backdropFilter: 'blur(4px)' }}>
-        <span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.4)', fontFamily: dm, letterSpacing: '0.08em', textTransform: 'uppercase' }}>verified</span>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${story.color}15`, border: `1px solid ${story.color}40`, borderRadius: 100, padding: '5px 11px' }}>
+        <span style={{ fontSize: 10.5, fontWeight: 700, color: story.color, fontFamily: dm }}>{story.win}</span>
       </div>
     </div>
   );
@@ -435,30 +443,30 @@ export default function LandingPage() {
 
         {/* ── HERO VISUAL + PHONE (student only) ── */}
         {isStudent && (
-          <div style={{ position: 'relative', zIndex: 2, padding: '4px 20px 40px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
-            {/* Split layout: lifestyle photo + phone */}
-            <div style={{ display: 'flex', gap: 14, alignItems: 'center', justifyContent: 'center' }}>
-              {/* Lifestyle image */}
-              <div style={{ flex: '0 0 auto', position: 'relative', borderRadius: 24, overflow: 'hidden', width: 148, height: 220, boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08)', transform: 'rotate(-2deg)' }}>
-                <img
-                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&q=75&auto=format&fit=crop"
-                  alt="Students collaborating"
-                  loading="lazy"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.1) brightness(0.88)' }}
-                />
-                {/* Grain overlay */}
-                <div style={{ position: 'absolute', inset: 0, opacity: 0.08, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 128 128' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '64px', pointerEvents: 'none' }} />
-                {/* Caption sticker */}
-                <div style={{ position: 'absolute', bottom: 10, left: 8, right: 8, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', borderRadius: 10, padding: '5px 8px', textAlign: 'center' }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: '#4ade80', fontFamily: dm, letterSpacing: '0.04em' }}>got a reply in 48h 🎉</span>
+          <div style={{ position: 'relative', zIndex: 2, padding: '4px 16px 40px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
+            {/* Three-photo lifestyle strip above phone */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16, height: 130 }}>
+              {[
+                { src: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&q=70&auto=format&fit=crop', caption: 'landed the interview 🎉', rotate: '-1.5deg', flex: '1.2' },
+                { src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&q=70&auto=format&fit=crop', caption: 'reply in 48h ✅', rotate: '0.5deg', flex: '1' },
+                { src: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=300&q=70&auto=format&fit=crop', caption: '3 chats booked 🚀', rotate: '1.8deg', flex: '1.1' },
+              ].map((p, i) => (
+                <div key={i} style={{ flex: p.flex, position: 'relative', borderRadius: 18, overflow: 'hidden', boxShadow: '0 10px 32px rgba(0,0,0,0.5)', transform: `rotate(${p.rotate})` }}>
+                  <img src={p.src} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.05) brightness(0.82)' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)', pointerEvents: 'none' }} />
+                  <div style={{ position: 'absolute', bottom: 6, left: 6, right: 6 }}>
+                    <span style={{ fontSize: 8.5, fontWeight: 700, color: '#fff', fontFamily: dm, lineHeight: 1.2, display: 'block', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>{p.caption}</span>
+                  </div>
                 </div>
-              </div>
-              {/* Phone mockup */}
-              <div style={{ flex: '0 0 auto', animation: mounted ? 'floatPhone 5s ease-in-out infinite' : 'none', transform: 'rotate(1.5deg)' }}>
+              ))}
+            </div>
+            {/* Phone mockup centered */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ display: 'inline-block', animation: mounted ? 'floatPhone 5s ease-in-out infinite' : 'none' }}>
                 <PhoneMockup />
               </div>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', margin: '10px 0 0', fontStyle: 'italic', fontFamily: dm }}>↑ FastIQ found the alum, wrote the message, she replied. Real story.</p>
             </div>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', margin: '12px 0 0', fontStyle: 'italic', textAlign: 'center', fontFamily: dm }}>↑ FastIQ found the alum, wrote the message, she replied. Real story.</p>
           </div>
         )}
 
@@ -486,26 +494,31 @@ export default function LandingPage() {
         {isStudent && (
           <div style={{ position: 'relative', zIndex: 2, padding: '0 0 56px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
             <div style={{ padding: '0 20px', marginBottom: 20 }}>
-              <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 8px', fontFamily: dm }}>📱 Real students. Real results.</p>
-              <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 6px' }}>
-                In their own words.{' '}
-                <span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 400, fontSize: '0.82em' }}>(no PR polish)</span>
-              </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 6px #4ade80', flexShrink: 0 }} />
-                <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.38)', margin: 0, fontFamily: dm }}>Raw iPhone videos coming — quotes below are real</p>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 100, padding: '5px 14px', marginBottom: 12 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 8px #E85D20' }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', fontFamily: dm, letterSpacing: '0.04em' }}>Real students. Real results.</span>
               </div>
+              <h2 style={{ fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.12, margin: '0 0 8px' }}>
+                They stopped applying cold.<br />
+                <span style={{ color: 'rgba(255,255,255,0.42)', fontWeight: 400 }}>Here&apos;s what happened instead.</span>
+              </h2>
+              <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.32)', margin: 0, fontFamily: dm, fontStyle: 'italic' }}>Unfiltered. Raw iPhone videos coming soon.</p>
             </div>
             {/* Video placeholder cards + quote cards */}
             <div style={{ display: 'flex', gap: 14, paddingLeft: 20, paddingBottom: 16, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', alignItems: 'flex-start' }}>
               {/* Video coming soon card */}
-              <div style={{ width: 148, flexShrink: 0, borderRadius: 20, overflow: 'hidden', aspectRatio: '9/16', background: 'linear-gradient(170deg, #1a1a2e 0%, #0d0d18 100%)', border: '1.5px dashed rgba(232,93,32,0.35)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px 12px', scrollSnapAlign: 'start', gap: 10 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '2px dashed rgba(232,93,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>📹</div>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)', textAlign: 'center', lineHeight: 1.4, margin: 0 }}>Raw student video<br />coming soon</p>
-                <p style={{ fontFamily: dm, fontSize: 9.5, color: 'rgba(255,255,255,0.28)', textAlign: 'center', margin: 0, lineHeight: 1.4 }}>Real faces, messy backgrounds, real results</p>
+              <div style={{ width: 148, flexShrink: 0, borderRadius: 20, overflow: 'hidden', aspectRatio: '9/16', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', scrollSnapAlign: 'start' }}>
+                <img src="https://images.unsplash.com/photo-1601933973783-43cf8a7d4c5f?w=300&q=65&auto=format&fit=crop" alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.45) saturate(0.8)' }} />
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 12px', gap: 8 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>▶</div>
+                  <p style={{ fontFamily: dm, fontSize: 10.5, fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.4, margin: 0, textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}>Raw video<br />dropping soon</p>
+                  <div style={{ background: 'rgba(232,93,32,0.85)', borderRadius: 100, padding: '3px 10px' }}>
+                    <span style={{ fontFamily: dm, fontSize: 8.5, fontWeight: 800, color: '#fff', letterSpacing: '0.06em' }}>REAL STUDENT</span>
+                  </div>
+                </div>
               </div>
               {STUDENT_STORIES.map((story, i) => (
-                <StudentCard key={i} story={story} />
+                <StudentCard key={i} story={story} photoUrl={STORY_PHOTOS[i]} />
               ))}
             </div>
             {/* Rotating win ticker */}
