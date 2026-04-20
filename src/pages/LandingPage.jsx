@@ -269,16 +269,16 @@ export default function LandingPage() {
   const [timeLeft, setTimeLeft] = useState('');
   const [showFoundingBanner, setShowFoundingBanner] = useState(true);
   const [activeWin, setActiveWin] = useState(0);
-  const [mode, setMode] = useState(() => {
-    try { return localStorage.getItem('lp_mode') || 'student'; } catch { return 'student'; }
-  });
+  const [mode, setMode] = useState('student');
 
   const handleModeChange = (newMode) => {
-    setMode(newMode);
-    try { localStorage.setItem('lp_mode', newMode); } catch {}
     trackEvent('landing_mode_toggle', { mode: newMode });
     if (newMode === 'helper') {
+      try { localStorage.setItem('lp_mode', 'student'); } catch {}
       navigate('ParentLandingPage');
+    } else {
+      setMode('student');
+      try { localStorage.setItem('lp_mode', 'student'); } catch {}
     }
   };
 
