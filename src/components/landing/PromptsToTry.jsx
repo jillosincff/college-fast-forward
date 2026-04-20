@@ -57,8 +57,8 @@ function PromptCard({ prompt, index }) {
 
   return (
     <div style={{
-      background: prompt.accentBg,
-      border: `1px solid ${prompt.accentBorder}`,
+      background: '#14151f',
+      border: `1px solid rgba(255,255,255,0.08)`,
       borderRadius: 20,
       padding: '22px 20px 18px',
       display: 'flex',
@@ -69,7 +69,7 @@ function PromptCard({ prompt, index }) {
       scrollSnapAlign: 'start',
       position: 'relative',
       borderTop: `3px solid ${prompt.accentColor}`,
-      boxShadow: `0 8px 32px ${prompt.accentColor}12, 0 0 0 1px rgba(255,255,255,0.03)`,
+      boxShadow: `0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04)`,
     }}>
       {/* Label */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -135,7 +135,7 @@ function PromptCard({ prompt, index }) {
       <p style={{
         fontFamily: dm,
         fontSize: 12,
-        color: 'rgba(255,255,255,0.42)',
+        color: 'rgba(255,255,255,0.65)',
         margin: 0,
         lineHeight: 1.6,
       }}>
@@ -169,12 +169,11 @@ function PromptCard({ prompt, index }) {
           margin: 0,
           lineHeight: 1.6,
           fontStyle: 'italic',
-          opacity: 0.8,
         }}>{prompt.preview}</p>
         <p style={{
           fontFamily: dm,
           fontSize: 10,
-          color: 'rgba(255,255,255,0.18)',
+          color: 'rgba(255,255,255,0.35)',
           margin: '5px 0 0',
           position: 'relative',
           zIndex: 2,
