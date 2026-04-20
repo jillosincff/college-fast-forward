@@ -138,11 +138,11 @@ export default function RawVideoTestimonials() {
         </div>
         <h2 style={{
           fontFamily: dm, fontSize: 'clamp(22px, 5.5vw, 32px)', fontWeight: 900,
-          color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 6px',
+          color: '#0d0d0d', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 6px',
         }}>
           Don't take our word for it.
         </h2>
-        <p style={{ fontFamily: dm, fontSize: 13.5, color: 'rgba(255,255,255,0.35)', margin: 0, lineHeight: 1.6 }}>
+        <p style={{ fontFamily: dm, fontSize: 13.5, color: 'rgba(0,0,0,0.38)', margin: 0, lineHeight: 1.6 }}>
           iPhone clips coming soon. These quotes are 100% real.
         </p>
       </div>

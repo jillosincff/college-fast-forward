@@ -195,7 +195,7 @@ export default function PromptsToTry({ onStudentJoin }) {
         <h2 style={{
           fontSize: 'clamp(24px, 6vw, 36px)',
           fontWeight: 900,
-          color: '#fff',
+          color: '#0d0d0d',
           letterSpacing: '-0.032em',
           lineHeight: 1.1,
           margin: '0 0 8px',
@@ -206,7 +206,7 @@ export default function PromptsToTry({ onStudentJoin }) {
         <p style={{
           fontFamily: dm,
           fontSize: 14,
-          color: 'rgba(255,255,255,0.38)',
+          color: 'rgba(0,0,0,0.45)',
           margin: 0,
           lineHeight: 1.6,
         }}>
@@ -237,7 +237,7 @@ export default function PromptsToTry({ onStudentJoin }) {
 
       {/* Bottom CTA line */}
       <div style={{ padding: '18px 20px 0', textAlign: 'center' }}>
-        <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: '0 0 14px', lineHeight: 1.6 }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(0,0,0,0.38)', margin: '0 0 14px', lineHeight: 1.6 }}>
           These are real prompts students are using right now. Try them free for 7 days — no card needed.
         </p>
         <button

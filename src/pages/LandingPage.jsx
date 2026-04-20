@@ -209,29 +209,29 @@ function Countdown({ timeLeft }) {
 function FAQItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+    <div style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
       <button onClick={() => setOpen(!open)} style={{ width: '100%', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', background: 'none', border: 'none', cursor: 'pointer', gap: 12, minHeight: 'auto' }}>
-        <span style={{ fontFamily: dm, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>{q}</span>
+        <span style={{ fontFamily: dm, fontSize: 15, fontWeight: 600, color: 'rgba(0,0,0,0.82)', lineHeight: 1.4 }}>{q}</span>
         <span style={{ fontSize: 20, color: '#E85D20', flexShrink: 0, display: 'inline-block', transition: 'transform 0.2s', transform: open ? 'rotate(45deg)' : 'none' }}>+</span>
       </button>
-      {open && <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.75, margin: '0 0 18px', paddingRight: 20 }}>{a}</p>}
+      {open && <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(0,0,0,0.52)', lineHeight: 1.75, margin: '0 0 18px', paddingRight: 20 }}>{a}</p>}
     </div>
   );
 }
 
 function RoleToggle({ mode, onChange }) {
   return (
-    <div style={{ position: 'sticky', top: 53, zIndex: 90, padding: '10px 16px', background: 'rgba(7,7,13,0.96)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(255,255,255,0.05)', borderRadius: 100, padding: 4 }}>
+    <div style={{ position: 'sticky', top: 53, zIndex: 90, padding: '10px 16px', background: 'rgba(245,242,238,0.95)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+      <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(0,0,0,0.06)', borderRadius: 100, padding: 4 }}>
         <button
           onClick={() => onChange('student')}
-          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'student' ? '#fff' : 'rgba(255,255,255,0.38)', background: mode === 'student' ? 'linear-gradient(135deg,#E85D20,#ff7340)' : 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: mode === 'student' ? '0 4px 22px rgba(232,93,32,0.45)' : 'none', transition: 'all 0.25s ease' }}
+          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'student' ? '#0a0a0a' : 'rgba(0,0,0,0.38)', background: mode === 'student' ? 'linear-gradient(135deg,#a8ff3e,#78ff44)' : 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: mode === 'student' ? '0 4px 22px rgba(168,255,62,0.5)' : 'none', transition: 'all 0.25s ease' }}
         >
           🎓 I need help
         </button>
         <button
           onClick={() => onChange('helper')}
-          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'helper' ? '#fff' : 'rgba(255,255,255,0.38)', background: mode === 'helper' ? 'rgba(79,140,255,0.22)' : 'none', border: mode === 'helper' ? '1px solid rgba(79,140,255,0.4)' : '1px solid transparent', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
+          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'helper' ? '#fff' : 'rgba(0,0,0,0.38)', background: mode === 'helper' ? 'linear-gradient(135deg,#3b7af5,#4f8cff)' : 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: mode === 'helper' ? '0 4px 22px rgba(79,140,255,0.45)' : 'none', transition: 'all 0.25s ease' }}
         >
           🤝 I want to help
         </button>
@@ -356,17 +356,17 @@ export default function LandingPage() {
         url="https://www.collegefastforward.com"
       />
 
-      <div style={{ minHeight: '100vh', background: '#07070d', fontFamily: dm, overflowX: 'hidden' }}>
+      <div style={{ minHeight: '100vh', background: '#f5f2ee', fontFamily: dm, overflowX: 'hidden' }}>
 
-        {/* Ambient warm glow */}
+        {/* Ambient color blobs — light version */}
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
           background: isStudent
-            ? 'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(232,93,32,0.2) 0%, transparent 55%), radial-gradient(ellipse 50% 35% at 15% 60%, rgba(168,255,62,0.07) 0%, transparent 50%), radial-gradient(ellipse 40% 30% at 85% 35%, rgba(0,33,165,0.06) 0%, transparent 50%)'
-            : 'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(79,140,255,0.16) 0%, transparent 58%), radial-gradient(ellipse 40% 30% at 15% 35%, rgba(74,222,128,0.05) 0%, transparent 50%)',
+            ? 'radial-gradient(ellipse 80% 45% at 50% -8%, rgba(168,255,62,0.18) 0%, transparent 55%), radial-gradient(ellipse 50% 35% at 90% 20%, rgba(232,93,32,0.10) 0%, transparent 50%), radial-gradient(ellipse 40% 30% at 10% 70%, rgba(79,140,255,0.07) 0%, transparent 50%)'
+            : 'radial-gradient(ellipse 80% 45% at 50% -8%, rgba(79,140,255,0.14) 0%, transparent 55%), radial-gradient(ellipse 40% 30% at 90% 25%, rgba(124,58,237,0.07) 0%, transparent 50%)',
           transition: 'background 0.8s ease',
         }} />
-        {/* Grain */}
-        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, opacity: 0.022, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '128px', animation: 'grainAnim 9s steps(10) infinite' }} />
+        {/* Subtle paper texture */}
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, opacity: 0.03, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '128px' }} />
 
         {/* ── NAV ── */}
         <nav style={{ position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'rgba(7,7,13,0.93)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -387,40 +387,40 @@ export default function LandingPage() {
 
         {/* ── HERO ── */}
         <div key={mode} style={{ position: 'relative', zIndex: 2, padding: '44px 20px 24px', maxWidth: 640, margin: '0 auto', textAlign: 'center', ...modeAnim }}>
-          {/* Warm glow behind headline */}
-          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 500, height: 400, borderRadius: '50%', background: isStudent ? 'radial-gradient(circle, rgba(232,93,32,0.12) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(79,140,255,0.09) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(52px)', animation: 'heroPulse 5s ease-in-out infinite' }} />
+          {/* Color block behind headline */}
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 500, height: 350, borderRadius: '50%', background: isStudent ? 'radial-gradient(circle, rgba(168,255,62,0.22) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(79,140,255,0.15) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(48px)', animation: 'heroPulse 5s ease-in-out infinite' }} />
 
           {/* Live badge */}
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: isStudent ? 'rgba(74,222,128,0.07)' : 'rgba(79,140,255,0.07)', border: `1px solid ${isStudent ? 'rgba(74,222,128,0.22)' : 'rgba(79,140,255,0.22)'}`, borderRadius: 100, padding: '8px 20px', animation: 'badgeFloat 3.5s ease-in-out infinite' }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: isStudent ? '#4ade80' : '#4f8cff', boxShadow: `0 0 8px ${isStudent ? '#4ade80' : '#4f8cff'}` }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: isStudent ? '#4ade80' : '#4f8cff', letterSpacing: '-0.01em' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: isStudent ? 'rgba(50,200,80,0.10)' : 'rgba(79,140,255,0.10)', border: `1.5px solid ${isStudent ? 'rgba(50,200,80,0.3)' : 'rgba(79,140,255,0.3)'}`, borderRadius: 100, padding: '8px 20px', animation: 'badgeFloat 3.5s ease-in-out infinite' }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: isStudent ? '#22c55e' : '#4f8cff', boxShadow: `0 0 8px ${isStudent ? '#22c55e' : '#4f8cff'}` }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: isStudent ? '#15803d' : '#1d4ed8', letterSpacing: '-0.01em' }}>
                 {isStudent ? 'Real students landing intros right now' : 'Join 1,000+ parents & alumni helping students'}
               </span>
             </div>
           </div>
 
           {/* Main headline */}
-          <h1 style={{ fontSize: 'clamp(32px, 8.5vw, 58px)', fontWeight: 900, lineHeight: 1.04, letterSpacing: '-0.038em', color: '#fff', margin: '0 0 17px', position: 'relative' }}>
+          <h1 style={{ fontSize: 'clamp(32px, 8.5vw, 58px)', fontWeight: 900, lineHeight: 1.04, letterSpacing: '-0.038em', color: '#0d0d0d', margin: '0 0 17px', position: 'relative' }}>
             {isStudent ? (
               <>
                 Tired of ghosted<br />applications?<br />
                 <span style={{ color: '#E85D20' }}>Yeah, us too.</span>{' '}
-                <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.87em', fontWeight: 700 }}>Get warm intros instead.</span>
+                <span style={{ color: 'rgba(0,0,0,0.5)', fontSize: '0.87em', fontWeight: 700 }}>Get warm intros instead.</span>
               </>
             ) : (
               <>
                 One intro from you<br />
-                <span style={{ color: '#4f8cff' }}>can actually change</span>{' '}
-                <span style={{ color: 'rgba(255,255,255,0.72)', fontWeight: 700 }}>a student's whole path.</span>
+                <span style={{ color: '#2563eb' }}>can actually change</span>{' '}
+                <span style={{ color: 'rgba(0,0,0,0.5)', fontWeight: 700 }}>a student's whole path.</span>
               </>
             )}
           </h1>
 
           {/* Sub */}
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 30px', textAlign: 'center' }}>
+          <p style={{ fontSize: 16, color: 'rgba(0,0,0,0.48)', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 30px', textAlign: 'center' }}>
             {isStudent ? (
-              <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
+              <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(0,0,0,0.75)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
             ) : (
               <>Free to join, zero obligation. The more parents and alumni connect, the stronger the whole community gets — including for your own kids.</>
             )}
@@ -447,7 +447,7 @@ export default function LandingPage() {
                 >
                   🎓 I'm a student — Try FastIQ free (7 days)
                 </button>
-                <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
+                <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
                   🤝 I'm a parent/alumni — Join free to help
                 </button>
               </>
@@ -456,7 +456,7 @@ export default function LandingPage() {
                 <button onClick={onParentJoin} style={{ fontSize: 20, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #3b7af5 0%, #4f8cff 50%, #7c3aed 100%)', border: 'none', borderRadius: 22, padding: '26px 36px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto', boxShadow: '0 16px 56px rgba(79,140,255,0.5)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
                   🤝 Join free — 2 minutes, zero obligation
                 </button>
-                <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
+                <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
                   🎓 I'm a student — Try FastIQ free
                 </button>
               </>
@@ -464,8 +464,8 @@ export default function LandingPage() {
           </div>
 
           {/* Social proof line */}
-          <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.28)', margin: '0 0 12px', textAlign: 'center' }}>
-            <span style={{ color: isStudent ? '#a8ff3e' : '#4f8cff', fontWeight: 700 }}>● Real students getting replies right now</span>
+          <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.35)', margin: '0 0 12px', textAlign: 'center' }}>
+            <span style={{ color: isStudent ? '#16a34a' : '#2563eb', fontWeight: 700 }}>● Real students getting replies right now</span>
             {' · '}1,000+ helpers across 15+ schools
           </p>
 
@@ -477,12 +477,12 @@ export default function LandingPage() {
                 ? ['No credit card', 'Cancel anytime', '2 min to set up']
                 : ['No fee ever', 'You control who you talk to', 'Join in 2 min']
               ).map(t => (
-                <span key={t} style={{ fontSize: 12, color: 'rgba(255,255,255,0.26)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ color: '#4ade80' }}>✓</span> {t}
+                <span key={t} style={{ fontSize: 12, color: 'rgba(0,0,0,0.38)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ color: '#16a34a', fontWeight: 700 }}>✓</span> {t}
                 </span>
               ))}
             </div>
-            {isStudent && foundingActive && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.17)' }}>Founding Rate $14.50/mo locks in → goes to $29 after April 30</span>}
+            {isStudent && foundingActive && <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.28)' }}>Founding Rate $14.50/mo locks in → goes to $29 after April 30</span>}
           </div>
         </div>
 
@@ -494,7 +494,7 @@ export default function LandingPage() {
               <div style={{ display: 'inline-block', animation: mounted ? 'floatPhone 5.5s ease-in-out infinite' : 'none' }}>
                 <PhoneMockup />
               </div>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.17)', margin: '10px 0 0', fontStyle: 'italic' }}>↑ FastIQ found the alum, wrote the message, she replied. Real story.</p>
+              <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.3)', margin: '10px 0 0', fontStyle: 'italic' }}>↑ FastIQ found the alum, wrote the message, she replied. Real story.</p>
             </div>
           </div>
         )}
@@ -509,10 +509,10 @@ export default function LandingPage() {
                 { icon: '🔄', title: 'Pay it forward', desc: 'You help students → their network later helps yours.' },
                 { icon: '🏫', title: '15+ universities', desc: 'Real community across schools and industries.' },
               ].map((b, i) => (
-                <div key={i} style={{ background: 'rgba(79,140,255,0.04)', border: '1px solid rgba(79,140,255,0.11)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.07}s both` : 'none' }}>
+                <div key={i} style={{ background: '#fff', border: '1.5px solid rgba(79,140,255,0.15)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.07}s both` : 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9 }}>{b.icon}</span>
-                  <p style={{ fontSize: 13, fontWeight: 800, color: '#fff', margin: '0 0 5px' }}>{b.title}</p>
-                  <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.36)', margin: 0, lineHeight: 1.5 }}>{b.desc}</p>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: '#0d0d0d', margin: '0 0 5px' }}>{b.title}</p>
+                  <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.5 }}>{b.desc}</p>
                 </div>
               ))}
             </div>
@@ -534,11 +534,11 @@ export default function LandingPage() {
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#a8ff3e', boxShadow: '0 0 10px #a8ff3e', animation: 'glowPulse 2s ease infinite' }} />
                 <span style={{ fontSize: 11, fontWeight: 800, color: '#a8ff3e', letterSpacing: '0.04em' }}>Real students. Real results.</span>
               </div>
-              <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 38px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.032em', lineHeight: 1.1, margin: '0 0 9px' }}>
+              <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 38px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.032em', lineHeight: 1.1, margin: '0 0 9px' }}>
                 They stopped applying cold.<br />
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '0.9em' }}>Here's what happened instead.</span>
+                <span style={{ color: 'rgba(0,0,0,0.38)', fontWeight: 400, fontSize: '0.9em' }}>Here's what happened instead.</span>
               </h2>
-              <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>Unfiltered. Raw iPhone videos coming soon — quotes below are real.</p>
+              <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.32)', margin: 0, fontStyle: 'italic' }}>Unfiltered. Raw iPhone videos coming soon — quotes below are real.</p>
             </div>
 
             {/* Horizontal scroll cards */}
@@ -590,11 +590,11 @@ export default function LandingPage() {
 
         {/* ── STATS BAR ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 56px', maxWidth: 640, margin: '0 auto' }}>
-          <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.015)' }}>
+          <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1.5px solid rgba(168,255,62,0.35)', background: 'linear-gradient(135deg, rgba(168,255,62,0.08), rgba(255,255,255,0.8))', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
             {[['1,000+', 'helpers in the network'], ['15+', 'universities'], ['50+', 'industries']].map(([n, l], i) => (
-              <div key={l} style={{ textAlign: 'center', flex: 1, padding: '20px 8px', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
-                <div style={{ fontSize: 26, fontWeight: 900, color: '#a8ff3e', letterSpacing: '-0.03em', lineHeight: 1, textShadow: '0 0 20px rgba(168,255,62,0.4)' }}>{n}</div>
-                <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.26)', marginTop: 5, lineHeight: 1.35 }}>{l}</div>
+              <div key={l} style={{ textAlign: 'center', flex: 1, padding: '20px 8px', borderLeft: i > 0 ? '1.5px solid rgba(168,255,62,0.25)' : 'none' }}>
+                <div style={{ fontSize: 26, fontWeight: 900, color: '#16a34a', letterSpacing: '-0.03em', lineHeight: 1 }}>{n}</div>
+                <div style={{ fontSize: 10.5, color: 'rgba(0,0,0,0.42)', marginTop: 5, lineHeight: 1.35 }}>{l}</div>
               </div>
             ))}
           </div>
@@ -603,23 +603,23 @@ export default function LandingPage() {
         {/* ── HOW IT WORKS ── */}
         <div key={`steps-${mode}`} style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto', animation: 'modeFade 0.32s ease both' }}>
           <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>How it works</p>
-          <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 40px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 24px' }}>
+          <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 40px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 24px' }}>
             {isStudent
-              ? <>From zero to interview.<br /><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.84em' }}>Days, not months. Seriously.</span></>
-              : <>Simple, on your terms.<br /><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.84em' }}>No commitments. Just helping.</span></>
+              ? <>From zero to interview.<br /><span style={{ color: 'rgba(0,0,0,0.35)', fontWeight: 400, fontSize: '0.84em' }}>Days, not months. Seriously.</span></>
+              : <>Simple, on your terms.<br /><span style={{ color: 'rgba(0,0,0,0.35)', fontWeight: 400, fontSize: '0.84em' }}>No commitments. Just helping.</span></>
             }
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {steps.map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: (isStudent && i === 3) ? 'rgba(232,93,32,0.055)' : 'rgba(255,255,255,0.022)', border: `1px solid ${(isStudent && i === 3) ? 'rgba(232,93,32,0.22)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 18, padding: '18px 16px', borderLeft: `3px solid ${(isStudent && i === 3) ? '#E85D20' : 'rgba(255,255,255,0.08)'}` }}>
+              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: (isStudent && i === 3) ? 'rgba(232,93,32,0.06)' : '#fff', border: `1px solid ${(isStudent && i === 3) ? 'rgba(232,93,32,0.25)' : 'rgba(0,0,0,0.08)'}`, borderRadius: 18, padding: '18px 16px', borderLeft: `3px solid ${(isStudent && i === 3) ? '#E85D20' : 'rgba(0,0,0,0.1)'}`, boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
                 <span style={{ fontSize: 28, flexShrink: 0, lineHeight: 1 }}>{s.icon}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span style={{ fontSize: 9.5, fontWeight: 900, color: 'rgba(232,93,32,0.65)', letterSpacing: '0.1em' }}>{s.num}</span>
-                    <p style={{ fontSize: 14, fontWeight: 800, color: '#fff', margin: 0 }}>{s.title}</p>
-                    {s.ai && <span style={{ fontSize: 8.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.12)', borderRadius: 100, padding: '2px 8px', border: '1px solid rgba(232,93,32,0.25)', whiteSpace: 'nowrap' }}>AI POWERED</span>}
+                    <span style={{ fontSize: 9.5, fontWeight: 900, color: 'rgba(232,93,32,0.7)', letterSpacing: '0.1em' }}>{s.num}</span>
+                    <p style={{ fontSize: 14, fontWeight: 800, color: '#0d0d0d', margin: 0 }}>{s.title}</p>
+                    {s.ai && <span style={{ fontSize: 8.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.10)', borderRadius: 100, padding: '2px 8px', border: '1px solid rgba(232,93,32,0.25)', whiteSpace: 'nowrap' }}>AI POWERED</span>}
                   </div>
-                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.42)', margin: 0, lineHeight: 1.55 }}>{s.desc}</p>
+                  <p style={{ fontSize: 12.5, color: 'rgba(0,0,0,0.45)', margin: 0, lineHeight: 1.55 }}>{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -630,14 +630,14 @@ export default function LandingPage() {
         {isStudent && (
           <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
             <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FastIQ unlocks</p>
-            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 4px' }}>Everything your job search is missing.</h2>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.36)', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
+            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 4px' }}>Everything your job search is missing.</h2>
+            <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.45)', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FASTIQ_FEATURES.map((f, i) => (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.022)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `2px solid rgba(232,93,32,${0.12 + i * 0.035})` }}>
+                <div key={i} style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `2.5px solid rgba(232,93,32,${0.3 + i * 0.04})`, boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9, lineHeight: 1 }}>{f.icon}</span>
-                  <p style={{ fontSize: 12.5, fontWeight: 800, color: '#fff', margin: '0 0 4px', lineHeight: 1.2 }}>{f.label}</p>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.34)', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
+                  <p style={{ fontSize: 12.5, fontWeight: 800, color: '#0d0d0d', margin: '0 0 4px', lineHeight: 1.2 }}>{f.label}</p>
+                  <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.42)', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -652,74 +652,74 @@ export default function LandingPage() {
         {/* ── PRICING ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
           <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>Pricing</p>
-          <h2 style={{ fontSize: 'clamp(25px, 5.5vw, 38px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 22px' }}>
+          <h2 style={{ fontSize: 'clamp(25px, 5.5vw, 38px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 22px' }}>
             Free for helpers.<br /><span style={{ color: '#E85D20' }}>Turbo for students.</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div style={{ background: 'rgba(255,255,255,0.022)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 22, padding: '24px 16px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.09)', borderRadius: 22, padding: '24px 16px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}>
               <span style={{ fontSize: 30, marginBottom: 12 }}>🏫</span>
-              <p style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(255,255,255,0.32)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>Free Network</p>
-              <p style={{ fontSize: 34, fontWeight: 900, color: '#fff', margin: '0 0 2px', letterSpacing: '-0.04em' }}>$0</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.26)', margin: '0 0 16px' }}>Forever free</p>
+              <p style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(0,0,0,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>Free Network</p>
+              <p style={{ fontSize: 34, fontWeight: 900, color: '#0d0d0d', margin: '0 0 2px', letterSpacing: '-0.04em' }}>$0</p>
+              <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', margin: '0 0 16px' }}>Forever free</p>
               <div style={{ flex: 1, marginBottom: 18 }}>
                 {['Join as parent or alumni', 'Help students at your school', 'No fee, no obligation, ever'].map(b => (
                   <div key={b} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 8 }}>
-                    <span style={{ color: '#4ade80', fontSize: 11, marginTop: 1, flexShrink: 0 }}>✓</span>
-                    <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.45 }}>{b}</span>
+                    <span style={{ color: '#16a34a', fontSize: 11, marginTop: 1, flexShrink: 0, fontWeight: 700 }}>✓</span>
+                    <span style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.5)', lineHeight: 1.45 }}>{b}</span>
                   </div>
                 ))}
               </div>
-              <button onClick={onParentJoin} style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.62)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto' }}>
+              <button onClick={onParentJoin} style={{ fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.55)', background: 'rgba(0,0,0,0.05)', border: '1.5px solid rgba(0,0,0,0.12)', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto' }}>
                 Join free →
               </button>
             </div>
-            <div style={{ background: 'rgba(232,93,32,0.07)', border: '2px solid rgba(232,93,32,0.32)', borderRadius: 22, padding: '24px 16px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: 'linear-gradient(160deg,rgba(232,93,32,0.06),rgba(255,150,80,0.04))', border: '2px solid rgba(232,93,32,0.35)', borderRadius: 22, padding: '24px 16px', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 28px rgba(232,93,32,0.15)' }}>
               {foundingActive && (
                 <div style={{ position: 'absolute', top: -12, right: 10 }}>
-                  <span style={{ fontSize: 9, fontWeight: 800, color: '#c9a84c', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 100, padding: '3px 11px', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>🏅 Founding</span>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: '#92600a', background: 'rgba(201,168,76,0.18)', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 100, padding: '3px 11px', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>🏅 Founding</span>
                 </div>
               )}
               <span style={{ fontSize: 30, marginBottom: 12 }}>⚡</span>
               <p style={{ fontSize: 9.5, fontWeight: 800, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>FastIQ AI</p>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 2 }}>
                 <p style={{ fontSize: 34, fontWeight: 900, color: '#E85D20', margin: 0, letterSpacing: '-0.04em' }}>{foundingActive ? '$14.50' : '$29'}</p>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.26)' }}>/mo</span>
+                <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)' }}>/mo</span>
               </div>
-              {foundingActive && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', margin: '0 0 16px' }}>$29 after April 30</p>}
+              {foundingActive && <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.35)', margin: '0 0 16px' }}>$29 after April 30</p>}
               <div style={{ flex: 1, marginBottom: 18 }}>
                 {['7-day free trial, no card', 'Alumni search + AI outreach', 'Resume, mock interviews & intel'].map(b => (
                   <div key={b} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 8 }}>
-                    <span style={{ color: '#E85D20', fontSize: 11, marginTop: 1, flexShrink: 0 }}>✓</span>
-                    <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.45 }}>{b}</span>
+                    <span style={{ color: '#E85D20', fontSize: 11, marginTop: 1, flexShrink: 0, fontWeight: 700 }}>✓</span>
+                    <span style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.5)', lineHeight: 1.45 }}>{b}</span>
                   </div>
                 ))}
               </div>
-              <button onClick={onStudentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg,#E85D20,#ff7340)', border: 'none', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto', boxShadow: '0 4px 20px rgba(232,93,32,0.4)' }}>
+              <button onClick={onStudentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#0a0a0a', background: 'linear-gradient(135deg,#a8ff3e,#78ff44)', border: 'none', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto', boxShadow: '0 4px 20px rgba(168,255,62,0.45)' }}>
                 Try 7 days free →
               </button>
             </div>
           </div>
-          <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.18)', textAlign: 'center', margin: '14px 0 0' }}>No credit card · Cancel anytime · Parents can gift FastIQ too</p>
+          <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.35)', textAlign: 'center', margin: '14px 0 0' }}>No credit card · Cancel anytime · Parents can gift FastIQ too</p>
         </div>
 
         {/* ── FAQ ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
           <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FAQs</p>
-          <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', margin: '0 0 22px' }}>Got questions? Fair.</h2>
+          <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.03em', margin: '0 0 22px' }}>Got questions? Fair.</h2>
           {FAQS.map((faq, i) => <FAQItem key={i} {...faq} />)}
         </div>
 
         {/* ── FINAL CTA ── */}
         <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 84px', maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ background: isStudent ? 'linear-gradient(155deg, rgba(232,93,32,0.11) 0%, rgba(0,33,165,0.07) 100%)' : 'linear-gradient(155deg, rgba(79,140,255,0.09) 0%, rgba(124,58,237,0.07) 100%)', border: `1px solid ${isStudent ? 'rgba(232,93,32,0.2)' : 'rgba(79,140,255,0.18)'}`, borderRadius: 26, padding: '52px 24px 48px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ background: isStudent ? 'linear-gradient(155deg, #fff 0%, rgba(168,255,62,0.12) 100%)' : 'linear-gradient(155deg, #fff 0%, rgba(79,140,255,0.10) 100%)', border: `1.5px solid ${isStudent ? 'rgba(168,255,62,0.4)' : 'rgba(79,140,255,0.22)'}`, borderRadius: 26, padding: '52px 24px 48px', position: 'relative', overflow: 'hidden', boxShadow: isStudent ? '0 8px 48px rgba(168,255,62,0.15)' : '0 8px 48px rgba(79,140,255,0.12)' }}>
             {/* Organic shape accent */}
-            <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%', background: isStudent ? 'rgba(232,93,32,0.06)' : 'rgba(79,140,255,0.05)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, borderRadius: '40% 60% 30% 70% / 60% 40% 60% 40%', background: isStudent ? 'rgba(255,115,64,0.05)' : 'rgba(124,58,237,0.04)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%', background: isStudent ? 'rgba(168,255,62,0.12)' : 'rgba(79,140,255,0.08)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, borderRadius: '40% 60% 30% 70% / 60% 40% 60% 40%', background: isStudent ? 'rgba(232,93,32,0.07)' : 'rgba(124,58,237,0.06)', pointerEvents: 'none' }} />
             <div style={{ fontSize: 46, marginBottom: 16, position: 'relative' }}>{isStudent ? '🚀' : '🤝'}</div>
-            <h2 style={{ fontSize: 'clamp(27px, 6.5vw, 46px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.035em', lineHeight: 1.08, margin: '0 0 14px', position: 'relative' }}>
+            <h2 style={{ fontSize: 'clamp(27px, 6.5vw, 46px)', fontWeight: 900, color: '#0d0d0d', letterSpacing: '-0.035em', lineHeight: 1.08, margin: '0 0 14px', position: 'relative' }}>
               {isStudent ? <>Your next opportunity is<br />literally one intro away.</> : <>One intro from you can<br />change everything.</>}
             </h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.38)', lineHeight: 1.68, margin: '0 auto 30px', maxWidth: 340, position: 'relative' }}>
+            <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.68, margin: '0 auto 30px', maxWidth: 340, position: 'relative' }}>
               {isStudent ? 'No credit card. No BS. Just real intros and AI that actually works.' : 'Free. 2 minutes. No obligation. Students at your school genuinely need you.'}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', position: 'relative' }}>
@@ -728,7 +728,7 @@ export default function LandingPage() {
                   <button onClick={onStudentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#0a0a0a', background: 'linear-gradient(108deg, #a8ff3e 0%, #78ff44 50%, #39e500 100%)', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 12px 56px rgba(120,255,68,0.45), 0 0 0 2px rgba(168,255,62,0.25)' }}>
                     🎓 Try FastIQ free — 7 days
                   </button>
-                  <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>
+                  <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>
                     🤝 Join as parent/alumni — free
                   </button>
                 </>
@@ -737,7 +737,7 @@ export default function LandingPage() {
                   <button onClick={onParentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #4f8cff 0%, #7c3aed 100%)', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 12px 48px rgba(79,140,255,0.42)' }}>
                     🤝 Join free — help students now
                   </button>
-                  <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>
+                  <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>
                     🎓 I'm a student — Try FastIQ free
                   </button>
                 </>
@@ -748,11 +748,11 @@ export default function LandingPage() {
         </div>
 
         {/* ── FOOTER ── */}
-        <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.05)', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.14)' }}>© 2026 College Fast Forward</span>
+        <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(0,0,0,0.08)', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.28)' }}>© 2026 College Fast Forward</span>
           <div style={{ display: 'flex', gap: 16 }}>
-            <a href="#Terms" style={{ fontSize: 12, color: 'rgba(255,255,255,0.14)', textDecoration: 'none' }}>Terms</a>
-            <a href="#Privacy" style={{ fontSize: 12, color: 'rgba(255,255,255,0.14)', textDecoration: 'none' }}>Privacy</a>
+            <a href="#Terms" style={{ fontSize: 12, color: 'rgba(0,0,0,0.28)', textDecoration: 'none' }}>Terms</a>
+            <a href="#Privacy" style={{ fontSize: 12, color: 'rgba(0,0,0,0.28)', textDecoration: 'none' }}>Privacy</a>
           </div>
         </div>
 
