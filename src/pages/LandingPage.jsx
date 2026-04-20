@@ -425,6 +425,11 @@ export default function LandingPage() {
             )}
           </h1>
 
+          {/* Clarity line */}
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0891b2', background: 'rgba(34,211,238,0.09)', border: '1px solid rgba(34,211,238,0.28)', borderRadius: 100, padding: '7px 18px', display: 'inline-block', margin: '0 0 18px' }}>
+            The parent &amp; alumni network is 100% free. FastIQ is the optional AI upgrade.
+          </p>
+
           {/* Sub */}
           <p style={{ fontSize: 16, color: '#334155', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 30px', textAlign: 'center' }}>
             {isStudent ? (
@@ -459,7 +464,7 @@ export default function LandingPage() {
                   🎓 I'm a student — Try FastIQ free (7 days)
                 </button>
                 <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
-                  🤝 I'm a parent/alumni — Join free to help
+                  🤝 I'm a parent/alumni — Join the free network
                 </button>
               </>
             ) : (

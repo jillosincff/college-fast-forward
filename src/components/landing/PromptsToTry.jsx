@@ -206,10 +206,13 @@ export default function PromptsToTry({ onStudentJoin }) {
           fontFamily: dm,
           fontSize: 14,
           color: 'rgba(0,0,0,0.45)',
-          margin: 0,
+          margin: '0 0 8px',
           lineHeight: 1.6,
         }}>
           Real prompts students are using today to get replies, book calls, and walk into interviews prepared.
+        </p>
+        <p style={{ fontFamily: dm, fontSize: 12, color: '#0891b2', fontWeight: 600, margin: 0 }}>
+          💡 The network is free for everyone. These prompts use FastIQ (optional AI upgrade).
         </p>
       </div>
 
