@@ -9,7 +9,6 @@ import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 const dm = "'DM Sans', system-ui, -apple-system, sans-serif";
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
-// Real student story cards (raw, authentic vibe)
 const STUDENT_STORIES = [
   {
     initials: 'KM',
@@ -18,7 +17,9 @@ const STUDENT_STORIES = [
     quote: 'I sent 40 applications and heard nothing. FastIQ wrote one message to a UF alum at Goldman. She replied in 2 days. TWO DAYS.',
     win: '☕ Coffee chat → offer',
     color: '#E85D20',
-    rotate: '-1.2deg',
+    rotate: '-1.5deg',
+    photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=160&q=75&auto=format&fit=crop&crop=face',
+    bg: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&q=60&auto=format&fit=crop',
   },
   {
     initials: 'JR',
@@ -27,7 +28,9 @@ const STUDENT_STORIES = [
     quote: 'A parent in the network literally forwarded my resume to their friend at P&G. I had zero connection to that person. This is real.',
     win: '🚀 Referral → interview',
     color: '#7c3aed',
-    rotate: '0.8deg',
+    rotate: '1deg',
+    photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&q=75&auto=format&fit=crop&crop=face',
+    bg: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=60&auto=format&fit=crop',
   },
   {
     initials: 'AL',
@@ -36,7 +39,9 @@ const STUDENT_STORIES = [
     quote: 'OK so I booked 3 coffee chats in my first week. My roommate still has zero interviews. I feel kind of guilty lol',
     win: '🎉 3 chats in week 1',
     color: '#0891b2',
-    rotate: '-0.5deg',
+    rotate: '-0.8deg',
+    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=160&q=75&auto=format&fit=crop&crop=face',
+    bg: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&q=60&auto=format&fit=crop',
   },
   {
     initials: 'TW',
@@ -45,7 +50,9 @@ const STUDENT_STORIES = [
     quote: 'The AI literally wrote a better message than anything I could have come up with. 60% reply rate. I want to cry.',
     win: '✉️ 60% reply rate',
     color: '#059669',
-    rotate: '1.1deg',
+    rotate: '1.2deg',
+    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=160&q=75&auto=format&fit=crop&crop=face',
+    bg: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&q=60&auto=format&fit=crop',
   },
 ];
 
@@ -60,7 +67,7 @@ const STEPS_STUDENT = [
   { icon: '🏫', num: '01', title: 'Free network at your school', desc: 'Parents & alumni at 15+ universities who actually want to help. Not fake LinkedIn connections. Real people.' },
   { icon: '📝', num: '02', title: 'Post what you need', desc: 'Referral, mock interview, honest advice — real humans see it and respond.' },
   { icon: '🤝', num: '03', title: 'Get warm intros', desc: 'Skip the applicant pile. Get inside the building before anyone else.' },
-  { icon: '⚡', num: '04', title: 'FastIQ turns it into a job', desc: 'Finds alumni, writes your outreach, preps your answers. It\'s genuinely ridiculous how much faster this is.', ai: true },
+  { icon: '⚡', num: '04', title: 'FastIQ turns it into a job', desc: "Finds alumni, writes your outreach, preps your answers. It's genuinely ridiculous how much faster this is.", ai: true },
 ];
 
 const STEPS_HELPER = [
@@ -75,7 +82,7 @@ const FASTIQ_FEATURES = [
   { icon: '✉️', label: 'Smart Outreach', desc: 'Messages that sound human and actually get replied to' },
   { icon: '📄', label: 'Resume Tailoring', desc: 'Role-specific rewrite in 30 seconds (not a joke)' },
   { icon: '🎤', label: 'Mock Interviews', desc: 'Practice until you stop saying "um" every 3 words' },
-  { icon: '📊', label: 'Company Intel', desc: "Know who\'s actively hiring before you even apply" },
+  { icon: '📊', label: 'Company Intel', desc: "Know who's actively hiring before you even apply" },
   { icon: '🗺️', label: 'Daily Action Plan', desc: 'Tells you exactly what to do next. No more paralysis.' },
 ];
 
@@ -88,7 +95,7 @@ const FAQS = [
   { q: "I'm alumni — can I join to help?", a: "Please do. Students specifically search for alumni at their exact target companies. Your experience is literally what they're looking for. 15 minutes can change someone's trajectory." },
 ];
 
-// ── Animated phone mockup ──
+// ── Animated typing phone mockup ──
 function PhoneMockup() {
   const messages = [
     { from: 'ai', text: "Found 3 Goldman alumni at UF who reply to outreach 🎯" },
@@ -97,95 +104,89 @@ function PhoneMockup() {
     { from: 'reply', text: "Hi! Happy to chat — Thursday 2pm work? ✅" },
   ];
   const [shown, setShown] = useState(1);
+  const [typing, setTyping] = useState(false);
+
   useEffect(() => {
     if (shown >= messages.length) return;
-    const delays = [1000, 900, 1600];
-    const t = setTimeout(() => setShown(s => s + 1), delays[shown - 1] || 1200);
+    setTyping(true);
+    const delays = [900, 800, 1500];
+    const t = setTimeout(() => { setShown(s => s + 1); setTyping(false); }, delays[shown - 1] || 1200);
     return () => clearTimeout(t);
   }, [shown]);
 
   return (
-    <div style={{ width: 248, margin: '0 auto', background: '#111118', borderRadius: 36, border: '2px solid rgba(255,255,255,0.12)', padding: '16px 13px 20px', boxShadow: '0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)', position: 'relative' }}>
-      {/* Notch */}
-      <div style={{ width: 64, height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3, margin: '0 auto 16px' }} />
-      {/* App header */}
+    <div style={{ width: 252, margin: '0 auto', background: '#0f0f18', borderRadius: 38, border: '2.5px solid rgba(255,255,255,0.13)', padding: '16px 13px 20px', boxShadow: '0 28px 72px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.09)', position: 'relative' }}>
+      <div style={{ width: 60, height: 5, background: 'rgba(255,255,255,0.08)', borderRadius: 3, margin: '0 auto 16px' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#E85D20,#ff9a6c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, boxShadow: '0 0 12px rgba(232,93,32,0.4)' }}>⚡</div>
+        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#E85D20,#ff9a6c)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, boxShadow: '0 0 14px rgba(232,93,32,0.5)' }}>⚡</div>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#fff', fontFamily: dm, letterSpacing: '-0.01em' }}>FastIQ</div>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: '#fff', fontFamily: dm }}>FastIQ</div>
           <div style={{ fontSize: 9, color: '#4ade80', fontFamily: dm, marginTop: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4ade80', display: 'inline-block', boxShadow: '0 0 6px #4ade80' }} />
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4ade80', display: 'inline-block', boxShadow: '0 0 6px #4ade80', animation: 'glowPulse 2s ease infinite' }} />
             Working for you
           </div>
         </div>
       </div>
-      {/* Messages */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 9, minHeight: 196 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9, minHeight: 200 }}>
         {messages.slice(0, shown).map((m, i) => (
-          <div key={i} style={{ alignSelf: m.from === 'sent' ? 'flex-end' : 'flex-start', maxWidth: '88%', background: m.from === 'sent' ? 'linear-gradient(135deg,#E85D20,#ff7340)' : m.from === 'reply' ? 'rgba(74,222,128,0.13)' : 'rgba(255,255,255,0.08)', borderRadius: m.from === 'sent' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', padding: '9px 11px', border: m.from === 'reply' ? '1px solid rgba(74,222,128,0.3)' : 'none', animation: 'msgIn 0.3s ease' }}>
-            <p style={{ fontFamily: dm, fontSize: 10.5, color: m.from === 'reply' ? '#4ade80' : '#fff', margin: 0, lineHeight: 1.5, opacity: m.from === 'ai' ? 0.75 : 1 }}>{m.text}</p>
+          <div key={i} style={{ alignSelf: m.from === 'sent' ? 'flex-end' : 'flex-start', maxWidth: '90%', background: m.from === 'sent' ? 'linear-gradient(135deg,#E85D20,#ff7340)' : m.from === 'reply' ? 'rgba(74,222,128,0.12)' : 'rgba(255,255,255,0.07)', borderRadius: m.from === 'sent' ? '16px 16px 4px 16px' : '16px 16px 16px 4px', padding: '9px 12px', border: m.from === 'reply' ? '1px solid rgba(74,222,128,0.3)' : 'none', animation: 'msgIn 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}>
+            <p style={{ fontFamily: dm, fontSize: 10.5, color: m.from === 'reply' ? '#4ade80' : '#fff', margin: 0, lineHeight: 1.5, opacity: m.from === 'ai' ? 0.72 : 1 }}>{m.text}</p>
           </div>
         ))}
-        {shown < messages.length && (
-          <div style={{ alignSelf: 'flex-start', display: 'flex', gap: 4, padding: '9px 13px', background: 'rgba(255,255,255,0.07)', borderRadius: '16px 16px 16px 4px' }}>
-            {[0, 1, 2].map(i => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', animation: `dotBounce 1.2s ease ${i * 0.2}s infinite` }} />)}
+        {typing && (
+          <div style={{ alignSelf: 'flex-start', display: 'flex', gap: 4, padding: '10px 14px', background: 'rgba(255,255,255,0.07)', borderRadius: '16px 16px 16px 4px' }}>
+            {[0, 1, 2].map(i => <div key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(255,255,255,0.5)', animation: `dotBounce 1.2s ease ${i * 0.2}s infinite` }} />)}
           </div>
         )}
       </div>
-      {/* Input bar */}
-      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.06)', borderRadius: 22, padding: '8px 11px' }}>
-        <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.22)', fontFamily: dm, flex: 1 }}>FastIQ is writing your next move...</span>
-        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', flexShrink: 0 }}>→</div>
+      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.05)', borderRadius: 22, padding: '8px 12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.2)', fontFamily: dm, flex: 1 }}>FastIQ is writing your next move...</span>
+        <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg,#E85D20,#ff7340)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#fff', flexShrink: 0 }}>→</div>
       </div>
     </div>
   );
 }
 
-// Real student photos from Unsplash for testimonial cards
-const STORY_PHOTOS = [
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=70&auto=format&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=70&auto=format&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&q=70&auto=format&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=70&auto=format&fit=crop&crop=face',
-];
-
-// ── Real Student Story Card ──
-function StudentCard({ story, photoUrl }) {
+// ── Imperfect student testimonial card ──
+function StudentCard({ story }) {
   return (
     <div style={{
-      width: 238, flexShrink: 0,
-      background: 'rgba(18,18,28,0.95)',
-      border: `1px solid rgba(255,255,255,0.09)`,
-      borderRadius: 22,
-      padding: '18px 16px',
+      width: 250, flexShrink: 0,
+      borderRadius: 24,
+      overflow: 'hidden',
       transform: `rotate(${story.rotate})`,
-      boxShadow: `0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)`,
-      position: 'relative',
+      boxShadow: `0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)`,
       scrollSnapAlign: 'start',
+      position: 'relative',
     }}>
-      {/* Color accent top */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${story.color}, ${story.color}88)`, borderRadius: '22px 22px 0 0' }} />
-      {/* Avatar with real photo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 13 }}>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid ${story.color}55`, boxShadow: `0 4px 12px ${story.color}44` }}>
-          {photoUrl ? (
-            <img src={photoUrl} alt={story.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: story.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#fff' }}>{story.initials}</div>
-          )}
-        </div>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', fontFamily: dm, lineHeight: 1.2 }}>{story.name}</div>
-          <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.38)', fontFamily: dm, marginTop: 1 }}>{story.school}</div>
-        </div>
+      {/* Blurred background photo */}
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <img src={story.bg} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(18px) brightness(0.25) saturate(0.7)', transform: 'scale(1.1)' }} />
       </div>
-      {/* Quote */}
-      <p style={{ fontFamily: dm, fontSize: 12.5, color: 'rgba(255,255,255,0.75)', lineHeight: 1.6, margin: '0 0 13px', fontStyle: 'italic' }}>
-        &ldquo;{story.quote}&rdquo;
-      </p>
-      {/* Win badge */}
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${story.color}15`, border: `1px solid ${story.color}40`, borderRadius: 100, padding: '5px 11px' }}>
-        <span style={{ fontSize: 10.5, fontWeight: 700, color: story.color, fontFamily: dm }}>{story.win}</span>
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 1, padding: '18px 16px 16px' }}>
+        {/* Color top accent line */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${story.color}, transparent)` }} />
+        {/* Avatar + name */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 13 }}>
+          <div style={{ width: 42, height: 42, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2.5px solid ${story.color}`, boxShadow: `0 0 16px ${story.color}55` }}>
+            <img src={story.photo} alt={story.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display='none'; e.target.parentNode.style.background=story.color; e.target.parentNode.innerHTML=`<span style="font-size:15px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;height:100%">${story.initials}</span>`; }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 12.5, fontWeight: 800, color: '#fff', fontFamily: dm, lineHeight: 1.2 }}>{story.name}</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', fontFamily: dm, marginTop: 1 }}>{story.school}</div>
+          </div>
+          {/* Verified dot */}
+          <div style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80', flexShrink: 0 }} />
+        </div>
+        {/* Quote */}
+        <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.82)', lineHeight: 1.62, margin: '0 0 14px', fontStyle: 'italic', letterSpacing: '-0.01em' }}>
+          "{story.quote}"
+        </p>
+        {/* Win pill */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${story.color}20`, border: `1.5px solid ${story.color}55`, borderRadius: 100, padding: '6px 13px', backdropFilter: 'blur(8px)' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: story.color, fontFamily: dm }}>{story.win}</span>
+        </div>
       </div>
     </div>
   );
@@ -194,7 +195,7 @@ function StudentCard({ story, photoUrl }) {
 function Countdown({ timeLeft }) {
   if (!timeLeft) return null;
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.35)', borderRadius: 100, padding: '5px 14px', fontSize: 12, fontWeight: 700, color: '#c9a84c', fontFamily: dm }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(201,168,76,0.14)', border: '1px solid rgba(201,168,76,0.32)', borderRadius: 100, padding: '5px 15px', fontSize: 12, fontWeight: 700, color: '#c9a84c', fontFamily: dm }}>
       ⏱ {timeLeft} left at $14.50/mo
     </span>
   );
@@ -215,21 +216,45 @@ function FAQItem({ q, a }) {
 
 function RoleToggle({ mode, onChange }) {
   return (
-    <div style={{ position: 'sticky', top: 53, zIndex: 90, padding: '10px 16px', background: 'rgba(7,7,13,0.96)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 100, padding: 4 }}>
+    <div style={{ position: 'sticky', top: 53, zIndex: 90, padding: '10px 16px', background: 'rgba(7,7,13,0.96)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: 'rgba(255,255,255,0.05)', borderRadius: 100, padding: 4 }}>
         <button
           onClick={() => onChange('student')}
-          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'student' ? '#fff' : 'rgba(255,255,255,0.4)', background: mode === 'student' ? 'linear-gradient(135deg,#E85D20,#ff7340)' : 'none', border: 'none', borderRadius: 100, padding: '11px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: mode === 'student' ? '0 4px 20px rgba(232,93,32,0.4)' : 'none', transition: 'all 0.25s ease' }}
+          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'student' ? '#fff' : 'rgba(255,255,255,0.38)', background: mode === 'student' ? 'linear-gradient(135deg,#E85D20,#ff7340)' : 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: mode === 'student' ? '0 4px 22px rgba(232,93,32,0.45)' : 'none', transition: 'all 0.25s ease' }}
         >
           🎓 I need help
         </button>
         <button
           onClick={() => onChange('helper')}
-          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'helper' ? '#fff' : 'rgba(255,255,255,0.4)', background: mode === 'helper' ? 'rgba(79,140,255,0.22)' : 'none', border: mode === 'helper' ? '1px solid rgba(79,140,255,0.4)' : '1px solid transparent', borderRadius: 100, padding: '11px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
+          style={{ flex: 1, fontFamily: dm, fontSize: 14, fontWeight: 800, color: mode === 'helper' ? '#fff' : 'rgba(255,255,255,0.38)', background: mode === 'helper' ? 'rgba(79,140,255,0.22)' : 'none', border: mode === 'helper' ? '1px solid rgba(79,140,255,0.4)' : '1px solid transparent', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
         >
           🤝 I want to help
         </button>
       </div>
+    </div>
+  );
+}
+
+// ── Hero photo collage (casual, warm, real) ──
+function HeroPhotoStrip() {
+  const photos = [
+    { src: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=320&q=70&auto=format&fit=crop', label: 'got the reply 🎉', rotate: '-2deg', flex: '1.15' },
+    { src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=320&q=70&auto=format&fit=crop', label: '48h turnaround ✅', rotate: '1deg', flex: '1' },
+    { src: 'https://images.unsplash.com/photo-1529633742550-a4d6e2a70389?w=320&q=70&auto=format&fit=crop', label: '3 chats booked 🚀', rotate: '2.5deg', flex: '1.1' },
+  ];
+  return (
+    <div style={{ display: 'flex', gap: 8, height: 138, marginBottom: 18 }}>
+      {photos.map((p, i) => (
+        <div key={i} style={{ flex: p.flex, position: 'relative', borderRadius: 20, overflow: 'hidden', boxShadow: '0 12px 36px rgba(0,0,0,0.55)', transform: `rotate(${p.rotate})`, flexShrink: 0 }}>
+          <img src={p.src} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(0.95) brightness(0.8)' }} />
+          {/* Grain overlay */}
+          <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`, backgroundSize: '32px', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: 7, left: 8, right: 8 }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', fontFamily: dm, textShadow: '0 1px 4px rgba(0,0,0,0.9)', letterSpacing: '0.01em' }}>{p.label}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -261,18 +286,19 @@ export default function LandingPage() {
       const s = document.createElement('style');
       s.id = 'lp-keyframes';
       s.textContent = `
-        @keyframes msgIn { from { opacity:0; transform:translateY(8px) scale(0.96); } to { opacity:1; transform:none; } }
-        @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-5px); opacity:1; } }
-        @keyframes floatPhone { 0%,100% { transform:translateY(0) rotate(-2deg); } 50% { transform:translateY(-10px) rotate(1.5deg); } }
-        @keyframes glowPulse { 0%,100% { box-shadow:0 0 0 0 rgba(232,93,32,0.5); } 50% { box-shadow:0 0 0 10px rgba(232,93,32,0); } }
-        @keyframes slideIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:none; } }
-        @keyframes iconPop { 0% { opacity:0; transform:scale(0.5) rotate(-10deg); } 70% { transform:scale(1.1) rotate(2deg); } 100% { opacity:1; transform:none; } }
-        @keyframes heroPulse { 0%,100% { opacity:0.6; } 50% { opacity:1; } }
-        @keyframes badgeFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+        @keyframes msgIn { from { opacity:0; transform:translateY(10px) scale(0.94); } to { opacity:1; transform:none; } }
+        @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.35; } 30% { transform:translateY(-6px); opacity:1; } }
+        @keyframes floatPhone { 0%,100% { transform:translateY(0) rotate(-1.5deg); } 50% { transform:translateY(-12px) rotate(2deg); } }
+        @keyframes glowPulse { 0%,100% { box-shadow:0 0 0 0 rgba(232,93,32,0.55); } 50% { box-shadow:0 0 0 10px rgba(232,93,32,0); } }
+        @keyframes slideIn { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:none; } }
+        @keyframes iconPop { 0% { opacity:0; transform:scale(0.5) rotate(-12deg); } 70% { transform:scale(1.1) rotate(2deg); } 100% { opacity:1; transform:none; } }
+        @keyframes heroPulse { 0%,100% { opacity:0.55; } 50% { opacity:1; } }
+        @keyframes badgeFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
         @keyframes ctaShine { 0% { background-position:-200% center; } 100% { background-position:200% center; } }
-        @keyframes modeFade { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
-        @keyframes cardDrift { 0%,100% { transform:translateY(0) rotate(var(--r,0deg)); } 50% { transform:translateY(-4px) rotate(var(--r,0deg)); } }
+        @keyframes modeFade { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
         @keyframes grainAnim { 0%,100% { transform:translate(0,0); } 25% { transform:translate(-1%,1%); } 50% { transform:translate(1%,-1%); } 75% { transform:translate(-0.5%,0.5%); } }
+        @keyframes ctaPop { 0%,100% { transform:scale(1); } 50% { transform:scale(1.015); } }
+        @keyframes tickerSlide { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:none; } }
       `;
       document.head.appendChild(s);
     }
@@ -293,12 +319,13 @@ export default function LandingPage() {
     };
     updateCountdown();
     const t1 = setInterval(updateCountdown, 30000);
-    const t2 = setInterval(() => setActiveWin(w => (w + 1) % WINS.length), 3500);
+    const t2 = setInterval(() => setActiveWin(w => (w + 1) % WINS.length), 3800);
     return () => { clearInterval(t1); clearInterval(t2); };
   }, []);
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
   const isStudent = mode === 'student';
+  const modeAnim = { animation: 'modeFade 0.32s ease both' };
 
   const onStudentJoin = () => {
     trackEvent('cta_student_clicked');
@@ -311,7 +338,6 @@ export default function LandingPage() {
     base44.auth.redirectToLogin(window.location.origin + '/#GatorWelcome');
   };
 
-  const modeAnim = { animation: 'modeFade 0.35s ease both' };
   const steps = isStudent ? STEPS_STUDENT : STEPS_HELPER;
 
   return (
@@ -326,26 +352,25 @@ export default function LandingPage() {
 
       <div style={{ minHeight: '100vh', background: '#07070d', fontFamily: dm, overflowX: 'hidden' }}>
 
-        {/* Ambient bg */}
+        {/* Ambient warm glow */}
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
           background: isStudent
-            ? `radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,93,32,0.18) 0%, transparent 55%), radial-gradient(ellipse 45% 35% at 88% 40%, rgba(0,33,165,0.08) 0%, transparent 50%)`
-            : `radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79,140,255,0.13) 0%, transparent 55%), radial-gradient(ellipse 45% 35% at 12% 40%, rgba(74,222,128,0.06) 0%, transparent 50%)`,
-          transition: 'background 0.7s ease',
+            ? 'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(232,93,32,0.22) 0%, transparent 58%), radial-gradient(ellipse 40% 30% at 85% 35%, rgba(0,33,165,0.07) 0%, transparent 50%)'
+            : 'radial-gradient(ellipse 90% 55% at 50% -5%, rgba(79,140,255,0.16) 0%, transparent 58%), radial-gradient(ellipse 40% 30% at 15% 35%, rgba(74,222,128,0.05) 0%, transparent 50%)',
+          transition: 'background 0.8s ease',
         }} />
-
-        {/* Subtle grain texture */}
-        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, opacity: 0.025, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '128px', animation: 'grainAnim 8s steps(10) infinite' }} />
+        {/* Grain */}
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, opacity: 0.022, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '128px', animation: 'grainAnim 9s steps(10) infinite' }} />
 
         {/* ── NAV ── */}
-        <nav style={{ position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'rgba(7,7,13,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <nav style={{ position: 'sticky', top: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'rgba(7,7,13,0.93)', backdropFilter: 'blur(22px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#E85D20', animation: 'glowPulse 2.5s ease infinite' }} />
             <span style={{ fontSize: 15, fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>CFF</span>
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button onClick={() => navigate('GetStarted')} style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.38)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 4px' }}>Sign in</button>
-            <button onClick={isStudent ? onStudentJoin : onParentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#fff', background: isStudent ? 'linear-gradient(135deg,#E85D20,#ff7340)' : 'rgba(79,140,255,0.28)', border: isStudent ? 'none' : '1px solid rgba(79,140,255,0.45)', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', boxShadow: isStudent ? '0 4px 16px rgba(232,93,32,0.4)' : 'none' }}>
+            <button onClick={() => navigate('GetStarted')} style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.36)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '6px 4px' }}>Sign in</button>
+            <button onClick={isStudent ? onStudentJoin : onParentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#fff', background: isStudent ? 'linear-gradient(135deg,#E85D20,#ff7340)' : 'rgba(79,140,255,0.28)', border: isStudent ? 'none' : '1px solid rgba(79,140,255,0.45)', borderRadius: 11, padding: '9px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: isStudent ? '0 4px 18px rgba(232,93,32,0.42)' : 'none' }}>
               {isStudent ? 'Try free →' : 'Join free →'}
             </button>
           </div>
@@ -355,184 +380,196 @@ export default function LandingPage() {
         <RoleToggle mode={mode} onChange={handleModeChange} />
 
         {/* ── HERO ── */}
-        <div key={mode} style={{ position: 'relative', zIndex: 2, padding: '48px 20px 28px', maxWidth: 640, margin: '0 auto', textAlign: 'center', ...modeAnim }}>
-
-          {/* Glow */}
-          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 480, height: 380, borderRadius: '50%', background: isStudent ? 'radial-gradient(circle, rgba(232,93,32,0.1) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(79,140,255,0.08) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(48px)', animation: 'heroPulse 5s ease-in-out infinite' }} />
+        <div key={mode} style={{ position: 'relative', zIndex: 2, padding: '44px 20px 24px', maxWidth: 640, margin: '0 auto', textAlign: 'center', ...modeAnim }}>
+          {/* Warm glow behind headline */}
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 500, height: 400, borderRadius: '50%', background: isStudent ? 'radial-gradient(circle, rgba(232,93,32,0.12) 0%, transparent 65%)' : 'radial-gradient(circle, rgba(79,140,255,0.09) 0%, transparent 65%)', pointerEvents: 'none', filter: 'blur(52px)', animation: 'heroPulse 5s ease-in-out infinite' }} />
 
           {/* Live badge */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: isStudent ? 'rgba(74,222,128,0.08)' : 'rgba(79,140,255,0.08)', border: `1px solid ${isStudent ? 'rgba(74,222,128,0.25)' : 'rgba(79,140,255,0.25)'}`, borderRadius: 100, padding: '7px 18px', animation: 'badgeFloat 3.5s ease-in-out infinite' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: isStudent ? 'rgba(74,222,128,0.07)' : 'rgba(79,140,255,0.07)', border: `1px solid ${isStudent ? 'rgba(74,222,128,0.22)' : 'rgba(79,140,255,0.22)'}`, borderRadius: 100, padding: '8px 20px', animation: 'badgeFloat 3.5s ease-in-out infinite' }}>
               <div style={{ width: 7, height: 7, borderRadius: '50%', background: isStudent ? '#4ade80' : '#4f8cff', boxShadow: `0 0 8px ${isStudent ? '#4ade80' : '#4f8cff'}` }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: isStudent ? '#4ade80' : '#4f8cff' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: isStudent ? '#4ade80' : '#4f8cff', letterSpacing: '-0.01em' }}>
                 {isStudent ? 'Real students landing intros right now' : 'Join 1,000+ parents & alumni helping students'}
               </span>
             </div>
           </div>
 
-          {/* Headline — intentionally slightly asymmetric */}
-          <h1 style={{ fontSize: 'clamp(31px, 8.5vw, 56px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.035em', color: '#fff', margin: '0 0 16px', position: 'relative' }}>
+          {/* Main headline */}
+          <h1 style={{ fontSize: 'clamp(32px, 8.5vw, 58px)', fontWeight: 900, lineHeight: 1.04, letterSpacing: '-0.038em', color: '#fff', margin: '0 0 17px', position: 'relative' }}>
             {isStudent ? (
               <>
-                Tired of ghosted applications?<br />
+                Tired of ghosted<br />applications?<br />
                 <span style={{ color: '#E85D20' }}>Yeah, us too.</span>{' '}
-                <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.88em', fontWeight: 700 }}>Get warm intros instead.</span>
+                <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.87em', fontWeight: 700 }}>Get warm intros instead.</span>
               </>
             ) : (
               <>
                 One intro from you<br />
                 <span style={{ color: '#4f8cff' }}>can actually change</span>{' '}
-                <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 700 }}>a student&apos;s whole path.</span>
+                <span style={{ color: 'rgba(255,255,255,0.72)', fontWeight: 700 }}>a student's whole path.</span>
               </>
             )}
           </h1>
 
-          {/* Subheadline */}
-          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.52)', lineHeight: 1.7, maxWidth: 460, margin: '0 auto 28px', textAlign: 'center' }}>
+          {/* Sub */}
+          <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 30px', textAlign: 'center' }}>
             {isStudent ? (
-              <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(255,255,255,0.82)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
+              <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
             ) : (
               <>Free to join, zero obligation. The more parents and alumni connect, the stronger the whole community gets — including for your own kids.</>
             )}
           </p>
 
-          {/* CTAs */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 11, alignItems: 'center', marginBottom: 16 }}>
+          {/* ── MAIN CTA — big, warm, unmissable ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', marginBottom: 18 }}>
             {isStudent ? (
               <>
-                <button onClick={onStudentJoin} style={{ fontSize: 19, fontWeight: 900, color: '#fff', background: 'linear-gradient(105deg, #d44e12 0%, #E85D20 35%, #ff7340 65%, #ffab40 100%)', backgroundSize: '200% auto', border: 'none', borderRadius: 20, padding: '24px 36px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto', boxShadow: '0 14px 56px rgba(232,93,32,0.6), 0 2px 0 rgba(255,255,255,0.15) inset', letterSpacing: '-0.02em', lineHeight: 1.2, animation: 'ctaShine 3s linear infinite', transform: 'scale(1)', transition: 'transform 0.15s ease' }}>
-                  🎓 I&apos;m a student — Try FastIQ free (7 days)
+                <button
+                  onClick={onStudentJoin}
+                  style={{
+                    fontSize: 20, fontWeight: 900, color: '#fff',
+                    background: 'linear-gradient(108deg, #c94410 0%, #E85D20 30%, #ff7340 62%, #ffab40 100%)',
+                    backgroundSize: '220% auto',
+                    border: 'none', borderRadius: 22,
+                    padding: '26px 36px',
+                    cursor: 'pointer', width: '100%', maxWidth: 480,
+                    minHeight: 'auto',
+                    boxShadow: '0 16px 64px rgba(232,93,32,0.65), 0 2px 0 rgba(255,255,255,0.18) inset, 0 -2px 0 rgba(0,0,0,0.25) inset',
+                    letterSpacing: '-0.02em', lineHeight: 1.2,
+                    animation: 'ctaShine 3.5s linear infinite, ctaPop 4s ease-in-out infinite',
+                  }}
+                >
+                  🎓 I'm a student — Try FastIQ free (7 days)
                 </button>
-                <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto' }}>
-                  🤝 I&apos;m a parent/alumni — Join free to help
+                <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
+                  🤝 I'm a parent/alumni — Join free to help
                 </button>
               </>
             ) : (
               <>
-                <button onClick={onParentJoin} style={{ fontSize: 19, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #3b7af5 0%, #4f8cff 50%, #7c3aed 100%)', border: 'none', borderRadius: 20, padding: '24px 36px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto', boxShadow: '0 14px 52px rgba(79,140,255,0.45)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                <button onClick={onParentJoin} style={{ fontSize: 20, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #3b7af5 0%, #4f8cff 50%, #7c3aed 100%)', border: 'none', borderRadius: 22, padding: '26px 36px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto', boxShadow: '0 16px 56px rgba(79,140,255,0.5)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
                   🤝 Join free — 2 minutes, zero obligation
                 </button>
-                <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 460, minHeight: 'auto' }}>
-                  🎓 I&apos;m a student — Try FastIQ free
+                <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
+                  🎓 I'm a student — Try FastIQ free
                 </button>
               </>
             )}
           </div>
+
           {/* Social proof line */}
-          <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)', margin: '0 0 12px', textAlign: 'center', fontFamily: dm }}>
+          <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.28)', margin: '0 0 12px', textAlign: 'center' }}>
             <span style={{ color: isStudent ? '#4ade80' : '#4f8cff', fontWeight: 700 }}>● Real students getting replies right now</span>
             {' · '}1,000+ helpers across 15+ schools
           </p>
 
-          {/* Trust signals */}
+          {/* Trust row */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             {isStudent && foundingActive && <Countdown timeLeft={timeLeft} />}
-            <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
               {(isStudent
                 ? ['No credit card', 'Cancel anytime', '2 min to set up']
                 : ['No fee ever', 'You control who you talk to', 'Join in 2 min']
               ).map(t => (
-                <span key={t} style={{ fontSize: 12, color: 'rgba(255,255,255,0.28)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span key={t} style={{ fontSize: 12, color: 'rgba(255,255,255,0.26)', display: 'flex', alignItems: 'center', gap: 4 }}>
                   <span style={{ color: '#4ade80' }}>✓</span> {t}
                 </span>
               ))}
             </div>
-            {isStudent && foundingActive && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)' }}>Founding Rate $14.50/mo locks in → goes to $29 after April 30</span>}
+            {isStudent && foundingActive && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.17)' }}>Founding Rate $14.50/mo locks in → goes to $29 after April 30</span>}
           </div>
         </div>
 
-        {/* ── HERO VISUAL + PHONE (student only) ── */}
+        {/* ── HERO VISUAL: photo strip + phone (student mode) ── */}
         {isStudent && (
-          <div style={{ position: 'relative', zIndex: 2, padding: '4px 16px 40px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
-            {/* Three-photo lifestyle strip above phone */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16, height: 130 }}>
-              {[
-                { src: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&q=70&auto=format&fit=crop', caption: 'landed the interview 🎉', rotate: '-1.5deg', flex: '1.2' },
-                { src: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&q=70&auto=format&fit=crop', caption: 'reply in 48h ✅', rotate: '0.5deg', flex: '1' },
-                { src: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=300&q=70&auto=format&fit=crop', caption: '3 chats booked 🚀', rotate: '1.8deg', flex: '1.1' },
-              ].map((p, i) => (
-                <div key={i} style={{ flex: p.flex, position: 'relative', borderRadius: 18, overflow: 'hidden', boxShadow: '0 10px 32px rgba(0,0,0,0.5)', transform: `rotate(${p.rotate})` }}>
-                  <img src={p.src} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.05) brightness(0.82)' }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%)', pointerEvents: 'none' }} />
-                  <div style={{ position: 'absolute', bottom: 6, left: 6, right: 6 }}>
-                    <span style={{ fontSize: 8.5, fontWeight: 700, color: '#fff', fontFamily: dm, lineHeight: 1.2, display: 'block', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>{p.caption}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {/* Phone mockup centered */}
+          <div style={{ position: 'relative', zIndex: 2, padding: '0 16px 44px', maxWidth: 640, margin: '0 auto' }}>
+            <HeroPhotoStrip />
             <div style={{ textAlign: 'center' }}>
-              <div style={{ display: 'inline-block', animation: mounted ? 'floatPhone 5s ease-in-out infinite' : 'none' }}>
+              <div style={{ display: 'inline-block', animation: mounted ? 'floatPhone 5.5s ease-in-out infinite' : 'none' }}>
                 <PhoneMockup />
               </div>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', margin: '10px 0 0', fontStyle: 'italic', fontFamily: dm }}>↑ FastIQ found the alum, wrote the message, she replied. Real story.</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.17)', margin: '10px 0 0', fontStyle: 'italic' }}>↑ FastIQ found the alum, wrote the message, she replied. Real story.</p>
             </div>
           </div>
         )}
 
-        {/* ── HELPER QUICK WINS (helper mode) ── */}
+        {/* ── HELPER QUICK WINS ── */}
         {!isStudent && (
-          <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 48px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
+          <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 52px', maxWidth: 640, margin: '0 auto', animation: 'modeFade 0.32s ease both' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
-                { icon: '⏱', title: '15 min/month', desc: 'That\'s genuinely all it takes. One call can change someone\'s direction.' },
+                { icon: '⏱', title: '15 min/month', desc: "That's genuinely all it takes. One call can change someone's direction." },
                 { icon: '🔒', title: 'You control everything', desc: 'Reply to who you want. No pressure, no spam, ever.' },
                 { icon: '🔄', title: 'Pay it forward', desc: 'You help students → their network later helps yours.' },
                 { icon: '🏫', title: '15+ universities', desc: 'Real community across schools and industries.' },
               ].map((b, i) => (
-                <div key={i} style={{ background: 'rgba(79,140,255,0.04)', border: '1px solid rgba(79,140,255,0.12)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.08}s both` : 'none' }}>
-                  <span style={{ fontSize: 24, display: 'block', marginBottom: 8 }}>{b.icon}</span>
-                  <p style={{ fontSize: 13, fontWeight: 800, color: '#fff', margin: '0 0 5px', fontFamily: dm }}>{b.title}</p>
-                  <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.38)', margin: 0, lineHeight: 1.5, fontFamily: dm }}>{b.desc}</p>
+                <div key={i} style={{ background: 'rgba(79,140,255,0.04)', border: '1px solid rgba(79,140,255,0.11)', borderRadius: 18, padding: '20px 16px', animation: mounted ? `iconPop 0.4s ease ${i * 0.07}s both` : 'none' }}>
+                  <span style={{ fontSize: 26, display: 'block', marginBottom: 9 }}>{b.icon}</span>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: '#fff', margin: '0 0 5px' }}>{b.title}</p>
+                  <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.36)', margin: 0, lineHeight: 1.5 }}>{b.desc}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ── REAL STUDENT STORIES (student only) ── */}
+        {/* ── REAL STUDENT RESULTS (redesigned — raw + warm) ── */}
         {isStudent && (
-          <div style={{ position: 'relative', zIndex: 2, padding: '0 0 56px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
-            <div style={{ padding: '0 20px', marginBottom: 20 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 100, padding: '5px 14px', marginBottom: 12 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 8px #E85D20' }} />
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', fontFamily: dm, letterSpacing: '0.04em' }}>Real students. Real results.</span>
+          <div style={{ position: 'relative', zIndex: 2, padding: '0 0 60px', maxWidth: 640, margin: '0 auto' }}>
+            {/* Section header */}
+            <div style={{ padding: '0 20px', marginBottom: 22 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(232,93,32,0.09)', border: '1px solid rgba(232,93,32,0.24)', borderRadius: 100, padding: '6px 16px', marginBottom: 13 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 9px #E85D20' }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.04em' }}>Real students. Real results.</span>
               </div>
-              <h2 style={{ fontSize: 'clamp(24px, 6vw, 36px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.12, margin: '0 0 8px' }}>
+              <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 38px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.032em', lineHeight: 1.1, margin: '0 0 9px' }}>
                 They stopped applying cold.<br />
-                <span style={{ color: 'rgba(255,255,255,0.42)', fontWeight: 400 }}>Here&apos;s what happened instead.</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '0.9em' }}>Here's what happened instead.</span>
               </h2>
-              <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.32)', margin: 0, fontFamily: dm, fontStyle: 'italic' }}>Unfiltered. Raw iPhone videos coming soon.</p>
+              <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>Unfiltered. Raw iPhone videos coming soon — quotes below are real.</p>
             </div>
-            {/* Video placeholder cards + quote cards */}
-            <div style={{ display: 'flex', gap: 14, paddingLeft: 20, paddingBottom: 16, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', alignItems: 'flex-start' }}>
-              {/* Video coming soon card */}
-              <div style={{ width: 148, flexShrink: 0, borderRadius: 20, overflow: 'hidden', aspectRatio: '9/16', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', scrollSnapAlign: 'start' }}>
-                <img src="https://images.unsplash.com/photo-1601933973783-43cf8a7d4c5f?w=300&q=65&auto=format&fit=crop" alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.45) saturate(0.8)' }} />
-                <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 12px', gap: 8 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>▶</div>
-                  <p style={{ fontFamily: dm, fontSize: 10.5, fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.4, margin: 0, textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}>Raw video<br />dropping soon</p>
-                  <div style={{ background: 'rgba(232,93,32,0.85)', borderRadius: 100, padding: '3px 10px' }}>
-                    <span style={{ fontFamily: dm, fontSize: 8.5, fontWeight: 800, color: '#fff', letterSpacing: '0.06em' }}>REAL STUDENT</span>
+
+            {/* Horizontal scroll cards */}
+            <div style={{ display: 'flex', gap: 14, paddingLeft: 20, paddingRight: 20, paddingBottom: 16, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none', alignItems: 'flex-start' }}>
+
+              {/* Video placeholder — iPhone-style vertical card */}
+              <div style={{
+                width: 155, flexShrink: 0,
+                borderRadius: 22, overflow: 'hidden',
+                aspectRatio: '9/16',
+                position: 'relative',
+                scrollSnapAlign: 'start',
+                boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
+              }}>
+                <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=300&q=65&auto=format&fit=crop" alt="" loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.4) saturate(0.7)' }} />
+                <div style={{ position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '16px 12px', gap: 10 }}>
+                  <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: '2px solid rgba(255,255,255,0.5)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>▶</div>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.4, margin: '0 0 6px', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Raw student video<br />dropping soon</p>
+                    <div style={{ background: 'rgba(232,93,32,0.9)', borderRadius: 100, padding: '3px 12px', display: 'inline-block' }}>
+                      <span style={{ fontFamily: dm, fontSize: 8.5, fontWeight: 800, color: '#fff', letterSpacing: '0.07em' }}>REAL STUDENT</span>
+                    </div>
                   </div>
                 </div>
               </div>
+
               {STUDENT_STORIES.map((story, i) => (
-                <StudentCard key={i} story={story} photoUrl={STORY_PHOTOS[i]} />
+                <StudentCard key={i} story={story} />
               ))}
             </div>
+
             {/* Rotating win ticker */}
             <div style={{ padding: '0 20px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14, minHeight: 72 }}>
-                <span style={{ fontSize: 28, flexShrink: 0 }}>{WINS[activeWin].emoji}</span>
+              <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14, minHeight: 74 }}>
+                <span style={{ fontSize: 30, flexShrink: 0 }}>{WINS[activeWin].emoji}</span>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13.5, fontWeight: 700, color: '#fff', margin: '0 0 3px', lineHeight: 1.35, animation: 'slideIn 0.3s ease', fontFamily: dm }}>"{WINS[activeWin].text}"</p>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.32)', margin: 0, fontFamily: dm }}>{WINS[activeWin].school}</p>
+                  <p key={activeWin} style={{ fontSize: 13.5, fontWeight: 700, color: '#fff', margin: '0 0 3px', lineHeight: 1.35, animation: 'tickerSlide 0.3s ease' }}>"{WINS[activeWin].text}"</p>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: 0 }}>{WINS[activeWin].school}</p>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 10 }}>
                 {WINS.map((_, i) => (
-                  <button key={i} onClick={() => setActiveWin(i)} style={{ width: i === activeWin ? 22 : 6, height: 6, borderRadius: 3, background: i === activeWin ? '#E85D20' : 'rgba(255,255,255,0.12)', border: 'none', padding: 0, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.3s ease' }} />
+                  <button key={i} onClick={() => setActiveWin(i)} style={{ width: i === activeWin ? 24 : 6, height: 6, borderRadius: 3, background: i === activeWin ? '#E85D20' : 'rgba(255,255,255,0.1)', border: 'none', padding: 0, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.3s ease' }} />
                 ))}
               </div>
             </div>
@@ -540,60 +577,60 @@ export default function LandingPage() {
         )}
 
         {/* ── STATS BAR ── */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 52px', maxWidth: 640, margin: '0 auto' }}>
-          <div style={{ display: 'flex', borderRadius: 18, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 56px', maxWidth: 640, margin: '0 auto' }}>
+          <div style={{ display: 'flex', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.015)' }}>
             {[['1,000+', 'helpers in the network'], ['15+', 'universities'], ['50+', 'industries']].map(([n, l], i) => (
-              <div key={l} style={{ textAlign: 'center', flex: 1, padding: '18px 8px', background: i === 1 ? 'rgba(255,255,255,0.02)' : 'transparent', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <div style={{ fontSize: 24, fontWeight: 900, color: '#E85D20', letterSpacing: '-0.03em', lineHeight: 1, fontFamily: dm }}>{n}</div>
-                <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.28)', marginTop: 4, lineHeight: 1.3, fontFamily: dm }}>{l}</div>
+              <div key={l} style={{ textAlign: 'center', flex: 1, padding: '20px 8px', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
+                <div style={{ fontSize: 26, fontWeight: 900, color: '#E85D20', letterSpacing: '-0.03em', lineHeight: 1 }}>{n}</div>
+                <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.26)', marginTop: 5, lineHeight: 1.35 }}>{l}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* ── HOW IT WORKS ── */}
-        <div key={`steps-${mode}`} style={{ position: 'relative', zIndex: 2, padding: '0 20px 60px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
-          <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px', fontFamily: dm }}>How it works</p>
-          <h2 style={{ fontSize: 'clamp(24px, 6vw, 38px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 22px' }}>
+        <div key={`steps-${mode}`} style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto', animation: 'modeFade 0.32s ease both' }}>
+          <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>How it works</p>
+          <h2 style={{ fontSize: 'clamp(25px, 6.5vw, 40px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 24px' }}>
             {isStudent
-              ? <>From zero to interview.<br /><span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 400, fontSize: '0.85em' }}>Days, not months. Seriously.</span></>
-              : <>Simple, on your terms.<br /><span style={{ color: 'rgba(255,255,255,0.38)', fontWeight: 400, fontSize: '0.85em' }}>No commitments. Just helping.</span></>
+              ? <>From zero to interview.<br /><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.84em' }}>Days, not months. Seriously.</span></>
+              : <>Simple, on your terms.<br /><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 400, fontSize: '0.84em' }}>No commitments. Just helping.</span></>
             }
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {steps.map((s, i) => (
-              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: (isStudent && i === 3) ? 'rgba(232,93,32,0.06)' : 'rgba(255,255,255,0.025)', border: `1px solid ${(isStudent && i === 3) ? 'rgba(232,93,32,0.2)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 16, padding: '18px 16px', borderLeft: i % 2 === 0 ? `3px solid ${(isStudent && i === 3) ? '#E85D20' : 'rgba(255,255,255,0.1)'}` : undefined }}>
+              <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', background: (isStudent && i === 3) ? 'rgba(232,93,32,0.055)' : 'rgba(255,255,255,0.022)', border: `1px solid ${(isStudent && i === 3) ? 'rgba(232,93,32,0.22)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 18, padding: '18px 16px', borderLeft: `3px solid ${(isStudent && i === 3) ? '#E85D20' : 'rgba(255,255,255,0.08)'}` }}>
                 <span style={{ fontSize: 28, flexShrink: 0, lineHeight: 1 }}>{s.icon}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span style={{ fontSize: 9.5, fontWeight: 900, color: 'rgba(232,93,32,0.7)', letterSpacing: '0.1em', fontFamily: dm }}>{s.num}</span>
-                    <p style={{ fontSize: 14, fontWeight: 800, color: '#fff', margin: 0, fontFamily: dm }}>{s.title}</p>
-                    {s.ai && <span style={{ fontSize: 8.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.12)', borderRadius: 100, padding: '2px 8px', border: '1px solid rgba(232,93,32,0.25)', whiteSpace: 'nowrap', fontFamily: dm }}>AI POWERED</span>}
+                    <span style={{ fontSize: 9.5, fontWeight: 900, color: 'rgba(232,93,32,0.65)', letterSpacing: '0.1em' }}>{s.num}</span>
+                    <p style={{ fontSize: 14, fontWeight: 800, color: '#fff', margin: 0 }}>{s.title}</p>
+                    {s.ai && <span style={{ fontSize: 8.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.12)', borderRadius: 100, padding: '2px 8px', border: '1px solid rgba(232,93,32,0.25)', whiteSpace: 'nowrap' }}>AI POWERED</span>}
                   </div>
-                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.44)', margin: 0, lineHeight: 1.55, fontFamily: dm }}>{s.desc}</p>
+                  <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.42)', margin: 0, lineHeight: 1.55 }}>{s.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── FASTIQ FEATURES (student only) ── */}
+        {/* ── FASTIQ FEATURES ── */}
         {isStudent && (
-          <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 60px', maxWidth: 640, margin: '0 auto', ...modeAnim }}>
-            <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px', fontFamily: dm }}>FastIQ unlocks</p>
+          <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
+            <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FastIQ unlocks</p>
             <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 4px' }}>Everything your job search is missing.</h2>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.38)', margin: '0 0 20px', lineHeight: 1.5, fontFamily: dm }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.36)', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FASTIQ_FEATURES.map((f, i) => (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.065)', borderRadius: 14, padding: '16px 13px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `2px solid rgba(232,93,32,${0.1 + i * 0.04})` }}>
+                <div key={i} style={{ background: 'rgba(255,255,255,0.022)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `2px solid rgba(232,93,32,${0.12 + i * 0.035})` }}>
                   <span style={{ fontSize: 26, display: 'block', marginBottom: 9, lineHeight: 1 }}>{f.icon}</span>
-                  <p style={{ fontSize: 12.5, fontWeight: 800, color: '#fff', margin: '0 0 4px', lineHeight: 1.2, fontFamily: dm }}>{f.label}</p>
-                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.36)', margin: 0, lineHeight: 1.5, fontFamily: dm }}>{f.desc}</p>
+                  <p style={{ fontSize: 12.5, fontWeight: 800, color: '#fff', margin: '0 0 4px', lineHeight: 1.2 }}>{f.label}</p>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.34)', margin: 0, lineHeight: 1.5 }}>{f.desc}</p>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 16, textAlign: 'center' }}>
-              <button onClick={onStudentJoin} style={{ fontSize: 13.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 12, padding: '13px 28px', cursor: 'pointer', minHeight: 'auto', fontFamily: dm }}>
+            <div style={{ marginTop: 18, textAlign: 'center' }}>
+              <button onClick={onStudentJoin} style={{ fontSize: 13.5, fontWeight: 800, color: '#E85D20', background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.28)', borderRadius: 13, padding: '14px 30px', cursor: 'pointer', minHeight: 'auto' }}>
                 Get all of this free for 7 days →
               </button>
             </div>
@@ -601,96 +638,95 @@ export default function LandingPage() {
         )}
 
         {/* ── PRICING ── */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 60px', maxWidth: 640, margin: '0 auto' }}>
-          <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px', fontFamily: dm }}>Pricing</p>
-          <h2 style={{ fontSize: 'clamp(24px, 5.5vw, 36px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 20px' }}>
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
+          <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>Pricing</p>
+          <h2 style={{ fontSize: 'clamp(25px, 5.5vw, 38px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 22px' }}>
             Free for helpers.<br /><span style={{ color: '#E85D20' }}>Turbo for students.</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {/* Free */}
-            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '22px 16px', display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 28, marginBottom: 12 }}>🏫</span>
-              <p style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px', fontFamily: dm }}>Free Network</p>
-              <p style={{ fontSize: 32, fontWeight: 900, color: '#fff', margin: '0 0 2px', letterSpacing: '-0.04em', fontFamily: dm }}>$0</p>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', margin: '0 0 14px', fontFamily: dm }}>Forever free</p>
-              <div style={{ flex: 1, marginBottom: 16 }}>
+            <div style={{ background: 'rgba(255,255,255,0.022)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 22, padding: '24px 16px', display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 30, marginBottom: 12 }}>🏫</span>
+              <p style={{ fontSize: 9.5, fontWeight: 800, color: 'rgba(255,255,255,0.32)', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>Free Network</p>
+              <p style={{ fontSize: 34, fontWeight: 900, color: '#fff', margin: '0 0 2px', letterSpacing: '-0.04em' }}>$0</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.26)', margin: '0 0 16px' }}>Forever free</p>
+              <div style={{ flex: 1, marginBottom: 18 }}>
                 {['Join as parent or alumni', 'Help students at your school', 'No fee, no obligation, ever'].map(b => (
-                  <div key={b} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 7 }}>
+                  <div key={b} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 8 }}>
                     <span style={{ color: '#4ade80', fontSize: 11, marginTop: 1, flexShrink: 0 }}>✓</span>
-                    <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.42)', lineHeight: 1.45, fontFamily: dm }}>{b}</span>
+                    <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.45 }}>{b}</span>
                   </div>
                 ))}
               </div>
-              <button onClick={onParentJoin} style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '11px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto', fontFamily: dm }}>
+              <button onClick={onParentJoin} style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.62)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto' }}>
                 Join free →
               </button>
             </div>
-            {/* FastIQ */}
-            <div style={{ background: 'rgba(232,93,32,0.07)', border: '2px solid rgba(232,93,32,0.35)', borderRadius: 20, padding: '22px 16px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: 'rgba(232,93,32,0.07)', border: '2px solid rgba(232,93,32,0.32)', borderRadius: 22, padding: '24px 16px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
               {foundingActive && (
-                <div style={{ position: 'absolute', top: -11, right: 10 }}>
-                  <span style={{ fontSize: 9, fontWeight: 800, color: '#c9a84c', background: 'rgba(201,168,76,0.16)', border: '1px solid rgba(201,168,76,0.32)', borderRadius: 100, padding: '3px 10px', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap', fontFamily: dm }}>🏅 Founding</span>
+                <div style={{ position: 'absolute', top: -12, right: 10 }}>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: '#c9a84c', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 100, padding: '3px 11px', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>🏅 Founding</span>
                 </div>
               )}
-              <span style={{ fontSize: 28, marginBottom: 12 }}>⚡</span>
-              <p style={{ fontSize: 9.5, fontWeight: 800, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px', fontFamily: dm }}>FastIQ AI</p>
+              <span style={{ fontSize: 30, marginBottom: 12 }}>⚡</span>
+              <p style={{ fontSize: 9.5, fontWeight: 800, color: '#E85D20', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 8px' }}>FastIQ AI</p>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 2 }}>
-                <p style={{ fontSize: 32, fontWeight: 900, color: '#E85D20', margin: 0, letterSpacing: '-0.04em', fontFamily: dm }}>{foundingActive ? '$14.50' : '$29'}</p>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', fontFamily: dm }}>/mo</span>
+                <p style={{ fontSize: 34, fontWeight: 900, color: '#E85D20', margin: 0, letterSpacing: '-0.04em' }}>{foundingActive ? '$14.50' : '$29'}</p>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.26)' }}>/mo</span>
               </div>
-              {foundingActive && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', margin: '0 0 14px', fontFamily: dm }}>$29 after April 30</p>}
-              <div style={{ flex: 1, marginBottom: 16 }}>
+              {foundingActive && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', margin: '0 0 16px' }}>$29 after April 30</p>}
+              <div style={{ flex: 1, marginBottom: 18 }}>
                 {['7-day free trial, no card', 'Alumni search + AI outreach', 'Resume, mock interviews & intel'].map(b => (
-                  <div key={b} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 7 }}>
+                  <div key={b} style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginBottom: 8 }}>
                     <span style={{ color: '#E85D20', fontSize: 11, marginTop: 1, flexShrink: 0 }}>✓</span>
-                    <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.42)', lineHeight: 1.45, fontFamily: dm }}>{b}</span>
+                    <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.4)', lineHeight: 1.45 }}>{b}</span>
                   </div>
                 ))}
               </div>
-              <button onClick={onStudentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg,#E85D20,#ff7340)', border: 'none', borderRadius: 12, padding: '11px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto', boxShadow: '0 4px 18px rgba(232,93,32,0.38)', fontFamily: dm }}>
+              <button onClick={onStudentJoin} style={{ fontSize: 13, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg,#E85D20,#ff7340)', border: 'none', borderRadius: 13, padding: '12px 14px', cursor: 'pointer', width: '100%', minHeight: 'auto', boxShadow: '0 4px 20px rgba(232,93,32,0.4)' }}>
                 Try 7 days free →
               </button>
             </div>
           </div>
-          <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: '12px 0 0', fontFamily: dm }}>No credit card · Cancel anytime · Parents can gift FastIQ too</p>
+          <p style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.18)', textAlign: 'center', margin: '14px 0 0' }}>No credit card · Cancel anytime · Parents can gift FastIQ too</p>
         </div>
 
         {/* ── FAQ ── */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 60px', maxWidth: 640, margin: '0 auto' }}>
-          <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px', fontFamily: dm }}>FAQs</p>
-          <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', margin: '0 0 20px', fontFamily: dm }}>
-            Got questions? Fair.
-          </h2>
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
+          <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FAQs</p>
+          <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', margin: '0 0 22px' }}>Got questions? Fair.</h2>
           {FAQS.map((faq, i) => <FAQItem key={i} {...faq} />)}
         </div>
 
         {/* ── FINAL CTA ── */}
-        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 80px', maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-          <div style={{ background: isStudent ? 'linear-gradient(155deg, rgba(232,93,32,0.12) 0%, rgba(0,33,165,0.08) 100%)' : 'linear-gradient(155deg, rgba(79,140,255,0.1) 0%, rgba(124,58,237,0.08) 100%)', border: `1px solid ${isStudent ? 'rgba(232,93,32,0.22)' : 'rgba(79,140,255,0.2)'}`, borderRadius: 24, padding: '48px 24px 44px', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ fontSize: 42, marginBottom: 14 }}>{isStudent ? '🚀' : '🤝'}</div>
-            <h2 style={{ fontSize: 'clamp(26px, 6.5vw, 44px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.035em', lineHeight: 1.1, margin: '0 0 12px', fontFamily: dm }}>
-              {isStudent ? <>Your next opportunity is literally one intro away.</> : <>One intro from you can change everything.</>}
+        <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 84px', maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ background: isStudent ? 'linear-gradient(155deg, rgba(232,93,32,0.11) 0%, rgba(0,33,165,0.07) 100%)' : 'linear-gradient(155deg, rgba(79,140,255,0.09) 0%, rgba(124,58,237,0.07) 100%)', border: `1px solid ${isStudent ? 'rgba(232,93,32,0.2)' : 'rgba(79,140,255,0.18)'}`, borderRadius: 26, padding: '52px 24px 48px', position: 'relative', overflow: 'hidden' }}>
+            {/* Organic shape accent */}
+            <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%', background: isStudent ? 'rgba(232,93,32,0.06)' : 'rgba(79,140,255,0.05)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: -40, left: -40, width: 160, height: 160, borderRadius: '40% 60% 30% 70% / 60% 40% 60% 40%', background: isStudent ? 'rgba(255,115,64,0.05)' : 'rgba(124,58,237,0.04)', pointerEvents: 'none' }} />
+            <div style={{ fontSize: 46, marginBottom: 16, position: 'relative' }}>{isStudent ? '🚀' : '🤝'}</div>
+            <h2 style={{ fontSize: 'clamp(27px, 6.5vw, 46px)', fontWeight: 900, color: '#fff', letterSpacing: '-0.035em', lineHeight: 1.08, margin: '0 0 14px', position: 'relative' }}>
+              {isStudent ? <>Your next opportunity is<br />literally one intro away.</> : <>One intro from you can<br />change everything.</>}
             </h2>
-            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', lineHeight: 1.65, margin: '0 auto 28px', maxWidth: 340, fontFamily: dm }}>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.38)', lineHeight: 1.68, margin: '0 auto 30px', maxWidth: 340, position: 'relative' }}>
               {isStudent ? 'No credit card. No BS. Just real intros and AI that actually works.' : 'Free. 2 minutes. No obligation. Students at your school genuinely need you.'}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 11, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', position: 'relative' }}>
               {isStudent ? (
                 <>
-                  <button onClick={onStudentJoin} style={{ fontSize: 16, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #E85D20 0%, #ff6b35 100%)', border: 'none', borderRadius: 16, padding: '19px 36px', cursor: 'pointer', width: '100%', maxWidth: 400, minHeight: 'auto', boxShadow: '0 10px 44px rgba(232,93,32,0.48)', fontFamily: dm }}>
+                  <button onClick={onStudentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #E85D20 0%, #ff6b35 100%)', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 12px 48px rgba(232,93,32,0.5)' }}>
                     🎓 Try FastIQ free — 7 days
                   </button>
-                  <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 400, minHeight: 'auto', fontFamily: dm }}>
+                  <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>
                     🤝 Join as parent/alumni — free
                   </button>
                 </>
               ) : (
                 <>
-                  <button onClick={onParentJoin} style={{ fontSize: 16, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #4f8cff 0%, #7c3aed 100%)', border: 'none', borderRadius: 16, padding: '19px 36px', cursor: 'pointer', width: '100%', maxWidth: 400, minHeight: 'auto', boxShadow: '0 10px 44px rgba(79,140,255,0.38)', fontFamily: dm }}>
+                  <button onClick={onParentJoin} style={{ fontSize: 17, fontWeight: 900, color: '#fff', background: 'linear-gradient(135deg, #4f8cff 0%, #7c3aed 100%)', border: 'none', borderRadius: 18, padding: '22px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto', boxShadow: '0 12px 48px rgba(79,140,255,0.42)' }}>
                     🤝 Join free — help students now
                   </button>
-                  <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 400, minHeight: 'auto', fontFamily: dm }}>
-                    🎓 I&apos;m a student — Try FastIQ free
+                  <button onClick={onStudentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.48)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: '16px 36px', cursor: 'pointer', width: '100%', maxWidth: 420, minHeight: 'auto' }}>
+                    🎓 I'm a student — Try FastIQ free
                   </button>
                 </>
               )}
@@ -701,10 +737,10 @@ export default function LandingPage() {
 
         {/* ── FOOTER ── */}
         <div style={{ position: 'relative', zIndex: 2, borderTop: '1px solid rgba(255,255,255,0.05)', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.15)', fontFamily: dm }}>© 2026 College Fast Forward</span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.14)' }}>© 2026 College Fast Forward</span>
           <div style={{ display: 'flex', gap: 16 }}>
-            <a href="#Terms" style={{ fontSize: 12, color: 'rgba(255,255,255,0.15)', textDecoration: 'none', fontFamily: dm }}>Terms</a>
-            <a href="#Privacy" style={{ fontSize: 12, color: 'rgba(255,255,255,0.15)', textDecoration: 'none', fontFamily: dm }}>Privacy</a>
+            <a href="#Terms" style={{ fontSize: 12, color: 'rgba(255,255,255,0.14)', textDecoration: 'none' }}>Terms</a>
+            <a href="#Privacy" style={{ fontSize: 12, color: 'rgba(255,255,255,0.14)', textDecoration: 'none' }}>Privacy</a>
           </div>
         </div>
 
