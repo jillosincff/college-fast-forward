@@ -332,12 +332,8 @@ export default function StudentLandingPage({ onParentClick }) {
             minHeight: 'auto',
             boxShadow: '0 0 0 0 rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)',
             transition: 'all 0.2s ease',
-            letterSpacing: '-0.01em',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 0 40px rgba(232,93,32,0.5), 0 16px 48px rgba(232,93,32,0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 0 0 rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)'; }}
-          >
-            Try FastIQ free — 7 days →
+          }}>
+            Join free →
           </button>
           <button onClick={parent} style={{
             fontFamily: dmSans, fontSize: 15, fontWeight: 600,
@@ -409,10 +405,6 @@ export default function StudentLandingPage({ onParentClick }) {
                   <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.5 }}>{f}</p>
                 </div>
               ))}
-              <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(232,93,32,0.15)' }}>
-                <p style={{ fontFamily: playfair, fontSize: 28, fontWeight: 700, color: '#E85D20', margin: '0 0 2px' }}>Free</p>
-                <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0 }}>Always. For parents & alumni.</p>
-              </div>
             </div>
           </div>
 
@@ -440,19 +432,17 @@ export default function StudentLandingPage({ onParentClick }) {
                   <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.5 }}>{f}</p>
                 </div>
               ))}
-              <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid rgba(34,211,238,0.15)' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
-                  <p style={{ fontFamily: playfair, fontSize: 28, fontWeight: 700, color: '#22d3ee', margin: 0 }}>
-                    {foundingActive ? '$14.50' : '$29'}
-                  </p>
-                  <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>/mo</span>
-                  {foundingActive && <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#E85D20', background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 100, padding: '2px 8px', letterSpacing: '0.06em' }}>FOUNDING</span>}
-                </div>
-                <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0 }}>7-day free trial · No credit card</p>
-              </div>
             </div>
           </div>
         </div>
+
+        <p style={{
+          fontFamily: dmSans, fontSize: 14,
+          color: 'rgba(255,255,255,0.3)',
+          textAlign: 'center', margin: '16px 0 0',
+        }}>
+          Free to join. FastIQ available inside — 7 days free, no credit card.
+        </p>
       </div>
 
       {/* ── VIDEO + PROOF ── */}
@@ -564,19 +554,16 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
 
           <button onClick={go} style={{
-            fontFamily: dmSans, fontSize: 17, fontWeight: 800,
+            fontFamily: dmSans, fontSize: 16, fontWeight: 800,
             color: '#fff', background: '#E85D20', border: 'none',
-            borderRadius: 16, padding: '20px 48px', cursor: 'pointer',
+            borderRadius: 14, padding: '18px 40px', cursor: 'pointer',
             minHeight: 'auto',
-            boxShadow: '0 0 60px rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)',
+            boxShadow: '0 0 0 0 rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)',
+            transition: 'all 0.2s ease',
             display: 'block', marginLeft: 'auto', marginRight: 'auto',
-            marginBottom: 16, transition: 'all 0.2s ease',
-            letterSpacing: '-0.01em',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px) scale(1.03)'; e.currentTarget.style.boxShadow = '0 0 80px rgba(232,93,32,0.6), 0 16px 48px rgba(232,93,32,0.5)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)'; }}
-          >
-            Try FastIQ free — 7 days →
+            marginBottom: 16,
+          }}>
+            Join free →
           </button>
 
           <button onClick={parent} style={{
