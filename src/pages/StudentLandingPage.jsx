@@ -196,7 +196,7 @@ function AlumniSearchDemo() {
   );
 }
 
-export default function StudentLandingPage({ onParentClick }) {
+export default function StudentLandingPage({ onParentClick, onStudentClick }) {
   const [mounted, setMounted] = useState(false);
   const [activePain, setActivePain] = useState(0);
   const [activeProof, setActiveProof] = useState(0);
@@ -233,6 +233,7 @@ export default function StudentLandingPage({ onParentClick }) {
   const foundingActive = new Date() < FOUNDING_DEADLINE;
   const go = () => navigate('GatorAuth');
   const parent = () => { if (onParentClick) onParentClick(); else navigate('ParentLandingPage'); };
+  const student = () => { if (onStudentClick) onStudentClick(); else navigate('GatorAuth'); };
 
   return (
     <div style={{ background: '#08080f', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
