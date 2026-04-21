@@ -105,32 +105,41 @@ export default function StudentLandingPage({ onParentClick }) {
           </span>
         </div>
 
-        {/* Eyebrow */}
-        <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(14px, 2vw, 16px)',
-          fontWeight: 700, color: 'rgba(255,255,255,0.4)',
-          letterSpacing: '0.08em', textTransform: 'uppercase',
-          margin: '0 0 16px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
-        }}>
-          The smarter way to job search
-        </p>
-
         {/* Headline */}
         <h1 style={{
           fontFamily: playfair,
           fontSize: 'clamp(44px, 9vw, 96px)',
           fontWeight: 700, color: '#fff',
           lineHeight: 1.0, letterSpacing: '-0.04em',
-          margin: '0 0 12px', maxWidth: 800,
+          margin: '0 0 4px', maxWidth: 800,
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.7s ease 0.1s',
+        }}>
+          The smarter way
+        </h1>
+        <h1 style={{
+          fontFamily: playfair,
+          fontSize: 'clamp(44px, 9vw, 96px)',
+          fontWeight: 700, color: '#E85D20', fontStyle: 'italic',
+          lineHeight: 1.0, letterSpacing: '-0.04em',
+          margin: '0 0 20px', maxWidth: 800,
           opacity: mounted ? 1 : 0,
           transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.15s',
         }}>
-          We got you covered.
+          to job search.
         </h1>
 
         {/* Sub */}
+        <p style={{
+          fontFamily: dmSans, fontSize: 'clamp(17px, 2.5vw, 22px)',
+          fontWeight: 700, color: '#fff',
+          lineHeight: 1.6, maxWidth: 560, margin: '0 auto 8px',
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
+        }}>
+          We got you covered.
+        </p>
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(17px, 2.5vw, 22px)',
           color: 'rgba(255,255,255,0.55)', lineHeight: 1.6,
