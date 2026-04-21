@@ -17,6 +17,8 @@ const NETWORK_FEATURES = [
   'Every industry. Every company.',
   'They agreed to help. For real.',
   "Whatever school you go to — you're in.",
+  'Message any helper directly — no gatekeepers.',
+  'Warm intros, not cold emails into the void.',
 ];
 
 const FASTIQ_FEATURES = [
