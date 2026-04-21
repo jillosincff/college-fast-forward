@@ -137,5 +137,5 @@ export const PAGES = {
 
 export const pagesConfig = {
     mainPage: "HomePage",
-    Pages: { "HomePage": HomePage, ...PAGES },
+    Pages: PAGES,
 };
