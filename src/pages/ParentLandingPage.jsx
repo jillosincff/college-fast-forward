@@ -219,6 +219,80 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
       </div>
 
+      {/* ── FOUNDER'S STORY ── */}
+      <div style={{
+        maxWidth: 680, margin: '0 auto',
+        padding: '64px 24px 0',
+      }}>
+        <p style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+          color: '#E85D20', letterSpacing: '0.12em',
+          textTransform: 'uppercase', margin: '0 0 28px',
+        }}>
+          Why we built this
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <p style={{
+            fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)',
+            fontWeight: 700, color: '#1f2937',
+            lineHeight: 1.4, letterSpacing: '-0.01em', margin: 0,
+          }}>
+            It's stressful watching your kid apply to hundreds
+            of jobs and hear almost nothing back.
+          </p>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 17,
+            color: '#334155', lineHeight: 1.75, margin: 0,
+          }}>
+            You've probably already asked everyone you know —
+            <em> "do you know anybody who can help?"</em>
+          </p>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 17,
+            color: '#334155', lineHeight: 1.75, margin: 0,
+          }}>
+            But that only goes so far.
+          </p>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 17, fontWeight: 700,
+            color: '#1f2937', lineHeight: 1.75, margin: 0,
+          }}>
+            So we decided to change that.
+          </p>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 17,
+            color: '#334155', lineHeight: 1.75, margin: 0,
+          }}>
+            We're on a mission to pool the connections of parents
+            at every college — exponentially expanding the warm
+            introductions available to every student in the network.
+          </p>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 17,
+            color: '#334155', lineHeight: 1.75, margin: 0,
+          }}>
+            Because one parent's connections plus another parent's
+            connections plus another parent's connections adds up
+            to something no student could build alone.
+          </p>
+
+          <p style={{
+            fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)',
+            fontWeight: 700, fontStyle: 'italic',
+            color: '#E85D20', lineHeight: 1.4,
+            margin: '8px 0 0',
+          }}>
+            That's College Fast Forward.
+          </p>
+        </div>
+      </div>
+
       {/* ── THE PREMISE ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
         <div style={{
