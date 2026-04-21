@@ -390,54 +390,6 @@ export default function ParentLandingPage({ onStudentClick }) {
         </p>
       </div>
 
-      {/* ── GROW THE NETWORK ── */}
-      <div style={{
-        background: C.bgWhite,
-        border: `1px solid ${C.border}`,
-        borderRadius: 20,
-        padding: '32px 28px',
-        margin: '0 0 0',
-        textAlign: 'center',
-      }}>
-        <p style={{
-          fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-          color: C.orange, letterSpacing: '0.12em',
-          textTransform: 'uppercase', margin: '0 0 12px',
-        }}>
-          Help us grow
-        </p>
-        <h3 style={{
-          fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)',
-          fontWeight: 700, color: C.dark,
-          lineHeight: 1.3, letterSpacing: '-0.01em',
-          margin: '0 0 12px',
-        }}>
-          Know another parent at your kid's school?
-        </h3>
-        <p style={{
-          fontFamily: dmSans, fontSize: 16,
-          color: C.muted, lineHeight: 1.7,
-          margin: '0 auto 24px', maxWidth: 460,
-        }}>
-          The bigger the network, the better the chances for every student — including yours. Invite them to join.
-        </p>
-        <button
-          onClick={() => setShowShareModal(true)}
-          style={{
-            fontFamily: dmSans, fontSize: 14, fontWeight: 700,
-            color: '#fff', background: C.orange, border: 'none',
-            borderRadius: 10, padding: '14px 28px',
-            cursor: 'pointer', minHeight: 'auto',
-            boxShadow: '0 4px 16px rgba(232,93,32,0.25)',
-            transition: 'opacity 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-        >
-          Invite a parent →
-        </button>
-      </div>
-
       {/* Share Modal */}
       {showShareModal && (
         <div style={{
@@ -506,7 +458,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
       )}
 
-      {/* ── VIDEO SECTION ── */}
+      {/* ── VIDEO SECTION (testimonials only) ── */}
       <div style={{ background: C.bgWhite, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, padding: '64px 24px' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.cyan, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px', textAlign: 'center' }}>Real parents. Real results.</p>
@@ -516,16 +468,6 @@ export default function ParentLandingPage({ onStudentClick }) {
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 700, color: C.orange, fontStyle: 'italic', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 32px', textAlign: 'center' }}>
             {"show up for each other's kids."}
           </h2>
-
-          <div style={{ background: C.dark, borderRadius: 16, aspectRatio: '16/9', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 24, border: `1px solid ${C.border}`, overflow: 'hidden', position: 'relative' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)' }} />
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: C.orange, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(232,93,32,0.4)', cursor: 'pointer' }}>
-                <div style={{ width: 0, height: 0, borderTop: '12px solid transparent', borderBottom: '12px solid transparent', borderLeft: '20px solid #fff', marginLeft: 4 }} />
-              </div>
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0, textAlign: 'center' }}>Add your video here</p>
-            </div>
-          </div>
 
           <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.orange}`, borderRadius: '0 12px 12px 0', padding: '20px 24px' }}>
             <p style={{ fontFamily: playfair, fontSize: 17, fontStyle: 'italic', color: C.dark, margin: '0 0 12px', lineHeight: 1.55 }}>
@@ -582,69 +524,63 @@ export default function ParentLandingPage({ onStudentClick }) {
         </button>
       </div>
 
-      {/* ── PRICING ── */}
-      <div style={{ background: C.bgWhite, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, padding: '64px 24px' }}>
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.orange, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>Pricing</p>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 38px)', fontWeight: 700, color: C.dark, lineHeight: 1.2, margin: '0 0 4px' }}>Free for helpers.</h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(22px, 3vw, 38px)', fontWeight: 700, color: C.orange, fontStyle: 'italic', lineHeight: 1.2, margin: '0 0 36px' }}>Turbo for students.</h2>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 20 }}>
-            {/* Free */}
-            <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 16, padding: '28px' }}>
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.hint, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Free Network</p>
-              <p style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: C.dark, margin: '0 0 20px', lineHeight: 1 }}>$0</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {['Join as a parent or alumni', 'Help students at your school', 'No fees, no obligation. Ever.'].map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: C.orangeLight, border: `1px solid ${C.orangeBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.orange }} />
-                    </div>
-                    <p style={{ fontFamily: dmSans, fontSize: 14, color: C.body, margin: 0 }}>{f}</p>
-                  </div>
-                ))}
-              </div>
-              <button onClick={handleJoin} style={{ width: '100%', fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: C.dark, background: C.bgWhite, border: `1px solid ${C.border}`, borderRadius: 8, padding: '11px 0', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = C.orange; e.currentTarget.style.color = C.orange; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.dark; }}
-              >Join free →</button>
-            </div>
-
-            {/* FastIQ */}
-            <div style={{ background: C.bgWhite, border: `2px solid ${C.orange}`, borderRadius: 16, padding: '28px', position: 'relative', boxShadow: '0 8px 32px rgba(232,93,32,0.1)' }}>
-              {foundingActive && (
-                <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: C.orange, color: '#fff', fontFamily: dmSans, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 14px', borderRadius: 100, whiteSpace: 'nowrap' }}>
-                  🏅 Founding Rate{timeLeft ? ` · ${timeLeft} left` : ''}
-                </div>
-              )}
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.orange, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>FastIQ — For Students</p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
-                <p style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: C.orange, margin: 0, lineHeight: 1 }}>$14.50</p>
-                <span style={{ fontFamily: dmSans, fontSize: 14, color: C.hint }}>/mo</span>
-              </div>
-              <p style={{ fontFamily: dmSans, fontSize: 12, color: C.hint, margin: '0 0 20px' }}>$29/mo after April 30</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-                {['7-day free trial, no credit card', 'Alumni search + AI outreach', 'Resume tailoring + mock interviews', 'Company intel + daily action plan', 'Parents can gift FastIQ too'].map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: C.orangeLight, border: `1px solid ${C.orangeBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.orange }} />
-                    </div>
-                    <p style={{ fontFamily: dmSans, fontSize: 14, color: C.body, margin: 0 }}>{f}</p>
-                  </div>
-                ))}
-              </div>
-              <button onClick={handleStudent} style={{ width: '100%', fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#fff', background: C.orange, border: 'none', borderRadius: 8, padding: '11px 0', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 12px rgba(232,93,32,0.3)', transition: 'opacity 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-              >Try 7 days free →</button>
-            </div>
-          </div>
-
-          <p style={{ fontFamily: dmSans, fontSize: 13, color: C.hint, textAlign: 'center', margin: 0 }}>
-            No credit card to start. Cancel anytime. Parents can pay on their student's behalf.
-          </p>
-        </div>
+      {/* ── GROW THE NETWORK ── */}
+      <div style={{
+        background: C.bgWhite,
+        border: `1px solid ${C.border}`,
+        borderRadius: 20,
+        padding: '32px 28px',
+        margin: '0 0 0',
+        textAlign: 'center',
+      }}>
+        <p style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+          color: C.orange, letterSpacing: '0.12em',
+          textTransform: 'uppercase', margin: '0 0 12px',
+        }}>
+          Help us grow
+        </p>
+        <h3 style={{
+          fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)',
+          fontWeight: 700, color: C.dark,
+          lineHeight: 1.3, letterSpacing: '-0.01em',
+          margin: '0 0 12px',
+        }}>
+          Know another parent at your kid's school?
+        </h3>
+        <p style={{
+          fontFamily: dmSans, fontSize: 16,
+          color: C.muted, lineHeight: 1.7,
+          margin: '0 auto 24px', maxWidth: 460,
+        }}>
+          The bigger the network, the better the chances for every student — including yours. Invite them to join.
+        </p>
+        <button
+          onClick={() => setShowShareModal(true)}
+          style={{
+            fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+            color: '#fff', background: C.orange, border: 'none',
+            borderRadius: 10, padding: '14px 28px',
+            cursor: 'pointer', minHeight: 'auto',
+            boxShadow: '0 4px 16px rgba(232,93,32,0.25)',
+            transition: 'opacity 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+        >
+          Invite a parent →
+        </button>
       </div>
+
+      <p style={{
+        fontFamily: dmSans, fontSize: 14,
+        color: C.hint, textAlign: 'center',
+        margin: '0 0 64px', padding: '0 24px',
+      }}>
+        Free to join as a parent or alumni. 
+        FastIQ — our AI career engine for students — 
+        is available inside the app.
+      </p>
 
       {/* ── FAQ ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
