@@ -407,7 +407,7 @@ export default function LandingPage() {
           </div>
 
           {/* Main headline */}
-          <h1 style={{ fontSize: 'clamp(32px, 8.5vw, 58px)', fontWeight: 900, lineHeight: 1.04, letterSpacing: '-0.038em', color: '#1f2937', margin: '0 0 17px', position: 'relative' }}>
+          <h1 style={{ fontSize: 'clamp(28px, 7.5vw, 52px)', fontWeight: 900, lineHeight: 1.06, letterSpacing: '-0.038em', color: '#1f2937', margin: '0 0 17px', position: 'relative' }}>
             {isStudent ? (
               <>
                 Tired of ghosted<br />applications?<br />
@@ -416,9 +416,10 @@ export default function LandingPage() {
               </>
             ) : (
               <>
-                Join the free parent &amp; alumni network —{' '}
-                <span style={{ color: '#2563eb' }}>real people who actually care</span>{' '}
-                <span style={{ color: 'rgba(0,0,0,0.5)', fontWeight: 700 }}>about helping our kids succeed.</span>
+                Imagine you had{' '}
+                <span style={{ color: '#2563eb' }}>1,000+ best friends</span>{' '}
+                helping your kid land a job.{' '}
+                <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Well, now you do.</span>
               </>
             )}
           </h1>
@@ -429,14 +430,23 @@ export default function LandingPage() {
           </p>
 
           {/* Sub */}
-          <p style={{ fontSize: 16, color: '#334155', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 30px', textAlign: 'center' }}>
+          <p style={{ fontSize: 16, color: '#334155', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 18px', textAlign: 'center' }}>
             {isStudent ? (
               <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(0,0,0,0.75)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
             ) : (
-              <>We're not LinkedIn. We're parents and alumni opening our networks because we want to see the next generation win. The more of us who join, the stronger the opportunities become for every student — including your own.</>
-            
+              <>We're parents and alumni who actually care — opening our networks because we want to see our kids win. <strong style={{ color: '#1f2937', fontWeight: 700 }}>The more of us who join, the stronger the opportunities become for every student — including your own.</strong></>
             )}
           </p>
+
+          {/* Stat pill — helper mode only */}
+          {!isStudent && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(37,99,235,0.08)', border: '1.5px solid rgba(37,99,235,0.25)', borderRadius: 14, padding: '10px 18px', margin: '0 auto 22px', maxWidth: 460, textAlign: 'left' }}>
+              <span style={{ fontSize: 20, flexShrink: 0 }}>📊</span>
+              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#1e3a8a', margin: 0, lineHeight: 1.55 }}>
+                <strong>70–80% of jobs are filled through personal connections</strong> — not cold applications. We make those warm intros real and easy.
+              </p>
+            </div>
+          )}
 
           {/* ── MAIN CTA — big, electric, unmissable ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', marginBottom: 18 }}>
