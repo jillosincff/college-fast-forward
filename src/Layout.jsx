@@ -780,9 +780,6 @@ function AppContent() {
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
-      if (user) {
-        navigate(getDashboardForUser(user)); return;
-      }
       setResolvedPage(currentPage); return;
     }
 
