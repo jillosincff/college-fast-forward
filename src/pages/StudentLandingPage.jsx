@@ -290,7 +290,7 @@ export default function StudentLandingPage({ onParentClick }) {
           transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          The smarter way
+          The real way
         </h1>
         <h1 style={{
           fontFamily: playfair,
@@ -302,7 +302,7 @@ export default function StudentLandingPage({ onParentClick }) {
           transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.15s',
         }}>
-          to job search.
+          to find a job.
         </h1>
 
         {/* Sub */}
@@ -312,7 +312,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.6, maxWidth: 560, margin: '0 auto 8px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          We got you covered.
+          {"It's all about who you know."}
         </p>
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(17px, 2.5vw, 22px)',
@@ -320,7 +320,7 @@ export default function StudentLandingPage({ onParentClick }) {
           maxWidth: 560, margin: '0 auto 8px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
-          A huge personal network of parents & alumni.
+          We help you tap into those connections.
         </p>
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(17px, 2.5vw, 22px)',
