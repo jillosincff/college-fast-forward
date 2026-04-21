@@ -443,7 +443,7 @@ export default function LandingPage() {
           {/* Sub */}
           <p style={{ fontSize: 16, color: '#334155', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 18px', textAlign: 'center' }}>
             {isStudent ? (
-              <>Thousands of parents and alumni from your school want to open their networks right now to help you.</>
+              <>You actually have thousands of personal connections that want to help right now.</>
             ) : (
               <>
                 The more of us who join, the stronger the opportunities become for every student —{' '}
@@ -733,9 +733,9 @@ export default function LandingPage() {
         {isStudent && (
           <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
             <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FastIQ unlocks</p>
-            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 6px' }}>Sometimes warm connections aren't enough.</h2>
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#E85D20', margin: '0 0 6px', lineHeight: 1.4 }}>Introducing FastIQ — your personal career agent that works 24/7.</p>
-            <p style={{ fontSize: 14, color: '#334155', margin: '0 0 22px', lineHeight: 1.6 }}>It finds alumni at companies in your field, crafts personalized outreach, tailors your resume to each job, spots hiring signals, and turns warm intros into real interviews and offers.</p>
+            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 8px' }}>Want to turbocharge your job search?</h2>
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#E85D20', margin: '0 0 8px', lineHeight: 1.4 }}>Meet FastIQ, your personal career agent available 24/7.</p>
+            <p style={{ fontSize: 14, color: '#334155', margin: '0 0 22px', lineHeight: 1.65 }}>FastIQ finds alumni, crafts personalized outreach, tailors your resume, spots hiring signals, and turns those warm connections into real interviews and offers.</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FASTIQ_FEATURES.map((f, i) => (
                 <div key={i} style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `3px solid ${i % 2 === 0 ? '#22d3ee' : '#E85D20'}`, boxShadow: '0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05)' }}>
