@@ -143,6 +143,11 @@ export default function GatorAuth() {
   };
 
   const handleGoogleSignIn = () => {
+    // Set pending role so we route to StudentOnboarding after auth
+    try {
+      localStorage.setItem('pending_invite_role', 'student');
+      sessionStorage.setItem('cff_onboarding_type', 'student');
+    } catch (e) { /* private browsing */ }
     base44.auth.redirectToLogin();
   };
 

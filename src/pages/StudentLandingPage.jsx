@@ -559,7 +559,7 @@ export default function StudentLandingPage({ onParentClick, onStudentClick }) {
             Join free →
           </button>
 
-          <button onClick={parent} style={{
+          <button onClick={student} style={{
             fontFamily: dmSans, fontSize: 13, fontWeight: 500,
             color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none',
             cursor: 'pointer', minHeight: 'auto', padding: 0,
