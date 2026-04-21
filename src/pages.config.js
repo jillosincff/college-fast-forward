@@ -65,7 +65,7 @@ import FastIQOnboarding from './pages/FastIQOnboarding';
 import Favorites from './pages/Favorites';
 import GatorInviteCode from './pages/GatorInviteCode';
 import GatorParentInvite from './pages/GatorParentInvite';
-import GatorWelcome from './pages/GatorWelcome';
+
 import Insights from './pages/Insights';
 import InviteRequired from './pages/InviteRequired';
 // LandingPage removed — redirected to "/" via App.jsx which serves StudentLandingPage
@@ -108,7 +108,7 @@ export const PAGES = {
     "Favorites": Favorites,
     "GatorInviteCode": GatorInviteCode,
     "GatorParentInvite": GatorParentInvite,
-    "GatorWelcome": GatorWelcome,
+
     "Insights": Insights,
     "InviteRequired": InviteRequired,
     "MatchesReview": MatchesReview,
