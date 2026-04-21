@@ -221,6 +221,92 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
       </div>
 
+      {/* ── TRUSTED BY ── */}
+      <div style={{
+        borderTop: `1px solid ${C.border}`,
+        borderBottom: `1px solid ${C.border}`,
+        padding: '32px 24px',
+        textAlign: 'center',
+        background: C.bgWhite,
+      }}>
+        <p style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+          color: C.hint, letterSpacing: '0.12em',
+          textTransform: 'uppercase', margin: '0 0 16px',
+        }}>
+          Trusted by parents & alumni at
+        </p>
+
+        {/* School pills */}
+        <div style={{
+          display: 'flex', flexWrap: 'wrap',
+          justifyContent: 'center', gap: 8,
+          marginBottom: 28,
+        }}>
+          {[
+            'University of Florida',
+            'Florida State',
+            'Ohio State',
+            'UCF',
+            'USC',
+            'Penn State',
+            'University of Michigan',
+            'Tulane',
+            'University of Maryland',
+            'And growing...',
+          ].map((school, i) => (
+            <div key={i} style={{
+              fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+              color: i === 9 ? C.orange : C.body,
+              background: i === 9 ? C.orangeLight : C.bg,
+              border: `1px solid ${i === 9 ? C.orangeBorder : C.border}`,
+              borderRadius: 100, padding: '6px 14px',
+              fontStyle: i === 9 ? 'italic' : 'normal',
+            }}>
+              {school}
+            </div>
+          ))}
+        </div>
+
+        {/* Don't see your school */}
+        <div style={{
+          background: C.bg,
+          border: `1px solid ${C.border}`,
+          borderRadius: 14, padding: '20px 24px',
+          maxWidth: 480, margin: '0 auto',
+        }}>
+          <p style={{
+            fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+            color: C.dark, margin: '0 0 6px',
+          }}>
+            Don't see your kid's school?
+          </p>
+          <p style={{
+            fontFamily: dmSans, fontSize: 14,
+            color: C.muted, lineHeight: 1.6,
+            margin: '0 0 16px',
+          }}>
+            We're building networks at colleges across the country.
+            Join and help us launch your school's network.
+          </p>
+          <button
+            onClick={() => navigate('GetStarted')}
+            style={{
+              fontFamily: dmSans, fontSize: 13, fontWeight: 700,
+              color: C.orange, background: 'none',
+              border: `1px solid ${C.orangeBorder}`,
+              borderRadius: 8, padding: '10px 20px',
+              cursor: 'pointer', minHeight: 'auto',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = C.orangeLight; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+          >
+            Help us build it →
+          </button>
+        </div>
+      </div>
+
       {/* ── FOUNDER'S STORY ── */}
       <div style={{
         maxWidth: 680, margin: '0 auto',
