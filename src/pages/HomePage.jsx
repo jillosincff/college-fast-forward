@@ -16,8 +16,7 @@ export default function HomePage() {
       document.head.appendChild(link);
     }
     const timers = [
-      setTimeout(() => setPhase(1), 400),
-      setTimeout(() => setPhase(2), 900),
+      setTimeout(() => setPhase(2), 600),
       setTimeout(() => setPhase(3), 1800),
       setTimeout(() => setPhase(4), 2600),
     ];
@@ -100,18 +99,6 @@ export default function HomePage() {
         gap: 0,
         position: 'relative', zIndex: 1,
       }}>
-
-        {/* Logo dot */}
-        <div style={{
-          width: 10, height: 10,
-          borderRadius: '50%',
-          background: '#E85D20',
-          boxShadow: phase >= 1 ? '0 0 20px rgba(232,93,32,0.6)' : 'none',
-          marginBottom: 28,
-          opacity: phase >= 1 ? 1 : 0,
-          transform: phase >= 1 ? 'scale(1)' : 'scale(0)',
-          transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        }} />
 
         {/* Main title */}
         <h1 style={{
