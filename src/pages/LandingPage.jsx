@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 import PromptsToTry from '@/components/landing/PromptsToTry';
 import VideoTestimonials from '@/components/landing/VideoTestimonials';
+import ShareSection from '@/components/landing/ShareSection';
 
 const dm = "'DM Sans', system-ui, -apple-system, sans-serif";
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
@@ -841,6 +842,11 @@ export default function LandingPage() {
               {foundingActive && <div style={{ marginTop: 4 }}><Countdown timeLeft={timeLeft} /></div>}
             </div>
           </div>
+        </div>
+
+        {/* ── SHARE SECTION ── */}
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 640, margin: '0 auto' }}>
+          <ShareSection />
         </div>
 
         {/* ── FOOTER ── */}
