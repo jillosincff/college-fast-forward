@@ -37,6 +37,28 @@ export default function HomePage() {
       overflow: 'hidden',
     }}>
 
+      {/* Background video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          opacity: 0.6,
+          pointerEvents: 'none',
+        }}
+      >
+        <source src="https://imagine-public.x.ai/imagine-public/share-videos/e0df326f-2021-4720-804d-3ead19d1aed3.mp4" type="video/mp4" />
+      </video>
+
       <div style={{
         position: 'absolute',
         top: '50%', left: '50%',
