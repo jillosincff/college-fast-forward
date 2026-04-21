@@ -536,7 +536,7 @@ export default function StudentLandingPage({ onParentClick }) {
             lineHeight: 1.05, letterSpacing: '-0.03em',
             margin: '0 0 10px',
           }}>
-            Stop sending
+            Stop sending resumes
           </h2>
           <h2 style={{
             fontFamily: playfair,
