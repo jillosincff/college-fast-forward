@@ -411,9 +411,9 @@ export default function LandingPage() {
           <h1 style={{ fontSize: 'clamp(28px, 7.5vw, 52px)', fontWeight: 900, lineHeight: 1.06, letterSpacing: '-0.038em', color: '#1f2937', margin: '0 0 17px', position: 'relative' }}>
             {isStudent ? (
               <>
-                Tired of ghosted<br />applications?<br />
-                <span style={{ color: '#E85D20' }}>Yeah, us too.</span>{' '}
-                <span style={{ color: 'rgba(0,0,0,0.5)', fontSize: '0.87em', fontWeight: 700 }}>Get warm intros instead.</span>
+                Finding an internship or job<br />
+                <span style={{ color: '#E85D20' }}>without a personal connection</span>{' '}
+                <span style={{ color: 'rgba(0,0,0,0.65)', fontWeight: 800 }}>seems impossible.</span>
               </>
             ) : (
               <>
@@ -443,7 +443,7 @@ export default function LandingPage() {
           {/* Sub */}
           <p style={{ fontSize: 16, color: '#334155', lineHeight: 1.72, maxWidth: 460, margin: '0 auto 18px', textAlign: 'center' }}>
             {isStudent ? (
-              <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(0,0,0,0.75)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
+              <>Thousands of parents and alumni from your school want to open their networks right now to help you.</>
             ) : (
               <>
                 The more of us who join, the stronger the opportunities become for every student —{' '}
@@ -484,7 +484,7 @@ export default function LandingPage() {
                   onMouseEnter={e => { e.currentTarget.style.background='#67e8f9'; e.currentTarget.style.boxShadow='0 20px 25px -5px rgba(34,211,238,0.4)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background='#22d3ee'; e.currentTarget.style.boxShadow='0 10px 15px -3px rgba(34,211,238,0.3), 0 20px 40px rgba(34,211,238,0.2)'; }}
                 >
-                  🎓 I'm a student — Try FastIQ free (7 days)
+                  🎓 I'm a student — Try FastIQ free for 7 days (no card needed)
                 </button>
                 <button onClick={onParentJoin} style={{ fontSize: 14, fontWeight: 600, color: 'rgba(0,0,0,0.45)', background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 16, padding: '14px 32px', cursor: 'pointer', width: '100%', maxWidth: 480, minHeight: 'auto' }}>
                   🤝 I'm a parent/alumni — Join the free network
@@ -733,8 +733,9 @@ export default function LandingPage() {
         {isStudent && (
           <div style={{ position: 'relative', zIndex: 2, padding: '0 20px 64px', maxWidth: 640, margin: '0 auto' }}>
             <p style={{ fontSize: 10.5, fontWeight: 800, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 10px' }}>FastIQ unlocks</p>
-            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 4px' }}>Everything your job search is missing.</h2>
-            <p style={{ fontSize: 14, color: '#334155', margin: '0 0 22px', lineHeight: 1.5 }}>One tool. All of it. No more juggling 8 tabs and a spreadsheet.</p>
+            <h2 style={{ fontSize: 'clamp(22px, 5.5vw, 34px)', fontWeight: 900, color: '#1f2937', letterSpacing: '-0.03em', lineHeight: 1.15, margin: '0 0 6px' }}>Sometimes warm connections aren't enough.</h2>
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#E85D20', margin: '0 0 6px', lineHeight: 1.4 }}>Introducing FastIQ — your personal career agent that works 24/7.</p>
+            <p style={{ fontSize: 14, color: '#334155', margin: '0 0 22px', lineHeight: 1.6 }}>It finds alumni at companies in your field, crafts personalized outreach, tailors your resume to each job, spots hiring signals, and turns warm intros into real interviews and offers.</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {FASTIQ_FEATURES.map((f, i) => (
                 <div key={i} style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, padding: '17px 14px', animation: mounted ? `iconPop 0.4s ease ${0.05 + i * 0.06}s both` : 'none', borderTop: `3px solid ${i % 2 === 0 ? '#22d3ee' : '#E85D20'}`, boxShadow: '0 6px 24px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.05)' }}>
