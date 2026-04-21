@@ -269,7 +269,7 @@ export default function ParentLandingPage({ onStudentClick }) {
             color: '#334155', lineHeight: 1.75, margin: 0,
           }}>
             We're on a mission to pool the connections of parents
-            at every college — exponentially expanding the warm
+            at your kid's college — exponentially expanding the warm
             introductions available to every student in the network.
           </p>
 
