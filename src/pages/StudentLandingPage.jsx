@@ -473,42 +473,59 @@ export default function StudentLandingPage({ onParentClick }) {
 
           <AlumniSearchDemo />
 
-          {/* Testimonial */}
+          {/* Testimonials — separate section */}
           <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderLeft: '3px solid #E85D20',
-            borderRadius: '0 14px 14px 0',
-            padding: '20px 24px', marginBottom: 14,
+            background: 'rgba(34,211,238,0.03)',
+            border: '1px solid rgba(34,211,238,0.08)',
+            borderRadius: 20,
+            padding: '32px 28px',
+            marginTop: 16,
           }}>
-            <p style={{ fontFamily: playfair, fontSize: 18, fontStyle: 'italic', color: '#fff', margin: '0 0 12px', lineHeight: 1.55 }}>
-              {TESTIMONIALS[activeProof].quote}
+            <p style={{
+              fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+              color: '#22d3ee', letterSpacing: '0.12em',
+              textTransform: 'uppercase', margin: '0 0 20px',
+              textAlign: 'center',
+            }}>
+              What students are saying
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(232,93,32,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20' }}>
-                  {TESTIMONIALS[activeProof].name[0]}
+
+            <div style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderLeft: '3px solid #E85D20',
+              borderRadius: '0 14px 14px 0',
+              padding: '20px 24px', marginBottom: 14,
+            }}>
+              <p style={{ fontFamily: playfair, fontSize: 18, fontStyle: 'italic', color: '#fff', margin: '0 0 12px', lineHeight: 1.55 }}>
+                {TESTIMONIALS[activeProof].quote}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(232,93,32,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20' }}>
+                    {TESTIMONIALS[activeProof].name[0]}
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', margin: 0 }}>{TESTIMONIALS[activeProof].name}</p>
+                    <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: 0 }}>{TESTIMONIALS[activeProof].detail}</p>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', margin: 0 }}>{TESTIMONIALS[activeProof].name}</p>
-                  <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: 0 }}>{TESTIMONIALS[activeProof].detail}</p>
+                <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 100, padding: '4px 12px' }}>
+                  <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#22c55e' }}>{TESTIMONIALS[activeProof].tag}</span>
                 </div>
-              </div>
-              <div style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 100, padding: '4px 12px' }}>
-                <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#22c55e' }}>{TESTIMONIALS[activeProof].tag}</span>
               </div>
             </div>
-          </div>
 
-          <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-            {TESTIMONIALS.map((_, i) => (
-              <button key={i} onClick={() => setActiveProof(i)} style={{
-                width: i === activeProof ? 20 : 6, height: 6, borderRadius: 3,
-                background: i === activeProof ? '#E85D20' : 'rgba(255,255,255,0.12)',
-                border: 'none', cursor: 'pointer', padding: 0,
-                minHeight: 'auto', transition: 'all 0.3s ease',
-              }} />
-            ))}
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+              {TESTIMONIALS.map((_, i) => (
+                <button key={i} onClick={() => setActiveProof(i)} style={{
+                  width: i === activeProof ? 20 : 6, height: 6, borderRadius: 3,
+                  background: i === activeProof ? '#E85D20' : 'rgba(255,255,255,0.12)',
+                  border: 'none', cursor: 'pointer', padding: 0,
+                  minHeight: 'auto', transition: 'all 0.3s ease',
+                }} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
