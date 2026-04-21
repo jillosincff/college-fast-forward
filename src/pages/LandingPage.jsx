@@ -419,12 +419,18 @@ export default function LandingPage() {
               <>
                 Imagine you had{' '}
                 <span style={{ color: '#2563eb' }}>1,000+ best friends</span>{' '}
-                helping your kid land a job.{' '}
-                <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Well, now you do.</span>
+                helping your kid land a job.
               </>
             )}
 
           </h1>
+
+          {/* "Well, now you do." standalone line — parent mode only */}
+          {!isStudent && (
+            <p style={{ fontFamily: dm, fontSize: 'clamp(22px, 5.5vw, 36px)', fontWeight: 900, color: '#E85D20', fontStyle: 'italic', letterSpacing: '-0.025em', margin: '0 0 18px', lineHeight: 1.1 }}>
+              Well, now you do.
+            </p>
+          )}
 
           {/* Clarity line */}
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0891b2', background: 'rgba(34,211,238,0.09)', border: '1px solid rgba(34,211,238,0.28)', borderRadius: 100, padding: '7px 18px', display: 'inline-block', margin: '0 0 18px' }}>
@@ -440,8 +446,8 @@ export default function LandingPage() {
               <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(0,0,0,0.75)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
             ) : (
               <>
-                Imagine all the parents and alumni at your kid's school opened up their networks to help students succeed.<br /><br />
-                That's exactly what we're building. <strong style={{ color: '#1f2937', fontWeight: 700 }}>The more parents and alumni from your kid's school who join, the stronger the opportunities become for every student — including your own.</strong>
+                The more of us who join, the stronger the opportunities become for every student —{' '}
+                <strong style={{ color: '#1f2937', fontWeight: 700 }}>including your own.</strong>
               </>
             )}
           </p>
