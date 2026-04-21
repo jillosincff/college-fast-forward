@@ -103,11 +103,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin" element={<AdminV2 />} />
 
           {/* Main routes */}
-          <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
+          <Route path="/" element={<StudentLandingPage />} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import ParentLandingPage from '@/pages/ParentLandingPage';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -98,6 +99,7 @@ function FAQItem({ q, a }) {
 }
 
 export default function StudentLandingPage({ onParentClick }) {
+  const [showParent, setShowParent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [timeLeft, setTimeLeft] = useState('');
@@ -126,7 +128,11 @@ export default function StudentLandingPage({ onParentClick }) {
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
   const handleTrial = () => navigate('GetStarted');
-  const handleParent = () => { if (onParentClick) onParentClick(); else navigate('GetStarted'); };
+  const handleParent = () => { if (onParentClick) onParentClick(); else setShowParent(true); };
+
+  if (showParent) {
+    return <ParentLandingPage onStudentClick={() => setShowParent(false)} />;
+  }
 
   return (
     <div style={{ background: C.bg, fontFamily: dmSans, color: C.dark, overflowX: 'hidden' }}>

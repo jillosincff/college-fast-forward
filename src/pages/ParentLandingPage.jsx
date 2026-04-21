@@ -75,7 +75,7 @@ function FAQItem({ q, a }) {
   );
 }
 
-export default function ParentLandingPage() {
+export default function ParentLandingPage({ onStudentClick }) {
   const [mounted, setMounted] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [timeLeft, setTimeLeft] = useState('');
@@ -104,7 +104,7 @@ export default function ParentLandingPage() {
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
   const handleJoin = () => navigate('GetStarted');
-  const handleStudent = () => navigate('LandingPage');
+  const handleStudent = () => { if (onStudentClick) onStudentClick(); else navigate('LandingPage'); };
 
   return (
     <div style={{ background: C.bg, fontFamily: dmSans, color: C.dark, overflowX: 'hidden' }}>
