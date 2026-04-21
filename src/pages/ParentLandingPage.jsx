@@ -79,6 +79,8 @@ export default function ParentLandingPage({ onStudentClick }) {
   const [mounted, setMounted] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [timeLeft, setTimeLeft] = useState('');
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -334,7 +336,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           The bigger the network, the better the chances for every student — including yours. Invite them to join.
         </p>
         <button
-          onClick={handleJoin}
+          onClick={() => setShowShareModal(true)}
           style={{
             fontFamily: dmSans, fontSize: 14, fontWeight: 700,
             color: '#fff', background: C.orange, border: 'none',
@@ -349,6 +351,74 @@ export default function ParentLandingPage({ onStudentClick }) {
           Invite a parent →
         </button>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 1000, padding: '20px',
+        }} onClick={() => setShowShareModal(false)}>
+          <div style={{
+            background: C.bgWhite, borderRadius: 16, padding: '32px',
+            maxWidth: 420, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }} onClick={e => e.stopPropagation()}>
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.orange, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+              Share with other parents
+            </p>
+            <h2 style={{ fontFamily: playfair, fontSize: 28, fontWeight: 700, color: C.dark, lineHeight: 1.2, margin: '0 0 20px' }}>
+              Grow the network
+            </h2>
+            <p style={{ fontFamily: dmSans, fontSize: 14, color: C.body, lineHeight: 1.6, margin: '0 0 28px' }}>
+              Help us connect more parents at your kid's school.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+              {/* Facebook Share */}
+              <button onClick={() => {
+                const url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(window.location.origin);
+                window.open(url, 'facebook-share', 'width=580,height=296');
+              }} style={{
+                width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+                color: '#fff', background: '#1877F2', border: 'none',
+                borderRadius: 10, padding: '14px 0', cursor: 'pointer',
+                minHeight: 'auto', transition: 'opacity 0.15s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+              >
+                Share on Facebook
+              </button>
+
+              {/* Copy Message */}
+              <button onClick={() => {
+                const msg = `Hey! I just learned about College Fast Forward — it's a network of parents at our kid's school who actually help each other's kids find jobs through real connections. No spam, just warm intros. Thought you should check it out: ${window.location.origin}`;
+                navigator.clipboard.writeText(msg);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }} style={{
+                width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+                color: C.dark, background: C.bg, border: `1px solid ${C.border}`,
+                borderRadius: 10, padding: '14px 0', cursor: 'pointer',
+                minHeight: 'auto', transition: 'all 0.15s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = C.orange; e.currentTarget.style.color = C.orange; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.dark; }}
+              >
+                {copied ? '✓ Message copied!' : 'Copy message'}
+              </button>
+            </div>
+
+            <button onClick={() => setShowShareModal(false)} style={{
+              width: '100%', fontFamily: dmSans, fontSize: 13,
+              color: C.muted, background: 'none', border: 'none',
+              cursor: 'pointer', minHeight: 'auto', padding: 0,
+            }}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── VIDEO SECTION ── */}
       <div style={{ background: C.bgWhite, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, padding: '64px 24px' }}>
