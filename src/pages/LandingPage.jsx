@@ -273,13 +273,8 @@ export default function LandingPage() {
 
   const handleModeChange = (newMode) => {
     trackEvent('landing_mode_toggle', { mode: newMode });
-    if (newMode === 'helper') {
-      try { localStorage.setItem('lp_mode', 'student'); } catch {}
-      navigate('ParentLandingPage');
-    } else {
-      setMode('student');
-      try { localStorage.setItem('lp_mode', 'student'); } catch {}
-    }
+    setMode(newMode);
+    try { localStorage.setItem('lp_mode', newMode); } catch {}
   };
 
   useEffect(() => {
