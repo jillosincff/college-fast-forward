@@ -46,12 +46,22 @@ Deno.serve(async (req) => {
       // Fall back to hashed_password stored directly on User record (original/migrated users)
       const users = await base44.asServiceRole.entities.User.filter({ email: emailLower });
       const userRecord = users?.[0];
-      if (!userRecord?.hashed_password) {
-        return new Response(JSON.stringify({ error: 'No account found with this email. Try signing in with Google or use a magic link.' }), {
+      
+      // If user exists but has no password set, they need to reset it
+      if (userRecord && !userRecord.hashed_password) {
+        return new Response(JSON.stringify({ error: 'Your account exists but has no password set. Use the magic link or reset your password to continue.' }), {
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
+      
+      if (!userRecord) {
+        return new Response(JSON.stringify({ error: 'No account found with this email. Try signing in with Google or create a new account.' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       passwordValid = await bcrypt.compare(password, userRecord.hashed_password);
     }
 
