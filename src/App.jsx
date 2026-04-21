@@ -31,6 +31,7 @@ import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
 import ParentLandingPage from '@/pages/ParentLandingPage';
+import StudentLandingPage from '@/pages/StudentLandingPage';
 import PostJoinUpsell from '@/pages/PostJoinUpsell';
 import ProfileEdit from '@/pages/ProfileEdit';
 
@@ -93,6 +94,7 @@ const AuthenticatedApp = () => {
           } />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
           <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
+          <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
           <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
 
           <Route path="/ProfileEdit" element={<LayoutWrapper currentPageName="ProfileEdit"><ProfileEdit /></LayoutWrapper>} />
