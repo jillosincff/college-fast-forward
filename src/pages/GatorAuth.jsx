@@ -148,7 +148,7 @@ export default function GatorAuth() {
       localStorage.setItem('pending_invite_role', 'student');
       sessionStorage.setItem('cff_onboarding_type', 'student');
     } catch (e) { /* private browsing */ }
-    base44.auth.redirectToLogin();
+    base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
   };
 
   useEffect(() => {
