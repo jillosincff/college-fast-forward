@@ -212,22 +212,22 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
       </div>
 
-      {/* ── SECTION 2: TRUSTED BY — Light gray ── */}
-      <div style={{ background: '#f4f4f0', borderBottom: '1px solid rgba(0,0,0,0.06)', padding: '44px 24px', textAlign: 'center' }}>
-        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#a0a0a0', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 20px' }}>Trusted by parents & alumni at</p>
+      {/* ── SECTION 2: TRUSTED BY — Vibrant gradient ── */}
+      <div style={{ background: 'linear-gradient(135deg, #E85D20 0%, #c9471a 100%)', borderBottom: '1px solid rgba(0,0,0,0.06)', padding: '44px 24px', textAlign: 'center' }}>
+        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 20px' }}>Trusted by parents & alumni at</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
           {SCHOOLS.map((school, i) => (
-            <div key={i} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: i === SCHOOLS.length - 1 ? '#E85D20' : '#3d3d3d', background: i === SCHOOLS.length - 1 ? 'rgba(232,93,32,0.08)' : '#fff', border: `1px solid ${i === SCHOOLS.length - 1 ? 'rgba(232,93,32,0.25)' : 'rgba(0,0,0,0.1)'}`, borderRadius: 100, padding: '8px 18px', fontStyle: i === SCHOOLS.length - 1 ? 'italic' : 'normal', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+            <div key={i} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', background: i === SCHOOLS.length - 1 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.15)', border: `1px solid ${i === SCHOOLS.length - 1 ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.25)'}`, borderRadius: 100, padding: '8px 18px', fontStyle: i === SCHOOLS.length - 1 ? 'italic' : 'normal', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
               {school}
             </div>
           ))}
         </div>
-        <div style={{ background: '#fff', border: '1px solid rgba(232,93,32,0.15)', borderRadius: 16, padding: '22px 28px', maxWidth: 460, margin: '0 auto', boxShadow: '0 2px 16px rgba(232,93,32,0.06)' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#1a1a1a', margin: '0 0 8px' }}>Don't see your kid's school?</p>
-          <p style={{ fontFamily: dmSans, fontSize: 14, color: '#6b6b6b', lineHeight: 1.65, margin: '0 0 16px' }}>We're building networks at colleges across the country. Join and help us launch your school's network.</p>
-          <button onClick={go} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#E85D20', background: 'none', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 8, padding: '9px 20px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.06)'; e.currentTarget.style.borderColor = '#E85D20'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.25)'; }}
+        <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 16, padding: '22px 28px', maxWidth: 460, margin: '0 auto', boxShadow: '0 2px 16px rgba(232,93,32,0.06)' }}>
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>Don't see your kid's school?</p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: '#fff', lineHeight: 1.65, margin: '0 0 16px' }}>We're building networks at colleges across the country. Join and help us launch your school's network.</p>
+          <button onClick={go} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#E85D20', background: '#fff', border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >Help us build it →</button>
         </div>
       </div>
