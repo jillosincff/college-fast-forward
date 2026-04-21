@@ -180,11 +180,11 @@ export default function ParentLandingPage({ onStudentClick }) {
           Your student needs a job.
         </h1>
         <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 32px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.15s', position: 'relative' }}>
-          Parents have connections.
+          You have connections.
         </h1>
 
         <p style={{ fontFamily: dmSans, fontSize: 'clamp(18px, 2.5vw, 22px)', fontWeight: 600, color: '#3d3d3d', maxWidth: 520, margin: '0 auto 44px', lineHeight: 1.6, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative' }}>
-          Let's pool them together and open doors.
+          Let's open some doors.
         </p>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 14, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s', position: 'relative' }}>
