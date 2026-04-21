@@ -274,15 +274,6 @@ export default function ParentLandingPage({ onStudentClick }) {
           </p>
 
           <p style={{
-            fontFamily: dmSans, fontSize: 17,
-            color: '#334155', lineHeight: 1.75, margin: 0,
-          }}>
-            Because one parent's connections plus another parent's
-            connections plus another parent's connections adds up
-            to something no student could build alone.
-          </p>
-
-          <p style={{
             fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)',
             fontWeight: 700, fontStyle: 'italic',
             color: '#E85D20', lineHeight: 1.4,
