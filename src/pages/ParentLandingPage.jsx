@@ -180,7 +180,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           maxWidth: 520, margin: '0 auto 12px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative',
         }}>
-          Every career platform was built for recruiters and job seekers. Nobody built one for parents — the most motivated people on earth when it comes to their kids' success.
+          {"Every career platform was built for recruiters and job seekers. Nobody built one for parents — the most motivated people on earth when it comes to their kids' success."}
         </p>
 
         <p style={{
@@ -216,8 +216,8 @@ export default function ParentLandingPage({ onStudentClick }) {
             onMouseEnter={e => { e.currentTarget.style.borderColor = C.orange; e.currentTarget.style.color = C.orange; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
           >
-            I'm a student →
-          </button>
+            {"I'm a student →"}
+            </button>
         </div>
 
         <p style={{
@@ -285,7 +285,7 @@ export default function ParentLandingPage({ onStudentClick }) {
             See what happens when parents
           </h2>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 700, color: C.orange, fontStyle: 'italic', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 32px', textAlign: 'center' }}>
-            show up for each other's kids.
+            {"show up for each other's kids."}
           </h2>
 
           <div style={{ background: C.dark, borderRadius: 16, aspectRatio: '16/9', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 24, border: `1px solid ${C.border}`, overflow: 'hidden', position: 'relative' }}>
@@ -443,8 +443,8 @@ export default function ParentLandingPage({ onStudentClick }) {
             onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; }}
           >
-            I'm a student — Try FastIQ free →
-          </button>
+            {"I'm a student — Try FastIQ free →"}
+            </button>
           {foundingActive && timeLeft && (
             <p style={{ fontFamily: dmSans, fontSize: 12, color: C.orange, marginTop: 16, fontWeight: 600 }}>
               🏅 Founding rate ends April 30 — {timeLeft} remaining
