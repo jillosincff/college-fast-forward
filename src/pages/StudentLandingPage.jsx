@@ -137,6 +137,23 @@ export default function StudentLandingPage({ onParentClick }) {
   return (
     <div style={{ background: C.bg, fontFamily: dmSans, color: C.dark, overflowX: 'hidden' }}>
 
+      {/* ── ROLE TOGGLE ── */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 90, padding: '10px 16px', background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(20px)', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 420, margin: '0 auto', display: 'flex', gap: 5, background: C.bg, borderRadius: 100, padding: 4, border: `1px solid ${C.border}` }}>
+          <button
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: C.orange, border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 12px rgba(232,93,32,0.3)', transition: 'all 0.25s ease' }}
+          >
+            🎓 I need help
+          </button>
+          <button
+            onClick={handleParent}
+            style={{ flex: 1, fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: C.muted, background: 'none', border: 'none', borderRadius: 100, padding: '12px 8px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.25s ease' }}
+          >
+            🤝 I want to help
+          </button>
+        </div>
+      </div>
+
       {/* ── SECTION 1: HERO ── */}
       <div style={{
         background: C.bgWhite,
