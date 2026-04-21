@@ -67,7 +67,7 @@ import GatorParentInvite from './pages/GatorParentInvite';
 import GatorWelcome from './pages/GatorWelcome';
 import Insights from './pages/Insights';
 import InviteRequired from './pages/InviteRequired';
-import LandingPage from './pages/LandingPage';
+// LandingPage removed — redirected to "/" via App.jsx which serves StudentLandingPage
 import MatchesReview from './pages/MatchesReview';
 import MessageComposer from './pages/MessageComposer';
 import MyApplications from './pages/MyApplications';
@@ -110,7 +110,6 @@ export const PAGES = {
     "GatorWelcome": GatorWelcome,
     "Insights": Insights,
     "InviteRequired": InviteRequired,
-    "LandingPage": LandingPage,
     "MatchesReview": MatchesReview,
     "MessageComposer": MessageComposer,
     "MyApplications": MyApplications,

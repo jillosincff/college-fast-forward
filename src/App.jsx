@@ -64,6 +64,7 @@ const AuthenticatedApp = () => {
         <Routes>
           {/* Redirects */}
           <Route path="/Home" element={<Navigate to="/" replace />} />
+          <Route path="/LandingPage" element={<Navigate to="/" replace />} />
 
           {/* Public/Auth routes - no layout wrapper */}
           <Route path="/GetStarted" element={<GatorAuth />} />
