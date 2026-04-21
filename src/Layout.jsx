@@ -602,6 +602,7 @@ const getPageComponent = (pageName) => {
     case 'ParentWelcome': return React.lazy(() => import('./pages/ParentWelcome'));
     case 'ParentUpsell': return React.lazy(() => import('./pages/ParentUpsell'));
     case 'ParentAllSet': return React.lazy(() => import('./pages/ParentAllSet'));
+    case 'ParentLandingPage': return React.lazy(() => import('./pages/ParentLandingPage'));
     default: return LandingPage;
   }
 };
@@ -775,13 +776,17 @@ function AppContent() {
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard', 'ParentLandingPage'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
       if (user) {
         navigate(getDashboardForUser(user)); return;
       }
+      setResolvedPage(currentPage); return;
+    }
+
+    if (currentPage === 'ParentLandingPage') {
       setResolvedPage(currentPage); return;
     }
 
