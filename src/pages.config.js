@@ -98,10 +98,12 @@ import SubmitFeedback from './pages/SubmitFeedback';
 import Terms from './pages/Terms';
 import TestingDashboard from './pages/TestingDashboard';
 import UnsubscribeReengagement from './pages/UnsubscribeReengagement';
+import ParentLandingPage from './pages/ParentLandingPage';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "ParentLandingPage": ParentLandingPage,
     "AIAdvisor": AIAdvisor,
     "AlumniOnboarding": AlumniOnboarding,
     "AlumniAllSet": AlumniAllSet,
