@@ -66,7 +66,7 @@ export default function HomePage() {
         left: 0,
         width: '100%',
         height: '100%',
-        background: 'rgba(0,0,0,0.55)',
+        background: 'rgba(0,0,0,0.38)',
         zIndex: 0,
         pointerEvents: 'none',
       }} />
