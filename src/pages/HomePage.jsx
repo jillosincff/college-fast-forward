@@ -59,6 +59,18 @@ export default function HomePage() {
         <source src="https://imagine-public.x.ai/imagine-public/share-videos/e0df326f-2021-4720-804d-3ead19d1aed3.mp4" type="video/mp4" />
       </video>
 
+      {/* Dark overlay for text readability */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'rgba(0,0,0,0.55)',
+        zIndex: 0,
+        pointerEvents: 'none',
+      }} />
+
       <div style={{
         position: 'absolute',
         top: '50%', left: '50%',
@@ -176,9 +188,9 @@ export default function HomePage() {
             style={{
               fontFamily: dmSans,
               fontSize: 15, fontWeight: 600,
-              color: 'rgba(255,255,255,0.6)',
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              color: '#fff',
+              background: 'rgba(255,255,255,0.15)',
+              border: '1px solid rgba(255,255,255,0.5)',
               borderRadius: 14,
               padding: '16px 32px',
               cursor: 'pointer',
