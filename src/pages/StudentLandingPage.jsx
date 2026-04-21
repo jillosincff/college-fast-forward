@@ -36,7 +36,7 @@ const SOCIAL_PROOF = [
 ];
 
 const FAQS = [
-  { q: 'Is the 7-day trial actually free?', a: 'Yes. No credit card. No catch. Full access to everything. If you don't love it, you never pay a cent.' },
+  { q: 'Is the 7-day trial actually free?', a: "Yes. No credit card. No catch. Full access to everything. If you don't love it, you never pay a cent." },
   { q: 'How is this different from LinkedIn?', a: "LinkedIn is a database no one responds to. CFF is a warm network — parents and alumni who have literally agreed to help students from your school. That's a completely different conversation." },
   { q: "What if I'm bad at networking?", a: 'FastIQ writes the first message for you. You just review it, personalize it a little, and hit send. The hardest part is already done.' },
   { q: 'Can my parents pay for this?', a: "Yes. They can gift FastIQ directly from their account. Show them this page — they'll get it immediately." },
@@ -240,7 +240,7 @@ export default function StudentLandingPage({ onParentClick }) {
             transform: mounted ? 'translateY(0)' : 'translateY(20px)',
             transition: 'all 0.7s ease 0.2s',
           }}>
-            You're not getting
+            {"You're not getting"}
           </h1>
           <h1 style={{
             fontFamily: playfair,
@@ -252,7 +252,7 @@ export default function StudentLandingPage({ onParentClick }) {
             transform: mounted ? 'translateY(0)' : 'translateY(20px)',
             transition: 'all 0.7s ease 0.25s',
           }}>
-            ghosted. You're not known.
+            {"ghosted. You're not known."}
           </h1>
 
           <p style={{
@@ -301,7 +301,7 @@ export default function StudentLandingPage({ onParentClick }) {
               onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
               onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
             >
-              I'm here to help →
+              {"I'm here to help →"}
             </button>
           </div>
 
@@ -345,7 +345,7 @@ export default function StudentLandingPage({ onParentClick }) {
             They stopped applying cold.
           </h2>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 46px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 48px', textAlign: 'center' }}>
-            Here's what happened instead.
+            {"Here's what happened instead."}
           </h2>
 
           <div style={{ background: '#1e2535', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.4)', marginBottom: 32 }}>
@@ -401,7 +401,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>FastIQ</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 8px' }}>Everything you need.</h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 40px' }}>Nothing you don't.</h2>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 40px' }}>{"Nothing you don't."}</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
             {FEATURES.map((f, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '20px 18px', transition: 'all 0.2s ease' }}
@@ -510,7 +510,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)'; }}
           >
-            I'm here to help →
+            {"I'm here to help →"}
           </button>
           {foundingActive && timeLeft && (
             <p style={{ fontFamily: dmSans, fontSize: 12, color: '#E85D20', marginTop: 16, fontWeight: 600 }}>
