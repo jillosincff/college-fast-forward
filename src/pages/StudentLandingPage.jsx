@@ -317,18 +317,10 @@ export default function StudentLandingPage({ onParentClick }) {
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(17px, 2.5vw, 22px)',
           color: 'rgba(255,255,255,0.55)', lineHeight: 1.6,
-          maxWidth: 560, margin: '0 auto 8px',
+          maxWidth: 560, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
-          We help you tap into those connections.
-        </p>
-        <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(17px, 2.5vw, 22px)',
-          color: '#22d3ee', fontWeight: 700,
-          lineHeight: 1.6, maxWidth: 560, margin: '0 auto 48px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s',
-        }}>
-          + A lightning fast AI agent that gets sh*t done.
+          CFF combines your school's parent network with the precision of AI to open doors to jobs and internships.
         </p>
 
         {/* CTA */}
