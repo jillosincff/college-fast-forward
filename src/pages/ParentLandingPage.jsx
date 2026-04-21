@@ -302,6 +302,54 @@ export default function ParentLandingPage({ onStudentClick }) {
         </p>
       </div>
 
+      {/* ── GROW THE NETWORK ── */}
+      <div style={{
+        background: C.bgWhite,
+        border: `1px solid ${C.border}`,
+        borderRadius: 20,
+        padding: '32px 28px',
+        margin: '0 0 0',
+        textAlign: 'center',
+      }}>
+        <p style={{
+          fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+          color: C.orange, letterSpacing: '0.12em',
+          textTransform: 'uppercase', margin: '0 0 12px',
+        }}>
+          Help us grow
+        </p>
+        <h3 style={{
+          fontFamily: playfair, fontSize: 'clamp(20px, 3vw, 28px)',
+          fontWeight: 700, color: C.dark,
+          lineHeight: 1.3, letterSpacing: '-0.01em',
+          margin: '0 0 12px',
+        }}>
+          Know another parent at your kid's school?
+        </h3>
+        <p style={{
+          fontFamily: dmSans, fontSize: 16,
+          color: C.muted, lineHeight: 1.7,
+          margin: '0 auto 24px', maxWidth: 460,
+        }}>
+          The bigger the network, the better the chances for every student — including yours. Invite them to join.
+        </p>
+        <button
+          onClick={handleJoin}
+          style={{
+            fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+            color: '#fff', background: C.orange, border: 'none',
+            borderRadius: 10, padding: '14px 28px',
+            cursor: 'pointer', minHeight: 'auto',
+            boxShadow: '0 4px 16px rgba(232,93,32,0.25)',
+            transition: 'opacity 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+        >
+          Invite a parent →
+        </button>
+      </div>
+
       {/* ── VIDEO SECTION ── */}
       <div style={{ background: C.bgWhite, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, padding: '64px 24px' }}>
         <div style={{ maxWidth: 720, margin: '0 auto' }}>
