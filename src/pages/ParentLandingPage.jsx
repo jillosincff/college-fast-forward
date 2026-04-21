@@ -342,10 +342,10 @@ export default function ParentLandingPage({ onStudentClick }) {
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, margin: '0 auto 36px', maxWidth: 420 }}>
             The bigger the network, the better the chances for every student — including yours.
           </p>
-          <button onClick={() => navigate('InviteParent')} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '17px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
+          <button onClick={() => navigate('ParentOnboarding')} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '17px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
-          >Invite a parent →</button>
+          >Join free — add your network →</button>
         </div>
       </div>
 
