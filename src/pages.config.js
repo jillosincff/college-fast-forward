@@ -49,6 +49,7 @@
  */
 // Pages explicitly routed in App.jsx are excluded here to avoid duplicate routes.
 // Only pages NOT already in App.jsx explicit routes belong here.
+import HomePage from './pages/HomePage';
 import AIAdvisor from './pages/AIAdvisor';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEmail from './pages/AdminEmail';
@@ -135,5 +136,6 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    Pages: PAGES,
+    mainPage: "HomePage",
+    Pages: { "HomePage": HomePage, ...PAGES },
 };

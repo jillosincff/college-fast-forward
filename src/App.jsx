@@ -38,6 +38,7 @@ import ProfileEdit from '@/pages/ProfileEdit';
 import ResetPassword from '@/pages/ResetPassword';
 import Logout from '@/pages/Logout';
 import AdminV2 from '@/pages/AdminV2';
+import HomePage from '@/pages/HomePage';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -104,7 +105,8 @@ const AuthenticatedApp = () => {
           <Route path="/admin" element={<AdminV2 />} />
 
           {/* Main routes */}
-          <Route path="/" element={<StudentLandingPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
