@@ -36,6 +36,151 @@ const TESTIMONIALS = [
   { quote: 'My daughter applied 40 times with silence. CFF changed everything.', name: 'Jennifer S.', detail: 'UF Parent', tag: '🎉 Internship' },
 ];
 
+function AlumniSearchDemo() {
+  const [typed, setTyped] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const [showCards, setShowCards] = useState([]);
+  const query = 'Find me Penn State alumni who are marketing VPs at Disney';
+
+  const RESULTS = [
+    { initials: 'JM', name: 'Jennifer Martinez', title: 'VP Marketing', company: 'Disney', grad: "Penn State '98" },
+    { initials: 'RC', name: 'Ryan Chen', title: 'VP Brand Marketing', company: 'Disney+', grad: "Penn State '03" },
+    { initials: 'SL', name: 'Sarah Liu', title: 'VP Marketing Strategy', company: 'Disney Parks', grad: "Penn State '01" },
+  ];
+
+  useEffect(() => {
+    let i = 0;
+    const type = setInterval(() => {
+      if (i <= query.length) {
+        setTyped(query.slice(0, i));
+        i++;
+      } else {
+        clearInterval(type);
+        setTimeout(() => {
+          setShowResults(true);
+          RESULTS.forEach((_, idx) => {
+            setTimeout(() => setShowCards(c => [...c, idx]), idx * 300);
+          });
+        }, 600);
+      }
+    }, 45);
+    return () => clearInterval(type);
+  }, []);
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, #111827 0%, #1a1f2e 100%)',
+      borderRadius: 20, overflow: 'hidden',
+      border: '1px solid rgba(255,255,255,0.08)',
+      boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
+      marginBottom: 28,
+    }}>
+      {/* Header bar */}
+      <div style={{
+        background: '#0d1117', padding: '12px 20px',
+        display: 'flex', alignItems: 'center', gap: 12,
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {['#ff5f57','#febc2e','#28c840'].map((c, i) => (
+            <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
+          ))}
+        </div>
+        <div style={{
+          flex: 1, background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 6, padding: '4px 12px',
+          fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)',
+        }}>
+          ⚡ FastIQ Alumni Search
+        </div>
+      </div>
+
+      {/* Search input */}
+      <div style={{ padding: '20px 20px 0' }}>
+        <div style={{
+          background: 'rgba(34,211,238,0.05)',
+          border: '1px solid rgba(34,211,238,0.2)',
+          borderRadius: 12, padding: '14px 16px',
+          display: 'flex', alignItems: 'center', gap: 10,
+          marginBottom: 20,
+        }}>
+          <span style={{ fontSize: 16 }}>🔍</span>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: '#fff', margin: 0, flex: 1, lineHeight: 1.4 }}>
+            {typed}
+            <span style={{
+              display: 'inline-block', width: 2, height: 16,
+              background: '#22d3ee', marginLeft: 2, verticalAlign: 'middle',
+              animation: 'blink 1s step-end infinite',
+            }} />
+          </p>
+        </div>
+
+        {/* Results */}
+        {showResults && (
+          <div style={{ marginBottom: 0 }}>
+            <p style={{
+              fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+              color: '#22d3ee', letterSpacing: '0.1em',
+              textTransform: 'uppercase', margin: '0 0 12px',
+            }}>
+              ✓ Found {RESULTS.length} alumni — ready to connect
+            </p>
+            {RESULTS.map((r, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '12px 0',
+                borderBottom: i < RESULTS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                opacity: showCards.includes(i) ? 1 : 0,
+                transform: showCards.includes(i) ? 'translateY(0)' : 'translateY(8px)',
+                transition: 'all 0.4s ease',
+              }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                  background: 'linear-gradient(135deg, #E85D20, #c9471a)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#fff',
+                }}>
+                  {r.initials}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>{r.name}</p>
+                  <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+                    {r.title} · {r.company} · {r.grad}
+                  </p>
+                </div>
+                <button style={{
+                  fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+                  color: i === 0 ? '#fff' : '#22d3ee',
+                  background: i === 0 ? '#E85D20' : 'rgba(34,211,238,0.1)',
+                  border: i === 0 ? 'none' : '1px solid rgba(34,211,238,0.25)',
+                  borderRadius: 8, padding: '6px 12px',
+                  cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0,
+                }}>
+                  {i === 0 ? 'Message →' : 'Connect →'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* FastIQ badge */}
+        <div style={{
+          background: 'rgba(232,93,32,0.06)',
+          borderTop: '1px solid rgba(232,93,32,0.12)',
+          padding: '10px 0', marginTop: 12,
+          display: 'flex', alignItems: 'center', gap: 8,
+        }}>
+          <span style={{ fontSize: 13 }}>⚡</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+            FastIQ found 3 Penn State alumni at Disney in 4 seconds
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function StudentLandingPage({ onParentClick }) {
   const [mounted, setMounted] = useState(false);
   const [activePain, setActivePain] = useState(0);
@@ -311,35 +456,7 @@ export default function StudentLandingPage({ onParentClick }) {
             60 seconds. No hype. Just the product.
           </p>
 
-          {/* Video */}
-          <div style={{
-            background: 'linear-gradient(135deg, #111827 0%, #1a1f2e 100%)',
-            borderRadius: 20,
-            aspectRatio: '16/9',
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            marginBottom: 28,
-            border: '1px solid rgba(255,255,255,0.07)',
-            overflow: 'hidden', position: 'relative',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-          }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(232,93,32,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-              <div style={{
-                width: 72, height: 72, borderRadius: '50%',
-                background: '#E85D20',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 0 12px rgba(232,93,32,0.1), 0 0 0 24px rgba(232,93,32,0.05), 0 8px 32px rgba(232,93,32,0.5)',
-                cursor: 'pointer', transition: 'transform 0.2s ease',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-              >
-                <div style={{ width: 0, height: 0, borderTop: '13px solid transparent', borderBottom: '13px solid transparent', borderLeft: '22px solid #fff', marginLeft: 5 }} />
-              </div>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0 }}>Add your video here</p>
-            </div>
-          </div>
+          <AlumniSearchDemo />
 
           {/* Testimonial */}
           <div style={{
@@ -454,6 +571,10 @@ export default function StudentLandingPage({ onParentClick }) {
         @keyframes glow {
           0%, 100% { box-shadow: 0 0 6px #22d3ee; }
           50% { box-shadow: 0 0 16px #22d3ee, 0 0 32px rgba(34,211,238,0.3); }
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
         }
         @media (max-width: 560px) {
           .powers-grid { grid-template-columns: 1fr !important; }
