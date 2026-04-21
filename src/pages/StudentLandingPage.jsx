@@ -231,7 +231,7 @@ export default function StudentLandingPage({ onParentClick }) {
   }, []);
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
-  const go = () => navigate('GetStarted');
+  const go = () => navigate('StudentLandingPage');
   const parent = () => { if (onParentClick) onParentClick(); else navigate('ParentLandingPage'); };
 
   return (

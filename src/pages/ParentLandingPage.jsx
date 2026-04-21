@@ -154,7 +154,7 @@ export default function ParentLandingPage({ onStudentClick }) {
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
   const go = () => navigate('ParentWelcome');
-  const student = () => { if (onStudentClick) onStudentClick(); else navigate('GetStarted'); };
+  const student = () => { if (onStudentClick) onStudentClick(); else navigate('StudentLandingPage'); };
 
   return (
     <div style={{ fontFamily: dmSans, overflowX: 'hidden' }}>
