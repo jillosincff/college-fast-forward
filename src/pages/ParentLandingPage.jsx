@@ -286,23 +286,6 @@ export default function ParentLandingPage({ onStudentClick }) {
 
       {/* ── THE PREMISE ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
-        <div style={{
-          background: C.bgWhite, border: `1px solid ${C.border}`,
-          borderLeft: `4px solid ${C.orange}`, borderRadius: '0 16px 16px 0',
-          padding: '28px 32px', marginBottom: 40, boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
-        }}>
-          <p style={{ fontFamily: dmSans, fontSize: 15, color: C.body, lineHeight: 1.75, margin: '0 0 16px' }}>
-            You have finance connections. Your kid wants healthcare.<br />
-            Another parent has healthcare connections. Their kid wants finance.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: C.dark, margin: '0 0 6px' }}>
-            When you help their student, they help yours.
-          </p>
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: C.orange, margin: 0 }}>
-            The larger the network, the better the chances.
-          </p>
-        </div>
-
         <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 3.5vw, 44px)', fontWeight: 700, color: C.dark, lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 8px' }}>
           Your kid isn't lazy.
         </h2>
@@ -310,7 +293,9 @@ export default function ParentLandingPage({ onStudentClick }) {
           They just don't know the right people yet.
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 17, color: C.body, lineHeight: 1.75, margin: '0 0 16px' }}>
-          70% of Gen Z students already ask their parents for help finding a job. The problem isn't motivation — it's access. Your connections open doors that no resume can.
+          70% of Gen Z students are already asking their parents for help finding a job. You're not alone in wanting to do more.
+
+          The problem isn't motivation — it's access. Your network opens doors that no resume ever could.
         </p>
         <p style={{ fontFamily: dmSans, fontSize: 17, color: C.body, lineHeight: 1.75, margin: 0 }}>
           College Fast Forward gives every parent a way to actually do something — not just worry.
