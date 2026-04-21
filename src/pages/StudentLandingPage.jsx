@@ -31,9 +31,24 @@ const FASTIQ_FEATURES = [
 ];
 
 const TESTIMONIALS = [
-  { quote: 'One warm intro did more than 50 applications.', name: 'Alex K.', detail: 'UF · Got the job at Deloitte', tag: '✅ Hired' },
-  { quote: 'Found a Goldman alumni in 10 minutes. Interview in 48 hours.', name: 'Maya R.', detail: 'Penn State · Finance', tag: '📅 Interview' },
-  { quote: 'My daughter applied 40 times with silence. CFF changed everything.', name: 'Jennifer S.', detail: 'UF Parent', tag: '🎉 Internship' },
+  {
+    quote: "I was shocked. I messaged three parents and they all got right back to me.",
+    name: 'Kayla M.',
+    detail: 'UF · Junior · Communications',
+    tag: '💬 3 replies same day',
+  },
+  {
+    quote: "I had no clue how to start my job search. FastIQ literally gave me a step-by-step plan.",
+    name: 'Tyler B.',
+    detail: 'Penn State · Senior · Business',
+    tag: '⚡ Got the plan',
+  },
+  {
+    quote: "Found a Disney alumni from my school in like 2 minutes. She actually responded.",
+    name: 'Jordan T.',
+    detail: 'OSU · Junior · Marketing',
+    tag: '📅 Interview booked',
+  },
 ];
 
 function AlumniSearchDemo() {
