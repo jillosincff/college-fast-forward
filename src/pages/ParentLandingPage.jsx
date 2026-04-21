@@ -145,7 +145,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)',
           transition: 'all 0.7s ease 0.1s', position: 'relative',
         }}>
-          The people who care most
+          Your student needs a job.
         </h1>
         <h1 style={{
           fontFamily: playfair, fontSize: 'clamp(36px, 6vw, 68px)',
@@ -155,23 +155,15 @@ export default function ParentLandingPage({ onStudentClick }) {
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(12px)',
           transition: 'all 0.7s ease 0.15s', position: 'relative',
         }}>
-          have been left out.
+          Parents have connections.
         </h1>
 
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 2vw, 18px)', color: C.body, lineHeight: 1.75,
-          maxWidth: 520, margin: '0 auto 12px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative',
-        }}>
-          {"Every career platform was built for recruiters and job seekers. Nobody built one for parents — the most motivated people on earth when it comes to their kids' success."}
-        </p>
-
-        <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(16px, 1.8vw, 19px)', fontWeight: 700, color: C.orange,
+          fontFamily: dmSans, fontSize: 'clamp(16px, 1.8vw, 19px)', fontWeight: 700, color: C.dark,
           margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s', position: 'relative',
         }}>
-          We're changing that.
+          Let's pool them together and open doors.
         </p>
 
         <div style={{
