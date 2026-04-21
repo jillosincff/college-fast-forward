@@ -422,11 +422,15 @@ export default function LandingPage() {
                 <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Well, now you do.</span>
               </>
             )}
+
           </h1>
 
           {/* Clarity line */}
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0891b2', background: 'rgba(34,211,238,0.09)', border: '1px solid rgba(34,211,238,0.28)', borderRadius: 100, padding: '7px 18px', display: 'inline-block', margin: '0 0 18px' }}>
-            The parent &amp; alumni network is 100% free. FastIQ is the optional AI upgrade.
+            {isStudent
+              ? <>The parent &amp; alumni network is 100% free. FastIQ is the optional AI upgrade.</>
+              : <>The parent &amp; alumni network is 100% free and specific to your kid's school. FastIQ is the optional AI upgrade.</>
+            }
           </p>
 
           {/* Sub */}
@@ -434,7 +438,10 @@ export default function LandingPage() {
             {isStudent ? (
               <>Free parent &amp; alumni network at your school. FastIQ AI writes your outreach, finds alumni, and preps you for interviews. <strong style={{ color: 'rgba(0,0,0,0.75)', fontWeight: 700 }}>No BS. No cold apps.</strong></>
             ) : (
-              <>We're parents and alumni who actually care — opening our networks because we want to see our kids win. <strong style={{ color: '#1f2937', fontWeight: 700 }}>The more of us who join, the stronger the opportunities become for every student — including your own.</strong></>
+              <>
+                Imagine all the parents and alumni at your kid's school opened up their networks to help students succeed.<br /><br />
+                That's exactly what we're building. <strong style={{ color: '#1f2937', fontWeight: 700 }}>The more parents and alumni from your kid's school who join, the stronger the opportunities become for every student — including your own.</strong>
+              </>
             )}
           </p>
 
