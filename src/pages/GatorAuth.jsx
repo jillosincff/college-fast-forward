@@ -239,7 +239,7 @@ export default function GatorAuth() {
           )}
 
           <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 10, padding: 4, marginBottom: 28, display: 'flex', gap: 4 }}>
-            {['signin', 'magic'].map(tab => (
+            {['signin', 'signup', 'magic'].map(tab => (
               <button
                 key={tab}
                 onClick={() => { setActiveTab(tab); setError(''); setInfo(''); }}
@@ -252,6 +252,7 @@ export default function GatorAuth() {
                 }}
               >
                 {tab === 'signin' && 'Sign in'}
+                {tab === 'signup' && 'Sign up'}
                 {tab === 'magic' && 'Magic link'}
               </button>
             ))}
@@ -278,6 +279,30 @@ export default function GatorAuth() {
               </div>
               <button type="submit" disabled={loading} style={{ background: loading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
                 {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+          )}
+
+          {activeTab === 'signup' && (
+            <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Full Name</label>
+                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Jane Smith" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
+                <input type="email" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} placeholder="you@example.com" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Password</label>
+                <input type="password" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
+              </div>
+              <div>
+                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Confirm Password</label>
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
+              </div>
+              <button type="submit" disabled={loading} style={{ background: loading ? '#ccc' : '#E85D20', border: 'none', borderRadius: 12, padding: '14px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: dmSans, width: '100%', minHeight: 'auto' }}>
+                {loading ? 'Creating account...' : 'Create Account'}
               </button>
             </form>
           )}
