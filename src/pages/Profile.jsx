@@ -47,10 +47,9 @@ export default function Profile() {
 
       const profileId = id || currentUser?.id;
       if (!profileId) {
-        if (!authIsLoading) {
-          setIsLoading(false);
-          setError('No profile to display. Please log in.');
-        }
+        // Still waiting for auth to resolve — don't error yet
+        if (authIsLoading) return;
+        setIsLoading(false);
         return;
       }
 
@@ -69,12 +68,12 @@ export default function Profile() {
       }
     };
 
-    fetchProfile();
-  }, [id, currentUser, authIsLoading]);
+    if (!authIsLoading) fetchProfile();
+  }, [id, currentUser?.id, authIsLoading]);
 
   const isParent = currentUser?.persona === 'parent' || currentUser?.roles?.includes('parent');
 
-  if (authIsLoading || isLoading) {
+  if ((authIsLoading && !currentUser) || isLoading) {
     const bg = isParent ? '#0A0A0A' : '#f4f2ee';
     return (
       <div style={{ minHeight: '100vh', background: bg, display: 'flex', flexDirection: 'column' }}>
