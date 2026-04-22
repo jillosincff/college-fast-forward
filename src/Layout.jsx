@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, useMemo, useRef } from 'react';
+import React, { useState, useEffect, Suspense, useMemo, useRef, useCallback } from 'react';
 import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from './components/theme/ThemeContext';
@@ -128,7 +128,7 @@ const MyApplications = React.lazy(() => import('./pages/MyApplications'));
 const MyMessages = React.lazy(() => import('./pages/MyMessages'));
 const MessageComposer = React.lazy(() => import('./pages/MessageComposer'));
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
-import TestingDashboard from './pages/TestingDashboard';
+const TestingDashboard = React.lazy(() => import('./pages/TestingDashboard'));
 const AdminSetup = React.lazy(() => import('./pages/AdminSetup'));
 const Privacy = React.lazy(() => import('./pages/Privacy'));
 const Terms = React.lazy(() => import('./pages/Terms'));
