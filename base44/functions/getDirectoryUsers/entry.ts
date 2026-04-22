@@ -33,9 +33,14 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    const user = await base44.auth.me();
+    let user;
+    try {
+      user = await base44.auth.me();
+    } catch (authErr) {
+      return Response.json({ error: 'Authentication required', success: false }, { status: 401 });
+    }
     if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      return Response.json({ error: 'Authentication required', success: false }, { status: 401 });
     }
 
     const isAdmin = user.roles?.includes('admin') || user.role === 'admin';

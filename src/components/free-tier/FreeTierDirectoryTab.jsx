@@ -82,7 +82,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
       try {
         const res = await getDirectoryUsers({});
         const payload = res?.data || {};
-        if (payload.error === 'School not set on your profile.') {
+        if (payload.error === 'incomplete_profile' || payload.error === 'School not set on your profile.') {
           setSchoolError(true);
           setMembers([]);
         } else {
@@ -92,6 +92,10 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
           setMembers(filtered);
         }
       } catch (e) {
+        // 401 means user not authenticated — show empty state, don't crash
+        if (e?.response?.status === 401 || e?.status === 401) {
+          setSchoolError(false);
+        }
         console.error('Directory load error:', e);
         setMembers([]);
       }

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
-import { generateDashboardBriefing } from '@/functions/generateDashboardBriefing';
 import { Loader2, X } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 import TrialUsageRecap from '@/components/free-tier/TrialUsageRecap';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
 export default function FreeTierHomeTab({ user, onOpenUpgrade, onTabChange, briefing, briefingLoading }) {
   const foundingOfferActive = user?.membership_tier === 'founding' && new Date() < FOUNDING_DEADLINE;
