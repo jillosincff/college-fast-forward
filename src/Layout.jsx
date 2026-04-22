@@ -591,6 +591,7 @@ const getPageComponent = (pageName) => {
     case 'StudentInvitedOnboarding': return StudentInvitedOnboarding;
     case 'FreeTierDashboard': return FreeTierDashboard;
     case 'FastIQDashboard': return FastIQDashboard;
+    case 'Profile': return React.lazy(() => import('./pages/Profile'));
     case 'ParentProfileEdit': return ParentProfileEdit;
     case 'AlumniAllSet': return React.lazy(() => import('./pages/AlumniAllSet'));
     case 'AlumniHome': return React.lazy(() => import('./pages/AlumniHome'));
