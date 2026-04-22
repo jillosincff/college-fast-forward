@@ -19,20 +19,7 @@ const C = {
   greenLight: 'rgba(34,197,94,0.1)',
 };
 
-function StatCard({ icon, value, label }) {
-  return (
-    <div style={{
-      background: C.card,
-      border: `1px solid ${C.cardBorder}`,
-      borderRadius: 16, padding: '20px 24px',
-      display: 'flex', flexDirection: 'column', gap: 4,
-    }}>
-      <p style={{ fontFamily: dmSans, fontSize: 22, margin: 0 }}>{icon}</p>
-      <p style={{ fontFamily: playfair, fontSize: 28, fontWeight: 700, color: C.orange, margin: 0, lineHeight: 1 }}>{value}</p>
-      <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: C.hint, margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</p>
-    </div>
-  );
-}
+
 
 export default function ParentHome() {
   const { user } = useAuth();
@@ -294,18 +281,6 @@ export default function ParentHome() {
               🎁 Give My Student FastIQ Free →
             </button>
           </div>
-        </div>
-
-        {/* ── STATS ROW ── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 12, marginBottom: 24,
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s',
-        }}>
-          <StatCard icon="🤝" value="0" label="Students Helped" />
-          <StatCard icon="💬" value="0" label="Messages" />
-          <StatCard icon="🚀" value="0" label="Intros Made" />
         </div>
 
         {/* ── NETWORK NUDGE ── */}
