@@ -20,6 +20,7 @@ export default function HomePage() {
       setTimeout(() => setPhase(3), 1800),
       setTimeout(() => setPhase(4), 2400),
       setTimeout(() => setPhase(5), 3000),
+      setTimeout(() => setPhase(6), 3200),
     ];
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -223,7 +224,7 @@ export default function HomePage() {
           color: 'rgba(255,255,255,0.15)',
           margin: '40px 0 0',
           letterSpacing: '0.04em',
-          opacity: phase >= 5 ? 1 : 0,
+          opacity: phase >= 6 ? 1 : 0,
           transition: 'opacity 1s ease 0.3s',
         }}>
           collegefastforward.com
