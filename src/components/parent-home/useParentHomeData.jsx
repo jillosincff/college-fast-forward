@@ -25,7 +25,7 @@ export default function useParentHomeData(user) {
   const [profiles, setProfiles] = useState([]);
 
   const load = useCallback(async () => {
-    if (!user?.email) return;
+    if (!user?.email) { setLoading(false); return; }
     setLoading(true);
 
     const emails = user.student_emails || [];
