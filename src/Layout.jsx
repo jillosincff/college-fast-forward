@@ -762,7 +762,9 @@ function AppContent() {
 
     if (user && user.onboarding_completed === false && user.persona) {
       if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
-      const onboardingDashPages = ['Dashboard', 'Profile', 'ParentHome', 'RecentGradDashboard', 'AlumniDashboard'];
+      // ParentHome and AlumniHome have their own nav — let them through even if onboarding flag hasn't refreshed yet
+      if (currentPage === 'ParentHome' || currentPage === 'AlumniHome') { setResolvedPage(currentPage); return; }
+      const onboardingDashPages = ['Dashboard', 'Profile', 'RecentGradDashboard', 'AlumniDashboard'];
       if (onboardingDashPages.includes(currentPage)) {
         const isParent = user.persona === 'parent' || user.roles?.includes('parent');
         const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
