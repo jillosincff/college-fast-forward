@@ -278,7 +278,7 @@ export default function ParentHome() {
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >
-              🎁 Give My Student FastIQ Free →
+              🎁 Unlock FastIQ for My Student →
             </button>
           </div>
         </div>
