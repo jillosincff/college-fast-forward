@@ -89,16 +89,22 @@ export default function ParentHome() {
   // Get first student name for offer display
   const firstStudentName = studentsNeedingFastIQ[0]?.student?.full_name?.split(' ')[0] || null;
 
-  if (isLoadingAuth || !user || loading) {
+  // Only block render while auth is loading or user is absent.
+  // Do NOT block on `loading` — data loads progressively and the page should render immediately.
+  if (isLoadingAuth) {
     return (
       <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
-        <ParentProfileNav user={user} currentPage="ParentHome" />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTopColor: '#E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
         </div>
       </div>
     );
+  }
+
+  if (!user) {
+    navigate('GatorAuth');
+    return null;
   }
 
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
