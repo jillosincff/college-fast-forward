@@ -5,7 +5,8 @@ export default function ParentWelcome() {
   const { user } = useAuth();
   // Read name from URL param first (passed from onboarding), fall back to auth context
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-  const firstName = urlParams.get('name') || user?.full_name?.split(' ')[0] || 'there';
+  const firstName = urlParams.get('name') || user?.full_name?.split(' ')[0] || '';
+  const schoolFromUrl = urlParams.get('school') || '';
 
   return (
     <div style={{
@@ -39,7 +40,7 @@ export default function ParentWelcome() {
           fontWeight: 700, color: '#fff',
           margin: '0 0 40px', lineHeight: 1.2,
         }}>
-          Thank you, {firstName}.
+          Thank you{firstName ? `, ${firstName}` : ''}.
         </h1>
 
         <p style={{
@@ -58,7 +59,7 @@ export default function ParentWelcome() {
         }}>
           You're now part of the{' '}
           <strong style={{ color: '#E85D20' }}>
-            {user?.school_name || 'College Fast Forward'}
+            {schoolFromUrl || user?.school_name || 'College Fast Forward'}
           </strong>{' '}
           network — a community of parents who are able to directly
           help their own kids — and each other's kids — land real opportunities.

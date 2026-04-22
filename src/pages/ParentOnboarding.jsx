@@ -167,7 +167,8 @@ export default function ParentOnboarding() {
 
     // Navigate to the standalone ParentWelcome page (emotional thank you → ParentUpsell flow)
     // Pass first name via URL param so it renders correctly before auth context re-hydrates
-    navigate('ParentWelcome', { name: formData.fullName.split(' ')[0] || '' });
+    const school = invitedStudents[0]?.university?.trim() || formData.studentUniversity?.trim() || formData.school?.trim() || '';
+    navigate('ParentWelcome', { name: formData.fullName.split(' ')[0] || '', school });
   };
 
   if (step === 1) {

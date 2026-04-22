@@ -3,8 +3,8 @@ import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentAllSet() {
-  const { user } = useAuth();
-  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const { user, isLoadingAuth } = useAuth();
+  const firstName = user?.full_name?.split(' ')[0] || '';
   const [copied, setCopied] = useState(false);
 
   return (
@@ -48,7 +48,7 @@ export default function ParentAllSet() {
           fontWeight: 700, color: '#fff',
           margin: '0 0 20px', lineHeight: 1.3,
         }}>
-          You're live in the network, {firstName}.
+          You're live in the network{firstName ? `, ${firstName}` : ''}.
         </h1>
 
         {/* Body */}
@@ -73,7 +73,7 @@ export default function ParentAllSet() {
 
         {/* Profile CTAs */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 0 }}>
-          <button onClick={() => navigate('Profile')} style={{
+          <button onClick={() => navigate('ParentHome')} style={{
             background: '#E85D20', color: '#fff', border: 'none',
             borderRadius: 12, padding: '14px 32px',
             fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600,
