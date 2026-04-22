@@ -14,7 +14,7 @@ const FEATURES = [
   'Job search tracking and follow-up alerts',
 ];
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
 export default function FastIQUpgradeModal({ user, onClose }) {
   const [showParentInvite, setShowParentInvite] = useState(false);
@@ -56,14 +56,11 @@ export default function FastIQUpgradeModal({ user, onClose }) {
     if (!parentEmail.trim()) return;
     setSending(true);
     try {
-      await fetch('/functions/sendEmail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: parentEmail.trim(),
-          subject: `${firstName} needs your help to activate FastIQ`,
-          body: `Hi,\n\n${user.full_name || firstName} is ready to activate FastIQ on College Fast Forward.\n\nFastIQ is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.\n\nActivate FastIQ for your family: ${window.location.origin}/#ParentHome\n\n— The College Fast Forward Team`,
-        }),
+      const { base44 } = await import('@/api/base44Client');
+      await base44.integrations.Core.SendEmail({
+        to: parentEmail.trim(),
+        subject: `${firstName} needs your help to activate FastIQ`,
+        body: `Hi,\n\n${user.full_name || firstName} is ready to activate FastIQ on College Fast Forward.\n\nFastIQ is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.\n\nActivate FastIQ for your family: ${window.location.origin}/#ParentHome\n\n— The College Fast Forward Team`,
       });
       setInviteSent(true);
     } catch (err) {
@@ -117,7 +114,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
              {foundingOfferActive ? '🎖 $14.50/month — Founding Rate (50% off forever)' : '$29/month or $249/year'}
            </p>
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
-             {foundingOfferActive ? 'Start free for 7 days — then $14.50/month. Founding rate expires April 15.' : 'Start free for 7 days — then $29/month. Cancel anytime.'}
+             {foundingOfferActive ? 'Start free for 7 days — then $14.50/month. Founding rate expires April 30.' : 'Start free for 7 days — then $29/month. Cancel anytime.'}
            </p>
           </div>
 
@@ -127,7 +124,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
                 <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 6px' }}>⚡ Founding Member Rate</p>
                 <p style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>$14.50/month or $124.50/year</p>
                 <p style={{ fontSize: 12, color: '#CCCCCC', margin: '0 0 8px' }}>50% off forever — locked in as long as you stay subscribed.</p>
-                <p style={{ fontSize: 11, color: '#fa8a6a', fontWeight: 500, margin: 0 }}>⏱ Expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''} — April 15th</p>
+                <p style={{ fontSize: 11, color: '#fa8a6a', fontWeight: 500, margin: 0 }}>⏱ Expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''} — April 30th</p>
               </div>
               <div className="space-y-2">
                 <button onClick={() => handleUpgrade('fastiq_founding_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>

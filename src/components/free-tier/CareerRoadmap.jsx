@@ -3,8 +3,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 
-const isFastIQ = (user) =>
-  !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+import { checkIsFastIQ as isFastIQ } from '@/utils/isFastIQ';
 
 function useRoadmapState(user) {
   const [pipelineCount, setPipelineCount] = useState(0);

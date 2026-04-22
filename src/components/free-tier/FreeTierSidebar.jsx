@@ -357,7 +357,7 @@ export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUp
               width: '100%', minHeight: 'auto',
             }}
           >
-            {new Date() < new Date('2026-04-15T23:59:59') ? 'Upgrade — $14.50/mo →' : 'Upgrade — $29/mo →'}
+            {new Date() < new Date('2026-04-30T23:59:59') ? 'Upgrade — $14.50/mo →' : 'Upgrade — $29/mo →'}
           </button>
         </div>
       )}
