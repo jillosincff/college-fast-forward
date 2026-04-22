@@ -103,7 +103,6 @@ export default function ParentHome() {
   }
 
   if (!user) {
-    navigate('GatorAuth');
     return null;
   }
 
