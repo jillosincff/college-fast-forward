@@ -70,18 +70,11 @@ export default function ParentWelcome() {
           paddingLeft: 24, marginBottom: 28,
           textAlign: 'left',
         }}>
-          <p style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: 'clamp(16px, 2.5vw, 20px)',
-            color: '#fff', lineHeight: 1.7,
-            margin: 0, fontStyle: 'italic',
-          }}>
-            <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, margin: '0 0 12px' }}>
-              Every parent in this network made the same choice you just made. To show up. To open their contacts. To say — I'll help.
-            </p>
-            <p style={{ fontWeight: 600, color: '#fff', margin: 0 }}>
-              That's what makes this work.
-            </p>
+          <p style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.75)', lineHeight: 1.75, margin: '0 0 12px', fontFamily: "'Playfair Display', serif", fontSize: 'clamp(16px, 2.5vw, 20px)' }}>
+            Every parent in this network made the same choice you just made. To show up. To open their contacts. To say — I'll help.
+          </p>
+          <p style={{ fontWeight: 600, color: '#fff', margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 'clamp(16px, 2.5vw, 20px)' }}>
+            That's what makes this work.
           </p>
         </div>
 

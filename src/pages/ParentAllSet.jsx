@@ -3,7 +3,7 @@ import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 export default function ParentAllSet() {
-  const { user, isLoadingAuth } = useAuth();
+  const { user } = useAuth();
   const firstName = user?.full_name?.split(' ')[0] || '';
   const [copied, setCopied] = useState(false);
 
