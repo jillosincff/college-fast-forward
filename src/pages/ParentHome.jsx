@@ -1,185 +1,345 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
-import { base44 } from '@/api/base44Client';
-import { navigate, useParams } from '@/components/utils/navigation';
-import ParentProfileNav from '@/components/profile/parent/ParentProfileNav';
-import ParentHomeHero from '@/components/parent-home/ParentHomeHero';
-import IntroRequestCard from '@/components/parent-home/IntroRequestCard';
-import FastIQNudgeCard from '@/components/parent-home/FastIQNudgeCard';
-import StudentInactiveCard from '@/components/parent-home/StudentInactiveCard';
-import ProfileIncompleteCard from '@/components/parent-home/ProfileIncompleteCard';
-import AllClearCard from '@/components/parent-home/AllClearCard';
-import StudentProgressSection from '@/components/parent-home/StudentProgressCard';
-import useParentHomeData from '@/components/parent-home/useParentHomeData';
-import useFoundingOffer from '@/components/founding-offer/useFoundingOffer';
-import FoundingOfferHomeCard from '@/components/founding-offer/FoundingOfferHomeCard';
-import PullToRefresh from '@/components/common/PullToRefresh';
-import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
-import GiftFastIQModal from '@/components/shared/GiftFastIQModal';
+
+const playfair = "'Playfair Display', Georgia, serif";
+const dmSans = "'DM Sans', system-ui, sans-serif";
+
+const C = {
+  bg: '#0d0d14',
+  card: '#13131f',
+  cardBorder: 'rgba(255,255,255,0.07)',
+  orange: '#E85D20',
+  orangeLight: 'rgba(232,93,32,0.12)',
+  orangeBorder: 'rgba(232,93,32,0.25)',
+  white: '#ffffff',
+  muted: 'rgba(255,255,255,0.5)',
+  hint: 'rgba(255,255,255,0.25)',
+  green: '#22c55e',
+  greenLight: 'rgba(34,197,94,0.1)',
+};
+
+function StatCard({ icon, value, label }) {
+  return (
+    <div style={{
+      background: C.card,
+      border: `1px solid ${C.cardBorder}`,
+      borderRadius: 16, padding: '20px 24px',
+      display: 'flex', flexDirection: 'column', gap: 4,
+    }}>
+      <p style={{ fontFamily: dmSans, fontSize: 22, margin: 0 }}>{icon}</p>
+      <p style={{ fontFamily: playfair, fontSize: 28, fontWeight: 700, color: C.orange, margin: 0, lineHeight: 1 }}>{value}</p>
+      <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: C.hint, margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</p>
+    </div>
+  );
+}
 
 export default function ParentHome() {
-  const { user, isLoadingAuth } = useAuth();
-  const [showBanner, setShowBanner] = useState(true);
+  const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  const [profileCompletion, setProfileCompletion] = useState(40);
+  const [currentTime, setCurrentTime] = useState('');
+  const [currentDate, setCurrentDate] = useState('');
 
   useEffect(() => {
-    if (!document.getElementById('parent-home-fonts')) {
-      const link = document.createElement('link');
-      link.id = 'parent-home-fonts';
-      link.rel = 'stylesheet';
-      link.href = "https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap";
-      document.head.appendChild(link);
+    setMounted(true);
+
+    if (user) {
+      const fields = [
+        user.full_name, user.email, user.company,
+        user.job_title, user.industry, user.linkedin_url,
+        user.bio, user.ways_to_help?.length > 0,
+        user.profile_photo, user.school,
+      ];
+      const filled = fields.filter(Boolean).length;
+      setProfileCompletion(Math.round((filled / fields.length) * 100));
     }
-  }, []);
 
-  // Redirect non-parents (only after auth has loaded to avoid premature redirects)
-  useEffect(() => {
-    if (!isLoadingAuth && user && user.persona !== 'parent' && !user.roles?.includes('parent')) {
-      navigate('Dashboard');
-    }
-  }, [user, isLoadingAuth]);
-
-  const {
-    loading, refresh, pendingMatches, students,
-    studentsNeedingFastIQ, inactiveStudents,
-    profileScore, profileTotal, profileComplete, profileNudge, allClear,
-  } = useParentHomeData(user);
-
-  const params = useParams();
-  const offer = useFoundingOffer(user);
-  const [showActivationConfirm, setShowActivationConfirm] = useState(false);
-  const [showGiftModal, setShowGiftModal] = useState(false);
-
-  // Auto-open gift modal when linked from email CTA (?gift=open) or direct #GiftFastIQ hash
-  useEffect(() => {
-    if (params.gift === 'open') {
-      setShowGiftModal(true);
-      window.history.replaceState(null, '', window.location.origin + '/#ParentHome');
-    }
-  }, [params.gift]);
-
-  useEffect(() => {
-    if (window.location.hash === '#GiftFastIQ' && user?.persona === 'parent') {
-      setShowGiftModal(true);
-      window.history.replaceState(null, '', window.location.origin + '/#ParentHome');
-    }
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentDate(now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
+      setCurrentTime(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+    };
+    updateTime();
+    const t = setInterval(updateTime, 60000);
+    return () => clearInterval(t);
   }, [user]);
 
-  // Detect payment success from Stripe redirect
-  useEffect(() => {
-    if (params.payment === 'success' && user) {
-      setShowActivationConfirm(true);
-      // Auto-fade after 8 seconds
-      const t = setTimeout(() => setShowActivationConfirm(false), 8000);
-      // Clean URL
-      window.history.replaceState(null, '', window.location.origin + '/#ParentHome');
-      return () => clearTimeout(t);
-    }
-  }, [params.payment, user]);
-
-  // Show first-visit-only: only when offer is active and parent hasn't seen it before on home
-  const showFoundingHome = offer.active && studentsNeedingFastIQ.length > 0 && !user?.founding_offer_home_seen;
-
-  // Mark home as seen on first render
-  useEffect(() => {
-    if (showFoundingHome && user && !user.founding_offer_home_seen) {
-      base44.auth.updateMe({ founding_offer_home_seen: true }).catch(() => {});
-    }
-  }, [showFoundingHome]);
-
-  // Get first student name for offer display
-  const firstStudentName = studentsNeedingFastIQ[0]?.student?.full_name?.split(' ')[0] || null;
-
-  // Only block render while auth is loading or user is absent.
-  // Do NOT block on `loading` — data loads progressively and the page should render immediately.
-  if (isLoadingAuth) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTopColor: '#E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const linkedInMissing = !user?.linkedin_url;
+  const profileIncomplete = profileCompletion < 100;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
-      <ParentProfileNav user={user} currentPage="ParentHome" />
+    <div style={{ minHeight: '100vh', background: C.bg, fontFamily: dmSans, padding: '0 0 80px' }}>
 
-      <FoundingMemberBanner
-        show={showBanner && !isFastIQ}
-        onUpgrade={() => navigate('FastIQDashboard')}
-        onDismiss={() => setShowBanner(false)}
-      />
-      <PullToRefresh onRefresh={refresh}>
-        <main style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '0 24px 80px' }}>
-          <ParentHomeHero user={user} />
-
-          {/* Activation confirmation toast */}
-          {showActivationConfirm && (
-            <div style={{
-              background: 'rgba(76,175,80,0.15)', border: '1px solid rgba(76,175,80,0.3)',
-              borderRadius: 12, padding: '14px 20px', marginBottom: 16,
-              display: 'flex', alignItems: 'center', gap: 10,
+      {/* ── NAV ── */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: '#0d1117', height: 56,
+        padding: '0 32px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <button onClick={() => navigate('ParentHome')} style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#f4f0e8',
+          minHeight: 'auto',
+        }}>
+          <span>C</span><span style={{ color: C.orange }}>FF</span>
+        </button>
+        <div style={{ display: 'flex', gap: 24 }}>
+          {[{ label: 'Home', page: 'ParentHome' }, { label: 'Directory', page: 'Directory' }, { label: 'Messages', page: 'MyMessages' }].map(l => (
+            <button key={l.page} onClick={() => navigate(l.page)} style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: dmSans, fontSize: 13, fontWeight: 400,
+              color: l.page === 'ParentHome' ? '#f4f0e8' : 'rgba(244,240,232,0.45)',
+              minHeight: 'auto',
             }}>
-              <span style={{ color: '#4CAF50', fontSize: 16 }}>✓</span>
-              <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, color: '#fff' }}>
-                Founding member rate locked in — $187/year. FastIQ is now active for {firstStudentName || 'your student'}.
+              {l.label}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => navigate('Profile')} style={{
+          width: 32, height: 32, borderRadius: '50%', background: '#0d1117',
+          border: `2px solid ${C.orange}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#fff',
+          cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
+        }}>
+          {(user?.full_name?.[0] || 'P').toUpperCase()}
+        </button>
+      </nav>
+
+      {/* ── HEADER ── */}
+      <div style={{
+        background: 'linear-gradient(180deg, #1a0a05 0%, #0d0d14 100%)',
+        borderBottom: `1px solid ${C.cardBorder}`,
+        padding: '48px 32px 40px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', top: -60, right: -40, width: 400, height: 400, background: 'radial-gradient(ellipse, rgba(232,93,32,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 900, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 13, color: C.hint, margin: '0 0 8px', letterSpacing: '0.02em' }}>
+            {currentDate} · {currentTime}
+          </p>
+          <h1 style={{
+            fontFamily: playfair, fontSize: 'clamp(32px, 4vw, 48px)',
+            fontWeight: 700, color: C.white, lineHeight: 1.1, letterSpacing: '-0.02em',
+            margin: '0 0 4px',
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? 'translateY(0)' : 'translateY(8px)',
+            transition: 'all 0.6s ease',
+          }}>
+            Welcome back, <span style={{ color: C.orange, fontStyle: 'italic' }}>{firstName}.</span>
+          </h1>
+          <p style={{
+            fontFamily: dmSans, fontSize: 15, color: C.muted, margin: '8px 0 0',
+            opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.1s',
+          }}>
+            You're live in the network. Students can find you and reach out.
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 32px 0' }}>
+
+        {/* ── QUICK ACTIONS ── */}
+        <div style={{
+          display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.15s',
+        }}>
+          <button onClick={() => navigate('Directory')} style={{
+            fontFamily: dmSans, fontSize: 14, fontWeight: 700,
+            color: '#fff', background: C.orange, border: 'none',
+            borderRadius: 12, padding: '13px 28px', cursor: 'pointer',
+            minHeight: 'auto', boxShadow: '0 4px 20px rgba(232,93,32,0.3)',
+            transition: 'all 0.2s ease',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+            Browse Students →
+          </button>
+          <button onClick={() => navigate('MyMessages')} style={{
+            fontFamily: dmSans, fontSize: 14, fontWeight: 600,
+            color: C.muted, background: C.card,
+            border: `1px solid ${C.cardBorder}`,
+            borderRadius: 12, padding: '13px 24px', cursor: 'pointer',
+            minHeight: 'auto', transition: 'all 0.2s ease',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}
+          >
+            Messages
+          </button>
+          <button onClick={() => navigate('Profile')} style={{
+            fontFamily: dmSans, fontSize: 14, fontWeight: 600,
+            color: C.muted, background: C.card,
+            border: `1px solid ${C.cardBorder}`,
+            borderRadius: 12, padding: '13px 24px', cursor: 'pointer',
+            minHeight: 'auto', transition: 'all 0.2s ease',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}
+          >
+            My Profile
+          </button>
+        </div>
+
+        {/* ── MAIN GRID ── */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 16, marginBottom: 16,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
+        }}>
+
+          {/* Profile card */}
+          <div style={{
+            background: C.card, border: `1px solid ${C.cardBorder}`,
+            borderRadius: 20, padding: '28px',
+            display: 'flex', flexDirection: 'column', gap: 20,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.hint, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
+                Your Profile
+              </p>
+              <span style={{
+                fontFamily: dmSans, fontSize: 12, fontWeight: 700,
+                color: profileCompletion === 100 ? C.green : C.orange,
+                background: profileCompletion === 100 ? C.greenLight : C.orangeLight,
+                border: `1px solid ${profileCompletion === 100 ? 'rgba(34,197,94,0.25)' : C.orangeBorder}`,
+                borderRadius: 100, padding: '3px 10px',
+              }}>
+                {profileCompletion}% complete
               </span>
             </div>
-          )}
+            <div>
+              <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 4, height: 6, overflow: 'hidden', marginBottom: 12 }}>
+                <div style={{ width: `${profileCompletion}%`, height: '100%', background: profileCompletion === 100 ? C.green : C.orange, borderRadius: 4, transition: 'width 0.8s ease' }} />
+              </div>
+              {profileIncomplete ? (
+                <p style={{ fontFamily: dmSans, fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.5 }}>
+                  {linkedInMissing
+                    ? '💡 Add your LinkedIn URL — parents with LinkedIn get 3x more intro requests'
+                    : '✨ Almost there — complete your profile to get more student requests'}
+                </p>
+              ) : (
+                <p style={{ fontFamily: dmSans, fontSize: 13, color: C.green, margin: 0 }}>
+                  ✅ Your profile is complete — students can find all your details
+                </p>
+              )}
+            </div>
+            <button onClick={() => navigate('ParentProfileEdit')} style={{
+              fontFamily: dmSans, fontSize: 13, fontWeight: 700,
+              color: C.orange, background: 'none',
+              border: `1px solid ${C.orangeBorder}`,
+              borderRadius: 10, padding: '11px 0',
+              cursor: 'pointer', minHeight: 'auto', width: '100%', transition: 'all 0.15s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.orangeLight; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+            >
+              {profileIncomplete ? 'Complete My Profile →' : 'Edit Profile →'}
+            </button>
+          </div>
 
-          {/* Priority 1 — Intro Requests */}
-          {pendingMatches.length > 0 && (
-            <IntroRequestCard matches={pendingMatches} onRespond={refresh} />
-          )}
-
-          {/* Founding Member Offer — between intro requests and FastIQ nudge */}
-          {showFoundingHome && (
-            <FoundingOfferHomeCard display={offer.display} studentName={firstStudentName} user={user} />
-          )}
-
-          {/* Priority 2 — FastIQ not activated */}
-          {studentsNeedingFastIQ.length > 0 && (
-            <FastIQNudgeCard studentsNeedingFastIQ={studentsNeedingFastIQ} />
-          )}
-
-          {/* Priority 3 — Student inactive */}
-          {inactiveStudents.length > 0 && (
-            <StudentInactiveCard inactiveStudents={inactiveStudents} parentName={user?.full_name} />
-          )}
-
-          {/* Priority 4 — Profile incomplete */}
-          {!profileComplete && (
-            <ProfileIncompleteCard profileScore={profileScore} profileTotal={profileTotal} profileNudge={profileNudge} />
-          )}
-
-          {/* Priority 5 — All clear */}
-          {allClear && <AllClearCard students={students} />}
-
-          {/* Gift FastIQ CTA */}
-          {!isFastIQ && (
-            <div style={{ marginTop: 24, textAlign: 'center' }}>
-              <button
-                onClick={() => setShowGiftModal(true)}
-                style={{ background: 'none', border: '1.5px solid #E85D20', borderRadius: 12, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', system-ui, sans-serif", minHeight: 'auto' }}
-              >
-                🎁 Give My Student FastIQ Free →
+          {/* Student card */}
+          <div style={{
+            background: C.card, border: `1px solid ${C.cardBorder}`,
+            borderRadius: 20, padding: '28px',
+            display: 'flex', flexDirection: 'column', gap: 20,
+          }}>
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.hint, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
+              Your Student
+            </p>
+            <div style={{
+              background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.cardBorder}`,
+              borderRadius: 12, padding: '16px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: C.orangeLight, border: `1px solid ${C.orangeBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: C.orange }}>
+                  S
+                </div>
+                <div>
+                  <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: C.white, margin: 0 }}>
+                    {user?.student_emails?.[0] || 'No student invited yet'}
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b' }} />
+                    <p style={{ fontFamily: dmSans, fontSize: 11, color: '#f59e0b', margin: 0, fontWeight: 600 }}>Invitation Pending</p>
+                  </div>
+                </div>
+              </div>
+              <p style={{ fontFamily: dmSans, fontSize: 12, color: C.hint, margin: '0 0 12px' }}>
+                Invited · awaiting signup
+              </p>
+              <button onClick={() => navigate('ParentOnboarding?step=invite')} style={{
+                fontFamily: dmSans, fontSize: 12, fontWeight: 600,
+                color: C.orange, background: 'none', border: 'none',
+                cursor: 'pointer', minHeight: 'auto', padding: 0,
+              }}>
+                Invite Another Student →
               </button>
             </div>
-          )}
+            <button onClick={() => navigate('FastIQDashboard')} style={{
+              fontFamily: dmSans, fontSize: 13, fontWeight: 700,
+              color: '#fff', background: 'linear-gradient(135deg, #E85D20, #c9471a)',
+              border: 'none', borderRadius: 10, padding: '13px 0',
+              cursor: 'pointer', minHeight: 'auto', width: '100%',
+              boxShadow: '0 4px 16px rgba(232,93,32,0.25)', transition: 'all 0.2s ease',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              🎁 Give My Student FastIQ Free →
+            </button>
+          </div>
+        </div>
 
-          {/* Student Progress — always shown */}
-          <StudentProgressSection students={students} />
-        </main>
-      </PullToRefresh>
-      {showGiftModal && <GiftFastIQModal user={user} onClose={() => setShowGiftModal(false)} />}
+        {/* ── STATS ROW ── */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: 12, marginBottom: 24,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s',
+        }}>
+          <StatCard icon="🤝" value="0" label="Students Helped" />
+          <StatCard icon="💬" value="0" label="Messages" />
+          <StatCard icon="🚀" value="0" label="Intros Made" />
+        </div>
+
+        {/* ── NETWORK NUDGE ── */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(232,93,32,0.08) 0%, rgba(232,93,32,0.03) 100%)',
+          border: `1px solid ${C.orangeBorder}`,
+          borderRadius: 16, padding: '20px 24px',
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.35s',
+        }}>
+          <div>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: C.white, margin: '0 0 4px' }}>
+              Know another parent at your kid's school?
+            </p>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: C.muted, margin: 0 }}>
+              The bigger the network, the better the chances — for every student.
+            </p>
+          </div>
+          <button onClick={() => navigate('ParentLandingPage')} style={{
+            fontFamily: dmSans, fontSize: 13, fontWeight: 700,
+            color: C.orange, background: 'none',
+            border: `1px solid ${C.orangeBorder}`,
+            borderRadius: 10, padding: '10px 20px',
+            cursor: 'pointer', minHeight: 'auto', flexShrink: 0, transition: 'all 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = C.orangeLight; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+          >
+            Invite a parent →
+          </button>
+        </div>
+
+      </div>
     </div>
   );
 }

@@ -31,6 +31,7 @@ import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
 import ParentLandingPage from '@/pages/ParentLandingPage';
+import ParentHome from '@/pages/ParentHome';
 import StudentLandingPage from '@/pages/StudentLandingPage';
 
 import PostJoinUpsell from '@/pages/PostJoinUpsell';
@@ -100,6 +101,7 @@ const AuthenticatedApp = () => {
           } />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
           <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
+          <Route path="/ParentHome" element={<ParentHome />} />
           <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
           <Route path="/GatorAuth" element={<GatorAuth />} />
 
