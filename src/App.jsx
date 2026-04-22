@@ -8,7 +8,7 @@ import { pagesConfig } from './pages.config'
 import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
 import AlumniOnboarding from '@/pages/AlumniOnboarding';
 import AlumniAllSet from '@/pages/AlumniAllSet';
@@ -50,7 +50,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   // Skip spinner for the home page so it renders immediately
