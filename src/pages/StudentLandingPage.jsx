@@ -231,9 +231,9 @@ export default function StudentLandingPage({ onParentClick, onStudentClick }) {
   }, []);
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
-  const go = () => navigate('GatorAuth');
+  const go = () => navigate('StudentOnboarding');
   const parent = () => { if (onParentClick) onParentClick(); else navigate('ParentLandingPage'); };
-  const student = () => { if (onStudentClick) onStudentClick(); else navigate('GatorAuth'); };
+  const student = () => { if (onStudentClick) onStudentClick(); else navigate('StudentOnboarding'); };
 
   return (
     <div style={{ background: '#08080f', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
