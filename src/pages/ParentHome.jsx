@@ -18,7 +18,7 @@ import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 import GiftFastIQModal from '@/components/shared/GiftFastIQModal';
 
 export default function ParentHome() {
-  const { user } = useAuth();
+  const { user, isLoadingAuth } = useAuth();
   const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
@@ -31,12 +31,12 @@ export default function ParentHome() {
     }
   }, []);
 
-  // Redirect non-parents
+  // Redirect non-parents (only after auth has loaded to avoid premature redirects)
   useEffect(() => {
-    if (user && user.persona !== 'parent' && !user.roles?.includes('parent')) {
+    if (!isLoadingAuth && user && user.persona !== 'parent' && !user.roles?.includes('parent')) {
       navigate('Dashboard');
     }
-  }, [user]);
+  }, [user, isLoadingAuth]);
 
   const {
     loading, refresh, pendingMatches, students,
@@ -89,7 +89,7 @@ export default function ParentHome() {
   // Get first student name for offer display
   const firstStudentName = studentsNeedingFastIQ[0]?.student?.full_name?.split(' ')[0] || null;
 
-  if (!user || loading) {
+  if (isLoadingAuth || !user || loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
         <ParentProfileNav user={user} currentPage="ParentHome" />
