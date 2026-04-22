@@ -18,7 +18,8 @@ export default function HomePage() {
     const timers = [
       setTimeout(() => setPhase(2), 600),
       setTimeout(() => setPhase(3), 1800),
-      setTimeout(() => setPhase(4), 2600),
+      setTimeout(() => setPhase(4), 2400),
+      setTimeout(() => setPhase(5), 3000),
     ];
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -123,7 +124,7 @@ export default function HomePage() {
           fontWeight: 700,
           fontStyle: 'italic',
           color: '#E85D20',
-          margin: '0 0 64px',
+          margin: '0 0 20px',
           letterSpacing: '-0.01em',
           opacity: phase >= 3 ? 1 : 0,
           transform: phase >= 3 ? 'translateY(0)' : 'translateY(16px)',
@@ -132,14 +133,31 @@ export default function HomePage() {
           Reimagining how students land jobs.
         </p>
 
+        {/* Description */}
+        <p style={{
+          fontFamily: dmSans,
+          fontSize: 'clamp(15px, 2vw, 18px)',
+          color: 'rgba(255,255,255,0.7)',
+          margin: '0 auto 44px',
+          maxWidth: 480,
+          lineHeight: 1.65,
+          opacity: phase >= 4 ? 1 : 0,
+          transform: phase >= 4 ? 'translateY(0)' : 'translateY(12px)',
+          transition: 'all 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          position: 'relative', zIndex: 1,
+          textAlign: 'center',
+        }}>
+          The tech students want. The parent connections they desperately need.
+        </p>
+
         {/* CTAs */}
         <div style={{
           display: 'flex',
           gap: 14,
           flexWrap: 'wrap',
           justifyContent: 'center',
-          opacity: phase >= 4 ? 1 : 0,
-          transform: phase >= 4 ? 'translateY(0)' : 'translateY(12px)',
+          opacity: phase >= 5 ? 1 : 0,
+          transform: phase >= 5 ? 'translateY(0)' : 'translateY(12px)',
           transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
         }}>
           <button
@@ -205,7 +223,7 @@ export default function HomePage() {
           color: 'rgba(255,255,255,0.15)',
           margin: '40px 0 0',
           letterSpacing: '0.04em',
-          opacity: phase >= 4 ? 1 : 0,
+          opacity: phase >= 5 ? 1 : 0,
           transition: 'opacity 1s ease 0.3s',
         }}>
           collegefastforward.com
