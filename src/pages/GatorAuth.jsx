@@ -143,12 +143,18 @@ export default function GatorAuth() {
   };
 
   const handleGoogleSignIn = () => {
-    // Set pending role so we route to StudentOnboarding after auth
+    // Preserve any existing pending role (e.g. 'parent' from ParentLandingPage)
+    // Only default to 'student' if no role has been set
     try {
-      localStorage.setItem('pending_invite_role', 'student');
-      sessionStorage.setItem('cff_onboarding_type', 'student');
-    } catch (e) { /* private browsing */ }
-    base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
+      const existingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+      const role = existingRole || 'student';
+      localStorage.setItem('pending_invite_role', role);
+      sessionStorage.setItem('cff_onboarding_type', role);
+      const redirectPage = role === 'parent' ? 'ParentOnboarding' : 'StudentOnboarding';
+      base44.auth.redirectToLogin(window.location.origin + `/#${redirectPage}`);
+    } catch (e) {
+      base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
+    }
   };
 
   useEffect(() => {
@@ -171,19 +177,17 @@ export default function GatorAuth() {
     }
     
     if (user && !user.persona) {
-      // Only go to GatorWelcome if there's a pending role — otherwise show the auth form
       const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      if (pendingRole) {
+      const safariType = sessionStorage.getItem('cff_onboarding_type');
+      const role = pendingRole || safariType;
+
+      if (role === 'parent') {
+        // Route parents directly to onboarding — no need for GatorWelcome role selection
+        navigate('ParentOnboarding');
+      } else if (role) {
         navigate('GatorWelcome');
       } else {
-        // Check sessionStorage fallback (Safari clears localStorage during OAuth)
-        const safariType = sessionStorage.getItem('cff_onboarding_type');
-        if (safariType) {
-          localStorage.setItem('pending_invite_role', safariType);
-          navigate('GatorWelcome');
-        } else {
-          setStep('auth');
-        }
+        setStep('auth');
       }
       return;
     }

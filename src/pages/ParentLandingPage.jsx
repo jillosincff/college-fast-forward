@@ -153,7 +153,12 @@ export default function ParentLandingPage({ onStudentClick }) {
   }, []);
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
-  const go = () => navigate('ParentOnboarding');
+  const go = () => {
+    // Store parent role hint so GatorAuth redirects to ParentOnboarding after login
+    localStorage.setItem('pending_invite_role', 'parent');
+    sessionStorage.setItem('pending_invite_role', 'parent');
+    navigate('GatorAuth');
+  };
   const student = () => { if (onStudentClick) onStudentClick(); else navigate('StudentLandingPage'); };
 
   return (
@@ -342,7 +347,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, margin: '0 auto 36px', maxWidth: 420 }}>
             The bigger the network, the better the chances for every student — including yours.
           </p>
-          <button onClick={() => navigate('ParentOnboarding')} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '17px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
+          <button onClick={go} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '17px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >Join free — add your network →</button>
