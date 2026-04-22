@@ -90,10 +90,10 @@ export default function ParentProfileNav({ user, currentPage = 'Profile' }) {
                 <span style={{ fontFamily: dmSans, fontSize: 11, color: '#888' }}>{user?.email}</span>
               </div>
               {[
-                { label: 'Profile', page: 'Profile' },
+                { label: 'My Profile', page: 'Profile' },
                 { label: 'Messages', page: 'MyMessages' },
               ].map(item => (
-                <button key={item.page} onClick={() => { navigate(item.page); setMenuOpen(false); }} style={{
+                <button key={item.page} onClick={() => { setMenuOpen(false); navigate(item.page); }} style={{
                   display: 'block', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer',
                   fontFamily: dmSans, fontSize: 13, color: '#ccc', textAlign: 'left', minHeight: 'auto',
                 }}>
