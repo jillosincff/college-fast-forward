@@ -186,7 +186,7 @@ export default function HomePage() {
               e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)';
             }}
           >
-            I'm a student →
+            I need a job →
           </button>
 
           <button
