@@ -438,13 +438,7 @@ const AdminDashboard = () => {
             >
               Auth Test
             </Button>
-            <Button 
-              onClick={() => navigate('TestGiftFastIQ')} 
-              variant="outline"
-              className="w-full sm:w-auto bg-orange-50 hover:bg-orange-100 border-orange-300"
-            >
-              🎁 Gift FastIQ Tests
-            </Button>
+
             <Button 
               onClick={testDirectoryFunction} 
               disabled={loadingDirectory}

@@ -8,6 +8,7 @@ import WeeklyLog from '@/components/adminv2/WeeklyLog';
 import Phase2Placeholders from '@/components/adminv2/Phase2Placeholders';
 import AdminUtilities from '@/components/adminv2/AdminUtilities';
 import EmailStatsPanel from '@/components/adminv2/EmailStatsPanel';
+import FastIQTrialPanel from '@/components/adminv2/FastIQTrialPanel';
 
 export default function AdminV2() {
   const [user, setUser] = useState(null);
@@ -82,6 +83,7 @@ export default function AdminV2() {
           <SchoolTable schools={data.schools} grandTotal={data.grandTotal} />
           <EngagementPanel data={data.engagement} />
           <EmailStatsPanel />
+          <FastIQTrialPanel />
           <Phase2Placeholders />
           <WeeklyLog />
           <AdminUtilities />
