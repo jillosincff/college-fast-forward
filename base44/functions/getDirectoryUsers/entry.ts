@@ -130,7 +130,12 @@ Deno.serve(async (req) => {
       let fullName = u.full_name;
       if (!fullName || fullName.includes('@')) {
         const parts = [u.first_name, u.last_name].filter(Boolean);
-        fullName = parts.length > 0 ? parts.join(' ') : (u.email || '').split('@')[0];
+        if (parts.length > 0) {
+          fullName = parts.join(' ');
+        } else {
+          // No real name available — skip this user
+          continue;
+        }
       }
 
       const persona = isParent ? 'parent' : isAlumni ? 'alumni' : 'student';
