@@ -248,17 +248,26 @@ export default function StudentLandingPage({ onParentClick }) {
         </p>
 
         {/* Body */}
-        <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
-          color: 'rgba(255,255,255,0.55)', lineHeight: 1.8,
-          maxWidth: 480, margin: '0 auto 48px',
+        <div style={{
+          maxWidth: 500, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
+          display: 'flex', flexDirection: 'column', gap: 16,
         }}>
-          Your school has a network of parents who care about helping students succeed.<br /><br />
-          You can search it, reach out directly, and get real responses.<br /><br />
-          And those responses can turn into{' '}
-          <span style={{ color: '#E85D20', fontWeight: 700 }}>referrals, interviews, and jobs.</span>
-        </p>
+          <p style={{
+            fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
+            color: 'rgba(255,255,255,0.55)', lineHeight: 1.75,
+            margin: 0,
+          }}>
+            Parents from your school have real connections across every industry — and they actually care about helping students like you succeed.
+          </p>
+          <p style={{
+            fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 21px)',
+            fontWeight: 700, color: '#fff',
+            lineHeight: 1.3, margin: 0,
+          }}>
+            Reach out. Get real responses.
+          </p>
+        </div>
 
         {/* CTAs */}
         <div style={{
