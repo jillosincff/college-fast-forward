@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const csvUrl = body.csvUrl || 'https://media.base44.com/files/public/684474c5723dc90efce23588/40854b0f4_users_all_2026-04-25.csv';
+    const csvUrl = body.csvUrl || 'https://media.base44.com/files/public/684474c5723dc90efce23588/a04a95891_users_student_2026-04-251.csv';
     
     const csvRes = await fetch(csvUrl);
     const csvText = await csvRes.text();
