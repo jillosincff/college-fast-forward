@@ -133,8 +133,13 @@ Deno.serve(async (req) => {
         if (parts.length > 0) {
           fullName = parts.join(' ');
         } else {
-          // No real name available — skip this user
-          continue;
+          // Fall back to a readable version of the email prefix
+          const prefix = (u.email || '').split('@')[0];
+          // Convert "aargyrakis" -> "Aargyrakis", "john.doe" -> "John Doe"
+          fullName = prefix
+            .replace(/[._-]+/g, ' ')
+            .replace(/\b\w/g, c => c.toUpperCase())
+            .trim() || 'CFF Member';
         }
       }
 
