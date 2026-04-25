@@ -4,19 +4,26 @@ import { navigate } from '@/components/utils/navigation';
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
-const NETWORK_FEATURES = [
-  'Alumni who remember being in your shoes',
-  'Parents and families who want students from their school to succeed',
-  'People connected to companies you care about',
-  'A growing network designed to help students get started',
+const PARENT_NETWORK_FEATURES = [
+  'Parents who care about helping students succeed',
+  'People you can search and contact directly',
+  'A trusted environment, not cold outreach',
+  'Built to open doors that can lead to jobs',
 ];
 
-const OUTREACH_FEATURES = [
-  'Find the right person to contact',
-  'Understand why they are relevant',
-  'Write a message that feels personal',
-  'Know what to ask for',
-  'Turn a connection into a real conversation',
+const ALUMNI_FEATURES = [
+  'Find alumni at companies you care about',
+  'Know who is most relevant to contact',
+  'Get help writing messages that get responses',
+  'Turn conversations into referrals, interviews, and opportunities',
+];
+
+const WHY_BULLETS = [
+  'Parents in the network care about helping students succeed',
+  'Alumni remember being in your position',
+  'A shared school connection builds trust faster',
+  'More responses lead to more conversations',
+  'More conversations can lead to referrals, interviews, and jobs',
 ];
 
 function AlumniSearchDemo() {
@@ -97,13 +104,13 @@ function AlumniSearchDemo() {
         </div>
 
         {showResults && (
-          <div style={{ marginBottom: 0 }}>
+          <div>
             <p style={{
               fontFamily: dmSans, fontSize: 11, fontWeight: 700,
               color: '#22d3ee', letterSpacing: '0.1em',
               textTransform: 'uppercase', margin: '0 0 12px',
             }}>
-              ✓ Found 3 people from your school ready to connect
+              ✓ Found 3 people from your school
             </p>
             {RESULTS.map((r, i) => (
               <div key={i} style={{
@@ -144,15 +151,15 @@ function AlumniSearchDemo() {
         )}
 
         <div style={{
-          background: 'rgba(232,93,32,0.06)',
-          borderTop: '1px solid rgba(232,93,32,0.12)',
-          padding: '10px 0', marginTop: 12,
-          display: 'flex', alignItems: 'center', gap: 8,
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          padding: '16px 0 20px', marginTop: 12,
         }}>
-          <span style={{ fontSize: 13 }}>🎓</span>
-          <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
-            These are real people from your school — the kind of people most likely to respond.
-          </span>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>
+            A response is just the start.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>
+            The right alumni can give you insider advice, point you to the right role, or help get your resume seen.
+          </p>
         </div>
       </div>
     </div>
@@ -200,7 +207,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee', boxShadow: '0 0 10px #22d3ee', animation: 'glow 2s ease-in-out infinite' }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            Students getting replies right now
+            Students getting responses right now
           </span>
         </div>
 
@@ -234,22 +241,23 @@ export default function StudentLandingPage({ onParentClick }) {
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(19px, 2.5vw, 24px)',
           fontWeight: 700, color: '#fff',
-          lineHeight: 1.3, maxWidth: 500, margin: '0 auto 16px',
+          lineHeight: 1.3, maxWidth: 500, margin: '0 auto 20px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
           It's all about who is willing to respond.
         </p>
 
-        {/* Body copy */}
+        {/* Body */}
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
-          color: 'rgba(255,255,255,0.55)', lineHeight: 1.75,
+          color: 'rgba(255,255,255,0.55)', lineHeight: 1.8,
           maxWidth: 480, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
-          Cold messages get ignored because no one knows you.<br />
-          People are far more likely to respond when you share the same school.<br /><br />
-          College Fast Forward helps you find those people — and reach out the right way.
+          Your school has a network of parents who care about helping students succeed.<br /><br />
+          You can search it, reach out directly, and get real responses.<br /><br />
+          And those responses can turn into{' '}
+          <span style={{ color: '#E85D20', fontWeight: 700 }}>referrals, interviews, and jobs.</span>
         </p>
 
         {/* CTAs */}
@@ -305,11 +313,11 @@ export default function StudentLandingPage({ onParentClick }) {
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
             See it work
           </p>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 12px', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 14px', textAlign: 'center' }}>
             Search your school's network
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 40px', maxWidth: 460, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
-            Find people from your school at companies you care about — then know exactly what to say.
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 40px', maxWidth: 440, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
+            Find people from your school who can help you get closer to the job.
           </p>
 
           <AlumniSearchDemo />
@@ -359,22 +367,36 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── WHY THIS WORKS ── */}
-      <div style={{ padding: '88px 20px', maxWidth: 920, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+      <div style={{ padding: '88px 20px 0', maxWidth: 920, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
             The reason it works
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
             Why this works
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 500, margin: '0 auto', lineHeight: 1.65 }}>
-            You are not just another cold message when you share a school connection.
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.65 }}>
+            People from your school are more likely to respond — and{' '}
+            <span style={{ color: '#E85D20', fontWeight: 600 }}>responses are what create opportunities.</span>
           </p>
+          <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'left' }}>
+            {WHY_BULLETS.map((b, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20' }} />
+                </div>
+                <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>{b}</p>
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
 
+      {/* ── TWO CARDS ── */}
+      <div style={{ padding: '48px 20px 88px', maxWidth: 920, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }} className="powers-grid">
 
-          {/* Network card */}
+          {/* Parent network card */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(232,93,32,0.08) 0%, rgba(232,93,32,0.03) 100%)',
             border: '1px solid rgba(232,93,32,0.2)',
@@ -385,9 +407,9 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
-                <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, color: '#fff', margin: 0 }}>People from your school</p>
+                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>Your school's parent network</p>
               </div>
-              {NETWORK_FEATURES.map((f, i) => (
+              {PARENT_NETWORK_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
                   <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#E85D20' }} />
@@ -398,7 +420,7 @@ export default function StudentLandingPage({ onParentClick }) {
             </div>
           </div>
 
-          {/* Outreach card */}
+          {/* Alumni card */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(34,211,238,0.08) 0%, rgba(34,211,238,0.03) 100%)',
             border: '1px solid rgba(34,211,238,0.2)',
@@ -409,9 +431,9 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
-                <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, color: '#fff', margin: 0 }}>Outreach that gets answered</p>
+                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>Alumni who can help you get seen</p>
               </div>
-              {OUTREACH_FEATURES.map((f, i) => (
+              {ALUMNI_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
                   <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
@@ -433,28 +455,28 @@ export default function StudentLandingPage({ onParentClick }) {
       }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.11) 0%, transparent 55%)', pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: 580, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <h2 style={{
             fontFamily: playfair,
-            fontSize: 'clamp(30px, 5vw, 64px)',
+            fontSize: 'clamp(28px, 4.5vw, 60px)',
             fontWeight: 700, color: '#fff',
             lineHeight: 1.05, letterSpacing: '-0.03em',
             margin: '0 0 8px',
           }}>
-            You don't need more applications.
+            Get in front of the right people —
           </h2>
           <h2 style={{
             fontFamily: playfair,
-            fontSize: 'clamp(30px, 5vw, 64px)',
+            fontSize: 'clamp(28px, 4.5vw, 60px)',
             fontWeight: 700, color: '#E85D20', fontStyle: 'italic',
             lineHeight: 1.05, letterSpacing: '-0.03em',
             margin: '0 0 28px',
           }}>
-            You need more responses.
+            and actually get hired.
           </h2>
 
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 440 }}>
-            Find people from your school. Reach out with confidence. Start real conversations that can lead to jobs and internships.
+            Find people from your school. Reach out with confidence. Start conversations that can lead to jobs.
           </p>
 
           <button onClick={go} style={{
@@ -465,7 +487,7 @@ export default function StudentLandingPage({ onParentClick }) {
             boxShadow: '0 8px 32px rgba(232,93,32,0.4)',
             transition: 'all 0.2s ease',
             display: 'block', marginLeft: 'auto', marginRight: 'auto',
-            marginBottom: 24,
+            marginBottom: 16,
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
