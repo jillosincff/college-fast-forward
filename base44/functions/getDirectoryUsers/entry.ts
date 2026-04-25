@@ -128,9 +128,11 @@ Deno.serve(async (req) => {
       const waysToHelp = u.ways_to_help || u.expertise_areas || u.help_categories || [];
 
       let fullName = u.full_name;
-      if (!fullName || fullName.includes('@')) {
+      // Treat email-like names (no spaces, looks like email prefix) as missing
+      const looksLikeEmailPrefix = fullName && !fullName.includes(' ') && (fullName.includes('.') || fullName.includes('_') || /^[a-z]+\d+$/.test(fullName));
+      if (!fullName || fullName.includes('@') || looksLikeEmailPrefix) {
         const parts = [u.first_name, u.last_name].filter(Boolean);
-        if (parts.length > 0) {
+        if (parts.length > 0 && !parts.some(p => !p.includes(' ') && (p.includes('.') || p.includes('_')))) {
           fullName = parts.join(' ');
         } else {
           // Fall back to a readable version of the email prefix
