@@ -134,7 +134,7 @@ export default function HomePage() {
           textAlign: 'center',
         }}>
           Your parents have connections.<br />
-          Imagine having access to <em style={{ color: '#E85D20', fontStyle: 'italic', fontWeight: 600 }}>every parent's network</em> at your school.
+          Imagine access to <em style={{ color: '#E85D20', fontStyle: 'italic', fontWeight: 600 }}>every family's network</em> at your school.
         </p>
 
         {/* Punchline */}
@@ -153,7 +153,7 @@ export default function HomePage() {
           textAlign: 'center',
           letterSpacing: '-0.01em',
         }}>
-          This is how people actually get hired.
+          This is how people actually get hired — not by applying online.
         </p>
 
         {/* CTAs */}
