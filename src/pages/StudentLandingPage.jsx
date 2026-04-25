@@ -6,19 +6,19 @@ const playfair = "'Playfair Display', Georgia, serif";
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
 const NETWORK_FEATURES = [
-  'Parents, alumni, and families from your school',
-  'People who actually want to help',
+  'Parents and families from your school',
+  'Alumni connected to your target companies',
+  'People willing to help students get started',
   'Search by company, industry, or role',
-  'Ask for advice, referrals, or introductions',
-  'No more cold outreach into the void',
+  'A growing network designed to open doors',
 ];
 
 const FASTIQ_FEATURES = [
-  'Finds the right people at target companies',
+  'Finds the right people to contact',
+  'Shows you who is most relevant',
   'Drafts messages that sound human',
   'Tailors your resume before you apply',
-  'Preps you for interviews',
-  'Gives you a daily action plan',
+  'Helps you turn connections into opportunities',
 ];
 
 function AlumniSearchDemo() {
@@ -155,7 +155,7 @@ function AlumniSearchDemo() {
         }}>
           <span style={{ fontSize: 13 }}>⚡</span>
           <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
-            FastIQ found 3 Penn State alumni at Disney in 4 seconds
+            These are real people connected to your school.
           </span>
         </div>
       </div>
@@ -260,10 +260,10 @@ export default function StudentLandingPage({ onParentClick }) {
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)',
           color: 'rgba(255,255,255,0.6)', lineHeight: 1.6,
-          maxWidth: 500, margin: '0 auto 48px',
+          maxWidth: 520, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
-          Find alumni at your target companies. Get introduced. Know exactly what to say.
+          We're building your school's parent network — and giving you AI to access alumni and opportunities right now.
         </p>
 
         {/* CTA */}
@@ -320,10 +320,10 @@ export default function StudentLandingPage({ onParentClick }) {
             Real results
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 8px', textAlign: 'center' }}>
-            See it work.
+            Search your school's network.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 36px' }}>
-            60 seconds. No hype. Just the product.
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', textAlign: 'center', margin: '0 0 36px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+            Parents, alumni, and connections — all organized so you know who to reach out to and what to say.
           </p>
 
           <AlumniSearchDemo />
@@ -385,8 +385,8 @@ export default function StudentLandingPage({ onParentClick }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
                 <div>
-                  <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Your school network</p>
-                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Human connections</p>
+                  <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>The network we're building</p>
+                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Your school's doors, opened</p>
                 </div>
               </div>
               {NETWORK_FEATURES.map((f, i) => (
@@ -412,8 +412,8 @@ export default function StudentLandingPage({ onParentClick }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
                 <div>
-                  <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>FastIQ</p>
-                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>AI that turns connections into opportunities</p>
+                  <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>The AI that helps you use it</p>
+                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Execution, not just access</p>
                 </div>
               </div>
               {FASTIQ_FEATURES.map((f, i) => (
@@ -446,7 +446,7 @@ export default function StudentLandingPage({ onParentClick }) {
             lineHeight: 1.05, letterSpacing: '-0.03em',
             margin: '0 0 10px',
           }}>
-            Start getting in front of
+            Start using your school's network
           </h2>
           <h2 style={{
             fontFamily: playfair,
@@ -455,11 +455,11 @@ export default function StudentLandingPage({ onParentClick }) {
             lineHeight: 1.05, letterSpacing: '-0.03em',
             margin: '0 0 24px',
           }}>
-            the people who actually hire.
+            to get hired.
           </h2>
 
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 420 }}>
-            Find the right people. Know what to say. Get closer to the job.
+            Find the right people. Know what to say. Turn connections into opportunities.
           </p>
 
           <button onClick={go} style={{
