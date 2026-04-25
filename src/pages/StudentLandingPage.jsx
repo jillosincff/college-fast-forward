@@ -258,7 +258,7 @@ export default function StudentLandingPage({ onParentClick }) {
             color: 'rgba(255,255,255,0.55)', lineHeight: 1.75,
             margin: 0,
           }}>
-            Parents from your school have real connections across every industry — and they actually care about helping students like you.
+            Parents from your school have real connections across every industry — and they actually care about helping students like you succeed.
           </p>
           <p style={{
             fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 21px)',
@@ -389,7 +389,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.65 }}>
             People from your school are more likely to respond — and{' '}
-            <span style={{ color: '#E85D20', fontWeight: 600 }}>responses are how you get in front of the people who hire.</span>
+            <span style={{ color: '#E85D20', fontWeight: 600 }}>that's how you get in front of the people who hire.</span>
           </p>
           <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'left' }}>
             {WHY_BULLETS.map((b, i) => (
@@ -472,8 +472,9 @@ export default function StudentLandingPage({ onParentClick }) {
             fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
             fontWeight: 700, color: 'rgba(255,255,255,0.4)',
             letterSpacing: '-0.01em', margin: '0 0 24px',
+            lineHeight: 1.5,
           }}>
-            You don't need more applications. You need more responses.
+            You don't need more applications.<br />You need more responses.
           </p>
           <h2 style={{
             fontFamily: playfair,
