@@ -38,39 +38,7 @@ export default function HomePage() {
       overflow: 'hidden',
     }}>
 
-      {/* Background video */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          zIndex: 0,
-          opacity: 0.6,
-          pointerEvents: 'none',
-        }}
-      >
-        <source src="https://imagine-public.x.ai/imagine-public/share-videos/e0df326f-2021-4720-804d-3ead19d1aed3.mp4" type="video/mp4" />
-      </video>
 
-      {/* Dark overlay for text readability */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'rgba(0,0,0,0.38)',
-        zIndex: 0,
-        pointerEvents: 'none',
-      }} />
 
       <div style={{
         position: 'absolute',
