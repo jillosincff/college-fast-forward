@@ -152,7 +152,7 @@ export default function HomePage() {
           textAlign: 'center',
           letterSpacing: '0.01em',
         }}>
-          One warm introduction beats 100 cold applications.
+          This is how you actually get hired.
         </p>
 
         {/* CTAs */}
