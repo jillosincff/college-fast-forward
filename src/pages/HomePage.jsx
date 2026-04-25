@@ -206,17 +206,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <p style={{
-          fontFamily: dmSans,
-          fontSize: 12,
-          color: 'rgba(255,255,255,0.15)',
-          margin: '40px 0 0',
-          letterSpacing: '0.04em',
-          opacity: phase >= 6 ? 1 : 0,
-          transition: 'opacity 1s ease 0.3s',
-        }}>
-          collegefastforward.com
-        </p>
+
       </div>
     </div>
   );
