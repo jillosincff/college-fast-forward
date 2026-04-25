@@ -112,7 +112,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   });
 
   const displayMembers = searchedMembers.filter(m => {
-    if (activeFilter === 'helping') return m.availability === 'actively_helping';
+    if (activeFilter === 'helping') return m.availability === 'actively_helping' || m.availability === 'yes';
     if (activeFilter === 'recent') return !!m.last_active_at;
     return true;
   });
@@ -350,9 +350,9 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
                   </span>
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: member.availability === 'actively_helping' ? '#22C55E' : member.availability === 'occasionally_available' ? '#F59E0B' : '#CCCCCC' }} />
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: (member.availability === 'actively_helping' || member.availability === 'yes') ? '#22C55E' : (member.availability === 'occasionally_available' || member.availability === 'occasionally') ? '#F59E0B' : '#CCCCCC' }} />
                   <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888', margin: 0 }}>
-                    {member.availability === 'actively_helping' ? 'Actively helping' : member.availability === 'occasionally_available' ? 'Occasionally available' : 'Availability unknown'}
+                    {(member.availability === 'actively_helping' || member.availability === 'yes') ? 'Actively helping' : (member.availability === 'occasionally_available' || member.availability === 'occasionally') ? 'Occasionally available' : 'Availability unknown'}
                   </p>
                 </div>
                 {member.linkedin_url && (
