@@ -118,104 +118,123 @@ export default function HomePage() {
           College Fast Forward
         </h1>
 
-        {/* Tagline */}
+        {/* Primary subheadline */}
         <p style={{
-          fontFamily: playfair,
-          fontSize: 'clamp(18px, 3vw, 32px)',
-          fontWeight: 700,
-          fontStyle: 'italic',
-          color: '#E85D20',
-          margin: '0 0 20px',
+          fontFamily: dmSans,
+          fontSize: 'clamp(17px, 2.5vw, 24px)',
+          fontWeight: 500,
+          color: '#ffffff',
+          margin: '0 auto 16px',
+          maxWidth: 520,
+          lineHeight: 1.55,
           letterSpacing: '-0.01em',
           opacity: phase >= 3 ? 1 : 0,
           transform: phase >= 3 ? 'translateY(0)' : 'translateY(16px)',
           transition: 'all 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
+          textAlign: 'center',
         }}>
-          Reimagining how students land jobs.
+          Your parents have connections.<br />
+          Now imagine if you had access to <em style={{ color: '#E85D20', fontStyle: 'italic' }}>every parent's network</em> at your school.
         </p>
 
-        {/* Description */}
+        {/* Supporting line */}
         <p style={{
           fontFamily: dmSans,
-          fontSize: 'clamp(15px, 2vw, 18px)',
-          color: 'rgba(255,255,255,0.7)',
+          fontSize: 'clamp(13px, 1.6vw, 16px)',
+          color: 'rgba(255,255,255,0.45)',
           margin: '0 auto 44px',
-          maxWidth: 480,
-          lineHeight: 1.65,
+          maxWidth: 400,
+          lineHeight: 1.6,
           opacity: phase >= 4 ? 1 : 0,
           transform: phase >= 4 ? 'translateY(0)' : 'translateY(12px)',
           transition: 'all 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
           position: 'relative', zIndex: 1,
           textAlign: 'center',
+          letterSpacing: '0.01em',
         }}>
-          The tech students want. The parent connections they desperately need.
+          One warm introduction beats 100 cold applications.
         </p>
 
         {/* CTAs */}
         <div style={{
           display: 'flex',
-          gap: 14,
+          gap: 20,
           flexWrap: 'wrap',
           justifyContent: 'center',
+          alignItems: 'flex-start',
           opacity: phase >= 5 ? 1 : 0,
           transform: phase >= 5 ? 'translateY(0)' : 'translateY(12px)',
           transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
         }}>
-          <button
-            onClick={() => navigate('StudentLandingPage')}
-            style={{
-              fontFamily: dmSans,
-              fontSize: 15, fontWeight: 700,
-              color: '#fff',
-              background: '#E85D20',
-              border: 'none',
-              borderRadius: 14,
-              padding: '16px 36px',
-              cursor: 'pointer',
-              minHeight: 'auto',
-              boxShadow: '0 8px 32px rgba(232,93,32,0.35)',
-              transition: 'all 0.2s ease',
-              letterSpacing: '-0.01em',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
-              e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.5)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0) scale(1)';
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)';
-            }}
-          >
-            I need a job →
-          </button>
+          {/* Student CTA */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={() => navigate('StudentLandingPage')}
+              style={{
+                fontFamily: dmSans,
+                fontSize: 15, fontWeight: 700,
+                color: '#fff',
+                background: '#E85D20',
+                border: 'none',
+                borderRadius: 14,
+                padding: '16px 36px',
+                cursor: 'pointer',
+                minHeight: 'auto',
+                boxShadow: '0 8px 32px rgba(232,93,32,0.35)',
+                transition: 'all 0.2s ease',
+                letterSpacing: '-0.01em',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
+                e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.5)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)';
+              }}
+            >
+              I need a job →
+            </button>
+            <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: 0, letterSpacing: '0.02em' }}>
+              Find the right people. Know what to say.
+            </p>
+          </div>
 
-          <button
-            onClick={() => navigate('ParentLandingPage')}
-            style={{
-              fontFamily: dmSans,
-              fontSize: 15, fontWeight: 600,
-              color: '#fff',
-              background: 'rgba(255,255,255,0.15)',
-              border: '1px solid rgba(255,255,255,0.5)',
-              borderRadius: 14,
-              padding: '16px 32px',
-              cursor: 'pointer',
-              minHeight: 'auto',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.color = '#fff';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            I'm here to help →
-          </button>
+          {/* Helper CTA */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <button
+              onClick={() => navigate('ParentLandingPage')}
+              style={{
+                fontFamily: dmSans,
+                fontSize: 15, fontWeight: 600,
+                color: 'rgba(255,255,255,0.75)',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: 14,
+                padding: '16px 32px',
+                cursor: 'pointer',
+                minHeight: 'auto',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.color = '#fff';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.14)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.35)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              I'm here to help →
+            </button>
+            <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: 0, letterSpacing: '0.02em' }}>
+              Open doors for students from your school.
+            </p>
+          </div>
         </div>
 
         <p style={{
