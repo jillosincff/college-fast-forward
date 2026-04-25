@@ -325,8 +325,11 @@ export default function StudentLandingPage({ onParentClick }) {
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 14px', textAlign: 'center' }}>
             Search your school's network
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 40px', maxWidth: 440, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 12px', maxWidth: 440, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
             Find people from your school who can help you get closer to the job.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', margin: '0 0 40px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
+            Start with parents from your school — then expand to alumni at the companies you want to work for.
           </p>
 
           <AlumniSearchDemo />
