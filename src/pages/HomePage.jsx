@@ -121,7 +121,7 @@ export default function HomePage() {
           textAlign: 'center',
           letterSpacing: '-0.01em',
         }}>
-          This is how people actually get hired — not by applying online.
+          This is how people actually get hired — by getting in front of the right people.
         </p>
 
         {/* CTAs */}
@@ -165,7 +165,7 @@ export default function HomePage() {
               Help me get a job →
             </button>
             <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: 0, letterSpacing: '0.01em' }}>
-              Find the right people. Know what to say.
+              Find the right people. Reach out with confidence. Get hired.
             </p>
           </div>
 
