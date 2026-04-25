@@ -4,6 +4,7 @@ import NorthStarBanner from '@/components/adminv2/NorthStarBanner';
 import SignupTiles from '@/components/adminv2/SignupTiles';
 import SchoolTable from '@/components/adminv2/SchoolTable';
 import EngagementPanel from '@/components/adminv2/EngagementPanel';
+import MessageStatsPanel from '@/components/adminv2/MessageStatsPanel';
 import WeeklyLog from '@/components/adminv2/WeeklyLog';
 import Phase2Placeholders from '@/components/adminv2/Phase2Placeholders';
 import AdminUtilities from '@/components/adminv2/AdminUtilities';
@@ -82,6 +83,7 @@ export default function AdminV2() {
           <SignupTiles data={data.signups} />
           <SchoolTable schools={data.schools} grandTotal={data.grandTotal} />
           <EngagementPanel data={data.engagement} />
+          <MessageStatsPanel data={data.messages} />
           <EmailStatsPanel />
           <FastIQTrialPanel />
           <Phase2Placeholders />

@@ -97,6 +97,20 @@ Deno.serve(async (req) => {
       ? Math.round((replied30.length / sent30Days.length) * 100)
       : null;
 
+    // ── Messages ──────────────────────────────────────────────────────────
+    let messagesAll = [];
+    try {
+      messagesAll = await base44.asServiceRole.entities.Message.list('-created_date', 2000);
+    } catch (_) { messagesAll = []; }
+
+    const messageSentThisWeek = messagesAll.filter(m => m.created_date >= day7);
+    const messageSentLastWeek = messagesAll.filter(m => m.created_date >= day14 && m.created_date < day7);
+    const messageSent30Days   = messagesAll.filter(m => m.created_date >= day30);
+    const messagesRead30      = messageSent30Days.filter(m => m.is_read);
+    const messageReadRate = messageSent30Days.length > 0
+      ? Math.round((messagesRead30.length / messageSent30Days.length) * 100)
+      : null;
+
     // % of helpers contacted this month
     const helpers = allUsers.filter(u => ['parent','alumni'].includes(u.persona));
     const contactedHelperEmails = new Set(
@@ -126,6 +140,14 @@ Deno.serve(async (req) => {
       },
       schools,
       grandTotal,
+      messages: {
+        sentThisWeek:   messageSentThisWeek.length,
+        sentLastWeek:   messageSentLastWeek.length,
+        sentDelta:      messageSentThisWeek.length - messageSentLastWeek.length,
+        readRate:       messageReadRate,
+        read30:         messagesRead30.length,
+        sent30:         messageSent30Days.length,
+      },
       engagement: {
         sentThisWeek:       sentThisWeek.length,
         sentLastWeek:       sentLastWeek.length,
