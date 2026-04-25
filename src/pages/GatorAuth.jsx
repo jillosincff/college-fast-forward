@@ -107,7 +107,7 @@ export default function GatorAuth() {
     try {
       const response = await registerUser({ email: signupEmail, password: signupPassword, full_name: fullName });
       if (response.data?.success) {
-        navigate('RegistrationSuccess', { email: signupEmail });
+        navigate('/RegistrationSuccess', { email: signupEmail });
       } else {
         setError(response.data?.error || 'Registration failed.');
       }
@@ -161,17 +161,17 @@ export default function GatorAuth() {
     if (isLoading) return;
     
     if (user?.persona && user.onboarding_completed) {
-      navigate('Dashboard');
+      navigate('/Dashboard');
       return;
     }
     
     if (user?.persona && !user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('ParentOnboarding');
+        navigate('/ParentOnboarding');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-        navigate('AlumniOnboarding');
+        navigate('/AlumniOnboarding');
       } else {
-        navigate('StudentOnboarding');
+        navigate('/StudentOnboarding');
       }
       return;
     }
@@ -183,9 +183,9 @@ export default function GatorAuth() {
 
       if (role === 'parent') {
         // Route parents directly to onboarding — no need for GatorWelcome role selection
-        navigate('ParentOnboarding');
+        navigate('/ParentOnboarding');
       } else if (role) {
-        navigate('GatorWelcome');
+        navigate('/GatorWelcome');
       } else {
         setStep('auth');
       }
@@ -271,7 +271,7 @@ export default function GatorAuth() {
               <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 8 }}>
                 <button
                   type="button"
-                  onClick={() => navigate('MigrationSignIn?forgot=true')}
+                  onClick={() => navigate('/MigrationSignIn?forgot=true')}
                   style={{ fontFamily: dmSans, fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'underline' }}
                 >
                   Forgot your password?
@@ -319,7 +319,7 @@ export default function GatorAuth() {
               <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: 0 }}>We'll email you a secure link. No password needed.</p>
               <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '8px 0 0' }}>
                 Need to reset your password?{' '}
-                <button type="button" onClick={() => navigate('MigrationSignIn?forgot=true')} style={{ fontFamily: dmSans, fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none' }}>Click here →</button>
+                <button type="button" onClick={() => navigate('/MigrationSignIn?forgot=true')} style={{ fontFamily: dmSans, fontSize: 13, color: '#E85D20', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none' }}>Click here →</button>
               </p>
             </form>
           )}
