@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const isParentUser = user.persona === 'parent' || (Array.isArray(user.roles) && user.roles.includes('parent'));
 
     // School isolation — derive from session, never trust client
-    const schoolCode = user.school_name || user.school || user.university || user.school_code || '';
+    const schoolCode = user.school_code || user.school_name || user.school || user.university || '';
     if (!isAdmin && !schoolCode) {
       return Response.json({
         success: false,
