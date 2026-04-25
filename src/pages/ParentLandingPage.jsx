@@ -20,7 +20,7 @@ const SCHOOLS = ['University of Florida', 'Florida State', 'Ohio State', 'UCF', 
 const HOW_IT_WORKS = [
   { number: "01", title: "Fill out a quick profile", desc: "Your industry, company, and how you're willing to help. Takes 2 minutes. Seriously." },
   { number: "02", title: "Students reach out to you", desc: "Only students from your school's network — no spam, no cold outreach from strangers." },
-  { number: "03", title: "You respond and help how you want", desc: "A 15-minute call. A LinkedIn intro. A referral. You decide. No pressure ever." },
+  { number: "03", title: "You respond and help how you want", desc: "Whether that's advice, a referral, or an introduction — you decide. No pressure ever." },
 ];
 
 const FAQS = [
@@ -188,7 +188,10 @@ export default function ParentLandingPage({ onStudentClick }) {
           You have connections.
         </h1>
 
-        <p style={{ fontFamily: dmSans, fontSize: 'clamp(18px, 2.5vw, 22px)', fontWeight: 600, color: '#3d3d3d', maxWidth: 520, margin: '0 auto 44px', lineHeight: 1.6, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative' }}>
+        <p style={{ fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 20px)', fontWeight: 600, color: '#3d3d3d', maxWidth: 520, margin: '0 auto 12px', lineHeight: 1.6, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.18s', position: 'relative' }}>
+          You can help them get in front of the right people.
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 1.8vw, 18px)', fontWeight: 400, color: '#888', maxWidth: 420, margin: '0 auto 44px', lineHeight: 1.6, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative' }}>
           Let's open some doors.
         </p>
 
@@ -277,9 +280,15 @@ export default function ParentLandingPage({ onStudentClick }) {
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 58px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 8px' }}>
             Your kid isn't lazy.
           </h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 58px)', fontWeight: 700, color: 'rgba(0,0,0,0.75)', fontStyle: 'italic', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 36px' }}>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 58px)', fontWeight: 700, color: 'rgba(0,0,0,0.75)', fontStyle: 'italic', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 20px' }}>
             They just don't know the right people yet.
           </h2>
+          <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.9)', lineHeight: 1.7, margin: '0 0 8px', maxWidth: 580 }}>
+            They haven't been able to get in front of the right people yet.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 700, color: '#fff', lineHeight: 1.7, margin: '0 0 32px', maxWidth: 580 }}>
+            That's what actually leads to interviews — and jobs.
+          </p>
           <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.9)', lineHeight: 1.8, margin: '0 0 16px', maxWidth: 580 }}>
             70% of Gen Z students are already asking their parents for help finding a job. You're not alone in wanting to do more.
           </p>
@@ -345,7 +354,7 @@ export default function ParentLandingPage({ onStudentClick }) {
             Know another parent at your kid's school?
           </h3>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, margin: '0 auto 36px', maxWidth: 420 }}>
-            The bigger the network, the better the chances for every student — including yours.
+            The bigger the network, the more students get in front of the right people.
           </p>
           <button onClick={go} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '17px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(232,93,32,0.55)'; }}
@@ -369,8 +378,8 @@ export default function ParentLandingPage({ onStudentClick }) {
 
         <div style={{ maxWidth: 500, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 24px' }}>Your best move</p>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 8px' }}>One intro from you</h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can change everything.</h2>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 8px' }}>One introduction from you</h2>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can lead to an interview — or a job.</h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, margin: '0 auto 40px' }}>
             Free. 2 minutes. No obligation.<br />Students at your school genuinely need you.
           </p>
