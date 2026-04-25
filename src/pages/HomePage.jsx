@@ -134,7 +134,7 @@ export default function HomePage() {
           textAlign: 'center',
         }}>
           Your parents have connections.<br />
-          Now imagine having access to <em style={{ color: '#E85D20', fontStyle: 'italic', fontWeight: 600 }}>every parent's network</em> at your school.
+          Imagine having access to <em style={{ color: '#E85D20', fontStyle: 'italic', fontWeight: 600 }}>every parent's network</em> at your school.
         </p>
 
         {/* Punchline */}
@@ -194,7 +194,7 @@ export default function HomePage() {
                 e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)';
               }}
             >
-              I need a job →
+              Help me get a job →
             </button>
             <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: 0, letterSpacing: '0.02em' }}>
               Find the right people. Know what to say.
