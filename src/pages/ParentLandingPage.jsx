@@ -19,7 +19,7 @@ const SCHOOLS = ['University of Florida', 'Florida State', 'Ohio State', 'UCF', 
 
 const HOW_IT_WORKS = [
   { number: "01", title: "Fill out a quick profile", desc: "Your industry, company, and how you're willing to help. Takes 2 minutes. Seriously." },
-  { number: "02", title: "Students reach out to you", desc: "Only students from your school's network — no spam, no cold outreach from strangers." },
+  { number: "02", title: "Students reach out to you directly", desc: "Only students from your school's network — no spam, no cold outreach from strangers." },
   { number: "03", title: "You respond and help how you want", desc: "Whether that's advice, a referral, or an introduction — you decide. No pressure ever." },
 ];
 
@@ -189,7 +189,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         </h1>
 
         <p style={{ fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 20px)', fontWeight: 600, color: '#3d3d3d', maxWidth: 520, margin: '0 auto 12px', lineHeight: 1.6, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.18s', position: 'relative' }}>
-          You can help them get in front of the right people.
+          You can help them get in front of the right people — the ones who hire.
         </p>
         <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 1.8vw, 18px)', fontWeight: 400, color: '#888', maxWidth: 420, margin: '0 auto 44px', lineHeight: 1.6, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative' }}>
           Let's open some doors.
@@ -250,7 +250,8 @@ export default function ParentLandingPage({ onStudentClick }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: 700, color: '#ffffff', lineHeight: 1.35, letterSpacing: '-0.01em', margin: 0 }}>
-              It's stressful watching your kid apply to hundreds of jobs and hear almost nothing back.
+              It's stressful watching your kid apply to hundreds of jobs and hear almost nothing back.{' '}
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 400, fontSize: 'clamp(18px, 2.5vw, 26px)' }}>You probably already know someone who could help them get their resume seen — and actually get a response.</span>
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
               You've probably already asked everyone you know — <em style={{ color: '#fff', fontWeight: 500 }}>"do you know anybody who can help?"</em>
@@ -287,7 +288,7 @@ export default function ParentLandingPage({ onStudentClick }) {
             They haven't been able to get in front of the right people yet.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 700, color: '#fff', lineHeight: 1.7, margin: '0 0 32px', maxWidth: 580 }}>
-            That's what actually leads to interviews — and jobs.
+            Getting in front of the right people is what leads to interviews — and jobs.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.9)', lineHeight: 1.8, margin: '0 0 16px', maxWidth: 580 }}>
             70% of Gen Z students are already asking their parents for help finding a job. You're not alone in wanting to do more.
@@ -379,7 +380,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         <div style={{ maxWidth: 500, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 24px' }}>Your best move</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 8px' }}>One introduction from you</h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can lead to an interview — or a job.</h2>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can lead to an interview — or even a job.</h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, margin: '0 auto 40px' }}>
             Free. 2 minutes. No obligation.<br />Students at your school genuinely need you.
           </p>
