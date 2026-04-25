@@ -102,17 +102,17 @@ export default function HomePage() {
           textAlign: 'center',
         }}>
           Your parents have connections.<br />
-          Imagine access to <em style={{ color: '#E85D20', fontStyle: 'italic', fontWeight: 600 }}>every family's network</em> at your school.
+          Imagine access to <em style={{ color: '#E85D20', fontStyle: 'italic', fontWeight: 700, textShadow: '0 0 20px rgba(232,93,32,0.4)' }}>every family's network</em> at your school.
         </p>
 
         {/* Punchline */}
         <p style={{
           fontFamily: dmSans,
-          fontSize: 'clamp(16px, 2vw, 20px)',
+          fontSize: 'clamp(17px, 2.2vw, 22px)',
           fontWeight: 700,
-          color: '#ffffff',
-          margin: '0 auto 48px',
-          maxWidth: 420,
+          color: '#f8f8f8',
+          margin: '12px auto 52px',
+          maxWidth: 460,
           lineHeight: 1.4,
           opacity: phase >= 4 ? 1 : 0,
           transform: phase >= 4 ? 'translateY(0)' : 'translateY(12px)',
@@ -164,7 +164,7 @@ export default function HomePage() {
             >
               Help me get a job →
             </button>
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0, letterSpacing: '0.01em' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: 0, letterSpacing: '0.01em' }}>
               Find the right people. Know what to say.
             </p>
           </div>
@@ -200,7 +200,7 @@ export default function HomePage() {
             >
               I'm here to help →
             </button>
-            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0, letterSpacing: '0.01em' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.7)', margin: 0, letterSpacing: '0.01em' }}>
               Open doors for students at your child's school.
             </p>
           </div>
@@ -210,8 +210,8 @@ export default function HomePage() {
         <p style={{
           fontFamily: dmSans,
           fontSize: 12,
-          color: 'rgba(255,255,255,0.4)',
-          margin: '32px 0 0',
+          color: 'rgba(255,255,255,0.45)',
+          margin: '40px 0 0',
           letterSpacing: '0.02em',
           textAlign: 'center',
           maxWidth: 480,
