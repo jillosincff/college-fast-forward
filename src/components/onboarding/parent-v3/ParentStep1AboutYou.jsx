@@ -30,7 +30,7 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
       {/* Header */}
       <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 26, color: '#f4f0e8', textAlign: 'center', lineHeight: 1.3, marginBottom: 8 }}>
-        Tell us a little about yourself.
+        Help students find you.
       </h1>
       <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 300, color: 'rgba(244,240,232,0.5)', textAlign: 'center', lineHeight: 1.6, marginBottom: 32 }}>
         This helps us match your connections to students who need them.
@@ -40,7 +40,7 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
       <div style={{ borderLeft: '3px solid #E85D20', padding: '16px 20px', background: 'rgba(255,255,255,0.04)', borderRadius: '0 10px 10px 0', marginBottom: 24 }}>
         <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, margin: '0 0 10px' }}>WHY WE ASK</p>
         <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.82)', margin: '0 0 10px', lineHeight: 1.7 }}>
-          Your network is your superpower here — whether you’re currently working, between roles, retired, or a stay-at-home parent with years of professional experience.
+          Your network helps students get in front of the right people — whether you’re currently working, between roles, retired, or a stay-at-home parent with years of professional experience.
         </p>
         <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.82)', margin: '0 0 10px', lineHeight: 1.7 }}>
           When you share your background, students who need someone exactly like you can find you and reach out directly — for guidance, advice, or introductions.
@@ -104,7 +104,7 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
       {/* Intro willingness */}
       <div style={{ marginBottom: 24 }}>
-        <FieldLabel>Are you open to making introductions for students?</FieldLabel>
+        <FieldLabel>Are you open to introducing students to people in your network?</FieldLabel>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
           {INTRO_OPTIONS.map(opt => {
             const selected = (formData.introWillingness || 'yes') === opt.value;
@@ -133,8 +133,11 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
       {/* Directory Visibility Toggle */}
       <div style={{ marginBottom: 28 }}>
-        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 12 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 8 }}>
           Directory Visibility
+        </p>
+        <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: '0 0 12px', lineHeight: 1.5 }}>
+          This is what allows students to find and reach out to you.
         </p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
           <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#f4f0e8', lineHeight: 1.5 }}>
@@ -165,7 +168,7 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
 
       {/* CTA */}
       <PrimaryButton onClick={handleContinue} loading={loading} disabled={loading}>
-        {loading ? 'Saving...' : 'Continue →'}
+        {loading ? 'Saving...' : 'Continue — help students find me →'}
       </PrimaryButton>
 
       <BackLink onClick={onBack} />
