@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
           existingEmails.add(email);
         }
 
-        await new Promise(r => setTimeout(r, 50));
+        await new Promise(r => setTimeout(r, 2500));
       } catch (err) {
         errors.push({ email, error: err.message });
       }
