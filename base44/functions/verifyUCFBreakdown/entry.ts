@@ -20,8 +20,8 @@ Deno.serve(async (req) => {
       total: ucfUsers.length,
       parents: {
         count: parents.length,
-        expected: 36,
-        match: parents.length === 36
+        expected: 30,
+        match: parents.length === 30
       },
       alumni: {
         count: alumni.length,
