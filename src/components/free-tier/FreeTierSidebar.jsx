@@ -20,7 +20,7 @@ const NAV_GROUPS = [
   {
     label: 'MY NETWORK',
     items: [
-      { label: 'CFF Connections', tab: 'directory', icon: Users },
+      { label: 'Parent Network', tab: 'directory', icon: Users },
       { label: 'Alumni Search', tab: 'alumni_search', icon: Search },
       { label: 'Outreach Drafts', tab: 'outreach_drafts', icon: Mail },
       { label: 'Messages', tab: 'messages', icon: MessageSquare },
