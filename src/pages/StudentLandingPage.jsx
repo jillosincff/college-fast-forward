@@ -155,7 +155,7 @@ function AlumniSearchDemo() {
         }}>
           <span style={{ fontSize: 13 }}>⚡</span>
           <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
-            These are real people connected to your school.
+            Real people from your school — you can actually reach out to them.
           </span>
         </div>
       </div>
@@ -263,7 +263,7 @@ export default function StudentLandingPage({ onParentClick }) {
           maxWidth: 520, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
-          We're building your school's parent network — and giving you AI to access alumni and opportunities right now.
+          We're building your school's parent network — and giving you AI to access your school's alumni and opportunities right now.
         </p>
 
         {/* CTA */}
@@ -322,8 +322,11 @@ export default function StudentLandingPage({ onParentClick }) {
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 8px', textAlign: 'center' }}>
             Search your school's network.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', textAlign: 'center', margin: '0 0 36px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', textAlign: 'center', margin: '0 0 8px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
             Parents, alumni, and connections — all organized so you know who to reach out to and what to say.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '0 0 32px', letterSpacing: '0.01em' }}>
+            All from your school — organized so you know exactly who to reach out to.
           </p>
 
           <AlumniSearchDemo />
@@ -342,7 +345,7 @@ export default function StudentLandingPage({ onParentClick }) {
               fontStyle: 'italic', color: '#fff',
               margin: '0 0 20px', lineHeight: 1.5,
             }}>
-              "Found a Disney alum from my school in like 2 minutes. She actually responded."
+              "I found a Disney alum from my school in 2 minutes. She actually responded."
             </p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -386,7 +389,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
                 <div>
                   <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>The network we're building</p>
-                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Your school's doors, opened</p>
+                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Your school's network</p>
                 </div>
               </div>
               {NETWORK_FEATURES.map((f, i) => (
@@ -413,7 +416,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
                 <div>
                   <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>The AI that helps you use it</p>
-                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>Execution, not just access</p>
+                  <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>The AI that helps you use it</p>
                 </div>
               </div>
               {FASTIQ_FEATURES.map((f, i) => (
@@ -458,8 +461,11 @@ export default function StudentLandingPage({ onParentClick }) {
             to get hired.
           </h2>
 
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 420 }}>
-            Find the right people. Know what to say. Turn connections into opportunities.
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 420 }}>
+            Students are already getting replies.
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.4)', lineHeight: 1.7, margin: '0 auto 36px', maxWidth: 420 }}>
+            Find the right people. Know what to say. Get hired faster.
           </p>
 
           <button onClick={go} style={{
@@ -477,6 +483,10 @@ export default function StudentLandingPage({ onParentClick }) {
           >
             Join free →
           </button>
+
+          <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 20px', letterSpacing: '0.02em' }}>
+            Takes 60 seconds to get started.
+          </p>
 
           <button onClick={parent} style={{
             fontFamily: dmSans, fontSize: 13, fontWeight: 500,
