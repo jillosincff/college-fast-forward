@@ -164,7 +164,7 @@ export default function HomePage() {
             >
               Help me get a job →
             </button>
-            <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: 0, letterSpacing: '0.02em' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0, letterSpacing: '0.02em' }}>
               Find the right people. Know what to say.
             </p>
           </div>
@@ -200,11 +200,27 @@ export default function HomePage() {
             >
               I'm here to help →
             </button>
-            <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: 0, letterSpacing: '0.02em' }}>
-              Open doors for students from your school.
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0, letterSpacing: '0.02em' }}>
+              Open doors for students from your child's school.
             </p>
           </div>
         </div>
+
+        {/* Trust line */}
+        <p style={{
+          fontFamily: dmSans,
+          fontSize: 12,
+          color: 'rgba(255,255,255,0.3)',
+          margin: '32px 0 0',
+          letterSpacing: '0.02em',
+          textAlign: 'center',
+          maxWidth: 480,
+          lineHeight: 1.6,
+          opacity: phase >= 6 ? 1 : 0,
+          transition: 'opacity 1s ease 0.3s',
+        }}>
+          Trusted by families at top schools including UF, FSU, OSU, USC, UCF and more.
+        </p>
 
 
       </div>
