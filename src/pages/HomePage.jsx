@@ -122,11 +122,11 @@ export default function HomePage() {
         <p style={{
           fontFamily: dmSans,
           fontSize: 'clamp(17px, 2.5vw, 24px)',
-          fontWeight: 500,
-          color: '#ffffff',
-          margin: '0 auto 16px',
+          fontWeight: 400,
+          color: 'rgba(255,255,255,0.8)',
+          margin: '0 auto 24px',
           maxWidth: 520,
-          lineHeight: 1.55,
+          lineHeight: 1.6,
           letterSpacing: '-0.01em',
           opacity: phase >= 3 ? 1 : 0,
           transform: phase >= 3 ? 'translateY(0)' : 'translateY(16px)',
@@ -134,25 +134,26 @@ export default function HomePage() {
           textAlign: 'center',
         }}>
           Your parents have connections.<br />
-          Now imagine if you had access to <em style={{ color: '#E85D20', fontStyle: 'italic' }}>every parent's network</em> at your school.
+          Now imagine having access to <em style={{ color: '#E85D20', fontStyle: 'italic', fontWeight: 600 }}>every parent's network</em> at your school.
         </p>
 
-        {/* Supporting line */}
+        {/* Punchline */}
         <p style={{
           fontFamily: dmSans,
-          fontSize: 'clamp(13px, 1.6vw, 16px)',
-          color: 'rgba(255,255,255,0.45)',
-          margin: '0 auto 44px',
-          maxWidth: 400,
-          lineHeight: 1.6,
+          fontSize: 'clamp(16px, 2vw, 20px)',
+          fontWeight: 700,
+          color: '#ffffff',
+          margin: '0 auto 48px',
+          maxWidth: 420,
+          lineHeight: 1.4,
           opacity: phase >= 4 ? 1 : 0,
           transform: phase >= 4 ? 'translateY(0)' : 'translateY(12px)',
           transition: 'all 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
           position: 'relative', zIndex: 1,
           textAlign: 'center',
-          letterSpacing: '0.01em',
+          letterSpacing: '-0.01em',
         }}>
-          This is how you actually get hired.
+          This is how people actually get hired.
         </p>
 
         {/* CTAs */}
