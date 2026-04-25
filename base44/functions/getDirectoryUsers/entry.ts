@@ -22,10 +22,10 @@ function hasMinimumData(u) {
   const name = u.full_name || u.first_name;
   const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
   const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
-  // Parents only need a name + completed onboarding (company/industry optional)
-  if (isParent) return !!(name && u.onboarding_completed);
-  // Alumni helpers need name + onboarding complete (company/industry optional) — we want to surface them even if sparse
-  if (isAlumni) return !!(name && u.onboarding_completed);
+  // Parents show if onboarding complete OR they have company/job title data
+  if (isParent) return !!(name && (u.onboarding_completed || getCompany(u) || u.job_title || u.current_position));
+  // Alumni show if onboarding complete OR they have company/job title data
+  if (isAlumni) return !!(name && (u.onboarding_completed || getCompany(u) || u.job_title || u.current_position));
   return !!(name && (getCompany(u) || getIndustry(u) || u.onboarding_completed));
 }
 
