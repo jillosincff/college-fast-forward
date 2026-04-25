@@ -20,13 +20,13 @@ Deno.serve(async (req) => {
       total: umichUsers.length,
       parents: {
         count: parents.length,
-        expected: null,
-        match: null
+        expected: 25,
+        match: parents.length === 25
       },
       alumni: {
         count: alumni.length,
-        expected: null,
-        match: null
+        expected: 12,
+        match: alumni.length === 12
       },
       students: students.length,
       parentSample: parents.slice(0, 3).map(u => ({ email: u.email, name: u.full_name, onboarding: u.onboarding_completed })),
