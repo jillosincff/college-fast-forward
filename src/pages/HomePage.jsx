@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { navigate } from '@/components/utils/navigation';
 
 const playfair = "'Playfair Display', Georgia, serif";
@@ -6,6 +7,7 @@ const dmSans = "'DM Sans', system-ui, sans-serif";
 
 export default function HomePage() {
   const [phase, setPhase] = useState(0);
+  const nav = useNavigate();
 
   useEffect(() => {
     if (!document.getElementById('home-fonts')) {
@@ -138,7 +140,7 @@ export default function HomePage() {
           {/* Student CTA */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <button
-              onClick={() => navigate('StudentLandingPage')}
+              onClick={() => nav('/StudentLandingPage')}
               style={{
                 fontFamily: dmSans,
                 fontSize: 15, fontWeight: 700,
@@ -172,7 +174,7 @@ export default function HomePage() {
           {/* Helper CTA */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
             <button
-              onClick={() => navigate('ParentLandingPage')}
+              onClick={() => nav('/ParentLandingPage')}
               style={{
                 fontFamily: dmSans,
                 fontSize: 15, fontWeight: 600,
