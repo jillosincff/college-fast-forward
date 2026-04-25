@@ -164,7 +164,7 @@ export default function HomePage() {
             >
               Help me get a job →
             </button>
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0, letterSpacing: '0.02em' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0, letterSpacing: '0.01em' }}>
               Find the right people. Know what to say.
             </p>
           </div>
@@ -200,8 +200,8 @@ export default function HomePage() {
             >
               I'm here to help →
             </button>
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0, letterSpacing: '0.02em' }}>
-              Open doors for students from your child's school.
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0, letterSpacing: '0.01em' }}>
+              Open doors for students at your child's school.
             </p>
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function HomePage() {
         <p style={{
           fontFamily: dmSans,
           fontSize: 12,
-          color: 'rgba(255,255,255,0.3)',
+          color: 'rgba(255,255,255,0.4)',
           margin: '32px 0 0',
           letterSpacing: '0.02em',
           textAlign: 'center',
@@ -219,7 +219,7 @@ export default function HomePage() {
           opacity: phase >= 6 ? 1 : 0,
           transition: 'opacity 1s ease 0.3s',
         }}>
-          Trusted by families at top schools including UF, FSU, OSU, USC, UCF and more.
+          Trusted by families at top schools including UF, FSU, OSU, and more.
         </p>
 
 
