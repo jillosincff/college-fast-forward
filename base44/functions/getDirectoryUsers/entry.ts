@@ -22,10 +22,10 @@ function hasMinimumData(u) {
   const name = u.full_name || u.first_name;
   const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
   const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
-  // Parents show if onboarding complete OR they have company/job title data
-  if (isParent) return !!(name && (u.onboarding_completed || getCompany(u) || u.job_title || u.current_position));
-  // Alumni show if onboarding complete OR they have company/job title data
-  if (isAlumni) return !!(name && (u.onboarding_completed || getCompany(u) || u.job_title || u.current_position));
+  // Founding members are allowed to show even with minimal data
+  const isFounding = u.is_founding_member === true;
+  // Parents/alumni show if: onboarding complete OR company/job title OR founding member
+  if (isParent || isAlumni) return !!(name && (u.onboarding_completed || getCompany(u) || u.job_title || u.current_position || isFounding));
   return !!(name && (getCompany(u) || getIndustry(u) || u.onboarding_completed));
 }
 
