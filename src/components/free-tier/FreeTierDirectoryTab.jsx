@@ -60,6 +60,7 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [viewingProfile, setViewingProfile] = useState(null);
 
   const topRole = user?.career_goals?.target_roles?.[0];
   const searchSuggestion = getBestKeyword(user);
@@ -360,13 +361,21 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
                     🔗 View LinkedIn →
                   </a>
                 )}
-                <button
-                  onClick={() => { if (alreadySent) return; setMessaging(member); setDraft(''); setSent(false); }}
-                  disabled={alreadySent}
-                  style={{ background: alreadySent ? '#F5F5F5' : '#E85D20', border: 'none', borderRadius: 8, padding: '11px', fontSize: 13, fontWeight: 600, color: alreadySent ? '#AAAAAA' : '#fff', cursor: alreadySent ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
-                >
-                  {alreadySent ? 'Message Sent ✓' : 'Send a Message →'}
-                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => setViewingProfile(member)}
+                    style={{ background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px', fontSize: 13, fontWeight: 600, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flex: 1, minHeight: 'auto' }}
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => { if (alreadySent) return; setMessaging(member); setDraft(''); setSent(false); }}
+                    disabled={alreadySent}
+                    style={{ background: alreadySent ? '#F5F5F5' : '#E85D20', border: 'none', borderRadius: 8, padding: '10px', fontSize: 13, fontWeight: 600, color: alreadySent ? '#AAAAAA' : '#fff', cursor: alreadySent ? 'default' : 'pointer', fontFamily: "'DM Sans', sans-serif", flex: 1, minHeight: 'auto' }}
+                  >
+                    {alreadySent ? 'Sent ✓' : 'Message →'}
+                  </button>
+                </div>
               </div>
             );
           })}
@@ -409,6 +418,95 @@ export default function FreeTierDirectoryTab({ user, onOpenUpgrade, onTabChange 
                 style={{ background: sent ? '#22C55E' : '#E85D20', border: 'none', borderRadius: 8, padding: '8px 20px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: sending || sent ? 'default' : 'pointer', minHeight: 'auto' }}
               >
                 {sent ? 'Sent ✓' : sending ? 'Sending...' : 'Send Message →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Profile modal */}
+      {viewingProfile && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}
+          onClick={() => setViewingProfile(null)}
+        >
+          <div
+            style={{ background: '#fff', borderRadius: 16, padding: 28, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#E85D20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, flexShrink: 0, fontFamily: "'DM Sans', sans-serif" }}>
+                {(viewingProfile.full_name || 'C').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{viewingProfile.full_name || 'CFF Member'}</p>
+                {viewingProfile.persona && (
+                  <span style={{ background: '#F5F5F5', borderRadius: 20, padding: '2px 10px', fontSize: 11, color: '#666', fontFamily: "'DM Sans', sans-serif" }}>
+                    {viewingProfile.persona === 'parent' ? 'Parent' : 'Alumni'}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Details */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid #F0F0F0', paddingTop: 16 }}>
+              {(viewingProfile.job_title || viewingProfile.current_position) && (
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>Job Title</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0 }}>{viewingProfile.job_title || viewingProfile.current_position}</p>
+                </div>
+              )}
+              {(viewingProfile.company || viewingProfile.current_company) && (
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>Company</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0 }}>{viewingProfile.company || viewingProfile.current_company}</p>
+                </div>
+              )}
+              {viewingProfile.industry && (
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>Industry</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0 }}>{viewingProfile.industry}</p>
+                </div>
+              )}
+              {viewingProfile.career_background && (
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>Background</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>{viewingProfile.career_background}</p>
+                </div>
+              )}
+              {viewingProfile.bio && (
+                <div>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>About</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0, lineHeight: 1.6 }}>{viewingProfile.bio}</p>
+                </div>
+              )}
+              <div>
+                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#AAAAAA', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>Availability</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: (viewingProfile.availability === 'actively_helping' || viewingProfile.availability === 'yes') ? '#22C55E' : (viewingProfile.availability === 'occasionally_available' || viewingProfile.availability === 'occasionally') ? '#F59E0B' : '#CCCCCC' }} />
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1A1A1A', margin: 0 }}>
+                    {(viewingProfile.availability === 'actively_helping' || viewingProfile.availability === 'yes') ? 'Actively helping students' : (viewingProfile.availability === 'occasionally_available' || viewingProfile.availability === 'occasionally') ? 'Occasionally available' : 'Availability unknown'}
+                  </p>
+                </div>
+              </div>
+              {viewingProfile.linkedin_url && (
+                <a href={viewingProfile.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#0077B5', textDecoration: 'none', fontWeight: 600 }}>
+                  🔗 View LinkedIn Profile →
+                </a>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 10, borderTop: '1px solid #F0F0F0', paddingTop: 16 }}>
+              <button onClick={() => setViewingProfile(null)} style={{ flex: 1, background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '10px', fontSize: 13, color: '#666', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}>
+                Close
+              </button>
+              <button
+                onClick={() => { setViewingProfile(null); setMessaging(viewingProfile); setDraft(''); setSent(false); }}
+                style={{ flex: 2, background: '#E85D20', border: 'none', borderRadius: 8, padding: '10px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', minHeight: 'auto', fontFamily: "'DM Sans', sans-serif" }}
+              >
+                Send a Message →
               </button>
             </div>
           </div>
