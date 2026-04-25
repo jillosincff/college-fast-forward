@@ -158,7 +158,7 @@ function AlumniSearchDemo() {
             A response is just the start.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>
-            The right alumni can give you insider advice, point you to the right role, or help get your resume seen.
+            The right person can help you get your resume seen, point you to the right role, or refer you.
           </p>
         </div>
       </div>
@@ -258,7 +258,7 @@ export default function StudentLandingPage({ onParentClick }) {
             color: 'rgba(255,255,255,0.55)', lineHeight: 1.75,
             margin: 0,
           }}>
-            Parents from your school have real connections across every industry — and they actually care about helping students like you succeed.
+            Parents from your school have real connections across every industry — and they actually care about helping students like you.
           </p>
           <p style={{
             fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 21px)',
@@ -386,7 +386,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.65 }}>
             People from your school are more likely to respond — and{' '}
-            <span style={{ color: '#E85D20', fontWeight: 600 }}>responses are what create opportunities.</span>
+            <span style={{ color: '#E85D20', fontWeight: 600 }}>responses are how you get in front of the people who hire.</span>
           </p>
           <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'left' }}>
             {WHY_BULLETS.map((b, i) => (
@@ -440,7 +440,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
-                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>Alumni who can help you get seen</p>
+                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>Alumni who can help you get hired</p>
               </div>
               {ALUMNI_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
@@ -465,6 +465,13 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.11) 0%, transparent 55%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 580, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <p style={{
+            fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
+            fontWeight: 700, color: 'rgba(255,255,255,0.4)',
+            letterSpacing: '-0.01em', margin: '0 0 24px',
+          }}>
+            You don't need more applications. You need more responses.
+          </p>
           <h2 style={{
             fontFamily: playfair,
             fontSize: 'clamp(28px, 4.5vw, 60px)',
