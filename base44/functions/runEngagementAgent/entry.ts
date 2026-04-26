@@ -138,10 +138,11 @@ Log in and get your profile set up: ${APP_URL}
 
 — Jill
 
-P.S. Parents on this platform are not here to lecture you. Most of them just wish someone had done this for them when they were in school.`;
+P.S. The parents on the platform are here for one reason only: to help students like you.`;
 
+  const parentVerb = parentCount === 1 ? 'is' : 'are';
   return {
-    subject: `Welcome to CFF — ${parentStr} from ${school} are here`,
+    subject: `Welcome to CFF — ${parentStr} from ${school} ${parentVerb} here`,
     body_text: body,
     body_html: wrapHtml(body),
   };
