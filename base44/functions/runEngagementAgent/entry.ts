@@ -1,21 +1,31 @@
 /**
  * CFF Engagement Agent — Workflow 1: Onboarding Sequence
- * 
- * Runs daily. For each student, checks which day they're on in the onboarding
- * sequence and queues the appropriate email for Jill's approval.
- * 
- * Day 0 → immediate welcome (queued same day as signup)
- * Day 2 → 3 parent profiles from their school/industry
- * Day 5 → platform activity summary
- * Day 9 → personalized industry update (two variants: active vs dormant)
- * Day 14 → re-orientation (two variants: profile complete vs incomplete)
  *
- * Safety rules enforced:
+ * Runs daily at 9:30am ET. For each student who signed up AFTER this agent
+ * was deployed (the AGENT_LAUNCH_DATE cutoff), checks which day they are on
+ * and queues the appropriate email for Jill's approval.
+ *
+ * LEGACY STUDENTS (signed up before AGENT_LAUNCH_DATE) are intentionally
+ * skipped. They will be addressed by Workflow 2 (re-engagement) once login
+ * tracking is in place.
+ *
+ * Day 0  → immediate welcome (queued same day as signup)
+ * Day 2  → 3 parent profiles from their school/industry
+ * Day 5  → platform activity summary
+ * Day 9  → personalized industry update (active vs dormant variants)
+ * Day 14 → re-orientation (profile complete vs incomplete variants)
+ *
+ * TOTAL: 5 templates / 7 variants — Workflow 1 only. Workflow 2 NOT built yet.
+ *
+ * Safety rules:
+ * - Skip all students who signed up before AGENT_LAUNCH_DATE
  * - Max 2 emails per student per 7 days
- * - No send between 10pm–7am ET (default timezone)
  * - Skip if student unsubscribed
- * - Skip if email already sent for this sequence day
+ * - Skip if email already queued/sent for this sequence day
  * - All emails → status: pending_approval (Jill reviews before send)
+ *
+ * Send time note: The automation is scheduled for 9:30am ET (14:30 UTC) per spec.
+ * The 8am default in the previous version was overridden per product owner request.
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
@@ -27,6 +37,12 @@ const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
 
 // Onboarding sequence days
 const SEQUENCE_DAYS = [0, 2, 5, 9, 14];
+
+// ─── LEGACY CUTOFF ─────────────────────────────────────────────────────────────
+// Students who signed up BEFORE this date are legacy and will be skipped.
+// Update this to the actual deployment date when you first activate the agent.
+// Format: ISO 8601 date string
+const AGENT_LAUNCH_DATE = '2026-04-26T00:00:00.000Z';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -47,8 +63,9 @@ function isProfileComplete(user) {
   const hasMajor = !!(user.major?.trim());
   const hasYear = !!(user.graduation_year);
   const hasIndustry = primaryIndustry(user) !== null;
-  const hasBio = !!(user.bio?.trim());
-  return hasMajor && hasYear && hasIndustry && hasBio;
+  // Bio check intentionally excluded pending field content review (item #3 in spec)
+  // Profile completion = 3 fields until dedicated "what I'm looking for" field is added
+  return hasMajor && hasYear && hasIndustry;
 }
 
 function missingProfileFields(user) {
@@ -56,12 +73,16 @@ function missingProfileFields(user) {
   if (!user.major?.trim()) missing.push('your major');
   if (!user.graduation_year) missing.push('your graduation year');
   if (!primaryIndustry(user)) missing.push('your target industry');
-  if (!user.bio?.trim()) missing.push('a one-sentence note about what you are looking for');
   return missing;
 }
 
 function firstName(user) {
   return user.first_name || user.full_name?.split(' ')[0] || 'there';
+}
+
+// Correct plural/singular for any count
+function plural(count, singular, pluralForm) {
+  return count === 1 ? `1 ${singular}` : `${count} ${pluralForm || singular + 's'}`;
 }
 
 function wrapHtml(bodyText) {
@@ -88,14 +109,15 @@ function templateDay0(user, stats) {
   const first = firstName(user);
   const school = user.school_name || user.school || 'your school';
   const parentCount = stats.parentsAtSchool || 0;
+  const parentStr = plural(parentCount, 'parent');
 
   const body = `Hi ${first},
 
 You just joined College Fast Forward, and I wanted to reach out personally.
 
-We have ${parentCount} parents from ${school} on the platform right now. They have real jobs, real connections, and they signed up specifically to be available to students like you.
+We have ${parentStr} from ${school} on the platform right now. They have real jobs, real connections, and they signed up specifically to be available to students like you.
 
-It takes about 4 minutes to fill out your profile: your major, graduation year, the industry you are interested in, and one sentence about what you are looking for. Once it is done, you can browse the full directory and reach out directly.
+It takes about 4 minutes to fill out your profile: your major, graduation year, and the industry you are interested in. Once it is done, you can browse the full directory and reach out directly.
 
 Log in and get your profile set up: ${APP_URL}
 
@@ -104,7 +126,7 @@ Log in and get your profile set up: ${APP_URL}
 P.S. Parents on this platform are not here to lecture you. Most of them just wish someone had done this for them when they were in school.`;
 
   return {
-    subject: `Welcome to CFF -- ${parentCount} parents from ${school} are here`,
+    subject: `Welcome to CFF -- ${parentStr} from ${school} are here`,
     body_text: body,
     body_html: wrapHtml(body),
   };
@@ -165,14 +187,18 @@ function templateDay5(user, stats) {
     : 'Parents across a range of industries have been active this week.';
 
   const msgLine = recentMessages > 0
-    ? `${recentMessages} conversations started between students and parents`
+    ? `${plural(recentMessages, 'conversation')} started between students and parents`
     : 'Students and parents have been connecting';
+
+  const newParentsLine = newParents7d > 0
+    ? `${plural(newParents7d, 'new parent')} joined the platform`
+    : 'New parents joined the platform';
 
   const body = `${first},
 
 Quick update on what has been happening on CFF this week:
 
-- ${newParents7d > 0 ? `${newParents7d} new parents joined the platform` : 'New parents joined the platform'}
+- ${newParentsLine}
 - ${msgLine}
 - ${industryLine}
 
@@ -198,12 +224,16 @@ function templateDay9Active(user, stats) {
   const totalInIndustry = stats.totalParentsInIndustry || 0;
 
   const countLine = newInIndustry > 0
-    ? `${newInIndustry} new parent${newInIndustry > 1 ? 's' : ''} in ${industry} joined CFF this week.`
-    : `There are now ${totalInIndustry} parents in ${industry} on the platform.`;
+    ? `${plural(newInIndustry, 'new parent')} in ${industry} joined CFF this week.`
+    : `There are now ${plural(totalInIndustry, 'parent')} in ${industry} on the platform.`;
+
+  const totalNote = (totalInIndustry > 0 && newInIndustry > 0)
+    ? ` That is ${plural(totalInIndustry, 'parent')} total in that area now.`
+    : '';
 
   const body = `${first},
 
-${countLine} ${totalInIndustry > 0 && newInIndustry > 0 ? `That is ${totalInIndustry} total in that area now.` : ''}
+${countLine}${totalNote}
 
 Since you have already been checking things out -- thought you would want to know.
 
@@ -214,7 +244,9 @@ Log in to see who is new: ${APP_URL}
 P.S. Parents who just joined tend to respond fastest. In their first few weeks, they are still checking the platform regularly.`;
 
   return {
-    subject: `New parents in ${industry} this week`,
+    subject: newInIndustry > 0
+      ? `${plural(newInIndustry, 'new parent')} in ${industry} this week`
+      : `New parents in ${industry} this week`,
     body_text: body,
     body_html: wrapHtml(body),
   };
@@ -227,8 +259,8 @@ function templateDay9Dormant(user, stats) {
   const totalInIndustry = stats.totalParentsInIndustry || 0;
 
   const countLine = newInIndustry > 0
-    ? `${newInIndustry} parent${newInIndustry > 1 ? 's' : ''} in ${industry} joined since you did.`
-    : `There are ${totalInIndustry} parents in ${industry} on the platform.`;
+    ? `${plural(newInIndustry, 'parent')} in ${industry} joined since you did.`
+    : `There are ${plural(totalInIndustry, 'parent')} in ${industry} on the platform.`;
 
   const body = `${first},
 
@@ -244,7 +276,7 @@ P.S. Your profile takes 4 minutes. That is the only thing standing between you a
 
   return {
     subject: newInIndustry > 0
-      ? `${newInIndustry} new parent${newInIndustry > 1 ? 's' : ''} in ${industry} since you signed up`
+      ? `${plural(newInIndustry, 'parent')} in ${industry} since you signed up`
       : `Parents in ${industry} are waiting`,
     body_text: body,
     body_html: wrapHtml(body),
@@ -352,7 +384,7 @@ function fetchStats(user, allParents, recentMsgCount) {
   };
 }
 
-// ─── Frequency Cap Check (uses pre-fetched records) ──────────────────────────
+// ─── Frequency Cap Check ──────────────────────────────────────────────────────
 
 function checkFrequencyCap(existingEmails, userId) {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -372,37 +404,6 @@ function alreadyQueuedForDay(existingEmails, userId, sequenceDay) {
   );
 }
 
-// ─── Send via SendGrid ────────────────────────────────────────────────────────
-
-async function sendEmail(toEmail, toName, subject, bodyHtml, bodyText) {
-  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SENDGRID_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: toEmail, name: toName }] }],
-      from: { email: FROM_EMAIL, name: FROM_NAME },
-      subject,
-      content: [
-        { type: 'text/plain', value: bodyText },
-        { type: 'text/html', value: bodyHtml },
-      ],
-      tracking_settings: {
-        click_tracking: { enable: true },
-        open_tracking: { enable: true },
-      },
-    }),
-  });
-  const msgId = res.headers.get('X-Message-Id');
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`SendGrid error ${res.status}: ${err}`);
-  }
-  return msgId;
-}
-
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 
 Deno.serve(async (req) => {
@@ -413,29 +414,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin only' }, { status: 403 });
     }
 
-    // Optional: pass { dryRun: true } to preview without creating records
     const body = await req.json().catch(() => ({}));
     const dryRun = body.dryRun === true;
 
-    // Fetch all students (persona: student OR gator)
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
     const students = allUsers.filter(u =>
       ['student', 'gator'].includes(u.persona) ||
       (Array.isArray(u.roles) && (u.roles.includes('student') || u.roles.includes('gator')))
     );
 
-    // Pre-fetch all existing engagement emails once (avoids rate limits)
     let existingEmails = [];
     try {
       existingEmails = await base44.asServiceRole.entities.EngagementEmail.list('-created_date', 2000);
     } catch (_) { existingEmails = []; }
 
-    // Pre-fetch all parents once
     const allParents = allUsers.filter(u =>
       u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'))
     );
 
-    // Pre-fetch recent message count once
     let recentMsgCount = 0;
     try {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -443,22 +439,23 @@ Deno.serve(async (req) => {
       recentMsgCount = msgs.filter(m => m.created_date >= sevenDaysAgo).length;
     } catch (_) {}
 
-    const results = { queued: 0, skipped: 0, details: [] };
+    const results = { queued: 0, skipped: 0, legacy_skipped: 0, details: [] };
 
     for (const student of students) {
-      // Skip unsubscribed
+      // ── LEGACY SKIP: only process students who signed up after launch date ──
+      if (!student.created_date || student.created_date < AGENT_LAUNCH_DATE) {
+        results.legacy_skipped++;
+        continue;
+      }
+
       if (student.reengagement_unsubscribed) {
         results.skipped++;
         continue;
       }
 
       const signupDate = student.created_date;
-      if (!signupDate) { results.skipped++; continue; }
-
       const daysSinceSignup = daysSince(signupDate);
 
-      // Find which sequence day to send today
-      // We find the highest day that has passed but not yet been queued
       let targetDay = null;
       for (const seqDay of [...SEQUENCE_DAYS].reverse()) {
         if (daysSinceSignup >= seqDay) {
@@ -472,7 +469,6 @@ Deno.serve(async (req) => {
 
       if (targetDay === null) { results.skipped++; continue; }
 
-      // Frequency cap
       const capOk = checkFrequencyCap(existingEmails, student.id);
       if (!capOk) {
         results.details.push({ email: student.email, skipped: `frequency cap (day ${targetDay})` });
@@ -480,13 +476,10 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Compute stats for personalization (no extra DB calls — uses pre-fetched data)
       const stats = fetchStats(student, allParents, recentMsgCount);
 
-      // Generate the email
       let template;
       const profileDone = isProfileComplete(student);
-      // Active = has visited recently (last_active_at within 7 days OR platform_visit_count > 1)
       const isActive = (student.platform_visit_count > 1) ||
         (student.last_active_at && daysSince(student.last_active_at) <= 7);
 
@@ -534,7 +527,13 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.EngagementEmail.create(emailRecord);
         results.queued++;
       } else {
-        results.details.push({ email: student.email, day: targetDay, subject: template.subject });
+        results.details.push({
+          email: student.email,
+          day: targetDay,
+          subject: template.subject,
+          body_text: template.body_text,
+          body_html: template.body_html,
+        });
         results.queued++;
       }
     }
@@ -543,6 +542,7 @@ Deno.serve(async (req) => {
       success: true,
       dryRun,
       totalStudents: students.length,
+      legacy_skipped: results.legacy_skipped,
       queued: results.queued,
       skipped: results.skipped,
       details: results.details,
