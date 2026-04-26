@@ -69,12 +69,20 @@ export default function AdminV2() {
           <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
           <p className="text-slate-500 text-sm mt-1">College Fast Forward · Phase 1</p>
         </div>
-        <button
-          onClick={loadData}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium border border-slate-700 transition-colors"
-        >
-          ↻ Refresh
-        </button>
+        <div className="flex gap-3">
+          <a
+            href="/#/engagement-agent"
+            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-medium border border-orange-500 transition-colors"
+          >
+            📧 Engagement Agent
+          </a>
+          <button
+            onClick={loadData}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium border border-slate-700 transition-colors"
+          >
+            ↻ Refresh
+          </button>
+        </div>
       </div>
 
       {data && (
