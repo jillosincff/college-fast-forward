@@ -72,12 +72,14 @@ export default function AdminV2() {
         <div className="flex gap-3">
           <a
             href="#/engagement-agent"
+            style={{minHeight: 'auto'}}
             className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-medium border border-orange-500 transition-colors"
           >
             📧 Engagement Agent
           </a>
           <button
             onClick={loadData}
+            style={{minHeight: 'auto'}}
             className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium border border-slate-700 transition-colors"
           >
             ↻ Refresh
