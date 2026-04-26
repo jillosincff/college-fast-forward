@@ -41,6 +41,7 @@ import ProfileEdit from '@/pages/ProfileEdit';
 import ResetPassword from '@/pages/ResetPassword';
 import Logout from '@/pages/Logout';
 import AdminV2 from '@/pages/AdminV2';
+import EngagementAgentDashboard from '@/pages/EngagementAgentDashboard';
 import HomePage from '@/pages/HomePage';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -112,6 +113,7 @@ const AuthenticatedApp = () => {
           <Route path="/ResetPassword" element={<ResetPassword />} />
           <Route path="/Logout" element={<Logout />} />
           <Route path="/admin" element={<AdminV2 />} />
+          <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
 
           {/* Main routes */}
           <Route path="/" element={<HomePage />} />

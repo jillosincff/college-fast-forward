@@ -1,0 +1,144 @@
+{
+  "name": "EngagementEmail",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the target student"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the target student"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "First name of the target student"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "Student's school code"
+    },
+    "workflow": {
+      "type": "string",
+      "enum": [
+        "onboarding",
+        "reengagement"
+      ],
+      "description": "Which workflow this email belongs to"
+    },
+    "sequence_day": {
+      "type": "number",
+      "description": "Day in the onboarding sequence (0, 2, 5, 9, 14) or null for reengagement"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "Template identifier e.g. onboarding_day0, onboarding_day2, reengagement_1"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject line"
+    },
+    "body_html": {
+      "type": "string",
+      "description": "Full HTML email body"
+    },
+    "body_text": {
+      "type": "string",
+      "description": "Plain text email body"
+    },
+    "personalization_data": {
+      "type": "object",
+      "default": {},
+      "description": "Snapshot of data used to personalize this email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_approval",
+        "approved",
+        "rejected",
+        "sent",
+        "failed",
+        "skipped"
+      ],
+      "default": "pending_approval",
+      "description": "Current status of this email"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of admin who approved"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was approved"
+    },
+    "rejected_reason": {
+      "type": "string",
+      "description": "Reason for rejection if applicable"
+    },
+    "scheduled_send_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this email is scheduled to send (after approval)"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was actually sent"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was opened (via tracking pixel)"
+    },
+    "clicked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a link in the email was clicked"
+    },
+    "resulted_in_login": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student logged in within 72 hours of this email"
+    },
+    "resulted_in_profile_completion": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student completed their profile within 7 days of this email"
+    },
+    "sendgrid_message_id": {
+      "type": "string",
+      "description": "SendGrid message ID for tracking"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error details if sending failed"
+    },
+    "frequency_check_passed": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the 2-emails-per-7-days cap was checked and passed"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "workflow",
+    "template_id",
+    "subject",
+    "body_html"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
