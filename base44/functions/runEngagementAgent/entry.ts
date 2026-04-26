@@ -77,7 +77,21 @@ function missingProfileFields(user) {
 }
 
 function firstName(user) {
-  return user.first_name || user.full_name?.split(' ')[0] || 'there';
+  const raw = user.first_name || user.full_name?.split(' ')[0] || null;
+  return nameIsReal(raw, user.email) ? raw : null;
+}
+
+// Returns true if name looks like a real human first name.
+// Returns false for email-prefix fallbacks like "dschneider416", "j.smith", "loloteaches".
+function nameIsReal(name, email) {
+  if (!name) return false;
+  const emailPrefix = email?.split('@')[0]?.toLowerCase() || '';
+  const nameLower = name.toLowerCase();
+  if (nameLower === emailPrefix) return false;
+  if (/\d/.test(name)) return false;
+  if (name.includes('_')) return false;
+  if (/\.[a-z]/i.test(name)) return false;
+  return true;
 }
 
 // Correct plural/singular for any count
@@ -107,26 +121,27 @@ You're receiving this because you joined College Fast Forward. &nbsp;
 
 function templateDay0(user, stats) {
   const first = firstName(user);
+  const greeting = first ? `Hi ${first},` : `Hi,`;
   const school = user.school_name || user.school || 'your school';
   const parentCount = stats.parentsAtSchool || 0;
   const parentStr = plural(parentCount, 'parent');
 
-  const body = `Hi ${first},
+  const body = `${greeting}
 
 You just joined College Fast Forward, and I wanted to reach out personally.
 
-We have ${parentStr} from ${school} on the platform right now. They have real jobs, real connections, and they signed up specifically to be available to students like you.
+We have ${parentStr} from ${school} on the platform right now — people who said they're open to hearing from students like you.
 
 It takes about 4 minutes to fill out your profile: your major, graduation year, and the industry you are interested in. Once it is done, you can browse the full directory and reach out directly.
 
 Log in and get your profile set up: ${APP_URL}
 
--- Jill
+— Jill
 
 P.S. Parents on this platform are not here to lecture you. Most of them just wish someone had done this for them when they were in school.`;
 
   return {
-    subject: `Welcome to CFF -- ${parentStr} from ${school} are here`,
+    subject: `Welcome to CFF — ${parentStr} from ${school} are here`,
     body_text: body,
     body_html: wrapHtml(body),
   };
@@ -134,6 +149,7 @@ P.S. Parents on this platform are not here to lecture you. Most of them just wis
 
 function templateDay2(user, stats) {
   const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
   const school = user.school_name || user.school || 'your school';
   const industry = primaryIndustry(user);
   const parents = stats.sampleParents || [];
@@ -143,7 +159,7 @@ function templateDay2(user, stats) {
     parentLines = parents.slice(0, 3).map(p => {
       const role = [p.current_position, p.current_company].filter(Boolean).join(' at ') || 'CFF parent';
       const ind = p.industry ? ` (${p.industry})` : '';
-      return `- ${p.full_name || 'A parent'} -- ${role}${ind}`;
+      return `- ${p.full_name || 'A parent'} — ${role}${ind}`;
     }).join('\n');
   } else {
     parentLines = `- Several parents from ${school} are active and open to conversations`;
@@ -153,7 +169,7 @@ function templateDay2(user, stats) {
     ? `A few of them work in ${industry}, which is the area you said you are focused on.`
     : `Several of them match what you said you are interested in.`;
 
-  const body = `${first},
+  const body = `${greeting}
 
 A few parents on the platform you might want to know about:
 
@@ -161,13 +177,13 @@ ${parentLines}
 
 ${industryLine}
 
-These are real people who said yes to being available to students. The directory has their full profiles -- what they do, how they can help, and how to reach them.
+These are real people who said they're open to hearing from students. The directory has their full profiles — what they do, how they can help, and how to reach them.
 
 Log in and take a look: ${APP_URL}
 
--- Jill
+— Jill
 
-P.S. You do not have to have a specific ask ready. Most students who reach out just start with: "I am studying X and would love to hear how you got into Y."`;
+P.S. You do not have to have a specific ask ready. Most students who reach out just start with: "I am studying X and would love to hear how you got into Y." That is enough.`;
 
   return {
     subject: `3 parents from ${school} you might want to meet`,
@@ -178,6 +194,7 @@ P.S. You do not have to have a specific ask ready. Most students who reach out j
 
 function templateDay5(user, stats) {
   const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
   const newParents7d = stats.newParentsLast7Days || 0;
   const recentMessages = stats.recentMessages || 0;
   const topIndustries = stats.topIndustriesThisWeek || [];
@@ -194,7 +211,7 @@ function templateDay5(user, stats) {
     ? `${plural(newParents7d, 'new parent')} joined the platform`
     : 'New parents joined the platform';
 
-  const body = `${first},
+  const body = `${greeting}
 
 Quick update on what has been happening on CFF this week:
 
@@ -202,13 +219,13 @@ Quick update on what has been happening on CFF this week:
 - ${msgLine}
 - ${industryLine}
 
-This is a small, active community -- not a job board. The people on here actually respond.
+This is a small, active community — not a job board. The people on here actually respond.
 
 If you have not set up your profile yet, that is the one thing that makes a difference: ${APP_URL}
 
--- Jill
+— Jill
 
-P.S. The students who get the most out of CFF are not necessarily the most prepared -- they are just the ones who showed up first.`;
+P.S. The students who get the most out of CFF are not necessarily the most prepared — they are just the ones who showed up first.`;
 
   return {
     subject: `What has been happening on CFF this week`,
@@ -219,6 +236,7 @@ P.S. The students who get the most out of CFF are not necessarily the most prepa
 
 function templateDay9Active(user, stats) {
   const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
   const industry = primaryIndustry(user) || 'your target industry';
   const newInIndustry = stats.newParentsInIndustry7Days || 0;
   const totalInIndustry = stats.totalParentsInIndustry || 0;
@@ -231,17 +249,17 @@ function templateDay9Active(user, stats) {
     ? ` That is ${plural(totalInIndustry, 'parent')} total in that area now.`
     : '';
 
-  const body = `${first},
+  const body = `${greeting}
 
 ${countLine}${totalNote}
 
-Since you have already been checking things out -- thought you would want to know.
+Since you have already been checking things out — thought you would want to know.
 
 Log in to see who is new: ${APP_URL}
 
--- Jill
+— Jill
 
-P.S. Parents who just joined tend to respond fastest. In their first few weeks, they are still checking the platform regularly.`;
+P.S. A short message goes a long way. Something like "I saw your profile and I am studying X — would you be open to a quick conversation?" is all you need.`;
 
   return {
     subject: newInIndustry > 0
@@ -254,6 +272,7 @@ P.S. Parents who just joined tend to respond fastest. In their first few weeks, 
 
 function templateDay9Dormant(user, stats) {
   const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
   const industry = primaryIndustry(user) || 'your target area';
   const newInIndustry = stats.newParentsInIndustry7Days || 0;
   const totalInIndustry = stats.totalParentsInIndustry || 0;
@@ -262,15 +281,15 @@ function templateDay9Dormant(user, stats) {
     ? `${plural(newInIndustry, 'parent')} in ${industry} joined since you did.`
     : `There are ${plural(totalInIndustry, 'parent')} in ${industry} on the platform.`;
 
-  const body = `${first},
+  const body = `${greeting}
 
 You signed up for CFF about 9 days ago and I wanted to check in.
 
-${countLine} These are people who specifically said they are open to hearing from students.
+${countLine} These are people who said they're open to hearing from students.
 
-I know it is easy to sign up and not get back to it. No pressure -- but if you have 5 minutes, log in and see who is there: ${APP_URL}
+I know it is easy to sign up and not get back to it. No pressure — but if you have 5 minutes, log in and see who is there: ${APP_URL}
 
--- Jill
+— Jill
 
 P.S. Your profile takes 4 minutes. That is the only thing standing between you and being able to reach out.`;
 
@@ -285,23 +304,24 @@ P.S. Your profile takes 4 minutes. That is the only thing standing between you a
 
 function templateDay14Complete(user) {
   const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
 
-  const body = `${first},
+  const body = `${greeting}
 
-You have been on CFF for two weeks and your profile is set up -- that is actually more than most students do.
+You have been on CFF for two weeks and your profile is set up — that is actually more than most students do.
 
-Here is how this works in practice: browse the parent directory, find someone in an industry or company you care about, and send a short note. Something like "I am studying X and interested in Y -- would you be open to a quick conversation?" works fine.
+Here is how this works in practice: browse the parent directory, find someone in an industry or company you care about, and send a short note. Something like "I am studying X and interested in Y — would you be open to a quick conversation?" works fine.
 
-Parents on this platform said yes to receiving messages. They signed up for this.
+Parents on this platform said they're open to receiving messages. They signed up for this.
 
 Go find someone worth reaching out to: ${APP_URL}
 
--- Jill
+— Jill
 
-P.S. The students who get the most out of networking are the ones who treat it like a normal conversation, not a favor ask.`;
+P.S. One conversation can lead to a referral, an introduction, or just a better sense of what you are walking into. It is worth the 5 minutes.`;
 
   return {
-    subject: `Two weeks in -- here is what to do next`,
+    subject: `Two weeks in — here is what to do next`,
     body_text: body,
     body_html: wrapHtml(body),
   };
@@ -309,27 +329,28 @@ P.S. The students who get the most out of networking are the ones who treat it l
 
 function templateDay14Incomplete(user) {
   const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
   const missing = missingProfileFields(user);
   const missingStr = missing.length > 0
     ? `You are still missing: ${missing.join(', ')}.`
     : 'Your profile has a few gaps.';
 
-  const body = `${first},
+  const body = `${greeting}
 
 You signed up two weeks ago, so I wanted to check in.
 
-${missingStr} I get it -- it is easy to sign up and not get back to it.
+${missingStr} I get it — it is easy to sign up and not get back to it.
 
-Here is the honest version of why it matters: parents in the directory can see your profile when you reach out. A profile with your major, what you are interested in, and one sentence about what you are looking for makes a real difference in whether you get a response.
+Here is the honest version of why it matters: parents in the directory can see your profile when you reach out. A profile with your major and what you are interested in makes a real difference in whether you get a response.
 
 It takes about 4 minutes: ${APP_URL}
 
--- Jill
+— Jill
 
 P.S. The directory has parents in most industries. Once your profile is up, you can browse and reach out directly.`;
 
   return {
-    subject: `Two weeks in -- one thing left to do`,
+    subject: `Two weeks in — one thing left to do`,
     body_text: body,
     body_html: wrapHtml(body),
   };
@@ -527,8 +548,11 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.EngagementEmail.create(emailRecord);
         results.queued++;
       } else {
+        const resolvedFirst = firstName(student);
         results.details.push({
           email: student.email,
+          name_resolved: resolvedFirst || '(no name — anonymous greeting used)',
+          name_broken: !resolvedFirst,
           day: targetDay,
           subject: template.subject,
           body_text: template.body_text,
