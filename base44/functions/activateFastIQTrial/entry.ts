@@ -7,6 +7,13 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Check eligibility
+    if (!user.stripe_customer_id) {
+      return Response.json({ 
+        success: false, 
+        reason: 'credit_card_required',
+      }, { status: 402 });
+    }
+
     const alreadyPaying = user.subscription_status === 'active';
     const alreadyTrialing = user.trial_status === 'active' || user.fastiq_trial_active;
     const hadTrialBefore = !!user.trial_start_date;
@@ -19,10 +26,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Activate trial
+    // Activate trial (5 days)
     const start = new Date();
     const end = new Date(start);
-    end.setDate(end.getDate() + 7);
+    end.setDate(end.getDate() + 5);
 
     await base44.auth.updateMe({
       trial_start_date: start.toISOString(),

@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
         
         if (existing?.length > 0) {
           const trialEnd = new Date();
-          trialEnd.setDate(trialEnd.getDate() + 7);
+          trialEnd.setDate(trialEnd.getDate() + 5);
           await base44.asServiceRole.entities.User.update(existing[0].id, {
             trial_status: 'active',
             trial_end_date: trialEnd.toISOString(),
