@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Linkedin, Loader2 } from 'lucide-react';
+import { proxycurlService } from '@/functions/proxycurlService';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -25,6 +26,7 @@ const INTRO_OPTIONS = [
 
 export default function ParentProfileEdit() {
   const { user, refreshUser } = useAuth();
+
   const [form, setForm] = useState({
     fullName: '',
     company: '',
@@ -35,6 +37,9 @@ export default function ParentProfileEdit() {
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [importingPhoto, setImportingPhoto] = useState(false);
+  const [photoImported, setPhotoImported] = useState(false);
+  const [photoImportError, setPhotoImportError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -45,6 +50,7 @@ export default function ParentProfileEdit() {
         industry: user.industry || '',
         introWillingness: user.intro_willingness || 'yes',
         directoryVisible: user.visible_in_directory !== false,
+        linkedinUrl: user.linkedin_url || '',
       });
     }
   }, [user]);
@@ -60,6 +66,7 @@ export default function ParentProfileEdit() {
         industry: form.industry,
         intro_willingness: form.introWillingness,
         visible_in_directory: form.directoryVisible,
+        ...(form.linkedinUrl.trim() ? { linkedin_url: form.linkedinUrl.trim() } : {}),
       });
       if (refreshUser) refreshUser().catch(() => {});
       try { sessionStorage.removeItem('directoryDataCache'); } catch (e) { /* ok */ }
@@ -72,6 +79,7 @@ export default function ParentProfileEdit() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', flexDirection: 'column', padding: '0 0 80px' }}>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       {/* Header */}
       <div style={{
         background: '#0d1117', borderBottom: '1px solid #1A1A1A',
@@ -171,6 +179,63 @@ export default function ParentProfileEdit() {
                 );
               })}
             </div>
+          </div>
+
+          {/* LinkedIn URL + Photo Import */}
+          <div>
+            <FieldLabel>
+              LinkedIn Profile{' '}
+              <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+            </FieldLabel>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <FieldInput
+                value={form.linkedinUrl}
+                onChange={e => { setForm(f => ({ ...f, linkedinUrl: e.target.value })); setPhotoImportError(''); setPhotoImported(false); }}
+                placeholder="https://linkedin.com/in/yourname"
+              />
+            </div>
+            {form.linkedinUrl.trim() && (
+              <div style={{ marginTop: 10 }}>
+                <button
+                  type="button"
+                  disabled={importingPhoto || photoImported}
+                  onClick={async () => {
+                    setImportingPhoto(true);
+                    setPhotoImportError('');
+                    try {
+                      const res = await proxycurlService({ action: 'enrichParentProfile', params: { linkedinUrl: form.linkedinUrl.trim() } });
+                      const photo = res?.data?.profile_pic;
+                      if (photo) {
+                        await base44.auth.updateMe({ profile_photo: photo, linkedin_url: form.linkedinUrl.trim() });
+                        if (refreshUser) refreshUser().catch(() => {});
+                        setPhotoImported(true);
+                      } else {
+                        setPhotoImportError('No photo found on this LinkedIn profile.');
+                      }
+                    } catch (e) {
+                      setPhotoImportError('Could not import photo. Check the URL and try again.');
+                    } finally {
+                      setImportingPhoto(false);
+                    }
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+                    color: photoImported ? '#4CAF50' : '#0a66c2',
+                    background: photoImported ? 'rgba(76,175,80,0.1)' : 'rgba(10,102,194,0.1)',
+                    border: `1px solid ${photoImported ? 'rgba(76,175,80,0.3)' : 'rgba(10,102,194,0.3)'}`,
+                    borderRadius: 8, padding: '8px 16px', cursor: importingPhoto || photoImported ? 'not-allowed' : 'pointer',
+                    minHeight: 'auto', opacity: importingPhoto ? 0.7 : 1,
+                  }}
+                >
+                  {importingPhoto ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Linkedin size={14} />}
+                  {photoImported ? '✓ Photo imported!' : importingPhoto ? 'Importing...' : 'Import profile photo from LinkedIn'}
+                </button>
+                {photoImportError && (
+                  <p style={{ fontFamily: dmSans, fontSize: 12, color: '#EF4444', margin: '6px 0 0' }}>{photoImportError}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Directory Visibility */}
