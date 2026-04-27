@@ -52,7 +52,7 @@ export default function Dashboard() {
   // Determine if user has FastIQ (paid)
   const isPaid = user?.fastiq_active === true || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq';
 
-  const handleUnlock = () => navigate('GetStarted');
+  const handleUnlock = () => navigate('FastIQDashboard');
 
   const renderTabContent = () => {
     switch (activeTab) {
