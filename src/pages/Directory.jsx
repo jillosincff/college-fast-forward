@@ -5,6 +5,7 @@ import { navigate } from '@/components/utils/navigation';
 import DashboardNav from '@/components/dashboard-v2/DashboardNav';
 import MessageUserModal from '../components/directory/MessageUserModal';
 import ProfileModal from '../components/directory/ProfileModal';
+import MessageComposerModal from '@/components/composer/MessageComposerModal';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -272,6 +273,8 @@ export default function Directory() {
   const [isMessageModalOpen, setMessageModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
+  const [isComposerOpen, setComposerOpen] = useState(false);
+  const [composerRecipient, setComposerRecipient] = useState(null);
 
   const isFastIQ = !!(
     user?.fastiq_setup_complete ||
@@ -703,7 +706,19 @@ export default function Directory() {
           isOpen={isProfileModalOpen}
           onClose={() => { setProfileModalOpen(false); setSelectedProfileId(null); }}
           userId={selectedProfileId}
-          onMessage={handleMessage}
+          onMessage={(recipient) => {
+            setComposerRecipient(recipient);
+            setComposerOpen(true);
+            setProfileModalOpen(false);
+          }}
+        />
+      )}
+      {composerRecipient && (
+        <MessageComposerModal
+          isOpen={isComposerOpen}
+          onClose={() => setComposerOpen(false)}
+          recipient={composerRecipient}
+          currentUser={user}
         />
       )}
     </div>
