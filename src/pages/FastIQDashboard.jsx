@@ -72,43 +72,49 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 11, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.12em',
           color: '#E85D20', margin: '0 0 12px'
-        }}>FASTIQ™</p>
+        }}>FASTIQ™ — FOR YOUR STUDENT</p>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
-          fontSize: 32, fontWeight: 700,
-          color: '#1A1A1A', margin: '0 0 12px'
+          fontSize: 30, fontWeight: 700,
+          color: '#1A1A1A', margin: '0 0 14px', lineHeight: 1.2
         }}>
-          The AI engine behind CFF.
+          Give your student the unfair advantage in a brutal job market.
         </h1>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: 15, color: '#888',
-          margin: '0 0 40px', lineHeight: 1.6
+          fontSize: 15, color: '#555',
+          margin: '0 0 36px', lineHeight: 1.7
         }}>
-          FastIQ powers every intelligent feature in College Fast Forward — from scoring your resume against your goals to finding alumni at your dream companies and drafting outreach that actually gets responses.
+          FastIQ is your student's personal career agent — available 24/7. It combines the power of the free parent & alumni network at their school with intelligent AI that actually moves the needle.
         </p>
 
         {/* Feature list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 40 }}>
-          {FASTIQ_FEATURES.map(f => (
-            <div key={f.label} style={{
-              display: 'flex', alignItems: 'center',
-              gap: 16, padding: '14px 0',
+        <p style={{
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: 11, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.1em',
+          color: '#888', margin: '0 0 16px'
+        }}>WHAT FASTIQ DOES FOR YOUR STUDENT</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 40 }}>
+          {[
+            { icon: '🔍', text: 'Finds alumni at the exact companies they want to work for and crafts personalized outreach messages that get real replies' },
+            { icon: '📄', text: 'Tailors their resume to every job or internship they apply to' },
+            { icon: '🔗', text: 'Optimizes their LinkedIn profile so recruiters and hiring managers actually notice them' },
+            { icon: '📡', text: 'Spots hiring signals and hidden opportunities at companies in their industry' },
+            { icon: '🎤', text: 'Runs full mock interviews using the STAR method with detailed feedback' },
+            { icon: '🧠', text: 'Includes a personality & career assessment to help them figure out what they really want to do' },
+          ].map((item, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start',
+              gap: 14, padding: '14px 0',
               borderBottom: '1px solid #F5F5F5',
             }}>
-              <span style={{ fontSize: 20, flexShrink: 0 }}>{f.icon}</span>
-              <div style={{ flex: 1 }}>
-                <p style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 14, fontWeight: 600,
-                  color: '#1A1A1A', margin: '0 0 2px'
-                }}>{f.label}</p>
-                <p style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 12, color: '#888', margin: 0
-                }}>{f.desc}</p>
-              </div>
-              <span style={{ color: '#E85D20', fontSize: 16 }}>🔒</span>
+              <span style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 14, color: '#333',
+                margin: 0, lineHeight: 1.6,
+              }}>{item.text}</p>
             </div>
           ))}
         </div>
@@ -118,20 +124,20 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           style={{
             background: '#E85D20', border: 'none',
             borderRadius: 10, padding: '16px',
-            fontSize: 15, fontWeight: 600,
+            fontSize: 15, fontWeight: 700,
             color: '#fff', cursor: 'pointer',
             fontFamily: "'DM Sans', sans-serif",
             width: '100%',
           }}
         >
-          Unlock FastIQ &mdash; $29/month &rarr;
+          Unlock FastIQ for my student &rarr;
         </button>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 13, color: '#888', textAlign: 'center',
           margin: '8px 0 0',
         }}>
-          7 day free trial &middot; Cancel anytime
+          $29/month &middot; 7-day free trial &middot; Cancel anytime
         </p>
         </div>
       </div>
