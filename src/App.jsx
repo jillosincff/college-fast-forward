@@ -104,6 +104,7 @@ const AuthenticatedApp = () => {
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
           <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
           <Route path="/ParentHome" element={<ParentHome />} />
+          <Route path="/ParentDashboard" element={<Navigate to="/ParentHome" replace />} />
           <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
           <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
           <Route path="/GatorAuth" element={<GatorAuth />} />
