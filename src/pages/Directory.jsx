@@ -8,6 +8,29 @@ import ProfileModal from '../components/directory/ProfileModal';
 import MessageComposerModal from '@/components/composer/MessageComposerModal';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 
+// Error boundary wrapper for modal
+class ErrorBoundaryWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error) {
+    console.error('Modal crashed:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null; // Silently fail — just close the modal
+    }
+    return this.props.children;
+  }
+}
+
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 const PAGE_SIZE = 24;
@@ -713,12 +736,16 @@ export default function Directory() {
           }}
         />
       )}
-      {/* <MessageComposerModal
-        isOpen={isComposerOpen && !!composerRecipient}
-        onClose={() => { setComposerOpen(false); setComposerRecipient(null); }}
-        recipient={composerRecipient}
-        currentUser={user}
-      /> */}
+      {isComposerOpen && composerRecipient && (
+        <ErrorBoundaryWrapper>
+          <MessageComposerModal
+            isOpen={true}
+            onClose={() => { setComposerOpen(false); setComposerRecipient(null); }}
+            recipient={composerRecipient}
+            currentUser={user}
+          />
+        </ErrorBoundaryWrapper>
+      )}
     </div>
   );
 }
