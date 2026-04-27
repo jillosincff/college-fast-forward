@@ -99,7 +99,7 @@ export default function MessageUserModal({ isOpen, onClose, recipientUser }) {
   useEffect(() => {
     if (recipientUser && isOpen) {
       const fn = getFirstName(recipientUser);
-      setMessage(`Hi ${fn},\n\n`);
+      setMessage(`Hi ${fn},\n\nI saw your profile on College Fast Forward. I'd love to set up a time to connect for some guidance if you're open to it.\n\n`);
       setSent(false);
     }
   }, [recipientUser, isOpen]);
