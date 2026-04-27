@@ -669,7 +669,7 @@ export default function Directory() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }} className="dir-grid">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, gridAutoRows: '1fr' }} className="dir-grid">
                 {visibleUsers.map(u => (
                   <MemberCard key={u.id} user={u} onMessage={handleMessage} onViewProfile={handleViewProfile} />
                 ))}
