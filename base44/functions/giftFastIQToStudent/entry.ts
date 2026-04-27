@@ -67,11 +67,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Case 2 — Student found, activate trial immediately
+    // Case 2 — Student found, activate trial immediately (5 days)
     if (student) {
       const trialStart = new Date();
       const trialEnd = new Date(trialStart);
-      trialEnd.setDate(trialEnd.getDate() + 7);
+      trialEnd.setDate(trialEnd.getDate() + 5);
 
       await base44.asServiceRole.entities.User.update(student.id, {
         fastiq_active: true,
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
         studentEmail: student.email,
         studentFirstName: student.first_name || student.full_name?.split(' ')[0] || 'there',
         parentFirstName: user.first_name || user.full_name?.split(' ')[0] || 'Your parent',
-        trialDays: 7,
+        trialDays: 5,
       }).catch(e => console.error('Gift email failed:', e.message));
 
       // Log analytics
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
         studentEmail,
         studentFirstName: 'there',
         parentFirstName: user.first_name || user.full_name?.split(' ')[0] || 'Your parent',
-        trialDays: 7,
+        trialDays: 5,
       }).catch(e => console.error('Pending gift email failed:', e.message));
 
       // Log analytics
