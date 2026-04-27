@@ -273,6 +273,11 @@ export default function Directory() {
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
 
+  // Prevent profile modal from auto-opening on mount
+  useEffect(() => {
+    setProfileModalOpen(false);
+  }, []);
+
   const isFastIQ = !!(
     user?.fastiq_setup_complete ||
     user?.subscription_status === 'active' ||
