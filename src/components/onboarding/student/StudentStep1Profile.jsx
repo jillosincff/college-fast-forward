@@ -25,6 +25,7 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
     full_name: formData?.full_name || '',
     graduation_year: formData?.graduation_year || new Date().getFullYear() + 2,
     major: formData?.major || '',
+    school: formData?.school || '',
     location: formData?.location || '',
     linkedin_url: formData?.linkedin_url || '',
     includeInDirectory: formData?.includeInDirectory !== false,
@@ -100,7 +101,7 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
   };
 
   const handleNext = () => {
-    const requiredFields = ['first_name', 'last_name', 'graduation_year', 'major'];
+    const requiredFields = ['first_name', 'last_name', 'graduation_year', 'major', 'school'];
     const newErrors = {};
     
     requiredFields.forEach(field => {
@@ -130,12 +131,12 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
     onNext();
   };
 
-  const canContinue = localData.first_name && localData.last_name && localData.graduation_year && localData.major && !errors.linkedin_url && !errors.first_name && !errors.last_name;
+  const canContinue = localData.first_name && localData.last_name && localData.graduation_year && localData.major && localData.school && !errors.linkedin_url && !errors.first_name && !errors.last_name;
 
   const currentYear = new Date().getFullYear();
   const graduationYears = Array.from({ length: 7 }, (_, i) => currentYear + i);
 
-  const requiredFields = ['first_name', 'last_name', 'graduation_year', 'major'];
+  const requiredFields = ['first_name', 'last_name', 'graduation_year', 'major', 'school'];
   const completedFields = requiredFields.filter(field => localData[field] && localData[field].toString().trim()).length;
   const progressPercent = (completedFields / requiredFields.length) * 100;
 
@@ -239,7 +240,22 @@ export default function StudentStep1Profile({ formData, onUpdate, onNext, onBack
               {errors.major && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex items-center gap-2 mt-2 text-red-600 text-sm"><AlertCircle className="w-4 h-4" />{errors.major}</motion.div>}
             </AnimatePresence>
           </div>
-        </div>
+          </div>
+
+          {/* School */}
+          <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">🏫 What school do you attend? *</label>
+          <Input 
+            value={localData.school} 
+            onChange={(e) => handleChange('school', e.target.value)} 
+            placeholder="e.g., University of Florida" 
+            className={`py-3 ${errors.school ? 'border-red-300' : ''}`} 
+            data-error={!!errors.school} 
+          />
+          <AnimatePresence>
+            {errors.school && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex items-center gap-2 mt-2 text-red-600 text-sm"><AlertCircle className="w-4 h-4" />{errors.school}</motion.div>}
+          </AnimatePresence>
+          </div>
 
         {/* Location with Autocomplete - OPTIONAL */}
         <div className="relative">
