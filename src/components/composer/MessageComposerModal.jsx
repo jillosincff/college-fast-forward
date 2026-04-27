@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import Step1Intent from './Step1Intent';
@@ -22,18 +22,18 @@ export default function MessageComposerModal({ isOpen, onClose, recipient, curre
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
-  const trackEvent = (eventName, data = {}) => {
+  const trackEvent = React.useCallback((eventName, data = {}) => {
     base44.analytics.track({
       eventName,
       properties: { recipient_id: recipient?.id, ...data },
     }).catch(() => {});
-  };
+  }, [recipient?.id]);
 
   useEffect(() => {
     if (isOpen) {
       trackEvent('composer_opened');
     }
-  }, [isOpen]);
+  }, [isOpen, trackEvent]);
 
   if (!isOpen) return null;
 
