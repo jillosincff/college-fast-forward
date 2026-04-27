@@ -96,11 +96,7 @@ const AuthenticatedApp = () => {
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
-          <Route path="/ParentAllSet" element={
-            <LayoutWrapper currentPageName="ParentAllSet">
-              <ParentAllSet />
-            </LayoutWrapper>
-          } />
+          <Route path="/ParentAllSet" element={<ParentAllSet />} />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
           <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
           <Route path="/ParentHome" element={<ParentHome />} />
