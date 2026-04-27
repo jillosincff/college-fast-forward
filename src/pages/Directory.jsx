@@ -713,12 +713,12 @@ export default function Directory() {
           }}
         />
       )}
-      <MessageComposerModal
+      {/* <MessageComposerModal
         isOpen={isComposerOpen && !!composerRecipient}
         onClose={() => { setComposerOpen(false); setComposerRecipient(null); }}
         recipient={composerRecipient}
         currentUser={user}
-      />
+      /> */}
     </div>
   );
 }
