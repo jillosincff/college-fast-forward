@@ -389,7 +389,7 @@ export default function Directory() {
 
   const visibleUsers = filteredUsers.slice(0, visibleCount);
 
-  const handleMessage = (u) => { setSelectedUser(u); setMessageModalOpen(true); };
+  const handleMessage = (u) => { setComposerRecipient(u); setComposerOpen(true); };
   const handleViewProfile = (id) => { setSelectedProfileId(id); setProfileModalOpen(true); };
   const clearFilters = () => { setSearchTerm(''); setRoleFilter('all'); setIndustryFilter('all'); setHelpFilter('all'); };
 
