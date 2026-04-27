@@ -296,8 +296,6 @@ export default function Directory() {
   const [isMessageModalOpen, setMessageModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState(null);
-  const [isComposerOpen, setComposerOpen] = useState(false);
-  const [composerRecipient, setComposerRecipient] = useState(null);
 
   const isFastIQ = !!(
     user?.fastiq_setup_complete ||
@@ -413,8 +411,8 @@ export default function Directory() {
   const visibleUsers = filteredUsers.slice(0, visibleCount);
 
   const handleMessage = (u) => { 
-  setSelectedProfileId(u.id); 
-  setProfileModalOpen(true);
+  setSelectedUser(u); 
+  setMessageModalOpen(true);
 };
   const handleViewProfile = (id) => { setSelectedProfileId(id); setProfileModalOpen(true); };
   const clearFilters = () => { setSearchTerm(''); setRoleFilter('all'); setIndustryFilter('all'); setHelpFilter('all'); };
@@ -733,13 +731,12 @@ export default function Directory() {
           onClose={() => { setProfileModalOpen(false); setSelectedProfileId(null); }}
           userId={selectedProfileId}
           onMessage={(recipient) => {
-            setComposerRecipient(recipient);
-            setComposerOpen(true);
+            setSelectedUser(recipient);
+            setMessageModalOpen(true);
             setProfileModalOpen(false);
           }}
         />
       )}
-      {/* Modal disabled temporarily due to third-party script conflicts */}
     </div>
   );
 }
