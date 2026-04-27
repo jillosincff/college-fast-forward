@@ -84,9 +84,11 @@ Deno.serve(async (req) => {
         const existing = await base44.asServiceRole.entities.User.filter({ email: userData.email });
         
         if (existing?.length > 0) {
+          const trialEnd = new Date();
+          trialEnd.setDate(trialEnd.getDate() + 7);
           await base44.asServiceRole.entities.User.update(existing[0].id, {
             trial_status: 'active',
-            trial_end_date: '2026-05-04T00:00:00Z',
+            trial_end_date: trialEnd.toISOString(),
             fastiq_trial_active: true,
             subscription_status: 'free',
             membership_tier: 'free',
