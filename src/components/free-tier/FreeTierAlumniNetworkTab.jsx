@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
 
 const SAMPLE_ALUMNI = [
   { company: 'Goldman Sachs', count: 12, roles: [{ title: 'Analyst', count: 3 }, { title: 'Associate', count: 2 }, { title: 'Manager', count: 1 }] },
@@ -8,6 +9,16 @@ const SAMPLE_ALUMNI = [
 
 export default function FreeTierAlumniNetworkTab({ user, onOpenUpgrade }) {
   const isFastIQ = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq');
+  const trackedRef = useRef(false);
+
+  // Track when non-trial users view blurred leads — "evaluated FastIQ but didn't trial" signal
+  useEffect(() => {
+    if (!isFastIQ && !trackedRef.current) {
+      trackedRef.current = true;
+      base44.analytics.track({ eventName: 'fastiq_leads_viewed', properties: { source: 'alumni_network_tab' } });
+    }
+  }, [isFastIQ]);
+
   const savedGoals = user?.career_goals;
   const targetCompanies = savedGoals?.target_companies || user?.target_companies || [];
   const targetIndustries = savedGoals?.industries || user?.target_industries || [];

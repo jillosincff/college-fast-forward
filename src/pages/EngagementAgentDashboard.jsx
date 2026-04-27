@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, XCircle, Mail, Eye, Clock, Send, AlertCircle, RefreshCw, Play } from 'lucide-react';
+import IntentSegmentPanel from '@/components/engagement/IntentSegmentPanel';
 
 const STATUS_COLORS = {
   pending_approval: 'bg-yellow-100 text-yellow-800',
@@ -162,6 +163,9 @@ export default function EngagementAgentDashboard() {
             </div>
           ))}
         </div>
+
+        {/* Intent Segment */}
+        <IntentSegmentPanel />
 
         {/* Tabs */}
         <Tabs defaultValue="pending">
