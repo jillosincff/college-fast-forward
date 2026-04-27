@@ -52,7 +52,7 @@ function buildHtml(firstName, school, persona, days) {
         🎖 FOUNDING RATE — ${urgencyLabel.toUpperCase()}
       </p>
       <h1 style="font-size:24px;font-weight:700;color:#fff;margin:0 0 10px;line-height:1.3;">
-        ${name}, ${urgencyLabel} to lock in the Founding Rate.
+        Hi ${name}, ${urgencyLabel} to lock in the Founding Rate.
       </h1>
       <p style="font-size:15px;color:rgba(255,255,255,0.55);margin:0;line-height:1.6;">
         Lock in $14.50/month before it's gone forever.

@@ -117,7 +117,8 @@ Deno.serve(async (req) => {
     // Dynamically fetch all affected users — anyone with last_day7_email_sent_at or last_day8_email_sent_at
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
     const affected = allUsers.filter(u =>
-      u.last_day7_email_sent_at || u.last_day8_email_sent_at
+      (u.last_day7_email_sent_at || u.last_day8_email_sent_at) &&
+      u.email !== 'josinoff@gmail.com'
     );
 
     console.log(`Found ${affected.length} affected users`);
