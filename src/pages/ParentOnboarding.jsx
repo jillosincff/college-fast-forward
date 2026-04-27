@@ -53,7 +53,7 @@ export default function ParentOnboarding() {
       intro_willingness: formData.introWillingness,
       visible_in_directory: formData.directoryVisible !== false,
       directory_consent_given: formData.directoryVisible !== false,
-      linkedin_url: formData.linkedinUrl?.trim() || '',
+      ...(formData.linkedinUrl?.trim() ? { linkedin_url: formData.linkedinUrl.trim() } : {}),
     };
     if (!user?.founding_offer_started_at) {
       updateData.founding_offer_started_at = new Date().toISOString();
