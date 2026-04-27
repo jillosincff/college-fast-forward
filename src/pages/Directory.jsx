@@ -212,7 +212,7 @@ function MemberCard({ user, onMessage, onViewProfile }) {
       {/* Actions */}
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button
-          onClick={() => onMessage(user)}
+          onClick={() => onViewProfile(user.id)}
           style={{
             flex: 1, fontFamily: dmSans, fontSize: 13, fontWeight: 600,
             color: '#fff', background: '#E85D20', border: 'none',
@@ -413,7 +413,8 @@ export default function Directory() {
   const visibleUsers = filteredUsers.slice(0, visibleCount);
 
   const handleMessage = (u) => { 
-  alert('Messaging temporarily disabled. Please use the message feature from their profile instead.');
+  setSelectedProfileId(u.id); 
+  setProfileModalOpen(true);
 };
   const handleViewProfile = (id) => { setSelectedProfileId(id); setProfileModalOpen(true); };
   const clearFilters = () => { setSearchTerm(''); setRoleFilter('all'); setIndustryFilter('all'); setHelpFilter('all'); };
