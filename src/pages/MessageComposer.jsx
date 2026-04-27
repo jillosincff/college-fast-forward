@@ -251,126 +251,170 @@ export default function MessageComposer() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div style={{ minHeight: '100vh', background: '#0d0d14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTop: '3px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
     );
   }
 
   if (!recipient) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="max-w-2xl mx-auto text-center py-12">
-          <User className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-slate-900 mb-2">User Not Found</h2>
-          <p className="text-slate-600 mb-4">We couldn't find this user.</p>
-          <Button onClick={() => navigate('Dashboard')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
-          </Button>
+      <div style={{ minHeight: '100vh', background: '#0d0d14', padding: '24px' }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: 60 }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 8 }}>User Not Found</h2>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>We couldn't find this user.</p>
+          <button onClick={() => navigate('MyMessages')} style={{
+            background: '#E85D20', color: '#fff', border: 'none',
+            borderRadius: 10, padding: '12px 24px',
+            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', minHeight: 'auto',
+          }}>
+            ← Back to Messages
+          </button>
         </div>
       </div>
     );
   }
 
   const recipientFirstName = recipient?.full_name?.split(' ')[0] || 'them';
+  const dmSans = "'DM Sans', system-ui, sans-serif";
+  const playfair = "'Playfair Display', Georgia, serif";
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div style={{ minHeight: '100vh', background: '#0d0d14', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('MyMessages')}
-            className="text-slate-600 -ml-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Back
-          </Button>
-        </div>
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: '#0d1117', borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '12px 24px',
+      }}>
+        <button
+          onClick={() => navigate('MyMessages')}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontFamily: dmSans, fontSize: 13, fontWeight: 400,
+            color: 'rgba(244,240,232,0.5)', display: 'flex', alignItems: 'center', gap: 6,
+            minHeight: 'auto', padding: 0,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.5)'; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          Back to Messages
+        </button>
       </div>
 
-      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {/* Profile Card - Context from dashboard */}
-        <RecipientProfileCard recipient={recipient} />
+      <div style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Profile Card */}
+        <div style={{
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: '50%', background: '#E85D20',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', flexShrink: 0,
+          }}>
+            {(recipient?.full_name?.[0] || 'U').toUpperCase()}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', margin: 0 }}>
+              {recipient?.full_name || recipient?.email}
+            </p>
+            {recipient?.current_company && (
+              <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>
+                {recipient.job_title ? `${recipient.job_title} at ${recipient.current_company}` : recipient.current_company}
+              </p>
+            )}
+          </div>
+        </div>
 
         {/* Message Thread */}
-        <div className="space-y-4 mb-6">
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 200, maxHeight: 500, overflowY: 'auto' }}>
           {messages.length === 0 && isFirstMessage && (
-            <div className="text-center py-6">
-              <MessageSquare className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-              <p className="text-slate-600 font-medium">Start a conversation with {recipientFirstName}</p>
+            <div style={{ textAlign: 'center', paddingY: 24, color: 'rgba(255,255,255,0.5)', fontFamily: dmSans }}>
+              <p style={{ fontSize: 14, margin: 0 }}>Start a conversation with {recipientFirstName}</p>
             </div>
           )}
 
           {messages.map((msg, idx) => {
             const isMine = msg.sender_email === user.email;
             return (
-              <motion.div
-                key={msg.id || idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`max-w-[80%] ${isMine ? 'order-2' : 'order-1'}`}>
-                  <div className={`rounded-2xl px-4 py-3 ${
-                    isMine 
-                      ? 'bg-[#0021A5] rounded-br-sm' 
-                      : 'bg-white border border-slate-200 rounded-bl-sm'
-                  }`}>
-                    <p className="text-sm leading-relaxed" style={{ color: isMine ? '#ffffff' : '#0f172a' }}>{msg.body}</p>
+              <div key={msg.id || idx} style={{
+                display: 'flex',
+                justifyContent: isMine ? 'flex-end' : 'flex-start',
+                gap: 8,
+              }}>
+                <div style={{ maxWidth: '75%' }}>
+                  <div style={{
+                    background: isMine ? '#0021A5' : 'rgba(255,255,255,0.08)',
+                    border: isMine ? 'none' : '1px solid rgba(255,255,255,0.12)',
+                    color: isMine ? '#fff' : 'rgba(255,255,255,0.85)',
+                    borderRadius: isMine ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
+                    padding: '10px 14px',
+                    fontFamily: dmSans, fontSize: 13, lineHeight: 1.5,
+                  }}>
+                    {msg.body}
                   </div>
-                  <p className={`text-xs text-slate-400 mt-1 ${isMine ? 'text-right' : 'text-left'}`}>
-                    {new Date(msg.created_date).toLocaleString()}
+                  <p style={{
+                    fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)',
+                    margin: '4px 0 0', textAlign: isMine ? 'right' : 'left',
+                  }}>
+                    {new Date(msg.created_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
 
-        {/* First Message Templates - Dynamic based on recipient */}
-        {isFirstMessage && messageTemplates.length > 0 && (
-          <div className="mb-6">
-            <MessageTemplatesSelector
-              templates={messageTemplates}
-              onSelect={handleTemplateSelect}
-              selectedId={selectedTemplateId}
-            />
-          </div>
-        )}
-
         {/* Message Composer */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-          <Textarea
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16 }}>
+          <textarea
             value={newMessage}
             onChange={(e) => {
               setNewMessage(e.target.value.slice(0, 5000));
-              if (selectedTemplateId) setSelectedTemplateId(null); // Clear selection if they edit
+              if (selectedTemplateId) setSelectedTemplateId(null);
             }}
             placeholder={`Message ${recipientFirstName}...`}
-            rows={5}
-            className="resize-none border-slate-200 focus:border-blue-500"
+            style={{
+              width: '100%', fontFamily: dmSans, fontSize: 13, color: '#fff',
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 10, padding: '12px 14px', boxSizing: 'border-box',
+              resize: 'vertical', minHeight: 80, maxHeight: 200,
+              outline: 'none',
+            }}
+            onFocus={e => { e.target.style.borderColor = 'rgba(232,93,32,0.4)'; }}
+            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
           />
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-sm text-slate-400">{newMessage.length}/5000</span>
-            <Button
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+            <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+              {newMessage.length}/5000
+            </span>
+            <button
               onClick={handleSend}
               disabled={!newMessage.trim() || sending}
-              className="bg-[#FA4616] hover:bg-orange-600 gap-2"
+              style={{
+                background: !newMessage.trim() || sending ? '#555' : '#E85D20',
+                color: '#fff', border: 'none', borderRadius: 10,
+                padding: '10px 20px', fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+                cursor: !newMessage.trim() || sending ? 'not-allowed' : 'pointer',
+                opacity: !newMessage.trim() || sending ? 0.5 : 1,
+                minHeight: 'auto', transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { if (!(!newMessage.trim() || sending)) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >
-              {sending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-              Send Message
-            </Button>
+              {sending ? 'Sending...' : 'Send Message →'}
+            </button>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }
