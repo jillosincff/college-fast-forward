@@ -251,25 +251,38 @@ export default function MessageComposer() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0d0d14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTop: '3px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ minHeight: '100vh', background: '#08080f', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(232,93,32,0.06) 0%, transparent 60%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTop: '3px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite', position: 'relative', zIndex: 1 }} />
       </div>
     );
   }
 
   if (!recipient) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0d0d14', padding: '24px' }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', textAlign: 'center', paddingTop: 60 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>❌</div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 8 }}>User Not Found</h2>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>We couldn't find this user.</p>
+      <div style={{ minHeight: '100vh', background: '#08080f', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: 500, height: 400, background: 'radial-gradient(ellipse, rgba(232,93,32,0.05) 0%, transparent 60%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{ maxWidth: 480, textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 12 }}>User Not Found</h2>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.65)', marginBottom: 28, lineHeight: 1.6 }}>We couldn't find this user. Head back to your messages.</p>
           <button onClick={() => navigate('MyMessages')} style={{
             background: '#E85D20', color: '#fff', border: 'none',
-            borderRadius: 10, padding: '12px 24px',
-            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
-            cursor: 'pointer', minHeight: 'auto',
-          }}>
+            borderRadius: 14, padding: '14px 32px',
+            fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600,
+            cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.35)',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(232,93,32,0.45)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)'; }}
+          >
             ← Back to Messages
           </button>
         </div>
@@ -282,11 +295,19 @@ export default function MessageComposer() {
   const playfair = "'Playfair Display', Georgia, serif";
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0d0d14', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: '#08080f', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+      {/* Background gradient */}
+      <div style={{
+        position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
+        width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.05) 0%, transparent 60%)',
+        pointerEvents: 'none', zIndex: 0,
+      }} />
+
       {/* Header */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 10,
-        background: '#0d1117', borderBottom: '1px solid rgba(255,255,255,0.06)',
+        position: 'sticky', top: 0, zIndex: 20,
+        background: 'rgba(8,8,15,0.85)', backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
         padding: '12px 24px',
       }}>
         <button
@@ -294,36 +315,37 @@ export default function MessageComposer() {
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
             fontFamily: dmSans, fontSize: 13, fontWeight: 400,
-            color: 'rgba(244,240,232,0.5)', display: 'flex', alignItems: 'center', gap: 6,
-            minHeight: 'auto', padding: 0,
+            color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 6,
+            minHeight: 'auto', padding: 0, transition: 'color 0.2s',
           }}
           onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.5)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           Back to Messages
         </button>
       </div>
 
-      <div style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '32px 20px 48px', display: 'flex', flexDirection: 'column', gap: 20, position: 'relative', zIndex: 1 }}>
         {/* Profile Card */}
         <div style={{
           background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 12,
+          borderRadius: 16, padding: '20px', display: 'flex', alignItems: 'center', gap: 14,
         }}>
           <div style={{
-            width: 44, height: 44, borderRadius: '50%', background: '#E85D20',
+            width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #E85D20, #c9471a)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', flexShrink: 0,
+            fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: '#fff', flexShrink: 0,
+            boxShadow: '0 4px 16px rgba(232,93,32,0.3)',
           }}>
             {(recipient?.full_name?.[0] || 'U').toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff', margin: 0 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: '#fff', margin: 0 }}>
               {recipient?.full_name || recipient?.email}
             </p>
             {recipient?.current_company && (
-              <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '2px 0 0' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '4px 0 0' }}>
                 {recipient.job_title ? `${recipient.job_title} at ${recipient.current_company}` : recipient.current_company}
               </p>
             )}
@@ -333,7 +355,7 @@ export default function MessageComposer() {
         {/* Message Thread */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 200, maxHeight: 500, overflowY: 'auto' }}>
           {messages.length === 0 && isFirstMessage && (
-            <div style={{ textAlign: 'center', paddingY: 24, color: 'rgba(255,255,255,0.5)', fontFamily: dmSans }}>
+            <div style={{ textAlign: 'center', paddingY: 32, color: 'rgba(255,255,255,0.5)', fontFamily: dmSans }}>
               <p style={{ fontSize: 14, margin: 0 }}>Start a conversation with {recipientFirstName}</p>
             </div>
           )}
@@ -348,18 +370,18 @@ export default function MessageComposer() {
               }}>
                 <div style={{ maxWidth: '75%' }}>
                   <div style={{
-                    background: isMine ? '#0021A5' : 'rgba(255,255,255,0.08)',
+                    background: isMine ? '#0021A5' : 'rgba(255,255,255,0.07)',
                     border: isMine ? 'none' : '1px solid rgba(255,255,255,0.12)',
                     color: isMine ? '#fff' : 'rgba(255,255,255,0.85)',
-                    borderRadius: isMine ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
-                    padding: '10px 14px',
+                    borderRadius: isMine ? '16px 6px 16px 16px' : '6px 16px 16px 16px',
+                    padding: '12px 16px',
                     fontFamily: dmSans, fontSize: 13, lineHeight: 1.5,
                   }}>
                     {msg.body}
                   </div>
                   <p style={{
-                    fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)',
-                    margin: '4px 0 0', textAlign: isMine ? 'right' : 'left',
+                    fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)',
+                    margin: '6px 0 0', textAlign: isMine ? 'right' : 'left',
                   }}>
                     {new Date(msg.created_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                   </p>
@@ -370,7 +392,7 @@ export default function MessageComposer() {
         </div>
 
         {/* Message Composer */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16 }}>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
           <textarea
             value={newMessage}
             onChange={(e) => {
@@ -380,31 +402,31 @@ export default function MessageComposer() {
             placeholder={`Message ${recipientFirstName}...`}
             style={{
               width: '100%', fontFamily: dmSans, fontSize: 13, color: '#fff',
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 10, padding: '12px 14px', boxSizing: 'border-box',
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 12, padding: '12px 16px', boxSizing: 'border-box',
               resize: 'vertical', minHeight: 80, maxHeight: 200,
-              outline: 'none',
+              outline: 'none', transition: 'border-color 0.2s',
             }}
             onFocus={e => { e.target.style.borderColor = 'rgba(232,93,32,0.4)'; }}
-            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; }}
           />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-            <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+            <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
               {newMessage.length}/5000
             </span>
             <button
               onClick={handleSend}
               disabled={!newMessage.trim() || sending}
               style={{
-                background: !newMessage.trim() || sending ? '#555' : '#E85D20',
-                color: '#fff', border: 'none', borderRadius: 10,
-                padding: '10px 20px', fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+                background: !newMessage.trim() || sending ? 'rgba(232,93,32,0.4)' : '#E85D20',
+                color: '#fff', border: 'none', borderRadius: 12,
+                padding: '12px 24px', fontFamily: dmSans, fontSize: 13, fontWeight: 600,
                 cursor: !newMessage.trim() || sending ? 'not-allowed' : 'pointer',
-                opacity: !newMessage.trim() || sending ? 0.5 : 1,
-                minHeight: 'auto', transition: 'all 0.2s',
+                opacity: !newMessage.trim() || sending ? 0.6 : 1,
+                minHeight: 'auto', transition: 'all 0.2s', boxShadow: !newMessage.trim() || sending ? 'none' : '0 4px 16px rgba(232,93,32,0.3)',
               }}
-              onMouseEnter={e => { if (!(!newMessage.trim() || sending)) e.currentTarget.style.transform = 'translateY(-1px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+              onMouseEnter={e => { if (!(!newMessage.trim() || sending)) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.4)'; } }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(232,93,32,0.3)'; }}
             >
               {sending ? 'Sending...' : 'Send Message →'}
             </button>
