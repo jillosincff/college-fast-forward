@@ -1,0 +1,28 @@
+{
+  "name": "GlobalSettings",
+  "type": "object",
+  "properties": {
+    "setting_key": {
+      "type": "string",
+      "description": "Unique key for the setting (e.g., 'total_users_count')"
+    },
+    "value": {
+      "type": "number",
+      "description": "Numeric value of the setting"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "What this setting controls or represents"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this setting was last updated"
+    }
+  },
+  "required": [
+    "setting_key",
+    "value"
+  ]
+}

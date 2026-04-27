@@ -1,0 +1,48 @@
+{
+  "name": "HelperStreak",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the helper"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about this helper's streak activity"
+    },
+    "current_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Current consecutive weeks of helping"
+    },
+    "longest_streak": {
+      "type": "number",
+      "default": 0,
+      "description": "Longest streak ever achieved"
+    },
+    "last_help_week": {
+      "type": "string",
+      "description": "ISO week string of last help (e.g., '2024-W01')"
+    },
+    "streak_started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When current streak started"
+    },
+    "total_help_actions": {
+      "type": "number",
+      "default": 0,
+      "description": "Total lifetime help actions (intros + offers)"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

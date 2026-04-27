@@ -1,0 +1,85 @@
+{
+  "name": "HelpOffer",
+  "type": "object",
+  "properties": {
+    "job_request_id": {
+      "type": "string",
+      "description": "ID of the job request this help offer is for"
+    },
+    "offerer_user_id": {
+      "type": "string",
+      "description": "ID of the user making the help offer"
+    },
+    "offerer_name": {
+      "type": "string",
+      "description": "Name of the person offering help"
+    },
+    "offerer_email": {
+      "type": "string",
+      "description": "Email of the person offering help"
+    },
+    "request_creator_email": {
+      "type": "string",
+      "description": "Email of the user who created the job request"
+    },
+    "help_type": {
+      "type": "string",
+      "enum": [
+        "introduction",
+        "advice",
+        "referral",
+        "resume_review",
+        "interview_prep"
+      ],
+      "description": "Type of help being offered"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message from the helper to the student"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional description of the help being offered"
+    },
+    "contact_info": {
+      "type": "string",
+      "description": "How the student can follow up"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "completed",
+        "declined"
+      ],
+      "default": "pending",
+      "description": "Status of the help offer"
+    }
+  },
+  "required": [
+    "job_request_id",
+    "offerer_user_id",
+    "offerer_name",
+    "offerer_email",
+    "request_creator_email",
+    "help_type",
+    "message"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "offerer_user_id": "{{user.id}}"
+        },
+        {
+          "request_creator_email": "{{user.email}}"
+        }
+      ]
+    },
+    "write": {
+      "offerer_email": "{{user.email}}"
+    }
+  }
+}

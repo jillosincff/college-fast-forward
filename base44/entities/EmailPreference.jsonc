@@ -1,0 +1,99 @@
+{
+  "name": "EmailPreference",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user for easy lookup"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about this user's email preferences"
+    },
+    "all_emails": {
+      "type": "boolean",
+      "default": true,
+      "description": "Master toggle \u2014 if false, no emails are sent"
+    },
+    "welcome_email": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether welcome email was sent (tracking, not opt-in)"
+    },
+    "answer_notifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "New answer notifications"
+    },
+    "nudge_emails": {
+      "type": "boolean",
+      "default": true,
+      "description": "24h/48h activation nudge emails"
+    },
+    "thank_you_notifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Thank you notifications from students"
+    },
+    "daily_digest": {
+      "type": "boolean",
+      "default": true,
+      "description": "Daily match digest emails"
+    },
+    "weekly_digest": {
+      "type": "boolean",
+      "default": true,
+      "description": "Weekly digest emails"
+    },
+    "parent_joined_notifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Notifications when a parent joins via invite"
+    },
+    "reengagement_emails": {
+      "type": "boolean",
+      "default": true,
+      "description": "Re-engagement reminder emails"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

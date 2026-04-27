@@ -1,0 +1,55 @@
+{
+  "name": "Reminder",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user to be reminded"
+    },
+    "application_id": {
+      "type": "string",
+      "description": "ID of the application this reminder is for"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Details about what this reminder is for"
+    },
+    "remind_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The ISO date when the reminder should be sent"
+    },
+    "delivered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the reminder was successfully delivered"
+    },
+    "canceled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the reminder was canceled"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "application_followup"
+      ],
+      "default": "application_followup"
+    }
+  },
+  "required": [
+    "user_id",
+    "application_id",
+    "remind_at",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "user_id": "{{user.id}}"
+    },
+    "write": {
+      "user_id": "{{user.id}}"
+    }
+  }
+}

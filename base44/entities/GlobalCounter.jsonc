@@ -1,0 +1,29 @@
+{
+  "name": "GlobalCounter",
+  "type": "object",
+  "properties": {
+    "counter_name": {
+      "type": "string",
+      "description": "Name of the counter (e.g., 'family_count', 'user_count')"
+    },
+    "counter_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Current value of the counter"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "What this counter tracks"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the counter was last updated"
+    }
+  },
+  "required": [
+    "counter_name",
+    "counter_value"
+  ]
+}

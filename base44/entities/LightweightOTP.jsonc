@@ -1,0 +1,66 @@
+{
+  "name": "LightweightOTP",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Email address the OTP was sent to"
+    },
+    "code": {
+      "type": "string",
+      "description": "6-digit verification code"
+    },
+    "first_name": {
+      "type": "string",
+      "description": "First name provided by the user"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "parent",
+        "alumni",
+        "student",
+        "other"
+      ],
+      "default": "other",
+      "description": "Self-reported relationship to UF"
+    },
+    "source_question_id": {
+      "type": "string",
+      "description": "ID of the question they're responding to"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Context about this OTP request"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the OTP expires"
+    },
+    "used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the OTP has been used"
+    },
+    "used_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the OTP was used"
+    }
+  },
+  "required": [
+    "email",
+    "code",
+    "expires_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {}
+  }
+}

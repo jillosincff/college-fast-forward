@@ -1,0 +1,48 @@
+{
+  "name": "NewsletterClick",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "User ID if logged in at time of click"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email if logged in at time of click"
+    },
+    "utm_source": {
+      "type": "string",
+      "description": "UTM source parameter (e.g., newsletter)"
+    },
+    "campaign": {
+      "type": "string",
+      "description": "UTM campaign value (e.g., parent_reengagement_feb10)"
+    },
+    "content_clicked": {
+      "type": "string",
+      "description": "UTM content value (e.g., pedro_question, header_cta)"
+    },
+    "utm_medium": {
+      "type": "string",
+      "description": "UTM medium parameter if present"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional context about this newsletter click"
+    },
+    "clicked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the click happened"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Random session identifier to correlate anonymous clicks with later signups"
+    }
+  },
+  "required": [
+    "utm_source",
+    "clicked_at"
+  ]
+}

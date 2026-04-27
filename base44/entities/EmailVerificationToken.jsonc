@@ -1,0 +1,46 @@
+{
+  "name": "EmailVerificationToken",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "The unique, secure token for verification."
+    },
+    "email": {
+      "type": "string",
+      "description": "The email address to be verified."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Purpose or context of the verification"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The timestamp when this token expires."
+    },
+    "used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this token has already been used."
+    }
+  },
+  "required": [
+    "token",
+    "email",
+    "expires_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

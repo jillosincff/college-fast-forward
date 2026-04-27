@@ -1,0 +1,63 @@
+{
+  "name": "CommunityInvite",
+  "type": "object",
+  "properties": {
+    "inviter_user_id": {
+      "type": "string",
+      "description": "The ID of the user sending the invite."
+    },
+    "email": {
+      "type": "string",
+      "description": "The email of the person being invited."
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "parent",
+        "alumni",
+        "student"
+      ],
+      "description": "The intended role for the invitee."
+    },
+    "campus": {
+      "type": "string",
+      "description": "The target campus for the invite."
+    },
+    "invite_token": {
+      "type": "string",
+      "description": "A unique, secure token for this specific invite."
+    },
+    "note": {
+      "type": "string",
+      "description": "An optional personal note from the inviter."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional context about this community invite"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "bounced",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "The status of the invitation."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The timestamp when this invite token expires."
+    }
+  },
+  "required": [
+    "inviter_user_id",
+    "email",
+    "role",
+    "invite_token",
+    "expires_at"
+  ]
+}

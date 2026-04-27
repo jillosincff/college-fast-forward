@@ -1,0 +1,92 @@
+{
+  "name": "OpportunityApplication",
+  "type": "object",
+  "properties": {
+    "opportunity_id": {
+      "type": "string",
+      "description": "ID of the Opportunity being applied for"
+    },
+    "applicant_id": {
+      "type": "string",
+      "description": "ID of the user who is applying"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "external",
+        "email",
+        "message"
+      ],
+      "description": "How the user applied"
+    },
+    "note": {
+      "type": "string",
+      "description": "The short note submitted with the application"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional description of the application"
+    },
+    "resume_url": {
+      "type": "string",
+      "description": "URL of the resume submitted with the application"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "applied",
+        "in_review",
+        "replied",
+        "interview",
+        "closed"
+      ],
+      "default": "applied",
+      "description": "Current status of the application"
+    },
+    "opportunity_title": {
+      "type": "string",
+      "description": "Snapshot of opportunity title at time of application"
+    },
+    "opportunity_company": {
+      "type": "string",
+      "description": "Snapshot of company name at time of application"
+    },
+    "opportunity_type": {
+      "type": "string",
+      "description": "Snapshot of opportunity type at time of application"
+    },
+    "opportunity_deleted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flag indicating if the opportunity has been deleted"
+    }
+  },
+  "required": [
+    "opportunity_id",
+    "applicant_id",
+    "method"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "applicant_id": "{{user.id}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "applicant_id": "{{user.id}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}

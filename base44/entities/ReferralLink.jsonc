@@ -1,0 +1,77 @@
+{
+  "name": "ReferralLink",
+  "type": "object",
+  "properties": {
+    "helper_user_id": {
+      "type": "string",
+      "description": "ID of the user who created this referral link"
+    },
+    "student_request_id": {
+      "type": "string",
+      "description": "ID of the job request this link refers to"
+    },
+    "request_title": {
+      "type": "string",
+      "description": "Title of the job request for easy reference"
+    },
+    "student_name": {
+      "type": "string",
+      "description": "Name of the student who posted the request"
+    },
+    "student_email": {
+      "type": "string",
+      "description": "Email of the student for the referral"
+    },
+    "link_token": {
+      "type": "string",
+      "description": "Unique token for the referral link"
+    },
+    "short_url": {
+      "type": "string",
+      "description": "The generated short URL for sharing"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Description of the referral link purpose"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "successful"
+      ],
+      "default": "active",
+      "description": "Current status of the referral link"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this referral link expires"
+    },
+    "click_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of clicks on this link"
+    },
+    "connection_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of people who connected with the student"
+    },
+    "success_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of successful outcomes achieved"
+    }
+  },
+  "required": [
+    "helper_user_id",
+    "student_request_id",
+    "request_title",
+    "student_name",
+    "student_email",
+    "link_token"
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "name": "Intro",
+  "type": "object",
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "ID of the job request this intro is for"
+    },
+    "student_id": {
+      "type": "string",
+      "description": "ID of the student being introduced"
+    },
+    "helper_user_id": {
+      "type": "string",
+      "description": "ID of the person making the introduction"
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Name of the person being introduced to"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email of the recipient"
+    },
+    "recipient_company": {
+      "type": "string",
+      "description": "Company/organization of the recipient"
+    },
+    "recipient_role": {
+      "type": "string",
+      "description": "Role/title of the recipient"
+    },
+    "relationship": {
+      "type": "string",
+      "enum": [
+        "colleague",
+        "former_manager",
+        "friend",
+        "recruiter",
+        "other"
+      ],
+      "description": "Helper's relationship to the recipient"
+    },
+    "ask_type": {
+      "type": "string",
+      "enum": [
+        "warm_intro",
+        "job_opening",
+        "resume_feedback",
+        "forward_teammate"
+      ],
+      "description": "Type of help being requested"
+    },
+    "custom_note": {
+      "type": "string",
+      "description": "Additional context provided by the helper"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "General description of the introduction"
+    },
+    "email_subject": {
+      "type": "string",
+      "description": "Subject line of the introduction email"
+    },
+    "email_body": {
+      "type": "string",
+      "description": "Full body of the introduction email"
+    },
+    "cc_student": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to CC the student on the email"
+    },
+    "cc_helper": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to CC the helper on the email"
+    },
+    "delivery_mode": {
+      "type": "string",
+      "enum": [
+        "platform_email",
+        "forwardable",
+        "linkedin"
+      ],
+      "default": "platform_email",
+      "description": "How the introduction was delivered"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending",
+        "sent",
+        "delivered",
+        "bounced",
+        "replied",
+        "closed"
+      ],
+      "default": "pending",
+      "description": "Current status of the introduction"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the introduction was sent"
+    },
+    "delivered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was delivered"
+    },
+    "replied_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the recipient replied"
+    }
+  },
+  "required": [
+    "request_id",
+    "student_id",
+    "helper_user_id",
+    "recipient_name",
+    "recipient_email",
+    "ask_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "helper_user_id": "{{user.id}}"
+        },
+        {
+          "student_id": "{{user.id}}"
+        }
+      ]
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

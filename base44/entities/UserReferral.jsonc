@@ -1,0 +1,23 @@
+{
+  "name": "UserReferral",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The user's ID."
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "The user's unique and permanent referral code."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this referral"
+    }
+  },
+  "required": [
+    "user_id",
+    "referral_code"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "name": "StudentKarma",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Student user ID"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Student email for easy lookup"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about this student's karma activity"
+    },
+    "total_karma": {
+      "type": "number",
+      "default": 0,
+      "description": "Total karma points earned"
+    },
+    "karma_level": {
+      "type": "string",
+      "enum": [
+        "newcomer",
+        "contributor",
+        "connector",
+        "leader",
+        "legend"
+      ],
+      "default": "newcomer",
+      "description": "Current karma tier"
+    },
+    "this_month_karma": {
+      "type": "number",
+      "default": 0,
+      "description": "Karma earned this calendar month"
+    },
+    "month_reset_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When to reset monthly karma"
+    },
+    "last_karma_earned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When karma was last earned"
+    },
+    "actions_count": {
+      "type": "object",
+      "default": {},
+      "description": "Count of each action type performed"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

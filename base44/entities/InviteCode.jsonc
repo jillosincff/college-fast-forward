@@ -1,0 +1,112 @@
+{
+  "name": "InviteCode",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Unique 8-character invite code"
+    },
+    "inviter_id": {
+      "type": "string",
+      "description": "ID of user who generated the code"
+    },
+    "inviter_email": {
+      "type": "string",
+      "description": "Email of user who generated the code"
+    },
+    "inviter_name": {
+      "type": "string",
+      "description": "Name of user who generated the code"
+    },
+    "invite_type": {
+      "type": "string",
+      "enum": [
+        "gator_to_parent",
+        "gator_to_gator",
+        "parent_to_parent",
+        "parent_to_gator",
+        "admin_to_parent",
+        "admin_to_gator",
+        "admin_to_alumni"
+      ],
+      "description": "Type of invite relationship"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "gator",
+        "parent",
+        "alumni"
+      ],
+      "description": "The persona role this code assigns"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Purpose or context of this invite code"
+    },
+    "family_group_id": {
+      "type": "string",
+      "description": "Family group ID to assign to invited parent"
+    },
+    "parent_slot": {
+      "type": "string",
+      "enum": [
+        "parent_1",
+        "parent_2"
+      ],
+      "description": "Which parent slot this invite is for"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "used",
+        "expired",
+        "cancelled"
+      ],
+      "default": "active",
+      "description": "Current status of the invite code"
+    },
+    "used_by_email": {
+      "type": "string",
+      "description": "Email of user who used this code"
+    },
+    "used_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the code was used"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the code expires (7 days from creation)"
+    },
+    "is_community_invite": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a community/group invite code"
+    },
+    "group_name": {
+      "type": "string",
+      "description": "Name of the community/group for community invites"
+    },
+    "max_uses": {
+      "type": "number",
+      "default": 1,
+      "description": "Maximum number of times this code can be used"
+    },
+    "current_uses": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times this code has been used"
+    }
+  },
+  "required": [
+    "code",
+    "inviter_id",
+    "inviter_email",
+    "invite_type",
+    "expires_at"
+  ]
+}

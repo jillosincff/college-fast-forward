@@ -1,0 +1,71 @@
+{
+  "name": "VictoryFund",
+  "type": "object",
+  "properties": {
+    "gator_id": {
+      "type": "string",
+      "description": "ID of the student who landed the job"
+    },
+    "gator_name": {
+      "type": "string",
+      "description": "Name of the student"
+    },
+    "gator_email": {
+      "type": "string",
+      "description": "Email of the student for PayPal payment"
+    },
+    "success_story_id": {
+      "type": "string",
+      "description": "ID of the related success story"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company where they landed"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job title they got"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Story or context about this victory fund"
+    },
+    "total_raised": {
+      "type": "number",
+      "default": 0,
+      "description": "Total amount raised in dollars"
+    },
+    "donor_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of donors"
+    },
+    "student_paypal_email": {
+      "type": "string",
+      "description": "Student's PayPal email for receiving payments"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "paused"
+      ],
+      "default": "active",
+      "description": "Status of the victory fund"
+    },
+    "max_cap": {
+      "type": "number",
+      "default": 1000,
+      "description": "Maximum amount that can be raised"
+    }
+  },
+  "required": [
+    "gator_id",
+    "gator_name",
+    "gator_email",
+    "success_story_id",
+    "company_name"
+  ]
+}

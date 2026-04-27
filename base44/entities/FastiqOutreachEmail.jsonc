@@ -1,0 +1,63 @@
+{
+  "name": "FastiqOutreachEmail",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student who received the outreach"
+    },
+    "email_type": {
+      "type": "string",
+      "enum": [
+        "zero_response_intro",
+        "zero_response_reminder"
+      ],
+      "description": "Type of FASTIQ outreach email sent"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Context or notes about this outreach email"
+    },
+    "sent_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was sent"
+    },
+    "opened": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the email was opened"
+    },
+    "clicked_fastiq": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student clicked through to FASTIQ"
+    },
+    "job_request_id": {
+      "type": "string",
+      "description": "ID of the zero-response JobRequest that triggered this outreach"
+    },
+    "student_name": {
+      "type": "string",
+      "description": "Cached student first name for reporting"
+    }
+  },
+  "required": [
+    "user_email",
+    "email_type",
+    "sent_date"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

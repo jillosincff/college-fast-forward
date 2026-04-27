@@ -1,0 +1,124 @@
+{
+  "name": "ActivationPrompt",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to the User"
+    },
+    "user_type": {
+      "type": "string",
+      "enum": [
+        "student",
+        "parent",
+        "alumni"
+      ],
+      "description": "Type of user"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email for sending nudge emails"
+    },
+    "school_id": {
+      "type": "string",
+      "description": "School identifier"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about this activation prompt"
+    },
+    "prompt_stage": {
+      "type": "string",
+      "enum": [
+        "welcome",
+        "nudge_24h",
+        "nudge_48h"
+      ],
+      "default": "welcome",
+      "description": "Current activation prompt stage"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "shown",
+        "acted",
+        "dismissed",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Current status of the activation prompt"
+    },
+    "action_taken": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user completed a meaningful action"
+    },
+    "action_type": {
+      "type": "string",
+      "description": "Type of action taken (e.g., posted_question, answered_question, linked_student, sent_message)"
+    },
+    "shown_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the banner was displayed to the user"
+    },
+    "acted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user completed the action"
+    },
+    "nudge_24h_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 24h nudge email was sent"
+    },
+    "nudge_48h_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the 48h nudge email was sent"
+    },
+    "source": {
+      "type": "string",
+      "description": "Where the user came from (organic, newsletter_parent, newsletter_student, referral_GATORINSIDER, etc.)"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_type",
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

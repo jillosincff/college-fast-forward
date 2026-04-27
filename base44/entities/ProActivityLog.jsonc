@@ -1,0 +1,71 @@
+{
+  "name": "ProActivityLog",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "company_search",
+        "alumni_view",
+        "message_draft",
+        "roadmap_created"
+      ],
+      "description": "Type of action performed"
+    },
+    "target_name": {
+      "type": "string",
+      "description": "Company or alumni name related to the action"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this activity"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the action occurred"
+    }
+  },
+  "required": [
+    "user_email",
+    "action_type",
+    "timestamp"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

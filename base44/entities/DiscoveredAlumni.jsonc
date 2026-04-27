@@ -1,0 +1,73 @@
+{
+  "name": "DiscoveredAlumni",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Alumni full name"
+    },
+    "role_title": {
+      "type": "string",
+      "description": "Current job title"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company they work at"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "School identifier (e.g. UF)"
+    },
+    "match_score": {
+      "type": "number",
+      "description": "Match relevance score (0-100)"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Source URL where alumni was found"
+    },
+    "degree_info": {
+      "type": "string",
+      "description": "Degree and major info from UF"
+    },
+    "location": {
+      "type": "string",
+      "description": "Current location"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL if found"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional context about this discovered alumni"
+    },
+    "greek_organization": {
+      "type": "string",
+      "description": "Fraternity or sorority affiliation if found (e.g. Kappa Delta, Sigma Chi)"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a student has verified this alumni actually attended UF"
+    },
+    "verified_by": {
+      "type": "string",
+      "description": "Email of student who verified this alumni"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cache expiration (24h TTL)"
+    }
+  },
+  "required": [
+    "name",
+    "company"
+  ],
+  "rls": {
+    "read": {},
+    "write": {}
+  }
+}

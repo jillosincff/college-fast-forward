@@ -1,0 +1,65 @@
+{
+  "name": "FoundingCircleApplication",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "Applicant's first name"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Applicant's last name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Applicant's email address"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Applicant's phone number"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "URL to applicant's LinkedIn profile"
+    },
+    "school": {
+      "type": "string",
+      "default": "UF",
+      "description": "School the applicant will represent"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details or motivation from the applicant"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Application status"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of the admin who approved"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the application was approved"
+    }
+  },
+  "required": [
+    "first_name",
+    "last_name",
+    "email",
+    "school"
+  ],
+  "rls": {
+    "read": {},
+    "write": {}
+  }
+}

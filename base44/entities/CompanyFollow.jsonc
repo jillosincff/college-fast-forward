@@ -1,0 +1,58 @@
+{
+  "name": "CompanyFollow",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user following the company"
+    },
+    "company_id": {
+      "type": "string",
+      "description": "ID of the company being followed"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Snapshot of company name"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about why this company is being followed"
+    },
+    "notification_preferences": {
+      "type": "object",
+      "properties": {
+        "new_jobs": {
+          "type": "boolean",
+          "default": true
+        },
+        "company_updates": {
+          "type": "boolean",
+          "default": true
+        },
+        "events": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "description": "Notification settings for this follow",
+      "default": {
+        "new_jobs": true,
+        "company_updates": true,
+        "events": false
+      }
+    }
+  },
+  "required": [
+    "user_id",
+    "company_id"
+  ],
+  "rls": {
+    "read": {
+      "user_id": "{{user.id}}"
+    },
+    "write": {
+      "user_id": "{{user.id}}"
+    }
+  }
+}

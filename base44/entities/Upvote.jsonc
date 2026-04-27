@@ -1,0 +1,43 @@
+{
+  "name": "Upvote",
+  "type": "object",
+  "properties": {
+    "answer_id": {
+      "type": "string",
+      "description": "ID of the answer that was upvoted"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who upvoted"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who upvoted"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional note about the upvote"
+    }
+  },
+  "required": [
+    "answer_id",
+    "user_id"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}

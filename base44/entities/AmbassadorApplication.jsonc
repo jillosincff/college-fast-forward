@@ -1,0 +1,57 @@
+{
+  "name": "AmbassadorApplication",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the applicant"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email of the applicant"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "student",
+        "alumni",
+        "parent"
+      ],
+      "description": "Applicant's role in the UF community"
+    },
+    "why": {
+      "type": "string",
+      "description": "Why they want to be an ambassador"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about the applicant"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending",
+      "description": "Application status"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "role",
+    "why"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {}
+  }
+}

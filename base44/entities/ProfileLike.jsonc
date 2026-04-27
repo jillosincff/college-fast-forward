@@ -1,0 +1,29 @@
+{
+  "name": "ProfileLike",
+  "type": "object",
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "description": "ID of the job request being liked"
+    },
+    "liker_email": {
+      "type": "string",
+      "description": "Email of the user who liked"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional note about why this profile was liked"
+    }
+  },
+  "required": [
+    "request_id",
+    "liker_email"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

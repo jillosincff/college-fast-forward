@@ -1,0 +1,48 @@
+{
+  "name": "MagicLink",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Email address the magic link was sent to"
+    },
+    "token": {
+      "type": "string",
+      "description": "Unique magic link token"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Purpose or context of the magic link"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the magic link expires"
+    },
+    "used": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the magic link has been used"
+    },
+    "used_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the magic link was used"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address from which the link was requested"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "User agent of the browser that requested the link"
+    }
+  },
+  "required": [
+    "email",
+    "token",
+    "expires_at"
+  ],
+  "rls": {}
+}

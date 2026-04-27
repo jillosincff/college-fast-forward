@@ -1,0 +1,63 @@
+{
+  "name": "ReengagementSettings",
+  "type": "object",
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "default": "uf",
+      "description": "School identifier"
+    },
+    "school_name": {
+      "type": "string",
+      "default": "University of Florida",
+      "description": "Full school name"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about these re-engagement settings"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether re-engagement emails are enabled"
+    },
+    "enabled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When re-engagement was enabled"
+    },
+    "enabled_by": {
+      "type": "string",
+      "description": "Admin email who enabled it"
+    },
+    "day1_threshold": {
+      "type": "number",
+      "default": 7,
+      "description": "Days inactive before first email"
+    },
+    "day2_threshold": {
+      "type": "number",
+      "default": 21,
+      "description": "Days inactive before second email"
+    },
+    "day3_threshold": {
+      "type": "number",
+      "default": 45,
+      "description": "Days inactive before third email"
+    },
+    "stop_threshold": {
+      "type": "number",
+      "default": 60,
+      "description": "Days after which to stop emailing"
+    },
+    "max_emails_per_day": {
+      "type": "number",
+      "default": 100,
+      "description": "Maximum emails to send per day"
+    }
+  },
+  "required": [
+    "school_id"
+  ]
+}

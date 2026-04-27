@@ -1,0 +1,99 @@
+{
+  "name": "IntroOffer",
+  "type": "object",
+  "properties": {
+    "thread_id": {
+      "type": "string",
+      "description": "ID of the help conversation/message thread"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "ID of the student's original job request"
+    },
+    "student_id": {
+      "type": "string",
+      "description": "ID of the student receiving the intro offer"
+    },
+    "helper_id": {
+      "type": "string",
+      "description": "ID of the helper offering the intro"
+    },
+    "candidate_name": {
+      "type": "string",
+      "description": "Name of the person being introduced"
+    },
+    "candidate_company": {
+      "type": "string",
+      "description": "Company of the contact"
+    },
+    "candidate_role": {
+      "type": "string",
+      "description": "Role/Title of the contact"
+    },
+    "candidate_linkedin": {
+      "type": "string",
+      "description": "LinkedIn URL of the contact"
+    },
+    "candidate_email": {
+      "type": "string",
+      "description": "Email of the contact"
+    },
+    "candidate_notes": {
+      "type": "string",
+      "description": "Helper's notes about the contact"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Overview of this intro offer"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "OFFERED",
+        "REQUESTED",
+        "SHARED",
+        "DECLINED",
+        "WITHDRAWN",
+        "CONNECTED",
+        "INTERVIEW",
+        "NO_RESPONSE"
+      ],
+      "default": "OFFERED",
+      "description": "Current status of the intro offer"
+    },
+    "helper_notes": {
+      "type": "string",
+      "description": "Internal notes from helper for their own reference"
+    }
+  },
+  "required": [
+    "thread_id",
+    "request_id",
+    "student_id",
+    "helper_id",
+    "candidate_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "helper_id": "{{user.id}}"
+        },
+        {
+          "student_id": "{{user.id}}"
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "helper_id": "{{user.id}}"
+        },
+        {
+          "student_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "InterviewQuestionConfirmation",
+  "type": "object",
+  "properties": {
+    "question_id": {
+      "type": "string",
+      "description": "ID of the interview question"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of user confirming"
+    },
+    "interview_date": {
+      "type": "string",
+      "description": "When they were asked this question"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional context about the confirmation"
+    }
+  },
+  "required": [
+    "question_id",
+    "user_id"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_id": "{{user.id}}"
+    }
+  }
+}

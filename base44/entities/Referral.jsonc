@@ -1,0 +1,89 @@
+{
+  "name": "Referral",
+  "type": "object",
+  "properties": {
+    "referrer_id": {
+      "type": "string",
+      "description": "ID of the user who created the referral"
+    },
+    "referrer_email": {
+      "type": "string",
+      "description": "Email of the referrer"
+    },
+    "referrer_name": {
+      "type": "string",
+      "description": "Name of the referrer"
+    },
+    "referred_email": {
+      "type": "string",
+      "description": "Email of the person being referred"
+    },
+    "referred_name": {
+      "type": "string",
+      "description": "Name of the person being referred"
+    },
+    "referred_user_id": {
+      "type": "string",
+      "description": "User ID if they signed up"
+    },
+    "question_id": {
+      "type": "string",
+      "description": "ID of the question they're being referred to answer"
+    },
+    "question_title": {
+      "type": "string",
+      "description": "Title of the question for reference"
+    },
+    "referral_token": {
+      "type": "string",
+      "description": "Unique token for the referral link"
+    },
+    "personal_note": {
+      "type": "string",
+      "description": "Personal note from referrer to referred person"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about this referral"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "opened",
+        "answered",
+        "converted",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Current status of the referral"
+    },
+    "link_opened_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the referral link was first opened"
+    },
+    "answered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the referred person answered"
+    },
+    "converted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the referred person completed their profile"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the referral link expires"
+    }
+  },
+  "required": [
+    "referrer_id",
+    "referred_email",
+    "question_id",
+    "referral_token"
+  ]
+}

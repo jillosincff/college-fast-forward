@@ -1,0 +1,56 @@
+{
+  "name": "PayItForwardNotification",
+  "type": "object",
+  "properties": {
+    "recipient_parent_email": {
+      "type": "string",
+      "description": "Email of the parent receiving the notification"
+    },
+    "student_email": {
+      "type": "string",
+      "description": "Email of the student who was helped"
+    },
+    "student_name": {
+      "type": "string",
+      "description": "Name of the student who was helped"
+    },
+    "helper_parent_name": {
+      "type": "string",
+      "description": "Name of the parent who helped"
+    },
+    "helper_parent_email": {
+      "type": "string",
+      "description": "Email of the parent who helped"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional context about this pay-it-forward notification"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "message",
+        "intro",
+        "help_offer"
+      ],
+      "description": "What triggered this notification"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the notification has been read"
+    },
+    "email_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether email notification was sent"
+    }
+  },
+  "required": [
+    "recipient_parent_email",
+    "student_email",
+    "helper_parent_email",
+    "trigger_type"
+  ]
+}

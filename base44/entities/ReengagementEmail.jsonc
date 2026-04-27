@@ -1,0 +1,85 @@
+{
+  "name": "ReengagementEmail",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who received the email"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email address of the recipient"
+    },
+    "email_type": {
+      "type": "string",
+      "enum": [
+        "day7",
+        "day21",
+        "day45",
+        "answer_notification",
+        "onboarding_abandonment",
+        "weekly_parent_digest",
+        "pay_it_forward",
+        "first_match_notification"
+      ],
+      "description": "Type of re-engagement email sent"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about this re-engagement email"
+    },
+    "question_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of questions included in the email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "opened",
+        "clicked",
+        "converted"
+      ],
+      "default": "sent",
+      "description": "Current status of the email"
+    },
+    "tracking_id": {
+      "type": "string",
+      "description": "Unique tracking ID for open/click tracking"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was sent"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was opened"
+    },
+    "clicked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a link was clicked"
+    },
+    "converted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user answered a question"
+    },
+    "subject_variant": {
+      "type": "string",
+      "description": "A/B test variant used for subject line"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "email_type"
+  ]
+}

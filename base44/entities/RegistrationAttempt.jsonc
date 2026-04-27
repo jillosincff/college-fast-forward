@@ -1,0 +1,70 @@
+{
+  "name": "RegistrationAttempt",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "password_hash": {
+      "type": "string"
+    },
+    "token": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional details about the registration attempt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processed",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "persona": {
+      "type": "string",
+      "enum": [
+        "student",
+        "alumni",
+        "parent"
+      ]
+    },
+    "signup_order": {
+      "type": "number",
+      "description": "The signup order assigned at registration time for Founding Gator tracking"
+    },
+    "referral_code": {
+      "type": "string",
+      "description": "Ambassador referral code used at signup (e.g., GATOR-JOHN)"
+    },
+    "ambassador_id": {
+      "type": "string",
+      "description": "ID of the ambassador who referred this user"
+    },
+    "team_lead_id": {
+      "type": "string",
+      "description": "ID of the team lead if referred via sub-code"
+    }
+  },
+  "required": [
+    "email",
+    "full_name",
+    "password_hash",
+    "token"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {}
+  }
+}

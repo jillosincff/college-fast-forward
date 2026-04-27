@@ -1,0 +1,46 @@
+{
+  "name": "ContactSubmission",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the person submitting the form"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email of the person submitting the form"
+    },
+    "message": {
+      "type": "string",
+      "description": "The message content from the form"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional description or context"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "read",
+        "archived"
+      ],
+      "default": "new",
+      "description": "Status of the submission"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "message"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {}
+  }
+}

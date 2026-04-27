@@ -1,0 +1,89 @@
+{
+  "name": "VictoryFundTransaction",
+  "type": "object",
+  "properties": {
+    "victory_fund_id": {
+      "type": "string",
+      "description": "ID of the victory fund"
+    },
+    "donor_id": {
+      "type": "string",
+      "description": "ID of the user who donated"
+    },
+    "donor_name": {
+      "type": "string",
+      "description": "Name of the donor"
+    },
+    "donor_email": {
+      "type": "string",
+      "description": "Email of the donor"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Total donation amount in dollars"
+    },
+    "student_split": {
+      "type": "number",
+      "description": "Amount going to student (50%)"
+    },
+    "cff_split": {
+      "type": "number",
+      "description": "Amount going to CFF (50%)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes or context about this transaction"
+    },
+    "paypal_transaction_id": {
+      "type": "string",
+      "description": "PayPal transaction ID"
+    },
+    "paypal_order_id": {
+      "type": "string",
+      "description": "PayPal order ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed",
+        "refunded"
+      ],
+      "default": "pending",
+      "description": "Transaction status"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the transaction occurred"
+    },
+    "payout_to_student_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "default": "pending",
+      "description": "Status of payout to student"
+    },
+    "payout_to_student_id": {
+      "type": "string",
+      "description": "PayPal payout batch ID to student"
+    }
+  },
+  "required": [
+    "victory_fund_id",
+    "amount",
+    "student_split",
+    "cff_split"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

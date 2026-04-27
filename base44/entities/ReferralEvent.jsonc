@@ -1,0 +1,55 @@
+{
+  "name": "ReferralEvent",
+  "type": "object",
+  "properties": {
+    "link_id": {
+      "type": "string",
+      "description": "ID of the referral link this event belongs to"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "created",
+        "clicked",
+        "connected",
+        "outcome_achieved"
+      ],
+      "description": "Type of event that occurred"
+    },
+    "outcome_type": {
+      "type": "string",
+      "enum": [
+        "career_advice",
+        "resume_review",
+        "informational_interview",
+        "job_interview",
+        "job_offer",
+        "networking",
+        "mentorship",
+        "industry_insights",
+        "other"
+      ],
+      "description": "Specific type of successful outcome (only for outcome_achieved events)"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional description of the referral event"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event occurred"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional event data like user agent, outcome details, etc.",
+      "default": {}
+    }
+  },
+  "required": [
+    "link_id",
+    "event_type",
+    "occurred_at"
+  ]
+}

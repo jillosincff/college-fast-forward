@@ -1,0 +1,131 @@
+{
+  "name": "Family",
+  "type": "object",
+  "properties": {
+    "family_name": {
+      "type": "string",
+      "description": "Family display name (e.g., 'The Smith Family')"
+    },
+    "family_group_id": {
+      "type": "string",
+      "description": "Unique identifier linking family members together"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional notes about this family record"
+    },
+    "member_number": {
+      "type": "number",
+      "description": "Position in line - Family #1, #2, etc. for pricing tier"
+    },
+    "price_tier": {
+      "type": "string",
+      "enum": [
+        "founding",
+        "early_adopter",
+        "standard"
+      ],
+      "description": "Pricing tier - founding (free), early_adopter ($9), standard ($19)"
+    },
+    "locked_price_monthly": {
+      "type": "number",
+      "default": 0,
+      "description": "Locked monthly price in cents: 0, 900, or 1900"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID for billing"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "canceled",
+        "past_due",
+        "trialing",
+        "none"
+      ],
+      "default": "none",
+      "description": "Current subscription status"
+    },
+    "subscription_tier": {
+      "type": "string",
+      "description": "Subscription tier for the family (free_founding, cff, fastiq)"
+    },
+    "billing_owner_id": {
+      "type": "string",
+      "description": "User ID of whoever pays \u2014 parent or student"
+    },
+    "billing_owner_email": {
+      "type": "string",
+      "description": "Email of the billing owner for display"
+    },
+    "billing_owner_name": {
+      "type": "string",
+      "description": "Name of the billing owner for display"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the free trial ends"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current billing period ends"
+    },
+    "primary_parent_id": {
+      "type": "string",
+      "description": "ID of primary parent who manages billing"
+    },
+    "parent_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "User IDs of parents (max 2)"
+    },
+    "student_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "User IDs of students (max 2)"
+    },
+    "student_email": {
+      "type": "string",
+      "description": "Student email entered by parent (for pending links before student signs up)"
+    },
+    "linked": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when both parent and student accounts are connected"
+    },
+    "linked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the link was completed"
+    },
+    "max_parents": {
+      "type": "number",
+      "default": 2,
+      "description": "Maximum parents allowed"
+    },
+    "max_students": {
+      "type": "number",
+      "default": 2,
+      "description": "Maximum students allowed"
+    }
+  },
+  "required": [
+    "member_number",
+    "price_tier"
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "name": "ScoutedOpportunity",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student this opportunity is for"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company offering the role"
+    },
+    "role_title": {
+      "type": "string",
+      "description": "Job title / role name"
+    },
+    "location": {
+      "type": "string",
+      "description": "Job location"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Summary of the scouted opportunity"
+    },
+    "posting_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the job was posted"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "Direct link to the posting"
+    },
+    "match_reason": {
+      "type": "string",
+      "description": "Why this fits the student's profile"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "viewed",
+        "saved",
+        "applied",
+        "dismissed"
+      ],
+      "default": "new",
+      "description": "Current status of this opportunity"
+    },
+    "alumni_available": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether UF alumni were found at this company"
+    },
+    "alumni_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of UF alumni at this company"
+    },
+    "scouted_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When FASTIQ found this opportunity"
+    },
+    "is_new": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the student has seen this yet"
+    }
+  },
+  "required": [
+    "user_email",
+    "company_name",
+    "role_title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

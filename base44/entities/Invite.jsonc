@@ -1,0 +1,77 @@
+{
+  "name": "Invite",
+  "type": "object",
+  "properties": {
+    "helper_user_id": {
+      "type": "string",
+      "description": "ID of the user sending the invite"
+    },
+    "student_request_id": {
+      "type": "string",
+      "description": "ID of the job request this invite is for"
+    },
+    "friend_name": {
+      "type": "string",
+      "description": "Name of the friend being invited"
+    },
+    "friend_email": {
+      "type": "string",
+      "description": "Email of the friend being invited"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional personal note from the helper"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional description of the invite"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Status of the invite"
+    },
+    "invite_token": {
+      "type": "string",
+      "description": "Unique token for tracking invite acceptance"
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invite was accepted"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invite expires"
+    }
+  },
+  "required": [
+    "helper_user_id",
+    "student_request_id",
+    "friend_name",
+    "friend_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "helper_user_id": "{{user.id}}"
+        },
+        {
+          "friend_email": "{{user.email}}"
+        }
+      ]
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}

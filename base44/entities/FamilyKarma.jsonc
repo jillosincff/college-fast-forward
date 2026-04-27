@@ -1,0 +1,93 @@
+{
+  "name": "FamilyKarma",
+  "type": "object",
+  "properties": {
+    "family_group_id": {
+      "type": "string",
+      "description": "Links family members together"
+    },
+    "parent_user_id": {
+      "type": "string",
+      "description": "ID of the primary parent who earns karma"
+    },
+    "student_user_id": {
+      "type": "string",
+      "description": "ID of the linked student who gets boosted"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about this family's karma history"
+    },
+    "total_karma": {
+      "type": "number",
+      "default": 0,
+      "description": "Total karma points earned by family"
+    },
+    "karma_level": {
+      "type": "string",
+      "enum": [
+        "Bronze",
+        "Silver",
+        "Gold",
+        "Platinum"
+      ],
+      "default": "Bronze",
+      "description": "Current karma tier based on points"
+    },
+    "karma_percentile": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentile ranking among all families (0-100)"
+    },
+    "boost_multiplier": {
+      "type": "number",
+      "default": 0,
+      "description": "How much to boost family questions (0-5)"
+    },
+    "badges_earned": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "List of badge keys the family has unlocked"
+    },
+    "school_id": {
+      "type": "string",
+      "default": "uf",
+      "description": "School identifier for multi-school compatibility"
+    },
+    "last_karma_earned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When karma was last earned"
+    },
+    "boost_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current boost expires"
+    },
+    "this_month_karma": {
+      "type": "number",
+      "default": 0,
+      "description": "Karma earned this month"
+    },
+    "month_reset_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When to reset monthly karma"
+    }
+  },
+  "required": [
+    "family_group_id"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

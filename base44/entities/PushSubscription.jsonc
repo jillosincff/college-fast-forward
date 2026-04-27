@@ -1,0 +1,76 @@
+{
+  "name": "PushSubscription",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user"
+    },
+    "endpoint": {
+      "type": "string",
+      "description": "Push subscription endpoint URL"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Notes about this push subscription"
+    },
+    "keys": {
+      "type": "object",
+      "description": "Push subscription keys (p256dh and auth)",
+      "default": {}
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "web",
+        "ios",
+        "android"
+      ],
+      "default": "web",
+      "description": "Device type"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this subscription is active"
+    },
+    "notifications_paused": {
+      "type": "boolean",
+      "default": false,
+      "description": "User has paused notifications"
+    },
+    "notifications_paused_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When notification pause expires"
+    },
+    "last_push_sent": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time a push was sent to this device"
+    },
+    "weekly_push_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of pushes sent this week"
+    },
+    "weekly_reset_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When to reset the weekly push count"
+    }
+  },
+  "required": [
+    "user_email",
+    "endpoint"
+  ],
+  "rls": {
+    "read": {
+      "user_email": "{{user.email}}"
+    },
+    "write": {
+      "user_email": "{{user.email}}"
+    }
+  }
+}

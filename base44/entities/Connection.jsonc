@@ -1,0 +1,70 @@
+{
+  "name": "Connection",
+  "type": "object",
+  "properties": {
+    "job_request_id": {
+      "type": "string",
+      "description": "ID of the job request"
+    },
+    "request_creator_email": {
+      "type": "string",
+      "description": "Email of the user who created the job request"
+    },
+    "connector_user_id": {
+      "type": "string",
+      "description": "ID of user making the connection"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message from connector to job seeker"
+    },
+    "connection_type": {
+      "type": "string",
+      "enum": [
+        "introduction",
+        "advice",
+        "referral"
+      ],
+      "description": "Type of connection being offered"
+    },
+    "contact_info": {
+      "type": "string",
+      "description": "How the job seeker can follow up"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Additional description of the connection"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "completed"
+      ],
+      "default": "pending",
+      "description": "Status of the connection"
+    }
+  },
+  "required": [
+    "job_request_id",
+    "message",
+    "connection_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "request_creator_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "write": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
