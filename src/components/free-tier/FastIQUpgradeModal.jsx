@@ -27,6 +27,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
   const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
   const hasLinkedParent = user?.parent_emails?.length > 0;
 
   const handleUpgrade = async (plan = 'fastiq_monthly') => {
@@ -84,13 +85,19 @@ export default function FastIQUpgradeModal({ user, onClose }) {
 
         <div className="pt-6 px-2">
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: 1.2 }}>
-            Hi {firstName}. I'm FastIQ.
+            {isParent
+              ? `Hi ${firstName}. Let's get FastIQ set up for your student.`
+              : `Hi ${firstName}. I'm FastIQ.`}
           </h2>
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontStyle: 'italic', color: '#E85D20', marginBottom: 16 }}>
-            Let's figure out exactly what you should do next.
-          </p>
+          {!isParent && (
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontStyle: 'italic', color: '#E85D20', marginBottom: 16 }}>
+              Let's figure out exactly what you should do next.
+            </p>
+          )}
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#CCCCCC', lineHeight: 1.6, marginBottom: 20 }}>
-            While you sleep, FastIQ is working — scouting target companies, discovering alumni, and building your personalized outreach. No more generic applications disappearing into a black hole.
+            {isParent
+              ? "FastIQ is your student's personal career agent. It will help them find alumni, write outreach that gets replies, tailor their resume to jobs, and prep for interviews."
+              : "While you sleep, FastIQ is working — scouting target companies, discovering alumni, and building your personalized outreach. No more generic applications disappearing into a black hole."}
           </p>
 
           <div className="bg-[#E85D20]/10 border border-[#E85D20]/30 rounded-lg p-4 mb-6">
@@ -130,7 +137,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
               </div>
               <div className="space-y-2">
                 <button onClick={() => handleUpgrade('fastiq_founding_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start Free Trial — $14.50/month →'}
+                  {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : isParent ? 'Activate FastIQ for My Student →' : 'Start Free Trial — $14.50/month →'}
                 </button>
                 <button onClick={() => handleUpgrade('fastiq_founding_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
                   Annual — $124.50/year (save $50)
@@ -140,7 +147,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           ) : (
             <div className="space-y-3">
               <button onClick={() => handleUpgrade('fastiq_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : 'Start Free Trial →'}
+                {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : isParent ? 'Activate FastIQ for My Student →' : 'Start Free Trial →'}
               </button>
               <button onClick={() => handleUpgrade('fastiq_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
                 Annual — $249/year (save $99)
