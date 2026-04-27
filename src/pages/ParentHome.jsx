@@ -64,7 +64,7 @@ export default function ParentHome() {
   }, [user]);
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
-  const linkedInMissing = !user?.linkedin_url;
+  const linkedInMissing = !user?.linkedin_url && !user?.linkedinUrl;
   const profileIncomplete = profileCompletion < 100;
 
   return (
