@@ -211,7 +211,7 @@ function MemberCard({ user, onMessage, onViewProfile }) {
       )}
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
         <button
           onClick={() => onMessage(user)}
           style={{
