@@ -159,7 +159,7 @@ export default function ParentLandingPage({ onStudentClick }) {
     // Store parent role hint so GatorAuth redirects to ParentOnboarding after login
     localStorage.setItem('pending_invite_role', 'parent');
     sessionStorage.setItem('pending_invite_role', 'parent');
-    navigate('GatorAuth');
+    window.location.hash = '#/GatorAuth';
   };
   const student = () => { if (onStudentClick) onStudentClick(); else navigate('#StudentLandingPage'); };
 
