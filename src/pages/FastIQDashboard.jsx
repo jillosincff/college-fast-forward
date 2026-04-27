@@ -170,14 +170,16 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
               fontSize: 26, fontWeight: 700,
               color: '#fff', margin: '0 0 8px'
             }}>
-              Your AI career engine is on.
+              {user?.persona === 'parent' ? "Your student's AI career engine is on." : 'Your AI career engine is on.'}
             </h1>
             <p style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 14, color: 'rgba(255,255,255,0.5)',
               margin: 0
             }}>
-              Every feature below is powered by FastIQ and personalized to your goals.
+              {user?.persona === 'parent' 
+                ? 'FastIQ is now active for your student. Every feature below helps them navigate their career with intelligence and confidence.' 
+                : 'Every feature below is powered by FastIQ and personalized to your goals.'}
             </p>
           </div>
 
