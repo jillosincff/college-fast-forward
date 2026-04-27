@@ -175,7 +175,7 @@ export default function ParentHome() {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
           >
-            Browse Students →
+            Browse Directory →
           </button>
           <button onClick={() => navigate('MyMessages')} style={{
             fontFamily: dmSans, fontSize: 14, fontWeight: 600,
