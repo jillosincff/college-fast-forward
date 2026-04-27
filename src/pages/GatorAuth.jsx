@@ -107,7 +107,7 @@ export default function GatorAuth() {
     try {
       const response = await registerUser({ email: signupEmail, password: signupPassword, full_name: fullName });
       if (response.data?.success) {
-        navigate('/RegistrationSuccess', { email: signupEmail });
+        navigate('RegistrationSuccess', { email: signupEmail });
       } else {
         setError(response.data?.error || 'Registration failed.');
       }
