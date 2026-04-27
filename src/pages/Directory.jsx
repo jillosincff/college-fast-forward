@@ -546,17 +546,17 @@ export default function Directory() {
         </div>
 
         {/* ── SEARCH + FILTERS ── */}
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 10,
-          background: 'rgba(13,17,23,0.95)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          padding: '16px 24px',
-        }}>
+         <div style={{
+           position: 'sticky', top: 0, zIndex: 10,
+           background: 'rgba(13,17,23,0.85)',
+           backdropFilter: 'blur(12px)',
+           borderBottom: '1px solid rgba(255,255,255,0.06)',
+           padding: '12px 16px',
+         }}>
           <div style={{ maxWidth: 960, margin: '0 auto', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
 
             {/* Search */}
-            <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
+            <div style={{ position: 'relative', flex: '1 1 140px', minWidth: 120 }}>
               <span style={{
                 position: 'absolute', left: 12, top: '50%',
                 transform: 'translateY(-50%)', fontSize: 14,
@@ -585,9 +585,10 @@ export default function Directory() {
                 color: industryFilter === 'all' ? 'rgba(255,255,255,0.5)' : '#fff',
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 10, padding: '10px 14px',
+                borderRadius: 10, padding: '10px 12px',
                 outline: 'none', cursor: 'pointer',
-                flex: '0 1 160px',
+                flex: '1 1 120px',
+                minWidth: '120px',
               }}
             >
               <option value="all">All Industries</option>
@@ -607,9 +608,10 @@ export default function Directory() {
                 color: helpFilter === 'all' ? 'rgba(255,255,255,0.5)' : '#fff',
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 10, padding: '10px 14px',
+                borderRadius: 10, padding: '10px 12px',
                 outline: 'none', cursor: 'pointer',
-                flex: '0 1 160px',
+                flex: '1 1 120px',
+                minWidth: '120px',
               }}
             >
               <option value="all">All Help Types</option>
@@ -710,14 +712,15 @@ export default function Directory() {
       </div>
 
       {/* Responsive grid */}
-      <style>{`
-        .dir-grid { grid-template-columns: repeat(3, 1fr) !important; grid-auto-rows: 1fr !important; }
-        @media (max-width: 768px) { .dir-grid { grid-template-columns: repeat(2, 1fr) !important; } }
-        @media (max-width: 480px) { .dir-grid { grid-template-columns: 1fr !important; } }
-        select option { background: #1a1a2e; color: #fff; }
-        input::placeholder { color: rgba(255,255,255,0.3); }
-        input:focus { border-color: rgba(232,93,32,0.4) !important; }
-      `}</style>
+       <style>{`
+         .dir-grid { grid-template-columns: repeat(3, 1fr) !important; grid-auto-rows: 1fr !important; }
+         @media (max-width: 1024px) { .dir-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+         @media (max-width: 768px) { .dir-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+         @media (max-width: 480px) { .dir-grid { grid-template-columns: 1fr !important; } }
+         select option { background: #1a1a2e; color: #fff; }
+         input::placeholder { color: rgba(255,255,255,0.3); }
+         input:focus { border-color: rgba(232,93,32,0.4) !important; }
+       `}</style>
 
       {selectedUser && (
         <MessageUserModal
