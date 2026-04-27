@@ -11,7 +11,7 @@ export default function FastIQTrialPanel() {
   const load = async () => {
     setLoading(true);
     try {
-      const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 2000);
+      const allUsers = await base44.entities.User.list('-created_date', 2000);
       const trialUsers = allUsers.filter(u => {
         return (
           u.fastiq_trial_active === true ||
