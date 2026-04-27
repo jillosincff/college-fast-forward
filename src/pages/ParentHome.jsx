@@ -27,6 +27,7 @@ export default function ParentHome() {
   const [profileCompletion, setProfileCompletion] = useState(40);
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
+  const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -40,6 +41,14 @@ export default function ParentHome() {
       ];
       const filled = fields.filter(Boolean).length;
       setProfileCompletion(Math.round((filled / fields.length) * 100));
+    }
+
+    // Show success banner if returning from Stripe checkout
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(hashPart);
+    if (params.get('upgraded') === 'true') {
+      setShowUpgradeSuccess(true);
+      window.history.replaceState(null, '', window.location.pathname + '#ParentHome');
     }
 
     const updateTime = () => {
@@ -95,6 +104,26 @@ export default function ParentHome() {
           {(user?.full_name?.[0] || 'P').toUpperCase()}
         </button>
       </nav>
+
+      {/* ── UPGRADE SUCCESS BANNER ── */}
+      {showUpgradeSuccess && (
+        <div style={{
+          background: 'linear-gradient(135deg, #0A0A0A 0%, #1a1a1a 100%)',
+          borderBottom: '1px solid rgba(232,93,32,0.3)',
+          padding: '16px 32px',
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
+        }}>
+          <div>
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: C.orange, margin: '0 0 4px' }}>⚡ FASTIQ ACTIVATED</p>
+            <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: C.white, margin: '0 0 2px' }}>Welcome to FastIQ, {firstName}! 🎉</p>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: C.muted, margin: 0 }}>Your student's full AI career engine is now unlocked. Check your email for a receipt.</p>
+          </div>
+          <button onClick={() => setShowUpgradeSuccess(false)} style={{ background: 'none', border: `1px solid rgba(255,255,255,0.2)`, borderRadius: 8, padding: '8px 16px', fontSize: 13, color: C.muted, cursor: 'pointer', fontFamily: dmSans, minHeight: 'auto' }}>
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* ── HEADER ── */}
       <div style={{

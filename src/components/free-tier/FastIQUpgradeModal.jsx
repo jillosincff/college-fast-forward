@@ -32,11 +32,13 @@ export default function FastIQUpgradeModal({ user, onClose }) {
   const handleUpgrade = async (plan = 'fastiq_monthly') => {
     setUpgrading(true);
     logAnalyticsEvent({ event_name: 'upgrade_clicked', properties: { source: 'upgrade_modal', plan } }).catch(() => {});
+    const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+    const postCheckoutPage = isParent ? 'ParentHome' : 'FreeTierDashboard';
     try {
       const response = await createCheckoutSession({
         plan,
-        successUrl: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
-        cancelUrl: `${window.location.origin}/#FreeTierDashboard`,
+        successUrl: `${window.location.origin}/#${postCheckoutPage}?upgraded=true`,
+        cancelUrl: `${window.location.origin}/#${postCheckoutPage}`,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
       });
       const result = response?.data || response;
