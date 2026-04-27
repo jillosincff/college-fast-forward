@@ -750,6 +750,30 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      // ROUTING GATE: Students on active FastIQ trial belong to Trial Activation sequence (TBD).
+      // Students who are paid subscribers need no onboarding emails.
+      // Only students with NO FastIQ engagement follow Workflow 1.
+      const isActiveTrial = student.fastiq_trial_active === true ||
+        student.trial_status === 'active' ||
+        student.membership_tier === 'fastiq_trial';
+      const isPaidSubscriber = student.subscription_status === 'active' &&
+        student.membership_tier !== 'fastiq_trial';
+      const trialExpired = student.trial_end_date && new Date(student.trial_end_date) <= new Date() &&
+        !isPaidSubscriber;
+
+      if (isPaidSubscriber) {
+        results.details.push({ email: student.email, skipped: 'paid_subscriber — no onboarding needed' });
+        results.skipped++;
+        continue;
+      }
+      if (isActiveTrial && !trialExpired) {
+        results.details.push({ email: student.email, skipped: 'active_fastiq_trial — routed to Trial Activation sequence (TBD)' });
+        results.skipped++;
+        continue;
+      }
+      // trialExpired students fall through to Workflow 1 (they didn't convert — need re-engagement)
+      // students who never started a trial follow Workflow 1 normally
+
       const signupDate = student.created_date;
       const daysSinceSignup = daysSince(signupDate);
 
