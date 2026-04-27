@@ -5,6 +5,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 export default function ParentAllSet() {
   const { user } = useAuth();
   const firstName = user?.full_name?.split(' ')[0] || '';
+  const schoolName = user?.school_name || user?.school || 'the network';
   const [copied, setCopied] = useState(false);
 
   return (
@@ -58,7 +59,7 @@ export default function ParentAllSet() {
           lineHeight: 1.8, margin: '0 0 16px',
         }}>
           Your profile is now visible to students across 
-          the College Fast Forward network.
+          the {schoolName} network.
         </p>
 
         <p style={{
@@ -82,13 +83,21 @@ export default function ParentAllSet() {
           }}>
             View My Profile →
           </button>
-          <button onClick={() => navigate('ParentProfileEdit')} style={{
+          <button onClick={() => navigate('Profile')} style={{
+            background: 'none', color: '#E85D20', border: 'none',
+            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
+            cursor: 'pointer', minHeight: 'auto', marginBottom: 8,
+            padding: 0,
+          }}>
+            Edit my profile →
+          </button>
+          <button onClick={() => navigate('FastIQDashboard?gift=open')} style={{
             background: 'none', color: '#E85D20', border: 'none',
             fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
             cursor: 'pointer', minHeight: 'auto', marginBottom: 32,
             padding: 0,
           }}>
-            Edit my profile →
+            Gift FastIQ to my student →
           </button>
         </div>
 
