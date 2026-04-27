@@ -166,10 +166,8 @@ export default function ParentOnboarding() {
     // Refresh auth context so layout routing sees onboarding_completed: true
     try { await refreshUser(); } catch (e) { /* non-blocking */ }
 
-    // Navigate to the standalone ParentWelcome page (emotional thank you → ParentUpsell flow)
-    // Pass first name via URL param so it renders correctly before auth context re-hydrates
-    const school = invitedStudents[0]?.university?.trim() || formData.studentUniversity?.trim() || formData.school?.trim() || '';
-    navigate('ParentWelcome', { name: formData.fullName.split(' ')[0] || '', school });
+    // Navigate to the ParentAllSet success page
+    navigate('ParentAllSet');
   };
 
   if (step === 1) {
