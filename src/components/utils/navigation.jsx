@@ -2,7 +2,7 @@ import React from 'react';
 
 // Simple navigation utilities to replace the deleted SimpleRouter
 export const navigate = (page, params = {}) => {
-  let hash = `#${page}`;
+  let hash = `#/${page}`;
   if (Object.keys(params).length > 0) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
