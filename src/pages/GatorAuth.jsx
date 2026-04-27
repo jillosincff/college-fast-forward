@@ -56,7 +56,8 @@ export default function GatorAuth() {
   const [signinPassword, setSigninPassword] = useState('');
   
   // Sign up state
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -91,8 +92,9 @@ export default function GatorAuth() {
     e.preventDefault();
     setError('');
     setInfo('');
-    if (!fullName || !signupEmail || !signupPassword || !confirmPassword) {
-      setError('Please fill in all fields.');
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    if (!firstName.trim() || !lastName.trim() || !signupEmail || !signupPassword || !confirmPassword) {
+      setError('Please fill in all fields including first and last name.');
       return;
     }
     if (signupPassword !== confirmPassword) {
@@ -285,9 +287,15 @@ export default function GatorAuth() {
 
           {activeTab === 'signup' && (
             <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div>
-                <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Full Name</label>
-                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Jane Smith" style={inputStyle} />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>First Name</label>
+                  <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" style={inputStyle} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Last Name</label>
+                  <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Smith" style={inputStyle} />
+                </div>
               </div>
               <div>
                 <label style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#888', display: 'block', marginBottom: 6 }}>Email</label>
