@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
       </div>
 
       <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 20px;">
-        If you want to keep that edge — now's the time. Lock in the <strong>Founding Rate of $14.50/month forever</strong> (50% off regular pricing). This special rate won't last.
+        If you want to keep that edge — now's the time. Lock in your rate before your trial ends on <strong>${trialEndDisplay}</strong>.
       </p>
 
       <div style="background:#0A0A0A;border-radius:12px;padding:20px 24px;margin:0 0 24px;">

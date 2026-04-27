@@ -32,7 +32,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const APP_URL = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 const AGENT_LAUNCH_DATE = '2026-04-26T00:00:00.000Z';
-const SEQUENCE_DAYS = [0, 2, 5, 9, 14];
+// Day 0 retired — sendWelcomeEmail fires immediately on signup and covers the welcome moment.
+// Agent sequence starts at Day 2 (first substantive network email, after welcome has landed).
+const SEQUENCE_DAYS = [2, 5, 9, 14];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -682,16 +684,29 @@ function selectTemplate(targetDay, student, stats, isActive) {
   return { template: null, tier };
 }
 
-// ─── Frequency Cap ────────────────────────────────────────────────────────────
+// ─── Unified Frequency Cap ────────────────────────────────────────────────────
+// Counts emails from ALL sources sent to this user in the past 7 days:
+//   1. EngagementEmail records (this agent's own sends)
+//   2. EmailLog records (sendWelcomeEmail, sendFoundingRateBlast, trialEmailScheduler, etc.)
+// If combined count >= 2, skip — the agent's email will be picked up next run.
 
-function checkFrequencyCap(existingEmails, userId) {
+function checkFrequencyCap(existingEmails, userId, userEmail, emailLogByEmail) {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const recentForUser = existingEmails.filter(e =>
+
+  // Count agent emails sent/approved in last 7 days
+  const agentCount = existingEmails.filter(e =>
     e.user_id === userId &&
     ['approved', 'sent'].includes(e.status) &&
     e.created_date >= sevenDaysAgo
-  );
-  return recentForUser.length < 2;
+  ).length;
+
+  // Count emails from all other sources (EmailLog) in last 7 days
+  const externalCount = (emailLogByEmail[userEmail?.toLowerCase()] || []).filter(e =>
+    e.sent_at >= sevenDaysAgo
+  ).length;
+
+  const total = agentCount + externalCount;
+  return total < 2; // true = cap not hit, ok to queue
 }
 
 function alreadyQueuedForDay(existingEmails, userId, sequenceDay) {
@@ -725,6 +740,22 @@ Deno.serve(async (req) => {
     try {
       existingEmails = await base44.asServiceRole.entities.EngagementEmail.list('-created_date', 2000);
     } catch (_) { existingEmails = []; }
+
+    // Unified frequency cap: fetch recent EmailLog records from ALL email sources
+    // (sendWelcomeEmail, sendFoundingRateBlast, trialEmailScheduler, fastiqUnansweredTrigger, etc.)
+    let emailLogByEmail = {};
+    try {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const recentLogs = await base44.asServiceRole.entities.EmailLog.list('-sent_at', 2000);
+      const recentFiltered = recentLogs.filter(e => e.sent_at >= sevenDaysAgo && e.status === 'sent');
+      recentFiltered.forEach(e => {
+        const key = e.user_email?.toLowerCase();
+        if (key) {
+          if (!emailLogByEmail[key]) emailLogByEmail[key] = [];
+          emailLogByEmail[key].push(e);
+        }
+      });
+    } catch (_) { emailLogByEmail = {}; }
 
     const allParents = allUsers.filter(u =>
       u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'))
@@ -790,7 +821,7 @@ Deno.serve(async (req) => {
 
       if (targetDay === null) { results.skipped++; continue; }
 
-      const capOk = checkFrequencyCap(existingEmails, student.id);
+      const capOk = checkFrequencyCap(existingEmails, student.id, student.email, emailLogByEmail);
       if (!capOk) {
         results.details.push({ email: student.email, skipped: `frequency cap (day ${targetDay})` });
         results.skipped++;

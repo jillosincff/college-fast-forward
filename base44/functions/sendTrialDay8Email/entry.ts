@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
         ${firstName}, your FastIQ trial has ended.
       </h1>
       <p style="font-size:15px;color:rgba(255,255,255,0.55);margin:0;line-height:1.6;">
-        Reactivate instantly and lock in the Founding Rate before April 15.
+        You can reactivate and keep going right now.
       </p>
     </div>
 
@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
       </div>
 
       <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 20px;">
-        Good news: You can reactivate right now and lock in the <strong>Founding Rate of $14.50/month forever</strong> — but only if you do it before <strong>April 15</strong>.
+        You can reactivate right now and lock in the <strong>Founding Rate of $14.50/month forever</strong> — 50% off the regular price, locked in permanently.
       </p>
 
       <div style="background:#0A0A0A;border-radius:12px;padding:20px 24px;margin:0 0 24px;">
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
           $14.50<span style="font-size:14px;color:rgba(255,255,255,0.5);font-weight:400;">/month forever</span>
         </p>
         <p style="font-size:13px;color:rgba(255,255,255,0.5);margin:0;">
-          50% off forever · Locked in permanently · Expires April 15
+          50% off forever · Locked in permanently
         </p>
       </div>
 
