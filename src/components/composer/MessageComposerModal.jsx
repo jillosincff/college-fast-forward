@@ -5,6 +5,39 @@ import Step1Intent from './Step1Intent';
 import Step2Draft from './Step2Draft';
 import Step3Review from './Step3Review';
 
+// Error boundary to prevent blank page
+class ModalErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Modal error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', maxWidth: '400px', textAlign: 'center' }}>
+            <h2 style={{ color: '#d32737', marginBottom: '12px' }}>Something went wrong</h2>
+            <p style={{ color: '#666', marginBottom: '16px', fontSize: '14px' }}>{this.state.error?.message}</p>
+            <button onClick={() => window.location.reload()} style={{ padding: '8px 16px', background: '#d32737', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+              Reload page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const INTENT_OPTIONS = [
   { id: 'career_advice', label: 'Career advice', desc: 'Learn how they broke into their industry' },
   { id: 'info_interview', label: 'Informational interview', desc: 'A 15-minute call about their career path' },
@@ -116,55 +149,57 @@ export default function MessageComposerModal({ isOpen, onClose, recipient, curre
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
-            {step === 1 && 'Message ' + (recipient.full_name || 'this person')}
-            {step === 2 && 'Your message'}
-            {step === 3 && 'Ready to send'}
-          </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X size={24} />
-          </button>
-        </div>
+    <ModalErrorBoundary>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900">
+              {step === 1 && 'Message ' + (recipient.full_name || 'this person')}
+              {step === 2 && 'Your message'}
+              {step === 3 && 'Ready to send'}
+            </h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <X size={24} />
+            </button>
+          </div>
 
-        {/* Body */}
-        <div className="p-6">
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-              {error}
-            </div>
-          )}
+          {/* Body */}
+          <div className="p-6">
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                {error}
+              </div>
+            )}
 
-          {step === 1 && (
-            <Step1Intent options={INTENT_OPTIONS} onSelect={handleSelectIntent} />
-          )}
+            {step === 1 && (
+              <Step1Intent options={INTENT_OPTIONS} onSelect={handleSelectIntent} />
+            )}
 
-          {step === 2 && (
-            <Step2Draft
-              draft={draft}
-              onDraftChange={setDraft}
-              onRegenerate={handleRegenerate}
-              generating={generating}
-              onNext={() => setStep(3)}
-              onBack={() => setStep(1)}
-            />
-          )}
+            {step === 2 && (
+              <Step2Draft
+                draft={draft}
+                onDraftChange={setDraft}
+                onRegenerate={handleRegenerate}
+                generating={generating}
+                onNext={() => setStep(3)}
+                onBack={() => setStep(1)}
+              />
+            )}
 
-          {step === 3 && (
-            <Step3Review
-              recipient={recipient}
-              draft={draft}
-              onSend={handleSend}
-              onSaveDraft={handleSaveDraft}
-              onBack={() => setStep(2)}
-              sending={sending}
-            />
-          )}
+            {step === 3 && (
+              <Step3Review
+                recipient={recipient}
+                draft={draft}
+                onSend={handleSend}
+                onSaveDraft={handleSaveDraft}
+                onBack={() => setStep(2)}
+                sending={sending}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ModalErrorBoundary>
   );
 }
