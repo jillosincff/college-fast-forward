@@ -5,17 +5,20 @@
  * was deployed (the AGENT_LAUNCH_DATE cutoff), checks which day they are on
  * and queues the appropriate email for Jill's approval.
  *
- * LEGACY STUDENTS (signed up before AGENT_LAUNCH_DATE) are intentionally
- * skipped. They will be addressed by Workflow 2 (re-engagement) once login
- * tracking is in place.
+ * TIERED PERSONALIZATION LOGIC:
+ * ─────────────────────────────
+ * Tier 1 (Well-staffed):  25+ parents at school AND 2+ parents in student's industry at that school
+ * Tier 2 (Developing):    5–24 parents at school (and industry slice is adequate, ≥2)
+ * Tier 3 (Understaffed):  <5 parents at school  OR  student's target industry has <2 parents at school
  *
- * Day 0  → immediate welcome (queued same day as signup)
- * Day 2  → 3 parent profiles from their school/industry
- * Day 5  → platform activity summary
- * Day 9  → personalized industry update (active vs dormant variants)
- * Day 14 → re-orientation (profile complete vs incomplete variants)
+ * Key rule: school-specific counts ONLY. Never reference platform-wide parent counts.
+ * Tier 3 always leads with FastIQ / alumni discovery — never surfaces thin parent numbers.
  *
- * TOTAL: 5 templates / 7 variants — Workflow 1 only. Workflow 2 NOT built yet.
+ * Day 0  → Welcome (tiered: T1/T2 = parent-led, T3 = FastIQ-led)
+ * Day 2  → 3 parent profiles (T1/T2) or FastIQ alumni thread (T3)
+ * Day 5  → Activity summary — school-scoped parent counts only; T3 pivots to FastIQ
+ * Day 9  → Industry update — school+industry-scoped; T3 pivots to FastIQ
+ * Day 14 → Re-orientation (profile complete vs incomplete variants)
  *
  * Safety rules:
  * - Skip all students who signed up before AGENT_LAUNCH_DATE
@@ -23,26 +26,13 @@
  * - Skip if student unsubscribed
  * - Skip if email already queued/sent for this sequence day
  * - All emails → status: pending_approval (Jill reviews before send)
- *
- * Send time note: The automation is scheduled for 9:30am ET (14:30 UTC) per spec.
- * The 8am default in the previous version was overridden per product owner request.
  */
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const APP_URL = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
-const FROM_EMAIL = 'support@collegefastforward.com';
-const FROM_NAME = 'Jill at CFF';
-const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
-
-// Onboarding sequence days
-const SEQUENCE_DAYS = [0, 2, 5, 9, 14];
-
-// ─── LEGACY CUTOFF ─────────────────────────────────────────────────────────────
-// Students who signed up BEFORE this date are legacy and will be skipped.
-// Update this to the actual deployment date when you first activate the agent.
-// Format: ISO 8601 date string
 const AGENT_LAUNCH_DATE = '2026-04-26T00:00:00.000Z';
+const SEQUENCE_DAYS = [0, 2, 5, 9, 14];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -59,12 +49,16 @@ function primaryIndustry(user) {
   return user.industry || null;
 }
 
+function allIndustries(user) {
+  const cg = user.career_goals;
+  const arr = cg?.target_industries || user.target_industries || user.industries_interested || [];
+  return arr.length > 0 ? arr : (user.industry ? [user.industry] : []);
+}
+
 function isProfileComplete(user) {
   const hasMajor = !!(user.major?.trim());
   const hasYear = !!(user.graduation_year);
   const hasIndustry = primaryIndustry(user) !== null;
-  // Bio check intentionally excluded pending field content review (item #3 in spec)
-  // Profile completion = 3 fields until dedicated "what I'm looking for" field is added
   return hasMajor && hasYear && hasIndustry;
 }
 
@@ -81,8 +75,6 @@ function firstName(user) {
   return nameIsReal(raw, user.email) ? raw : null;
 }
 
-// Returns true if name looks like a real human first name.
-// Returns false for email-prefix fallbacks like "dschneider416", "j.smith", "loloteaches".
 function nameIsReal(name, email) {
   if (!name) return false;
   const emailPrefix = email?.split('@')[0]?.toLowerCase() || '';
@@ -94,7 +86,6 @@ function nameIsReal(name, email) {
   return true;
 }
 
-// Correct plural/singular for any count
 function plural(count, singular, pluralForm) {
   return count === 1 ? `1 ${singular}` : `${count} ${pluralForm || singular + 's'}`;
 }
@@ -117,14 +108,104 @@ You're receiving this because you joined College Fast Forward. &nbsp;
 </p></td></tr></table></td></tr></table></body></html>`;
 }
 
+// ─── Tier Classification ───────────────────────────────────────────────────────
+// Returns 1, 2, or 3.
+// Rule: Tier 3 if school has <5 parents OR student's primary industry has <2 parents at that school.
+// This catches "hidden Tier 3" — students at large schools whose specific industry is unrepresented.
+
+function classifyTier(student, stats) {
+  const schoolCount = stats.parentsAtSchool;
+  const industryAtSchool = stats.parentsInIndustryAtSchool;
+  const hasIndustry = primaryIndustry(student) !== null;
+
+  // Under 5 parents at school → always Tier 3
+  if (schoolCount < 5) return 3;
+
+  // Student has an industry but fewer than 2 parents at their school match it → Tier 3
+  if (hasIndustry && industryAtSchool < 2) return 3;
+
+  // 5–24 parents → Tier 2
+  if (schoolCount < 25) return 2;
+
+  // 25+ parents and industry is adequate → Tier 1
+  return 1;
+}
+
+// ─── Stats Fetchers ───────────────────────────────────────────────────────────
+
+function fetchStats(user, allParents, recentMsgCount) {
+  const schoolCode = user.school_code;
+  const schoolName = user.school_name || user.school;
+  const industry = primaryIndustry(user);
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  // School-scoped parent lists — always school-specific, never platform-wide
+  const schoolParents = allParents.filter(p =>
+    (schoolCode && p.school_code === schoolCode) ||
+    (schoolName && p.school_name === schoolName)
+  );
+  const parentsAtSchool = schoolParents.length;
+  const newParentsAtSchoolLast7Days = schoolParents.filter(p => p.created_date >= sevenDaysAgo).length;
+
+  // Industry match — school-scoped only
+  const industryMatchFn = (p) => {
+    if (!industry) return false;
+    const pInd = (p.industry || '').toLowerCase();
+    const indLower = industry.toLowerCase();
+    // Check primary industry first word against parent industry (handles "Finance & Banking" vs "Finance")
+    return pInd.includes(indLower.split(' ')[0]) || indLower.includes(pInd.split(' ')[0]);
+  };
+
+  const parentsInIndustryAtSchool = schoolParents.filter(industryMatchFn).length;
+  const newParentsInIndustryAtSchoolLast7Days = schoolParents
+    .filter(p => p.created_date >= sevenDaysAgo)
+    .filter(industryMatchFn).length;
+
+  // Sample parents for Day 2 — school-scoped, prefer industry match
+  const industryParentsAtSchool = schoolParents.filter(industryMatchFn);
+  const samplePool = industryParentsAtSchool.length >= 3
+    ? industryParentsAtSchool
+    : schoolParents.length >= 3
+    ? schoolParents
+    : [];
+  const sampleParents = samplePool.slice(0, 3).map(p => ({
+    full_name: p.full_name,
+    current_position: p.current_position,
+    current_company: p.current_company,
+    industry: p.industry,
+  }));
+
+  // Top industries at school this week (school-scoped)
+  const industryCounts = {};
+  schoolParents.forEach(p => {
+    if (p.industry) industryCounts[p.industry] = (industryCounts[p.industry] || 0) + 1;
+  });
+  const topIndustriesAtSchool = Object.entries(industryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([ind]) => ind);
+
+  return {
+    parentsAtSchool,
+    newParentsAtSchoolLast7Days,
+    parentsInIndustryAtSchool,
+    newParentsInIndustryAtSchoolLast7Days,
+    sampleParents,
+    topIndustriesAtSchool,
+    recentMessages: recentMsgCount || 0,
+  };
+}
+
 // ─── Email Templates ───────────────────────────────────────────────────────────
 
-function templateDay0(user, stats) {
+// DAY 0 — Tier 1: well-staffed school, adequate industry representation
+function templateDay0Tier1(user, stats) {
   const first = firstName(user);
   const greeting = first ? `Hi ${first},` : `Hi,`;
   const school = user.school_name || user.school || 'your school';
-  const parentCount = stats.parentsAtSchool || 0;
+  const parentCount = stats.parentsAtSchool;
   const parentStr = plural(parentCount, 'parent');
+  const parentVerb = parentCount === 1 ? 'is' : 'are';
 
   const body = `${greeting}
 
@@ -140,7 +221,6 @@ Log in and get your profile set up: ${APP_URL}
 
 P.S. The parents on the platform are here for one reason only: to help students like you.`;
 
-  const parentVerb = parentCount === 1 ? 'is' : 'are';
   return {
     subject: `Welcome to CFF — ${parentStr} from ${school} ${parentVerb} here`,
     body_text: body,
@@ -148,7 +228,81 @@ P.S. The parents on the platform are here for one reason only: to help students 
   };
 }
 
-function templateDay2(user, stats) {
+// DAY 0 — Tier 2: developing school (5-24 parents), mention count + FastIQ as complement
+function templateDay0Tier2(user, stats) {
+  const first = firstName(user);
+  const greeting = first ? `Hi ${first},` : `Hi,`;
+  const school = user.school_name || user.school || 'your school';
+  const parentCount = stats.parentsAtSchool;
+  const parentStr = plural(parentCount, 'parent');
+  const parentVerb = parentCount === 1 ? 'is' : 'are';
+
+  const body = `${greeting}
+
+You just joined College Fast Forward, and I wanted to reach out personally.
+
+We have ${parentStr} from ${school} on the platform right now — they joined specifically to help students from your school.
+
+As your school's network grows, CFF also gives you FastIQ — it finds alumni at companies you're interested in and helps you reach out to them directly. Both paths are useful.
+
+Log in and get your profile set up: ${APP_URL}
+
+— Jill
+
+P.S. The parents on the platform are here for one reason only: to help students like you.`;
+
+  return {
+    subject: `Welcome to CFF — ${parentStr} from ${school} ${parentVerb} here`,
+    body_text: body,
+    body_html: wrapHtml(body),
+  };
+}
+
+// DAY 0 — Tier 3: <5 parents at school OR <2 parents in student's industry at school
+// Lead with FastIQ, honest about parent network being early-stage
+function templateDay0Tier3(user, stats) {
+  const first = firstName(user);
+  const greeting = first ? `Hi ${first},` : `Hi,`;
+  const school = user.school_name || user.school || 'your school';
+  const industry = primaryIndustry(user);
+  const cg = user.career_goals;
+  const industries = cg?.target_industries || user.target_industries || [];
+
+  // Build specific industry mention if we have it
+  let industryLine = '';
+  if (industries.length > 1) {
+    industryLine = `You mentioned you're interested in ${industries.slice(0, 2).join(' and ')}. FastIQ can find you alumni working in those spaces right now.`;
+  } else if (industry) {
+    industryLine = `You mentioned you're interested in ${industry}. FastIQ can find you alumni working in that space right now.`;
+  } else {
+    industryLine = `FastIQ can find you alumni in industries you're interested in — once your profile is set up.`;
+  }
+
+  const body = `${greeting}
+
+Welcome to College Fast Forward. I wanted to reach out personally.
+
+CFF gives you two ways to connect with professionals who can help: the parent network at your school, and FastIQ — which finds alumni at companies you're interested in and helps you reach out directly.
+
+For ${school} right now, the alumni path is the stronger one. Your school's parent network is still growing, and I don't want to oversell what's there. FastIQ, on the other hand, is ready to use today.
+
+${industryLine}
+
+Log in and try it: ${APP_URL}
+
+— Jill
+
+P.S. The parents on the platform are here for one reason only: to help students like you. As more Wisconsin parents join, you'll hear from us.`;
+
+  return {
+    subject: `Welcome to CFF — two ways to get connected`,
+    body_text: body,
+    body_html: wrapHtml(body),
+  };
+}
+
+// DAY 2 — Tier 1/2: Show 3 school parents
+function templateDay2Tier12(user, stats) {
   const first = firstName(user);
   const greeting = first ? `${first},` : `Hi,`;
   const school = user.school_name || user.school || 'your school';
@@ -163,7 +317,7 @@ function templateDay2(user, stats) {
       return `- ${p.full_name || 'A parent'} — ${role}${ind}`;
     }).join('\n');
   } else {
-    parentLines = `- Several parents from ${school} are active and open to conversations`;
+    parentLines = `- Parents from ${school} are active and open to conversations`;
   }
 
   const industryLine = industry
@@ -172,13 +326,13 @@ function templateDay2(user, stats) {
 
   const body = `${greeting}
 
-A few parents on the platform you might want to know about:
+A few parents from ${school} you might want to know about:
 
 ${parentLines}
 
 ${industryLine}
 
-These are real people who said they're open to hearing from students. The directory has their full profiles — what they do, how they can help, and how to reach them.
+These are real people who said they're open to hearing from students at ${school}. The directory has their full profiles — what they do, how they can help, and how to reach them.
 
 Log in and take a look: ${APP_URL}
 
@@ -187,30 +341,73 @@ Log in and take a look: ${APP_URL}
 P.S. You do not have to have a specific ask ready. Most students who reach out just start with: "I am studying X and would love to hear how you got into Y." That is enough.`;
 
   return {
-    subject: `3 parents from ${school} you might want to meet`,
+    subject: `Parents from ${school} you might want to meet`,
     body_text: body,
     body_html: wrapHtml(body),
   };
 }
 
-function templateDay5(user, stats) {
+// DAY 2 — Tier 3: FastIQ-led, no parent names/counts, continues the alumni thread
+function templateDay2Tier3(user, stats) {
   const first = firstName(user);
   const greeting = first ? `${first},` : `Hi,`;
-  const newParents7d = stats.newParentsLast7Days || 0;
+  const industry = primaryIndustry(user);
+  const cg = user.career_goals;
+  const targetCompanies = cg?.target_companies || [];
+
+  let companyLine = '';
+  if (targetCompanies.length > 0) {
+    const companies = targetCompanies.slice(0, 3).join(', ');
+    companyLine = `You listed ${companies} as target companies. FastIQ can show you who from your school has worked there — and help you write a message to reach out.`;
+  } else if (industry) {
+    companyLine = `FastIQ can show you alumni working in ${industry} right now and help you write a first message.`;
+  } else {
+    companyLine = `Once your profile is set up, FastIQ can show you alumni at companies you care about and help you write a first message.`;
+  }
+
+  const body = `${greeting}
+
+I wanted to follow up on what I mentioned when you joined.
+
+FastIQ is built for the situation you're in: you know roughly what you want, but you don't have a direct line to people doing it. That's what it fixes.
+
+${companyLine}
+
+You don't have to know exactly what to say. FastIQ helps you draft the message too.
+
+Log in and take a look: ${APP_URL}
+
+— Jill
+
+P.S. The students who get responses are usually the ones who send a message in the first week. After that it gets easier to put off.`;
+
+  return {
+    subject: `Your next step on CFF`,
+    body_text: body,
+    body_html: wrapHtml(body),
+  };
+}
+
+// DAY 5 — Tier 1/2: School-scoped activity summary
+function templateDay5Tier12(user, stats) {
+  const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
+  const school = user.school_name || user.school || 'your school';
+  const newParents7d = stats.newParentsAtSchoolLast7Days || 0;
   const recentMessages = stats.recentMessages || 0;
-  const topIndustries = stats.topIndustriesThisWeek || [];
+  const topIndustries = stats.topIndustriesAtSchool || [];
 
   const industryLine = topIndustries.length > 0
-    ? `The most active industries this week: ${topIndustries.slice(0, 3).join(', ')}.`
-    : 'Parents across a range of industries have been active this week.';
+    ? `The most active industries at ${school} this week: ${topIndustries.slice(0, 3).join(', ')}.`
+    : `Parents at ${school} across a range of industries have been active this week.`;
 
   const msgLine = recentMessages > 0
     ? `${plural(recentMessages, 'conversation')} started between students and parents`
     : 'Students and parents have been connecting';
 
   const newParentsLine = newParents7d > 0
-    ? `${plural(newParents7d, 'new parent')} joined the platform`
-    : 'New parents joined the platform';
+    ? `${plural(newParents7d, 'new parent')} from ${school} joined this week`
+    : `The parent network at ${school} is active`;
 
   const body = `${greeting}
 
@@ -235,24 +432,60 @@ P.S. The students who get the most out of CFF are not necessarily the most prepa
   };
 }
 
-function templateDay9Active(user, stats) {
+// DAY 5 — Tier 3: Skip school-specific stats (nothing to show), lead with FastIQ momentum
+function templateDay5Tier3(user, stats) {
   const first = firstName(user);
   const greeting = first ? `${first},` : `Hi,`;
-  const industry = primaryIndustry(user) || 'your target industry';
-  const newInIndustry = stats.newParentsInIndustry7Days || 0;
-  const totalInIndustry = stats.totalParentsInIndustry || 0;
+  const industry = primaryIndustry(user);
 
-  const countLine = newInIndustry > 0
-    ? `${plural(newInIndustry, 'new parent')} in ${industry} joined CFF this week.`
-    : `There are now ${plural(totalInIndustry, 'parent')} in ${industry} on the platform.`;
-
-  const totalNote = (totalInIndustry > 0 && newInIndustry > 0)
-    ? ` That is ${plural(totalInIndustry, 'parent')} total in that area now.`
-    : '';
+  const industryMention = industry
+    ? `in ${industry}`
+    : 'in the areas you care about';
 
   const body = `${greeting}
 
-${countLine}${totalNote}
+You've been on CFF for about 5 days. I wanted to check in.
+
+FastIQ has been active this week — students have been using it to find alumni ${industryMention} and start conversations. That's the path that tends to move fastest when you're getting started.
+
+The one thing that makes a difference: a complete profile. Your major, graduation year, and target industries. Without it, you can't reach out.
+
+Takes 4 minutes: ${APP_URL}
+
+— Jill
+
+P.S. You don't have to have a great resume or a polished pitch. You just have to start.`;
+
+  return {
+    subject: `Five days in — here's where most students get stuck`,
+    body_text: body,
+    body_html: wrapHtml(body),
+  };
+}
+
+// DAY 9 Active — Tier 1/2: School+industry-scoped update
+function templateDay9ActiveTier12(user, stats) {
+  const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
+  const school = user.school_name || user.school || 'your school';
+  const industry = primaryIndustry(user) || 'your target industry';
+  const newInIndustry = stats.newParentsInIndustryAtSchoolLast7Days || 0;
+  const totalInIndustry = stats.parentsInIndustryAtSchool || 0;
+
+  let countLine;
+  if (newInIndustry > 0) {
+    countLine = `${plural(newInIndustry, 'new parent')} in ${industry} from ${school} joined CFF this week.`;
+    if (totalInIndustry > 0) countLine += ` That is ${plural(totalInIndustry, 'parent')} total in that area at your school.`;
+  } else if (totalInIndustry > 0) {
+    countLine = `There are ${plural(totalInIndustry, 'parent')} in ${industry} from ${school} on the platform.`;
+  } else {
+    // No parents in this industry at this school — pivot to FastIQ
+    countLine = `FastIQ has alumni in ${industry} you can reach out to directly — even if the parent network at ${school} doesn't have that covered yet.`;
+  }
+
+  const body = `${greeting}
+
+${countLine}
 
 Since you have already been checking things out — thought you would want to know.
 
@@ -264,23 +497,30 @@ P.S. A short message goes a long way. Something like "I saw your profile and I a
 
   return {
     subject: newInIndustry > 0
-      ? `${plural(newInIndustry, 'new parent')} in ${industry} this week`
-      : `New parents in ${industry} this week`,
+      ? `${plural(newInIndustry, 'new parent')} in ${industry} from ${school} this week`
+      : `Updates from ${school}'s network`,
     body_text: body,
     body_html: wrapHtml(body),
   };
 }
 
-function templateDay9Dormant(user, stats) {
+// DAY 9 Dormant — Tier 1/2: School+industry-scoped
+function templateDay9DormantTier12(user, stats) {
   const first = firstName(user);
   const greeting = first ? `${first},` : `Hi,`;
+  const school = user.school_name || user.school || 'your school';
   const industry = primaryIndustry(user) || 'your target area';
-  const newInIndustry = stats.newParentsInIndustry7Days || 0;
-  const totalInIndustry = stats.totalParentsInIndustry || 0;
+  const newInIndustry = stats.newParentsInIndustryAtSchoolLast7Days || 0;
+  const totalInIndustry = stats.parentsInIndustryAtSchool || 0;
 
-  const countLine = newInIndustry > 0
-    ? `${plural(newInIndustry, 'parent')} in ${industry} joined since you did.`
-    : `There are ${plural(totalInIndustry, 'parent')} in ${industry} on the platform.`;
+  let countLine;
+  if (newInIndustry > 0) {
+    countLine = `${plural(newInIndustry, 'parent')} in ${industry} from ${school} joined since you did.`;
+  } else if (totalInIndustry > 0) {
+    countLine = `There are ${plural(totalInIndustry, 'parent')} in ${industry} from ${school} on the platform.`;
+  } else {
+    countLine = `FastIQ has alumni in ${industry} you can reach out to — a faster path when the parent network at ${school} is still growing in your area.`;
+  }
 
   const body = `${greeting}
 
@@ -296,13 +536,66 @@ P.S. Your profile takes 4 minutes. That is the only thing standing between you a
 
   return {
     subject: newInIndustry > 0
-      ? `${plural(newInIndustry, 'parent')} in ${industry} since you signed up`
-      : `Parents in ${industry} are waiting`,
+      ? `${plural(newInIndustry, 'parent')} in ${industry} from ${school} since you signed up`
+      : `Checking in — 9 days since you joined`,
     body_text: body,
     body_html: wrapHtml(body),
   };
 }
 
+// DAY 9 Active — Tier 3: FastIQ-focused
+function templateDay9ActiveTier3(user, stats) {
+  const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
+  const industry = primaryIndustry(user) || 'your target area';
+
+  const body = `${greeting}
+
+You've been active on CFF — that's good. Wanted to give you an update.
+
+FastIQ has new alumni results in ${industry} this week. If you haven't started a conversation yet, this is a good moment to try.
+
+The students who get responses are the ones who send a message before they feel ready. The message doesn't have to be perfect.
+
+Log in: ${APP_URL}
+
+— Jill
+
+P.S. Something like "I'm a student interested in ${industry} — would you be open to a 15-minute conversation?" is enough to get a response from most people.`;
+
+  return {
+    subject: `Alumni in ${industry} — ready when you are`,
+    body_text: body,
+    body_html: wrapHtml(body),
+  };
+}
+
+// DAY 9 Dormant — Tier 3: FastIQ-focused
+function templateDay9DormantTier3(user, stats) {
+  const first = firstName(user);
+  const greeting = first ? `${first},` : `Hi,`;
+  const industry = primaryIndustry(user) || 'your target area';
+
+  const body = `${greeting}
+
+You signed up about 9 days ago and I wanted to check in.
+
+I know it's easy to sign up and not come back. Here's what's waiting for you: FastIQ has alumni in ${industry} you can reach out to today. You don't need a referral or a warm intro — just a profile and a short message.
+
+That's what CFF is for. Log in when you're ready: ${APP_URL}
+
+— Jill
+
+P.S. Takes about 10 minutes to set up your profile and send your first message. Most students say it feels easier than they expected.`;
+
+  return {
+    subject: `Still here when you're ready`,
+    body_text: body,
+    body_html: wrapHtml(body),
+  };
+}
+
+// DAY 14 Complete — same for all tiers (no counts)
 function templateDay14Complete(user) {
   const first = firstName(user);
   const greeting = first ? `${first},` : `Hi,`;
@@ -328,6 +621,7 @@ P.S. One conversation can lead to a referral, an introduction, or just a better 
   };
 }
 
+// DAY 14 Incomplete — same for all tiers (no counts)
 function templateDay14Incomplete(user) {
   const first = firstName(user);
   const greeting = first ? `${first},` : `Hi,`;
@@ -348,7 +642,7 @@ It takes about 4 minutes: ${APP_URL}
 
 — Jill
 
-P.S. The directory has parents in most industries. Once your profile is up, you can browse and reach out directly.`;
+P.S. The directory has parents across industries. Once your profile is up, you can browse and reach out directly.`;
 
   return {
     subject: `Two weeks in — one thing left to do`,
@@ -357,56 +651,38 @@ P.S. The directory has parents in most industries. Once your profile is up, you 
   };
 }
 
-// ─── Stats Fetchers ───────────────────────────────────────────────────────────
+// ─── Template Router ───────────────────────────────────────────────────────────
 
-function fetchStats(user, allParents, recentMsgCount) {
-  const schoolCode = user.school_code;
-  const industry = primaryIndustry(user);
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+function selectTemplate(targetDay, student, stats, isActive) {
+  const tier = classifyTier(student, stats);
+  const profileDone = isProfileComplete(student);
 
-  const parentsAtSchool = allParents.filter(p => p.school_code === schoolCode || p.school_name === user.school_name).length;
-  const newParentsLast7Days = allParents.filter(p => p.created_date >= sevenDaysAgo).length;
-
-  const parentsInIndustry = industry
-    ? allParents.filter(p => {
-        const pInd = (p.industry || '').toLowerCase();
-        const indLower = industry.toLowerCase();
-        return pInd.includes(indLower) || indLower.includes(pInd.split(' ')[0]);
-      })
-    : [];
-  const totalParentsInIndustry = parentsInIndustry.length;
-  const newParentsInIndustry7Days = parentsInIndustry.filter(p => p.created_date >= sevenDaysAgo).length;
-
-  const schoolParents = allParents.filter(p => p.school_code === schoolCode || p.school_name === user.school_name);
-  const samplePool = schoolParents.length >= 3 ? schoolParents : allParents;
-  const sampleParents = samplePool.slice(0, 3).map(p => ({
-    full_name: p.full_name,
-    current_position: p.current_position,
-    current_company: p.current_company,
-    industry: p.industry,
-  }));
-
-  const industryCounts = {};
-  allParents.forEach(p => {
-    if (p.industry) industryCounts[p.industry] = (industryCounts[p.industry] || 0) + 1;
-  });
-  const topIndustriesThisWeek = Object.entries(industryCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([ind]) => ind);
-
-  return {
-    parentsAtSchool,
-    newParentsLast7Days,
-    totalParentsInIndustry,
-    newParentsInIndustry7Days,
-    sampleParents,
-    topIndustriesThisWeek,
-    recentMessages: recentMsgCount || 0,
-  };
+  if (targetDay === 0) {
+    if (tier === 1) return { template: templateDay0Tier1(student, stats), tier };
+    if (tier === 2) return { template: templateDay0Tier2(student, stats), tier };
+    return { template: templateDay0Tier3(student, stats), tier };
+  }
+  if (targetDay === 2) {
+    if (tier === 3) return { template: templateDay2Tier3(student, stats), tier };
+    return { template: templateDay2Tier12(student, stats), tier };
+  }
+  if (targetDay === 5) {
+    if (tier === 3) return { template: templateDay5Tier3(student, stats), tier };
+    return { template: templateDay5Tier12(student, stats), tier };
+  }
+  if (targetDay === 9) {
+    if (tier === 3) {
+      return { template: isActive ? templateDay9ActiveTier3(student, stats) : templateDay9DormantTier3(student, stats), tier };
+    }
+    return { template: isActive ? templateDay9ActiveTier12(student, stats) : templateDay9DormantTier12(student, stats), tier };
+  }
+  if (targetDay === 14) {
+    return { template: profileDone ? templateDay14Complete(student) : templateDay14Incomplete(student), tier };
+  }
+  return { template: null, tier };
 }
 
-// ─── Frequency Cap Check ──────────────────────────────────────────────────────
+// ─── Frequency Cap ────────────────────────────────────────────────────────────
 
 function checkFrequencyCap(existingEmails, userId) {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -464,7 +740,6 @@ Deno.serve(async (req) => {
     const results = { queued: 0, skipped: 0, legacy_skipped: 0, details: [] };
 
     for (const student of students) {
-      // ── LEGACY SKIP: only process students who signed up after launch date ──
       if (!student.created_date || student.created_date < AGENT_LAUNCH_DATE) {
         results.legacy_skipped++;
         continue;
@@ -499,24 +774,10 @@ Deno.serve(async (req) => {
       }
 
       const stats = fetchStats(student, allParents, recentMsgCount);
-
-      let template;
-      const profileDone = isProfileComplete(student);
       const isActive = (student.platform_visit_count > 1) ||
         (student.last_active_at && daysSince(student.last_active_at) <= 7);
 
-      if (targetDay === 0) {
-        template = templateDay0(student, stats);
-      } else if (targetDay === 2) {
-        template = templateDay2(student, stats);
-      } else if (targetDay === 5) {
-        template = templateDay5(student, stats);
-      } else if (targetDay === 9) {
-        template = isActive ? templateDay9Active(student, stats) : templateDay9Dormant(student, stats);
-      } else if (targetDay === 14) {
-        template = profileDone ? templateDay14Complete(student) : templateDay14Incomplete(student);
-      }
-
+      const { template, tier } = selectTemplate(targetDay, student, stats, isActive);
       if (!template) { results.skipped++; continue; }
 
       const emailRecord = {
@@ -526,19 +787,21 @@ Deno.serve(async (req) => {
         school_code: student.school_code || '',
         workflow: 'onboarding',
         sequence_day: targetDay,
-        template_id: `onboarding_day${targetDay}${targetDay === 9 ? (isActive ? '_active' : '_dormant') : ''}${targetDay === 14 ? (profileDone ? '_complete' : '_incomplete') : ''}`,
+        template_id: `onboarding_day${targetDay}_tier${tier}${targetDay === 9 ? (isActive ? '_active' : '_dormant') : ''}${targetDay === 14 ? (isProfileComplete(student) ? '_complete' : '_incomplete') : ''}`,
         subject: template.subject,
         body_html: template.body_html,
         body_text: template.body_text,
         personalization_data: {
-          profileComplete: profileDone,
+          tier,
+          profileComplete: isProfileComplete(student),
           isActive,
           daysSinceSignup,
           industry: primaryIndustry(student),
           school: student.school_name || student.school,
           parentsAtSchool: stats.parentsAtSchool,
-          newParentsInIndustry7Days: stats.newParentsInIndustry7Days,
-          totalParentsInIndustry: stats.totalParentsInIndustry,
+          parentsInIndustryAtSchool: stats.parentsInIndustryAtSchool,
+          newParentsAtSchoolLast7Days: stats.newParentsAtSchoolLast7Days,
+          newParentsInIndustryAtSchoolLast7Days: stats.newParentsInIndustryAtSchoolLast7Days,
         },
         status: 'pending_approval',
         frequency_check_passed: true,
@@ -549,15 +812,15 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.EngagementEmail.create(emailRecord);
         results.queued++;
       } else {
-        const resolvedFirst = firstName(student);
         results.details.push({
           email: student.email,
-          name_resolved: resolvedFirst || '(no name — anonymous greeting used)',
-          name_broken: !resolvedFirst,
+          name_resolved: firstName(student) || '(no name)',
+          tier,
           day: targetDay,
+          parentsAtSchool: stats.parentsAtSchool,
+          parentsInIndustryAtSchool: stats.parentsInIndustryAtSchool,
           subject: template.subject,
           body_text: template.body_text,
-          body_html: template.body_html,
         });
         results.queued++;
       }
