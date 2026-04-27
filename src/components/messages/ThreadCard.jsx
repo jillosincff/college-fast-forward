@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import formatDisplayName, { getInitialsFromUser } from '@/components/utils/formatDisplayName';
 
@@ -32,8 +32,9 @@ function getRole(userData) {
   return null;
 }
 
-export default function ThreadCard({ thread, currentUserEmail, index, onClick }) {
+export default function ThreadCard({ thread, currentUserEmail, index, onClick, onDelete }) {
   const { contactEmail, contactName, contactData, lastMessage, lastMessageAt, unreadCount, isSentByMe } = thread;
+  const [showDeleteBtn, setShowDeleteBtn] = useState(false);
 
   const displayName = formatDisplayName(contactName, 'Unknown');
   const initials = getInitialsFromUser(contactName, '??');
@@ -49,7 +50,18 @@ export default function ThreadCard({ thread, currentUserEmail, index, onClick })
   const senderTag = isSentByMe ? 'You: ' : `${formatDisplayName(contactName, 'Unknown').split(' ')[0]}: `;
 
   return (
-    <div onClick={onClick} style={{
+    <div onClick={onClick} 
+      onMouseEnter={e => { 
+        e.currentTarget.style.borderColor = 'rgba(232,93,32,0.25)'; 
+        e.currentTarget.style.transform = 'translateY(-1px)'; 
+        setShowDeleteBtn(true);
+      }}
+      onMouseLeave={e => { 
+        e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; 
+        e.currentTarget.style.transform = 'none'; 
+        setShowDeleteBtn(false);
+      }}
+      style={{
       background: isUnread ? 'rgba(232,93,32,0.02)' : '#fff',
       border: '0.5px solid rgba(0,0,0,0.08)',
       borderLeft: isUnread ? '3px solid #E85D20' : '0.5px solid rgba(0,0,0,0.08)',
@@ -58,8 +70,6 @@ export default function ThreadCard({ thread, currentUserEmail, index, onClick })
       cursor: 'pointer', transition: 'all 0.2s',
       animation: `msgFadeUp 0.4s ease ${0.1 + index * 0.05}s both`,
     }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(232,93,32,0.25)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'none'; }}
     >
       {/* Avatar */}
       <div style={{
@@ -95,15 +105,35 @@ export default function ThreadCard({ thread, currentUserEmail, index, onClick })
 
       {/* Right */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-        <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#bbb', whiteSpace: 'nowrap' }}>
-          {formatTimestamp(lastMessageAt)}
-        </span>
-        {isUnread && (
-          <span style={{
-            width: 20, height: 20, borderRadius: '50%', background: '#E85D20',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: dmSans, fontSize: 10, fontWeight: 600, color: '#fff',
-          }}>{unreadCount}</span>
+        {showDeleteBtn ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onDelete) onDelete(contactEmail);
+            }}
+            style={{
+              background: '#E85D20', color: '#fff', border: 'none', borderRadius: 6,
+              padding: '6px 12px', fontFamily: dmSans, fontSize: 11, fontWeight: 500,
+              cursor: 'pointer', minHeight: 'auto', transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+          >
+            Delete
+          </button>
+        ) : (
+          <>
+            <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 300, color: '#bbb', whiteSpace: 'nowrap' }}>
+              {formatTimestamp(lastMessageAt)}
+            </span>
+            {isUnread && (
+              <span style={{
+                width: 20, height: 20, borderRadius: '50%', background: '#E85D20',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: dmSans, fontSize: 10, fontWeight: 600, color: '#fff',
+              }}>{unreadCount}</span>
+            )}
+          </>
         )}
       </div>
 

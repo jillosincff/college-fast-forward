@@ -162,6 +162,20 @@ export default function MyMessagesPage() {
     navigate('MessageComposer', { to: thread.contactEmail, name: formatNameClean(thread.contactName) });
   };
 
+  const handleDeleteThread = async (contactEmail) => {
+    if (confirm('Delete all messages with this person?')) {
+      try {
+        const threadsToDelete = messages.filter(m => m.sender_email === contactEmail || m.recipient_email === contactEmail);
+        for (const msg of threadsToDelete) {
+          await base44.entities.Message.delete(msg.id);
+        }
+        await loadData();
+      } catch (e) {
+        console.error('Failed to delete thread:', e);
+      }
+    }
+  };
+
   const filterLabels = { all: 'All', unread: 'unread', parents: 'parent', alumni: 'alumni' };
 
   if (isParent) return <ParentMessagesView user={user} />;
@@ -222,6 +236,7 @@ export default function MyMessagesPage() {
                 currentUserEmail={user.email}
                 index={i}
                 onClick={() => handleThreadClick(thread)}
+                onDelete={handleDeleteThread}
               />
             ))}
           </div>
