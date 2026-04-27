@@ -22,17 +22,39 @@
       "type": "string",
       "enum": [
         "onboarding",
+        "trial_activation",
+        "trial_expired",
         "reengagement"
       ],
       "description": "Which workflow this email belongs to"
     },
     "sequence_day": {
       "type": "number",
-      "description": "Day in the onboarding sequence (0, 2, 5, 9, 14) or null for reengagement"
+      "description": "Day in the sequence (0, 2, 5, 9, 14) or null for reengagement"
     },
     "template_id": {
       "type": "string",
-      "description": "Template identifier e.g. onboarding_day0, onboarding_day2, reengagement_1"
+      "description": "Template identifier e.g. onboarding_day0_tier1, trial_activation_day1, reengagement_1"
+    },
+    "tier": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3
+      ],
+      "description": "Personalization tier (1=well-staffed school, 2=developing, 3=understaffed or thin industry)"
+    },
+    "fastiq_routing": {
+      "type": "string",
+      "enum": [
+        "no_trial",
+        "active_trial",
+        "trial_expired_converted",
+        "trial_expired_not_converted",
+        "paid"
+      ],
+      "description": "Student's FastIQ status at time of queue build \u2014 determines which workflow they were routed to"
     },
     "subject": {
       "type": "string",
@@ -106,6 +128,16 @@
       "type": "boolean",
       "default": false,
       "description": "Whether the student completed their profile within 7 days of this email"
+    },
+    "resulted_in_trial_start": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student started a FastIQ trial within 7 days of this email"
+    },
+    "resulted_in_conversion": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student converted to paid within 14 days of this email"
     },
     "sendgrid_message_id": {
       "type": "string",
