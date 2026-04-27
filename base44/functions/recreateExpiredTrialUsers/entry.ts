@@ -77,26 +77,24 @@ Deno.serve(async (req) => {
       },
     ];
 
-    const results = { created: 0, errors: [] };
+    const results = { updated: 0, errors: [] };
 
     for (const userData of usersToRestore) {
       try {
-        const newUser = await base44.asServiceRole.entities.User.create({
-          email: userData.email,
-          full_name: userData.full_name,
-          persona: userData.persona,
-          school_name: userData.school_name,
-          trial_status: 'active',
-          trial_start_date: userData.trial_start_date,
-          trial_end_date: '2026-05-04T00:00:00Z',
-          subscription_status: 'free',
-          fastiq_trial_active: true,
-          membership_tier: 'free',
-          onboarding_completed: true,
-          role: 'user',
-        });
-
-        results.created++;
+        const existing = await base44.asServiceRole.entities.User.filter({ email: userData.email });
+        
+        if (existing?.length > 0) {
+          await base44.asServiceRole.entities.User.update(existing[0].id, {
+            trial_status: 'active',
+            trial_end_date: '2026-05-04T00:00:00Z',
+            fastiq_trial_active: true,
+            subscription_status: 'free',
+            membership_tier: 'free',
+          });
+          results.updated++;
+        } else {
+          results.errors.push({ email: userData.email, error: 'User not found' });
+        }
       } catch (e) {
         results.errors.push({ email: userData.email, error: e.message });
       }
@@ -105,7 +103,7 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       ...results,
-      message: `Recreated ${results.created} expired trial user(s).`,
+      message: `Updated ${results.updated} trial user(s).`,
     });
   } catch (error) {
     console.error('[recreateExpiredTrialUsers] Error:', error);
