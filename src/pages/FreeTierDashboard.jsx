@@ -153,6 +153,16 @@ export default function FreeTierDashboard() {
   useEffect(() => {
     const hashPart = window.location.hash.split('?')[1] || '';
     const params = new URLSearchParams(hashPart);
+    // Auto-open upgrade modal when arriving from FastIQDashboard gate or email CTA
+    if (params.get('upgrade') === 'true') {
+      setShowUpgradeModal(true);
+      window.history.replaceState(null, '', window.location.pathname + '#FreeTierDashboard');
+    }
+  }, []);
+
+  useEffect(() => {
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(hashPart);
     if (params.get('upgraded') === 'true') {
       setShowUpgradeSuccess(true);
       window.history.replaceState(null, '', window.location.pathname + '#FreeTierDashboard');

@@ -11,6 +11,16 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
   const [showBanner, setShowBanner] = useState(true);
   const isFastIQ = checkIsFastIQ(user);
 
+  // When rendered standalone (direct URL, no parent passing onOpenUpgrade),
+  // fall back to navigating to FreeTierDashboard with the upgrade modal open.
+  const handleUpgrade = () => {
+    if (onOpenUpgrade) {
+      onOpenUpgrade();
+    } else {
+      navigate('FreeTierDashboard?upgrade=true');
+    }
+  };
+
   const isFounding = !!(user?.founding_offer_redeemed || user?.founding_member_plan);
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const [portalLoading, setPortalLoading] = useState(false);
@@ -53,7 +63,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 24px 48px' }}>
         <FoundingMemberBanner
           show={showBanner}
-          onUpgrade={() => onOpenUpgrade?.()}
+          onUpgrade={handleUpgrade}
           onDismiss={() => setShowBanner(false)}
         />
         <div style={{ marginTop: 32 }}>
@@ -104,7 +114,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
         </div>
 
         <button
-          onClick={() => onOpenUpgrade?.()}
+          onClick={handleUpgrade}
           style={{
             background: '#E85D20', border: 'none',
             borderRadius: 10, padding: '16px',
