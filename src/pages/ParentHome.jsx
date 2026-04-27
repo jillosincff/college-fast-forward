@@ -29,6 +29,16 @@ export default function ParentHome() {
   const [currentDate, setCurrentDate] = useState('');
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
 
+  // Check for post-Stripe redirect once on mount only
+  useEffect(() => {
+    const hashPart = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(hashPart);
+    if (params.get('upgraded') === 'true') {
+      setShowUpgradeSuccess(true);
+      window.history.replaceState(null, '', '#ParentHome');
+    }
+  }, []);
+
   useEffect(() => {
     setMounted(true);
 
@@ -41,14 +51,6 @@ export default function ParentHome() {
       ];
       const filled = fields.filter(Boolean).length;
       setProfileCompletion(Math.round((filled / fields.length) * 100));
-    }
-
-    // Show success banner if returning from Stripe checkout
-    const hashPart = window.location.hash.split('?')[1] || '';
-    const params = new URLSearchParams(hashPart);
-    if (params.get('upgraded') === 'true') {
-      setShowUpgradeSuccess(true);
-      window.history.replaceState(null, '', window.location.pathname + '#ParentHome');
     }
 
     const updateTime = () => {

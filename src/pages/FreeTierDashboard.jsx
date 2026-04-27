@@ -156,7 +156,7 @@ export default function FreeTierDashboard() {
     // Auto-open upgrade modal when arriving from FastIQDashboard gate or email CTA
     if (params.get('upgrade') === 'true') {
       setShowUpgradeModal(true);
-      window.history.replaceState(null, '', window.location.pathname + '#FreeTierDashboard');
+      window.history.replaceState(null, '', '#FreeTierDashboard');
     }
   }, []);
 
@@ -165,7 +165,7 @@ export default function FreeTierDashboard() {
     const params = new URLSearchParams(hashPart);
     if (params.get('upgraded') === 'true') {
       setShowUpgradeSuccess(true);
-      window.history.replaceState(null, '', window.location.pathname + '#FreeTierDashboard');
+      window.history.replaceState(null, '', '#FreeTierDashboard');
       // Poll until FastIQ is active — webhook may take a few seconds
       let attempts = 0;
       const poll = setInterval(async () => {
