@@ -99,6 +99,7 @@ function MemberCard({ user, onMessage, onViewProfile }) {
         gap: 12,
         transition: 'all 0.2s ease',
         cursor: 'default',
+        height: '100%',
       }}
     >
       {/* Top row — avatar + name + badge */}
