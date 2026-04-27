@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { useAuth } from '@/components/auth/AuthContext';
 
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
@@ -131,6 +132,7 @@ function TestimonialCarousel() {
 }
 
 export default function ParentLandingPage({ onStudentClick }) {
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
 
@@ -154,10 +156,14 @@ export default function ParentLandingPage({ onStudentClick }) {
 
   const foundingActive = new Date() < FOUNDING_DEADLINE;
   const go = () => {
+    if (user?.persona === 'parent') {
+      navigate('ParentOnboarding?step=invite');
+      return;
+    }
     // Store parent role hint so GatorAuth redirects to ParentOnboarding after login
     localStorage.setItem('pending_invite_role', 'parent');
     sessionStorage.setItem('pending_invite_role', 'parent');
-    navigate('#GatorAuth');
+    navigate('GatorAuth');
   };
   const student = () => { if (onStudentClick) onStudentClick(); else navigate('#StudentLandingPage'); };
 
