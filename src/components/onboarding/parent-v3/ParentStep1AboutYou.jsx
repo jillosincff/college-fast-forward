@@ -131,6 +131,20 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
         <HelperText>You can change this anytime in your profile settings.</HelperText>
       </div>
 
+      {/* LinkedIn */}
+      <div style={{ marginBottom: 24 }}>
+        <FieldLabel>
+          LinkedIn Profile{' '}
+          <span style={{ color: '#888', fontWeight: 400, textTransform: 'none', fontSize: 11 }}>(optional)</span>
+        </FieldLabel>
+        <FieldInput
+          value={formData.linkedinUrl || ''}
+          onChange={e => onUpdate({ linkedinUrl: e.target.value })}
+          placeholder="https://linkedin.com/in/yourname"
+        />
+        <HelperText>Parents with LinkedIn get significantly more intro requests from students.</HelperText>
+      </div>
+
       {/* Directory Visibility Toggle */}
       <div style={{ marginBottom: 28 }}>
         <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 8 }}>
