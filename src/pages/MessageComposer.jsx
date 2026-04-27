@@ -251,37 +251,26 @@ export default function MessageComposer() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#08080f', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(232,93,32,0.06) 0%, transparent 60%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTop: '3px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite', position: 'relative', zIndex: 1 }} />
+      <div style={{ minHeight: '100vh', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid rgba(232,93,32,0.3)', borderTop: '3px solid #E85D20', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
     );
   }
 
   if (!recipient) {
     return (
-      <div style={{ minHeight: '100vh', background: '#08080f', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{
-          position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 500, height: 400, background: 'radial-gradient(ellipse, rgba(232,93,32,0.05) 0%, transparent 60%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{ maxWidth: 480, textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 12 }}>User Not Found</h2>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.65)', marginBottom: 28, lineHeight: 1.6 }}>We couldn't find this user. Head back to your messages.</p>
+      <div style={{ minHeight: '100vh', background: '#1a1a1a', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ maxWidth: 480, textAlign: 'center' }}>
+          <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 20, fontWeight: 600, color: '#fff', marginBottom: 12 }}>User Not Found</h2>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: 'rgba(255,255,255,0.6)', marginBottom: 24 }}>We couldn't find this user. Head back to your messages.</p>
           <button onClick={() => navigate('MyMessages')} style={{
             background: '#E85D20', color: '#fff', border: 'none',
-            borderRadius: 14, padding: '14px 32px',
-            fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600,
-            cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.35)',
-            transition: 'all 0.2s ease',
+            borderRadius: 8, padding: '12px 24px',
+            fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600,
+            cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(232,93,32,0.45)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.35)'; }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
           >
             ← Back to Messages
           </button>
@@ -292,23 +281,14 @@ export default function MessageComposer() {
 
   const recipientFirstName = recipient?.full_name?.split(' ')[0] || 'them';
   const dmSans = "'DM Sans', system-ui, sans-serif";
-  const playfair = "'Playfair Display', Georgia, serif";
 
   return (
-    <div style={{ minHeight: '100vh', background: '#08080f', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-      {/* Background gradient */}
-      <div style={{
-        position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
-        width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.05) 0%, transparent 60%)',
-        pointerEvents: 'none', zIndex: 0,
-      }} />
-
+    <div style={{ minHeight: '100vh', background: '#1a1a1a', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 20,
-        background: 'rgba(8,8,15,0.85)', backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '12px 24px',
+        position: 'sticky', top: 0, zIndex: 10,
+        background: '#1a1a1a', borderBottom: '1px solid rgba(255,255,255,0.1)',
+        padding: '14px 24px', display: 'flex', alignItems: 'center',
       }}>
         <button
           onClick={() => navigate('MyMessages')}
@@ -321,22 +301,20 @@ export default function MessageComposer() {
           onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; }}
           onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          Back to Messages
+          ← Back
         </button>
       </div>
 
-      <div style={{ flex: 1, maxWidth: 640, margin: '0 auto', width: '100%', padding: '32px 20px 48px', display: 'flex', flexDirection: 'column', gap: 20, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, maxWidth: 700, margin: '0 auto', width: '100%', padding: '24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
         {/* Profile Card */}
         <div style={{
-          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 16, padding: '20px', display: 'flex', alignItems: 'center', gap: 14,
+          background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '20px', display: 'flex', alignItems: 'center', gap: 14,
+          borderLeft: '4px solid #E85D20',
         }}>
           <div style={{
-            width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #E85D20, #c9471a)',
+            width: 50, height: 50, borderRadius: '50%', background: '#E85D20',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: '#fff', flexShrink: 0,
-            boxShadow: '0 4px 16px rgba(232,93,32,0.3)',
           }}>
             {(recipient?.full_name?.[0] || 'U').toUpperCase()}
           </div>
@@ -353,10 +331,10 @@ export default function MessageComposer() {
         </div>
 
         {/* Message Thread */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 200, maxHeight: 500, overflowY: 'auto' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, minHeight: 200, maxHeight: 400, overflowY: 'auto' }}>
           {messages.length === 0 && isFirstMessage && (
-            <div style={{ textAlign: 'center', paddingY: 32, color: 'rgba(255,255,255,0.5)', fontFamily: dmSans }}>
-              <p style={{ fontSize: 14, margin: 0 }}>Start a conversation with {recipientFirstName}</p>
+            <div style={{ textAlign: 'center', paddingY: 32, color: 'rgba(255,255,255,0.4)', fontFamily: dmSans, fontSize: 14 }}>
+              Start a conversation with {recipientFirstName}
             </div>
           )}
 
@@ -368,20 +346,19 @@ export default function MessageComposer() {
                 justifyContent: isMine ? 'flex-end' : 'flex-start',
                 gap: 8,
               }}>
-                <div style={{ maxWidth: '75%' }}>
+                <div style={{ maxWidth: '80%' }}>
                   <div style={{
-                    background: isMine ? '#0021A5' : 'rgba(255,255,255,0.07)',
-                    border: isMine ? 'none' : '1px solid rgba(255,255,255,0.12)',
+                    background: isMine ? '#0021A5' : 'rgba(255,255,255,0.08)',
                     color: isMine ? '#fff' : 'rgba(255,255,255,0.85)',
-                    borderRadius: isMine ? '16px 6px 16px 16px' : '6px 16px 16px 16px',
-                    padding: '12px 16px',
+                    borderRadius: isMine ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
+                    padding: '11px 15px',
                     fontFamily: dmSans, fontSize: 13, lineHeight: 1.5,
                   }}>
                     {msg.body}
                   </div>
                   <p style={{
                     fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)',
-                    margin: '6px 0 0', textAlign: isMine ? 'right' : 'left',
+                    margin: '5px 0 0', textAlign: isMine ? 'right' : 'left',
                   }}>
                     {new Date(msg.created_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                   </p>
@@ -392,7 +369,7 @@ export default function MessageComposer() {
         </div>
 
         {/* Message Composer */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 18 }}>
           <textarea
             value={newMessage}
             onChange={(e) => {
@@ -402,15 +379,15 @@ export default function MessageComposer() {
             placeholder={`Message ${recipientFirstName}...`}
             style={{
               width: '100%', fontFamily: dmSans, fontSize: 13, color: '#fff',
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 12, padding: '12px 16px', boxSizing: 'border-box',
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 8, padding: '12px 14px', boxSizing: 'border-box',
               resize: 'vertical', minHeight: 80, maxHeight: 200,
               outline: 'none', transition: 'border-color 0.2s',
             }}
-            onFocus={e => { e.target.style.borderColor = 'rgba(232,93,32,0.4)'; }}
-            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+            onFocus={e => { e.target.style.borderColor = 'rgba(232,93,32,0.4)'; e.target.style.background = 'rgba(255,255,255,0.08)'; }}
+            onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; e.target.style.background = 'rgba(255,255,255,0.05)'; }}
           />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, gap: 10 }}>
             <span style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
               {newMessage.length}/5000
             </span>
@@ -418,17 +395,16 @@ export default function MessageComposer() {
               onClick={handleSend}
               disabled={!newMessage.trim() || sending}
               style={{
-                background: !newMessage.trim() || sending ? 'rgba(232,93,32,0.4)' : '#E85D20',
-                color: '#fff', border: 'none', borderRadius: 12,
-                padding: '12px 24px', fontFamily: dmSans, fontSize: 13, fontWeight: 600,
+                background: !newMessage.trim() || sending ? 'rgba(232,93,32,0.5)' : '#E85D20',
+                color: '#fff', border: 'none', borderRadius: 8,
+                padding: '10px 22px', fontFamily: dmSans, fontSize: 13, fontWeight: 600,
                 cursor: !newMessage.trim() || sending ? 'not-allowed' : 'pointer',
-                opacity: !newMessage.trim() || sending ? 0.6 : 1,
-                minHeight: 'auto', transition: 'all 0.2s', boxShadow: !newMessage.trim() || sending ? 'none' : '0 4px 16px rgba(232,93,32,0.3)',
+                minHeight: 'auto', transition: 'all 0.15s',
               }}
-              onMouseEnter={e => { if (!(!newMessage.trim() || sending)) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.4)'; } }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(232,93,32,0.3)'; }}
+              onMouseEnter={e => { if (!(!newMessage.trim() || sending)) e.currentTarget.style.opacity = '0.9'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
             >
-              {sending ? 'Sending...' : 'Send Message →'}
+              {sending ? 'Sending...' : 'Send Message'}
             </button>
           </div>
         </div>
