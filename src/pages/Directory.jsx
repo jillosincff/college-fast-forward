@@ -412,7 +412,9 @@ export default function Directory() {
 
   const visibleUsers = filteredUsers.slice(0, visibleCount);
 
-  const handleMessage = (u) => { setComposerRecipient(u); setComposerOpen(true); };
+  const handleMessage = (u) => { 
+  alert('Messaging temporarily disabled. Please use the message feature from their profile instead.');
+};
   const handleViewProfile = (id) => { setSelectedProfileId(id); setProfileModalOpen(true); };
   const clearFilters = () => { setSearchTerm(''); setRoleFilter('all'); setIndustryFilter('all'); setHelpFilter('all'); };
 
@@ -736,16 +738,7 @@ export default function Directory() {
           }}
         />
       )}
-      {isComposerOpen && composerRecipient && (
-        <ErrorBoundaryWrapper>
-          <MessageComposerModal
-            isOpen={true}
-            onClose={() => { setComposerOpen(false); setComposerRecipient(null); }}
-            recipient={composerRecipient}
-            currentUser={user}
-          />
-        </ErrorBoundaryWrapper>
-      )}
+      {/* Modal disabled temporarily due to third-party script conflicts */}
     </div>
   );
 }
