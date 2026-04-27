@@ -35,7 +35,7 @@ export default function DashboardHero({ user, isPaid, onUnlock }) {
             borderRadius: 12, padding: '20px 24px',
           }}>
             <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.5, marginBottom: 4 }}>
-              🚀 Your parent can activate FastIQ for you in one click.
+              🚀 Your parent can activate FastIQ in one click.
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#888', lineHeight: 1.5, marginBottom: 16 }}>
               It takes 5 minutes. It changes everything.
