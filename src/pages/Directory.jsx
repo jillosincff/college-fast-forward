@@ -713,10 +713,11 @@ export default function Directory() {
 
       {/* Responsive grid */}
        <style>{`
-         .dir-grid { grid-template-columns: repeat(3, 1fr) !important; grid-auto-rows: 1fr !important; }
-         @media (max-width: 1024px) { .dir-grid { grid-template-columns: repeat(2, 1fr) !important; } }
-         @media (max-width: 768px) { .dir-grid { grid-template-columns: repeat(2, 1fr) !important; } }
-         @media (max-width: 480px) { .dir-grid { grid-template-columns: 1fr !important; } }
+         .dir-grid { display: grid; grid-auto-rows: 1fr; }
+         .dir-grid { grid-template-columns: repeat(3, 1fr); }
+         @media (max-width: 1024px) { .dir-grid { grid-template-columns: repeat(2, 1fr); } }
+         @media (max-width: 768px) { .dir-grid { grid-template-columns: repeat(2, 1fr); } }
+         @media (max-width: 480px) { .dir-grid { grid-template-columns: 1fr; } }
          select option { background: #1a1a2e; color: #fff; }
          input::placeholder { color: rgba(255,255,255,0.3); }
          input:focus { border-color: rgba(232,93,32,0.4) !important; }
