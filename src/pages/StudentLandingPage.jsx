@@ -606,17 +606,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
 
 
-          <button onClick={parent} style={{
-            fontFamily: dmSans, fontSize: 13, fontWeight: 500,
-            color: 'rgba(255,255,255,0.28)', background: 'none', border: 'none',
-            cursor: 'pointer', minHeight: 'auto', padding: 0,
-            display: 'block', margin: '0 auto', transition: 'color 0.15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.28)'; }}
-          >
-            Compare plans & features ↓
-          </button>
+
         </div>
       </div>
 
