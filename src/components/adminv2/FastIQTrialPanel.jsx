@@ -1,31 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { getFastIQTrialUsers } from '@/functions/getFastIQTrialUsers';
 import { RefreshCw } from 'lucide-react';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
 export default function FastIQTrialPanel() {
-  const [users, setUsers] = useState([]);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const allUsers = await base44.entities.User.list('-created_date', 2000);
-      const trialUsers = allUsers.filter(u => {
-        return (
-          u.fastiq_trial_active === true ||
-          u.trial_status === 'active' ||
-          u.membership_tier === 'fastiq_trial' ||
-          u.membership_tier === 'fastiq' ||
-          u.fastiq_setup_complete === true ||
-          u.subscription_status === 'active' ||
-          u.subscription_status === 'trialing'
-        );
-      });
-      setUsers(trialUsers);
+      const res = await getFastIQTrialUsers({});
+      setData(res?.data || res);
     } catch (e) {
       console.error('FastIQ trial panel error:', e);
+      setError(e.message);
     } finally {
       setLoading(false);
     }
@@ -33,27 +25,9 @@ export default function FastIQTrialPanel() {
 
   useEffect(() => { load(); }, []);
 
+  const summary = data?.summary || {};
+  const users = data?.users || [];
   const now = new Date();
-
-  const active = users.filter(u => {
-    if (u.subscription_status === 'active' || u.subscription_status === 'trialing') return true;
-    if (u.fastiq_trial_active === true || u.trial_status === 'active') {
-      if (u.trial_end_date) return new Date(u.trial_end_date) > now;
-      return true;
-    }
-    return false;
-  });
-
-  const paying = users.filter(u => u.subscription_status === 'active');
-  const trialing = users.filter(u =>
-    u.subscription_status === 'trialing' ||
-    ((u.fastiq_trial_active === true || u.trial_status === 'active') && u.subscription_status !== 'active')
-  );
-  const expired = users.filter(u => {
-    if (u.subscription_status === 'active') return false;
-    if (u.trial_end_date && new Date(u.trial_end_date) <= now) return true;
-    return false;
-  });
 
   return (
     <div style={{
@@ -86,21 +60,25 @@ export default function FastIQTrialPanel() {
       {/* Summary tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 12, marginBottom: 24 }}>
         {[
-          { label: 'Paying', value: paying.length, color: '#22c55e' },
-          { label: 'On Trial', value: trialing.length, color: '#E85D20' },
-          { label: 'Trial Expired', value: expired.length, color: '#ef4444' },
-          { label: 'Total Access', value: active.length, color: '#4F8CFF' },
+          { label: 'Paying', value: summary.paying, color: '#22c55e' },
+          { label: 'On Trial', value: summary.trialing, color: '#E85D20' },
+          { label: 'Trial Expired', value: summary.expired, color: '#ef4444' },
+          { label: 'Total Access', value: summary.active_total, color: '#4F8CFF' },
         ].map(({ label, value, color }) => (
           <div key={label} style={{
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: 12, padding: '14px 16px', textAlign: 'center',
           }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color, margin: 0, lineHeight: 1 }}>{loading ? '…' : value}</p>
+            <p style={{ fontSize: 28, fontWeight: 700, color, margin: 0, lineHeight: 1 }}>{loading ? '…' : (value ?? 0)}</p>
             <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0' }}>{label}</p>
           </div>
         ))}
       </div>
+
+      {error && (
+        <p style={{ color: '#ef4444', fontSize: 13, textAlign: 'center', padding: '12px 0' }}>Error: {error}</p>
+      )}
 
       {/* User list */}
       {loading ? (
