@@ -4,8 +4,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 // Scheduled sends: April 20, April 27, April 30, 2026
 // Audience: trial users + free users who have NOT yet upgraded
 // Deadline is fixed: April 30, 2026 — does NOT reference individual trial end dates
+// SNAPSHOT LOCK: 2026-04-28 22:57:26 UTC — only users created before this time are eligible
 
 const FOUNDING_RATE_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
+const SNAPSHOT_TIMESTAMP = new Date('2026-04-28T22:57:26Z');
 
 const FASTIQ_UPGRADE_URL = 'https://collegefastforward.com/#FastIQDashboard';
 const MONTHLY_URL = `${FASTIQ_UPGRADE_URL}?plan=monthly`;
@@ -124,9 +126,12 @@ Deno.serve(async (req) => {
   const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
 
   // Eligible: has fastiq_trial_active OR is free user with no subscription — and NOT already upgraded
+  // AND created before snapshot timestamp (2026-04-28 22:57:26 UTC) to lock audience
   const eligible = allUsers.filter(u => {
     if (!u.email) return false;
     if (isUpgraded(u)) return false;
+    // Snapshot lock: only include users created before snapshot time
+    if (new Date(u.created_date) > SNAPSHOT_TIMESTAMP) return false;
     // Has a trial OR is a free member who signed up
     return u.fastiq_trial_active === true || u.trial_status === 'active' || (!u.subscription_status && u.persona);
   });
