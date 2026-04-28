@@ -9,14 +9,16 @@ const STORIES = [
     name: "Jordan T.",
     school: "ODU · Junior · Marketing",
     initials: "J",
+    avatar: null,
     tag: "Response received",
     tagIcon: "✉️"
   },
   {
     quote: "Used FastIQ to tailor my resume. Landed three interviews the same week.",
-    name: "Alex M.",
+    name: "Marcus",
     school: "Penn State · Senior · Finance",
-    initials: "A",
+    initials: "M",
+    avatar: "https://media.base44.com/images/public/684474c5723dc90efce23588/d319a92e5_IMG_0016.jpg",
     tag: "3 interviews booked",
     tagIcon: "📅"
   },
@@ -25,6 +27,7 @@ const STORIES = [
     name: "Sam K.",
     school: "UF · Junior · Engineering",
     initials: "S",
+    avatar: null,
     tag: "Got the role",
     tagIcon: "🎯"
   }
@@ -171,7 +174,7 @@ export default function SuccessStoriesCarousel() {
             height: 40,
             borderRadius: '50%',
             flexShrink: 0,
-            background: 'linear-gradient(135deg, #E85D20, #c9471a)',
+            background: story.avatar ? 'none' : 'linear-gradient(135deg, #E85D20, #c9471a)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -180,8 +183,21 @@ export default function SuccessStoriesCarousel() {
             fontWeight: 700,
             color: '#fff',
             boxShadow: '0 4px 12px rgba(232,93,32,0.4)',
+            overflow: 'hidden',
           }}>
-            {story.initials}
+            {story.avatar ? (
+              <img
+                src={story.avatar}
+                alt={story.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              story.initials
+            )}
           </div>
           <div>
             <p style={{
