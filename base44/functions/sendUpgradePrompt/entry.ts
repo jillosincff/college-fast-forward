@@ -90,6 +90,13 @@ const divider = () => `
   <div style="height: 1px; background: #F0F0F0; margin: 0 36px;"></div>
 `;
 
+// SYNC NOTE: Founding offer deadline must align across:
+// - sendUpgradePrompt.js (this file)
+// - PaywallScreen.jsx (component)
+// - createCheckoutSession.js (backend)
+// If deadline changes, update all three.
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -110,6 +117,14 @@ Deno.serve(async (req) => {
 
     const featureText = featureMessages[featureHit] || 'the full FastIQ AI career engine';
 
+    // Dynamic pricing based on founding offer status
+    const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
+    const priceDisplay = foundingOfferActive ? '$14.50/month' : '$29/month';
+    const ctaLabel = foundingOfferActive ? `Unlock FastIQ — ${priceDisplay}` : `Unlock FastIQ — ${priceDisplay}`;
+    const priceNote = foundingOfferActive 
+      ? '🎖 Founding member offer — <strong>50% off forever</strong> if you upgrade before April 30. That\'s $14.50/month, locked in permanently.'
+      : 'Start your 5-day trial. Credit card required, converts to $29/month unless cancelled.';
+
     const html = emailWrapper(`
       ${darkHero(
         '⚡ UNLOCK FASTIQ',
@@ -127,11 +142,11 @@ Deno.serve(async (req) => {
           '🧠 Career archetype assessment',
           '📊 Company hiring signals and intel',
         ])}
-        ${ctaButton('Unlock FastIQ — $29/month', 'https://collegefastforward.com/#FastIQDashboard')}
+        ${ctaButton(ctaLabel, 'https://collegefastforward.com/#FastIQDashboard')}
         ${divider()}
         <div style="padding-top: 20px;">
           <p style="font-size: 13px; color: #888; text-align: center; margin: 0;">
-            🎖 Founding member offer — <strong>50% off forever</strong> if you upgrade before April 30. That's $14.50/month, locked in permanently.
+            ${priceNote}
           </p>
         </div>
       `)}

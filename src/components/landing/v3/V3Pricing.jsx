@@ -182,10 +182,11 @@ export default function V3Pricing({ onCTA }) {
             </div>
             <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>CFF + FASTIQ™</p>
             <div style={{ marginBottom: 8 }}>
-              <span style={{ fontFamily: playfair, fontSize: 48, fontWeight: 700, color: '#fff' }}>$29</span>
-              <span style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>/ month</span>
+              <span style={{ fontFamily: playfair, fontSize: 48, fontWeight: 700, color: '#fff' }}>$14.50</span>
+              <span style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', marginLeft: 4 }}>/month</span>
             </div>
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 4px' }}>or $249/year — save 28%</p>
+            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: '#E85D20', margin: '0 0 8px' }}>Founding Rate — locked in forever</p>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 16px' }}>After April 30: $29/month</p>
             <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)', margin: '0 0 20px' }}>The warm network + AI to turbocharge your job search.</p>
             {[
               'Unlimited alumni searches at any company',
@@ -205,10 +206,10 @@ export default function V3Pricing({ onCTA }) {
               onClick={onCTA}
               style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: dmSans, width: '100%', marginTop: 24, minHeight: 'auto' }}
             >
-              Unlock FastIQ →
+              Start your trial
             </button>
             <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '12px 0 0' }}>
-              🎖 Founding rate: $14.50/mo forever · Expires April 30
+              5-day trial · credit card required · cancel anytime
             </p>
           </div>
 

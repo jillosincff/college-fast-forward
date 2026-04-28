@@ -21,7 +21,7 @@ const QUESTIONS = [
   },
   {
     q: 'Is the network really free to join?',
-    a: 'Yes. Parents join the College Fast Forward network for free. FastIQ — the AI career engine — is the paid tier at $29/month or $249/year with a free 5-day trial.',
+    a: 'Yes. Parents join the College Fast Forward network for free. FastIQ is $14.50/month (founding rate through April 30, then $29/month). Starts with a 5-day trial — credit card required, converts automatically unless cancelled.',
   },
 ];
 
