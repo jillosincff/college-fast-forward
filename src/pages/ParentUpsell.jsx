@@ -3,7 +3,7 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
 export default function ParentUpsell() {
   const { user, isLoadingAuth } = useAuth();
@@ -78,7 +78,7 @@ export default function ParentUpsell() {
           }}>
             You're already helping other students by being in the
             network. FastIQ gives your own student the full AI
-            advantage — try it free for 7 days.
+            advantage — try it free for 5 days.
           </p>
         </div>
 
@@ -134,7 +134,7 @@ export default function ParentUpsell() {
               margin: 0, lineHeight: 1.6,
             }}>
               {foundingOfferActive ? (
-                <>🎖 After your trial, continue at the{' '}<strong style={{ color: '#E85D20' }}>Founding Rate of $14.50/month forever</strong>{' '}— 50% off the regular price. Expires April 15th.</>
+                <>🎖 After your trial, continue at the{' '}<strong style={{ color: '#E85D20' }}>Founding Rate of $14.50/month forever</strong>{' '}— 50% off the regular price. Expires April 30.</>
               ) : (
                 <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$29/month</strong>. Cancel anytime.</>
               )}
@@ -155,7 +155,7 @@ export default function ParentUpsell() {
               minHeight: 'auto',
             }}
           >
-            {loading ? 'Loading...' : 'Start 7-Day FastIQ Trial for My Student →'}
+            {loading ? 'Loading...' : 'Start 5-Day FastIQ Trial for My Student →'}
           </button>
 
           <p style={{
