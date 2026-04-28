@@ -3,7 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+// SYNC NOTE: Must match FOUNDING_OFFER_DEADLINE in functions/createCheckoutSession.js
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
 export default function PostJoinUpsell() {
   const { user } = useAuth();
@@ -22,7 +23,7 @@ export default function PostJoinUpsell() {
         userEmail: user?.email,
         plan: foundingOfferActive ? 'fastiq_founding_monthly' : 'fastiq_monthly',
         isTrial: true,
-        trialDays: 7,
+        trialDays: 5,
         isFoundingMember: true,
         successUrl,
         cancelUrl: `${window.location.origin}/#PostJoinUpsell`,
@@ -94,7 +95,7 @@ export default function PostJoinUpsell() {
             textTransform: 'uppercase', letterSpacing: '0.15em',
             color: '#E85D20', margin: '0 0 16px',
           }}>
-            ⚡ TRY FASTIQ FREE FOR 7 DAYS
+            ⚡ TRY FASTIQ FREE FOR 5 DAYS
           </p>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
@@ -102,7 +103,7 @@ export default function PostJoinUpsell() {
             lineHeight: 1.7, margin: '0 0 24px',
           }}>
             The free network gets you in the door. FastIQ gets
-            you the interview. Just 7 days to see what AI can do for your search.
+            you the interview. Just 5 days to see what AI can do for your search.
           </p>
 
           {[
@@ -137,9 +138,7 @@ export default function PostJoinUpsell() {
               fontSize: 13, color: 'rgba(255,255,255,0.82)',
               margin: 0, lineHeight: 1.6,
             }}>
-              {foundingOfferActive
-                ? <>🎖 After your trial, continue at the <strong style={{ color: '#E85D20' }}>Founding Rate of $14.50/month forever</strong> — 50% off the regular price. This rate disappears after April 15th.</>
-                : <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$29/month</strong>. Cancel anytime.</>}
+              <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$14.50/month</strong>. Cancel anytime.{' '}<strong style={{ color: '#fa8a6a' }}>Price increases to $29/month after April 30.</strong></>
             </p>
           </div>
 
@@ -156,7 +155,7 @@ export default function PostJoinUpsell() {
               width: '100%', marginBottom: 8, minHeight: 'auto',
             }}
           >
-            {loading ? 'Loading...' : 'Start My 7-Day FastIQ Trial — Free →'}
+            {loading ? 'Loading...' : 'Start My 5-Day Trial →'}
           </button>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
