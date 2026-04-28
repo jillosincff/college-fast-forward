@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import SocialProofToasts from '@/components/landing/SocialProofToasts';
+import SuccessStoriesCarousel from '@/components/landing/SuccessStoriesCarousel';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -440,46 +441,20 @@ export default function StudentLandingPage({ onParentClick }) {
 
           <AlumniSearchDemo />
 
-          {/* Testimonial */}
-          <div style={{
-            marginTop: 28,
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderLeft: '4px solid #E85D20',
-            borderRadius: '0 16px 16px 0',
-            padding: '28px 32px',
-          }}>
-            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>
-              What students are saying
-            </p>
+          {/* Success Stories Section */}
+          <div style={{ marginTop: 28 }}>
             <p style={{
-              fontFamily: playfair, fontSize: 'clamp(20px, 2.5vw, 27px)',
-              fontStyle: 'italic', color: '#fff',
-              margin: '0 0 24px', lineHeight: 1.5,
+              fontFamily: dmSans,
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.12em',
+              color: '#E85D20',
+              margin: '0 0 20px',
             }}>
-              "I found a Disney alum from my school in 2 minutes. She actually responded."
+              Success Stories
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #E85D20, #c9471a)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#fff',
-                }}>J</div>
-                <div>
-                  <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.9)', margin: 0 }}>Jordan T.</p>
-                  <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>ODU · Junior · Marketing</p>
-                </div>
-              </div>
-              <div style={{
-                background: 'rgba(34,197,94,0.12)',
-                border: '1px solid rgba(34,197,94,0.3)',
-                borderRadius: 100, padding: '6px 16px',
-              }}>
-                <span style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#22c55e' }}>✉️ Response received</span>
-              </div>
-            </div>
+            <SuccessStoriesCarousel />
           </div>
         </div>
       </div>
