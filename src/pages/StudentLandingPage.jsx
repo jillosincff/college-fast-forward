@@ -309,7 +309,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >
-            I need a job
+            Help me get in front of the right people →
           </button>
           <button onClick={parent} style={{
             fontFamily: dmSans, fontSize: 14, fontWeight: 600,
@@ -353,16 +353,16 @@ export default function StudentLandingPage({ onParentClick }) {
             The parent network is powerful.
           </p>
           <p style={{
-            fontFamily: dmSans,
-            fontSize: 'clamp(28px, 4vw, 52px)',
-            fontWeight: 800,
-            color: '#E85D20',
-            lineHeight: 1.1,
-            letterSpacing: '-0.01em',
-            margin: '0 0 24px',
-          }}>
-            FastIQ makes you unstoppable.
-          </p>
+             fontFamily: dmSans,
+             fontSize: 'clamp(28px, 4vw, 52px)',
+             fontWeight: 800,
+             color: '#E85D20',
+             lineHeight: 1.1,
+             letterSpacing: '-0.01em',
+             margin: '0 0 24px',
+           }}>
+             FastIQ helps you reach the right people — and get responses.
+           </p>
           <p style={{
             fontFamily: dmSans,
             fontSize: 'clamp(16px, 2vw, 19px)',
@@ -416,7 +416,7 @@ export default function StudentLandingPage({ onParentClick }) {
             margin: '0 auto 44px',
             maxWidth: 540,
           }}>
-            Alumni are <strong style={{ color: '#fff', fontWeight: 700 }}>10x more likely to help</strong> a fellow student than a stranger. FastIQ finds them at the companies you care about—like a <strong style={{ color: '#fff', fontWeight: 700 }}>VP of Marketing at Disney</strong>—and researches exactly how they can help you get in.
+            Alumni are <strong style={{ color: '#fff', fontWeight: 700 }}>far more likely to respond</strong> — especially when you share a school connection. FastIQ finds them at the companies you care about—like a <strong style={{ color: '#fff', fontWeight: 700 }}>VP of Marketing at Disney</strong>—and researches exactly how they can help you get in.
           </p>
         </div>
       </div>
@@ -492,7 +492,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
             <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Foundation</p>
           </div>
-              {['Highly Responsive: Connect with people who care about your success and actually respond.', 'The "Parent" Bond: Access a community that is genuinely motivated to help you succeed.', 'Lifelong Networks: Tap into extensive connections across every major industry.', 'Warm Introductions: Skip the cold application and get your resume in front of the people who hire.'].map((f, i) => {
+              {['Start here: search the Parent Network and send your first message.', 'Highly Responsive: Connect with people who care about your success and actually respond.', 'The "Parent" Bond: Access a community that is genuinely motivated to help you succeed.', 'Lifelong Networks: Tap into extensive connections across every major industry.', 'Warm Introductions: Skip the cold application and get your resume in front of the people who hire.'].map((f, i) => {
                 const [boldPart, restPart] = f.split(': ');
                 return (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
