@@ -299,53 +299,90 @@ export default function StudentLandingPage({ onParentClick }) {
         </p>
       </div>
 
-      {/* ── TRANSITION & FASTIQ INTRO ── */}
+      {/* ── ALUMNI ADVANTAGE: BRIDGE HEADLINE ── */}
       <div style={{
-        padding: '80px 20px',
+        padding: '88px 20px 48px',
         textAlign: 'center',
         background: '#08080f',
       }}>
-        <div style={{ maxWidth: 580, margin: '0 auto' }}>
+        <div style={{ maxWidth: 620, margin: '0 auto' }}>
           <p style={{
             fontFamily: playfair,
-            fontSize: 'clamp(24px, 3.5vw, 42px)',
+            fontSize: 'clamp(28px, 4vw, 52px)',
             fontWeight: 700,
             color: '#fff',
-            lineHeight: 1.3,
+            lineHeight: 1.1,
             letterSpacing: '-0.02em',
-            margin: '0 0 8px',
+            margin: '0 0 12px',
           }}>
             The parent network is powerful.
           </p>
           <p style={{
             fontFamily: playfair,
-            fontSize: 'clamp(24px, 3.5vw, 42px)',
+            fontSize: 'clamp(28px, 4fvw, 52px)',
             fontWeight: 700,
             color: '#E85D20',
-            lineHeight: 1.3,
+            fontStyle: 'italic',
+            lineHeight: 1.1,
             letterSpacing: '-0.02em',
-            margin: '0 0 20px',
+            margin: '0 0 24px',
           }}>
-            FastIQ takes it to another level.
+            FastIQ makes it personal.
           </p>
           <p style={{
             fontFamily: dmSans,
-            fontSize: 'clamp(17px, 2.2vw, 22px)',
-            fontWeight: 600,
-            color: '#fff',
-            lineHeight: 1.5,
-            margin: '0 0 8px',
-          }}>
-            FastIQ is your personal career agent that works for you 24/7.
-          </p>
-          <p style={{
-            fontFamily: dmSans,
-            fontSize: 'clamp(16px, 2vw, 20px)',
-            color: '#22d3ee',
-            lineHeight: 1.5,
+            fontSize: 'clamp(16px, 2vw, 19px)',
+            color: 'rgba(255,255,255,0.65)',
+            lineHeight: 1.75,
             margin: 0,
+            maxWidth: 520,
+            marginLeft: 'auto',
+            marginRight: 'auto',
           }}>
-            Here's what it can do:
+            Alumni are your biggest advocates. FastIQ acts as your 24/7 personal agent to find your school's insiders at your dream companies and write the perfect message to turn a cold lead into a warm referral.
+          </p>
+        </div>
+      </div>
+
+      {/* ── FEATURE SPOTLIGHT: ALUMNI SHORTCUT ── */}
+      <div style={{
+        padding: '56px 20px 72px',
+        textAlign: 'center',
+        background: '#08080f',
+      }}>
+        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+          <p style={{
+            fontFamily: dmSans,
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#E85D20',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            margin: '0 0 14px',
+            textAlign: 'center',
+          }}>
+            ⚡ The Aha Moment
+          </p>
+          <h2 style={{
+            fontFamily: playfair,
+            fontSize: 'clamp(26px, 3.5vw, 44px)',
+            fontWeight: 700,
+            color: '#fff',
+            lineHeight: 1.2,
+            letterSpacing: '-0.02em',
+            margin: '0 0 12px',
+          }}>
+            Tap into the "Alumni Shortcut"
+          </h2>
+          <p style={{
+            fontFamily: dmSans,
+            fontSize: 'clamp(16px, 1.8vw, 18px)',
+            color: 'rgba(255,255,255,0.55)',
+            lineHeight: 1.75,
+            margin: '0 auto 44px',
+            maxWidth: 520,
+          }}>
+            Instantly locate alumni at companies you care about — like a VP of Marketing at Disney or a Dev Lead at Google. FastIQ doesn't just find them; it researches their role and drafts a personalized outreach message that leans into your shared school bond.
           </p>
         </div>
       </div>
