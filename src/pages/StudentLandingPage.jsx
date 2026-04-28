@@ -222,7 +222,7 @@ export default function StudentLandingPage({ onParentClick }) {
           transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Finding an internship or job without a personal connection{' '}
+          Landing a job without a personal connection{' '}
           <span style={{ color: '#E85D20', fontStyle: 'italic' }}>seems impossible.</span>
         </h1>
 
@@ -243,7 +243,7 @@ export default function StudentLandingPage({ onParentClick }) {
           maxWidth: 460, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
-          The Parent &amp; Alumni Network is 100% free and specific to your school.
+          The Parent Network is 100% free and specific to your school.
         </p>
 
         {/* CTAs */}
