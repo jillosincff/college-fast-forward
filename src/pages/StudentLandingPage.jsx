@@ -284,7 +284,7 @@ export default function StudentLandingPage({ onParentClick }) {
           fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s',
         }}>
-          Free to join. No credit card. No obligation.
+          Free to join. No obligation.
         </p>
       </div>
 
