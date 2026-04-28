@@ -19,7 +19,8 @@ export default function FastIQTrialPanel() {
           u.membership_tier === 'fastiq_trial' ||
           u.membership_tier === 'fastiq' ||
           u.fastiq_setup_complete === true ||
-          u.subscription_status === 'active'
+          u.subscription_status === 'active' ||
+          u.subscription_status === 'trialing'
         );
       });
       setUsers(trialUsers);
@@ -35,7 +36,7 @@ export default function FastIQTrialPanel() {
   const now = new Date();
 
   const active = users.filter(u => {
-    if (u.subscription_status === 'active') return true;
+    if (u.subscription_status === 'active' || u.subscription_status === 'trialing') return true;
     if (u.fastiq_trial_active === true || u.trial_status === 'active') {
       if (u.trial_end_date) return new Date(u.trial_end_date) > now;
       return true;
@@ -44,7 +45,10 @@ export default function FastIQTrialPanel() {
   });
 
   const paying = users.filter(u => u.subscription_status === 'active');
-  const trialing = users.filter(u => (u.fastiq_trial_active === true || u.trial_status === 'active') && u.subscription_status !== 'active');
+  const trialing = users.filter(u =>
+    u.subscription_status === 'trialing' ||
+    ((u.fastiq_trial_active === true || u.trial_status === 'active') && u.subscription_status !== 'active')
+  );
   const expired = users.filter(u => {
     if (u.subscription_status === 'active') return false;
     if (u.trial_end_date && new Date(u.trial_end_date) <= now) return true;
@@ -107,7 +111,7 @@ export default function FastIQTrialPanel() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 400, overflowY: 'auto' }}>
           {users.map(u => {
             const isPaying = u.subscription_status === 'active';
-            const isTrial = u.fastiq_trial_active === true || u.trial_status === 'active';
+            const isTrial = u.subscription_status === 'trialing' || u.fastiq_trial_active === true || u.trial_status === 'active';
             const trialEnd = u.trial_end_date ? new Date(u.trial_end_date) : null;
             const isExpired = trialEnd && trialEnd <= now && !isPaying;
             const daysLeft = trialEnd && !isPaying ? Math.ceil((trialEnd - now) / (1000 * 60 * 60 * 24)) : null;
