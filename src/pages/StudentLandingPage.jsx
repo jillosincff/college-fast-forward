@@ -559,7 +559,7 @@ export default function StudentLandingPage({ onParentClick }) {
             letterSpacing: '-0.01em', margin: '0 0 24px',
             lineHeight: 1.5,
           }}>
-            You don't need more applications.<br />You need more responses.
+            Start for free. Finish with a referral.
           </p>
           <h2 style={{
             fontFamily: playfair,
@@ -581,7 +581,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </h2>
 
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 440 }}>
-            Find people from your school. Reach out with confidence. Start conversations that can lead to jobs.
+            Join your school's parent network for free today. Activate your personal agent whenever you're ready to accelerate your search.
           </p>
 
           <button onClick={go} style={{
@@ -597,8 +597,12 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >
-            Join free →
+            Join for free →
           </button>
+
+          <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 20px' }}>
+            Always free to join. Early bird Agent pricing ($14.50/mo) available until April 30th.
+          </p>
 
 
 
@@ -611,7 +615,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.28)'; }}
           >
-            I'm here to help →
+            Compare plans & features ↓
           </button>
         </div>
       </div>
