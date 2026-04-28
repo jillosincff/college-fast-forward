@@ -396,13 +396,13 @@ export default function StudentLandingPage({ onParentClick }) {
       }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
-            ⚡ See the Advantage
+            ⚡ The Aha Moment
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 14px', textAlign: 'center' }}>
-            Activate the Alumni Advantage
+            See the 'Alumni Shortcut' in action
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 40px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
-            Alumni are 10x more likely to help you than a stranger. FastIQ finds them at your dream companies and researches exactly how they can help.
+            FastIQ scans thousands of companies in your target industry to find the exact alumni who can help you—then researches their background and drafts the perfect message to get you a referral.
           </p>
 
           <AlumniSearchDemo />
