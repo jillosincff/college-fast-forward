@@ -30,6 +30,7 @@ function AlumniSearchDemo() {
   const [typed, setTyped] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [showCards, setShowCards] = useState([]);
+  const [visibleResults, setVisibleResults] = useState([]);
   const query = 'Find Penn State alumni in marketing at Disney.';
 
   const RESULTS = [
@@ -49,7 +50,10 @@ function AlumniSearchDemo() {
         setTimeout(() => {
           setShowResults(true);
           RESULTS.forEach((_, idx) => {
-            setTimeout(() => setShowCards(c => [...c, idx]), idx * 300);
+            setTimeout(() => {
+              setShowCards(c => [...c, idx]);
+              setVisibleResults(v => [...v, idx]);
+            }, idx * 300);
           });
         }, 600);
       }
@@ -117,9 +121,9 @@ function AlumniSearchDemo() {
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '12px 0',
                 borderBottom: i < RESULTS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                opacity: showCards.includes(i) ? 1 : 0,
-                transform: showCards.includes(i) ? 'translateY(0)' : 'translateY(8px)',
-                transition: 'all 0.4s ease',
+                opacity: visibleResults.includes(i) ? 1 : 0,
+                transform: visibleResults.includes(i) ? 'translateY(0)' : 'translateY(8px)',
+                transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
               }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
@@ -623,6 +627,10 @@ export default function StudentLandingPage({ onParentClick }) {
         @keyframes ctaPulse {
           0%, 100% { box-shadow: 0 8px 32px rgba(232,93,32,0.4); }
           50% { box-shadow: 0 8px 48px rgba(232,93,32,0.65), 0 0 20px rgba(232,93,32,0.4); }
+        }
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
         @media (max-width: 560px) {
           .powers-grid { grid-template-columns: 1fr !important; }
