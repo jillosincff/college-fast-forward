@@ -24,3 +24,15 @@ To target a specific time, **subtract 4 hours** from your desired UTC time when 
 Always test-fire 5 minutes out before deploying recurring schedules. Compare actual wall-clock fire time against expected time to confirm offset hasn't changed.
 
 **Status:** Active as of 2026-04-28. Pending platform fix.
+
+---
+
+## Workaround (Confirmed April 28)
+
+To target a specific fire time despite the +4 offset:
+- **Goal time:** 9:30 AM ET = 13:30 UTC
+- **Input to scheduler:** 09:30 UTC
+- **Platform stores:** 13:30 UTC (after +4 offset)
+- **Result:** Fires at 9:30 AM ET ✓
+
+**Testing protocol:** Always test-fire 5 minutes out before trusting any new recurring schedule. The offset will be applied consistently, allowing you to reverse-engineer the correct input time.
