@@ -17,7 +17,13 @@ Deno.serve(async (req) => {
     u.fastiq_setup_complete !== true
   );
 
-  const results = { day5: 0, day6_payment: 0, day7: 0, day8: 0, errors: [] };
+  // NEW MODEL (trials from 2026-04-29+): 5-day trial, CC required, auto-converts at end of day 5.
+  // Day 5 email fires when daysLeft === 1 (1 day before auto-charge).
+  // No Day 7/8 emails — the trial auto-converts so there's nothing to manually nudge after day 5.
+  // GRANDFATHERED (trials started before 2026-04-29): old 7-day model, keep Day 7/8 emails.
+  const NEW_TRIAL_CUTOFF = new Date('2026-04-29T00:00:00Z');
+
+  const results = { day4: 0, day5: 0, day6_payment: 0, day7: 0, day8: 0, errors: [] };
   const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 
   for (const u of trialUsers) {
@@ -28,10 +34,14 @@ Deno.serve(async (req) => {
 
     const firstName = u.full_name?.split(' ')[0] || 'there';
 
+    // Determine if this user is on the new 5-day model or grandfathered 7-day model
+    const isNewModel = new Date(u.trial_start_date) >= NEW_TRIAL_CUTOFF;
+    const trialDays = isNewModel ? 5 : 7;
+
     // Use trial_end_date if set, otherwise derive from trial_start_date
     const trialEndDateTime = u.trial_end_date
       ? new Date(u.trial_end_date)
-      : new Date(new Date(u.trial_start_date).getTime() + 7 * 24 * 60 * 60 * 1000);
+      : new Date(new Date(u.trial_start_date).getTime() + trialDays * 24 * 60 * 60 * 1000);
 
     const daysLeft = Math.max(0, Math.ceil((trialEndDateTime - new Date()) / (1000 * 60 * 60 * 24)));
 
@@ -40,9 +50,6 @@ Deno.serve(async (req) => {
     });
 
     const upgradeUrl = `${appBaseUrl}/#FastIQDashboard`;
-
-    // Day 5 trigger: trial_end_date is exactly 2 days away
-    const isDay5 = daysLeft === 2;
 
     const payload = {
       userEmail: u.email,
@@ -54,18 +61,35 @@ Deno.serve(async (req) => {
       upgradeUrl,
       giftedByParent: u.gifted_by_parent_email || null,
       parentName: u.linked_parent_name || null,
+      isNewModel,
     };
 
-    // Day 6 parent nudge: trial ends tomorrow AND was gifted by a parent
-    const isDay6ParentNudge = daysLeft === 1 && !!u.gifted_by_parent_email;
+    // NEW MODEL (5-day auto-convert): Day 4 email fires 1 day before auto-charge (daysLeft===1).
+    // There are no Day 7/8 emails because the trial auto-converts — no manual upgrade needed.
+    //
+    // LEGACY MODEL (7-day, grandfathered): Day 5 fires at daysLeft===2, Day 6 nudges, Day 7/8 upgrade prompts.
 
-    // Day 6 payment method nudge: Stripe-based trial user (self-initiated, not parent-gifted).
-    // stripe_payment_method_id is never written to the user record, so we can't filter on it.
-    // Sending to all Stripe trial users is safe — having a card already is harmless.
-    const isDay6PaymentNudge = daysLeft === 1 && !!u.stripe_customer_id && !u.gifted_by_parent_email;
+    const isDay4NewModel = isNewModel && daysLeft === 1;
+    const isDay5LegacyModel = !isNewModel && daysLeft === 2;
+
+    // Parent nudge (both models): trial ends tomorrow AND was gifted by a parent
+    const isDayBeforeEndParentNudge = daysLeft === 1 && !!u.gifted_by_parent_email;
+
+    // Legacy Day 6 payment method nudge: only for old model, Stripe-based, not parent-gifted
+    const isDay6PaymentNudge = !isNewModel && daysLeft === 1 && !!u.stripe_customer_id && !u.gifted_by_parent_email;
 
     try {
-      if (isDay5) {
+      if (isDay4NewModel && !u.gifted_by_parent_email) {
+        // New model self-signup: 1 day before auto-charge — heads-up email
+        const sentToday = u.last_day5_email_sent_at &&
+          new Date(u.last_day5_email_sent_at).toDateString() === new Date().toDateString();
+        if (!sentToday) {
+          await base44.asServiceRole.functions.invoke('sendTrialDay5Email', payload);
+          await base44.asServiceRole.entities.User.update(u.id, { last_day5_email_sent_at: new Date().toISOString() });
+          results.day4++;
+        }
+      } else if (isDay5LegacyModel) {
+        // Legacy model: Day 5 = 2 days left warning
         const sentToday = u.last_day5_email_sent_at &&
           new Date(u.last_day5_email_sent_at).toDateString() === new Date().toDateString();
         if (!sentToday) {
@@ -74,38 +98,28 @@ Deno.serve(async (req) => {
           results.day5++;
         }
       } else if (isDay6PaymentNudge) {
+        // Legacy only: Day 6 payment method nudge
         const sentToday = u.last_day6_payment_email_sent_at &&
           new Date(u.last_day6_payment_email_sent_at).toDateString() === new Date().toDateString();
         if (!sentToday) {
-          // Generate a Stripe customer portal URL for adding a payment method
           const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
           let portalUrl = `${appBaseUrl}/#FastIQDashboard`;
           try {
             const portalRes = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
               method: 'POST',
-              headers: {
-                Authorization: `Bearer ${STRIPE_SECRET}`,
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              body: new URLSearchParams({
-                customer: u.stripe_customer_id,
-                return_url: `${appBaseUrl}/#FreeTierDashboard`,
-              }),
+              headers: { Authorization: `Bearer ${STRIPE_SECRET}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({ customer: u.stripe_customer_id, return_url: `${appBaseUrl}/#FreeTierDashboard` }),
             });
             const portalSession = await portalRes.json();
             if (portalSession.url) portalUrl = portalSession.url;
           } catch (_) {}
 
-          await base44.asServiceRole.functions.invoke('sendTrialPaymentReminderEmail', {
-            userEmail: u.email,
-            firstName,
-            portalUrl,
-          });
+          await base44.asServiceRole.functions.invoke('sendTrialPaymentReminderEmail', { userEmail: u.email, firstName, portalUrl });
           await base44.asServiceRole.entities.User.update(u.id, { last_day6_payment_email_sent_at: new Date().toISOString() });
           results.day6_payment++;
         }
-      } else if (isDay6ParentNudge) {
-        // Dedup on the PARENT record using last_parent_day6_email_sent_at
+      } else if (isDayBeforeEndParentNudge) {
+        // Both models: notify parent 1 day before student trial ends
         let parentRecord = null;
         try {
           const parents = await base44.asServiceRole.entities.User.filter({ email: u.gifted_by_parent_email });
@@ -123,11 +137,10 @@ Deno.serve(async (req) => {
             studentName: firstName,
             upgradeUrl: `${appBaseUrl}/#ParentHome`,
           });
-          await base44.asServiceRole.entities.User.update(parentRecord.id, {
-            last_parent_day6_email_sent_at: new Date().toISOString(),
-          });
+          await base44.asServiceRole.entities.User.update(parentRecord.id, { last_parent_day6_email_sent_at: new Date().toISOString() });
         }
-      } else if (daysSinceTrial === 7) {
+      } else if (!isNewModel && daysSinceTrial === 7) {
+        // Legacy only: Day 7 upgrade prompt
         const sentToday = u.last_day7_email_sent_at &&
           new Date(u.last_day7_email_sent_at).toDateString() === new Date().toDateString();
         if (!sentToday) {
@@ -135,7 +148,8 @@ Deno.serve(async (req) => {
           await base44.asServiceRole.entities.User.update(u.id, { last_day7_email_sent_at: new Date().toISOString() });
           results.day7++;
         }
-      } else if (daysSinceTrial === 8) {
+      } else if (!isNewModel && daysSinceTrial === 8) {
+        // Legacy only: Day 8 final prompt
         const sentToday = u.last_day8_email_sent_at &&
           new Date(u.last_day8_email_sent_at).toDateString() === new Date().toDateString();
         if (!sentToday) {
@@ -151,5 +165,5 @@ Deno.serve(async (req) => {
   }
 
   console.log('Trial scheduler complete:', results);
-  return Response.json({ success: true, results });
+  return Response.json({ success: true, results, note: 'day4=new_model_1_day_before_autocharge, day5=legacy_model_2_days_left' });
 });

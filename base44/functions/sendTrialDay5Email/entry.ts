@@ -2,9 +2,50 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
 
-  const { userEmail, firstName, school, persona, trialEndDate, daysLeft = 2, upgradeUrl = 'https://collegefastforward.com/#FastIQDashboard', parentName, giftedByParent } = await req.json();
+  const { userEmail, firstName, school, persona, trialEndDate, daysLeft = 2, upgradeUrl = 'https://collegefastforward.com/#FastIQDashboard', parentName, giftedByParent, isNewModel } = await req.json();
   const isParent = persona === 'parent';
   const isGiftedStudent = !isParent && !!giftedByParent;
+
+  // New model: self-signup, CC on file, 1 day before auto-charge
+  if (isNewModel && !isGiftedStudent && !isParent) {
+    const autoChargeHtml = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#F5F5F5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+<div style="max-width:560px;margin:0 auto;padding:48px 24px;">
+  <p style="font-size:13px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#E85D20;margin:0 0 32px;">COLLEGE FAST FORWARD</p>
+  <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 16px;">Hi ${firstName},</p>
+  <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 16px;">
+    Your 5-day FastIQ trial ends tomorrow (${trialEndDate}). Your card on file will be charged automatically to continue your access.
+  </p>
+  <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 16px;">
+    You're locking in the <strong>Founding Rate of $14.50/month</strong> — 50% off the regular $29/month, locked in permanently as long as you stay subscribed.
+  </p>
+  <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 24px;">
+    If you'd like to cancel before being charged, you can do that from your account settings anytime today.
+  </p>
+  <div style="margin:0 0 32px;">
+    <a href="${upgradeUrl}" style="display:inline-block;background:#E85D20;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;">Go to My Dashboard →</a>
+  </div>
+  <p style="font-size:14px;color:#1A1A1A;margin:0;">Warmly,<br>Jill Osinoff</p>
+</div>
+</body>
+</html>`;
+
+    const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${Deno.env.get('SENDGRID_API_KEY')}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: userEmail }] }],
+        from: { email: 'jill@collegefastforward.com', name: 'Jill at College Fast Forward' },
+        subject: `Your FastIQ trial ends tomorrow — you're all set`,
+        content: [{ type: 'text/html', value: autoChargeHtml }],
+      }),
+    });
+    const responseBody = await sgRes.text();
+    if (!sgRes.ok) return Response.json({ error: responseBody, status: sgRes.status }, { status: 500 });
+    return Response.json({ success: true, sgStatus: sgRes.status });
+  }
 
   const daysLabel = daysLeft === 1 ? '1 day' : `${daysLeft} days`;
   const subject = isParent
@@ -25,7 +66,7 @@ Deno.serve(async (req) => {
   <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 16px;">Hi ${firstName},</p>
 
   <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 16px;">
-    ${parentName || 'Your parent'} gave you 7 days of FastIQ —<br>
+    ${parentName || 'Your parent'} gave you access to FastIQ —<br>
     and your trial ends in <strong>${daysLabel}</strong>.
   </p>
 

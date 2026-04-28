@@ -784,6 +784,8 @@ Deno.serve(async (req) => {
       // ROUTING GATE: Students on active FastIQ trial belong to Trial Activation sequence (TBD).
       // Students who are paid subscribers need no onboarding emails.
       // Only students with NO FastIQ engagement follow Workflow 1.
+      // NOTE: From 2026-04-29, new trials are 5-day CC-required auto-convert. Grandfathered 16 users
+      // on the old 7-day no-card model keep their original terms. Routing logic is model-agnostic.
       const isActiveTrial = student.fastiq_trial_active === true ||
         student.trial_status === 'active' ||
         student.membership_tier === 'fastiq_trial';

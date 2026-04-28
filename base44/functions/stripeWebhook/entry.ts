@@ -114,7 +114,7 @@ async function sendStudentActivationEmails(billingUser, family) {
         studentEmail: email,
         studentFirstName,
         parentFirstName: parentName,
-        trialDays: 7,
+        trialDays: 5,
       });
       console.log('[stripeWebhook] Rich FastIQ gift email sent to student:', email);
     } catch (emailError) {
@@ -297,7 +297,7 @@ Deno.serve(async (req) => {
                   gifted_by_parent_email: billingUser.email,
                   linked_parent_name: billingUser.full_name?.split(' ')[0] || 'Your parent',
                   trial_start_date: new Date().toISOString(),
-                  trial_end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                  trial_end_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
                   trial_status: 'active',
                   fastiq_trial_active: true,
                 });
@@ -306,7 +306,7 @@ Deno.serve(async (req) => {
                   studentEmail: student.email,
                   studentFirstName: student.full_name?.split(' ')[0] || 'there',
                   parentFirstName: billingUser.full_name?.split(' ')[0] || 'Your parent',
-                  trialDays: 7,
+                  trialDays: 5,
                 }).catch(e => console.error('[stripeWebhook] Student gift email failed:', e.message));
 
                 console.log('[stripeWebhook] FastIQ gifted to student:', studentEmail);
