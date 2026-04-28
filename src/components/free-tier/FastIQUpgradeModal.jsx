@@ -123,7 +123,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
              {foundingOfferActive ? '🎖 $14.50/month — Founding Rate (50% off forever)' : '$29/month or $249/year'}
            </p>
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
-             {foundingOfferActive ? 'Start free for 7 days — then $14.50/month. Founding rate expires April 30.' : 'Start free for 7 days — then $29/month. Cancel anytime.'}
+             {foundingOfferActive ? 'Start free for 5 days — then $14.50/month. Founding rate expires April 30.' : 'Start free for 5 days — then $29/month. Cancel anytime.'}
            </p>
           </div>
 
@@ -177,7 +177,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 16, textAlign: 'center' }}>
-            {foundingOfferActive ? 'Start free for 7 days — then $14.50/month. Cancel anytime.' : 'Start free for 7 days — then $29/month. Cancel anytime.'}
+            {foundingOfferActive ? 'Start free for 5 days — then $14.50/month. Cancel anytime.' : 'Start free for 5 days — then $29/month. Cancel anytime.'}
           </p>
         </div>
       </DialogContent>

@@ -208,7 +208,7 @@ export default function V3Pricing({ onCTA }) {
               Unlock FastIQ →
             </button>
             <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '12px 0 0' }}>
-              🎖 Founding rate: $14.50/mo forever · Expires April 15
+              🎖 Founding rate: $14.50/mo forever · Expires April 30
             </p>
           </div>
 
