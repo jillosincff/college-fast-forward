@@ -240,10 +240,21 @@ export default function StudentLandingPage({ onParentClick }) {
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(13px, 1.5vw, 15px)',
           color: 'rgba(255,255,255,0.4)', lineHeight: 1.6,
-          maxWidth: 460, margin: '0 auto 44px',
+          maxWidth: 460, margin: '0 auto 20px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
           The Parent Network is 100% free and specific to your school.
+        </p>
+
+        {/* Social proof line */}
+        <p style={{
+          fontFamily: dmSans, fontSize: 12,
+          color: 'rgba(255,255,255,0.28)', lineHeight: 1.6,
+          maxWidth: 460, margin: '0 auto 44px',
+          letterSpacing: '0.02em',
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s',
+        }}>
+          Growing parent networks at UF, UCF, Penn State, USC, Ohio State, and more.
         </p>
 
         {/* CTAs */}
