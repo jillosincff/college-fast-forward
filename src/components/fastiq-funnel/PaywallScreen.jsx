@@ -79,7 +79,9 @@ export default function PaywallScreen() {
     };
   }
 
-  const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+  // SYNC NOTE: This deadline must match FOUNDING_OFFER_DEADLINE in functions/createCheckoutSession.js
+  // When the deadline changes, update BOTH files. Current deadline: April 30, 2026 ET.
+  const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
   const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
   const totalMatches = matchData?.totalMatches || 18;
   const major = answers.major || 'your major';
@@ -220,7 +222,7 @@ export default function PaywallScreen() {
       {/* Trial callout */}
       <motion.div variants={fadeUp} className="text-center mb-6">
         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/25 text-green-400 text-[12px] font-bold">
-          <Shield className="w-3 h-3" /> 7-day free trial — cancel anytime
+          <Shield className="w-3 h-3" /> 5-day trial · card required · cancel anytime
         </span>
       </motion.div>
 
