@@ -600,9 +600,7 @@ export default function StudentLandingPage({ onParentClick }) {
             Join free →
           </button>
 
-          <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: '0 0 20px' }}>
-            No credit card required.
-          </p>
+
 
           <button onClick={parent} style={{
             fontFamily: dmSans, fontSize: 13, fontWeight: 500,
