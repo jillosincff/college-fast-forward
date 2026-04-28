@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import SocialProofToasts from '@/components/landing/SocialProofToasts';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -29,8 +30,9 @@ const WHY_BULLETS = [
 function AlumniSearchDemo() {
   const [typed, setTyped] = useState('');
   const [showResults, setShowResults] = useState(false);
-  const [showCards, setShowCards] = useState([]);
   const [visibleResults, setVisibleResults] = useState([]);
+  const [demoVisible, setDemoVisible] = useState(false);
+  const demoRef = useRef(null);
   const query = 'Find Penn State alumni in marketing at Disney.';
 
   const RESULTS = [
@@ -39,7 +41,23 @@ function AlumniSearchDemo() {
     { initials: 'SL', name: 'Sarah Liu', title: 'Marketing Strategy', company: 'Disney Parks', grad: "Penn State '01" },
   ];
 
+  // Scroll-to-trigger animation
   useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !demoVisible) {
+        setDemoVisible(true);
+        observer.unobserve(entry.target);
+      }
+    }, { threshold: 0.3 });
+
+    if (demoRef.current) observer.observe(demoRef.current);
+    return () => observer.disconnect();
+  }, [demoVisible]);
+
+  // Typing animation when demo becomes visible
+  useEffect(() => {
+    if (!demoVisible) return;
+    
     let i = 0;
     const type = setInterval(() => {
       if (i <= query.length) {
@@ -51,18 +69,17 @@ function AlumniSearchDemo() {
           setShowResults(true);
           RESULTS.forEach((_, idx) => {
             setTimeout(() => {
-              setShowCards(c => [...c, idx]);
               setVisibleResults(v => [...v, idx]);
-            }, idx * 300);
+            }, idx * 100);
           });
-        }, 600);
+        }, 400);
       }
-    }, 45);
+    }, 40);
     return () => clearInterval(type);
-  }, []);
+  }, [demoVisible]);
 
   return (
-    <div style={{
+    <div ref={demoRef} style={{
       background: 'linear-gradient(135deg, #111827 0%, #1a1f2e 100%)',
       borderRadius: 20, overflow: 'hidden',
       border: '1px solid rgba(255,255,255,0.08)',
@@ -122,7 +139,7 @@ function AlumniSearchDemo() {
                 padding: '12px 0',
                 borderBottom: i < RESULTS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                 opacity: visibleResults.includes(i) ? 1 : 0,
-                transform: visibleResults.includes(i) ? 'translateY(0)' : 'translateY(8px)',
+                transform: visibleResults.includes(i) ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(12px)',
                 transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
               }}>
                 <div style={{
@@ -190,6 +207,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
   return (
     <div style={{ background: '#08080f', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
+      <SocialProofToasts />
 
       {/* ── HERO ── */}
       <div style={{
@@ -252,15 +270,26 @@ export default function StudentLandingPage({ onParentClick }) {
         </p>
 
         {/* Social proof line */}
-        <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.6vw, 17px)',
-          fontWeight: 500, color: '#22d3ee', lineHeight: 1.6,
-          maxWidth: 460, margin: '0 auto 44px',
-          letterSpacing: '0.3px',
+        {/* School ticker */}
+        <div style={{
+          maxWidth: '100%', overflow: 'hidden', marginBottom: 44,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s',
         }}>
-          Growing parent networks at UF, UCF, Penn State, USC, Ohio State, and more.
-        </p>
+          <div style={{
+            display: 'flex', gap: 24, animation: 'marquee 20s linear infinite',
+            width: 'max-content',
+          }}>
+            {['UF', 'UCF', 'Penn State', 'USC', 'Ohio State', 'FSU', 'Indiana', 'Texas', 'UF', 'UCF', 'Penn State', 'USC'].map((school, i) => (
+              <span key={i} style={{
+                fontFamily: dmSans, fontSize: 15, fontWeight: 500,
+                color: '#22d3ee', whiteSpace: 'nowrap',
+                opacity: 0.7,
+              }}>
+                {school} {i < 11 ? '·' : ''}
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* CTAs */}
         <div style={{
@@ -605,8 +634,8 @@ export default function StudentLandingPage({ onParentClick }) {
             Join for free →
           </button>
 
-          <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 20px' }}>
-            Always free to join. Early bird Agent pricing ($14.50/mo) available until April 30th.
+          <p style={{ fontFamily: dmSans, fontSize: 12, margin: '0 0 20px' }}>
+            Always free to join. Early bird Agent pricing ($14.50/mo) available until <span style={{ animation: 'dateGlow 2s ease-in-out infinite' }}>April 30th</span>.
           </p>
 
 
@@ -625,8 +654,12 @@ export default function StudentLandingPage({ onParentClick }) {
           50% { opacity: 0; }
         }
         @keyframes ctaPulse {
-          0%, 100% { box-shadow: 0 8px 32px rgba(232,93,32,0.4); }
-          50% { box-shadow: 0 8px 48px rgba(232,93,32,0.65), 0 0 20px rgba(232,93,32,0.4); }
+          0%, 100% { transform: scale(1); box-shadow: 0 8px 32px rgba(232,93,32,0.4); }
+          50% { transform: scale(1.03); box-shadow: 0 8px 48px rgba(232,93,32,0.65), 0 0 20px rgba(232,93,32,0.4); }
+        }
+        @keyframes dateGlow {
+          0%, 100% { color: rgba(255,255,255,0.3); text-shadow: 0 0 0 rgba(239,68,68,0); }
+          50% { color: rgba(239,68,68,0.5); text-shadow: 0 0 12px rgba(239,68,68,0.4); }
         }
         @keyframes marquee {
           0% { transform: translateX(0); }
