@@ -361,20 +361,32 @@ export default function StudentLandingPage({ onParentClick }) {
              letterSpacing: '-0.01em',
              margin: '0 0 24px',
            }}>
-             FastIQ helps you reach the right people — and get responses.
+             FastIQ makes you unstoppable.
            </p>
-          <p style={{
-            fontFamily: dmSans,
-            fontSize: 'clamp(16px, 2vw, 19px)',
-            color: 'rgba(255,255,255,0.65)',
-            lineHeight: 1.75,
-            margin: 0,
-            maxWidth: 540,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}>
-            We've covered every base. The Parent Network gives you a community of warm connections, and FastIQ <strong style={{ color: '#fff', fontWeight: 700 }}>handles</strong> your entire job search.
-          </p>
+           <p style={{
+             fontFamily: dmSans,
+             fontSize: 'clamp(16px, 2vw, 19px)',
+             color: 'rgba(255,255,255,0.65)',
+             lineHeight: 1.75,
+             margin: '0 0 24px',
+             maxWidth: 540,
+             marginLeft: 'auto',
+             marginRight: 'auto',
+           }}>
+             It helps you find the right people — and get real responses.
+           </p>
+           <p style={{
+             fontFamily: dmSans,
+             fontSize: 'clamp(16px, 2vw, 19px)',
+             color: 'rgba(255,255,255,0.65)',
+             lineHeight: 1.75,
+             margin: 0,
+             maxWidth: 540,
+             marginLeft: 'auto',
+             marginRight: 'auto',
+           }}>
+             We've covered every base. The Parent Network gives you a community of warm connections, and FastIQ <strong style={{ color: '#fff', fontWeight: 700 }}>handles</strong> your entire job search.
+           </p>
         </div>
       </div>
 
