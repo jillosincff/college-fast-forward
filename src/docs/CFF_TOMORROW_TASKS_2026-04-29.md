@@ -4,28 +4,44 @@
 
 ---
 
-## ⚠️ FIRST THING — BEFORE 8AM ET
+## ✅ SYSTEM STATUS AT CLOSE OF APRIL 28
 
-### MANUAL PAUSE: Trial Email Scheduler
-The Trial Email Scheduler automation could NOT be paused programmatically tonight (API returned truncated ID). It runs daily at **12:00 UTC (8:00am ET)**.
+All sends confirmed held for the night:
+- Trial Email Scheduler: ✅ **PAUSED MANUALLY** (April 28 evening)
+- Founding Rate Blast — April 30: ✅ **PAUSED**
+- CFF Engagement Agent: ✅ **PAUSED**
+- Correction Email (9:30am ET): ✅ **ACTIVE** (intentional — no trial terms)
 
-**Go to:** Dashboard → Automations → "Trial Email Scheduler" → Toggle off
+**No automated emails will fire overnight. System is fully held.**
 
-Without this, `sendTrialDay5Email`, `sendTrialDay7Email`, `sendTrialDay8Email` will fire at 8am for any eligible users.
+---
+
+## 🔴 TOP PRIORITY — REVENUE-IMPACTING BUG (moved to #1)
 
 ---
 
 ## ORDERED TASK LIST
 
-### Priority 1 — Live Bugs (fix before any new users hit the paywall)
+### Priority 1 — Revenue-Impacting Bug (first thing tomorrow)
 
-**1. Fix `PaywallScreen.jsx` — FOUNDING_DEADLINE wrong date**
+**1. AUDIT + FIX `PaywallScreen.jsx` — FOUNDING_DEADLINE wrong date (13-day revenue gap)**
 - File: `components/fastiq-funnel/PaywallScreen.jsx`
-- Issue: `FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59')` → paywall is showing **$29/month** to everyone right now
-- Fix: Change to `'2026-04-30T23:59:59'`
-- Also: Change "7-day free trial — cancel anytime" badge to "5-day trial — card required"
-- Also: Add credit card disclosure near CTA ("Card required. Auto-converts at end of day 5. Cancel anytime.")
-- Impact: **Every new user who hits the funnel today sees wrong pricing**
+- Issue: `FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59')` → paywall has been showing **$29/month** to every new user since April 15. Today is April 28. That's **13 days of wrong pricing.**
+- Same family as the `sendParentTrialEndingEmail` / `sendUpgradePrompt` April 15 date bug — all hardcoded from the same original deadline.
+
+**Step 1 — Pull impact data BEFORE fixing:**
+- Query `AnalyticsEvent` for `event_name: 'upgrade_clicked'` or `event_name: 'fastiq_trial_started'` between April 15–28
+- Also check Stripe dashboard: any checkouts between April 15–28 where the user saw $29/month
+- Count affected users — anyone who converted during this window did so at the correct $14.50 price (Stripe checkout still had founding rate logic), but they were shown $29 on the paywall before clicking. They may not know they got the founding rate.
+- Decision point: **Do any of these users deserve a proactive "you got the founding rate" confirmation email?** (Probably yes — builds trust.)
+
+**Step 2 — Fix the code:**
+- Change `FOUNDING_DEADLINE` to `'2026-04-30T23:59:59'`
+- Change "7-day free trial — cancel anytime" badge → "5-day trial · card required"
+- Add CC disclosure near CTA: "Card required. Auto-converts at day 5. Cancel anytime."
+
+**Step 3 — Draft confirmation email for affected users (if any converted April 15–28):**
+- Short, from Jill: "Just want to confirm — you're locked in at $14.50/month. The paywall showed the wrong price for a period, but your checkout captured the founding rate correctly. You're good."
 
 **2. Fix `sendParentTrialEndingEmail.js` — wrong deadline date**
 - File: `functions/sendParentTrialEndingEmail.js`
