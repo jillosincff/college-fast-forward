@@ -28,7 +28,7 @@ export default function SocialProofToasts() {
   }, []);
 
   return (
-    <div style={{ position: 'fixed', bottom: 24, left: 24, zIndex: 40, pointerEvents: 'none' }}>
+    <div className="social-proof-container" style={{ position: 'fixed', bottom: 24, left: 24, zIndex: 40, pointerEvents: 'none' }}>
       <style>{`
         @keyframes toastSlideIn {
           from {
@@ -49,6 +49,9 @@ export default function SocialProofToasts() {
             opacity: 0;
             transform: translateX(-20px);
           }
+        }
+        @media (max-width: 768px) {
+          .social-proof-container { display: none !important; }
         }
       `}</style>
       {toasts.map((toast, idx) => (

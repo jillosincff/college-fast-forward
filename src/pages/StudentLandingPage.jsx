@@ -48,7 +48,7 @@ function AlumniSearchDemo() {
         setDemoVisible(true);
         observer.unobserve(entry.target);
       }
-    }, { threshold: 0.3 });
+    }, { threshold: 0.25, rootMargin: '50px' });
 
     if (demoRef.current) observer.observe(demoRef.current);
     return () => observer.disconnect();
@@ -275,7 +275,7 @@ export default function StudentLandingPage({ onParentClick }) {
           maxWidth: '100%', overflow: 'hidden', marginBottom: 44,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s',
         }}>
-          <div style={{
+          <div className="marquee-scroll" style={{
             display: 'flex', gap: 24, animation: 'marquee 20s linear infinite',
             width: 'max-content',
           }}>
@@ -664,6 +664,12 @@ export default function StudentLandingPage({ onParentClick }) {
         @keyframes marquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
+        }
+        .marquee-scroll {
+          will-change: transform;
+          transform: translateZ(0);
+          backface-visibility: hidden;
+          perspective: 1000px;
         }
         @media (max-width: 560px) {
           .powers-grid { grid-template-columns: 1fr !important; }
