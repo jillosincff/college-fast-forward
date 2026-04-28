@@ -446,6 +446,39 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
       </div>
 
+      {/* ── TRANSITION ── */}
+      <div style={{
+        padding: '60px 20px',
+        textAlign: 'center',
+        background: '#08080f',
+      }}>
+        <div style={{ maxWidth: 500, margin: '0 auto' }}>
+          <p style={{
+            fontFamily: playfair,
+            fontSize: 'clamp(24px, 3.5vw, 42px)',
+            fontWeight: 700,
+            color: '#fff',
+            lineHeight: 1.3,
+            letterSpacing: '-0.02em',
+            margin: '0 0 8px',
+          }}>
+            The parent network is powerful.
+          </p>
+          <p style={{
+            fontFamily: playfair,
+            fontSize: 'clamp(24px, 3.5vw, 42px)',
+            fontWeight: 700,
+            color: '#E85D20',
+            fontStyle: 'italic',
+            lineHeight: 1.3,
+            letterSpacing: '-0.02em',
+            margin: 0,
+          }}>
+            FastIQ takes it to another level.
+          </p>
+        </div>
+      </div>
+
       {/* ── FINAL CTA ── */}
       <div style={{
         padding: '88px 20px 108px',
