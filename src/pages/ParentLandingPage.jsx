@@ -201,7 +201,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           <button onClick={go} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '17px 36px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 28px rgba(232,93,32,0.35)', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(232,93,32,0.45)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(232,93,32,0.35)'; }}
-          >Join free — add your network →</button>
+          >Yes, I want to help →</button>
           <button onClick={student} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#6b6b6b', background: '#fff', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 14, padding: '17px 28px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#E85D20'; e.currentTarget.style.color = '#E85D20'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; e.currentTarget.style.color = '#6b6b6b'; }}
@@ -277,7 +277,7 @@ export default function ParentLandingPage({ onStudentClick }) {
               <button onClick={go} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '15px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 20px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(232,93,32,0.5)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(232,93,32,0.4)'; }}
-              >🤝 Join free — 2 minutes, zero obligation</button>
+              >🤝 Yes, I want to help</button>
             </div>
           </div>
         </div>
@@ -310,7 +310,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           <button onClick={go} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#E85D20', background: '#fff', border: 'none', borderRadius: 14, padding: '17px 36px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 28px rgba(0,0,0,0.15)', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.2)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.15)'; }}
-          >Join free — add your network →</button>
+          >Yes, I want to help →</button>
         </div>
       </div>
 
@@ -351,7 +351,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           <button onClick={go} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px 36px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 20px rgba(232,93,32,0.3)', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(232,93,32,0.4)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(232,93,32,0.3)'; }}
-          >Join free — 2 minutes, zero obligation →</button>
+          >Yes, I want to help →</button>
         </div>
       </div>
 
@@ -371,7 +371,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           <button onClick={go} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '17px 40px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 44px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
-          >Join free — add your network →</button>
+          >Yes, I want to help →</button>
         </div>
       </div>
 
@@ -398,7 +398,7 @@ export default function ParentLandingPage({ onStudentClick }) {
           <button onClick={go} style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '19px 48px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 0 60px rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)', marginBottom: 14, display: 'block', marginLeft: 'auto', marginRight: 'auto', transition: 'all 0.2s ease' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 0 80px rgba(232,93,32,0.55), 0 16px 48px rgba(232,93,32,0.5)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 0 60px rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)'; }}
-          >Join free — add your network →</button>
+          >Yes, I want to help →</button>
           <button onClick={student} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.28)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, display: 'block', margin: '0 auto', transition: 'color 0.15s' }}
             onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.28)'; }}
