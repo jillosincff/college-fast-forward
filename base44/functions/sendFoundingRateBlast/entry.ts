@@ -29,9 +29,10 @@ function daysRemaining() {
 function buildHtml(firstName, school, persona, days) {
   const isParent = persona === 'parent';
   const name = firstName || 'there';
-  const displaySchool = school || 'your school';
-  const urgencyLabel = days === 0 ? 'Today is the last day' : days === 1 ? '1 day left' : `${days} days left`;
-  const urgencyColor = days <= 1 ? '#D32737' : days <= 7 ? '#E85D20' : '#E85D20';
+
+  const studentBody = `Hi ${name},<br/><br/>Quick note from me. The Founding Rate for FastIQ ($14.50/month, locked in forever) expires tomorrow at midnight. After that, it's $29/month for everyone.<br/><br/>If you've been thinking about it, this is the moment. The trial is 5 days now — credit card required, converts automatically unless you cancel.<br/><br/>We're at the start of summer internship season, so these next few weeks matter. If FastIQ is going to help you find alumni, draft outreach, or prep for interviews, you'll know in 5 days.<br/><br/>Lock in the rate before tomorrow: <a href="${FASTIQ_UPGRADE_URL}" style="color:#E85D20; text-decoration:none; font-weight:600;">https://collegefastforward.com/#FastIQDashboard</a><br/><br/>— Jill<br/><br/><strong>P.S.</strong> If you've already tried FastIQ and decided it's not for you, no worries — you'll never hear from me about it again.`;
+
+  const parentBody = `Hi ${name},<br/><br/>Quick note about FastIQ — the AI career tool we built for students on College Fast Forward.<br/><br/>The Founding Rate ($14.50/month, locked in forever) expires tomorrow at midnight. After that, it's $29/month for everyone, no exceptions.<br/><br/>If you've been thinking about getting it for your student, this is the moment. The trial is 5 days, requires a credit card, and auto-converts unless you cancel. That's intentional — we want students who'll actually use it during summer internship recruiting season, not a long free trial that gets ignored.<br/><br/>Lock in the rate before tomorrow: <a href="${FASTIQ_UPGRADE_URL}" style="color:#E85D20; text-decoration:none; font-weight:600;">https://collegefastforward.com/#FastIQDashboard</a><br/><br/>— Jill<br/><br/><strong>P.S.</strong> Any questions, just reply to this email — I read everything that comes in.`;
 
   return `
 <!DOCTYPE html>
@@ -40,98 +41,15 @@ function buildHtml(firstName, school, persona, days) {
 <body style="margin:0;padding:0;background:#F5F5F5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
 <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
 
-  <div style="text-align:center;margin-bottom:32px;">
-    <p style="font-size:13px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#E85D20;margin:0;">
-      COLLEGE FAST FORWARD
-    </p>
-  </div>
-
-  <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-
-    <div style="background:#0A0A0A;padding:32px 36px;">
-      <p style="font-size:10px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:${urgencyColor};margin:0 0 12px;">
-        🎖 FOUNDING RATE — ${urgencyLabel.toUpperCase()}
-      </p>
-      <h1 style="font-size:24px;font-weight:700;color:#fff;margin:0 0 10px;line-height:1.3;">
-        Hi ${name}, ${urgencyLabel} to lock in the Founding Rate.
-      </h1>
-      <p style="font-size:15px;color:rgba(255,255,255,0.55);margin:0;line-height:1.6;">
-        Lock in $14.50/month before it's gone forever.
-      </p>
-    </div>
-
-    <div style="padding:28px 36px 32px;">
-      <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">
-        Hi ${name},
-      </p>
-      <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 16px;">
-        The Founding Rate for FastIQ expires <strong>April 30, 2026</strong> — permanently. After that, it's $29/month for everyone.
-      </p>
-      <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 20px;">
-        ${isParent
-          ? `Students at ${displaySchool} are using FastIQ to craft outreach that gets replies, tailor applications, and land conversations they never could have found alone. Lock in their access now.`
-          : `Students at ${displaySchool} are using FastIQ to discover alumni, craft outreach that actually gets replies, tailor resumes to specific jobs, and prep for interviews. Lock in your rate today.`}
-      </p>
-
-      <div style="background:#FFF5F0;border-left:3px solid #E85D20;border-radius:0 10px 10px 0;padding:16px 20px;margin:0 0 20px;">
-        <p style="font-size:14px;color:#555;font-style:italic;line-height:1.7;margin:0 0 8px;">
-          "I found an internship in legal marketing that was never posted. I got it through a parent in College Fast Forward."
-        </p>
-        <p style="font-size:12px;color:#E85D20;font-weight:700;margin:0;">
-          — UF Student, CFF Member
-        </p>
-      </div>
-
-      <div style="background:#0A0A0A;border-radius:12px;padding:20px 24px;margin:0 0 24px;">
-        <p style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#E85D20;margin:0 0 12px;">
-          🎖 FOUNDING RATE — EXPIRES APRIL 30
-        </p>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;">
-          <div style="flex:1;min-width:180px;">
-            <p style="font-size:22px;font-weight:700;color:#fff;margin:0 0 2px;">
-              $14.50<span style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:400;">/mo</span>
-            </p>
-            <p style="font-size:12px;color:rgba(255,255,255,0.5);margin:0;">Monthly · Cancel anytime</p>
-          </div>
-          <div style="flex:1;min-width:180px;">
-            <p style="font-size:22px;font-weight:700;color:#fff;margin:0 0 2px;">
-              $124.50<span style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:400;">/yr</span>
-            </p>
-            <p style="font-size:12px;color:rgba(255,255,255,0.5);margin:0;">Annual · Save 2 months</p>
-          </div>
-        </div>
-        <p style="font-size:12px;color:rgba(255,255,255,0.35);margin:12px 0 0;">
-          Both options are 50% off the regular rate · Locked in permanently
-        </p>
-      </div>
-
-      <div style="text-align:center;margin:0 0 12px;">
-        <a href="${MONTHLY_URL}"
-           style="display:inline-block;background:#E85D20;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;margin-bottom:8px;">
-          ${isParent ? 'Lock in $14.50/mo for My Student →' : 'Lock in $14.50/mo →'}
-        </a>
-      </div>
-      <div style="text-align:center;margin:0 0 20px;">
-        <a href="${ANNUAL_URL}"
-           style="display:inline-block;background:transparent;border:1px solid #E85D20;color:#E85D20;font-size:13px;font-weight:600;text-decoration:none;padding:10px 24px;border-radius:10px;">
-          Or save more with Annual ($124.50/yr) →
-        </a>
-      </div>
-
-      <div style="height:1px;background:#F0F0F0;margin:20px 0;"></div>
-
-      <p style="font-size:13px;color:#888;line-height:1.6;margin:0;">
-        ${isParent ? 'Your free profile' : 'Your free CFF network'} stays active no matter what. Cancel anytime. Questions? Just reply.
-      </p>
+  <div style="background:#fff;border-radius:12px;padding:32px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="font-size:15px;color:#333;line-height:1.7;">
+      ${isParent ? parentBody : studentBody}
     </div>
   </div>
 
   <div style="text-align:center;margin-top:32px;">
-    <p style="font-size:13px;color:#888;margin:0 0 4px;">
+    <p style="font-size:12px;color:#888;margin:0;">
       Jill Osinoff · Founder, College Fast Forward
-    </p>
-    <p style="font-size:11px;color:#CCCCCC;margin:0;">
-      support@collegefastforward.com
     </p>
   </div>
 
@@ -184,8 +102,8 @@ Deno.serve(async (req) => {
     const isParent = persona === 'parent';
     const name = firstName || 'there';
     const subject = isParent
-      ? `Last chance — lock in $14.50/mo for your student before April 30`
-      : `Last chance — lock in $14.50/mo before April 30 🎖`;
+      ? `Tomorrow the rate doubles for FastIQ`
+      : `Tomorrow the rate doubles`;
 
     const html = buildHtml(firstName, school, persona, days);
     const res = await sendEmail(SENDGRID_API_KEY, userEmail, subject, html);
@@ -223,8 +141,8 @@ Deno.serve(async (req) => {
     const persona = u.persona || 'student';
     const isParent = persona === 'parent';
     const subject = isParent
-      ? `Last chance — lock in $14.50/mo for your student before April 30`
-      : `Last chance — lock in $14.50/mo before April 30 🎖`;
+      ? `Tomorrow the rate doubles for FastIQ`
+      : `Tomorrow the rate doubles`;
 
     const html = buildHtml(firstName, school, persona, days);
     try {
