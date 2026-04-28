@@ -6,10 +6,13 @@ import { Zap } from 'lucide-react';
 import FoundingMemberBanner from '@/components/shared/FoundingMemberBanner';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
+
 export default function FastIQDashboard({ onOpenUpgrade }) {
   const { user } = useAuth();
   const [showBanner, setShowBanner] = useState(true);
   const isFastIQ = checkIsFastIQ(user);
+  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
 
   // When rendered standalone (direct URL, no parent passing onOpenUpgrade),
   // fall back to navigating to FreeTierDashboard with the upgrade modal open.
@@ -160,7 +163,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 13, color: '#888', textAlign: 'center',
           margin: '8px 0 0',
         }}>
-          $29/month &middot; 5-day free trial &middot; Cancel anytime
+          {foundingOfferActive ? '$14.50/month · Founding Rate — expires April 30' : '$29/month'} &middot; 5-day free trial &middot; Cancel anytime
         </p>
         </div>
       </div>
