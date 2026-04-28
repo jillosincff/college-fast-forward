@@ -593,6 +593,7 @@ export default function StudentLandingPage({ onParentClick }) {
             transition: 'all 0.2s ease',
             display: 'block', marginLeft: 'auto', marginRight: 'auto',
             marginBottom: 16,
+            animation: 'ctaPulse 3s ease-in-out infinite',
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
@@ -618,6 +619,10 @@ export default function StudentLandingPage({ onParentClick }) {
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
+        }
+        @keyframes ctaPulse {
+          0%, 100% { box-shadow: 0 8px 32px rgba(232,93,32,0.4); }
+          50% { box-shadow: 0 8px 48px rgba(232,93,32,0.65), 0 0 20px rgba(232,93,32,0.4); }
         }
         @media (max-width: 560px) {
           .powers-grid { grid-template-columns: 1fr !important; }
