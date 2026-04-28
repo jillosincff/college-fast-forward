@@ -292,7 +292,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <p style={{
-          fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0,
+          fontFamily: dmSans, fontSize: 12, color: '#22d3ee', margin: 0,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s',
         }}>
           Free to join. No obligation.
