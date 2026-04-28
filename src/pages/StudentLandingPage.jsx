@@ -345,7 +345,7 @@ export default function StudentLandingPage({ onParentClick }) {
             lineHeight: 1.5,
             margin: 0,
           }}>
-            See what it can do:
+            Here's what it can do:
           </p>
         </div>
       </div>
