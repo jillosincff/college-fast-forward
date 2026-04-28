@@ -54,11 +54,12 @@ Deno.serve(async (req) => {
         .map(e => e.event_name);
     }
 
-    // Helper: was user emailed about FastIQ in last 30 days
+    // Helper: was user emailed about FastIQ or paywall corrections in last 30 days
     function wasRecentlyEmailedAboutFastIQ(u) {
       return recentEmailLogs.some(log => 
         log.user_email?.toLowerCase() === u.email?.toLowerCase() &&
-        (log.email_type?.includes('fastiq') || log.subject?.toLowerCase().includes('fastiq'))
+        (log.email_type?.includes('fastiq') || log.email_type?.includes('paywall') || 
+         log.subject?.toLowerCase().includes('fastiq') || log.subject?.toLowerCase().includes('correction'))
       );
     }
 
