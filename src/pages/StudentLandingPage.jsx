@@ -248,10 +248,10 @@ export default function StudentLandingPage({ onParentClick }) {
 
         {/* Social proof line */}
         <p style={{
-          fontFamily: dmSans, fontSize: 12,
-          color: 'rgba(255,255,255,0.28)', lineHeight: 1.6,
+          fontFamily: dmSans, fontSize: 'clamp(15px, 1.6vw, 17px)',
+          fontWeight: 500, color: '#22d3ee', lineHeight: 1.6,
           maxWidth: 460, margin: '0 auto 44px',
-          letterSpacing: '0.02em',
+          letterSpacing: '0.3px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s',
         }}>
           Growing parent networks at UF, UCF, Penn State, USC, Ohio State, and more.
