@@ -458,10 +458,10 @@ export default function StudentLandingPage({ onParentClick }) {
             The two-part approach
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
-            Everything you need to get hired.
+            Choose your advantage.
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.65 }}>
-            The Parent Network provides the connections. FastIQ provides the tools to close the deal.
+            Start with the exclusive network, then let FastIQ handle the heavy lifting.
           </p>
         </div>
       </div>
@@ -481,16 +481,24 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
-                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Warm Introduction</p>
+                <div>
+                  <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.2 }}>The Parent Network</p>
+                  <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, fontStyle: 'italic' }}>Exclusive to your school</p>
+                </div>
               </div>
-              {['Access a private network of parents ready to open doors.', 'Find the exact alumni most relevant to your target role.', 'Skip the "Cold Call" and lead with your shared school bond.', 'Turn casual conversations into formal referrals.'].map((f, i) => (
+              {['Highly Responsive: Connect with people who care about your success and actually respond.', 'The "Parent" Bond: Access a community that is genuinely motivated to help you succeed.', 'Lifelong Networks: Tap into extensive connections across every major industry.', 'Warm Introductions: Skip the cold application and get your resume in front of the people who hire.'].map((f, i) => {
+                const [boldPart, restPart] = f.split(': ');
+                return (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
                   <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#E85D20' }} />
                   </div>
-                  <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>{f}</p>
+                  <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>
+                    <span style={{ fontWeight: 700, color: '#fff' }}>{boldPart}:</span> {restPart}
+                  </p>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -505,9 +513,12 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
-                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Personal Agent</p>
+                <div>
+                  <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.2 }}>The Personal Agent</p>
+                  <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(34,211,238,0.5)', margin: 0, fontStyle: 'italic' }}>Powered by FastIQ</p>
+                </div>
               </div>
-              {['LinkedIn Optimization: Get your profile found by recruiters automatically.', 'Instant Resume Tailoring: Match any job description in seconds.', 'Hiring Signals: Get notified the moment your dream company starts looking.', 'Smart Nudges: Automated follow-up reminders so you never go silent.'].map((f, i) => {
+              {['Alumni Shortcut: We scan thousands of companies to find the exact matches for your goals.', 'AI Outreach: We research their background and draft the perfect message to get you a referral.', 'Instant Optimization: Auto-tailor your Resume and LinkedIn to any job description in seconds.', 'Smart Nudging: Automated follow-ups and hiring signals so you never miss an opportunity.'].map((f, i) => {
                 const [boldPart, restPart] = f.split(': ');
                 return (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
