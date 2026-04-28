@@ -23,7 +23,7 @@ const STORIES = [
     tagIcon: "📅"
   },
   {
-    quote: "The alumni search found exactly who I needed to talk to at my dream company.",
+    quote: "I applied to over 100 jobs and got zero responses. I reached out to one parent from my school and he got me an interview by the following Monday. Insane.",
     name: "Sarah K.",
     school: "University of Michigan · Junior · Engineering",
     initials: "S",
