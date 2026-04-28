@@ -301,7 +301,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── TRANSITION ── */}
       <div style={{
-        padding: '60px 20px',
+        padding: '60px 20px 40px',
         textAlign: 'center',
         background: '#08080f',
       }}>
@@ -327,6 +327,35 @@ export default function StudentLandingPage({ onParentClick }) {
             margin: 0,
           }}>
             FastIQ takes it to another level.
+          </p>
+        </div>
+      </div>
+
+      {/* ── FASTIQ INTRO ── */}
+      <div style={{
+        padding: '40px 20px 60px',
+        textAlign: 'center',
+        background: '#08080f',
+      }}>
+        <div style={{ maxWidth: 580, margin: '0 auto' }}>
+          <p style={{
+            fontFamily: dmSans,
+            fontSize: 'clamp(17px, 2.2vw, 22px)',
+            fontWeight: 600,
+            color: '#fff',
+            lineHeight: 1.5,
+            margin: '0 0 8px',
+          }}>
+            FastIQ is your personal career agent that works for you 24/7.
+          </p>
+          <p style={{
+            fontFamily: dmSans,
+            fontSize: 'clamp(16px, 2vw, 20px)',
+            color: '#22d3ee',
+            lineHeight: 1.5,
+            margin: 0,
+          }}>
+            See it in action:
           </p>
         </div>
       </div>
