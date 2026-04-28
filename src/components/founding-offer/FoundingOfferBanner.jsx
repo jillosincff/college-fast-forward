@@ -89,7 +89,7 @@ export default function FoundingOfferBanner({ display, studentName }) {
         color: 'rgba(255,255,255,0.45)', textAlign: 'center',
         lineHeight: 1.6, marginTop: 14,
       }}>
-        Both plans include a 7-day free trial. Annual plan billed as one payment of $187 — locks in at $187 for every renewal. Cancel anytime.
+        Both plans include a 5-day free trial. Annual plan billed as one payment of $187 — locks in at $187 for every renewal. Cancel anytime.
       </p>
     </div>
   );

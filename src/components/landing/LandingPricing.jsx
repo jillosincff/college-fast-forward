@@ -55,7 +55,7 @@ export default function LandingPricing({ stats, onClaim, onFastIQ }) {
               ))}
             </ul>
             <Button onClick={onClaim} variant="outline" className="w-full py-5 font-bold min-h-[48px] border-2">
-              Start 7-day free trial <ArrowRight className="w-4 h-4 ml-1" />
+              Start 5-day free trial <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </motion.div>
 
@@ -78,7 +78,7 @@ export default function LandingPricing({ stats, onClaim, onFastIQ }) {
               className="w-full py-3 rounded-lg text-sm font-bold text-white transition-all hover:brightness-110 min-h-[48px]"
               style={{ background: 'linear-gradient(135deg, #FA4616 0%, #E03A0F 100%)' }}
             >
-              Activate FASTIQ – 7-day free trial
+              Activate FASTIQ – 5-day free trial
             </button>
           </motion.div>
         </motion.div>

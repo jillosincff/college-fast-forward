@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Check, Loader2 } from 'lucide-react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
 export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user }) {
   const [loading, setLoading] = useState(false);
@@ -103,7 +103,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
               <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 6px' }}>⚡ Founding Member Rate</p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>$14.50/month or $124.50/year</p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666', margin: '0 0 8px' }}>50% off forever — locked in as long as you stay subscribed.</p>
-              <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 500, margin: 0 }}>⏱ Expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''} — April 15th</p>
+              <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 500, margin: 0 }}>⏱ Expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''} — April 30</p>
             </div>
           ) : (
             <div className="bg-[#FFF8F5] rounded-xl p-4">
@@ -111,7 +111,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
                 $29/month <span style={{ fontWeight: 400, color: '#888' }}>or</span> $249/year
               </p>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0 }}>
-                Start free for 7 days — then $29/month. Cancel anytime.
+                Start free for 5 days — then $29/month. Cancel anytime.
               </p>
             </div>
           )}
@@ -147,7 +147,7 @@ export default function CareerConciergeUpgradeModal({ onClose, onAskParent, user
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa', textAlign: 'center', margin: 0 }}>
-            {foundingOfferActive ? 'Start free for 7 days — then $14.50/month. Cancel anytime.' : 'Start free for 7 days — then $29/month. Cancel anytime.'}
+            {foundingOfferActive ? 'Start free for 5 days — then $14.50/month. Cancel anytime.' : 'Start free for 5 days — then $29/month. Cancel anytime.'}
           </p>
         </div>
       </div>

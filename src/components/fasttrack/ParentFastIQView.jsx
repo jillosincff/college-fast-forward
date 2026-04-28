@@ -249,7 +249,7 @@ export default function ParentFastIQView({ user }) {
             Activate FastIQ for your student
           </p>
           <p className="text-[#888888] text-sm mb-4">
-            $29/month or $187/year — 7-day free trial included.
+            $29/month or $187/year — 5-day free trial included.
           </p>
           <button
             onClick={() => navigate('ParentHome')}
