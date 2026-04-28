@@ -247,13 +247,13 @@ export default function StudentLandingPage({ onParentClick }) {
           transition: 'all 0.7s ease 0.1s',
         }}>
           Landing a job{' '}
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>feels impossible</span> without a personal connection.
+          <span style={{ color: '#E85D20', fontStyle: 'italic', fontFamily: playfair }}>feels impossible</span> without a personal connection.
         </h1>
 
         {/* Subheadline */}
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(17px, 2.2vw, 22px)',
-          fontWeight: 600, color: 'rgba(255,255,255,0.85)',
+          fontWeight: 600, color: 'rgba(255,255,255,0.8)',
           lineHeight: 1.5, maxWidth: 580, margin: '0 auto 16px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
@@ -263,7 +263,7 @@ export default function StudentLandingPage({ onParentClick }) {
         {/* Clarifying line */}
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(13px, 1.5vw, 15px)',
-          color: 'rgba(255,255,255,0.4)', lineHeight: 1.6,
+          color: 'rgba(255,255,255,0.5)', lineHeight: 1.6,
           maxWidth: 460, margin: '0 auto 20px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
@@ -390,12 +390,12 @@ export default function StudentLandingPage({ onParentClick }) {
             fontSize: 11,
             fontWeight: 700,
             color: '#E85D20',
-            letterSpacing: '0.14em',
+            letterSpacing: '0.15em',
             textTransform: 'uppercase',
             margin: '0 0 14px',
             textAlign: 'center',
           }}>
-            ⚡ The Aha Moment
+            ⚡ THE AHA MOMENT
           </p>
           <h2 style={{
             fontFamily: playfair,
@@ -411,12 +411,12 @@ export default function StudentLandingPage({ onParentClick }) {
           <p style={{
             fontFamily: dmSans,
             fontSize: 'clamp(16px, 1.8vw, 18px)',
-            color: 'rgba(255,255,255,0.55)',
+            color: 'rgba(255,255,255,0.65)',
             lineHeight: 1.6,
             margin: '0 auto 44px',
             maxWidth: 540,
           }}>
-            Alumni are <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>10x more likely to help</strong> a fellow student than a stranger. FastIQ finds them at the companies you care about—like a <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>VP of Marketing at Disney</strong>—and researches exactly how they can help you get in.
+            Alumni are <strong style={{ color: '#fff', fontWeight: 700 }}>10x more likely to help</strong> a fellow student than a stranger. FastIQ finds them at the companies you care about—like a <strong style={{ color: '#fff', fontWeight: 700 }}>VP of Marketing at Disney</strong>—and researches exactly how they can help you get in.
           </p>
         </div>
       </div>
@@ -429,13 +429,13 @@ export default function StudentLandingPage({ onParentClick }) {
         padding: '80px 20px 72px',
       }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
-            ⚡ The Aha Moment
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
+            ⚡ THE AHA MOMENT
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 14px', textAlign: 'center' }}>
             See the 'Alumni Shortcut' in action
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 40px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.6)', textAlign: 'center', margin: '0 0 40px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
             FastIQ scans thousands of companies in your target industry to find the exact alumni who can help you—then researches their background and drafts the perfect message to get you a referral.
           </p>
 
@@ -462,15 +462,15 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── WHY THIS WORKS ── */}
       <div style={{ padding: '88px 20px 0', maxWidth: 920, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-            Pricing
-          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+             PRICING
+           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
             Choose your advantage.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 620, margin: '0 auto 36px', lineHeight: 1.65 }}>
-            Join the community for free, or activate your personal agent to accelerate the results.
-          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.6)', maxWidth: 620, margin: '0 auto 36px', lineHeight: 1.65 }}>
+             Join the community for free, or activate your personal agent to accelerate the results.
+           </p>
         </div>
       </div>
 
@@ -487,7 +487,7 @@ export default function StudentLandingPage({ onParentClick }) {
       }}>
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(ellipse, rgba(232,93,32,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#E85D20', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 16px' }}>FREE</p>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 16px' }}>FREE</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
             <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Foundation</p>
@@ -499,9 +499,9 @@ export default function StudentLandingPage({ onParentClick }) {
                   <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#E85D20' }} />
                   </div>
-                  <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>
-                    <span style={{ fontWeight: 700, color: '#fff' }}>{boldPart}:</span> {restPart}
-                  </p>
+                  <p style={{ fontFamily: dmSans, fontSize: 14, color: '#A0A0A0', margin: 0, lineHeight: 1.6 }}>
+                     <span style={{ fontWeight: 700, color: '#fff' }}>{boldPart}:</span> {restPart}
+                   </p>
                 </div>
                 );
               })}
@@ -516,7 +516,7 @@ export default function StudentLandingPage({ onParentClick }) {
             position: 'relative', overflow: 'hidden',
           }}>
             <div style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(34,211,238,0.2)', border: '1px solid rgba(34,211,238,0.35)', borderRadius: 100, padding: '4px 12px' }}>
-              <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.08em', textTransform: 'uppercase' }}>50% OFF</span>
+              <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.15em', textTransform: 'uppercase' }}>50% OFF</span>
             </div>
             <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(ellipse, rgba(34,211,238,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -537,9 +537,9 @@ export default function StudentLandingPage({ onParentClick }) {
                     <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
                       <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
                     </div>
-                    <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>
-                      <span style={{ fontWeight: 700, color: '#fff' }}>{boldPart}:</span> {restPart}
-                    </p>
+                    <p style={{ fontFamily: dmSans, fontSize: 14, color: '#A0A0A0', margin: 0, lineHeight: 1.6 }}>
+                       <span style={{ fontWeight: 700, color: '#fff' }}>{boldPart}:</span> {restPart}
+                     </p>
                   </div>
                 );
               })}
@@ -581,14 +581,14 @@ export default function StudentLandingPage({ onParentClick }) {
           <h2 style={{
             fontFamily: playfair,
             fontSize: 'clamp(28px, 4.5vw, 60px)',
-            fontWeight: 700, color: '#E85D20', fontStyle: 'italic',
+            fontWeight: 700, color: '#E85D20', fontStyle: 'italic', fontFamily: playfair,
             lineHeight: 1.05, letterSpacing: '-0.03em',
             margin: '0 0 28px',
           }}>
             and actually get hired.
           </h2>
 
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 440 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 440 }}>
             Join your school's parent network for free today. Activate your personal agent whenever you're ready to accelerate your search.
           </p>
 
@@ -609,7 +609,7 @@ export default function StudentLandingPage({ onParentClick }) {
             Join for free →
           </button>
 
-          <p style={{ fontFamily: dmSans, fontSize: 12, margin: '0 0 20px' }}>
+          <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '0 0 20px' }}>
             Always free to join. Early bird Agent pricing ($14.50/mo) available until <span style={{ animation: 'dateGlow 2s ease-in-out infinite' }}>April 30th</span>.
           </p>
 
