@@ -319,7 +319,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
           <p style={{
             fontFamily: playfair,
-            fontSize: 'clamp(28px, 4fvw, 52px)',
+            fontSize: 'clamp(28px, 4vw, 52px)',
             fontWeight: 700,
             color: '#E85D20',
             fontStyle: 'italic',
@@ -327,7 +327,7 @@ export default function StudentLandingPage({ onParentClick }) {
             letterSpacing: '-0.02em',
             margin: '0 0 24px',
           }}>
-            FastIQ makes it personal.
+            FastIQ makes you unstoppable.
           </p>
           <p style={{
             fontFamily: dmSans,
@@ -335,11 +335,11 @@ export default function StudentLandingPage({ onParentClick }) {
             color: 'rgba(255,255,255,0.65)',
             lineHeight: 1.75,
             margin: 0,
-            maxWidth: 520,
+            maxWidth: 540,
             marginLeft: 'auto',
             marginRight: 'auto',
           }}>
-            Alumni are your biggest advocates. FastIQ acts as your 24/7 personal agent to find your school's insiders at your dream companies and write the perfect message to turn a cold lead into a warm referral.
+            We've covered every base. The Parent Network gives you a community of warm connections, and FastIQ handles your entire job search.
           </p>
         </div>
       </div>
