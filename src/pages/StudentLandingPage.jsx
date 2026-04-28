@@ -222,8 +222,8 @@ export default function StudentLandingPage({ onParentClick }) {
           transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Landing a job without a personal connection{' '}
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>feels impossible.</span>
+          Landing a job{' '}
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>feels impossible</span> without a personal connection.
         </h1>
 
         {/* Subheadline */}
