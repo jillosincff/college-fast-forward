@@ -153,12 +153,13 @@ function AlumniSearchDemo() {
         <div style={{
           borderTop: '1px solid rgba(255,255,255,0.06)',
           padding: '16px 0 20px', marginTop: 12,
+          textAlign: 'center',
         }}>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>
             A response is just the start.
           </p>
           <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>
-            The right person can help you get your resume seen, point you to the right role, or refer you.
+            The right person can get your resume seen, point you to the right role, or offer a direct referral.
           </p>
         </div>
       </div>
