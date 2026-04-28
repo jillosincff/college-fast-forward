@@ -69,7 +69,8 @@ Deno.serve(async (req) => {
       !isUnsubscribed(u) &&
       !wasRecentlyEmailedAboutFastIQ(u) &&
       hasIntentSignal(u) &&
-      u.email
+      u.email &&
+      u.email.toLowerCase() !== 'jill@uffastforward.com'
     );
 
     console.log(`[analyzeAudience] ${studentEligible.length} eligible students`);
