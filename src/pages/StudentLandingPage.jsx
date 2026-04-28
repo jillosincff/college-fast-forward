@@ -180,7 +180,7 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  const go = () => navigate('StudentOnboarding');
+  const go = () => navigate('GetStarted');
   const parent = () => { if (onParentClick) onParentClick(); else navigate('ParentLandingPage'); };
 
   return (
