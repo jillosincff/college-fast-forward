@@ -14,7 +14,7 @@ const TESTIMONIALS = [
   { quote: "I wish I had this when I was looking for a job!", name: "Nancy H.", school: "Indiana Parent", initials: "NH", tag: "Early member", tagIcon: "🏅" },
   { quote: "I felt so helpless watching my kid apply and hear nothing back. This gave me something real to do.", name: "David K.", school: "OSU Parent", initials: "DK", tag: "Now helping", tagIcon: "🤝" },
   { quote: "A conversation through CFF changed the trajectory of my son's career.", name: "Lisa M.", school: "UF Parent", initials: "LM", tag: "Career changed", tagIcon: "🚀" },
-  { quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked out. I used FastIQ and reached out to an alumni who totally hooked me up with an internship for the summer. Definitely relieved.", name: "Chris C.", school: "USC · '27 grad", initials: "CC", tag: "Internship locked", tagIcon: "🎯" },
+  { quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked out. I used FastIQ and reached out to an alumni who totally hooked me up with an internship for the summer. Definitely relieved.", name: "Chris C.", school: "USC · '27 grad", initials: "CC", avatar: "https://media.base44.com/images/public/684474c5723dc90efce23588/1a1e252be_IMG_0020.jpg", tag: "Internship locked", tagIcon: "🎯" },
 ];
 
 const SCHOOLS = ['University of Florida', 'Florida State', 'Ohio State', 'UCF', 'USC', 'Penn State', 'University of Michigan', 'Tulane', 'University of Maryland', 'And growing…'];
