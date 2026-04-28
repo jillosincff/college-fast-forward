@@ -148,7 +148,7 @@ export default function SuccessStoriesCarousel() {
 
         {/* Quote */}
         <p style={{
-          fontFamily: playfair,
+          fontFamily: dmSans,
           fontSize: 'clamp(18px, 2.5vw, 23px)',
           fontStyle: 'italic',
           fontWeight: 700,
