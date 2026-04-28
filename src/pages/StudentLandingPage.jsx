@@ -214,92 +214,69 @@ export default function StudentLandingPage({ onParentClick }) {
         {/* Headline */}
         <h1 style={{
           fontFamily: playfair,
-          fontSize: 'clamp(38px, 7.5vw, 88px)',
+          fontSize: 'clamp(32px, 6vw, 76px)',
           fontWeight: 700, color: '#fff',
-          lineHeight: 1.0, letterSpacing: '-0.04em',
-          margin: '0 0 4px', maxWidth: 800,
+          lineHeight: 1.05, letterSpacing: '-0.03em',
+          margin: '0 0 28px', maxWidth: 820,
           opacity: mounted ? 1 : 0,
           transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          This is how people
-        </h1>
-        <h1 style={{
-          fontFamily: playfair,
-          fontSize: 'clamp(38px, 7.5vw, 88px)',
-          fontWeight: 700, color: '#E85D20', fontStyle: 'italic',
-          lineHeight: 1.0, letterSpacing: '-0.04em',
-          margin: '0 0 28px', maxWidth: 800,
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.7s ease 0.15s',
-        }}>
-          actually get hired.
+          Finding an internship or job without a personal connection{' '}
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>seems impossible.</span>
         </h1>
 
         {/* Subheadline */}
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(19px, 2.5vw, 24px)',
-          fontWeight: 700, color: '#fff',
-          lineHeight: 1.3, maxWidth: 500, margin: '0 auto 20px',
+          fontFamily: dmSans, fontSize: 'clamp(17px, 2.2vw, 22px)',
+          fontWeight: 600, color: 'rgba(255,255,255,0.85)',
+          lineHeight: 1.5, maxWidth: 580, margin: '0 auto 16px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          It's all about who is willing to respond.
+          You actually have thousands of parents at your school who want to open their networks and help you right now.
         </p>
 
-        {/* Body */}
-        <div style={{
-          maxWidth: 500, margin: '0 auto 48px',
+        {/* Clarifying line */}
+        <p style={{
+          fontFamily: dmSans, fontSize: 'clamp(13px, 1.5vw, 15px)',
+          color: 'rgba(255,255,255,0.4)', lineHeight: 1.6,
+          maxWidth: 460, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
-          display: 'flex', flexDirection: 'column', gap: 16,
         }}>
-          <p style={{
-            fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
-            color: 'rgba(255,255,255,0.55)', lineHeight: 1.75,
-            margin: 0,
-          }}>
-            Parents from your school have real connections across every industry — and they actually care about helping students like you succeed.
-          </p>
-          <p style={{
-            fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 21px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.3, margin: 0,
-          }}>
-            Reach out. Get real responses.
-          </p>
-        </div>
+          The Parent &amp; Alumni Network is 100% free and specific to your school.
+        </p>
 
         {/* CTAs */}
         <div style={{
-          display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center',
-          marginBottom: 20,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+          marginBottom: 20, width: '100%', maxWidth: 480,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.35s',
         }}>
           <button onClick={go} style={{
             fontFamily: dmSans, fontSize: 16, fontWeight: 800,
             color: '#fff', background: '#E85D20', border: 'none',
-            borderRadius: 14, padding: '18px 44px', cursor: 'pointer',
-            minHeight: 'auto',
+            borderRadius: 14, padding: '18px 36px', cursor: 'pointer',
+            minHeight: 'auto', width: '100%',
             boxShadow: '0 8px 32px rgba(232,93,32,0.4)',
             transition: 'all 0.2s ease',
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >
-            Join free →
+            I need a job — Join the FREE network
           </button>
           <button onClick={parent} style={{
-            fontFamily: dmSans, fontSize: 15, fontWeight: 600,
-            color: 'rgba(255,255,255,0.45)',
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 14, padding: '18px 24px', cursor: 'pointer',
-            minHeight: 'auto', transition: 'all 0.2s ease',
+            fontFamily: dmSans, fontSize: 14, fontWeight: 600,
+            color: 'rgba(255,255,255,0.6)',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 14, padding: '16px 24px', cursor: 'pointer',
+            minHeight: 'auto', width: '100%', transition: 'all 0.2s ease',
           }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
           >
-            I'm here to help →
+            I'm here to help — I'm a parent or alumni who can open doors
           </button>
         </div>
 
@@ -307,7 +284,7 @@ export default function StudentLandingPage({ onParentClick }) {
           fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s',
         }}>
-          Takes 60 seconds to get started. No credit card required.
+          Free to join. No credit card. No obligation.
         </p>
       </div>
 
