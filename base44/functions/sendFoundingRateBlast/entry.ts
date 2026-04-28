@@ -7,8 +7,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const FOUNDING_RATE_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
-const MONTHLY_URL = 'https://collegefastforward.com/#FastIQDashboard?plan=monthly';
-const ANNUAL_URL = 'https://collegefastforward.com/#FastIQDashboard?plan=annual';
+const FASTIQ_UPGRADE_URL = 'https://collegefastforward.com/#FastIQDashboard';
+const MONTHLY_URL = `${FASTIQ_UPGRADE_URL}?plan=monthly`;
+const ANNUAL_URL = `${FASTIQ_UPGRADE_URL}?plan=annual`;
 
 function isUpgraded(user) {
   return (
