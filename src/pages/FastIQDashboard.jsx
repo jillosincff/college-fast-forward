@@ -59,6 +59,36 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
 
   // FastIQ gate — show upgrade prompt
   if (!isFastIQ) {
+    const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
+
+    const headline = isParent
+      ? 'Give your student the unfair advantage in a brutal job market.'
+      : 'Your AI-powered career engine is one step away.';
+
+    const subhead = isParent
+      ? "FastIQ is your student's personal career agent — available 24/7. It combines the power of the free parent & alumni network at their school with intelligent AI that actually moves the needle."
+      : 'FastIQ combines the power of the CFF alumni & parent network with intelligent AI to help you land the right role — faster.';
+
+    const featuresLabel = isParent ? 'WHAT FASTIQ DOES FOR YOUR STUDENT' : 'WHAT FASTIQ DOES FOR YOU';
+
+    const features = isParent ? [
+      { icon: '🔍', text: 'Finds alumni at the exact companies they want to work for and crafts personalized outreach messages that get real replies' },
+      { icon: '📄', text: 'Tailors their resume to every job or internship they apply to' },
+      { icon: '🔗', text: 'Optimizes their LinkedIn profile so recruiters and hiring managers actually notice them' },
+      { icon: '📡', text: 'Spots hiring signals and hidden opportunities at companies in their industry' },
+      { icon: '🎤', text: 'Runs full mock interviews using the STAR method with detailed feedback' },
+      { icon: '🧠', text: 'Includes a personality & career assessment to help them figure out what they really want to do' },
+    ] : [
+      { icon: '🔍', text: 'Finds alumni at the exact companies you want to work for and drafts personalized outreach messages that get real replies' },
+      { icon: '📄', text: 'Tailors your resume to every job or internship you apply to' },
+      { icon: '🔗', text: 'Optimizes your LinkedIn profile so recruiters and hiring managers actually notice you' },
+      { icon: '📡', text: 'Spots hiring signals and hidden opportunities at companies in your industry' },
+      { icon: '🎤', text: 'Runs full mock interviews using the STAR method with detailed feedback' },
+      { icon: '🧠', text: 'Includes a personality & career assessment to help you figure out what you really want to do' },
+    ];
+
+    const ctaLabel = isParent ? 'Unlock FastIQ for my student →' : 'Unlock FastIQ →';
+
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 24px 48px' }}>
         <FoundingMemberBanner
@@ -72,20 +102,20 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 11, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.12em',
           color: '#E85D20', margin: '0 0 12px'
-        }}>FASTIQ™ — FOR YOUR STUDENT</p>
+        }}>{isParent ? 'FASTIQ™ — FOR YOUR STUDENT' : 'FASTIQ™ — YOUR AI CAREER ENGINE'}</p>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 30, fontWeight: 700,
           color: '#1A1A1A', margin: '0 0 14px', lineHeight: 1.2
         }}>
-          Give your student the unfair advantage in a brutal job market.
+          {headline}
         </h1>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 15, color: '#555',
           margin: '0 0 36px', lineHeight: 1.7
         }}>
-          FastIQ is your student's personal career agent — available 24/7. It combines the power of the free parent & alumni network at their school with intelligent AI that actually moves the needle.
+          {subhead}
         </p>
 
         {/* Feature list */}
@@ -94,16 +124,9 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 11, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.1em',
           color: '#888', margin: '0 0 16px'
-        }}>WHAT FASTIQ DOES FOR YOUR STUDENT</p>
+        }}>{featuresLabel}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 40 }}>
-          {[
-            { icon: '🔍', text: 'Finds alumni at the exact companies they want to work for and crafts personalized outreach messages that get real replies' },
-            { icon: '📄', text: 'Tailors their resume to every job or internship they apply to' },
-            { icon: '🔗', text: 'Optimizes their LinkedIn profile so recruiters and hiring managers actually notice them' },
-            { icon: '📡', text: 'Spots hiring signals and hidden opportunities at companies in their industry' },
-            { icon: '🎤', text: 'Runs full mock interviews using the STAR method with detailed feedback' },
-            { icon: '🧠', text: 'Includes a personality & career assessment to help them figure out what they really want to do' },
-          ].map((item, i) => (
+          {features.map((item, i) => (
             <div key={i} style={{
               display: 'flex', alignItems: 'flex-start',
               gap: 14, padding: '14px 0',
@@ -130,7 +153,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
             width: '100%',
           }}
         >
-          Unlock FastIQ for my student &rarr;
+          {ctaLabel}
         </button>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
