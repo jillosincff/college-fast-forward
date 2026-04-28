@@ -318,13 +318,12 @@ export default function StudentLandingPage({ onParentClick }) {
             The parent network is powerful.
           </p>
           <p style={{
-            fontFamily: playfair,
+            fontFamily: dmSans,
             fontSize: 'clamp(28px, 4vw, 52px)',
-            fontWeight: 700,
+            fontWeight: 800,
             color: '#E85D20',
-            fontStyle: 'italic',
             lineHeight: 1.1,
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.01em',
             margin: '0 0 24px',
           }}>
             FastIQ makes you unstoppable.
