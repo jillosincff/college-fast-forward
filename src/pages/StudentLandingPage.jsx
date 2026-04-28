@@ -360,7 +360,7 @@ export default function StudentLandingPage({ onParentClick }) {
             margin: '0 0 14px',
             textAlign: 'center',
           }}>
-            ⚡ The Unfair Advantage
+            ⚡ The Aha Moment
           </p>
           <h2 style={{
             fontFamily: playfair,
