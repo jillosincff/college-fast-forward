@@ -9,7 +9,7 @@ const STORIES = [
     name: "Jordan T.",
     school: "ODU · Junior · Marketing",
     initials: "J",
-    avatar: "https://media.base44.com/images/public/684474c5723dc90efce23588/0667c9c20_IMG_0005.jpg",
+    avatar: "https://media.base44.com/images/public/684474c5723dc90efce23588/00aa78059_IMG_0018.jpg",
     tag: "Response received",
     tagIcon: "✉️"
   },
