@@ -30,6 +30,15 @@ const STORIES = [
     avatar: "https://media.base44.com/images/public/684474c5723dc90efce23588/acbc74f17_IMG_0017.jpg",
     tag: "Got the role",
     tagIcon: "🎯"
+  },
+  {
+    quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked out. I used FastIQ and reached out to an alumni who totally hooked me up with an internship for the summer. Definitely relieved.",
+    name: "Chris C.",
+    school: "USC · '27 grad",
+    initials: "CC",
+    avatar: "https://media.base44.com/images/public/684474c5723dc90efce23588/1a1e252be_IMG_0020.jpg",
+    tag: "Internship locked",
+    tagIcon: "🎯"
   }
 ];
 
