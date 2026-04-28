@@ -209,7 +209,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, color: '#a0a0a0', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.35s', position: 'relative' }}>
-          Free to join. No credit card. No obligation.
+          Free to join. No obligation.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', marginTop: 56, paddingTop: 40, borderTop: '1px solid rgba(0,0,0,0.07)', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s', position: 'relative' }}>
