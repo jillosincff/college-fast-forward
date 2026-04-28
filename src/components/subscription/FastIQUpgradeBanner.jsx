@@ -6,7 +6,7 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
  * Banner shown to CFF-only subscribers or non-subscribers when they visit FASTIQ.
  * Not shown to founding members (they have full access).
  */
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
 export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
   const [upgrading, setUpgrading] = useState(false);
@@ -97,7 +97,7 @@ export default function FastIQUpgradeBanner({ user, reason, periodEnd }) {
           {upgrading ? <><Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> Processing...</> : <><Zap style={{ width: 14, height: 14 }} /> {foundingOfferActive ? `Start Free Trial — $14.50/month (${daysLeft}d left)` : 'Start Free Trial'}</>}
         </button>
       </div>
-      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>{foundingOfferActive ? `Founding rate: $14.50/month forever — expires April 15th` : 'Start free for 7 days — then $29/month. Cancel anytime.'}</p>
+      <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 10 }}>{foundingOfferActive ? `Founding rate: $14.50/month forever — expires April 30` : 'Start free for 5 days — then $29/month. Cancel anytime.'}</p>
     </div>
   );
 }

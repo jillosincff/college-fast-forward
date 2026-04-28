@@ -59,7 +59,7 @@ export default function WelcomeBackTrialBanner({ user, onTrialActivated }) {
           fontSize: 22, fontWeight: 700,
           color: '#fff', margin: '0 0 8px', lineHeight: 1.3,
         }}>
-          Your free 7-day FastIQ trial is waiting.
+          Your free 5-day FastIQ trial is waiting.
         </p>
         <p style={{
           fontFamily: "'DM Sans', sans-serif",

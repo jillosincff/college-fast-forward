@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
-const FOUNDING_DEADLINE = new Date('2026-04-15T23:59:59');
+const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
 export default function PostTrialUpgradePrompt({ message }) {
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,7 @@ export default function PostTrialUpgradePrompt({ message }) {
           fontSize: 13, color: '#E85D20',
           fontWeight: 600, margin: '0 0 24px',
         }}>
-          Lock in $14.50/mo founding rate before April 15 — then $29/mo.
+          Lock in $14.50/mo founding rate before April 30 — then $29/mo.
         </p>
       )}
       <button
