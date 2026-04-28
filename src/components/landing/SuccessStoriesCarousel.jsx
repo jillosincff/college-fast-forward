@@ -24,10 +24,10 @@ const STORIES = [
   },
   {
     quote: "The alumni search found exactly who I needed to talk to at my dream company.",
-    name: "Sam K.",
-    school: "UF · Junior · Engineering",
+    name: "Sarah K.",
+    school: "University of Michigan · Junior · Engineering",
     initials: "S",
-    avatar: null,
+    avatar: "https://media.base44.com/images/public/684474c5723dc90efce23588/acbc74f17_IMG_0017.jpg",
     tag: "Got the role",
     tagIcon: "🎯"
   }
