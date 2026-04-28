@@ -41,7 +41,7 @@ function FAQItem({ q, a }) {
         <span style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 600, color: '#fff', lineHeight: 1.4 }}>{q}</span>
         <span style={{ fontSize: 22, color: '#E85D20', flexShrink: 0, transform: open ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1 }}>+</span>
       </button>
-      {open && <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, margin: '0 0 20px' }}>{a}</p>}
+      {open && <p style={{ fontFamily: dmSans, fontSize: 15, color: '#A0A0A0', lineHeight: 1.75, margin: '0 0 20px' }}>{a}</p>}
     </div>
   );
 }
@@ -91,10 +91,10 @@ function TestimonialCarousel() {
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.2)', border: '1px solid rgba(232,93,32,0.35)', borderRadius: 100, padding: '4px 12px', marginBottom: 18 }}>
           <span style={{ fontSize: 12 }}>{t.tagIcon}</span>
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{t.tag}</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase' }}>{t.tag}</span>
         </div>
 
-        <p style={{ fontFamily: playfair, fontSize: 'clamp(18px, 2.5vw, 23px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', lineHeight: 1.55, margin: '0 0 24px', position: 'relative', zIndex: 1 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 'clamp(18px, 2.5vw, 23px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', lineHeight: 1.55, margin: '0 0 24px', position: 'relative', zIndex: 1 }}>
           "{t.quote}"
         </p>
 
@@ -180,13 +180,13 @@ export default function ParentLandingPage({ onStudentClick }) {
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 100, padding: '7px 18px', marginBottom: 36, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease', position: 'relative' }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20' }} />
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase' }}>1,000+ parents & alumni helping students</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase' }}>1,000+ PARENTS & ALUMNI HELPING STUDENTS</span>
         </div>
 
         <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 8px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.1s', position: 'relative' }}>
           Your student needs a job.
         </h1>
-        <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 32px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.15s', position: 'relative' }}>
+        <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', fontFamily: playfair, lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 32px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.15s', position: 'relative' }}>
           You have connections.
         </h1>
 
@@ -224,7 +224,7 @@ export default function ParentLandingPage({ onStudentClick }) {
 
       {/* ── SECTION 2: TRUSTED BY — Vibrant gradient ── */}
       <div style={{ background: 'linear-gradient(135deg, #E85D20 0%, #c9471a 100%)', borderBottom: '1px solid rgba(0,0,0,0.06)', padding: '44px 24px', textAlign: 'center' }}>
-        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 20px' }}>Trusted by parents & alumni at</p>
+        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 20px' }}>TRUSTED BY PARENTS & ALUMNI AT</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
           {SCHOOLS.map((school, i) => (
             <div key={i} style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: '#fff', background: i === SCHOOLS.length - 1 ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.15)', border: `1px solid ${i === SCHOOLS.length - 1 ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.25)'}`, borderRadius: 100, padding: '8px 18px', fontStyle: i === SCHOOLS.length - 1 ? 'italic' : 'normal', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
@@ -248,7 +248,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         <div style={{ position: 'absolute', bottom: 0, left: 0, width: 300, height: 300, background: 'radial-gradient(ellipse, rgba(34,211,238,0.05) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 680, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 36px' }}>Why we built this</p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 36px' }}>WHY WE BUILT THIS</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: 700, color: '#ffffff', lineHeight: 1.35, letterSpacing: '-0.01em', margin: 0 }}>
@@ -257,17 +257,17 @@ export default function ParentLandingPage({ onStudentClick }) {
             <p style={{ fontFamily: dmSans, fontSize: 20, fontWeight: 700, color: '#fff', lineHeight: 1.6, margin: 0 }}>
               Let's be real.
             </p>
-            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.65)', lineHeight: 1.8, margin: 0 }}>
               It's all about who you know — and right now, your kid has almost no real experience or connections.
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 700, color: '#ffffff', lineHeight: 1.8, margin: 0 }}>
               That's why we built this:
             </p>
-            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.65)', lineHeight: 1.8, margin: 0 }}>
               This is a network of real parents who will actually respond and do whatever they can to help launch your kid's career.{' '}
               <em style={{ color: '#fff', fontWeight: 600 }}>Because that's what parents do.</em>
             </p>
-            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.65)', lineHeight: 1.8, margin: 0 }}>
               The more of us who join from your kid's school, the stronger the network becomes for every student… including your own.
             </p>
             <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px 24px', margin: '8px 0 0' }}>
@@ -319,7 +319,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         <div style={{ position: 'absolute', top: '20%', right: '-5%', width: 500, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 680, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 12px' }}>From the network</p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 12px' }}>FROM THE NETWORK</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 46px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 40px' }}>
             Parents just like you.
           </h2>
@@ -330,7 +330,7 @@ export default function ParentLandingPage({ onStudentClick }) {
       {/* ── SECTION 6: HOW IT WORKS — Clean white ── */}
       <div style={{ background: '#ffffff', padding: '88px 24px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 16px' }}>How it works</p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 16px' }}>HOW IT WORKS</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 46px)', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.2, letterSpacing: '-0.02em', margin: '0 0 8px' }}>Simple, on your terms.</h2>
           <p style={{ fontFamily: dmSans, fontSize: 16, fontStyle: 'italic', color: '#a0a0a0', margin: '0 0 48px' }}>No commitments. Just helping.</p>
 
@@ -342,7 +342,7 @@ export default function ParentLandingPage({ onStudentClick }) {
                 </div>
                 <div style={{ paddingTop: 12 }}>
                   <p style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 700, color: '#1a1a1a', margin: '0 0 6px' }}>{title}</p>
-                  <p style={{ fontFamily: dmSans, fontSize: 15, color: '#6b6b6b', margin: 0, lineHeight: 1.7 }}>{desc}</p>
+                  <p style={{ fontFamily: dmSans, fontSize: 15, color: '#A0A0A0', margin: 0, lineHeight: 1.7 }}>{desc}</p>
                 </div>
               </div>
             ))}
@@ -361,7 +361,7 @@ export default function ParentLandingPage({ onStudentClick }) {
 
         <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: 40, marginBottom: 20 }}>🤝</div>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 14px' }}>Help us grow</p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px' }}>HELP US GROW</p>
           <h3 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 42px)', fontWeight: 700, color: '#fff', lineHeight: 1.25, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
             Know another parent at your kid's school?
           </h3>
@@ -378,7 +378,7 @@ export default function ParentLandingPage({ onStudentClick }) {
       {/* ── SECTION 8: FAQ — Dark navy ── */}
       <div style={{ background: '#0d1b2a', padding: '88px 24px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 16px' }}>FAQ</p>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 16px' }}>FAQ</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 46px)', fontWeight: 700, color: '#fff', lineHeight: 1.2, margin: '0 0 40px' }}>Got questions? Fair.</h2>
           {FAQS.map((faq, i) => <FAQItem key={i} q={faq.q} a={faq.a} />)}
         </div>
@@ -391,8 +391,8 @@ export default function ParentLandingPage({ onStudentClick }) {
         <div style={{ maxWidth: 500, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 24px' }}>Your best move</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 8px' }}>One introduction from you</h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can lead to an interview — or even a job.</h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', lineHeight: 1.75, margin: '0 auto 40px' }}>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', fontFamily: playfair, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can lead to an interview — or even a job.</h2>
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, margin: '0 auto 40px' }}>
             Free. 2 minutes. No obligation.<br />Students at your school genuinely need you.
           </p>
           <button onClick={go} style={{ fontFamily: dmSans, fontSize: 16, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '19px 48px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 0 60px rgba(232,93,32,0.4), 0 8px 32px rgba(232,93,32,0.4)', marginBottom: 14, display: 'block', marginLeft: 'auto', marginRight: 'auto', transition: 'all 0.2s ease' }}
