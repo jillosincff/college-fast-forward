@@ -274,7 +274,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >
-            I need a job — Join the FREE network
+            I need a job
           </button>
           <button onClick={parent} style={{
             fontFamily: dmSans, fontSize: 14, fontWeight: 600,
@@ -287,7 +287,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
           >
-            I'm here to help — I'm a parent or alumni who can open doors
+            I'm here to help
           </button>
         </div>
 
