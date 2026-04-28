@@ -455,37 +455,35 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ padding: '88px 20px 0', maxWidth: 920, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-            The two-part approach
+            Pricing
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
             Choose your advantage.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.65 }}>
-            Start with the exclusive network, then let FastIQ handle the heavy lifting.
+          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 620, margin: '0 auto 36px', lineHeight: 1.65 }}>
+            Join the community for free, or activate your personal agent to accelerate the results.
           </p>
         </div>
       </div>
 
       {/* ── TWO CARDS ── */}
       <div style={{ padding: '48px 20px 88px', maxWidth: 920, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }} className="powers-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }} className="powers-grid">
 
-          {/* Parent network card */}
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(232,93,32,0.08) 0%, rgba(232,93,32,0.03) 100%)',
-            border: '1px solid rgba(232,93,32,0.2)',
-            borderRadius: 20, padding: '32px 28px',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(ellipse, rgba(232,93,32,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
-                <div>
-                  <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.2 }}>The Parent Network</p>
-                  <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, fontStyle: 'italic' }}>Exclusive to your school</p>
-                </div>
-              </div>
+      {/* Foundation card */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(232,93,32,0.08) 0%, rgba(232,93,32,0.03) 100%)',
+        border: '1px solid rgba(232,93,32,0.2)',
+        borderRadius: 20, padding: '32px 28px',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(ellipse, rgba(232,93,32,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#E85D20', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 16px' }}>FREE</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
+            <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Foundation</p>
+          </div>
               {['Highly Responsive: Connect with people who care about your success and actually respond.', 'The "Parent" Bond: Access a community that is genuinely motivated to help you succeed.', 'Lifelong Networks: Tap into extensive connections across every major industry.', 'Warm Introductions: Skip the cold application and get your resume in front of the people who hire.'].map((f, i) => {
                 const [boldPart, restPart] = f.split(': ');
                 return (
@@ -502,21 +500,27 @@ export default function StudentLandingPage({ onParentClick }) {
             </div>
           </div>
 
-          {/* Alumni card */}
+          {/* Accelerator card */}
           <div style={{
             background: 'linear-gradient(135deg, rgba(34,211,238,0.08) 0%, rgba(34,211,238,0.03) 100%)',
             border: '1px solid rgba(34,211,238,0.2)',
             borderRadius: 20, padding: '32px 28px',
             position: 'relative', overflow: 'hidden',
           }}>
+            <div style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(34,211,238,0.2)', border: '1px solid rgba(34,211,238,0.35)', borderRadius: 100, padding: '4px 12px' }}>
+              <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.08em', textTransform: 'uppercase' }}>50% OFF</span>
+            </div>
             <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(ellipse, rgba(34,211,238,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
+                <span style={{ fontFamily: playfair, fontSize: 24, fontWeight: 700, color: '#22d3ee' }}>$14.50</span>
+                <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>/mo</span>
+                <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>~~$29~~</span>
+              </div>
+              <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(34,211,238,0.5)', margin: '0 0 20px', fontStyle: 'italic' }}>Increases to $29/mo on April 30th</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
-                <div>
-                  <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.2 }}>The Personal Agent</p>
-                  <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(34,211,238,0.5)', margin: 0, fontStyle: 'italic' }}>Powered by FastIQ</p>
-                </div>
+                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Accelerator</p>
               </div>
               {['Alumni Shortcut: We scan thousands of companies to find the exact matches for your goals.', 'AI Outreach: We research their background and draft the perfect message to get you a referral.', 'Instant Optimization: Auto-tailor your Resume and LinkedIn to any job description in seconds.', 'Smart Nudging: Automated follow-ups and hiring signals so you never miss an opportunity.'].map((f, i) => {
                 const [boldPart, restPart] = f.split(': ');
@@ -534,6 +538,9 @@ export default function StudentLandingPage({ onParentClick }) {
             </div>
           </div>
         </div>
+        <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: '32px 0 0' }}>
+          Early bird pricing ($14.50) expires at midnight on April 30th.
+        </p>
       </div>
 
       {/* ── FINAL CTA ── */}
