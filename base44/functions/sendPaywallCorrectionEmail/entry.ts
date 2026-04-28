@@ -10,7 +10,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 const AFFECTED_USERS = [
   { email: 'gracestoker16@gmail.com',   firstName: 'Grace' },
   { email: 'dschneider416@icloud.com',  firstName: null },     // no first name known
-  { email: 'suztab.43@gmail.com',       firstName: null },
+  // suztab.43@gmail.com excluded — opted out of reengagement emails
   { email: 'szczesniakc@gmail.com',     firstName: null },
   { email: 'tscholder@wisc.edu',        firstName: null },
   { email: 'laelarocksat123@gmail.com', firstName: null },
