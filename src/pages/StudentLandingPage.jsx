@@ -338,7 +338,7 @@ export default function StudentLandingPage({ onParentClick }) {
             marginLeft: 'auto',
             marginRight: 'auto',
           }}>
-            We've covered every base. The Parent Network gives you a community of warm connections, and FastIQ handles your entire job search.
+            We've covered every base. The Parent Network gives you a community of warm connections, and FastIQ <strong style={{ color: '#fff', fontWeight: 700 }}>handles</strong> your entire job search.
           </p>
         </div>
       </div>
@@ -377,11 +377,11 @@ export default function StudentLandingPage({ onParentClick }) {
             fontFamily: dmSans,
             fontSize: 'clamp(16px, 1.8vw, 18px)',
             color: 'rgba(255,255,255,0.55)',
-            lineHeight: 1.75,
+            lineHeight: 1.6,
             margin: '0 auto 44px',
-            maxWidth: 520,
+            maxWidth: 540,
           }}>
-            Instantly locate alumni at companies you care about — like a VP of Marketing at Disney or a Dev Lead at Google. FastIQ doesn't just find them; it researches their role and drafts a personalized outreach message that leans into your shared school bond.
+            Instantly locate alumni at companies you care about—like a <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>VP of Marketing at Disney</strong> or a <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>Dev Lead at Google</strong>. FastIQ doesn't just find them; it researches their role and drafts a personalized outreach message that leans into your shared school bond.
           </p>
         </div>
       </div>
