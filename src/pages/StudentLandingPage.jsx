@@ -299,13 +299,13 @@ export default function StudentLandingPage({ onParentClick }) {
         </p>
       </div>
 
-      {/* ── TRANSITION ── */}
+      {/* ── TRANSITION & FASTIQ INTRO ── */}
       <div style={{
-        padding: '60px 20px 40px',
+        padding: '80px 20px',
         textAlign: 'center',
         background: '#08080f',
       }}>
-        <div style={{ maxWidth: 500, margin: '0 auto' }}>
+        <div style={{ maxWidth: 580, margin: '0 auto' }}>
           <p style={{
             fontFamily: playfair,
             fontSize: 'clamp(24px, 3.5vw, 42px)',
@@ -324,20 +324,10 @@ export default function StudentLandingPage({ onParentClick }) {
             color: '#E85D20',
             lineHeight: 1.3,
             letterSpacing: '-0.02em',
-            margin: 0,
+            margin: '0 0 20px',
           }}>
             FastIQ takes it to another level.
           </p>
-        </div>
-      </div>
-
-      {/* ── FASTIQ INTRO ── */}
-      <div style={{
-        padding: '40px 20px 60px',
-        textAlign: 'center',
-        background: '#08080f',
-      }}>
-        <div style={{ maxWidth: 580, margin: '0 auto' }}>
           <p style={{
             fontFamily: dmSans,
             fontSize: 'clamp(17px, 2.2vw, 22px)',
@@ -355,7 +345,7 @@ export default function StudentLandingPage({ onParentClick }) {
             lineHeight: 1.5,
             margin: 0,
           }}>
-            See it in action:
+            See what it can do:
           </p>
         </div>
       </div>
