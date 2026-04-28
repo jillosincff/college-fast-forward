@@ -233,7 +233,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.5, maxWidth: 580, margin: '0 auto 16px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          You actually have thousands of parents at your school who want to open their networks and help you right now.
+          You now have thousands of parents at your school who can help you.
         </p>
 
         {/* Clarifying line */}
