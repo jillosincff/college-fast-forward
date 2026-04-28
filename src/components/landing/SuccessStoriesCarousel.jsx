@@ -14,7 +14,7 @@ const STORIES = [
     tagIcon: "✉️"
   },
   {
-    quote: "Used FastIQ to tailor my resume. Landed three interviews the same week.",
+    quote: "I literally had no clue how to start my job search. FastIQ gave me the perfect plan to execute.",
     name: "Marcus",
     school: "Penn State · Senior · Finance",
     initials: "M",
