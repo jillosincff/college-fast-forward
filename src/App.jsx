@@ -115,7 +115,7 @@ const AuthenticatedApp = () => {
           <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
 
           {/* Main routes */}
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<StudentLandingPage />} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
