@@ -1,7 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const INTENT_EVENTS = ['paywall_viewed', 'teaser_reveal_viewed', 'match_score_viewed', 'fastiq_leads_viewed', 'alumni_search_used', 'checkout_started'];
+const INTENT_EVENTS = ['fastiq_feature_used', 'trial_ended', 'upgrade_clicked'];
 const SIXTY_DAYS_AGO = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
+const THIRTY_DAYS_AGO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
 Deno.serve(async (req) => {
   try {
@@ -19,6 +20,13 @@ Deno.serve(async (req) => {
     // Fetch email preferences
     const allPrefs = await base44.asServiceRole.entities.EmailPreference.list('-created_date', 5000);
     console.log(`[analyzeAudience] Fetched ${allPrefs.length} email preferences`);
+
+    // Fetch email logs from last 30 days
+    const allEmailLogs = await base44.asServiceRole.entities.EmailLog.list('-sent_at', 10000);
+    const recentEmailLogs = allEmailLogs.filter(e => 
+      e.sent_at && new Date(e.sent_at) >= new Date(THIRTY_DAYS_AGO)
+    );
+    console.log(`[analyzeAudience] Fetched ${recentEmailLogs.length} email logs in last 30 days`);
 
     // Helper: check if user is upgraded
     function isUpgraded(u) {
@@ -39,11 +47,27 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Helper: get which intent signals user triggered
+    function getIntentSignals(u) {
+      return recentEvents
+        .filter(e => e.user_email?.toLowerCase() === u.email?.toLowerCase() && INTENT_EVENTS.includes(e.event_name))
+        .map(e => e.event_name);
+    }
+
+    // Helper: was user emailed about FastIQ in last 30 days
+    function wasRecentlyEmailedAboutFastIQ(u) {
+      return recentEmailLogs.some(log => 
+        log.user_email?.toLowerCase() === u.email?.toLowerCase() &&
+        (log.email_type?.includes('fastiq') || log.subject?.toLowerCase().includes('fastiq'))
+      );
+    }
+
     // Filter students
     const studentEligible = allUsers.filter(u =>
       u.persona === 'student' &&
       !isUpgraded(u) &&
       !isUnsubscribed(u) &&
+      !wasRecentlyEmailedAboutFastIQ(u) &&
       hasIntentSignal(u) &&
       u.email
     );
@@ -51,14 +75,13 @@ Deno.serve(async (req) => {
     console.log(`[analyzeAudience] ${studentEligible.length} eligible students`);
 
     // Filter parents with linked students
-    // Assuming 'linked_students' or similar field exists; adjust based on actual schema
     const parentEligible = allUsers.filter(u => {
       if (u.persona !== 'parent') return false;
       if (isUpgraded(u)) return false;
       if (isUnsubscribed(u)) return false;
+      if (wasRecentlyEmailedAboutFastIQ(u)) return false;
       
       // Check if parent has linked student
-      // This may need adjustment based on actual schema
       const hasLinkedStudent = u.linked_students && Array.isArray(u.linked_students) && u.linked_students.length > 0;
       if (!hasLinkedStudent) return false;
       
@@ -93,9 +116,7 @@ Deno.serve(async (req) => {
 
     // Sample 5 students with their intent signals
     const studentSample = studentEligible.slice(0, 5).map(s => {
-      const signals = recentEvents
-        .filter(e => e.user_email?.toLowerCase() === s.email?.toLowerCase())
-        .map(e => e.event_name);
+      const signals = getIntentSignals(s);
       return {
         name: s.full_name || s.email,
         email: s.email,
@@ -112,14 +133,22 @@ Deno.serve(async (req) => {
       linked_students: p.linked_students ? p.linked_students.length : 0,
     }));
 
+    // Check overlap with previous 13 parents query
+    const prevParentEmails = ['jflitt2@gmail.com', 'ukandusa20@gmail.com', 'weloveziti@gmail.com', 'jdate1972@hotmail.com', 'robert_monto@yahoo.com'];
+    const overlapWithPrevious = parentEligible.filter(p => 
+      prevParentEmails.some(pe => pe.toLowerCase() === p.email?.toLowerCase())
+    );
+
     return Response.json({
       total_students_eligible: studentEligible.length,
       total_parents_eligible: parentEligible.length,
       overlap_count: overlap.length,
+      overlap_with_previous_13: overlapWithPrevious.length,
       students_by_school: topStudentSchools.map(([school, count]) => ({ school, count })),
       parents_by_school: topParentSchools.map(([school, count]) => ({ school, count })),
       student_samples: studentSample,
       parent_samples: parentSample,
+      overlap_with_previous_13_details: overlapWithPrevious.map(p => ({ email: p.email, name: p.full_name })),
       technical_readiness: {
         targeted_query: true,
         pagination_100_chunks: 'queued_for_implementation',
