@@ -455,25 +455,14 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ padding: '88px 20px 0', maxWidth: 920, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-            The reason it works
+            The two-part approach
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
-            Why this works
+            Everything you need to get hired.
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.45)', maxWidth: 520, margin: '0 auto 36px', lineHeight: 1.65 }}>
-            People from your school are more likely to respond — and{' '}
-            <span style={{ color: '#E85D20', fontWeight: 600 }}>that's how you get in front of the people who hire.</span>
+            The Parent Network provides the connections. FastIQ provides the tools to close the deal.
           </p>
-          <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'left' }}>
-            {WHY_BULLETS.map((b, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
-                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20' }} />
-                </div>
-                <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>{b}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -492,9 +481,9 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🤝</div>
-                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>Your school's parent network</p>
+                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Warm Introduction</p>
               </div>
-              {PARENT_NETWORK_FEATURES.map((f, i) => (
+              {['Access a private network of parents ready to open doors.', 'Find the exact alumni most relevant to your target role.', 'Skip the "Cold Call" and lead with your shared school bond.', 'Turn casual conversations into formal referrals.'].map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
                   <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#E85D20' }} />
@@ -516,16 +505,21 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
-                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>Alumni who can help you get hired</p>
+                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Personal Agent</p>
               </div>
-              {ALUMNI_FEATURES.map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
-                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
-                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
+              {['LinkedIn Optimization: Get your profile found by recruiters automatically.', 'Instant Resume Tailoring: Match any job description in seconds.', 'Hiring Signals: Get notified the moment your dream company starts looking.', 'Smart Nudges: Automated follow-up reminders so you never go silent.'].map((f, i) => {
+                const [boldPart, restPart] = f.split(': ');
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 3 }}>
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
+                    </div>
+                    <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>
+                      <span style={{ fontWeight: 700, color: '#fff' }}>{boldPart}:</span> {restPart}
+                    </p>
                   </div>
-                  <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: 0, lineHeight: 1.55 }}>{f}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
