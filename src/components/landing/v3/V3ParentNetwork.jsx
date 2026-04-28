@@ -224,7 +224,7 @@ export default function V3ParentNetwork({ onCTA }) {
 
         {/* CTA */}
         <div className="text-center" style={fadeStyle(vis, 0.24)}>
-          <CTAButton text="Start Free 7-Day Trial" onClick={onCTA} />
+          <CTAButton text="Start Free 5-Day Trial" onClick={onCTA} />
           <p style={{
             fontFamily: dmSans, fontSize: 13, fontWeight: 300,
             color: 'rgba(255,255,255,0.4)', marginTop: 14, lineHeight: 1.5,

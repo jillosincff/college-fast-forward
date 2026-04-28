@@ -71,7 +71,7 @@ export default function V3Numbers() {
               minHeight: 'auto', minWidth: 'auto', textAlign: 'center',
             }}
           >
-            Try FastIQ Free for 7 Days →
+            Try FastIQ Free for 5 Days →
           </button>
         </div>
       </div>

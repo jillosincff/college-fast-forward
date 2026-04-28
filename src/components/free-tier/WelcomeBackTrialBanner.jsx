@@ -73,7 +73,7 @@ export default function WelcomeBackTrialBanner({ user, onTrialActivated }) {
           fontSize: 12, color: 'rgba(255,255,255,0.35)',
           margin: 0,
         }}>
-          No credit card needed.
+          Card required · cancel anytime.
         </p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
