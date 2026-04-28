@@ -252,24 +252,33 @@ export default function ParentLandingPage({ onStudentClick }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: 700, color: '#ffffff', lineHeight: 1.35, letterSpacing: '-0.01em', margin: 0 }}>
-              It's stressful watching your kid apply to hundreds of jobs and hear almost nothing back.{' '}
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 400, fontSize: 'clamp(18px, 2.5vw, 26px)' }}>You probably already know someone who could help them get their resume seen — and actually get a response.</span>
+              It's heartbreaking watching your child send out hundreds of applications… only to get silence in return.
+            </p>
+            <p style={{ fontFamily: dmSans, fontSize: 20, fontWeight: 700, color: '#fff', lineHeight: 1.6, margin: 0 }}>
+              Let's be real.
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
-              You've probably already asked everyone you know — <em style={{ color: '#fff', fontWeight: 500 }}>"do you know anybody who can help?"</em>
-            </p>
-            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
-              But that only goes so far.
+              It's all about who you know — and right now, your kid has almost no real experience or connections.
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 18, fontWeight: 700, color: '#ffffff', lineHeight: 1.8, margin: 0 }}>
-              So we decided to change that.
+              That's why we built this:
             </p>
             <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
-              We're on a mission to pool the connections of parents at your kid's college — exponentially expanding the warm introductions available to every student in the network.
+              This is a network of real parents who will actually respond and do whatever they can to help launch your kid's career.{' '}
+              <em style={{ color: '#fff', fontWeight: 600 }}>Because that's what parents do.</em>
             </p>
-            <p style={{ fontFamily: playfair, fontSize: 'clamp(24px, 3.5vw, 34px)', fontWeight: 700, fontStyle: 'italic', color: '#E85D20', lineHeight: 1.35, margin: '8px 0 0' }}>
-              That's College Fast Forward.
+            <p style={{ fontFamily: dmSans, fontSize: 18, color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>
+              The more of us who join from your kid's school, the stronger the network becomes for every student… including your own.
             </p>
+            <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px 24px', margin: '8px 0 0' }}>
+              <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 0 24px' }}>
+                The parent network is 100% free and specific to your kid's school. FastIQ is the optional AI upgrade that makes every connection even more powerful.
+              </p>
+              <button onClick={go} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 700, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '15px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 20px rgba(232,93,32,0.4)', transition: 'all 0.2s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(232,93,32,0.5)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(232,93,32,0.4)'; }}
+              >🤝 Join free — 2 minutes, zero obligation</button>
+            </div>
           </div>
         </div>
       </div>
