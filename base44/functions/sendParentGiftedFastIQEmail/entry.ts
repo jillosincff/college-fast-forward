@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
     studentEmail,
     studentFirstName,
     parentFirstName,
-    trialDays = 7,
+    trialDays = 5,
   } = await req.json();
 
   const subject = `Your parent just did something really cool for you 🎉`;

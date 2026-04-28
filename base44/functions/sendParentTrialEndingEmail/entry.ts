@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
   </p>
 
   <p style="font-size:16px;color:#1A1A1A;line-height:1.75;margin:0 0 28px;">
-    If it's been useful for their job search, you can lock in the Founding Rate of <strong>$14.50/month</strong> before April 15th.
+    If it's been useful for their job search, you can lock in the Founding Rate of <strong>$14.50/month</strong> before April 30.
   </p>
 
   <div style="margin:0 0 32px;">

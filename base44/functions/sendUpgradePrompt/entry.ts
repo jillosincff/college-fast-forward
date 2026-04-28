@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
         ${divider()}
         <div style="padding-top: 20px;">
           <p style="font-size: 13px; color: #888; text-align: center; margin: 0;">
-            🎖 Founding member offer — <strong>50% off forever</strong> if you upgrade before April 15th. That's $14.50/month, locked in permanently.
+            🎖 Founding member offer — <strong>50% off forever</strong> if you upgrade before April 30. That's $14.50/month, locked in permanently.
           </p>
         </div>
       `)}
