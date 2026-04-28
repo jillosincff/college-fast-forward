@@ -180,7 +180,7 @@ export default function ParentLandingPage({ onStudentClick }) {
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 100, padding: '7px 18px', marginBottom: 36, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease', position: 'relative' }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20' }} />
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase' }}>1,000+ PARENTS & ALUMNI HELPING STUDENTS</span>
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase' }}>1,500+ PARENTS & ALUMNI HELPING STUDENTS</span>
         </div>
 
         <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 8px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.1s', position: 'relative' }}>
