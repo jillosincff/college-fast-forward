@@ -395,14 +395,14 @@ export default function StudentLandingPage({ onParentClick }) {
         padding: '80px 20px 72px',
       }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
-            See it work
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
+            ⚡ See the Advantage
           </p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 14px', textAlign: 'center' }}>
-            Search Your School's Alumni Network
+            Activate the Alumni Advantage
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 40px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
-            Find alumni from your school at companies you care about and reach out with personalized messages that actually get responses.
+            Alumni are 10x more likely to help you than a stranger. FastIQ finds them at your dream companies and researches exactly how they can help.
           </p>
 
           <AlumniSearchDemo />
