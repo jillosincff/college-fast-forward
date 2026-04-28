@@ -360,7 +360,7 @@ export default function StudentLandingPage({ onParentClick }) {
             margin: '0 0 14px',
             textAlign: 'center',
           }}>
-            ⚡ The Aha Moment
+            ⚡ The Unfair Advantage
           </p>
           <h2 style={{
             fontFamily: playfair,
@@ -371,7 +371,7 @@ export default function StudentLandingPage({ onParentClick }) {
             letterSpacing: '-0.02em',
             margin: '0 0 12px',
           }}>
-            Tap into the "Alumni Shortcut"
+            Activate the Alumni Advantage
           </h2>
           <p style={{
             fontFamily: dmSans,
@@ -381,7 +381,7 @@ export default function StudentLandingPage({ onParentClick }) {
             margin: '0 auto 44px',
             maxWidth: 540,
           }}>
-            Instantly locate alumni at companies you care about—like a <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>VP of Marketing at Disney</strong> or a <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>Dev Lead at Google</strong>. FastIQ doesn't just find them; it researches their role and drafts a personalized outreach message that leans into your shared school bond.
+            Alumni are <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>10x more likely to help</strong> a fellow student than a stranger. FastIQ finds them at the companies you care about—like a <strong style={{ color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>VP of Marketing at Disney</strong>—and researches exactly how they can help you get in.
           </p>
         </div>
       </div>
