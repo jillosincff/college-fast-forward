@@ -163,7 +163,18 @@ export default function GatorAuth() {
     if (isLoading) return;
     
     if (user?.persona && user.onboarding_completed) {
-      navigate('/Dashboard');
+      // Send users directly to their correct dashboard — avoid double-redirect on mobile
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        navigate('/ParentHome');
+      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+        if (user.alumni_intent === 'giving_help') {
+          navigate('/AlumniHome');
+        } else {
+          navigate('/FreeTierDashboard');
+        }
+      } else {
+        navigate('/FreeTierDashboard');
+      }
       return;
     }
     

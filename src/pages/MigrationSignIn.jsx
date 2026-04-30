@@ -35,9 +35,9 @@ export default function MigrationSignIn() {
         if (data?.success) {
           setTokenVerified(true);
           if (data.email) sessionStorage.setItem('migration_verified_email', data.email);
-          setInfo('Identity verified! Redirecting you to sign in with Google...');
+          setInfo('Identity verified! Redirecting you in...');
           setTimeout(() => {
-            base44.auth.redirectToLogin(window.location.origin + '/#FreeTierDashboard');
+            base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
           }, 1800);
         } else {
           setError(data?.error || 'This link is invalid or has expired. Please request a new one.');
