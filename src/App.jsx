@@ -44,6 +44,7 @@ import Logout from '@/pages/Logout';
 import AdminV2 from '@/pages/AdminV2';
 import EngagementAgentDashboard from '@/pages/EngagementAgentDashboard';
 import HomePage from '@/pages/HomePage';
+import Unsubscribe from '@/pages/Unsubscribe';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -113,6 +114,7 @@ const AuthenticatedApp = () => {
           <Route path="/Logout" element={<Logout />} />
           <Route path="/admin" element={<AdminV2 />} />
           <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
+          <Route path="/Unsubscribe" element={<Unsubscribe />} />
 
           {/* Main routes */}
           <Route path="/" element={<StudentLandingPage />} />

@@ -86,6 +86,13 @@ const featureList = (items) => `
   </div>
 `;
 
+// Build a simple unsubscribe token (base64 of userId:email)
+function makeUnsubscribeUrl(userId, email) {
+  const token = btoa(`${userId}:${email}`).replace(/=/g, '');
+  const appBase = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
+  return `${appBase}/#Unsubscribe?token=${token}`;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -97,6 +104,8 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { userEmail, schoolName, persona, alumniIntent } = body;
     const firstName = body.firstName || body.userName || '';
+    const userId = body.userId || user.id;
+    const unsubscribeUrl = makeUnsubscribeUrl(userId, userEmail);
 
     // Routing logic: alumni helpers get a helper-style email, seekers get student email
     const isAlumniHelper =
@@ -225,6 +234,9 @@ Deno.serve(async (req) => {
         <a href="https://collegefastforward.com" style="color: rgba(255,255,255,0.4); text-decoration: none;">collegefastforward.com</a> &nbsp;·&nbsp;
         <a href="mailto:jill@collegefastforward.com" style="color: rgba(255,255,255,0.4); text-decoration: none;">jill@collegefastforward.com</a>
       </p>
+      <p style="font-family: 'DM Sans', sans-serif; font-size: 11px; color: rgba(255,255,255,0.2); margin-top: 8px;">
+        <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.3); text-decoration: underline;">Unsubscribe</a>
+      </p>
       <p style="font-family: 'Playfair Display', Georgia, serif; font-size: 13px; font-style: italic; color: rgba(255,255,255,0.2); margin-top: 12px;">Building networks at colleges across the country.</p>
     </div>
   </div>
@@ -251,7 +263,7 @@ Deno.serve(async (req) => {
           ${ctaButton('Set My Career Goals', 'https://collegefastforward.com/#CareerGoals')}
           ${bodyText(`Questions? Just reply to this email — we're real people.`)}
         `)}
-      `);
+      `, unsubscribeUrl);
     }
 
     const response = await fetch('https://api.sendgrid.com/v3/mail/send', {

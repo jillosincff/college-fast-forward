@@ -8,7 +8,7 @@ export const escapeHtml = (str) => {
     .replace(/'/g, '&#039;');
 };
 
-export const emailWrapper = (content) => `
+export const emailWrapper = (content, unsubscribeUrl = null) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,9 +36,12 @@ export const emailWrapper = (content) => `
       <p style="font-size: 12px; color: #AAAAAA; margin: 0 0 4px;">
         College Fast Forward · support@collegefastforward.com
       </p>
-      <p style="font-size: 11px; color: #CCCCCC; margin: 0;">
+      <p style="font-size: 11px; color: #CCCCCC; margin: 0 0 8px;">
         You're receiving this because you joined College Fast Forward.
       </p>
+      ${unsubscribeUrl ? `<p style="font-size: 11px; color: #CCCCCC; margin: 0;">
+        <a href="${unsubscribeUrl}" style="color: #AAAAAA; text-decoration: underline;">Unsubscribe</a>
+      </p>` : ''}
     </div>
 
   </div>
