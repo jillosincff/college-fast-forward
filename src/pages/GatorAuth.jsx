@@ -158,24 +158,27 @@ export default function GatorAuth() {
 
   useEffect(() => {
     if (isLoading) return;
-    
-    if (user?.persona && user.onboarding_completed) {
-      // Send users directly to their correct dashboard — avoid double-redirect on mobile
+
+    // Not logged in — show the auth form
+    if (!user) {
+      setStep('auth');
+      return;
+    }
+
+    // Fully onboarded — send to the right dashboard
+    if (user.persona && user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentHome');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-        if (user.alumni_intent === 'giving_help') {
-          navigate('/AlumniHome');
-        } else {
-          navigate('/FreeTierDashboard');
-        }
+        navigate(user.alumni_intent === 'giving_help' ? '/AlumniHome' : '/FreeTierDashboard');
       } else {
         navigate('/FreeTierDashboard');
       }
       return;
     }
-    
-    if (user?.persona && !user.onboarding_completed) {
+
+    // Has persona but hasn't finished onboarding
+    if (user.persona && !user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentOnboarding');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
@@ -185,25 +188,19 @@ export default function GatorAuth() {
       }
       return;
     }
-    
+
+    // Logged in but no persona yet — route to role selection, never loop back to auth form
     if (user && !user.persona) {
       const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
       const safariType = sessionStorage.getItem('cff_onboarding_type');
       const role = pendingRole || safariType;
 
       if (role === 'parent') {
-        // Route parents directly to onboarding — no need for GatorWelcome role selection
         navigate('/ParentOnboarding');
-      } else if (role) {
-        navigate('/GatorWelcome');
       } else {
-        setStep('auth');
+        // Always go to GatorWelcome for role selection — never show the auth form again
+        navigate('/GatorWelcome');
       }
-      return;
-    }
-    
-    if (!user) {
-      setStep('auth');
       return;
     }
   }, [user, isLoading]);

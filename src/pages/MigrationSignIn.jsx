@@ -32,21 +32,21 @@ export default function MigrationSignIn() {
     setChecking(true);
     verifyMagicLink({ token })
       .then(({ data }) => {
-        if (data?.success) {
-          setTokenVerified(true);
-          if (data.email) sessionStorage.setItem('migration_verified_email', data.email);
-          setInfo('Identity verified! Redirecting you in...');
-          setTimeout(() => {
-            base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
-          }, 1800);
-        } else {
-          setError(data?.error || 'This link is invalid or has expired. Please request a new one.');
-          setTimeout(() => { window.location.hash = '#GetStarted?migration=true'; }, 2500);
-        }
+      if (data?.success) {
+        setTokenVerified(true);
+        if (data.email) sessionStorage.setItem('migration_verified_email', data.email);
+        setInfo('Identity verified! Redirecting you in...');
+        setTimeout(() => {
+          base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+        }, 1800);
+      } else {
+        setError(data?.error || 'This link is invalid or has expired. Please request a new one.');
+        setTimeout(() => { window.location.hash = '#MigrationSignIn?migration=true'; }, 2500);
+      }
       })
       .catch(() => {
-        setError('This link is invalid or has expired. Please request a new one.');
-        setTimeout(() => { window.location.hash = '#GetStarted?migration=true'; }, 2500);
+      setError('This link is invalid or has expired. Please request a new one.');
+      setTimeout(() => { window.location.hash = '#MigrationSignIn?migration=true'; }, 2500);
       })
       .finally(() => setChecking(false));
   }, []);

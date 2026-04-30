@@ -522,7 +522,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
 }
 
 const onboardingPages = ['StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'AlumniAllSet', 'ParentOnboarding', 'ParentPledge', 'ParentWelcome', 'ParentUpsell', 'ParentAllSet'];
-const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell'];
+const newUserFlowPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'RequestInvite', 'InviteRequired', 'MatchesReview', 'StudentInvitedOnboarding', 'StudentOnboarding', 'PostJoinUpsell', 'MigrationSignIn', 'RegistrationSuccess'];
 const hideFooterPages = ['GatorAuth', 'GatorRoleSelection', 'GatorInviteCode', 'GatorWelcome', 'GatorParentInvite', 'StudentOnboarding', 'StudentInvitedOnboarding', 'AlumniOnboarding', 'AlumniAllSet', 'ProfileEdit', 'ParentOnboarding', 'ParentPledge', 'MockInterview', 'LinkedInReview', 'ApplicationBoost', 'RecentGradDashboard', 'AlumniDashboard', 'FastIQOnboarding', 'ParentHome', 'FreeTierDashboard'];
 const bottomNavPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'GatorDirectory', 'MyMessages', 'MyRequests', 'MyApplications', 'Profile', 'PostRequest', 'PostOpportunity', 'MessageComposer', 'CompanyProfile', 'PublicProfile', 'Notifications', 'MyMatches', 'FastIQ', 'FollowedCompanies', 'ActionPlanTracker', 'ResumeTailoring', 'MockInterview', 'LinkedInReview', 'ApplicationBoost'];
 const publicPages = ['Privacy', 'Terms', 'CookiePolicy', 'PublicProfile'];
@@ -757,7 +757,8 @@ function AppContent() {
         sessionStorage.removeItem('cff_onboarding_type');
         navigate(safariOnboardingType === 'parent' ? 'ParentOnboarding' : 'StudentOnboarding'); return;
       }
-      navigate('GatorAuth'); return;
+      // Send to GatorWelcome (role selection) instead of GatorAuth to avoid auth loop
+      navigate('GatorWelcome'); return;
     }
 
     if (user && user.onboarding_completed === false && user.persona) {
@@ -824,7 +825,7 @@ function AppContent() {
 
       if (inNewUserFlow) { destination = 'GatorWelcome'; }
       else if (pendingRole === 'gator' && isUFLStudent && hasNoRole) { destination = 'GatorWelcome'; }
-      else if (hasNoRole && !pendingRole) { destination = 'GatorAuth'; }
+      else if (hasNoRole && !pendingRole) { destination = 'GatorWelcome'; }
       else if (needsOnboarding) {
         const isParentRole = effectiveRole === 'parent' || user.roles?.includes('parent');
         const isGatorRole = effectiveRole === 'gator' || user.roles?.includes('gator');
@@ -844,7 +845,7 @@ function AppContent() {
     if (newUserFlowPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (inNewUserFlow || (hasNoRole && pendingRole === 'gator' && isUFLStudent)) { navigate('GatorWelcome'); }
-    else if (hasNoRole && !pendingRole) { navigate('GatorAuth'); }
+    else if (hasNoRole && !pendingRole) { navigate('GatorWelcome'); }
     else if (needsOnboarding && user.onboarding_completed === false) {
       const isParent = user.persona === 'parent' || user.roles?.includes('parent');
       const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
