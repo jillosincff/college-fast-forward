@@ -146,17 +146,14 @@ export default function GatorAuth() {
 
   const handleGoogleSignIn = () => {
     // Preserve any existing pending role (e.g. 'parent' from ParentLandingPage)
-    // Only default to 'student' if no role has been set
+    // Always redirect back to GatorAuth — it smart-routes returning vs new users
     try {
       const existingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
       const role = existingRole || 'student';
       localStorage.setItem('pending_invite_role', role);
       sessionStorage.setItem('cff_onboarding_type', role);
-      const redirectPage = role === 'parent' ? 'ParentOnboarding' : 'StudentOnboarding';
-      base44.auth.redirectToLogin(window.location.origin + `/#${redirectPage}`);
-    } catch (e) {
-      base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
-    }
+    } catch (e) { /* private browsing */ }
+    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };
 
   useEffect(() => {

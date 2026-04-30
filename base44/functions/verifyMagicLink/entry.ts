@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const ALLOWED_ORIGINS = ['https://collegefastforward.com', 'https://www.collegefastforward.com'];
 function getCORSHeaders(req) {

@@ -46,13 +46,23 @@ export default function StudentOnboarding() {
     }
   }, []);
 
-  // After OAuth completes, pre-fill name and advance to step 2
+  // After OAuth completes — if already onboarded, redirect; otherwise pre-fill and advance
   useEffect(() => {
-    if (user && step === 1) {
-      const name = user.full_name?.split(' ')[0] || '';
-      setFirstName(name);
-      setStep(2);
+    if (!user || step !== 1) return;
+    // Already onboarded — route them directly to the right dashboard
+    if (user.persona && user.onboarding_completed) {
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        navigate('ParentHome');
+      } else if (user.persona === 'alumni' && user.alumni_intent === 'giving_help') {
+        navigate('AlumniHome');
+      } else {
+        navigate('FreeTierDashboard');
+      }
+      return;
     }
+    const name = user.full_name?.split(' ')[0] || '';
+    setFirstName(name);
+    setStep(2);
   }, [user, step]);
 
   // Handle OAuth error
@@ -71,8 +81,8 @@ export default function StudentOnboarding() {
       // Safari clears localStorage during OAuth — sessionStorage survives
       sessionStorage.setItem('cff_onboarding_type', 'student');
     } catch (e) { /* private browsing */ }
-
-    base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
+    // Always redirect to GatorAuth — it smart-routes new vs returning users
+    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };
 
   const handleSubmit = async () => {
@@ -304,7 +314,7 @@ export default function StudentOnboarding() {
             <button
               onClick={() => {
                 try { localStorage.removeItem('pending_invite_role'); } catch (e) { /* ok */ }
-                base44.auth.redirectToLogin(window.location.origin + '/#Dashboard');
+                base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
               }}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',

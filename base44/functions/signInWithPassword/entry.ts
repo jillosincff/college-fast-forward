@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import bcrypt from 'npm:bcryptjs@2.4.3';
 
 const ALLOWED_ORIGINS = ['https://collegefastforward.com', 'https://www.collegefastforward.com'];
