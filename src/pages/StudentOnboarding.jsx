@@ -42,6 +42,7 @@ export default function StudentOnboarding() {
     const ref = hashParams.get('ref') || hashParams.get('referral');
     if (ref) {
       try { sessionStorage.setItem('pending_referral_code', ref); } catch (e) { /* ok */ }
+      try { localStorage.setItem('parent_referral_code', ref); } catch (e) { /* ok */ }
     }
   }, []);
 
@@ -133,6 +134,18 @@ export default function StudentOnboarding() {
           user_email: user.email,
         }).catch(() => {});
         try { sessionStorage.removeItem('pending_referral_code'); } catch (e) { /* ok */ }
+      }
+
+      // Claim parent referral if present (non-blocking)
+      const parentRefCode = (() => { try { return localStorage.getItem('parent_referral_code'); } catch (e) { return null; } })();
+      if (parentRefCode) {
+        fetch('https://growth-hacker-marketing-agent-101dbdc8.base44.app/functions/claimParentReferral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ referral_code: parentRefCode }),
+          credentials: 'include',
+        }).catch(() => {});
+        try { localStorage.removeItem('parent_referral_code'); } catch (e) { /* ok */ }
       }
 
       localStorage.removeItem('pending_invite_role');

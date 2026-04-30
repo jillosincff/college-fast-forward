@@ -28,6 +28,34 @@ export default function ParentHome() {
   const [currentTime, setCurrentTime] = useState('');
   const [currentDate, setCurrentDate] = useState('');
   const [showUpgradeSuccess, setShowUpgradeSuccess] = useState(false);
+  const [inviteLink, setInviteLink] = useState(null);
+  const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
+
+  const generateInviteLink = async () => {
+    setInviteLinkLoading(true);
+    try {
+      const res = await fetch('https://growth-hacker-marketing-agent-101dbdc8.base44.app/functions/generateParentInviteLink', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.invite_url) setInviteLink(data.invite_url);
+    } catch (e) {
+      console.error('Failed to generate invite link:', e);
+    } finally {
+      setInviteLinkLoading(false);
+    }
+  };
+
+  const copyInviteLink = () => {
+    if (!inviteLink) return;
+    navigator.clipboard.writeText(inviteLink).then(() => {
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 2000);
+    });
+  };
 
   // Check for post-Stripe redirect once on mount only
   useEffect(() => {
@@ -312,6 +340,56 @@ export default function ParentHome() {
               🎁 Unlock FastIQ for My Student →
             </button>
           </div>
+        </div>
+
+        {/* ── INVITE YOUR STUDENT ── */}
+        <div style={{
+          background: C.card, border: `1px solid ${C.cardBorder}`,
+          borderRadius: 20, padding: '28px',
+          marginBottom: 16,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.28s',
+        }}>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: C.hint, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+            Invite Your Student
+          </p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: C.muted, margin: '0 0 16px', lineHeight: 1.6 }}>
+            Share this link with <strong style={{ color: C.white }}>{user?.student_emails?.[0] || 'your student'}</strong> to connect their account to yours.
+          </p>
+          {!inviteLink ? (
+            <button onClick={generateInviteLink} disabled={inviteLinkLoading} style={{
+              fontFamily: dmSans, fontSize: 13, fontWeight: 700,
+              color: C.orange, background: 'none',
+              border: `1px solid ${C.orangeBorder}`,
+              borderRadius: 10, padding: '11px 20px',
+              cursor: inviteLinkLoading ? 'not-allowed' : 'pointer',
+              minHeight: 'auto', transition: 'all 0.15s',
+              opacity: inviteLinkLoading ? 0.6 : 1,
+            }}>
+              {inviteLinkLoading ? 'Generating…' : 'Generate Invite Link →'}
+            </button>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'stretch', flexWrap: 'wrap' }}>
+              <div style={{
+                flex: 1, background: 'rgba(255,255,255,0.04)',
+                border: `1px solid ${C.cardBorder}`,
+                borderRadius: 10, padding: '10px 14px',
+                fontFamily: dmSans, fontSize: 12, color: C.muted,
+                wordBreak: 'break-all', lineHeight: 1.5, minWidth: 0,
+              }}>
+                {inviteLink}
+              </div>
+              <button onClick={copyInviteLink} style={{
+                fontFamily: dmSans, fontSize: 13, fontWeight: 700,
+                color: inviteCopied ? C.green : C.orange,
+                background: inviteCopied ? C.greenLight : C.orangeLight,
+                border: `1px solid ${inviteCopied ? 'rgba(34,197,94,0.25)' : C.orangeBorder}`,
+                borderRadius: 10, padding: '10px 18px',
+                cursor: 'pointer', minHeight: 'auto', flexShrink: 0, transition: 'all 0.2s',
+              }}>
+                {inviteCopied ? '✓ Copied!' : 'Copy'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── NETWORK NUDGE ── */}
