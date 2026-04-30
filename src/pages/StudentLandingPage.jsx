@@ -203,8 +203,17 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  const go = () => navigate('GetStarted');
-  const parent = () => { if (onParentClick) onParentClick(); else navigate('ParentLandingPage'); };
+  const go = () => {
+    localStorage.setItem('pending_intent', 'seeker');
+    navigate('GatorAuth');
+  };
+  const parent = () => {
+    if (onParentClick) { onParentClick(); return; }
+    localStorage.setItem('pending_intent', 'helper');
+    localStorage.setItem('pending_invite_role', 'parent');
+    sessionStorage.setItem('pending_invite_role', 'parent');
+    navigate('ParentLandingPage');
+  };
 
   return (
     <div style={{ background: '#08080f', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
