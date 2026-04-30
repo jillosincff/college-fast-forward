@@ -5,7 +5,7 @@ import {
   Sparkles, Brain, Zap, BookOpen,
   ChevronDown, ChevronUp, LogOut
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 
 const NAV_GROUPS = [
   {
@@ -44,6 +44,7 @@ const FASTIQ_ITEMS = [
 ];
 
 export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUpgrade }) {
+  const { logout } = useAuth();
   const [conciergeOpen, setConciergeOpen] = useState(
     ['mock_interview', 'linkedin_review'].includes(currentTab)
   );
@@ -310,7 +311,7 @@ export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUp
 
       {/* Logout */}
       <button
-        onClick={() => base44.auth.logout()}
+        onClick={() => logout()}
         style={{
           width: '100%', display: 'flex',
           alignItems: 'center', gap: 10,

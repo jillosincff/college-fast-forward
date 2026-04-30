@@ -22,7 +22,7 @@ const C = {
 
 
 export default function ParentHome() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(40);
   const [currentTime, setCurrentTime] = useState('');
@@ -125,14 +125,27 @@ export default function ParentHome() {
             </button>
           ))}
         </div>
-        <button onClick={() => navigate('Profile')} style={{
-          width: 32, height: 32, borderRadius: '50%', background: '#0d1117',
-          border: `2px solid ${C.orange}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#fff',
-          cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
-        }}>
-          {(user?.full_name?.[0] || 'P').toUpperCase()}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => logout()} style={{
+            background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            fontFamily: dmSans, fontSize: 13, fontWeight: 400,
+            color: 'rgba(244,240,232,0.4)', minHeight: 'auto', width: 'auto',
+            transition: 'color 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.8)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(244,240,232,0.4)'; }}
+          >
+            Log Out
+          </button>
+          <button onClick={() => navigate('Profile')} style={{
+            width: 32, height: 32, borderRadius: '50%', background: '#0d1117',
+            border: `2px solid ${C.orange}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: dmSans, fontSize: 13, fontWeight: 500, color: '#fff',
+            cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
+          }}>
+            {(user?.full_name?.[0] || 'P').toUpperCase()}
+          </button>
+        </div>
       </nav>
 
       {/* ── UPGRADE SUCCESS BANNER ── */}
