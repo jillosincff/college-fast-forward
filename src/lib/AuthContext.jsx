@@ -48,10 +48,29 @@ export const AuthProvider = ({ children }) => {
     base44.auth.redirectToLogin(window.location.href);
   };
 
-  const logout = (shouldRedirect = true) => {
+  const logout = () => {
+    // Clear all session/local storage that could cause re-auth loops
+    try {
+      localStorage.removeItem('pending_invite_role');
+      localStorage.removeItem('pending_invite_code');
+      localStorage.removeItem('pending_student_email');
+      localStorage.removeItem('pending_referral_code');
+      localStorage.removeItem('oauth_attempt_count');
+      localStorage.removeItem('oauth_start_time');
+      sessionStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('pending_invite_code');
+      sessionStorage.removeItem('cff_onboarding_type');
+      sessionStorage.removeItem('oauth_callback_detected');
+      sessionStorage.removeItem('oauth_state_token');
+      sessionStorage.removeItem('email_click_tracked');
+      sessionStorage.removeItem('utm_already_captured');
+      sessionStorage.removeItem('migration_verified_email');
+    } catch (e) { /* private browsing */ }
+
     setUser(null);
     setIsAuthenticated(false);
-    base44.auth.logout(shouldRedirect ? window.location.href : undefined);
+    // Always redirect to the auth page — never back to the current page
+    base44.auth.logout(window.location.origin + '/#GatorAuth');
   };
 
   return (
