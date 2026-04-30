@@ -322,6 +322,23 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
             </button>
             );
           })}
+          <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.08)', margin: '8px 32px' }} />
+          <button onClick={() => { navigate('Profile'); setMobileOpen(false); }} style={{
+            display: 'block', width: '100%', textAlign: 'left', padding: '12px 32px',
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontFamily: dmSans, fontSize: 14, fontWeight: 400,
+            color: 'rgba(244,240,232,0.45)', minHeight: 'auto',
+          }}>
+            Profile
+          </button>
+          <button onClick={() => { logout(); setMobileOpen(false); }} style={{
+            display: 'block', width: '100%', textAlign: 'left', padding: '12px 32px',
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontFamily: dmSans, fontSize: 14, fontWeight: 400,
+            color: '#E85D20', minHeight: 'auto',
+          }}>
+            Log Out
+          </button>
         </div>
       )}
 
