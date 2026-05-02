@@ -120,40 +120,21 @@ export default function FastIQUpgradeModal({ user, onClose }) {
 
           <div className="bg-[#0A0A0A] rounded-lg p-4 mb-6">
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-             {foundingOfferActive ? '🎖 $14.50/month — Founding Rate (50% off forever)' : '$29/month or $249/year'}
+             $29/month or $249/year
            </p>
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
-             {foundingOfferActive ? 'Start free for 5 days — then $14.50/month. Founding rate expires April 30.' : 'Start free for 5 days — then $29/month. Cancel anytime.'}
+             Start free for 5 days — then $29/month. Cancel anytime.
            </p>
           </div>
 
-          {foundingOfferActive ? (
-            <div>
-              <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.25)', borderRadius: 10, padding: '14px 18px', marginBottom: 16 }}>
-                <p style={{ fontSize: 11, color: '#E85D20', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', margin: '0 0 6px' }}>⚡ Founding Member Rate</p>
-                <p style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>$14.50/month or $124.50/year</p>
-                <p style={{ fontSize: 12, color: '#CCCCCC', margin: '0 0 8px' }}>50% off forever — locked in as long as you stay subscribed.</p>
-                <p style={{ fontSize: 11, color: '#fa8a6a', fontWeight: 500, margin: 0 }}>⏱ Expires in {daysLeft} day{daysLeft !== 1 ? 's' : ''} — April 30th</p>
-              </div>
-              <div className="space-y-2">
-                <button onClick={() => handleUpgrade('fastiq_founding_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : isParent ? 'Activate FastIQ for My Student →' : 'Start Free Trial — $14.50/month →'}
-                </button>
-                <button onClick={() => handleUpgrade('fastiq_founding_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
-                  Annual — $124.50/year (save $50)
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <button onClick={() => handleUpgrade('fastiq_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : isParent ? 'Activate FastIQ for My Student →' : 'Start Free Trial →'}
-              </button>
-              <button onClick={() => handleUpgrade('fastiq_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
-                Annual — $249/year (save $99)
-              </button>
-            </div>
-          )}
+          <div className="space-y-3">
+            <button onClick={() => handleUpgrade('fastiq_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : isParent ? 'Activate FastIQ for My Student →' : 'Start Free Trial →'}
+            </button>
+            <button onClick={() => handleUpgrade('fastiq_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
+              Annual — $249/year (save $99)
+            </button>
+          </div>
 
           <div className="space-y-2">
             {!hasLinkedParent && !inviteSent && !showParentInvite && (
@@ -177,7 +158,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 16, textAlign: 'center' }}>
-            {foundingOfferActive ? 'Start free for 5 days — then $14.50/month. Cancel anytime.' : 'Start free for 5 days — then $29/month. Cancel anytime.'}
+            Start free for 5 days — then $29/month. Cancel anytime.
           </p>
         </div>
       </DialogContent>

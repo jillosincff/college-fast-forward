@@ -207,15 +207,15 @@ export default function PaywallScreen() {
           className={`px-5 py-2.5 rounded-xl text-[14px] font-bold transition-all ${selectedPlan === 'monthly' ? 'bg-white text-slate-900 shadow-lg' : 'bg-white/10 text-white/60 hover:bg-white/15'}`}
           style={{ minHeight: 'auto', minWidth: 'auto' }}
         >
-          {foundingOfferActive ? '$14.50/month' : '$29/month'}
+          $29/month
         </button>
         <button
           onClick={() => setSelectedPlan('annual')}
           className={`px-5 py-2.5 rounded-xl text-[14px] font-bold transition-all relative ${selectedPlan === 'annual' ? 'bg-white text-slate-900 shadow-lg' : 'bg-white/10 text-white/60 hover:bg-white/15'}`}
           style={{ minHeight: 'auto', minWidth: 'auto' }}
         >
-          {foundingOfferActive ? '$124.50/year' : '$249/year'}
-          <span className="absolute -top-2.5 -right-2 px-1.5 py-0.5 rounded-full bg-green-500 text-[9px] font-bold text-white uppercase">Save {foundingOfferActive ? '50%' : '28%'}</span>
+          $249/year
+          <span className="absolute -top-2.5 -right-2 px-1.5 py-0.5 rounded-full bg-green-500 text-[9px] font-bold text-white uppercase">Save 28%</span>
         </button>
       </motion.div>
 
@@ -253,7 +253,7 @@ export default function PaywallScreen() {
           {checkingOut ? (
             <><Loader2 className="w-5 h-5 animate-spin" /> Redirecting to checkout...</>
           ) : (
-            <><Zap className="w-5 h-5" /> Start Free Trial — {selectedPlan === 'annual' ? (foundingOfferActive ? '$124.50/year' : '$249/year') : (foundingOfferActive ? '$14.50/month' : '$29/month')}</>
+            <><Zap className="w-5 h-5" /> Start Free Trial — {selectedPlan === 'annual' ? '$249/year' : '$29/month'}</>
           )}
         </button>
       </motion.div>

@@ -141,19 +141,7 @@ export default function InvitationUpgradeScreen({ studentName, display, onInvite
 
       {/* ── URGENCY ── */}
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <p style={{
-          fontSize: 11, fontWeight: 600, color: '#999',
-          textTransform: 'uppercase', letterSpacing: '0.1em',
-          marginBottom: 6,
-        }}>
-          Founding rate expires in:
-        </p>
-        <p style={{
-          fontFamily: mono, fontSize: 28, fontWeight: 700,
-          color: ORANGE, letterSpacing: '0.06em', margin: 0,
-        }}>
-          {display}
-        </p>
+
       </div>
 
       {/* ── CTA SECTION ── */}
@@ -183,7 +171,7 @@ export default function InvitationUpgradeScreen({ studentName, display, onInvite
           fontSize: 12, fontWeight: 500, color: '#888',
           textAlign: 'center', marginTop: 8, marginBottom: 16,
         }}>
-          Lock in $187/year before pricing increases
+          5-day free trial · Cancel anytime
         </p>
 
         <button onClick={() => startCheckout('fastiq_monthly')} disabled={loading} style={{

@@ -62,11 +62,7 @@ export default function TrialBanner({ user }) {
         margin: 0,
       }}>
         ⚡ FastIQ Trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
-        {foundingActive && (
-          <span style={{ fontWeight: 400, opacity: 0.9 }}>
-            {' '}| Lock in $14.50/mo before April 30
-          </span>
-        )}
+
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
         <button
@@ -85,7 +81,7 @@ export default function TrialBanner({ user }) {
             whiteSpace: 'nowrap',
           }}
         >
-          {loading ? 'Loading...' : foundingActive ? 'Lock in $14.50/mo →' : 'Upgrade Now →'}
+          {loading ? 'Loading...' : 'Upgrade Now →'}
         </button>
         <button
           onClick={() => setDismissed(true)}

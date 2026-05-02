@@ -52,15 +52,7 @@ export default function PostTrialUpgradePrompt({ message }) {
       }}>
         {message || 'Upgrade to continue using this feature.'}
       </p>
-      {foundingActive && (
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 13, color: '#E85D20',
-          fontWeight: 600, margin: '0 0 24px',
-        }}>
-          Lock in $14.50/mo founding rate before April 30 — then $29/mo.
-        </p>
-      )}
+
       <button
         onClick={handleUpgrade}
         disabled={loading}
