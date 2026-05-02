@@ -163,7 +163,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 13, color: '#888', textAlign: 'center',
           margin: '8px 0 0',
         }}>
-          {foundingOfferActive ? '$14.50/month · Founding Rate — expires April 30' : '$29/month'} &middot; 5-day free trial &middot; Cancel anytime
+          $29/month &middot; 5-day free trial &middot; Cancel anytime
         </p>
         </div>
       </div>

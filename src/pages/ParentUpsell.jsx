@@ -133,11 +133,7 @@ export default function ParentUpsell() {
               fontSize: 13, color: 'rgba(255,255,255,0.82)',
               margin: 0, lineHeight: 1.6,
             }}>
-              {foundingOfferActive ? (
-                <>🎖 After your trial, continue at the{' '}<strong style={{ color: '#E85D20' }}>Founding Rate of $14.50/month forever</strong>{' '}— 50% off the regular price. Expires April 30.</>
-              ) : (
-                <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$29/month</strong>. Cancel anytime.</>
-              )}
+              <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$29/month</strong>. Cancel anytime.</>
             </p>
           </div>
 

@@ -537,16 +537,14 @@ export default function StudentLandingPage({ onParentClick }) {
             position: 'relative', overflow: 'hidden',
           }}>
             <div style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(34,211,238,0.2)', border: '1px solid rgba(34,211,238,0.35)', borderRadius: 100, padding: '4px 12px' }}>
-              <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.15em', textTransform: 'uppercase' }}>50% OFF</span>
+              <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.15em', textTransform: 'uppercase' }}>AI AGENT</span>
             </div>
             <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(ellipse, rgba(34,211,238,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
-                <span style={{ fontFamily: playfair, fontSize: 24, fontWeight: 700, color: '#22d3ee' }}>$14.50</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 20 }}>
+                <span style={{ fontFamily: playfair, fontSize: 24, fontWeight: 700, color: '#22d3ee' }}>$29</span>
                 <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>/mo</span>
-                <span style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>~~$29~~</span>
               </div>
-              <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(34,211,238,0.5)', margin: '0 0 20px', fontStyle: 'italic' }}>Increases to $29/mo on April 30th</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
                 <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>The Accelerator</p>
@@ -568,7 +566,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
         </div>
         <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: '32px 0 0' }}>
-          Early bird pricing ($14.50) expires at midnight on April 30th.
+          Free to join. Activate FastIQ for $29/mo whenever you're ready.
         </p>
       </div>
 
@@ -631,7 +629,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </button>
 
           <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '0 0 20px' }}>
-            Always free to join. Early bird Agent pricing ($14.50/mo) available until <span style={{ animation: 'dateGlow 2s ease-in-out infinite' }}>April 30th</span>.
+            Always free to join. Activate your AI agent for $29/mo whenever you're ready.
           </p>
 
 

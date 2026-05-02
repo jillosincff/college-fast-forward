@@ -138,7 +138,8 @@ export default function PostJoinUpsell() {
               fontSize: 13, color: 'rgba(255,255,255,0.82)',
               margin: 0, lineHeight: 1.6,
             }}>
-              <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$14.50/month</strong>. Cancel anytime.{' '}<strong style={{ color: '#fa8a6a' }}>Price increases to $29/month after April 30.</strong></>
+              <>After your trial, continue for <strong style={{ color: '#E85D20' }}>$29/month</strong>. Cancel anytime.</>
+              
             </p>
           </div>
 
