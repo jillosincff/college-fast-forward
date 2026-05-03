@@ -16,6 +16,8 @@ import AlumniHome from '@/pages/AlumniHome';
 import Directory from '@/pages/Directory';
 import FastIQAssessment from '@/pages/FastIQAssessment';
 import StudentOnboarding from '@/pages/StudentOnboarding';
+import StudentOnboardingV2 from '@/pages/StudentOnboardingV2';
+import StudentInvitedOnboarding from '@/pages/StudentInvitedOnboarding';
 import ResumeTailoring from '@/pages/ResumeTailoring';
 import MockInterview from '@/pages/MockInterview';
 import LinkedInReview from '@/pages/LinkedInReview';
@@ -84,6 +86,8 @@ const AuthenticatedApp = () => {
           <Route path="/Directory" element={<LayoutWrapper currentPageName="Directory"><Directory /></LayoutWrapper>} />
           <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
           <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
+          <Route path="/StudentOnboardingV2" element={<LayoutWrapper currentPageName="StudentOnboardingV2"><StudentOnboardingV2 /></LayoutWrapper>} />
+          <Route path="/StudentInvitedOnboarding" element={<LayoutWrapper currentPageName="StudentInvitedOnboarding"><StudentInvitedOnboarding /></LayoutWrapper>} />
           <Route path="/ResumeTailoring" element={<LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper>} />
           <Route path="/MockInterview" element={<LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper>} />
           <Route path="/LinkedInReview" element={<LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper>} />
