@@ -166,12 +166,13 @@ Deno.serve(async (req) => {
     if (targetEmail) {
       const currentPending = user.pending_fastiq_gift_emails || [];
       const pendingGifts = user.pending_fastiq_gifts || {};
-      if (!currentPending.includes(targetEmail)) {
-        await base44.asServiceRole.entities.User.update(user.id, {
-          pending_fastiq_gift_emails: [...currentPending, targetEmail],
-          pending_fastiq_gifts: { ...pendingGifts, [targetEmail]: subscription.id },
-        });
-      }
+      // Always overwrite the subscription ID (handles re-gift of same email)
+      await base44.asServiceRole.entities.User.update(user.id, {
+        pending_fastiq_gift_emails: currentPending.includes(targetEmail)
+          ? currentPending
+          : [...currentPending, targetEmail],
+        pending_fastiq_gifts: { ...pendingGifts, [targetEmail]: subscription.id },
+      });
 
       base44.functions.invoke('sendParentGiftedFastIQEmail', {
         studentEmail: targetEmail,

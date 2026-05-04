@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Loader2, CreditCard } from 'lucide-react';
 import { giftFastIQToStudent } from '@/functions/giftFastIQToStudent';
 import { findStudentOnCFF } from '@/functions/findStudentOnCFF';
+import { createCustomerPortal } from '@/functions/createCustomerPortal';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -14,9 +15,9 @@ export default function GiftFastIQModal({ user, onClose }) {
   const [searching, setSearching] = useState(false);
   const [matches, setMatches] = useState([]);
   const [email, setEmail] = useState('');
-  const [gifting, setGifting] = useState(false);
   const [result, setResult] = useState(null);
   const [pendingGift, setPendingGift] = useState(null); // { studentId, studentEmail } — saved while user adds card
+  const [planBackStep, setPlanBackStep] = useState('search'); // which step to return to from plan
   const [selectedPlan, setSelectedPlan] = useState('monthly');
 
   const savedEmail = user?.student_emails?.[0] || null;
@@ -38,15 +39,15 @@ export default function GiftFastIQModal({ user, onClose }) {
     setSearching(false);
   };
 
-  // Show plan selection before gifting
-  const promptPlan = (giftTarget) => {
+  // Show plan selection before gifting — remember where we came from
+  const promptPlan = (giftTarget, fromStep) => {
     setPendingGift(giftTarget);
+    setPlanBackStep(fromStep || step);
     setStep('plan');
   };
 
   const doGift = async ({ studentId, studentEmail, plan }) => {
     setStep('loading');
-    setGifting(true);
     try {
       const payload = {
         plan: plan || selectedPlan,
@@ -57,7 +58,6 @@ export default function GiftFastIQModal({ user, onClose }) {
 
       if (res?.status === 402 || data?.reason === 'credit_card_required') {
         setStep('need_card');
-        setGifting(false);
         return;
       }
 
@@ -66,28 +66,35 @@ export default function GiftFastIQModal({ user, onClose }) {
       setResult({ status, studentName, email: studentEmail || null });
       setStep('success');
     } catch (e) {
-      // Check if the error is a 402
       if (e?.response?.status === 402 || e?.message?.includes('credit_card')) {
         setStep('need_card');
-        setGifting(false);
         return;
       }
       setResult({ status: 'pending', studentName: null, email: studentEmail || null });
       setStep('success');
     }
-    setGifting(false);
   };
 
   const handleAddCard = async () => {
-    // Route parent to a checkout session just to collect their card, then return to gift
+    const returnUrl = `${window.location.origin}/#ParentHome?gift=open`;
     try {
-      const res = await createCheckoutSession({
-        plan: 'fastiq_monthly',
-        successUrl: `${window.location.origin}/#ParentHome?gift=open`,
-        cancelUrl: window.location.href,
-        user: { id: user?.id, email: user?.email, full_name: user?.full_name },
-      });
-      if (res?.data?.url) window.location.href = res.data.url;
+      if (user?.stripe_customer_id) {
+        // Parent already has a Stripe customer — open billing portal to add/update card
+        const res = await createCustomerPortal({
+          customerId: user.stripe_customer_id,
+          returnUrl,
+        });
+        if (res?.data?.url) window.location.href = res.data.url;
+      } else {
+        // No Stripe customer yet — use setup mode checkout (no subscription created)
+        const res = await createCheckoutSession({
+          plan: 'setup_only',
+          successUrl: returnUrl,
+          cancelUrl: window.location.href,
+          user: { id: user?.id, email: user?.email, full_name: user?.full_name },
+        });
+        if (res?.data?.url) window.location.href = res.data.url;
+      }
     } catch (e) {
       console.error('Card add failed:', e.message);
     }
@@ -205,7 +212,7 @@ export default function GiftFastIQModal({ user, onClose }) {
                   </div>
                   <p style={{ fontSize: 14, color: '#555', marginBottom: 16, fontFamily: dm }}>Is this your student?</p>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => promptPlan({ studentId: matches[0].id })} style={{ ...btnOrange(false), flex: 2 }}>
+                    <button onClick={() => promptPlan({ studentId: matches[0].id }, 'found')} style={{ ...btnOrange(false), flex: 2 }}>
                       Yes, Gift FastIQ →
                     </button>
                     <button onClick={() => setStep('email')} style={{ ...btnOutline, flex: 1 }}>
@@ -225,7 +232,7 @@ export default function GiftFastIQModal({ user, onClose }) {
                 We found a few students named <strong>{firstName} {lastName}</strong>.<br />Enter their email so we can find the right one:
               </p>
               <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && promptPlan({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
-              <button onClick={() => promptPlan({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+              <button onClick={() => promptPlan({ studentEmail: email }, 'multiple')} disabled={!email.trim()} style={btnOrange(!email.trim())}>
                 Find My Student →
               </button>
             </>
@@ -240,7 +247,7 @@ export default function GiftFastIQModal({ user, onClose }) {
                 Enter their email and we'll send them a FastIQ trial invite:
               </p>
               <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && promptPlan({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
-              <button onClick={() => promptPlan({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+              <button onClick={() => promptPlan({ studentEmail: email }, 'notfound')} disabled={!email.trim()} style={btnOrange(!email.trim())}>
                 Continue →
               </button>
             </>
@@ -254,11 +261,11 @@ export default function GiftFastIQModal({ user, onClose }) {
                 Student's email address
               </label>
               <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && promptPlan({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
-              <button onClick={() => promptPlan({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+              <button onClick={() => promptPlan({ studentEmail: email }, 'email')} disabled={!email.trim()} style={btnOrange(!email.trim())}>
                 Continue →
               </button>
               {savedEmail && (
-                <button onClick={() => promptPlan({ studentEmail: savedEmail })} style={{ ...btnGhost, marginTop: 12 }}>
+                <button onClick={() => promptPlan({ studentEmail: savedEmail }, 'email')} style={{ ...btnGhost, marginTop: 12 }}>
                   Use {savedEmail} on file →
                 </button>
               )}
@@ -268,7 +275,7 @@ export default function GiftFastIQModal({ user, onClose }) {
           {/* STEP: plan selection */}
           {step === 'plan' && (
             <>
-              {backBtn('search')}
+              {backBtn(planBackStep)}
               <p style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', marginBottom: 6, fontFamily: playfair }}>Choose a plan</p>
               <p style={{ fontSize: 13, color: '#888', marginBottom: 20, fontFamily: dm }}>
                 Your card will be charged after the 5-day free trial. Cancel anytime from your dashboard.
@@ -322,7 +329,7 @@ export default function GiftFastIQModal({ user, onClose }) {
                   Add a payment method first
                 </p>
                 <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 24, fontFamily: dm }}>
-                  To gift FastIQ, we need your card on file. You'll be charged $29/mo after the 5-day free trial. You can cancel anytime.
+                  To gift FastIQ, we need your card on file. You'll be charged {selectedPlan === 'annual' ? '$249/year' : '$29/mo'} after the 5-day free trial. You can cancel anytime.
                 </p>
                 <button onClick={handleAddCard} style={btnOrange(false)}>
                   Add Payment Method →

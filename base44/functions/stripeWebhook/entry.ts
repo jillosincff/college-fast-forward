@@ -39,6 +39,9 @@ async function revokeGiftedStudentAccess(subscriptionId) {
     fastiq_setup_complete: false,
     trial_status: 'expired',
     fastiq_trial_active: false,
+    // Clear stale gift fields so re-gifting works cleanly
+    fastiq_gifted_by_user_id: null,
+    fastiq_gift_subscription_id: null,
   });
   console.log('[stripeWebhook] Gifted FastIQ revoked for student:', student.id, 'sub:', subscriptionId);
 }
