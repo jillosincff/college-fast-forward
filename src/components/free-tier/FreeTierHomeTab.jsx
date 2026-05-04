@@ -285,30 +285,6 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </div>
       )}
 
-      {/* Parent Network nudge */}
-      <div style={{ padding: '0 24px', marginBottom: 12, marginTop: 8 }}>
-        <p style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 14, color: '#555', margin: 0, lineHeight: 1.5,
-        }}>
-          👥 Start by searching your{' '}
-          <button
-            onClick={() => onTabChange('directory')}
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 14, fontWeight: 600,
-              color: '#E85D20', background: 'none',
-              border: 'none', cursor: 'pointer',
-              padding: 0, minHeight: 'auto',
-              textDecoration: 'underline',
-            }}
-          >
-            Parent Network
-          </button>
-          {' '}→
-        </p>
-      </div>
-
       {/* Roadmap section header */}
       <div style={{ padding: '0 24px', marginBottom: 16, marginTop: 8 }}>
         <p style={{

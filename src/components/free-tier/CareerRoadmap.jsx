@@ -140,7 +140,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
 
   const allStatuses = [step1, step2, step3, step4, step5, step6];
   const nextActionable = allStatuses.map((s, i) => ({ s, i })).find(({ s }) => s !== 'done' && s !== 'locked');
-  const stepTitles = ['Set Your Career Goals', 'Explore Companies', 'Choose Your Targets', 'Reach Out to Alumni', 'Optimize Your Profile', 'Follow Up & Track Everything'];
+  const stepTitles = ['Set Your Career Goals', 'Connect with a Parent in Your Network', 'Upload & Optimize Your Resume', 'Research Companies & Industries', 'Find Alumni at Target Companies', 'Draft Outreach & Track Replies'];
 
   const summaryText = completedCount === 0
     ? 'Your roadmap is ready. Step 1 starts now.'
@@ -186,9 +186,9 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
   const activeStepNumber = parseInt(Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || '7');
 
   const upNextSteps = [
-    { n: 2, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: null, page: 'ResumeTailoring' },
-    { n: 3, label: 'Research Companies & Industries', tag: 'Free', tabKey: 'company_intel' },
-    { n: 4, label: 'Find Your CFF Connections', tag: 'Free', tabKey: 'directory' },
+    { n: 2, label: 'Connect with a Parent in Your Network', tag: 'Free', tabKey: 'directory', description: "Browse parents from your school who've offered to help. Send one message — that's all it takes to get a warm intro.", isFeatured: true },
+    { n: 3, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: null, page: 'ResumeTailoring' },
+    { n: 4, label: 'Research Companies & Industries', tag: 'Free', tabKey: 'company_intel' },
     { n: 5, label: 'Find Alumni at Target Companies', tag: 'Free · 1 search', tabKey: 'alumni_search' },
     { n: 6, label: 'Draft Outreach & Track Replies', tag: 'FastIQ', tabKey: null },
   ];
@@ -293,6 +293,57 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           const isClickable = isUnlocked && !isCompleted && (step.tabKey || step.page);
 
           if (isActive) {
+            if (step.isFeatured) {
+              return (
+                <div
+                  key={step.n}
+                  style={{
+                    background: '#fff',
+                    border: '2px solid #E85D20',
+                    borderRadius: 16,
+                    padding: '28px 32px',
+                    marginBottom: 8,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 20,
+                    boxShadow: '0 2px 12px rgba(232,93,32,0.12)',
+                  }}
+                >
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: '#E85D20', color: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 16, fontWeight: 700, flexShrink: 0,
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}>
+                    {step.n}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
+                        {step.label}
+                      </p>
+                      <span style={{ background: '#E8F5E9', color: '#2E7D32', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>FREE</span>
+                    </div>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 16px', lineHeight: 1.6 }}>
+                      {step.description}
+                    </p>
+                    <button
+                      onClick={() => handleStepClick(step)}
+                      style={{
+                        background: '#E85D20', border: 'none',
+                        borderRadius: 10, padding: '12px 28px',
+                        fontSize: 14, fontWeight: 600, color: '#fff',
+                        cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto',
+                      }}
+                    >
+                      Browse Parent Network →
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div
                 key={step.n}
