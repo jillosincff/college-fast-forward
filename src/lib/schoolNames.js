@@ -1,6 +1,6 @@
 export const SCHOOL_NAMES = {
   'uf': 'University of Florida',
-  'usc': 'University of Southern California',
+  'usc': 'University of South Carolina',
   'osu': 'Ohio State University',
   'ucf': 'University of Central Florida',
   'umich': 'University of Michigan',
@@ -23,7 +23,7 @@ export const SCHOOL_NAMES = {
 // Used by all onboarding flows to derive school_code from school_name
 const NAME_TO_CODE = {
   'university of florida': 'uf',
-  'university of southern california': 'usc',
+  'university of south carolina': 'usc',
   'ohio state university': 'osu',
   'ohio state': 'osu',
   'university of central florida': 'ucf',
