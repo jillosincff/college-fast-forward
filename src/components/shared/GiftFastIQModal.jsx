@@ -1,20 +1,23 @@
 import { useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, CreditCard } from 'lucide-react';
 import { giftFastIQToStudent } from '@/functions/giftFastIQToStudent';
 import { findStudentOnCFF } from '@/functions/findStudentOnCFF';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
 export default function GiftFastIQModal({ user, onClose }) {
-  const [step, setStep] = useState('search'); // search | found | multiple | notfound | email | loading | success
+  const [step, setStep] = useState('search'); // search | found | multiple | notfound | email | plan | loading | success | need_card
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [searching, setSearching] = useState(false);
   const [matches, setMatches] = useState([]);
   const [email, setEmail] = useState('');
   const [gifting, setGifting] = useState(false);
-  const [result, setResult] = useState(null); // { status, studentName }
+  const [result, setResult] = useState(null);
+  const [pendingGift, setPendingGift] = useState(null); // { studentId, studentEmail } — saved while user adds card
+  const [selectedPlan, setSelectedPlan] = useState('monthly');
 
   const savedEmail = user?.student_emails?.[0] || null;
 
@@ -35,21 +38,59 @@ export default function GiftFastIQModal({ user, onClose }) {
     setSearching(false);
   };
 
-  const doGift = async ({ studentId, studentEmail }) => {
+  // Show plan selection before gifting
+  const promptPlan = (giftTarget) => {
+    setPendingGift(giftTarget);
+    setStep('plan');
+  };
+
+  const doGift = async ({ studentId, studentEmail, plan }) => {
     setStep('loading');
     setGifting(true);
     try {
-      const payload = studentId ? { studentId } : { studentEmail: studentEmail.trim().toLowerCase() };
+      const payload = {
+        plan: plan || selectedPlan,
+        ...(studentId ? { studentId } : { studentEmail: studentEmail?.trim().toLowerCase() }),
+      };
       const res = await giftFastIQToStudent(payload);
-      const status = res?.data?.status || 'activated';
-      const studentName = res?.data?.studentName || (studentId ? matches[0]?.first_name : null) || null;
+      const data = res?.data;
+
+      if (res?.status === 402 || data?.reason === 'credit_card_required') {
+        setStep('need_card');
+        setGifting(false);
+        return;
+      }
+
+      const status = data?.status || 'activated';
+      const studentName = data?.studentName || (studentId ? matches[0]?.first_name : null) || null;
       setResult({ status, studentName, email: studentEmail || null });
       setStep('success');
     } catch (e) {
+      // Check if the error is a 402
+      if (e?.response?.status === 402 || e?.message?.includes('credit_card')) {
+        setStep('need_card');
+        setGifting(false);
+        return;
+      }
       setResult({ status: 'pending', studentName: null, email: studentEmail || null });
       setStep('success');
     }
     setGifting(false);
+  };
+
+  const handleAddCard = async () => {
+    // Route parent to a checkout session just to collect their card, then return to gift
+    try {
+      const res = await createCheckoutSession({
+        plan: 'fastiq_monthly',
+        successUrl: `${window.location.origin}/#ParentHome?gift=open`,
+        cancelUrl: window.location.href,
+        user: { id: user?.id, email: user?.email, full_name: user?.full_name },
+      });
+      if (res?.data?.url) window.location.href = res.data.url;
+    } catch (e) {
+      console.error('Card add failed:', e.message);
+    }
   };
 
   const inputStyle = {
@@ -78,8 +119,8 @@ export default function GiftFastIQModal({ user, onClose }) {
     padding: 0,
   };
 
-  const backBtn = (
-    <button onClick={() => setStep('search')} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: '0 0 16px', display: 'block', fontFamily: dm }}>
+  const backBtn = (toStep = 'search') => (
+    <button onClick={() => setStep(toStep)} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: '0 0 16px', display: 'block', fontFamily: dm }}>
       ← Back
     </button>
   );
@@ -96,7 +137,7 @@ export default function GiftFastIQModal({ user, onClose }) {
                 🎁 FASTIQ GIFT
               </p>
               <h2 style={{ fontSize: 19, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3, fontFamily: playfair }}>
-                Give Your Student<br />FastIQ Free
+                Give Your Student<br />FastIQ Access
               </h2>
             </div>
             <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: 4, marginTop: -4 }}>
@@ -113,7 +154,6 @@ export default function GiftFastIQModal({ user, onClose }) {
               <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20, fontFamily: dm }}>
                 First, let's check if your student is already on CFF.
               </p>
-
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 6, fontFamily: dm }}>First Name</label>
@@ -124,11 +164,9 @@ export default function GiftFastIQModal({ user, onClose }) {
                   <input type="text" placeholder="Smith" value={lastName} onChange={e => setLastName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSearch()} style={inputStyle} />
                 </div>
               </div>
-
               <button onClick={handleSearch} disabled={!firstName.trim() || !lastName.trim() || searching} style={btnOrange(!firstName.trim() || !lastName.trim() || searching)}>
                 {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Find My Student →'}
               </button>
-
               <div style={{ borderTop: '1px solid #F0F0F0', marginTop: 20, paddingTop: 16, textAlign: 'center' }}>
                 <span style={{ fontSize: 13, color: '#888', fontFamily: dm }}>Or skip to </span>
                 <button onClick={() => setStep('email')} style={btnGhost}>Enter their email instead →</button>
@@ -139,7 +177,7 @@ export default function GiftFastIQModal({ user, onClose }) {
           {/* STEP: found (exactly 1 match) */}
           {step === 'found' && matches.length === 1 && (
             <>
-              {backBtn}
+              {backBtn()}
               {matches[0].already_has_fastiq ? (
                 <>
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -148,7 +186,7 @@ export default function GiftFastIQModal({ user, onClose }) {
                       {matches[0].first_name} is already set!
                     </p>
                     <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, fontFamily: dm }}>
-                      {matches[0].first_name} is already on CFF with FastIQ access — they're all set!
+                      {matches[0].first_name} already has FastIQ access — they're all set!
                     </p>
                   </div>
                   <button onClick={onClose} style={btnOrange(false)}>Close</button>
@@ -167,8 +205,8 @@ export default function GiftFastIQModal({ user, onClose }) {
                   </div>
                   <p style={{ fontSize: 14, color: '#555', marginBottom: 16, fontFamily: dm }}>Is this your student?</p>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => doGift({ studentId: matches[0].id })} style={{ ...btnOrange(false), flex: 2 }}>
-                      Yes, Gift FastIQ Free →
+                    <button onClick={() => promptPlan({ studentId: matches[0].id })} style={{ ...btnOrange(false), flex: 2 }}>
+                      Yes, Gift FastIQ →
                     </button>
                     <button onClick={() => setStep('email')} style={{ ...btnOutline, flex: 1 }}>
                       Not them
@@ -182,12 +220,12 @@ export default function GiftFastIQModal({ user, onClose }) {
           {/* STEP: multiple matches */}
           {step === 'multiple' && (
             <>
-              {backBtn}
+              {backBtn()}
               <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, marginBottom: 16, fontFamily: dm }}>
                 We found a few students named <strong>{firstName} {lastName}</strong>.<br />Enter their email so we can find the right one:
               </p>
-              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && doGift({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
-              <button onClick={() => doGift({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && promptPlan({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
+              <button onClick={() => promptPlan({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
                 Find My Student →
               </button>
             </>
@@ -196,34 +234,103 @@ export default function GiftFastIQModal({ user, onClose }) {
           {/* STEP: no match */}
           {step === 'notfound' && (
             <>
-              {backBtn}
+              {backBtn()}
               <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, marginBottom: 16, fontFamily: dm }}>
                 We don't see anyone by that name on CFF yet.<br /><br />
-                Enter their email and we'll send them a free FastIQ trial invite:
+                Enter their email and we'll send them a FastIQ trial invite:
               </p>
-              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && doGift({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
-              <button onClick={() => doGift({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
-                Send Invite →
+              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && promptPlan({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
+              <button onClick={() => promptPlan({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+                Continue →
               </button>
             </>
           )}
 
-          {/* STEP: email (manual entry / skip) */}
+          {/* STEP: email (manual entry) */}
           {step === 'email' && (
             <>
-              {backBtn}
+              {backBtn()}
               <label style={{ fontSize: 12, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8, fontFamily: dm }}>
                 Student's email address
               </label>
-              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && doGift({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
-              <button onClick={() => doGift({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
-                Send Gift →
+              <input type="email" placeholder="student@university.edu" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && email.trim() && promptPlan({ studentEmail: email })} style={{ ...inputStyle, marginBottom: 12 }} />
+              <button onClick={() => promptPlan({ studentEmail: email })} disabled={!email.trim()} style={btnOrange(!email.trim())}>
+                Continue →
               </button>
               {savedEmail && (
-                <button onClick={() => doGift({ studentEmail: savedEmail })} style={{ ...btnGhost, marginTop: 12 }}>
+                <button onClick={() => promptPlan({ studentEmail: savedEmail })} style={{ ...btnGhost, marginTop: 12 }}>
                   Use {savedEmail} on file →
                 </button>
               )}
+            </>
+          )}
+
+          {/* STEP: plan selection */}
+          {step === 'plan' && (
+            <>
+              {backBtn('search')}
+              <p style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', marginBottom: 6, fontFamily: playfair }}>Choose a plan</p>
+              <p style={{ fontSize: 13, color: '#888', marginBottom: 20, fontFamily: dm }}>
+                Your card will be charged after the 5-day free trial. Cancel anytime from your dashboard.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                {[
+                  { key: 'monthly', label: 'Monthly', price: '$29/month', sub: 'Billed monthly after trial' },
+                  { key: 'annual', label: 'Annual', price: '$249/year', sub: 'Save $99 — billed annually after trial' },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setSelectedPlan(opt.key)}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '14px 16px', borderRadius: 12,
+                      border: `2px solid ${selectedPlan === opt.key ? '#E85D20' : '#E0E0E0'}`,
+                      background: selectedPlan === opt.key ? '#FFF5F0' : '#fff',
+                      cursor: 'pointer', minHeight: 'auto', width: '100%', fontFamily: dm,
+                    }}
+                  >
+                    <div style={{ textAlign: 'left' }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>{opt.label}</p>
+                      <p style={{ fontSize: 12, color: '#888', margin: '2px 0 0' }}>{opt.sub}</p>
+                    </div>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: selectedPlan === opt.key ? '#E85D20' : '#1A1A1A' }}>
+                      {opt.price}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p style={{ fontSize: 12, color: '#AAAAAA', marginBottom: 16, fontFamily: dm, textAlign: 'center' }}>
+                5-day free trial · Your card is charged on day 5 · Cancel anytime
+              </p>
+              <button
+                onClick={() => doGift({ ...pendingGift, plan: selectedPlan })}
+                style={btnOrange(false)}
+              >
+                Start 5-Day Free Trial →
+              </button>
+            </>
+          )}
+
+          {/* STEP: need card */}
+          {step === 'need_card' && (
+            <>
+              <div style={{ textAlign: 'center', padding: '8px 0 20px' }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#FFF5F0', border: '2px solid #E85D20', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <CreditCard className="w-6 h-6" style={{ color: '#E85D20' }} />
+                </div>
+                <p style={{ fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: '0 0 10px', fontFamily: playfair }}>
+                  Add a payment method first
+                </p>
+                <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 24, fontFamily: dm }}>
+                  To gift FastIQ, we need your card on file. You'll be charged $29/mo after the 5-day free trial. You can cancel anytime.
+                </p>
+                <button onClick={handleAddCard} style={btnOrange(false)}>
+                  Add Payment Method →
+                </button>
+                <button onClick={onClose} style={{ ...btnGhost, marginTop: 14, display: 'block', width: '100%', textAlign: 'center' }}>
+                  Cancel
+                </button>
+              </div>
             </>
           )}
 
@@ -231,7 +338,7 @@ export default function GiftFastIQModal({ user, onClose }) {
           {step === 'loading' && (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <p style={{ fontSize: 28, marginBottom: 12 }}>🎁</p>
-              <p style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A', fontFamily: dm }}>Sending gift...</p>
+              <p style={{ fontSize: 16, fontWeight: 600, color: '#1A1A1A', fontFamily: dm }}>Activating trial...</p>
             </div>
           )}
 
@@ -242,33 +349,16 @@ export default function GiftFastIQModal({ user, onClose }) {
                 {result.status === 'already_active' ? '✅' : result.status === 'pending' ? '📬' : '🎉'}
               </p>
               <p style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', marginBottom: 10, fontFamily: playfair }}>
-                {result.status === 'already_active'
-                  ? 'Already covered!'
-                  : result.status === 'pending'
-                  ? 'Invite sent!'
-                  : 'Done!'}
+                {result.status === 'already_active' ? 'Already covered!' : result.status === 'pending' ? 'Invite sent!' : 'Trial activated!'}
               </p>
               <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, marginBottom: 24, fontFamily: dm }}>
                 {result.status === 'already_active'
                   ? `${result.studentName || 'Your student'} already has FastIQ access. They're all set.`
                   : result.status === 'activated'
-                  ? `${result.studentName ? result.studentName + "'s" : "Your student's"} FastIQ trial is active right now. We've sent them an email so they know. Their trial runs for 7 days. If they love it, lock in $14.50/mo before April 15th.`
-                  : `We've emailed ${result.email || 'your student'} with their free FastIQ trial. Their 7-day clock starts the moment they sign up.`}
+                  ? `${result.studentName ? result.studentName + "'s" : "Your student's"} 5-day FastIQ trial is now active. Your card will be charged after day 5. We've emailed them to let them know.`
+                  : `We've sent an invite to ${result.email || 'your student'}. Their 5-day trial starts the moment they sign up. Your card will be charged after day 5.`}
               </p>
-              {result.status === 'activated' && (
-                <div style={{ display: 'flex', gap: 10, marginBottom: 4 }}>
-                  <a
-                    href="https://collegefastforward.com/#FastIQDashboard"
-                    style={{ ...btnOrange(false), flex: 2, textDecoration: 'none', fontSize: 13 }}
-                  >
-                    Lock In Founding Rate →
-                  </a>
-                  <button onClick={onClose} style={{ ...btnOutline, flex: 1 }}>Close</button>
-                </div>
-              )}
-              {result.status !== 'activated' && (
-                <button onClick={onClose} style={btnOrange(false)}>Done</button>
-              )}
+              <button onClick={onClose} style={btnOrange(false)}>Done</button>
             </div>
           )}
 

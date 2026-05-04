@@ -23,6 +23,26 @@ async function findUserByCustomerId(customerId) {
   return users?.length > 0 ? users[0] : null;
 }
 
+async function findStudentByGiftSubscriptionId(subscriptionId) {
+  const users = await base44.asServiceRole.entities.User.filter({ fastiq_gift_subscription_id: subscriptionId });
+  return users?.length > 0 ? users[0] : null;
+}
+
+async function revokeGiftedStudentAccess(subscriptionId) {
+  const student = await findStudentByGiftSubscriptionId(subscriptionId);
+  if (!student) return;
+  await base44.asServiceRole.entities.User.update(student.id, {
+    subscription_status: 'canceled',
+    membership_tier: 'free',
+    fastiq_active: false,
+    is_fastiq: false,
+    fastiq_setup_complete: false,
+    trial_status: 'expired',
+    fastiq_trial_active: false,
+  });
+  console.log('[stripeWebhook] Gifted FastIQ revoked for student:', student.id, 'sub:', subscriptionId);
+}
+
 async function findBillingUser(customerId, userId, userEmail) {
   if (customerId) {
     const user = await findUserByCustomerId(customerId);
@@ -363,6 +383,10 @@ Deno.serve(async (req) => {
             userUpdates.fastiq_active = false;
             userUpdates.membership_tier = 'free';
           }
+          // Revoke gifted student access if this is a parent-gifted subscription
+          if (subscription.metadata?.gifted_by_parent_id) {
+            await revokeGiftedStudentAccess(subscription.id);
+          }
         }
 
         if (billingUser) {
@@ -398,6 +422,11 @@ Deno.serve(async (req) => {
         const deletedSub = event.data.object;
         const customerId = deletedSub.customer;
         const familyId = deletedSub.metadata?.family_id;
+
+        // Handle gifted subscription cancellation — revoke student access
+        if (deletedSub.metadata?.gifted_by_parent_id) {
+          await revokeGiftedStudentAccess(deletedSub.id);
+        }
 
         const billingUser = await findUserByCustomerId(customerId);
 

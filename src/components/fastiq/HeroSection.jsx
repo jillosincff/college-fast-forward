@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PulseDot } from './LiveTickerBar';
 import ProgressRing from './ProgressRing';
+import GiftedFastIQBadge from './GiftedFastIQBadge';
 
 function HeroStatusLineInline({ lines = [] }) {
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -158,6 +159,13 @@ export default function HeroSection({ userName, user, profile, statValues, onOpe
               </button>
             )}
           </div>
+
+          {/* Gifted badge — shown instead of manage/cancel controls for gifted students */}
+          {user?.fastiq_gifted_by_user_id && (
+            <div style={{ marginTop: 10 }}>
+              <GiftedFastIQBadge user={user} />
+            </div>
+          )}
 
           {/* Line 5: Rotating status line with live pulse */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, height: 20 }}>
