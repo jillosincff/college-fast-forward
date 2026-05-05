@@ -2,10 +2,20 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 // AUTOMATION: Daily at 7:00 AM ET (11:00 UTC) — runs AFTER checkTrialExpiry (6 AM ET).
 // Routes each active/recently-expired trial user to the correct email template.
+//
+// TRIAL LENGTH IS PER-USER, COMPUTED FROM DATA — NOT A GLOBAL POLICY CONSTANT.
+// Each user's trial length = Math.round((trial_end_date - trial_start_date) / 86400000)
+// This means manually-extended users, gifted users, and any future variable-length trials
+// are all routed correctly without touching this scheduler. Do not add a TRIAL_LENGTH_DAYS
+// constant here — that's what this replaces.
+//
+// Routing table:
+//   5-day users:  daysLeft===1 → Day4 warning; daysSinceTrial===5 → ends today; daysSinceTrial===6 → reactivate
+//   7-day users:  daysLeft===2 → Day5 mid-trial; daysLeft===1 → Day6 payment/parent; daysSinceTrial===7 → ends today; daysSinceTrial===8 → reactivate
+//   All lengths:  daysLeft===1 + gifted → parent notification
+//
 // Idempotency: checks EmailEvent entity before every send — no duplicate emails.
 // After every successful send, writes an EmailEvent record.
-
-const NEW_TRIAL_CUTOFF = new Date('2026-04-29T00:00:00Z');
 
 // Check if a user already received a specific template
 async function alreadyReceived(base44, userId, templateName) {
@@ -50,6 +60,7 @@ Deno.serve(async (req) => {
   const runAt = new Date().toISOString();
   const appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
   const errors = [];
+  const skippedInvalid = [];
   const templateCounts = {
     day5_new_model: 0,
     day5_legacy: 0,
@@ -59,6 +70,7 @@ Deno.serve(async (req) => {
     day8: 0,
     skipped_already_sent: 0,
     skipped_upgraded: 0,
+    skipped_invalid_trial_length: 0,
   };
 
   // Fetch all users who have ever started a trial and are not yet paid/active
@@ -75,20 +87,38 @@ Deno.serve(async (req) => {
 
   for (const u of trialUsers) {
     try {
-      const isNewModel = new Date(u.trial_start_date) >= NEW_TRIAL_CUTOFF;
-      const trialDays = isNewModel ? 5 : 7;
+      // ── Compute trial length from the user's actual dates ─────────────────
+      // This is the ground truth — no global policy constant, no cutover date.
+      // Each user's trial length is whatever their data says it is.
+      if (!u.trial_start_date || !u.trial_end_date) {
+        // No end date set — can't route correctly, skip safely
+        skippedInvalid.push({ user_id: u.id, reason: 'missing trial_end_date' });
+        templateCounts.skipped_invalid_trial_length++;
+        continue;
+      }
 
-      // Always compute from trial_end_date (canonical source), fallback to trial_start_date + duration
-      const trialEndDateTime = u.trial_end_date
-        ? new Date(u.trial_end_date)
-        : new Date(new Date(u.trial_start_date).getTime() + trialDays * 24 * 60 * 60 * 1000);
+      const trialStartMs = new Date(u.trial_start_date).getTime();
+      const trialEndMs = new Date(u.trial_end_date).getTime();
+      const trialLengthDays = Math.round((trialEndMs - trialStartMs) / (1000 * 60 * 60 * 24));
 
+      // Defensive bounds: skip records with clearly bad date data
+      if (isNaN(trialLengthDays) || trialLengthDays < 1 || trialLengthDays > 90) {
+        console.warn(`[trialEmailScheduler] Skipping ${u.email} — invalid trial length: ${trialLengthDays} days`);
+        skippedInvalid.push({ user_id: u.id, email: u.email, reason: `invalid trial length: ${trialLengthDays}` });
+        templateCounts.skipped_invalid_trial_length++;
+        continue;
+      }
+
+      // 5-day model = any trial ≤ 5 days; 7-day model = anything longer (legacy)
+      const isNewModel = trialLengthDays <= 5;
+
+      const trialEndDateTime = new Date(u.trial_end_date);
       const now = new Date();
       const daysLeft = Math.max(0, Math.ceil((trialEndDateTime - now) / (1000 * 60 * 60 * 24)));
       const daysSinceTrial = Math.floor((now - new Date(u.trial_start_date)) / (1000 * 60 * 60 * 24));
 
-      // Skip users whose trial ended more than 10 days ago — past the point of all templates
-      if (daysSinceTrial > 10) continue;
+      // Skip users whose trial ended more than (trialLengthDays + 3) days ago
+      if (daysSinceTrial > trialLengthDays + 3) continue;
 
       const firstName = u.full_name?.split(' ')[0] || 'there';
       const trialEndDate = trialEndDateTime.toLocaleDateString('en-US', {
@@ -110,28 +140,30 @@ Deno.serve(async (req) => {
       };
 
       // ── Route to correct email template ──────────────────────────────────
+      // All daysLeft checks are relative to trial_end_date (self-correcting for any length).
+      // daysSinceTrial checks must be length-aware for "ends today" and "reactivate" emails.
 
-      // NEW MODEL: 1 day before auto-charge (not gifted)
+      // 5-DAY MODEL: 1 day before end — warning email (not gifted)
       if (isNewModel && daysLeft === 1 && !u.gifted_by_parent_email) {
         if (await alreadyReceived(base44, u.id, 'sendTrialDay5Email')) {
           templateCounts.skipped_already_sent++;
           continue;
         }
         await base44.asServiceRole.functions.invoke('sendTrialDay5Email', payload);
-        await recordEmailSent(base44, u, 'sendTrialDay5Email', { daysLeft, isNewModel });
+        await recordEmailSent(base44, u, 'sendTrialDay5Email', { daysLeft, isNewModel, trialLengthDays });
         templateCounts.day5_new_model++;
 
-      // LEGACY: 2 days left warning
+      // 7-DAY LEGACY: 2 days left — mid-trial check-in (skipped for 5-day, too short)
       } else if (!isNewModel && daysLeft === 2) {
         if (await alreadyReceived(base44, u.id, 'sendTrialDay5Email')) {
           templateCounts.skipped_already_sent++;
           continue;
         }
         await base44.asServiceRole.functions.invoke('sendTrialDay5Email', payload);
-        await recordEmailSent(base44, u, 'sendTrialDay5Email', { daysLeft, isNewModel });
+        await recordEmailSent(base44, u, 'sendTrialDay5Email', { daysLeft, isNewModel, trialLengthDays });
         templateCounts.day5_legacy++;
 
-      // LEGACY: Day 6 — Stripe payment method nudge (not parent-gifted)
+      // 7-DAY LEGACY: Day 6 — Stripe payment method nudge (not parent-gifted)
       } else if (!isNewModel && daysLeft === 1 && u.stripe_customer_id && !u.gifted_by_parent_email) {
         if (await alreadyReceived(base44, u.id, 'sendTrialPaymentReminderEmail')) {
           templateCounts.skipped_already_sent++;
@@ -149,10 +181,10 @@ Deno.serve(async (req) => {
           if (portalSession.url) portalUrl = portalSession.url;
         } catch (_) {}
         await base44.asServiceRole.functions.invoke('sendTrialPaymentReminderEmail', { userEmail: u.email, firstName, portalUrl });
-        await recordEmailSent(base44, u, 'sendTrialPaymentReminderEmail', { daysLeft });
+        await recordEmailSent(base44, u, 'sendTrialPaymentReminderEmail', { daysLeft, trialLengthDays });
         templateCounts.day6_payment++;
 
-      // BOTH MODELS: 1 day before end, parent-gifted — notify the parent
+      // ALL MODELS: 1 day before end, parent-gifted — notify the parent
       } else if (daysLeft === 1 && u.gifted_by_parent_email) {
         if (await alreadyReceived(base44, u.id, 'sendParentTrialEndingEmail')) {
           templateCounts.skipped_already_sent++;
@@ -171,28 +203,28 @@ Deno.serve(async (req) => {
             studentName: firstName,
             upgradeUrl: `${appBaseUrl}/#ParentHome`,
           });
-          await recordEmailSent(base44, u, 'sendParentTrialEndingEmail', { daysLeft });
+          await recordEmailSent(base44, u, 'sendParentTrialEndingEmail', { daysLeft, trialLengthDays });
           templateCounts.day6_parent++;
         }
 
-      // LEGACY: Day 7 — trial ends today
-      } else if (!isNewModel && daysSinceTrial === 7) {
+      // ALL MODELS: Trial ends today — computed from actual trial length
+      } else if (daysSinceTrial === trialLengthDays) {
         if (await alreadyReceived(base44, u.id, 'sendTrialDay7Email')) {
           templateCounts.skipped_already_sent++;
           continue;
         }
         await base44.asServiceRole.functions.invoke('sendTrialDay7Email', payload);
-        await recordEmailSent(base44, u, 'sendTrialDay7Email', { daysSinceTrial });
+        await recordEmailSent(base44, u, 'sendTrialDay7Email', { daysSinceTrial, trialLengthDays });
         templateCounts.day7++;
 
-      // LEGACY: Day 8 — trial has ended, reactivate prompt
-      } else if (!isNewModel && daysSinceTrial === 8) {
+      // ALL MODELS: Trial ended yesterday — reactivate prompt, computed from actual trial length
+      } else if (daysSinceTrial === trialLengthDays + 1) {
         if (await alreadyReceived(base44, u.id, 'sendTrialDay8Email')) {
           templateCounts.skipped_already_sent++;
           continue;
         }
         await base44.asServiceRole.functions.invoke('sendTrialDay8Email', payload);
-        await recordEmailSent(base44, u, 'sendTrialDay8Email', { daysSinceTrial });
+        await recordEmailSent(base44, u, 'sendTrialDay8Email', { daysSinceTrial, trialLengthDays });
         templateCounts.day8++;
       }
 
@@ -218,18 +250,19 @@ Deno.serve(async (req) => {
       actions_taken: totalSent,
       errors,
       duration_ms: durationMs,
-      details: templateCounts,
+      details: { ...templateCounts, skipped_invalid_records: skippedInvalid },
     });
   } catch (e) {
     console.error('[trialEmailScheduler] Failed to write SchedulerRun:', e.message);
   }
 
-  console.log(`[trialEmailScheduler] Done. sent=${totalSent}, skipped=${templateCounts.skipped_already_sent}, errors=${errors.length}, duration=${durationMs}ms`, templateCounts);
+  console.log(`[trialEmailScheduler] Done. sent=${totalSent}, skipped=${templateCounts.skipped_already_sent}, invalid=${templateCounts.skipped_invalid_trial_length}, errors=${errors.length}, duration=${durationMs}ms`, templateCounts);
   return Response.json({
     success: true,
     users_scanned: trialUsers.length,
     emails_sent: totalSent,
     template_breakdown: templateCounts,
+    skipped_invalid: skippedInvalid,
     errors,
     duration_ms: durationMs,
   });
