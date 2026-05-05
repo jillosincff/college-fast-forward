@@ -1,0 +1,65 @@
+{
+  "name": "SchedulerRun",
+  "type": "object",
+  "properties": {
+    "automation_name": {
+      "type": "string",
+      "description": "e.g. checkTrialExpiry or trialEmailScheduler"
+    },
+    "run_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this run started"
+    },
+    "users_scanned": {
+      "type": "number",
+      "default": 0
+    },
+    "actions_taken": {
+      "type": "number",
+      "default": 0,
+      "description": "Emails sent or flags expired"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Per-user errors encountered during the run"
+    },
+    "duration_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "details": {
+      "type": "object",
+      "default": {},
+      "description": "Template breakdown for email scheduler, or extra context"
+    }
+  },
+  "required": [
+    "automation_name",
+    "run_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

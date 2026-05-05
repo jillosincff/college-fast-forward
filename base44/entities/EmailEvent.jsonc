@@ -1,0 +1,49 @@
+{
+  "name": "EmailEvent",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who received the email"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email address for quick lookup"
+    },
+    "template_name": {
+      "type": "string",
+      "description": "Name of the email template sent, e.g. sendTrialDay5Email"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was sent"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "School code for multi-school isolation"
+    },
+    "metadata": {
+      "type": "object",
+      "default": {},
+      "description": "Debug context: daysLeft, daysSinceTrial, etc."
+    }
+  },
+  "required": [
+    "user_id",
+    "template_name",
+    "sent_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
