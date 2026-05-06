@@ -39,8 +39,8 @@ export default function EngagementAgentDashboard() {
   const loadEmails = async () => {
     setLoading(true);
     try {
-      const all = await base44.entities.EngagementEmail.list('-created_date', 200);
-      setEmails(all || []);
+      const res = await base44.functions.invoke('getEngagementEmails', {});
+      setEmails(res.data?.emails || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -49,10 +49,9 @@ export default function EngagementAgentDashboard() {
   };
 
   const approveEmail = async (id) => {
-    await base44.entities.EngagementEmail.update(id, {
-      status: 'approved',
-      approved_by: user?.email,
-      approved_at: new Date().toISOString(),
+    await base44.functions.invoke('updateEngagementEmail', {
+      id,
+      updates: { status: 'approved', approved_by: user?.email, approved_at: new Date().toISOString() },
     });
     setEmails(prev => prev.map(e => e.id === id ? { ...e, status: 'approved', approved_by: user?.email } : e));
     if (previewEmail?.id === id) setPreviewEmail(prev => ({ ...prev, status: 'approved' }));
@@ -60,9 +59,9 @@ export default function EngagementAgentDashboard() {
 
   const rejectEmail = async (id) => {
     const reason = prompt('Rejection reason (optional):') || 'Rejected by admin';
-    await base44.entities.EngagementEmail.update(id, {
-      status: 'rejected',
-      rejected_reason: reason,
+    await base44.functions.invoke('updateEngagementEmail', {
+      id,
+      updates: { status: 'rejected', rejected_reason: reason },
     });
     setEmails(prev => prev.map(e => e.id === id ? { ...e, status: 'rejected' } : e));
     if (previewEmail?.id === id) setPreviewEmail(prev => ({ ...prev, status: 'rejected' }));
