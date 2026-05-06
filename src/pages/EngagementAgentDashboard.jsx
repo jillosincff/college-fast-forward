@@ -30,6 +30,7 @@ export default function EngagementAgentDashboard() {
   const [previewEmail, setPreviewEmail] = useState(null);
   const [runningAgent, setRunningAgent] = useState(false);
   const [dispatching, setDispatching] = useState(false);
+  const [rejectingStale, setRejectingStale] = useState(false);
   const [actionMsg, setActionMsg] = useState('');
 
   useEffect(() => {
@@ -79,6 +80,20 @@ export default function EngagementAgentDashboard() {
       setActionMsg(`Error: ${e.message}`);
     } finally {
       setRunningAgent(false);
+    }
+  };
+
+  const rejectStale = async () => {
+    setRejectingStale(true);
+    setActionMsg('');
+    try {
+      const res = await base44.functions.invoke('rejectStaleEngagementEmails', { maxAgeDays: 2 });
+      setActionMsg(`Rejected ${res.data.rejected} stale emails (older than 2 days)`);
+      await loadEmails();
+    } catch (e) {
+      setActionMsg(`Error: ${e.message}`);
+    } finally {
+      setRejectingStale(false);
     }
   };
 
@@ -134,6 +149,9 @@ export default function EngagementAgentDashboard() {
             </Button>
             <Button variant="outline" size="sm" onClick={() => runAgent(true)} disabled={runningAgent} className="border-slate-700 text-slate-300 hover:bg-slate-800">
               Dry Run
+            </Button>
+            <Button variant="outline" size="sm" onClick={rejectStale} disabled={rejectingStale} className="border-red-800 text-red-400 hover:bg-red-900/20">
+              {rejectingStale ? 'Rejecting...' : 'Reject Stale (>2d)'}
             </Button>
             <Button size="sm" onClick={() => runAgent(false)} disabled={runningAgent} className="bg-orange-600 hover:bg-orange-700 text-white">
               <Play className="w-4 h-4 mr-1" /> {runningAgent ? 'Running...' : 'Run Agent'}
