@@ -31,6 +31,7 @@ export default function EngagementAgentDashboard() {
   const [runningAgent, setRunningAgent] = useState(false);
   const [dispatching, setDispatching] = useState(false);
   const [rejectingStale, setRejectingStale] = useState(false);
+  const [syncingOpens, setSyncingOpens] = useState(false);
   const [actionMsg, setActionMsg] = useState('');
 
   useEffect(() => {
@@ -80,6 +81,21 @@ export default function EngagementAgentDashboard() {
       setActionMsg(`Error: ${e.message}`);
     } finally {
       setRunningAgent(false);
+    }
+  };
+
+  const syncOpens = async () => {
+    setSyncingOpens(true);
+    setActionMsg('');
+    try {
+      const res = await base44.functions.invoke('syncEngagementEmailOpens', {});
+      const d = res.data;
+      setActionMsg(`Synced: checked ${d.checked} emails, updated ${d.updated} with open/click data from SendGrid (${d.sendgridMessages} SG messages scanned)`);
+      await loadEmails();
+    } catch (e) {
+      setActionMsg(`Sync error: ${e.message}`);
+    } finally {
+      setSyncingOpens(false);
     }
   };
 
@@ -152,6 +168,9 @@ export default function EngagementAgentDashboard() {
             </Button>
             <Button variant="outline" size="sm" onClick={rejectStale} disabled={rejectingStale} className="border-red-800 text-red-400 hover:bg-red-900/20">
               {rejectingStale ? 'Rejecting...' : 'Reject Stale (>2d)'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={syncOpens} disabled={syncingOpens} className="border-blue-800 text-blue-400 hover:bg-blue-900/20">
+              {syncingOpens ? 'Syncing...' : '↻ Sync Opens'}
             </Button>
             <Button size="sm" onClick={() => runAgent(false)} disabled={runningAgent} className="bg-orange-600 hover:bg-orange-700 text-white">
               <Play className="w-4 h-4 mr-1" /> {runningAgent ? 'Running...' : 'Run Agent'}
