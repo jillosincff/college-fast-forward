@@ -20,8 +20,12 @@ export default function AdminV2() {
   useEffect(() => {
     base44.auth.me().then(u => {
       setUser(u);
-      // Access check handled by layout — proceed for all authenticated users
-      
+      const isAdmin = u?.role === 'admin' || u?.roles?.includes('admin');
+      if (!isAdmin) {
+        setError('Admin access required.');
+        setLoading(false);
+        return;
+      }
       loadData();
     }).catch(() => setLoading(false));
   }, []);
