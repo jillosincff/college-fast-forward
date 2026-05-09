@@ -37,6 +37,7 @@ export default function SchoolSearchInput({ value, onChange, error }) {
   const [search, setSearch] = useState(value || '');
   const [showDropdown, setShowDropdown] = useState(false);
   const [filtered, setFiltered] = useState([]);
+  const [selectedFromList, setSelectedFromList] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => { setSearch(value || ''); }, [value]);
@@ -60,15 +61,25 @@ export default function SchoolSearchInput({ value, onChange, error }) {
 
   const select = (name) => {
     setSearch(name);
+    setSelectedFromList(true);
     onChange(name);
     setShowDropdown(false);
   };
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setSearch(val);
+    setSelectedFromList(false);
+    onChange(val);
+  };
+
+  const isCustomEntry = search.trim().length >= 3 && !selectedFromList && filtered.length === 0;
 
   return (
     <div style={{ position: 'relative' }} ref={ref}>
       <input
         value={search}
-        onChange={e => { setSearch(e.target.value); onChange(e.target.value); }}
+        onChange={handleInputChange}
         placeholder="Start typing your school..."
         style={{
           width: '100%', background: 'rgba(255,255,255,0.06)',
@@ -107,6 +118,11 @@ export default function SchoolSearchInput({ value, onChange, error }) {
             </button>
           ))}
         </div>
+      )}
+      {isCustomEntry && (
+        <p style={{ fontFamily: dmSans, fontSize: 12, color: '#888', marginTop: 6, marginBottom: 0 }}>
+          Don't see your school? No problem — we'll use "{search.trim()}"
+        </p>
       )}
     </div>
   );

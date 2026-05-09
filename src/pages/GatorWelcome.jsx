@@ -2,9 +2,21 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
+import { trackEvent } from '@/components/utils/analytics';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
+
+async function retryUpdateMe(data, maxAttempts = 3) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await base44.auth.updateMe(data);
+    } catch (e) {
+      if (attempt === maxAttempts) throw e;
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
+  }
+}
 
 export default function GatorWelcome() {
   const { user, refreshUser, isLoading } = useAuth();
@@ -30,9 +42,10 @@ export default function GatorWelcome() {
   const handleChoice = useCallback(async (intent) => {
     setSaving(intent);
     setError(null);
+    trackEvent('onboarding_step', { flow: 'welcome', step: 0, action: 'role_chosen', role: intent });
     try {
       const isHelper = intent === 'helper';
-      await base44.auth.updateMe({
+      await retryUpdateMe({
         persona: isHelper ? 'parent' : 'student',
         roles: [isHelper ? 'parent' : 'student'],
         alumni_intent: isHelper ? 'help_students' : 'seeking',
@@ -95,6 +108,7 @@ export default function GatorWelcome() {
     // Already onboarded — send to the right dashboard
     if (user.onboarding_completed === true) {
       localStorage.removeItem('pending_intent');
+      try { sessionStorage.removeItem('pending_intent'); } catch (e) {}
       const dest = (user.alumni_intent === 'help_students' || user.persona === 'parent')
         ? 'ParentHome'
         : 'FreeTierDashboard';
@@ -103,9 +117,11 @@ export default function GatorWelcome() {
     }
 
     // Pre-stored intent from landing page CTA — skip the choice screen
-    const pendingIntent = localStorage.getItem('pending_intent');
+    // Read from both storage backends (Safari clears localStorage during OAuth)
+    const pendingIntent = localStorage.getItem('pending_intent') || sessionStorage.getItem('pending_intent');
     if (pendingIntent === 'helper' || pendingIntent === 'seeker') {
       localStorage.removeItem('pending_intent');
+      try { sessionStorage.removeItem('pending_intent'); } catch (e) {}
       handleChoice(pendingIntent);
       return;
     }
@@ -115,6 +131,7 @@ export default function GatorWelcome() {
     if (user.persona === 'student' || user.persona === 'gator') { navigate('StudentOnboarding'); return; }
 
     // No persona, no intent — show the choice screen
+    trackEvent('onboarding_step', { flow: 'welcome', step: 0, action: 'role_choice_shown' });
     setChoosing(true);
   }, [user, isLoading, refreshUser, handleChoice]);
 

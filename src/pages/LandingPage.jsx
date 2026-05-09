@@ -168,7 +168,7 @@ export default function LandingPage() {
     sessionStorage.removeItem('oauth_redirect_in_progress');
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('auth_error') === 'timeout') {
-      toast.error('Sign-in timed out. Please try again or use Magic Link.', { duration: 6000 });
+      toast.error('Sign-in timed out. Slow network? Try again or use Magic Link on the sign-in page.', { duration: 8000 });
       window.history.replaceState({}, '', window.location.pathname + window.location.hash);
     }
     setMounted(true);
@@ -193,6 +193,7 @@ export default function LandingPage() {
   const onParentJoin = () => {
     trackEvent('cta_parent_clicked');
     localStorage.setItem('pending_intent', 'helper');
+    try { sessionStorage.setItem('pending_intent', 'helper'); } catch (e) { /* private browsing */ }
     const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };
@@ -200,6 +201,7 @@ export default function LandingPage() {
   const onStudentJoin = () => {
     trackEvent('cta_student_clicked');
     localStorage.setItem('pending_intent', 'seeker');
+    try { sessionStorage.setItem('pending_intent', 'seeker'); } catch (e) { /* private browsing */ }
     const callbackUrl = window.location.origin + '/#GatorWelcome';
     base44.auth.redirectToLogin(callbackUrl);
   };

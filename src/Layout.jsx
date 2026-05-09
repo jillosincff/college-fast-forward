@@ -702,7 +702,7 @@ function AppContent() {
 
     if (sessionStorage.getItem('oauth_redirect_in_progress') === 'true') {
       const redirectStartTime = parseInt(sessionStorage.getItem('oauth_redirect_start') || '0');
-      if (Date.now() - redirectStartTime < 30000) return;
+      if (Date.now() - redirectStartTime < 60000) return;
       sessionStorage.removeItem('oauth_redirect_in_progress');
       sessionStorage.removeItem('oauth_redirect_start');
     }
@@ -716,7 +716,7 @@ function AppContent() {
     const oauthAttempts = parseInt(localStorage.getItem('oauth_attempt_count') || '0');
     const oauthStartTime = parseInt(localStorage.getItem('oauth_start_time') || '0');
     const timeSinceStart = Date.now() - oauthStartTime;
-    if ((oauthStartTime && timeSinceStart > 30000) || oauthAttempts >= 3) {
+    if ((oauthStartTime && timeSinceStart > 60000) || oauthAttempts >= 3) {
       localStorage.removeItem('pending_invite_role'); localStorage.removeItem('pending_invite_code');
       localStorage.removeItem('pending_student_email'); localStorage.removeItem('pending_referral_code');
       localStorage.removeItem('oauth_attempt_count'); localStorage.removeItem('oauth_start_time');

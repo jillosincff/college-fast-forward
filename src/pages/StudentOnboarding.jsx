@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
+import { trackEvent } from '@/components/utils/analytics';
 import GoogleSignInButton from '@/components/onboarding/student/GoogleSignInButton';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
 import StudentWelcomeScreen from '@/components/onboarding/student/StudentWelcomeScreen';
@@ -9,6 +10,17 @@ import StudentWelcomeScreen from '@/components/onboarding/student/StudentWelcome
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 const ORANGE = '#E85D20';
+
+async function retryUpdateMe(data, maxAttempts = 3) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await base44.auth.updateMe(data);
+    } catch (e) {
+      if (attempt === maxAttempts) throw e;
+      await new Promise(r => setTimeout(r, 1000 * attempt));
+    }
+  }
+}
 
 /**
  * FLOW B — Student joins on their own (from role selection "I'm a Job Seeker").
@@ -49,6 +61,7 @@ export default function StudentOnboarding() {
     if (user && step === 1) {
       const name = user.full_name?.split(' ')[0] || '';
       setFirstName(name);
+      trackEvent('onboarding_step', { flow: 'student', step: 2, action: 'profile_form_shown' });
       setStep(2);
     }
   }, [user, step]);
@@ -64,6 +77,7 @@ export default function StudentOnboarding() {
   const handleGoogleSignIn = () => {
     setLoading(true);
     setError(null);
+    trackEvent('onboarding_step', { flow: 'student', step: 1, action: 'google_signin_clicked' });
     try {
       localStorage.setItem('pending_invite_role', 'student');
       // Safari clears localStorage during OAuth — sessionStorage survives
@@ -101,7 +115,8 @@ export default function StudentOnboarding() {
     }
 
     try {
-      await base44.auth.updateMe(updateData);
+      trackEvent('onboarding_step', { flow: 'student', step: 2, action: 'profile_submitted', school: school.trim() });
+      await retryUpdateMe(updateData);
 
       // Auto-link to parent if any (non-blocking)
       base44.functions.invoke('linkStudentToParent', {
@@ -135,9 +150,11 @@ export default function StudentOnboarding() {
       localStorage.removeItem('pending_invite_role');
       try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
       if (refreshUser) await refreshUser();
+      trackEvent('onboarding_step', { flow: 'student', step: 3, action: 'onboarding_completed' });
       setStep(3);
     } catch (e) {
       console.error('Onboarding update failed:', e.message);
+      trackEvent('onboarding_step', { flow: 'student', step: 2, action: 'profile_submit_failed', error: e.message });
       setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -145,8 +162,7 @@ export default function StudentOnboarding() {
   };
 
   const handleWelcomeComplete = useCallback(() => {
-    // Flow B: Go to PostJoinUpsell (7-day trial offer)
-    navigate('PostJoinUpsell');
+    navigate('FreeTierDashboard?welcome=true');
   }, []);
 
   // ── SCREEN 3: Welcome Moment ──

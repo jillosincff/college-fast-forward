@@ -164,20 +164,14 @@ export default function GatorAuth() {
     }
     
     if (user && !user.persona) {
-      // Only go to GatorWelcome if there's a pending role — otherwise show the auth form
+      // User is authenticated but has no persona — always send to role selection.
+      // Check for pending role in either storage backend (Safari clears localStorage during OAuth).
       const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      if (pendingRole) {
-        navigate('GatorWelcome');
-      } else {
-        // Check sessionStorage fallback (Safari clears localStorage during OAuth)
-        const safariType = sessionStorage.getItem('cff_onboarding_type');
-        if (safariType) {
-          localStorage.setItem('pending_invite_role', safariType);
-          navigate('GatorWelcome');
-        } else {
-          setStep('auth');
-        }
+      const safariType = sessionStorage.getItem('cff_onboarding_type');
+      if (safariType && !pendingRole) {
+        localStorage.setItem('pending_invite_role', safariType);
       }
+      navigate('GatorWelcome');
       return;
     }
     
