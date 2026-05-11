@@ -15,17 +15,25 @@ const HOW_IT_WORKS = [
     number: '02',
     icon: '✨',
     title: 'Stand Out',
-    desc: 'Resume, cover letters & LinkedIn optimization that actually gets noticed — not just ATS-safe, but genuinely compelling.',
+    desc: 'Resume versions, cover letters & LinkedIn optimization — built to actually get noticed.',
   },
   {
     number: '03',
-    icon: '💬',
-    title: 'Get Replies',
-    desc: "Finds relevant connections from your school and writes messages that work — when you're ready to use them.",
+    icon: '📋',
+    title: 'Stay on Top of Everything',
+    desc: 'Track every application, manage resume versions per job, and send outreach when ready.',
   },
 ];
 
 const STORIES = [
+  {
+    quote: "I finally stayed organized with all my applications and resume versions. The Agent helped me land an internship in 3 weeks.",
+    name: "Chris C.",
+    school: "USC '27",
+    initials: "CC",
+    tag: "Internship locked",
+    tagIcon: "🎯",
+  },
   {
     quote: "I found a Disney alum from my school in 2 minutes. She actually responded.",
     name: "Jordan T.",
@@ -35,6 +43,14 @@ const STORIES = [
     tagIcon: "✉️",
   },
   {
+    quote: "I literally had no clue how to start my job search. The Agent gave me a clear plan and kept everything organized.",
+    name: "Marcus",
+    school: "Penn State · Senior · Finance",
+    initials: "M",
+    tag: "3 interviews booked",
+    tagIcon: "📅",
+  },
+  {
     quote: "I applied to over 100 jobs and got zero responses. I reached out to one parent from my school and he got me an interview by the following Monday.",
     name: "Sarah K.",
     school: "University of Michigan · Junior · Engineering",
@@ -42,37 +58,21 @@ const STORIES = [
     tag: "Got the role",
     tagIcon: "🎯",
   },
-  {
-    quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked. I used the Agent to fix my resume and outreach — landed an internship in 3 weeks.",
-    name: "Chris C.",
-    school: "USC '27",
-    initials: "CC",
-    tag: "Internship locked",
-    tagIcon: "🎯",
-  },
-  {
-    quote: "I literally had no clue how to start my job search. The Agent gave me the perfect plan to execute.",
-    name: "Marcus",
-    school: "Penn State · Senior · Finance",
-    initials: "M",
-    tag: "3 interviews booked",
-    tagIcon: "📅",
-  },
 ];
 
 const FREE_FEATURES = [
   'Basic resume help',
-  'Limited Agent searches',
+  'Limited Agent usage',
   'Application tracker',
   'Perfect for getting started',
 ];
 
 const PRO_FEATURES = [
   'Unlimited Agent usage',
-  'Smart matching + outreach messages',
-  'Advanced resume & LinkedIn help',
-  'Mock interviews + daily signals',
-  'Most students upgrade after their first win',
+  'Full application & resume version tracking',
+  'Advanced optimization + outreach',
+  'Daily signals and interview prep',
+  'Most students upgrade after seeing real organization',
 ];
 
 function StoriesCarousel() {
@@ -206,22 +206,30 @@ export default function StudentLandingPage({ onParentClick }) {
         <h1 style={{
           fontFamily: playfair, fontSize: 'clamp(40px, 7vw, 88px)',
           fontWeight: 700, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.03em',
-          margin: '0 0 28px', maxWidth: 760,
+          margin: '0 0 16px', maxWidth: 760,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Your Job Search<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Starts Here</span>
+          Stay Organized.<br />
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Get Hired.</span>
         </h1>
 
         {/* Sub-headline */}
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)',
-          fontWeight: 400, color: 'rgba(255,255,255,0.65)',
+          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)',
+          fontWeight: 700, color: 'rgba(255,255,255,0.85)',
+          lineHeight: 1.4, maxWidth: 500, margin: '0 auto 10px',
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
+        }}>
+          One platform for your entire job search.
+        </p>
+        <p style={{
+          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)',
+          fontWeight: 400, color: 'rgba(255,255,255,0.55)',
           lineHeight: 1.7, maxWidth: 560, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          The all-in-one AI Agent built for college students — resumes, outreach messages, LinkedIn optimization, interview prep, and application tracking.
+          The all-in-one AI Agent that helps with resumes, outreach, LinkedIn, interview prep, and application tracking — all in a single organized dashboard.
         </p>
 
         {/* CTAs */}
@@ -269,7 +277,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>HOW IT WORKS</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 52px', textAlign: 'center' }}>
-            The Agent helps you at every stage
+            Stay organized. Get hired.
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 40 }}>
@@ -286,7 +294,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
           <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.08), rgba(232,93,32,0.03))', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '22px 32px', textAlign: 'center' }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              "Stop doing it all manually. Let the Agent do the heavy lifting."
+              "Stop jumping between tabs. Keep your entire job search in one place."
             </p>
           </div>
         </div>
@@ -299,7 +307,7 @@ export default function StudentLandingPage({ onParentClick }) {
           Watch the Agent work in seconds
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', margin: '0 0 40px', lineHeight: 1.65 }}>
-          Tell it what you're looking for — it finds strong matches from your school and drafts the message for you.
+          Upload your resume → Tell it the job → Get a tailored version + automatically track it in your dashboard.
         </p>
 
         {/* Mock screen */}
@@ -343,7 +351,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
           <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
           <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.65 }}>
-            <strong style={{ color: '#fff' }}>Real result:</strong> One UF student went from zero responses to landing a Disney internship after using the Agent for outreach.
+            <strong style={{ color: '#fff' }}>Never wonder again</strong> which resume you sent to which company — everything is organized and visible in one place.
           </p>
         </div>
       </div>
@@ -424,10 +432,10 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.12) 0%, transparent 55%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 10px' }}>
-            Your job search
+            Stay organized.
           </h2>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>
-            starts here.
+            Get hired.
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 420 }}>
             Join thousands of students using College Fast Forward to simplify their job search.
