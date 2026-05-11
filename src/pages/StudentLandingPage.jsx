@@ -102,7 +102,7 @@ function AlumniSearchDemo() {
           borderRadius: 6, padding: '4px 12px',
           fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)',
         }}>
-          ⚡ College Fast Forward — Alumni Search
+          ⚡ College Fast Forward — AI Alumni Search
         </div>
       </div>
 
@@ -395,7 +395,7 @@ export default function StudentLandingPage({ onParentClick }) {
              marginLeft: 'auto',
              marginRight: 'auto',
            }}>
-             We've covered every base. The Parent Network gives you a community of warm connections, and FastIQ <strong style={{ color: '#fff', fontWeight: 700 }}>handles</strong> your entire job search.
+             We've covered every base. The Parent Network gives you a community of warm connections, and our AI agent <strong style={{ color: '#fff', fontWeight: 700 }}>handles</strong> your entire job search.
            </p>
         </div>
       </div>
@@ -438,7 +438,7 @@ export default function StudentLandingPage({ onParentClick }) {
             margin: '0 auto 44px',
             maxWidth: 540,
           }}>
-            Alumni are <strong style={{ color: '#fff', fontWeight: 700 }}>far more likely to respond</strong> — especially when you share a school connection. FastIQ finds them at the companies you care about—like a <strong style={{ color: '#fff', fontWeight: 700 }}>VP of Marketing at Disney</strong>—and researches exactly how they can help you get in.
+            Alumni are <strong style={{ color: '#fff', fontWeight: 700 }}>far more likely to respond</strong> — especially when you share a school connection. Our AI agent finds them at the companies you care about—like a <strong style={{ color: '#fff', fontWeight: 700 }}>VP of Marketing at Disney</strong>—and researches exactly how they can help you get in.
           </p>
         </div>
       </div>
@@ -458,7 +458,7 @@ export default function StudentLandingPage({ onParentClick }) {
             See the 'Alumni Shortcut' in action
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.6)', textAlign: 'center', margin: '0 0 40px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.65 }}>
-            FastIQ scans thousands of companies in your target industry to find the exact alumni who can help you—then researches their background and drafts the perfect message to get you a referral.
+            Our AI agent scans thousands of companies in your target industry to find the exact alumni who can help you—then researches their background and drafts the perfect message to get you a referral.
           </p>
 
           <AlumniSearchDemo />
@@ -567,7 +567,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
         </div>
         <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: '32px 0 0' }}>
-          Free to join. Activate FastIQ for $29/mo whenever you're ready.
+          Free to join. Activate your AI agent for $29/mo whenever you're ready.
         </p>
       </div>
 
