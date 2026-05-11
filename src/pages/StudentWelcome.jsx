@@ -113,8 +113,10 @@ export default function StudentWelcome() {
     card: (active) => ({
       background: active ? 'rgba(232,93,32,0.1)' : 'rgba(255,255,255,0.04)',
       border: `1.5px solid ${active ? '#E85D20' : 'rgba(255,255,255,0.09)'}`,
-      borderRadius: 14, padding: '16px 20px', cursor: 'pointer',
-      textAlign: 'left', transition: 'all 0.15s ease', width: '100%', marginBottom: 10,
+      borderRadius: 16, padding: '18px 20px', cursor: 'pointer',
+      textAlign: 'left', transition: 'all 0.18s ease', width: '100%', marginBottom: 10,
+      boxShadow: active ? '0 4px 20px rgba(232,93,32,0.15)' : 'none',
+      transform: active ? 'translateY(-1px)' : 'none',
     }),
     btnPrimary: { fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 14, padding: '16px 28px', cursor: 'pointer', width: '100%', marginTop: 24, minHeight: 'auto', boxShadow: '0 8px 28px rgba(232,93,32,0.32)', transition: 'opacity 0.15s' },
     btnBack: { fontFamily: dm, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.45)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, padding: '14px 18px', cursor: 'pointer', minHeight: 'auto', flexShrink: 0 },
@@ -124,9 +126,9 @@ export default function StudentWelcome() {
   };
 
   const ProgressBar = ({ n }) => (
-    <div style={{ display: 'flex', gap: 6, marginBottom: 36 }}>
+    <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
       {Array.from({ length: TOTAL }).map((_, i) => (
-        <div key={i} style={{ flex: 1, height: 3, borderRadius: 100, background: i < n ? '#E85D20' : 'rgba(255,255,255,0.09)', transition: 'background 0.3s' }} />
+        <div key={i} style={{ flex: 1, height: 3, borderRadius: 100, background: i < n ? '#E85D20' : 'rgba(255,255,255,0.09)', transition: 'background 0.4s ease' }} />
       ))}
     </div>
   );
@@ -139,7 +141,7 @@ export default function StudentWelcome() {
   );
 
   const StepLabel = ({ n }) => (
-    <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+    <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 24px' }}>
       Step {n} of {TOTAL}
     </p>
   );
@@ -156,8 +158,8 @@ export default function StudentWelcome() {
   if (step === 1) {
     const opts = [
       { key: 'applying', emoji: '🚀', label: 'Actively applying for internships / jobs', sub: 'I have applications in progress or ready to send' },
-      { key: 'building', emoji: '🛠️', label: 'Building materials (resume, LinkedIn, etc.)', sub: 'Getting my profiles and documents ready first' },
-      { key: 'exploring', emoji: '🔭', label: 'Just exploring / early stage', sub: 'Figuring out direction, not applying yet' },
+      { key: 'building', emoji: '🔧', label: 'Building materials (resume, LinkedIn, etc.)', sub: 'Getting my profiles and documents ready first' },
+      { key: 'exploring', emoji: '🔭', label: 'Just exploring / early stage', sub: 'Figuring things out, not applying yet' },
     ];
     return (
       <div style={S.shell}><div style={S.inner}>
@@ -165,20 +167,22 @@ export default function StudentWelcome() {
         <ProgressBar n={1} />
         <StepLabel n={1} />
         <h1 style={S.h1}>Let's build your job search workspace</h1>
-        <p style={S.sub}>Answer 3 quick questions so we can show you the most useful tools first.</p>
+        <p style={S.sub}>Answer 3 quick questions so we can highlight the most useful tools for you right away.</p>
         <p style={S.q}>What are you focused on right now?</p>
         {opts.map(o => (
           <button key={o.key} onClick={() => setFocus(o.key)} style={S.card(focus === o.key)}
-            onMouseEnter={e => { if (focus !== o.key) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}}
-            onMouseLeave={e => { if (focus !== o.key) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}}
+            onMouseEnter={e => { if (focus !== o.key) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)'; e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+            onMouseLeave={e => { if (focus !== o.key) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.transform = 'none'; }}}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <span style={{ fontSize: 22, flexShrink: 0 }}>{o.emoji}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 26, flexShrink: 0 }}>{o.emoji}</span>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 14, fontWeight: focus === o.key ? 700 : 500, color: focus === o.key ? '#fff' : 'rgba(255,255,255,0.8)', margin: '0 0 2px' }}>{o.label}</p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', margin: 0 }}>{o.sub}</p>
+                <p style={{ fontSize: 14, fontWeight: focus === o.key ? 700 : 500, color: focus === o.key ? '#fff' : 'rgba(255,255,255,0.85)', margin: '0 0 4px' }}>{o.label}</p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', margin: 0, lineHeight: 1.5 }}>{o.sub}</p>
               </div>
-              {focus === o.key && <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#E85D20', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700 }}>✓</div>}
+              <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${focus === o.key ? '#E85D20' : 'rgba(255,255,255,0.18)'}`, background: focus === o.key ? '#E85D20' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.18s', fontSize: 9, color: '#fff', fontWeight: 700 }}>
+                {focus === o.key && '✓'}
+              </div>
             </div>
           </button>
         ))}
@@ -272,35 +276,43 @@ export default function StudentWelcome() {
   }
 
   // ── DONE ──
-  const cards = [
-    ...(focus === 'applying' ? [{ emoji: '📋', title: 'Open Application Tracker', sub: 'Track every application in one place', dest: 'FreeTierDashboard', hot: true }] : []),
-    ...(focus === 'building' ? [{ emoji: '📄', title: 'Improve My Resume', sub: 'AI-powered resume tailoring and optimization', dest: 'ResumeTailoring', hot: true }] : []),
-    { emoji: '⚡', title: 'Let the Agent help with your first task', sub: 'Tell the AI what you need — it handles the rest', dest: 'FreeTierDashboard', hot: !focus || focus === 'exploring' },
+  const focusCards = {
+    applying: { emoji: '📋', title: 'Open Application Tracker', sub: 'Log and track every application in one organized place', dest: 'FreeTierDashboard' },
+    building:  { emoji: '📄', title: 'Improve My Resume', sub: 'AI-powered tailoring — match your resume to any job description', dest: 'ResumeTailoring' },
+    exploring: { emoji: '🔭', title: 'Explore Opportunities', sub: 'Browse roles matched to your school, major, and interests', dest: 'FreeTierDashboard' },
+  };
+  const primaryCard = focusCards[focus] || focusCards.exploring;
+  const quickStartCards = [
+    primaryCard,
+    { emoji: '⚡', title: 'Start with the AI Agent', sub: 'Describe your situation — it figures out the best next step', dest: 'FreeTierDashboard' },
+    { emoji: '✉️', title: 'Write Outreach in 60 Seconds', sub: 'AI drafts a cold email or LinkedIn note for any company', dest: 'FreeTierDashboard' },
   ];
 
   return (
     <div style={S.shell}><div style={{ ...S.inner, textAlign: 'center' }}>
-      <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '2px solid rgba(232,93,32,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: 22 }}>🎯</div>
-      <h1 style={{ ...S.h1, textAlign: 'center', marginBottom: 10 }}>Your job search workspace is ready</h1>
-      <p style={{ ...S.sub, maxWidth: 380, margin: '0 auto 32px', textAlign: 'center' }}>Based on your answers, here's where we recommend starting:</p>
+      <style>{`@keyframes popIn{0%{transform:scale(0.6);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}`}</style>
+      <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '2px solid rgba(232,93,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 28, animation: 'popIn 0.5s ease forwards' }}>🎯</div>
+      <h1 style={{ ...S.h1, textAlign: 'center', marginBottom: 8 }}>Your workspace is ready.</h1>
+      <p style={{ ...S.sub, maxWidth: 360, margin: '0 auto 28px', textAlign: 'center' }}>Based on your answers, here's where we recommend starting:</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28, textAlign: 'left' }}>
-        {cards.map((c, i) => (
-          <button key={i} onClick={() => navigate(c.dest)} style={{ background: c.hot ? 'rgba(232,93,32,0.09)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${c.hot ? 'rgba(232,93,32,0.35)' : 'rgba(255,255,255,0.09)'}`, borderRadius: 14, padding: '16px 20px', cursor: 'pointer', width: '100%', transition: 'all 0.15s', textAlign: 'left' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+        {quickStartCards.map((c, i) => (
+          <button key={i} onClick={() => navigate(c.dest)}
+            style={{ background: i === 0 ? 'rgba(232,93,32,0.1)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${i === 0 ? 'rgba(232,93,32,0.4)' : 'rgba(255,255,255,0.09)'}`, borderRadius: 16, padding: '18px 20px', cursor: 'pointer', width: '100%', transition: 'all 0.18s', textAlign: 'left' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px ${i === 0 ? 'rgba(232,93,32,0.2)' : 'rgba(0,0,0,0.3)'}`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <span style={{ fontSize: 22, flexShrink: 0 }}>{c.emoji}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <span style={{ fontSize: 24, flexShrink: 0 }}>{c.emoji}</span>
               <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#fff', margin: '0 0 2px' }}>{c.title}</p>
-                <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.42)', margin: 0 }}>{c.sub}</p>
+                <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#fff', margin: '0 0 3px' }}>{c.title}</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.42)', margin: 0, lineHeight: 1.5 }}>{c.sub}</p>
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: c.hot ? '#E85D20' : 'rgba(255,255,255,0.3)', flexShrink: 0 }}>→</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: i === 0 ? '#E85D20' : 'rgba(255,255,255,0.25)', flexShrink: 0 }}>→</span>
             </div>
           </button>
         ))}
       </div>
-      <button onClick={() => navigate('FreeTierDashboard')} style={S.btnPrimary}>Go to My Workspace →</button>
+      <button onClick={() => navigate('FreeTierDashboard')} style={{ ...S.btnPrimary, fontSize: 16 }}>Go to My Workspace →</button>
     </div></div>
   );
 }
