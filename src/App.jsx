@@ -24,6 +24,7 @@ import CareerAssessment from '@/pages/CareerAssessment';
 import FastIQDashboard from '@/pages/FastIQDashboard';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
+import GatorWelcome from '@/pages/GatorWelcome';
 import MigrationSignIn from '@/pages/MigrationSignIn';
 import ParentWelcome from '@/pages/ParentWelcome';
 import ParentOnboarding from '@/pages/ParentOnboarding';
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
           <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
           <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
           <Route path="/GatorAuth" element={<GatorAuth />} />
+          <Route path="/GatorWelcome" element={<GatorWelcome />} />
 
           <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
 
