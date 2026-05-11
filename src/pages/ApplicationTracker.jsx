@@ -5,6 +5,7 @@ import { Search, Filter, Plus, MapPin, Calendar, Mail } from 'lucide-react';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
+import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -46,6 +47,7 @@ export default function ApplicationTracker() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -396,10 +398,12 @@ export default function ApplicationTracker() {
               </button>
 
               {/* Secondary Button */}
-              <button style={{
-                background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8,
-                padding: '12px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
-              }}>
+              <button 
+                onClick={() => setShowReminderModal(true)}
+                style={{
+                  background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8,
+                  padding: '12px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
+                }}>
                 Add Follow-up Reminder
               </button>
 
@@ -473,6 +477,13 @@ export default function ApplicationTracker() {
       <FollowUpDraftModal 
         isOpen={showFollowUpModal} 
         onClose={() => setShowFollowUpModal(false)} 
+        application={selectedApp}
+      />
+
+      {/* Follow-up Reminder Modal */}
+      <FollowUpReminderModal 
+        isOpen={showReminderModal} 
+        onClose={() => setShowReminderModal(false)} 
         application={selectedApp}
       />
 
