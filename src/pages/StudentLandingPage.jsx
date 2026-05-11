@@ -15,19 +15,19 @@ const HOW_IT_WORKS = [
     number: '02',
     icon: '✨',
     title: 'Stand Out',
-    desc: 'Resume versions, cover letters & LinkedIn optimization — built to actually get noticed.',
+    desc: 'AI agents for resume versions, cover letters & LinkedIn optimization.',
   },
   {
     number: '03',
     icon: '📋',
-    title: 'Stay on Top of Everything',
-    desc: 'Track every application, manage resume versions per job, and send outreach when ready.',
+    title: 'Stay Organized & Move Forward',
+    desc: 'Track every application, manage resume versions per company, send outreach, and prepare for interviews — all in one workspace.',
   },
 ];
 
 const STORIES = [
   {
-    quote: "I finally stayed organized with all my applications and resume versions. The Agent helped me land an internship in 3 weeks.",
+    quote: "I finally had one place for everything. The Agent helped me stay organized and I landed an internship in 3 weeks.",
     name: "Chris C.",
     school: "USC '27",
     initials: "CC",
@@ -63,16 +63,16 @@ const STORIES = [
 const FREE_FEATURES = [
   'Basic resume help',
   'Limited Agent usage',
-  'Application tracker',
+  'Application tracker + workspace',
   'Perfect for getting started',
 ];
 
 const PRO_FEATURES = [
-  'Unlimited Agent usage',
-  'Full application & resume version tracking',
+  'Unlimited AI agents',
+  'Full resume version history & tracking',
   'Advanced optimization + outreach',
   'Daily signals and interview prep',
-  'Most students upgrade after seeing real organization',
+  'Most students upgrade once they experience the organized workspace',
 ];
 
 function StoriesCarousel() {
@@ -210,8 +210,8 @@ export default function StudentLandingPage({ onParentClick }) {
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Stay Organized.<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Get Hired.</span>
+          Your Job Search<br />
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Workspace</span>
         </h1>
 
         {/* Sub-headline */}
@@ -221,15 +221,15 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.4, maxWidth: 500, margin: '0 auto 10px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          One platform for your entire job search.
+          One organized platform with built-in AI agents.
         </p>
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)',
           fontWeight: 400, color: 'rgba(255,255,255,0.55)',
-          lineHeight: 1.7, maxWidth: 560, margin: '0 auto 44px',
+          lineHeight: 1.7, maxWidth: 600, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          The all-in-one AI Agent that helps with resumes, outreach, LinkedIn, interview prep, and application tracking — all in a single organized dashboard.
+          Manage applications, track resume versions per job, write outreach, optimize LinkedIn, prep for interviews — everything in a single dashboard.
         </p>
 
         {/* CTAs */}
@@ -277,7 +277,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>HOW IT WORKS</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 52px', textAlign: 'center' }}>
-            Stay organized. Get hired.
+            Your workspace. Built-in agents. Real progress.
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 40 }}>
@@ -294,7 +294,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
           <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.08), rgba(232,93,32,0.03))', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '22px 32px', textAlign: 'center' }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              "Stop jumping between tabs. Keep your entire job search in one place."
+              "Stop jumping between tabs and docs. Keep your entire job search in one organized workspace."
             </p>
           </div>
         </div>
@@ -304,10 +304,10 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ padding: '88px 24px', maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
         <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px' }}>⚡ SEE THE AGENT IN ACTION</p>
         <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 14px' }}>
-          Watch the Agent work in seconds
+          Watch the workspace in action
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', margin: '0 0 40px', lineHeight: 1.65 }}>
-          Upload your resume → Tell it the job → Get a tailored version + automatically track it in your dashboard.
+          Upload your resume → Tell the Agent the job → Get a tailored version that's automatically saved and tracked.
         </p>
 
         {/* Mock screen */}
@@ -351,7 +351,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
           <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
           <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.65 }}>
-            <strong style={{ color: '#fff' }}>Never wonder again</strong> which resume you sent to which company — everything is organized and visible in one place.
+            <strong style={{ color: '#fff' }}>The real advantage:</strong> Every resume version, every application, every message — all organized and searchable in your personal workspace.
           </p>
         </div>
       </div>
@@ -431,14 +431,12 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ padding: '96px 24px 110px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.12) 0%, transparent 55%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 10px' }}>
-            Stay organized.
-          </h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>
-            Get hired.
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4.5vw, 58px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 28px' }}>
+            Your job search workspace<br />
+            <span style={{ color: '#E85D20', fontStyle: 'italic' }}>with built-in agents.</span>
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 420 }}>
-            Join thousands of students using College Fast Forward to simplify their job search.
+            Join thousands of students using College Fast Forward to stay organized and get hired faster.
           </p>
           <button onClick={go} style={{
             fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none',
