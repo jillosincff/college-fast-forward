@@ -26,6 +26,7 @@ import MockInterview from '@/pages/MockInterview';
 import LinkedInReview from '@/pages/LinkedInReview';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import CareerAssessment from '@/pages/CareerAssessment';
+import ApplicationTracker from '@/pages/ApplicationTracker';
 
 export default function FreeTierDashboard() {
   const { user, isLoading: isLoadingAuth, refreshUser } = useAuth();
@@ -189,6 +190,11 @@ export default function FreeTierDashboard() {
   };
 
   const handleTabChange = (tab) => {
+    // Navigate to ApplicationTracker page if that tab is clicked
+    if (tab === 'application_tracker') {
+      navigate('ApplicationTracker');
+      return;
+    }
     setActiveTab(tab);
     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#FreeTierDashboard?tab=${tab}`);
     // Track first-visit milestones

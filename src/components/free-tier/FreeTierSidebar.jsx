@@ -20,7 +20,7 @@ const NAV_GROUPS = [
   {
     label: 'MY WORKSPACE',
     items: [
-      { label: 'Application Tracker', tab: 'career_path', icon: FileText },
+      { label: 'Application Tracker', tab: 'application_tracker', icon: FileText },
       { label: 'Outreach Drafts', tab: 'outreach_drafts', icon: Mail },
       { label: 'Messages', tab: 'messages', icon: MessageSquare },
     ]
