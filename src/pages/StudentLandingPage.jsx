@@ -15,7 +15,7 @@ const HOW_IT_WORKS = [
     number: '02',
     icon: '✨',
     title: 'Stand Out',
-    desc: 'AI agents for resume versions, cover letters & LinkedIn optimization.',
+    desc: 'AI agents for resume versions, cover letters & LinkedIn optimization that actually get noticed.',
   },
   {
     number: '03',
@@ -27,7 +27,7 @@ const HOW_IT_WORKS = [
 
 const STORIES = [
   {
-    quote: "I finally had one place for everything. The Agent helped me stay organized and I landed an internship in 3 weeks.",
+    quote: "I finally had one place for everything — all my applications, resume versions, and outreach. The Agent helped me stay organized and I landed an internship in 3 weeks.",
     name: "Chris C.",
     school: "USC '27",
     initials: "CC",
@@ -71,7 +71,7 @@ const PRO_FEATURES = [
   'Unlimited AI agents',
   'Full resume version history & tracking',
   'Advanced optimization + outreach',
-  'Daily signals and interview prep',
+  'Mock interviews + daily signals',
   'Most students upgrade once they experience the organized workspace',
 ];
 
@@ -221,7 +221,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.4, maxWidth: 500, margin: '0 auto 10px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          One organized platform with built-in AI agents.
+          One organized workspace with built-in AI agents.
         </p>
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)',
@@ -229,7 +229,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 600, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          Manage applications, track resume versions per job, write outreach, optimize LinkedIn, prep for interviews — everything in a single dashboard.
+          Manage applications, track resume versions per job, write outreach, optimize LinkedIn, and prep for interviews — everything in one dashboard.
         </p>
 
         {/* CTAs */}
@@ -307,7 +307,7 @@ export default function StudentLandingPage({ onParentClick }) {
           Watch the workspace in action
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', margin: '0 0 40px', lineHeight: 1.65 }}>
-          Upload your resume → Tell the Agent the job → Get a tailored version that's automatically saved and tracked.
+          Upload your resume → Tell the Agent the job → Get a tailored version that's automatically saved and tracked in your dashboard.
         </p>
 
         {/* Mock screen */}
@@ -351,7 +351,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
           <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
           <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.65 }}>
-            <strong style={{ color: '#fff' }}>The real advantage:</strong> Every resume version, every application, every message — all organized and searchable in your personal workspace.
+            <strong style={{ color: '#fff' }}>The real advantage:</strong> Never wonder which resume you sent to which company. Every version, every application, every message — all organized and searchable in your personal workspace.
           </p>
         </div>
       </div>
