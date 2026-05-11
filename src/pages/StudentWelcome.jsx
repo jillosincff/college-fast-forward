@@ -75,7 +75,7 @@ export default function StudentWelcome() {
     if (user.persona === 'parent') { navigate('ParentOnboarding'); return; }
     if (user.persona === 'alumni') { navigate('AlumniOnboarding'); return; }
 
-    // Pre-stored helper intent
+    // Pre-stored helper intent (parent/alumni flow)
     const pendingIntent = localStorage.getItem('pending_intent');
     if (pendingIntent === 'helper') {
       localStorage.removeItem('pending_intent');
@@ -86,17 +86,12 @@ export default function StudentWelcome() {
       localStorage.removeItem('pending_intent');
     }
 
-    // Student/gator or no persona — show onboarding
-    if (user.persona === 'student' || user.persona === 'gator') {
-      // Pre-fill school if available
-      if (user.school_name) setSchool(user.school_name);
-      if (user.major) setMajor(user.major);
-      setStep(1);
-      return;
-    }
+    // Pre-fill school if available
+    if (user.school_name) setSchool(user.school_name);
+    if (user.major) setMajor(user.major);
 
-    // No persona set — show role picker
-    setStep('choose_role');
+    // Student/gator or no persona — go straight to step 1 (student onboarding)
+    setStep(1);
   }, [user, isLoading, refreshUser]);
 
   const saveAsHelper = useCallback(async (persona, alumniIntent, destination) => {
