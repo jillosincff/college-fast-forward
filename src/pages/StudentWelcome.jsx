@@ -55,7 +55,15 @@ export default function StudentWelcome() {
     // Pre-fill if available
     if (user.school_name) setSchool(user.school_name);
     if (user.major) setMajor(user.major);
-    setStep(1);
+    // If focus was already chosen on GatorWelcome, skip step 1
+    const savedFocus = sessionStorage.getItem('onboarding_focus');
+    if (savedFocus) {
+      sessionStorage.removeItem('onboarding_focus');
+      setFocus(savedFocus);
+      setStep(2);
+    } else {
+      setStep(1);
+    }
   }, [user, isLoading]);
 
   const toggleChallenge = (val) => {
