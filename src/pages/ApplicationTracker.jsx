@@ -6,6 +6,7 @@ import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
+import JobPostingLinkSection from '@/components/tracker/JobPostingLinkSection';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -367,6 +368,12 @@ export default function ApplicationTracker() {
               </div>
             </div>
 
+            {/* Job Posting Link */}
+            <JobPostingLinkSection 
+              application={selectedApp}
+              onUpdate={setSelectedApp}
+            />
+
             {/* Notes Section */}
             <div style={{ marginBottom: 20 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 8px', letterSpacing: '0.05em' }}>
@@ -407,14 +414,7 @@ export default function ApplicationTracker() {
                 Add Follow-up Reminder
               </button>
 
-              {/* Tertiary Link/Button */}
-              <button style={{
-                background: 'none', color: '#0021A5', border: 'none', borderRadius: 8,
-                padding: '12px', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
-                textDecoration: 'underline',
-              }}>
-                Link to Job Posting
-              </button>
+
             </div>
 
             {/* Helpful Text */}
