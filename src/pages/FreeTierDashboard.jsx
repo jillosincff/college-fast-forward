@@ -335,7 +335,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} refreshUser={refreshUser} />}
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-        {activeTab === 'career_goals' && <SetSearchGoals onGoalsSaved={handleGoalsSaved} onTabChange={handleTabChange} />}
+        {activeTab === 'career_goals' && <SetSearchGoals key="search-goals" onGoalsSaved={handleGoalsSaved} onTabChange={handleTabChange} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} refreshUser={refreshUser} />}
         {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
