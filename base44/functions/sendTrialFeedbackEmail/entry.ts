@@ -13,9 +13,9 @@ const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY');
 const APP_URL = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 
 async function sendEmail(to, firstName) {
-  const greeting = firstName && !/\d/.test(firstName) && !firstName.includes('@') && firstName.length < 20
-    ? `Hi ${firstName},`
-    : 'Hi,';
+  const greeting = firstName === 'Hey there'
+    ? 'Hey there,'
+    : (firstName ? `Hi ${firstName},` : 'Hi,');
 
   const body = `${greeting}
 
@@ -105,15 +105,27 @@ Deno.serve(async (req) => {
       u.trial_status === 'expired' &&
       u.subscription_status !== 'active' &&
       u.membership_tier !== 'fastiq' &&
-      u.email
+      u.email &&
+      u.email !== 'karenbuxton@comcast.net' // excluded per admin request
     );
+
+    // Name overrides
+    const NAME_OVERRIDES = {
+      'pgplasma@gmail.com': 'Hey there',
+      'mossrex@ufl.edu': 'Rex',
+    };
 
     const results = { sent: 0, failed: 0, skipped: 0, dryRun, users: [] };
 
     for (const u of expiredTrialUsers) {
-      const firstName = u.first_name || u.full_name?.split(' ')[0] || null;
-      const cleanFirst = firstName && !/\d/.test(firstName) && !firstName.includes('@') && firstName.length < 20
-        ? firstName : null;
+      let cleanFirst;
+      if (NAME_OVERRIDES[u.email]) {
+        cleanFirst = NAME_OVERRIDES[u.email];
+      } else {
+        const firstName = u.first_name || u.full_name?.split(' ')[0] || null;
+        cleanFirst = firstName && !/\d/.test(firstName) && !firstName.includes('@') && firstName.length < 20
+          ? firstName : null;
+      }
 
       if (dryRun) {
         results.users.push({ email: u.email, name: u.full_name, firstName: cleanFirst });
