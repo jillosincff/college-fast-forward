@@ -300,8 +300,8 @@ export default function StudentWelcome() {
     <div style={S.shell}><div style={{ ...S.inner, textAlign: 'center' }}>
       <style>{`@keyframes popIn{0%{transform:scale(0.6);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}`}</style>
       <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(232,93,32,0.12)', border: '2px solid rgba(232,93,32,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 28, animation: 'popIn 0.5s ease forwards' }}>🎯</div>
-      <h1 style={{ ...S.h1, textAlign: 'center', marginBottom: 8 }}>Your workspace is ready.</h1>
-      <p style={{ ...S.sub, maxWidth: 360, margin: '0 auto 28px', textAlign: 'center' }}>Based on your answers, here's where we recommend starting:</p>
+      <h1 style={{ ...S.h1, textAlign: 'center', marginBottom: 8 }}>Your job search workspace is ready!</h1>
+      <p style={{ ...S.sub, maxWidth: 360, margin: '0 auto 28px', textAlign: 'center' }}>We've personalized your dashboard based on your answers. Here's where we recommend starting:</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28, textAlign: 'left' }}>
         {quickStartCards.map((c, i) => (
           <button key={i} onClick={() => navigate(c.dest)}
