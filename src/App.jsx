@@ -26,6 +26,7 @@ import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
 import GatorWelcome from '@/pages/GatorWelcome';
 import StudentWelcome from '@/pages/StudentWelcome';
+import SetSearchGoals from '@/pages/SetSearchGoals';
 import MigrationSignIn from '@/pages/MigrationSignIn';
 import ParentWelcome from '@/pages/ParentWelcome';
 import ParentOnboarding from '@/pages/ParentOnboarding';
@@ -109,6 +110,7 @@ const AuthenticatedApp = () => {
           <Route path="/GatorAuth" element={<GatorAuth />} />
           <Route path="/GatorWelcome" element={<StudentWelcome />} />
           <Route path="/StudentWelcome" element={<StudentWelcome />} />
+          <Route path="/SetSearchGoals" element={<SetSearchGoals />} />
 
           <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
 
