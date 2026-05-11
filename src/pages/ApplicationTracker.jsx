@@ -3,6 +3,7 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Search, Filter, Plus, MapPin, Calendar } from 'lucide-react';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
+import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -42,6 +43,7 @@ export default function ApplicationTracker() {
   const [selectedApp, setSelectedApp] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -167,7 +169,7 @@ export default function ApplicationTracker() {
               <button onClick={() => setShowAddModal(true)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
                 + Add Application Manually
               </button>
-              <button style={{ background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
+              <button onClick={() => setShowEmailModal(true)} style={{ background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
                 Connect Email for Auto-Import
               </button>
             </div>
@@ -415,6 +417,15 @@ export default function ApplicationTracker() {
         onClose={() => setShowAddModal(false)} 
         onSuccess={(newApp) => {
           setApplications([newApp, ...applications]);
+        }}
+      />
+
+      {/* Email Connection Modal */}
+      <EmailConnectionModal 
+        isOpen={showEmailModal} 
+        onClose={() => setShowEmailModal(false)} 
+        onSuccess={() => {
+          // Optional: could trigger a success toast or refetch applications here
         }}
       />
 
