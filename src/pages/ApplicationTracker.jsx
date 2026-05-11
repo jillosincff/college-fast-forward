@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
 import { Search, Filter, Plus, MapPin, Calendar } from 'lucide-react';
+import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -40,6 +41,7 @@ export default function ApplicationTracker() {
   const [sortBy, setSortBy] = useState('date');
   const [selectedApp, setSelectedApp] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -162,7 +164,7 @@ export default function ApplicationTracker() {
               Once you apply or connect your email, applications will appear here automatically.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
+              <button onClick={() => setShowAddModal(true)} style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
                 + Add Application Manually
               </button>
               <button style={{ background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
@@ -394,6 +396,7 @@ export default function ApplicationTracker() {
       {/* Floating Action Button */}
       {!isMobile && (
         <button
+          onClick={() => setShowAddModal(true)}
           style={{
             position: 'fixed', bottom: 32, right: 32, width: 56, height: 56, borderRadius: '50%',
             background: '#E85D20', color: '#fff', border: 'none', fontSize: 24, cursor: 'pointer',
@@ -405,6 +408,15 @@ export default function ApplicationTracker() {
           +
         </button>
       )}
+
+      {/* Add Application Modal */}
+      <AddApplicationModal 
+        isOpen={showAddModal} 
+        onClose={() => setShowAddModal(false)} 
+        onSuccess={(newApp) => {
+          setApplications([newApp, ...applications]);
+        }}
+      />
 
       <style>{`
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
