@@ -171,6 +171,8 @@ export default function StudentLandingPage({ onParentClick }) {
 
   const go = () => navigate('GatorAuth');
 
+  const testTracker = () => navigate('ApplicationTracker');
+
   const parent = () => {
     if (onParentClick) { onParentClick(); return; }
     localStorage.setItem('pending_invite_role', 'parent');
@@ -264,12 +266,19 @@ export default function StudentLandingPage({ onParentClick }) {
         </p>
 
         {/* Helper link */}
-        <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 24, transition: 'color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}
-        >
-          I'm here to help students →
-        </button>
+         <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 24, transition: 'color 0.15s', marginRight: 16 }}
+           onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
+           onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}
+         >
+           I'm here to help students →
+         </button>
+         {/* Dev test button */}
+         <button onClick={testTracker} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 24, transition: 'color 0.15s' }}
+           onMouseEnter={e => e.currentTarget.style.color = '#E85D20'}
+           onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}
+         >
+           [Test Tracker]
+         </button>
       </div>
 
       {/* ── HOW IT WORKS ── */}
