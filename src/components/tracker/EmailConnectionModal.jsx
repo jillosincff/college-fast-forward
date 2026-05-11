@@ -121,8 +121,8 @@ export default function EmailConnectionModal({ isOpen, onClose, onSuccess }) {
             {/* Benefits */}
             <div style={{ background: '#F9F9F9', borderRadius: 12, padding: 24, marginBottom: 32 }}>
               {[
-                'Works with LinkedIn, Indeed, company emails, and more',
-                'Automatically tracks resume versions and responses',
+                'Works with LinkedIn, Indeed, Handshake, company emails, and more',
+                'Automatically tracks which resume you used and responses',
                 'You stay in full control — disconnect anytime',
               ].map((benefit, i) => (
                 <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: i < 2 ? 16 : 0 }}>
@@ -199,8 +199,9 @@ export default function EmailConnectionModal({ isOpen, onClose, onSuccess }) {
             </div>
 
             {/* Trust Bar */}
-            <div style={{ background: '#EBF5FF', borderRadius: 12, padding: '12px 16px', fontSize: 12, color: '#0066CC', textAlign: 'center', fontFamily: dm }}>
-              🔒 Secure & private • We use read-only access • You can revoke permission anytime in settings
+            <div style={{ background: '#f9f9f9', borderRadius: 12, padding: '14px 16px', fontSize: 12, color: '#555', textAlign: 'center', fontFamily: dm, lineHeight: 1.6 }}>
+              <div style={{ marginBottom: 4 }}>🔒 Secure read-only access via OAuth</div>
+              <div>We only scan for job-related emails. You can revoke access anytime in Settings.</div>
             </div>
           </div>
         )}
