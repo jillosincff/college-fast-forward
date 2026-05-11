@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Search, Filter, Plus, MapPin, Calendar, Mail } from 'lucide-react';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
+import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -44,6 +45,7 @@ export default function ApplicationTracker() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showFollowUpModal, setShowFollowUpModal] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -380,13 +382,15 @@ export default function ApplicationTracker() {
             {/* Action Buttons - Stacked, Prominent */}
             <div style={{ display: 'grid', gap: 10, marginBottom: 16 }}>
               {/* Primary Orange Button */}
-              <button style={{
-                background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '14px',
-                fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
-              onMouseLeave={e => e.currentTarget.style.background = '#E85D20'}
+              <button 
+                onClick={() => setShowFollowUpModal(true)}
+                style={{
+                  background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '14px',
+                  fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
+                onMouseLeave={e => e.currentTarget.style.background = '#E85D20'}
               >
                 Let the Agent Draft a Follow-up
               </button>
@@ -463,6 +467,13 @@ export default function ApplicationTracker() {
         onSuccess={() => {
           // Optional: could trigger a success toast or refetch applications here
         }}
+      />
+
+      {/* Follow-up Draft Modal */}
+      <FollowUpDraftModal 
+        isOpen={showFollowUpModal} 
+        onClose={() => setShowFollowUpModal(false)} 
+        application={selectedApp}
       />
 
       <style>{`
