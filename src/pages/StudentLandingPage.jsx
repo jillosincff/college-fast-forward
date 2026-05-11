@@ -362,15 +362,16 @@ export default function StudentLandingPage({ onParentClick }) {
             The parent network is powerful.
           </p>
           <p style={{
-             fontFamily: dmSans,
+             fontFamily: playfair,
              fontSize: 'clamp(28px, 4vw, 52px)',
-             fontWeight: 800,
+             fontWeight: 700,
+             fontStyle: 'italic',
              color: '#E85D20',
              lineHeight: 1.1,
              letterSpacing: '-0.01em',
              margin: '0 0 24px',
            }}>
-             FastIQ makes you unstoppable.
+             Having an AI job search agent makes you unstoppable.
            </p>
            <p style={{
              fontFamily: dmSans,
