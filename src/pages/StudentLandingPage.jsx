@@ -318,7 +318,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >
-            Help me get in front of the right people →
+            Help me connect →
           </button>
           <button onClick={parent} style={{
             fontFamily: dmSans, fontSize: 14, fontWeight: 600,
