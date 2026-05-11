@@ -73,7 +73,7 @@ export default function StudentWelcome() {
       await base44.auth.updateMe({
         persona: 'student',
         roles: ['student'],
-        onboarding_completed: false,
+        onboarding_completed: true,
         is_new_signup: true,
         onboarding_focus: focus,
         onboarding_challenges: finalChallenges,
@@ -93,7 +93,7 @@ export default function StudentWelcome() {
   const skip = useCallback(async () => {
     setSaving(true);
     try {
-      await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: false, is_new_signup: true });
+      await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
       base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
       await refreshUser();
     } catch {}
