@@ -86,7 +86,7 @@ export default function ApplicationTracker() {
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
           {[
             { label: 'Total Applications', value: stats.total },
-            { label: 'Response Rate', value: `${stats.responseRate}% (${Math.ceil(stats.total * stats.responseRate / 100)} replies)` },
+            { label: 'Response Rate', value: `${stats.responseRate}%${stats.total > 0 ? ` (${Math.ceil(stats.total * stats.responseRate / 100)} replies)` : ''}` },
             { label: 'Interviews Scheduled', value: stats.interviews },
           ].map((stat, i) => (
             <div key={i} style={{ padding: '16px', background: '#F9F9F9', borderRadius: 12, border: '1px solid #F0F0F0' }}>
@@ -156,10 +156,10 @@ export default function ApplicationTracker() {
           <div style={{ background: '#fff', borderRadius: 12, padding: '60px 32px', textAlign: 'center', border: '1px solid #E5E5E5' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
             <h3 style={{ fontFamily: pf, fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>
-              No applications yet
+              No applications tracked yet
             </h3>
             <p style={{ fontSize: 14, color: '#666', maxWidth: 380, margin: '0 auto 24px', lineHeight: 1.6 }}>
-              Once you start applying, they'll appear here automatically (if you connect your email) or you can add them manually.
+              Once you apply or connect your email, applications will appear here automatically.
             </p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button style={{ background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto' }}>
@@ -247,8 +247,10 @@ export default function ApplicationTracker() {
                     <td style={{ padding: '12px 16px', color: '#888' }}>
                       {new Date(app.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </td>
-                    <td style={{ padding: '12px 16px', color: '#888', fontFamily: "'Monaco', monospace", fontSize: 12 }}>
-                      {app.resumeVersion}
+                    <td style={{ padding: '12px 16px' }}>
+                      <button style={{ background: 'none', border: 'none', color: '#0021A5', fontSize: 12, fontFamily: "'Monaco', monospace", cursor: 'pointer', textDecoration: 'underline', padding: 0, minHeight: 'auto' }}>
+                        {app.resumeVersion}
+                      </button>
                     </td>
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{
@@ -258,7 +260,15 @@ export default function ApplicationTracker() {
                         {STATUS_LABELS[app.status]}
                       </span>
                     </td>
-                    <td style={{ padding: '12px 16px', color: '#888' }}>{app.nextAction}</td>
+                    <td style={{ padding: '12px 16px' }}>
+                      {app.nextAction === '—' ? (
+                        <span style={{ color: '#888' }}>—</span>
+                      ) : (
+                        <button style={{ background: 'none', border: 'none', color: '#E85D20', fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, minHeight: 'auto' }}>
+                          {app.nextAction}
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
