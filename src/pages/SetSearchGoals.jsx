@@ -119,7 +119,7 @@ export default function SetSearchGoals({ onGoalsSaved, onTabChange }) {
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => onTabChange ? onTabChange('career_path') : navigate('FreeTierDashboard')}
+              onClick={() => navigate('ApplicationTracker')}
               style={{ ...S.btnPrimary, width: 'auto', padding: '14px 28px' }}
             >
               Open My Application Tracker
