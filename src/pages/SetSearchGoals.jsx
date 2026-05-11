@@ -111,21 +111,24 @@ export default function SetSearchGoals({ onGoalsSaved, onTabChange }) {
         <div style={{ ...S.inner, textAlign: 'center', paddingTop: 60 }}>
           <div style={{ width: 60, height: 60, borderRadius: '50%', background: '#FFF5F0', border: '2px solid rgba(232,93,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 26 }}>🎯</div>
           <h1 style={{ ...S.h1, textAlign: 'center', marginBottom: 10 }}>Goals saved! Your workspace is now personalized.</h1>
-          <p style={{ fontSize: 14, color: '#777', maxWidth: 420, margin: '0 auto 32px', lineHeight: 1.7 }}>
-            The Agent will now prioritize opportunities, suggestions, and messaging that match your goals.
+          <p style={{ fontSize: 14, color: '#777', maxWidth: 420, margin: '0 auto 12px', lineHeight: 1.7 }}>
+            The Agent will now prioritize opportunities, suggestions, and messaging that match what you're looking for.
+          </p>
+          <p style={{ fontSize: 13, color: '#999', maxWidth: 420, margin: '0 auto 32px', lineHeight: 1.6 }}>
+            You're one step closer to landing your next opportunity.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={() => onTabChange ? onTabChange('career_path') : navigate('FreeTierDashboard')}
               style={{ ...S.btnPrimary, width: 'auto', padding: '14px 28px' }}
             >
-              Go to Application Tracker
+              Open My Application Tracker
             </button>
             <button
               onClick={() => onTabChange ? onTabChange('resume') : navigate('ResumeTailoring')}
               style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: '#E85D20', background: '#FFF5F0', border: '1.5px solid rgba(232,93,32,0.25)', borderRadius: 12, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto' }}
             >
-              Improve My Resume
+              Let the Agent Review My Resume
             </button>
           </div>
         </div>
