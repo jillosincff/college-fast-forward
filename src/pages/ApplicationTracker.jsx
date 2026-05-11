@@ -33,6 +33,7 @@ const STATUS_LABELS = {
 
 export default function ApplicationTracker() {
   const { user } = useAuth();
+  // v2.0
   const [applications, setApplications] = useState(SAMPLE_APPS);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
