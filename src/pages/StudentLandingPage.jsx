@@ -43,9 +43,9 @@ const STORIES = [
     tagIcon: "🎯",
   },
   {
-    quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked. I used the Agent to fix my resume and find alumni at the companies I wanted — landed an internship in 3 weeks.",
+    quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked. I used the Agent to fix my resume and outreach — landed an internship in 3 weeks.",
     name: "Chris C.",
-    school: "USC · '27 grad",
+    school: "USC '27",
     initials: "CC",
     tag: "Internship locked",
     tagIcon: "🎯",
@@ -221,7 +221,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 560, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          The all-in-one AI Agent that helps with resumes, outreach messages, LinkedIn, interview prep, and application tracking — so you can actually move forward instead of feeling stuck.
+          The all-in-one AI Agent built for college students — resumes, outreach messages, LinkedIn optimization, interview prep, and application tracking.
         </p>
 
         {/* CTAs */}
@@ -299,7 +299,7 @@ export default function StudentLandingPage({ onParentClick }) {
           Watch the Agent work in seconds
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', margin: '0 0 40px', lineHeight: 1.65 }}>
-          Tell it what you're looking for → It finds strong matches from your school → Drafts the message for you.
+          Tell it what you're looking for — it finds strong matches from your school and drafts the message for you.
         </p>
 
         {/* Mock screen */}
@@ -343,7 +343,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
           <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
           <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.65 }}>
-            <strong style={{ color: '#fff' }}>Real result:</strong> One student went from zero responses to landing a Disney internship after using the Agent for outreach.
+            <strong style={{ color: '#fff' }}>Real result:</strong> One UF student went from zero responses to landing a Disney internship after using the Agent for outreach.
           </p>
         </div>
       </div>
