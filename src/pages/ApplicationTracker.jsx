@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { base44 } from '@/api/base44Client';
-import { Search, Filter, Plus, MapPin, Calendar } from 'lucide-react';
+import { Search, Filter, Plus, MapPin, Calendar, Mail } from 'lucide-react';
 import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 
@@ -107,6 +107,23 @@ export default function ApplicationTracker() {
 
       {/* Search & Filters */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 20px' }}>
+        {/* Connect Email Button */}
+        <div style={{ marginBottom: 20 }}>
+          <button 
+            onClick={() => setShowEmailModal(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: '#fff5f0', border: '1.5px solid #E85D20',
+              color: '#E85D20', padding: '12px 20px', borderRadius: 8,
+              fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              fontFamily: dm, minHeight: 'auto',
+            }}
+          >
+            <Mail size={16} />
+            Connect Email for Auto-Import
+          </button>
+        </div>
+
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
           {/* Search */}
           <div style={{ flex: 1, minWidth: 200, position: 'relative', display: 'flex', alignItems: 'center' }}>
