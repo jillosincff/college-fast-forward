@@ -314,44 +314,44 @@ export default function ApplicationTracker() {
             }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <div style={{ fontSize: 36 }}>{selectedApp.logo}</div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px', fontSize: 16 }}>
-                  {selectedApp.jobTitle}
-                </h3>
-                <p style={{ fontSize: 13, color: '#666', margin: 0 }}>{selectedApp.company}</p>
-              </div>
-            </div>
+            {/* Title: Company – Job Title */}
+            <h2 style={{ fontFamily: pf, fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 20px' }}>
+              {selectedApp.company} – {selectedApp.jobTitle}
+            </h2>
 
-            {/* Info */}
-            <div style={{ background: '#F9F9F9', borderRadius: 12, padding: 16, marginBottom: 20 }}>
-              <div style={{ marginBottom: 12 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 4px', letterSpacing: '0.05em' }}>
+            {/* Key Info Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+              {/* Date Applied */}
+              <div style={{ background: '#F9F9F9', borderRadius: 10, padding: 12 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 6px', letterSpacing: '0.05em' }}>
                   Date Applied
                 </p>
-                <p style={{ fontSize: 14, color: '#1A1A1A', margin: 0 }}>
-                  {new Date(selectedApp.dateApplied).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                <p style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>
+                  {new Date(selectedApp.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
                 </p>
               </div>
-              <div style={{ marginBottom: 12 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 4px', letterSpacing: '0.05em' }}>
+
+              {/* Resume Version */}
+              <div style={{ background: '#F9F9F9', borderRadius: 10, padding: 12 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 6px', letterSpacing: '0.05em' }}>
                   Resume Version
                 </p>
-                <p style={{ fontSize: 14, color: '#1A1A1A', margin: 0 }}>
-                  {selectedApp.resumeVersion} <button style={{ background: 'none', border: 'none', color: '#E85D20', cursor: 'pointer', fontSize: 12, padding: 0, minHeight: 'auto' }}>
-                    (View)
+                <p style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>
+                  {selectedApp.resumeVersion}{' '}
+                  <button style={{ background: 'none', border: 'none', color: '#E85D20', cursor: 'pointer', fontSize: 11, padding: 0, minHeight: 'auto', fontWeight: 600 }}>
+                    View
                   </button>
                 </p>
               </div>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 4px', letterSpacing: '0.05em' }}>
+
+              {/* Status Dropdown */}
+              <div style={{ background: '#F9F9F9', borderRadius: 10, padding: 12 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 6px', letterSpacing: '0.05em' }}>
                   Status
                 </p>
                 <select style={{
-                  fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, padding: '8px 10px',
-                  width: '100%', outline: 'none', fontFamily: dm, cursor: 'pointer', minHeight: 'auto',
+                  fontSize: 12, fontWeight: 500, border: '1px solid #E0E0E0', borderRadius: 6, padding: '4px 6px',
+                  width: '100%', outline: 'none', fontFamily: dm, cursor: 'pointer', minHeight: 'auto', background: '#fff',
                 }}>
                   <option>{STATUS_LABELS[selectedApp.status]}</option>
                   <option>Applied</option>
@@ -363,46 +363,65 @@ export default function ApplicationTracker() {
               </div>
             </div>
 
-            {/* Notes */}
+            {/* Notes Section */}
             <div style={{ marginBottom: 20 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 8px', letterSpacing: '0.05em' }}>
                 Notes
               </p>
               <textarea
-                placeholder="Add notes about this application..."
+                placeholder="Add notes about this application… (interview questions, salary expectations, things to follow up on, etc.)"
                 style={{
-                  width: '100%', minHeight: 80, fontSize: 13, border: '1px solid #E0E0E0', borderRadius: 8,
-                  padding: 10, outline: 'none', fontFamily: dm, resize: 'vertical',
+                  width: '100%', minHeight: 100, fontSize: 13, border: '1px solid #E0E0E0', borderRadius: 8,
+                  padding: 12, outline: 'none', fontFamily: dm, resize: 'vertical', lineHeight: 1.5,
                 }}
               />
             </div>
 
-            {/* Actions */}
-            <div style={{ display: 'grid', gap: 10 }}>
+            {/* Action Buttons - Stacked, Prominent */}
+            <div style={{ display: 'grid', gap: 10, marginBottom: 16 }}>
+              {/* Primary Orange Button */}
               <button style={{
-                background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '12px',
+                background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '14px',
                 fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
-              }}>
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
+              onMouseLeave={e => e.currentTarget.style.background = '#E85D20'}
+              >
                 Let the Agent Draft a Follow-up
               </button>
+
+              {/* Secondary Button */}
               <button style={{
-                background: '#FFF5F0', color: '#E85D20', border: '1px solid #E85D20', borderRadius: 8,
+                background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8,
                 padding: '12px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
               }}>
                 Add Follow-up Reminder
               </button>
+
+              {/* Tertiary Link/Button */}
               <button style={{
-                background: '#F9F9F9', color: '#666', border: '1px solid #E0E0E0', borderRadius: 8,
+                background: 'none', color: '#0021A5', border: 'none', borderRadius: 8,
                 padding: '12px', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
+                textDecoration: 'underline',
               }}>
                 Link to Job Posting
               </button>
             </div>
 
+            {/* Helpful Text */}
+            <div style={{ background: '#F5F5F5', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 12, color: '#666', lineHeight: 1.5 }}>
+              <p style={{ margin: 0 }}>
+                <span style={{ fontWeight: 600 }}>Last updated:</span> {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                <br />
+                <span style={{ color: '#888' }}>Connected via email • Auto-tracked</span>
+              </p>
+            </div>
+
             <button
               onClick={() => setSelectedApp(null)}
               style={{
-                width: '100%', marginTop: 12, background: 'none', border: 'none', color: '#888',
+                width: '100%', background: 'none', border: 'none', color: '#888',
                 fontSize: 13, cursor: 'pointer', fontFamily: dm, minHeight: 'auto', padding: 8,
               }}
             >
