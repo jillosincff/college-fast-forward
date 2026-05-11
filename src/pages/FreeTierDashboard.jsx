@@ -11,6 +11,7 @@ import FreeTierCompanyIntelTab from '@/components/free-tier/FreeTierCompanyIntel
 import FreeTierCareerPathTab from '@/components/free-tier/FreeTierCareerPathTab';
 import FreeTierCareerCenterTab from '@/components/free-tier/FreeTierCareerCenterTab';
 import FreeTierCareerGoalsTab from '@/components/free-tier/FreeTierCareerGoalsTab';
+import SetSearchGoals from '@/pages/SetSearchGoals';
 import FreeTierAlumniNetworkTab from '@/components/free-tier/FreeTierAlumniNetworkTab';
 import FreeTierMessagesTab from '@/components/free-tier/FreeTierMessagesTab';
 import FastIQUpgradeModal from '@/components/free-tier/FastIQUpgradeModal';
@@ -334,7 +335,7 @@ export default function FreeTierDashboard() {
         {activeTab === 'company_intel' && <FreeTierCompanyIntelTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}
         {activeTab === 'career_path' && <FreeTierCareerPathTab user={user} onOpenUpgrade={handleOpenUpgrade} refreshUser={refreshUser} />}
         {activeTab === 'career_center' && <FreeTierCareerCenterTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
-        {activeTab === 'career_goals' && <FreeTierCareerGoalsTab user={user} onOpenUpgrade={handleOpenUpgrade} onGoalsSaved={handleGoalsSaved} onTabChange={handleTabChange} />}
+        {activeTab === 'career_goals' && <SetSearchGoals onGoalsSaved={handleGoalsSaved} onTabChange={handleTabChange} />}
         {activeTab === 'alumni_network' && <FreeTierAlumniNetworkTab user={user} onOpenUpgrade={handleOpenUpgrade} />}
         {activeTab === 'alumni_search' && <AlumniSearch user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} refreshUser={refreshUser} />}
         {activeTab === 'directory' && <FreeTierDirectoryTab user={user} onOpenUpgrade={handleOpenUpgrade} onTabChange={handleTabChange} />}

@@ -62,7 +62,7 @@ const S = {
   btnSkip: { fontFamily: dm, fontSize: 13, color: '#AAAAAA', background: 'none', border: 'none', cursor: 'pointer', marginTop: 16, display: 'block', width: '100%', textAlign: 'center', minHeight: 'auto' },
 };
 
-export default function SetSearchGoals() {
+export default function SetSearchGoals({ onGoalsSaved, onTabChange }) {
   const { user } = useAuth();
   const cg = user?.career_goals || {};
 
@@ -94,6 +94,7 @@ export default function SetSearchGoals() {
           saved_at: new Date().toISOString(),
         },
       });
+      onGoalsSaved?.();
       setDone(true);
     } catch (e) {
       console.error(e);
@@ -101,7 +102,7 @@ export default function SetSearchGoals() {
     setSaving(false);
   };
 
-  const handleSkip = () => navigate('FreeTierDashboard');
+  const handleSkip = () => onTabChange ? onTabChange('home') : navigate('FreeTierDashboard');
 
   // ── DONE STATE ──
   if (done) {
@@ -115,13 +116,13 @@ export default function SetSearchGoals() {
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
-              onClick={() => navigate('FreeTierDashboard')}
+              onClick={() => onTabChange ? onTabChange('career_path') : navigate('FreeTierDashboard')}
               style={{ ...S.btnPrimary, width: 'auto', padding: '14px 28px' }}
             >
               Go to Application Tracker
             </button>
             <button
-              onClick={() => navigate('ResumeTailoring')}
+              onClick={() => onTabChange ? onTabChange('resume') : navigate('ResumeTailoring')}
               style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: '#E85D20', background: '#FFF5F0', border: '1.5px solid rgba(232,93,32,0.25)', borderRadius: 12, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto' }}
             >
               Improve My Resume
