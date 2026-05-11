@@ -299,13 +299,18 @@ export default function EmailConnectionModal({ isOpen, onClose, onSuccess }) {
         {screen === 'connecting' && (
           <div style={{ padding: '60px 32px', textAlign: 'center' }}>
             <div style={{ fontSize: 48, marginBottom: 24 }} className="pulse">
-              🔄
+              🔍
             </div>
             <h2 style={{ fontFamily: pf, fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px' }}>
-              Connecting…
+              Scanning your emails…
             </h2>
-            <p style={{ fontFamily: dm, fontSize: 14, color: '#666', margin: 0 }}>
-              Scanning recent emails for applications. This may take a minute.
+            <p style={{ fontFamily: dm, fontSize: 14, color: '#666', margin: '0 0 20px', lineHeight: 1.6 }}>
+              We're safely scanning for job-related emails (application confirmations, interview invites, etc.).
+              <br />
+              This usually takes 30–60 seconds.
+            </p>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#999', margin: 0 }}>
+              Only looking at recent messages • You can continue using the app
             </p>
           </div>
         )}
@@ -313,12 +318,12 @@ export default function EmailConnectionModal({ isOpen, onClose, onSuccess }) {
         {/* Success Screen */}
         {screen === 'success' && (
           <div style={{ padding: '40px 32px' }}>
-            <div style={{ fontSize: 56, textAlign: 'center', marginBottom: 24 }}>🎉</div>
+            <div style={{ fontSize: 56, textAlign: 'center', marginBottom: 24 }}>✅</div>
             <h2 style={{ fontFamily: pf, fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', textAlign: 'center' }}>
               Email connected successfully!
             </h2>
             <p style={{ fontFamily: dm, fontSize: 15, color: '#666', margin: '0 0 32px', lineHeight: 1.6, textAlign: 'center' }}>
-              We're now scanning your inbox. Any recent application emails (last 30 days) will be imported shortly. You'll receive a notification when new applications are added automatically.
+              We've started scanning your inbox. Any recent application emails from the last 30 days will be imported shortly.<br />You'll get a notification when new applications are added automatically.
             </p>
 
             {/* Status Card */}
