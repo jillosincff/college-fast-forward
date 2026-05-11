@@ -10,19 +10,19 @@ const HOW_IT_WORKS = [
     number: '01',
     icon: '🎯',
     title: 'Know What to Apply For',
-    desc: 'Smart opportunity matching + daily hiring signals so you always know your next best move.',
+    desc: 'Smart matching + daily opportunities so you always know exactly where to focus your energy.',
   },
   {
     number: '02',
     icon: '✨',
     title: 'Stand Out',
-    desc: 'Resume & cover letter tailoring that beats ATS filters, plus LinkedIn optimization that gets noticed.',
+    desc: 'Resume, cover letters & LinkedIn optimization that actually get noticed — not just ATS-safe, but genuinely compelling.',
   },
   {
     number: '03',
     icon: '💬',
     title: 'Get Replies',
-    desc: 'The Agent finds alumni from your school at your target companies and writes outreach messages that actually work.',
+    desc: 'The Agent finds real connections from your school and writes outreach messages that work — when you\'re ready to use them.',
   },
 ];
 
@@ -113,20 +113,20 @@ export default function StudentLandingPage({ onParentClick }) {
 
         {/* Sub-headline */}
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 20px)',
+          fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)',
           fontWeight: 500, color: 'rgba(255,255,255,0.72)',
-          lineHeight: 1.65, maxWidth: 600, margin: '0 auto 12px',
+          lineHeight: 1.65, maxWidth: 560, margin: '0 auto 10px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          Resume tailoring. LinkedIn optimization. Outreach messages. Interview prep. Application tracking.
+          Resume help. Outreach messages. Interview prep. Application tracking.
         </p>
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 20px)',
+          fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)',
           fontWeight: 700, color: '#fff',
-          lineHeight: 1.5, maxWidth: 540, margin: '0 auto 44px',
+          lineHeight: 1.55, maxWidth: 540, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.25s',
         }}>
-          Everything you need to go from stressed to hired — in one place.
+          One Agent that actually moves you forward — instead of another tab you forget about.
         </p>
 
         {/* CTAs */}
@@ -160,7 +160,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
           >
-            See how it works →
+            Watch 45-second demo →
           </button>
         </div>
 
@@ -170,7 +170,7 @@ export default function StudentLandingPage({ onParentClick }) {
           margin: 0, lineHeight: 1.6,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s',
         }}>
-          Free to start. No credit card required. Built for students at UF, UCF, Penn State, USC & more.
+          Free to start &nbsp;•&nbsp; No card needed &nbsp;•&nbsp; Built for UF, UCF, Penn State, USC students & more
         </p>
 
         {/* Helper link */}
@@ -250,10 +250,10 @@ export default function StudentLandingPage({ onParentClick }) {
           ⚡ SEE THE AGENT IN ACTION
         </p>
         <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
-          Watch the Agent find alumni and draft real messages in seconds
+          Watch the Agent work in seconds
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.55)', margin: '0 0 40px', lineHeight: 1.65 }}>
-          Type what you're looking for. The Agent finds the right people from your school — and writes the message for you.
+          Tell it what you're looking for → It finds relevant alumni & companies from your school → Drafts the message for you.
         </p>
 
         {/* Demo screen */}
@@ -403,6 +403,9 @@ export default function StudentLandingPage({ onParentClick }) {
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(232,93,32,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.35)'; }}
             >Start free, upgrade anytime →</button>
+            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '12px 0 0', fontStyle: 'italic', lineHeight: 1.5 }}>
+              Most students upgrade after their first successful outreach or resume improvement.
+            </p>
           </div>
         </div>
 
