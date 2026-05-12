@@ -62,8 +62,11 @@ const formatResumeText = (text) => {
 };
 
 export default function ResumeBuilderStep({ user, onResumeReady, onBack }) {
-  const [phase, setPhase] = useState('intro'); // 'intro', 'questions', 'generating', 'done'
+  const [phase, setPhase] = useState('intro'); // 'intro', 'linkedin_prompt', 'import_linkedin', 'questions', 'generating', 'done'
   const [currentStep, setCurrentStep] = useState(0);
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [importedData, setImportedData] = useState(null);
+  const [importing, setImporting] = useState(false);
   const [answers, setAnswers] = useState({
     name: user?.full_name || '',
     phone: '',
@@ -206,15 +209,166 @@ Return the full resume text and a brief encouraging summary.`,
     URL.revokeObjectURL(url);
   };
 
+  const handleImportLinkedin = async () => {
+    if (!linkedinUrl.trim()) return;
+    setImporting(true);
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `Extract professional information from this LinkedIn profile URL: ${linkedinUrl}
+        
+Return a JSON object with:
+- name: Full name
+- headline: Current job title/headline
+- experience: Array of {company, title, description, duration}
+- education: Array of {school, degree, field, year}
+- skills: Array of skill strings
+- summary: Brief professional summary
+
+If you cannot access the profile, return an error message.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            headline: { type: "string" },
+            experience: { type: "array", items: { type: "object" } },
+            education: { type: "array", items: { type: "object" } },
+            skills: { type: "array", items: { type: "string" } },
+            summary: { type: "string" },
+            error: { type: "string" }
+          }
+        },
+        add_context_from_internet: true,
+        model: 'gemini_3_flash'
+      });
+
+      if (result.error) {
+        alert('Could not import from that LinkedIn URL. Please try again or enter manually.');
+        return;
+      }
+
+      setImportedData(result);
+      setAnswers(prev => ({
+        ...prev,
+        name: result.name || prev.name,
+        linkedin: linkedinUrl,
+        experience_text: result.experience?.map(e => `${e.title} at ${e.company} - ${e.description}`).join('\n\n') || '',
+        skills_text: result.skills?.join(', ') || '',
+        major: result.education?.[0]?.field || '',
+        graduation: result.education?.[0]?.year || '',
+      }));
+      setPhase('questions');
+    } catch (err) {
+      console.error('LinkedIn import error:', err);
+      alert('Failed to import from LinkedIn. Please try entering manually.');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   // Intro phase
   if (phase === 'intro') {
     return (
       <ResumeBuilderIntro
         user={user}
-        onStart={() => setPhase('questions')}
+        onStart={() => setPhase('linkedin_prompt')}
         onUpload={onBack}
         onSkip={onBack}
       />
+    );
+  }
+
+  // LinkedIn prompt phase
+  if (phase === 'linkedin_prompt') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="text-3xl">💼</div>
+            <div>
+              <h2 className="text-white font-bold text-lg mb-2">Do you have a LinkedIn profile?</h2>
+              <p className="text-white/60 text-sm">We can import your experience, education, and skills to get started faster.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setPhase('import_linkedin')}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all"
+            style={{ minHeight: 'auto' }}
+          >
+            ✓ Yes – Import from LinkedIn (Recommended)
+          </button>
+          <button
+            onClick={() => setPhase('questions')}
+            className="w-full bg-white/5 hover:bg-white/10 border border-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-all"
+            style={{ minHeight: 'auto' }}
+          >
+            No – I'll enter manually
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Import LinkedIn phase
+  if (phase === 'import_linkedin') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <button
+          onClick={() => setPhase('linkedin_prompt')}
+          className="text-white/40 text-xs hover:text-white/60 underline flex items-center gap-1"
+          style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+        >
+          <ArrowLeft className="w-3 h-3" /> Back
+        </button>
+
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
+          <p className="text-white/90 text-sm font-medium mb-1">Paste your LinkedIn profile URL</p>
+          <p className="text-white/40 text-xs">e.g., linkedin.com/in/yourprofile</p>
+        </div>
+
+        <Input
+          value={linkedinUrl}
+          onChange={(e) => setLinkedinUrl(e.target.value)}
+          placeholder="linkedin.com/in/yourprofile"
+          className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+          disabled={importing}
+        />
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setPhase('linkedin_prompt')}
+            className="flex-1 text-white/40 text-xs hover:text-white/60 underline"
+            style={{ minHeight: 'auto' }}
+            disabled={importing}
+          >
+            Cancel
+          </button>
+          <Button
+            onClick={handleImportLinkedin}
+            disabled={!linkedinUrl.trim() || importing}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-10 px-6 font-semibold"
+            style={{ minHeight: 'auto', width: 'auto' }}
+          >
+            {importing ? (
+              <>
+                <Loader2 className="w-3 h-3 mr-2 animate-spin" /> Importing...
+              </>
+            ) : (
+              <>Import My Profile →</>
+            )}
+          </Button>
+        </div>
+      </motion.div>
     );
   }
 
