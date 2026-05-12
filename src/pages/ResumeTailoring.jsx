@@ -149,32 +149,38 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     setFileName(file.name);
     setPhase('uploading');
     try {
+      // Upload file
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.auth.updateMe({ resume_url: file_url });
-      let parsed_text = '';
-      try {
-        const extracted = await base44.integrations.Core.InvokeLLM({
-          prompt: 'Extract all text content from this resume document. Return only the raw text, preserving structure but no JSON or formatting.',
-          file_urls: [file_url],
-          model: 'gemini_3_flash',
-        });
-        parsed_text = typeof extracted === 'string' ? extracted : '';
-      } catch (e) {
-        console.warn('Text extraction failed:', e);
-      }
+      await base44.auth.updateMe({ resume_url: file_url }).catch(() => {});
+      
+      // Create resume record immediately (don't wait for text extraction)
       const newResume = await base44.entities.Resume.create({
         student_email: user.email,
         original_file_name: file.name,
         original_file_url: file_url,
-        parsed_text,
+        parsed_text: '',
         is_active: resumes.length === 0,
       });
+      
       setResumes(prev => [...prev, newResume]);
       setResumeId(newResume.id);
-      // New resume — clear any cached analysis so it runs fresh
       localStorage.removeItem(`resume_analysis_${newResume.id}`);
       setAnalysis(null);
       setAnalysisError(false);
+      setPhase('hub');
+      
+      // Extract text asynchronously in background
+      base44.integrations.Core.InvokeLLM({
+        prompt: 'Extract all text content from this resume document. Return only the raw text, preserving structure but no JSON or formatting.',
+        file_urls: [file_url],
+        model: 'gemini_3_flash',
+      })
+        .then(extracted => {
+          const parsed_text = typeof extracted === 'string' ? extracted : '';
+          return base44.entities.Resume.update(newResume.id, { parsed_text });
+        })
+        .catch(e => console.warn('Text extraction failed:', e));
+        
     } catch (e) {
       console.error('Upload failed:', e);
       setPhase(hasResumes ? 'hub' : 'entry');
