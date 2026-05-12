@@ -297,30 +297,81 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>
         <button
           onClick={() => setPhase(hasResumes ? 'hub' : 'uploaded')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 24, padding: 0, minHeight: 'auto' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 32, padding: 0, minHeight: 'auto' }}
         >
           ← Back
         </button>
-        {selectedResume && (
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 16 }}>
-            Tailoring: <strong style={{ color: '#1A1A1A' }}>{selectedResume.name || selectedResume.original_file_name || 'My Resume'}</strong>
+
+        {/* Header */}
+        <div style={{ marginBottom: 40 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>Optimize Resume</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
+            Let the Agent optimize your resume
+          </h1>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>
+            Based on your career goals, the Agent will strengthen your bullet points, improve clarity, and better align your experience with what employers are looking for.
           </p>
+        </div>
+
+        {/* Current File */}
+        {selectedResume && (
+          <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 32 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 6px' }}>Current File</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>
+              {selectedResume.name || selectedResume.original_file_name || 'My Resume'}
+            </p>
+          </div>
         )}
+
         {error && (
-          <div style={{ background: 'rgba(229,57,53,0.08)', border: '1px solid rgba(229,57,53,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
+          <div style={{ background: 'rgba(229,57,53,0.08)', border: '1px solid rgba(229,57,53,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 24 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#e53935', margin: 0 }}>{error}</p>
           </div>
         )}
-        <JobDescriptionStep
-          companyName={companyName}
-          jobTitle={jobTitle}
-          jobDescription={jobDescription}
-          resumeText={resumeText}
-          onCompanyChange={setCompanyName}
-          onJobTitleChange={setJobTitle}
-          onJobDescriptionChange={setJobDescription}
-          onTailor={handleDoTailor}
-        />
+
+        {/* Primary: Optimize by Career Goals */}
+        <div style={{ marginBottom: 40 }}>
+          <button
+            onClick={() => {
+              setCompanyName('');
+              setJobTitle('');
+              setJobDescription('');
+              handleDoTailor();
+            }}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
+          >
+            Optimize My Resume →
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
+          <div style={{ flex: 1, height: '1px', background: '#E5E5E5' }} />
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAA' }}>or</span>
+          <div style={{ flex: 1, height: '1px', background: '#E5E5E5' }} />
+        </div>
+
+        {/* Secondary: Tailor to Specific Job */}
+        <div>
+          <div style={{ marginBottom: 16 }}>
+            <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#1A1A1A', margin: '0 0 8px' }}>
+              Want to tailor it to a specific job?
+            </h3>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0, lineHeight: 1.5 }}>
+              Paste a job description and the Agent will customize your resume for that exact role.
+            </p>
+          </div>
+          <JobDescriptionStep
+            companyName={companyName}
+            jobTitle={jobTitle}
+            jobDescription={jobDescription}
+            resumeText={resumeText}
+            onCompanyChange={setCompanyName}
+            onJobTitleChange={setJobTitle}
+            onJobDescriptionChange={setJobDescription}
+            onTailor={handleDoTailor}
+          />
+        </div>
       </div>
     );
   }
