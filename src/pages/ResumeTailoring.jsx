@@ -397,7 +397,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: window.innerWidth < 600 ? 'wrap' : 'nowrap' }}>
             <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>RESUME HUB</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>Resume</p>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Resumes</h1>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -429,7 +429,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {!isFastIQ && resumes.length >= 1 && (
             <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>
-                Free accounts include 1 master resume. Upgrade to store unlimited versions.
+                Free accounts can have 1 master resume. Upgrade to store unlimited versions and get advanced tailoring.
               </p>
               <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>
                 Unlock FastIQ →
@@ -459,7 +459,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
               {analysis && !analyzing && (
                 <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>RESUME ANALYSIS · MATCHED TO YOUR GOALS</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Goals</p>
 
                   <div style={{ display: 'flex', flexDirection: window.innerWidth < 600 ? 'column' : 'row', gap: 24, alignItems: window.innerWidth < 600 ? 'center' : 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'center', flexShrink: 0 }}>
@@ -471,11 +471,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                     </div>
 
                     <div style={{ flex: 1, minWidth: 200 }}>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#fff', margin: '0 0 16px', lineHeight: 1.6 }}>{analysis.summary}</p>
-                      <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '12px 16px' }}>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>⚡ TOP PRIORITY</p>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
-                      </div>
+                      <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
+                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top Priority</p>
+                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
+                       </div>
                     </div>
                   </div>
 
@@ -503,10 +502,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   {!isFastIQ && (
                     <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                       <div>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>FastIQ can fix every one of these gaps.</p>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Tailor your resume to any job description in 60 seconds.</p>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>The Agent can help fix these gaps.</p>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Tell it your target job or company and it will tailor your resume in seconds.</p>
                       </div>
-                      <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Unlock FastIQ to Optimize →</button>
+                      <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Let the Agent Optimize This Resume →</button>
                     </div>
                   )}
 
