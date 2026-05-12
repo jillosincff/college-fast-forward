@@ -663,7 +663,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
           {/* Right Card: Help me build one */}
           <div
-            onClick={() => isFastIQ ? setPhase('builder') : onOpenUpgrade()}
+            onClick={() => setPhase('builder')}
             style={{
               background: '#fff', border: '1px solid #E0E0E0', borderRadius: 16, padding: '32px 24px', textAlign: 'center', cursor: 'pointer',
               transition: 'transform 0.2s, box-shadow 0.2s'
@@ -677,9 +677,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            {!isFastIQ && (
-              <div style={{ position: 'absolute', top: 12, right: 12, background: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: 20, padding: '4px 8px', fontSize: 9, fontWeight: 700, color: '#666', letterSpacing: '0.06em', marginBottom: 12 }}>Powered by Agent</div>
-            )}
+
             <div style={{ width: 56, height: 56, borderRadius: 12, background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>✨</div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Help me build one</p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 24px', lineHeight: 1.5 }}>
