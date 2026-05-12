@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Send, Download, Pencil, Check, Sparkles, ArrowLeft } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
+import ResumeBuilderIntro from '@/components/resume-tailor/ResumeBuilderIntro';
 
 const BUILDER_STEPS = [
   {
@@ -61,6 +62,7 @@ const formatResumeText = (text) => {
 };
 
 export default function ResumeBuilderStep({ user, onResumeReady, onBack }) {
+  const [phase, setPhase] = useState('intro'); // 'intro', 'questions', 'generating', 'done'
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({
     name: user?.full_name || '',
@@ -118,7 +120,7 @@ export default function ResumeBuilderStep({ user, onResumeReady, onBack }) {
     setGenerating(true);
     try {
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ, helping a UF student build their first resume. Generate a complete, professionally formatted resume from this information. Strengthen weak bullet points — make them quantified and impactful.
+        prompt: `You are an AI Resume Assistant helping a student build their first resume. Generate a complete, professionally formatted resume from this information. Strengthen weak bullet points — make them quantified and impactful.
 
 STUDENT INFO:
 - Name: ${answers.name || user?.full_name || 'Student'}
@@ -204,6 +206,18 @@ Return the full resume text and a brief encouraging summary.`,
     URL.revokeObjectURL(url);
   };
 
+  // Intro phase
+  if (phase === 'intro') {
+    return (
+      <ResumeBuilderIntro
+        user={user}
+        onStart={() => setPhase('questions')}
+        onUpload={onBack}
+        onSkip={onBack}
+      />
+    );
+  }
+
   // Generating state
   if (generating) {
     return (
@@ -286,12 +300,15 @@ Return the full resume text and a brief encouraging summary.`,
             onClick={handleSaveResume}
             className="flex-1 bg-[#FA4616] hover:bg-orange-600 text-white h-11 font-semibold"
           >
-            <Check className="w-4 h-4 mr-2" /> Save & Activate FASTIQ
+            <Check className="w-4 h-4 mr-2" /> Save & Activate
           </Button>
         </div>
       </motion.div>
     );
   }
+
+  // Questions phase
+  if (phase !== 'questions') return null;
 
   // Conversational builder steps
   return (
