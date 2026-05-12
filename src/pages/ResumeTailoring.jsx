@@ -432,7 +432,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                 Free accounts can have 1 master resume. Upgrade to store unlimited versions and get advanced tailoring.
               </p>
               <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>
-                Unlock FastIQ →
+                Unlock Accelerator →
               </button>
             </div>
           )}
@@ -444,7 +444,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '28px 32px', display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #F0F0F0', borderTop: '3px solid #E85D20', animation: 'spin 1s linear infinite', flexShrink: 0 }} />
                   <div>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>FastIQ is reviewing your resume...</p>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>The Agent is reviewing your resume...</p>
                     <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Scoring against your career goals</p>
                   </div>
                 </div>
@@ -629,9 +629,9 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         )}
 
         <div style={{ marginBottom: 40, textAlign: 'center' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>RESUME</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>Resume</p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
-            Your resume is your first impression.
+          Your resume is your first impression.
           </h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>
             Let's make it count. Do you have one already?
