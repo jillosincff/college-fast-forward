@@ -505,7 +505,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>The Agent can help fix these gaps.</p>
                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Tell it your target job or company and it will tailor your resume in seconds.</p>
                       </div>
-                      <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Let the Agent Optimize This Resume →</button>
+                      <button onClick={() => handleTailor(resumes.find(r => r.is_active) || resumes[0])} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Let the Agent Optimize This Resume →</button>
                     </div>
                   )}
 
