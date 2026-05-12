@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import JobPostingLinkSection from '@/components/tracker/JobPostingLinkSection';
+import { scheduleInterviewReminder } from '@/functions/scheduleInterviewReminder';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -42,6 +43,8 @@ export default function ApplicationDetailPanel({ app, onClose, onUpdate, onFollo
   const [activityOpen, setActivityOpen] = useState(false);
   const [editingInterview, setEditingInterview] = useState(false);
   const [interviewDraft, setInterviewDraft] = useState(app.interview || {});
+  const [remindersEnabled, setRemindersEnabled] = useState(app.interview?.remindersEnabled || false);
+  const [reminderSaved, setReminderSaved] = useState(false);
 
   const activityLog = buildActivityLog(app);
   const status = app.status;
@@ -52,6 +55,21 @@ export default function ApplicationDetailPanel({ app, onClose, onUpdate, onFollo
   const saveInterview = () => {
     onUpdate({ ...app, interview: { ...interviewDraft, autoImported: interviewDraft.autoImported } });
     setEditingInterview(false);
+  };
+
+  const toggleReminders = async (enabled) => {
+    setRemindersEnabled(enabled);
+    setReminderSaved(false);
+    const updatedApp = { ...app, interview: { ...(app.interview || {}), remindersEnabled: enabled } };
+    onUpdate(updatedApp);
+    if (enabled && app.interview?.date) {
+      await scheduleInterviewReminder({
+        company: app.company,
+        jobTitle: app.jobTitle,
+        interview: app.interview,
+      });
+      setReminderSaved(true);
+    }
   };
 
   return (
@@ -336,6 +354,57 @@ export default function ApplicationDetailPanel({ app, onClose, onUpdate, onFollo
                     </button>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* ── Interview Reminders Toggle ── */}
+            {(isInterviewingOrHigher || interview) && interview?.date && (
+              <div style={{
+                marginBottom: 20, background: '#F9F5FF', border: '1px solid #DDD6FE',
+                borderRadius: 12, padding: '14px 16px',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  <div>
+                    <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#1A1A1A', margin: '0 0 3px' }}>
+                      🔔 Interview Reminders
+                    </p>
+                    <p style={{ fontFamily: dm, fontSize: 11, color: '#888', margin: 0, lineHeight: 1.4 }}>
+                      24h before · Day before @ 6 PM · 1h before
+                    </p>
+                  </div>
+                  {/* Toggle switch */}
+                  <button
+                    onClick={() => toggleReminders(!remindersEnabled)}
+                    style={{
+                      width: 44, height: 24, borderRadius: 100, border: 'none', padding: 0,
+                      background: remindersEnabled ? '#7C3AED' : '#D1D5DB',
+                      cursor: 'pointer', position: 'relative', flexShrink: 0,
+                      minHeight: 'auto', minWidth: 'auto', transition: 'background 0.2s',
+                    }}
+                    aria-label="Toggle reminders"
+                  >
+                    <span style={{
+                      position: 'absolute', top: 2,
+                      left: remindersEnabled ? 22 : 2,
+                      width: 20, height: 20, borderRadius: '50%',
+                      background: '#fff', transition: 'left 0.2s',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    }} />
+                  </button>
+                </div>
+                {remindersEnabled && (
+                  <p style={{
+                    fontFamily: dm, fontSize: 11, color: reminderSaved ? '#059669' : '#7C3AED',
+                    margin: '10px 0 0', fontWeight: 600,
+                  }}>
+                    {reminderSaved ? '✓ Reminders scheduled! Email confirmed.' : 'Scheduling reminders…'}
+                  </p>
+                )}
+                {remindersEnabled && !interview?.date && (
+                  <p style={{ fontFamily: dm, fontSize: 11, color: '#D97706', margin: '8px 0 0' }}>
+                    ⚠ Add an interview date above to activate reminders.
+                  </p>
+                )}
               </div>
             )}
 
