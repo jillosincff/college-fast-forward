@@ -7,13 +7,15 @@ import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
+import ImportToast from '@/components/tracker/ImportToast';
+import ImportUpdateModal from '@/components/tracker/ImportUpdateModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
 
 // Fake data for now
 const SAMPLE_APPS = [
-  { id: 1, company: 'Disney', logo: '🏰', jobTitle: 'Marketing Intern', dateApplied: '2025-03-12', resumeVersion: 'v2.1', status: 'interviewing', nextAction: 'Prepare for Interview' },
+  { id: 1, company: 'Disney', logo: '🏰', jobTitle: 'Marketing Intern', dateApplied: '2025-03-12', resumeVersion: 'v2.1', status: 'interviewing', nextAction: 'Prepare for Interview', notes: 'Interview invite received via email on March 20th.', interview: { scheduledAt: 'March 25, 2025 at 2:00 PM', type: 'Zoom', interviewer: 'Sarah Chen (Marketing Manager)', joinLink: 'https://zoom.us/j/example', autoImported: true } },
   { id: 2, company: 'Google', logo: '🔵', jobTitle: 'Software Engineer Intern', dateApplied: '2025-03-10', resumeVersion: 'v3.0', status: 'applied', nextAction: '—' },
   { id: 3, company: 'JPMorgan', logo: '💼', jobTitle: 'Finance Analyst', dateApplied: '2025-03-05', resumeVersion: 'v1.8', status: 'rejected', nextAction: '—' },
   { id: 4, company: 'Microsoft', logo: '⚪', jobTitle: 'Product Manager Intern', dateApplied: '2025-03-01', resumeVersion: 'v2.1', status: 'in_review', nextAction: 'Follow up' },
@@ -49,6 +51,15 @@ export default function ApplicationTracker() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  const [importToast, setImportToast] = useState({ company: 'Disney', jobTitle: 'Marketing Intern', change: 'Status changed to Interviewing' });
+  const [showImportModal, setShowImportModal] = useState(false);
+  const importNotification = {
+    company: 'Disney', jobTitle: 'Marketing Intern',
+    details: [
+      'Status changed to Interviewing',
+      'Interview scheduled for March 25 @ 2:00 PM via Zoom with Sarah Chen',
+    ],
+  };
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -78,6 +89,23 @@ export default function ApplicationTracker() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f8f8', fontFamily: dm }}>
+      {/* Import Toast */}
+      {importToast && (
+        <ImportToast
+          notification={importToast}
+          onView={() => { setImportToast(null); setShowImportModal(true); }}
+          onDismiss={() => setImportToast(null)}
+        />
+      )}
+
+      {/* Import Update Modal */}
+      {showImportModal && (
+        <ImportUpdateModal
+          notification={importNotification}
+          onViewDetails={() => { setShowImportModal(false); setSelectedApp(applications[0]); }}
+          onDismiss={() => setShowImportModal(false)}
+        />
+      )}
       {/* Header */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E5E5E5', padding: '32px 20px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -367,6 +395,7 @@ export default function ApplicationTracker() {
 
       <style>{`
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
       `}</style>
     </div>
   );

@@ -115,6 +115,56 @@ export default function ApplicationDetailPanel({ app, onClose, onUpdate, onFollo
           </div>
         </div>
 
+        {/* Interview Details — shown when status is interviewing */}
+        {app.status === 'interviewing' && app.interview && (
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+              <span style={{ fontSize: 14 }}>📅</span>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#8B5CF6', textTransform: 'uppercase', margin: 0, letterSpacing: '0.05em' }}>
+                Interview Details
+              </p>
+              {app.interview.autoImported && (
+                <span style={{ fontSize: 10, background: '#EDE9FE', color: '#7C3AED', borderRadius: 4, padding: '2px 6px', fontWeight: 600, fontFamily: dm }}>
+                  Auto-imported
+                </span>
+              )}
+            </div>
+            <div style={{ background: '#FAF5FF', border: '1px solid #DDD6FE', borderRadius: 10, padding: 14, display: 'grid', gap: 8 }}>
+              {app.interview.scheduledAt && (
+                <div style={{ display: 'flex', gap: 8, fontSize: 13, fontFamily: dm }}>
+                  <span style={{ color: '#888', minWidth: 90, fontWeight: 600 }}>Scheduled</span>
+                  <span style={{ color: '#1A1A1A' }}>{app.interview.scheduledAt}</span>
+                </div>
+              )}
+              {app.interview.type && (
+                <div style={{ display: 'flex', gap: 8, fontSize: 13, fontFamily: dm }}>
+                  <span style={{ color: '#888', minWidth: 90, fontWeight: 600 }}>Type</span>
+                  <span style={{ color: '#1A1A1A' }}>{app.interview.type}</span>
+                </div>
+              )}
+              {app.interview.interviewer && (
+                <div style={{ display: 'flex', gap: 8, fontSize: 13, fontFamily: dm }}>
+                  <span style={{ color: '#888', minWidth: 90, fontWeight: 600 }}>Interviewer</span>
+                  <span style={{ color: '#1A1A1A' }}>{app.interview.interviewer}</span>
+                </div>
+              )}
+              {app.interview.joinLink && (
+                <div style={{ display: 'flex', gap: 8, fontSize: 13, fontFamily: dm }}>
+                  <span style={{ color: '#888', minWidth: 90, fontWeight: 600 }}>Link</span>
+                  <a
+                    href={app.interview.joinLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#7C3AED', fontWeight: 600, textDecoration: 'none' }}
+                  >
+                    Join Meeting ↗
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Job Posting Link Section */}
         <JobPostingLinkSection
           application={app}
@@ -138,20 +188,47 @@ export default function ApplicationDetailPanel({ app, onClose, onUpdate, onFollo
           />
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons — context-aware based on status */}
         <div style={{ display: 'grid', gap: 10, marginBottom: 20 }}>
-          <button
-            onClick={onFollowUp}
-            style={{
-              background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8,
-              padding: '13px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm,
-              minHeight: 'auto', transition: 'background 0.2s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#d44e14')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#E85D20')}
-          >
-            Let the Agent Draft a Follow-up
-          </button>
+          {app.status === 'interviewing' ? (
+            <>
+              <button
+                style={{
+                  background: '#7C3AED', color: '#fff', border: 'none', borderRadius: 8,
+                  padding: '13px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: dm,
+                  minHeight: 'auto', transition: 'background 0.2s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#6D28D9')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#7C3AED')}
+              >
+                Let the Agent Draft Prep Questions
+              </button>
+              <button
+                style={{
+                  background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8,
+                  padding: '12px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm,
+                  minHeight: 'auto', transition: 'background 0.2s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#d44e14')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#E85D20')}
+              >
+                Let the Agent Draft a Thank You Note
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onFollowUp}
+              style={{
+                background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8,
+                padding: '13px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm,
+                minHeight: 'auto', transition: 'background 0.2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#d44e14')}
+              onMouseLeave={e => (e.currentTarget.style.background = '#E85D20')}
+            >
+              Let the Agent Draft a Follow-up
+            </button>
+          )}
 
           <button
             onClick={onReminder}
@@ -163,13 +240,9 @@ export default function ApplicationDetailPanel({ app, onClose, onUpdate, onFollo
             Add Follow-up Reminder
           </button>
 
-          {/* Tertiary: only show if no job posting link yet */}
           {!app.jobPostingUrl && (
             <button
-              onClick={() => {
-                // Scroll up to the link section — the section handles its own edit state via its own open trigger
-                document.getElementById('job-posting-link-trigger')?.click();
-              }}
+              onClick={() => document.getElementById('job-posting-link-trigger')?.click()}
               style={{
                 background: 'none', color: '#0021A5', border: 'none', borderRadius: 8,
                 padding: '10px', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: dm,
