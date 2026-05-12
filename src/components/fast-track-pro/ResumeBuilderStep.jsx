@@ -213,15 +213,28 @@ Return the full resume text and a brief encouraging summary.`,
     if (!linkedinUrl.trim()) return;
     setImporting(true);
     try {
-      // Store LinkedIn URL and move to questions
-      setAnswers(prev => ({
-        ...prev,
-        linkedin: linkedinUrl,
-      }));
-      setPhase('questions');
+      const response = await base44.functions.invoke('importLinkedinProfile', {
+        linkedinUrl: linkedinUrl.trim(),
+      });
+
+      if (response.data?.success) {
+        const imported = response.data;
+        setAnswers(prev => ({
+          ...prev,
+          name: imported.name || prev.name,
+          linkedin: linkedinUrl,
+          experience_text: imported.experience?.map(e => `${e.title} at ${e.company}`).join('\n') || '',
+          skills_text: imported.skills?.join(', ') || '',
+          major: imported.education?.[0]?.field || '',
+          graduation: imported.education?.[0]?.year || '',
+        }));
+        setPhase('questions');
+      } else {
+        alert('Could not extract data from that profile. Please enter manually.');
+      }
     } catch (err) {
       console.error('LinkedIn import error:', err);
-      alert('Error processing LinkedIn URL. Please try again.');
+      alert('Failed to import from LinkedIn. Please try entering manually.');
     } finally {
       setImporting(false);
     }
