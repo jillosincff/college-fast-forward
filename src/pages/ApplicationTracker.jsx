@@ -9,6 +9,7 @@ import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
 import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
 import ImportToast from '@/components/tracker/ImportToast';
 import ImportUpdateModal from '@/components/tracker/ImportUpdateModal';
+import EmailParserTestPanel from '@/components/tracker/EmailParserTestPanel';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -51,6 +52,7 @@ export default function ApplicationTracker() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [showReminderModal, setShowReminderModal] = useState(false);
+  const [showParserTest, setShowParserTest] = useState(false);
   const [importToast, setImportToast] = useState({ company: 'Disney', jobTitle: 'Marketing Intern', change: 'Status changed to Interviewing' });
   const [showImportModal, setShowImportModal] = useState(false);
   const importNotification = {
@@ -142,19 +144,33 @@ export default function ApplicationTracker() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 20px' }}>
         {/* Connect Email Button */}
         <div style={{ marginBottom: 20 }}>
-          <button 
-            onClick={() => setShowEmailModal(true)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: '#fff5f0', border: '1.5px solid #E85D20',
-              color: '#E85D20', padding: '12px 20px', borderRadius: 8,
-              fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              fontFamily: dm, minHeight: 'auto',
-            }}
-          >
-            <Mail size={16} />
-            Connect Email for Auto-Import
-          </button>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button 
+              onClick={() => setShowEmailModal(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: '#fff5f0', border: '1.5px solid #E85D20',
+                color: '#E85D20', padding: '12px 20px', borderRadius: 8,
+                fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                fontFamily: dm, minHeight: 'auto',
+              }}
+            >
+              <Mail size={16} />
+              Connect Email for Auto-Import
+            </button>
+            <button
+              onClick={() => setShowParserTest(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: '#F5F3FF', border: '1.5px solid #7C3AED',
+                color: '#7C3AED', padding: '12px 20px', borderRadius: 8,
+                fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                fontFamily: dm, minHeight: 'auto',
+              }}
+            >
+              🧪 Test Email Parser
+            </button>
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
@@ -385,6 +401,29 @@ export default function ApplicationTracker() {
         onClose={() => setShowFollowUpModal(false)} 
         application={selectedApp}
       />
+
+      {/* Email Parser Test Panel */}
+      {showParserTest && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
+            zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end',
+          }}
+          onClick={() => setShowParserTest(false)}
+        >
+          <div
+            style={{
+              width: '100%', maxWidth: 600, height: '100vh', background: '#fff',
+              overflowY: 'auto', padding: 24,
+              animation: 'slideInRight 0.3s ease',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <EmailParserTestPanel onClose={() => setShowParserTest(false)} />
+          </div>
+          <style>{`@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
+        </div>
+      )}
 
       {/* Follow-up Reminder Modal */}
       <FollowUpReminderModal 

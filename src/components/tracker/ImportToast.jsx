@@ -27,7 +27,7 @@ export default function ImportToast({ notification, onView, onDismiss }) {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: 13, color: '#fff' }}>
-          New update imported!
+          Application update imported!
         </p>
         <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.65)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {notification.company} {notification.jobTitle} → {notification.change}
