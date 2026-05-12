@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Send, Download, Pencil, Check, Sparkles, ArrowLeft } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import ResumeBuilderIntro from '@/components/resume-tailor/ResumeBuilderIntro';
+import ResumeBuilderIntro from '@/components/resume-tailor/ResumeBuilderIntro.jsx';
 
 const BUILDER_STEPS = [
   {
