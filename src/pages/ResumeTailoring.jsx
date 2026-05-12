@@ -419,7 +419,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   onClick={() => onOpenUpgrade()}
                   style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
                 >
-                  + Add Resume · FastIQ
+                  + Add Resume
                 </button>
               )}
             </div>
