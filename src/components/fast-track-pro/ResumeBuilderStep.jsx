@@ -213,53 +213,15 @@ Return the full resume text and a brief encouraging summary.`,
     if (!linkedinUrl.trim()) return;
     setImporting(true);
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Extract professional information from this LinkedIn profile URL: ${linkedinUrl}
-        
-Return a JSON object with:
-- name: Full name
-- headline: Current job title/headline
-- experience: Array of {company, title, description, duration}
-- education: Array of {school, degree, field, year}
-- skills: Array of skill strings
-- summary: Brief professional summary
-
-If you cannot access the profile, return an error message.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            name: { type: "string" },
-            headline: { type: "string" },
-            experience: { type: "array", items: { type: "object" } },
-            education: { type: "array", items: { type: "object" } },
-            skills: { type: "array", items: { type: "string" } },
-            summary: { type: "string" },
-            error: { type: "string" }
-          }
-        },
-        add_context_from_internet: true,
-        model: 'gemini_3_flash'
-      });
-
-      if (result.error) {
-        alert('Could not import from that LinkedIn URL. Please try again or enter manually.');
-        return;
-      }
-
-      setImportedData(result);
+      // Store LinkedIn URL and move to questions
       setAnswers(prev => ({
         ...prev,
-        name: result.name || prev.name,
         linkedin: linkedinUrl,
-        experience_text: result.experience?.map(e => `${e.title} at ${e.company} - ${e.description}`).join('\n\n') || '',
-        skills_text: result.skills?.join(', ') || '',
-        major: result.education?.[0]?.field || '',
-        graduation: result.education?.[0]?.year || '',
       }));
       setPhase('questions');
     } catch (err) {
       console.error('LinkedIn import error:', err);
-      alert('Failed to import from LinkedIn. Please try entering manually.');
+      alert('Error processing LinkedIn URL. Please try again.');
     } finally {
       setImporting(false);
     }
