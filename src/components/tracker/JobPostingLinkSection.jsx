@@ -123,18 +123,24 @@ export default function JobPostingLinkSection({ application, onUpdate }) {
         </div>
       ) : (
         /* No Link - Add Button */
-        <button
-          onClick={() => setIsEditing(true)}
-          style={{
-            width: '100%', background: '#F9F9F9', color: '#E85D20', border: '1.5px dashed #E85D20',
-            borderRadius: 8, padding: '10px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-            fontFamily: dm, minHeight: 'auto', transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#FFF5F0')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#F9F9F9')}
-        >
-          + Add Job Posting Link
-        </button>
+        <div>
+          <button
+            id="job-posting-link-trigger"
+            onClick={() => setIsEditing(true)}
+            style={{
+              width: '100%', background: '#F9F9F9', color: '#E85D20', border: '1.5px dashed #E85D20',
+              borderRadius: 8, padding: '10px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              fontFamily: dm, minHeight: 'auto', transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#FFF5F0')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#F9F9F9')}
+          >
+            + Add Job Posting Link
+          </button>
+          <p style={{ fontSize: 11, color: '#999', margin: '6px 0 0', lineHeight: 1.4, fontFamily: dm }}>
+            Suggested: Paste the original job URL so you can easily reference it later.
+          </p>
+        </div>
       )}
     </div>
   );

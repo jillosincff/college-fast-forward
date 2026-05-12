@@ -6,7 +6,7 @@ import AddApplicationModal from '@/components/tracker/AddApplicationModal';
 import EmailConnectionModal from '@/components/tracker/EmailConnectionModal';
 import FollowUpDraftModal from '@/components/tracker/FollowUpDraftModal';
 import FollowUpReminderModal from '@/components/tracker/FollowUpReminderModal';
-import JobPostingLinkSection from '@/components/tracker/JobPostingLinkSection';
+import ApplicationDetailPanel from '@/components/tracker/ApplicationDetailPanel';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const pf = "'Playfair Display', Georgia, serif";
@@ -305,138 +305,16 @@ export default function ApplicationTracker() {
 
       {/* Detail Panel */}
       {selectedApp && (
-        <div
-          style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
-            zIndex: 100, display: 'flex', alignItems: 'flex-end',
+        <ApplicationDetailPanel
+          app={selectedApp}
+          onClose={() => setSelectedApp(null)}
+          onUpdate={(updatedApp) => {
+            setSelectedApp(updatedApp);
+            setApplications(prev => prev.map(a => a.id === updatedApp.id ? updatedApp : a));
           }}
-          onClick={() => setSelectedApp(null)}
-        >
-          <div
-            style={{
-              width: '100%', maxWidth: 400, background: '#fff', borderRadius: '20px 20px 0 0',
-              padding: 24, maxHeight: '90vh', overflowY: 'auto', animation: 'slideUp 0.3s ease',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Title: Company – Job Title */}
-            <h2 style={{ fontFamily: pf, fontSize: 20, fontWeight: 700, color: '#1A1A1A', margin: '0 0 20px' }}>
-              {selectedApp.company} – {selectedApp.jobTitle}
-            </h2>
-
-            {/* Key Info Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
-              {/* Date Applied */}
-              <div style={{ background: '#F9F9F9', borderRadius: 10, padding: 12 }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 6px', letterSpacing: '0.05em' }}>
-                  Date Applied
-                </p>
-                <p style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>
-                  {new Date(selectedApp.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}
-                </p>
-              </div>
-
-              {/* Resume Version */}
-              <div style={{ background: '#F9F9F9', borderRadius: 10, padding: 12 }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 6px', letterSpacing: '0.05em' }}>
-                  Resume Version
-                </p>
-                <p style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', margin: 0 }}>
-                  {selectedApp.resumeVersion}{' '}
-                  <button style={{ background: 'none', border: 'none', color: '#E85D20', cursor: 'pointer', fontSize: 11, padding: 0, minHeight: 'auto', fontWeight: 600 }}>
-                    View
-                  </button>
-                </p>
-              </div>
-
-              {/* Status Dropdown */}
-              <div style={{ background: '#F9F9F9', borderRadius: 10, padding: 12 }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 6px', letterSpacing: '0.05em' }}>
-                  Status
-                </p>
-                <select style={{
-                  fontSize: 12, fontWeight: 500, border: '1px solid #E0E0E0', borderRadius: 6, padding: '4px 6px',
-                  width: '100%', outline: 'none', fontFamily: dm, cursor: 'pointer', minHeight: 'auto', background: '#fff',
-                }}>
-                  <option>{STATUS_LABELS[selectedApp.status]}</option>
-                  <option>Applied</option>
-                  <option>In Review</option>
-                  <option>Interviewing</option>
-                  <option>Offer Received</option>
-                  <option>Rejected</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Job Posting Link */}
-            <JobPostingLinkSection 
-              application={selectedApp}
-              onUpdate={setSelectedApp}
-            />
-
-            {/* Notes Section */}
-            <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase', margin: '0 0 8px', letterSpacing: '0.05em' }}>
-                Notes
-              </p>
-              <textarea
-                placeholder="Add notes about this application… (interview questions, salary expectations, things to follow up on, etc.)"
-                style={{
-                  width: '100%', minHeight: 100, fontSize: 13, border: '1px solid #E0E0E0', borderRadius: 8,
-                  padding: 12, outline: 'none', fontFamily: dm, resize: 'vertical', lineHeight: 1.5,
-                }}
-              />
-            </div>
-
-            {/* Action Buttons - Stacked, Prominent */}
-            <div style={{ display: 'grid', gap: 10, marginBottom: 16 }}>
-              {/* Primary Orange Button */}
-              <button 
-                onClick={() => setShowFollowUpModal(true)}
-                style={{
-                  background: '#E85D20', color: '#fff', border: 'none', borderRadius: 8, padding: '14px',
-                  fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#d44e14'}
-                onMouseLeave={e => e.currentTarget.style.background = '#E85D20'}
-              >
-                Let the Agent Draft a Follow-up
-              </button>
-
-              {/* Secondary Button */}
-              <button 
-                onClick={() => setShowReminderModal(true)}
-                style={{
-                  background: '#FFF5F0', color: '#E85D20', border: '1.5px solid #E85D20', borderRadius: 8,
-                  padding: '12px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: dm, minHeight: 'auto',
-                }}>
-                Add Follow-up Reminder
-              </button>
-
-
-            </div>
-
-            {/* Helpful Text */}
-            <div style={{ background: '#F5F5F5', borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 12, color: '#666', lineHeight: 1.5 }}>
-              <p style={{ margin: 0 }}>
-                <span style={{ fontWeight: 600 }}>Last updated:</span> {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                <br />
-                <span style={{ color: '#888' }}>Connected via email • Auto-tracked</span>
-              </p>
-            </div>
-
-            <button
-              onClick={() => setSelectedApp(null)}
-              style={{
-                width: '100%', background: 'none', border: 'none', color: '#888',
-                fontSize: 13, cursor: 'pointer', fontFamily: dm, minHeight: 'auto', padding: 8,
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
+          onFollowUp={() => setShowFollowUpModal(true)}
+          onReminder={() => setShowReminderModal(true)}
+        />
       )}
 
       {/* Floating Action Button */}
