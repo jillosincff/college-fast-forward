@@ -30,13 +30,24 @@ Deno.serve(async (req) => {
       }),
     });
 
+    const scrapedData = await scrapeResponse.json();
+
     if (!scrapeResponse.ok) {
-      console.error('Firecrawl scrape failed:', scrapeResponse.status);
-      return Response.json({ error: 'Could not scrape LinkedIn profile' }, { status: 400 });
+      console.error('Firecrawl scrape failed:', scrapeResponse.status, scrapedData);
+      return Response.json({ 
+        error: 'LinkedIn profiles are protected. Please enter your experience manually.',
+        fallback: true 
+      }, { status: 400 });
     }
 
-    const scrapedData = await scrapeResponse.json();
     const markdown = scrapedData.data?.markdown || '';
+    if (!markdown) {
+      console.warn('No markdown extracted from LinkedIn profile');
+      return Response.json({ 
+        error: 'Could not extract data from that profile. Please enter manually.',
+        fallback: true 
+      }, { status: 400 });
+    }
 
     // Parse the markdown to extract structured data
     const extracted = parseLinkedInMarkdown(markdown);
