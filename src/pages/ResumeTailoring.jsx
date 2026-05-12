@@ -625,56 +625,88 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
         <div style={{ marginBottom: 40, textAlign: 'center' }}>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>RESUME</p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
             Your resume is your first impression.
           </h1>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>
             Let's make it count. Do you have one already?
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 16, marginBottom: 32 }}>
-          {/* Path A — Upload */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 20, marginBottom: 32 }}>
+          {/* Left Card: Yes, I have one (Recommended) */}
           <div
             onDragOver={e => e.preventDefault()}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            style={{ background: '#fff', border: '2px dashed #E85D20', borderRadius: 16, padding: '36px 24px', textAlign: 'center', cursor: 'pointer' }}
+            style={{ background: '#fff', border: '2px dashed #E85D20', borderRadius: 16, padding: '32px 24px', textAlign: 'center', cursor: 'pointer', transition: 'transform 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
           >
             <div style={{ width: 56, height: 56, borderRadius: 12, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>📄</div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Yes, I have one</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 20px', lineHeight: 1.5 }}>
-              Upload your resume and FastIQ will review it, score it, and help you tailor it to any job.
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 24px', lineHeight: 1.5 }}>
+              Upload your resume and the Agent will review it, score it, and help you tailor it to any job.
             </p>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600 }}>Drop PDF or Word doc here or click to upload →</span>
+            <div style={{
+              background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.4)',
+              borderRadius: 12, padding: '24px 16px', marginBottom: '16px',
+              fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#E85D20', fontWeight: 500,
+            }}>
+              Drop PDF or Word doc here or click to upload
+            </div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#AAA', margin: 0, letterSpacing: '0.03em' }}>
+              Supported formats: PDF, Word (.docx)
+            </p>
             <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }} onChange={handleFileSelect} />
           </div>
 
-          {/* Path B — Build with FastIQ */}
+          {/* Right Card: Help me build one */}
           <div
             onClick={() => isFastIQ ? setPhase('builder') : onOpenUpgrade()}
-            style={{ background: isFastIQ ? '#fff' : '#FAFAFA', border: '1px solid #E0E0E0', borderRadius: 16, padding: '36px 24px', textAlign: 'center', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+            style={{
+              background: '#fff', border: '1px solid #E0E0E0', borderRadius: 16, padding: '32px 24px', textAlign: 'center', cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
             {!isFastIQ && (
-              <div style={{ position: 'absolute', top: 12, right: 12, background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 20, padding: '3px 10px', fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.08em' }}>FASTIQ</div>
+              <div style={{ position: 'absolute', top: 12, right: 12, background: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: 20, padding: '4px 8px', fontSize: 9, fontWeight: 700, color: '#666', letterSpacing: '0.06em', marginBottom: 12 }}>Powered by Agent</div>
             )}
-            <div style={{ width: 56, height: 56, borderRadius: 12, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>✨</div>
+            <div style={{ width: 56, height: 56, borderRadius: 12, background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>✨</div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Help me build one</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 20px', lineHeight: 1.5 }}>
-              Answer a few questions and FastIQ will build a professional resume for you.
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 24px', lineHeight: 1.5 }}>
+              Answer a few quick questions and the Agent will build a strong, professional resume for you from scratch.
             </p>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: isFastIQ ? '#E85D20' : '#AAAAAA', fontWeight: 600 }}>
-              {isFastIQ ? 'Build my resume →' : 'Unlock with FastIQ →'}
-            </span>
+            <button style={{
+              background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px',
+              fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#fff',
+              cursor: 'pointer', minHeight: 'auto', width: '100%'
+            }}>
+              Start Building →
+            </button>
           </div>
         </div>
 
-        <p
-          onClick={() => navigate('FreeTierDashboard')}
-          style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: 0 }}
-        >
-          Skip for now — go to dashboard →
-        </p>
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <button
+            onClick={() => navigate('FreeTierDashboard')}
+            style={{
+              background: 'none', border: 'none', fontFamily: "'DM Sans', sans-serif",
+              fontSize: 13, color: '#888', cursor: 'pointer', padding: 0, minHeight: 'auto',
+              textDecoration: 'underline'
+            }}
+          >
+            Skip for now — go to dashboard →
+          </button>
+        </div>
       </div>
     </>
   );
