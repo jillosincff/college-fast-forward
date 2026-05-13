@@ -4,74 +4,47 @@ import { navigate } from '@/components/utils/navigation';
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
 
+const BENEFIT_CARDS = [
+  { icon: '📄', title: 'Tailored resumes', desc: 'Automatically adapt your resume for each role so you can apply faster and with more confidence.' },
+  { icon: '🎯', title: 'Relevant opportunities', desc: 'Surface jobs that better match your background, goals, and interests.' },
+  { icon: '📊', title: 'Application tracking', desc: 'Keep every application organized in one place with clear status updates.' },
+  { icon: '🔔', title: 'Follow-up reminders', desc: 'Never miss the right time to check in again.' },
+  { icon: '💼', title: 'LinkedIn optimization', desc: 'Improve your profile so recruiters and connections can find you more easily.' },
+  { icon: '🤝', title: 'Warm intros', desc: 'Find alumni and parent connections who may help create warmer paths into companies.' },
+];
+
 const HOW_IT_WORKS = [
-  {
-    number: '01',
-    icon: '🎯',
-    title: 'Know What to Apply For',
-    desc: 'Smart matching + daily opportunities tailored to your goals.',
-  },
-  {
-    number: '02',
-    icon: '✨',
-    title: 'Stand Out',
-    desc: 'Modern resumes and LinkedIn optimization that get noticed.',
-  },
-  {
-    number: '03',
-    icon: '📋',
-    title: 'Stay on Track & Get Replies',
-    desc: 'Track every application, get smart reminders, and reach the right connections.',
-  },
+  { number: '01', icon: '📁', title: 'Upload your resume', desc: 'Add your background once and let Fast Forward do the setup work.' },
+  { number: '02', icon: '✨', title: 'Get personalized support', desc: 'Receive tailored resume help, relevant job matches, and LinkedIn guidance.' },
+  { number: '03', icon: '📋', title: 'Stay organized and follow up', desc: 'Track applications, reminders, and outreach without juggling spreadsheets.' },
 ];
 
 const STORIES = [
-  {
-    quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized my search, fixed my resume, and helped me get real responses. Landed an internship in 3 weeks.",
-    name: "Marcus",
-    school: "Penn State '27 · Finance",
-    initials: "M",
-    tag: "Internship landed",
-    tagIcon: "🎯",
-  },
-  {
-    quote: "I found a Disney alum from my school in 2 minutes. She actually responded.",
-    name: "Jordan T.",
-    school: "USC '27 · Marketing",
-    initials: "J",
-    tag: "Response received",
-    tagIcon: "✉️",
-  },
-  {
-    quote: "I applied to over 100 jobs and got zero responses. I reached out to one parent from my school and he got me an interview by the following Monday.",
-    name: "Sarah K.",
-    school: "University of Michigan · Junior · Engineering",
-    initials: "S",
-    tag: "Got the role",
-    tagIcon: "🎯",
-  },
-  {
-    quote: "I finally had one place for everything — all my applications, resume versions, and outreach. The Agent kept me organized and I stopped second-guessing myself.",
-    name: "Chris C.",
-    school: "USC '27",
-    initials: "CC",
-    tag: "3 interviews booked",
-    tagIcon: "📅",
-  },
+  { quote: "Fast Forward helped me stop losing track of applications and follow-ups.", name: "Jordan T.", school: "Computer Science student", initials: "JT", tag: "Stayed organized" },
+  { quote: "I finally felt like I had a system instead of a mess.", name: "Maya R.", school: "Business student", initials: "MR", tag: "Less stress" },
+  { quote: "The warm intro feature made networking feel less random.", name: "Alex P.", school: "Marketing student", initials: "AP", tag: "Better outreach" },
 ];
 
 const FREE_FEATURES = [
   'Basic resume tools',
-  'Limited Agent usage',
+  'Limited AI usage',
   'Application tracker',
-  'Perfect for getting started',
+  'Good for getting started',
 ];
 
 const PRO_FEATURES = [
-  'Unlimited AI Agent',
-  'Advanced tailoring + modern templates',
-  'Smart reminders + interview prep',
-  'Most students upgrade once they see real results',
+  'Unlimited AI support',
+  'Advanced tailoring',
+  'Smart reminders and follow-ups',
+  'LinkedIn optimization',
+  'Warm intro support',
+];
+
+const PROOF_CALLOUTS = [
+  'Track every application automatically.',
+  'Draft better outreach faster.',
+  'Get reminders before deadlines and follow-ups.',
+  'Find alumni and trusted connections worth reaching out to.',
 ];
 
 function StoriesCarousel() {
@@ -102,36 +75,28 @@ function StoriesCarousel() {
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
         style={{
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.12)',
-          borderLeft: '4px solid #E85D20',
-          borderRadius: '0 20px 20px 0',
-          padding: '36px 36px 32px',
-          cursor: dragging ? 'grabbing' : 'grab',
-          transform: `translateX(${offset * 0.07}px)`,
-          transition: dragging ? 'none' : 'transform 0.3s ease',
-          minHeight: 190, position: 'relative', overflow: 'hidden',
+          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+          borderLeft: '4px solid #E85D20', borderRadius: '0 20px 20px 0',
+          padding: '36px 36px 32px', cursor: dragging ? 'grabbing' : 'grab',
+          transform: `translateX(${offset * 0.07}px)`, transition: dragging ? 'none' : 'transform 0.3s ease',
+          minHeight: 170, position: 'relative', overflow: 'hidden',
         }}
       >
         <div style={{ position: 'absolute', top: 12, right: 20, fontFamily: playfair, fontSize: 90, lineHeight: 1, color: 'rgba(255,255,255,0.05)', fontWeight: 700, pointerEvents: 'none' }}>"</div>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 100, padding: '4px 12px', marginBottom: 18 }}>
-          <span style={{ fontSize: 12 }}>{s.tagIcon}</span>
           <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.tag}</span>
         </div>
-        <p style={{ fontFamily: dmSans, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', lineHeight: 1.55, margin: '0 0 24px', position: 'relative', zIndex: 1 }}>
+        <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 20px)', fontStyle: 'italic', fontWeight: 600, color: '#fff', lineHeight: 1.6, margin: '0 0 24px', position: 'relative', zIndex: 1 }}>
           "{s.quote}"
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #E85D20, #c9471a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#fff' }}>
-            {s.initials}
-          </div>
+          <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #E85D20, #c9471a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#fff' }}>{s.initials}</div>
           <div>
             <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>{s.name}</p>
             <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>{s.school}</p>
           </div>
         </div>
       </div>
-
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 }}>
         <div style={{ display: 'flex', gap: 6 }}>
           {STORIES.map((_, i) => (
@@ -147,9 +112,6 @@ function StoriesCarousel() {
           ))}
         </div>
       </div>
-      <p style={{ fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: '10px 0 0' }}>
-        swipe or drag · {active + 1} of {total}
-      </p>
     </div>
   );
 }
@@ -170,14 +132,37 @@ export default function StudentLandingPage({ onParentClick }) {
 
   const go = () => navigate('GatorAuth');
 
-  const testTracker = () => navigate('ApplicationTracker');
-
   const parent = () => {
     if (onParentClick) { onParentClick(); return; }
     localStorage.setItem('pending_invite_role', 'parent');
     sessionStorage.setItem('pending_invite_role', 'parent');
     navigate('ParentLandingPage');
   };
+
+  const sectionLabel = (text) => (
+    <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>{text}</p>
+  );
+
+  const ctaBtn = (label, primary = true, onClick = go) => (
+    <button onClick={onClick} style={{
+      fontFamily: dmSans, fontSize: primary ? 16 : 15, fontWeight: primary ? 800 : 600,
+      color: primary ? '#fff' : 'rgba(255,255,255,0.75)',
+      background: primary ? '#E85D20' : 'rgba(255,255,255,0.06)',
+      border: primary ? 'none' : '1px solid rgba(255,255,255,0.15)',
+      borderRadius: 14, padding: primary ? '18px 40px' : '18px 28px',
+      cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease',
+      boxShadow: primary ? '0 8px 32px rgba(232,93,32,0.4)' : 'none',
+    }}
+      onMouseEnter={e => {
+        if (primary) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }
+        else { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }
+      }}
+      onMouseLeave={e => {
+        if (primary) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }
+        else { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }
+      }}
+    >{label}</button>
+  );
 
   return (
     <div style={{ background: '#08080f', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
@@ -190,206 +175,170 @@ export default function StudentLandingPage({ onParentClick }) {
       }}>
         <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 700, background: 'radial-gradient(ellipse, rgba(232,93,32,0.09) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
-        {/* Tag */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)',
+          background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.2)',
           borderRadius: 100, padding: '7px 18px', marginBottom: 36,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#E85D20' }} />
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee' }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            Powered by AI and Parent Connections
+            Powered by AI and trusted connections
           </span>
         </div>
 
-        {/* Headline */}
         <h1 style={{
-          fontFamily: playfair, fontSize: 'clamp(44px, 7.5vw, 96px)',
-          fontWeight: 700, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.03em',
+          fontFamily: playfair, fontSize: 'clamp(38px, 6.5vw, 80px)',
+          fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em',
           margin: '0 0 24px', maxWidth: 760,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Job Search Platform<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Built For College Students</span>
+          Job search support for students<br />
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>who are tired of getting ignored.</span>
         </h1>
 
-        {/* Sub-headline */}
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
-          fontWeight: 700, color: 'rgba(255,255,255,0.9)',
-          lineHeight: 1.45, maxWidth: 560, margin: '0 auto 12px',
+          fontWeight: 400, color: 'rgba(255,255,255,0.7)',
+          lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          College Fast Forward is a powerful, personalized AI agent that optimizes your entire job search — so you get hired faster.
+          Fast Forward helps you tailor resumes, surface relevant opportunities, track applications, send follow-ups, optimize your LinkedIn, and find warm intros through alumni and parent connections when available.
         </p>
 
-        {/* CTAs */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
-          <button onClick={go} style={{
-            fontFamily: dmSans, fontSize: 16, fontWeight: 800,
-            color: '#fff', background: '#E85D20', border: 'none',
-            borderRadius: 14, padding: '18px 40px', cursor: 'pointer', minHeight: 'auto',
-            boxShadow: '0 8px 32px rgba(232,93,32,0.4)', transition: 'all 0.2s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
-          >
-            Try the Agent Free
-          </button>
-          <button onClick={go} style={{
-            fontFamily: dmSans, fontSize: 15, fontWeight: 600,
-            color: 'rgba(255,255,255,0.7)', background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.15)', borderRadius: 14,
-            padding: '18px 28px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
-          >
-            Watch 45-second demo →
-          </button>
+          {ctaBtn('Start free')}
+          {ctaBtn('Watch 45-second demo →', false)}
         </div>
 
-        {/* Trust line */}
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
-          Free to start &nbsp;•&nbsp; No credit card needed &nbsp;•&nbsp; Built for UF, UCF, Penn State, USC & more
+        <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
+          No credit card required. Built for college students.
         </p>
 
-        {/* Helper link */}
-         <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 24, transition: 'color 0.15s', marginRight: 16 }}
-           onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
-           onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}
-         >
-           I'm here to help students →
-         </button>
-         {/* Dev test button */}
-         <button onClick={testTracker} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 24, transition: 'color 0.15s' }}
-           onMouseEnter={e => e.currentTarget.style.color = '#E85D20'}
-           onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}
-         >
-           [Test Tracker]
-         </button>
+        <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 28, transition: 'color 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}
+        >
+          I'm here to help students →
+        </button>
+      </div>
+
+      {/* ── PROBLEM STRIP ── */}
+      <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '80px 24px' }}>
+        <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
+          {sectionLabel('You are not alone')}
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 24px' }}>
+            Applying shouldn't feel this exhausting.
+          </h2>
+          <p style={{ fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: 0 }}>
+            Students are sending out hundreds of applications, getting rejected, or hearing nothing back. The process is tiring, frustrating, and hard to manage without a system that actually keeps up.
+          </p>
+        </div>
+      </div>
+
+      {/* ── BENEFIT CARDS ── */}
+      <div style={{ padding: '88px 24px', maxWidth: 980, margin: '0 auto' }}>
+        {sectionLabel('Why students use Fast Forward')}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: 40 }}>
+          {BENEFIT_CARDS.map((card, i) => (
+            <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 26px' }}>
+              <div style={{ fontSize: 26, marginBottom: 14 }}>{card.icon}</div>
+              <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.3 }}>{card.title}</p>
+              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.7 }}>{card.desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
+      <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>HOW IT WORKS</p>
+          {sectionLabel('How it works')}
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 52px', textAlign: 'center' }}>
-            One Agent. Everything organized. Real progress.
+            Three steps to a smarter search.
           </h2>
-
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 40 }}>
             {HOW_IT_WORKS.map((step) => (
               <div key={step.number} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '32px 28px', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: -16, right: -8, fontSize: 72, opacity: 0.04, lineHeight: 1, pointerEvents: 'none', fontFamily: playfair, fontWeight: 700 }}>{step.number}</div>
-                <div style={{ fontSize: 30, marginBottom: 14 }}>{step.icon}</div>
+                <div style={{ fontSize: 28, marginBottom: 14 }}>{step.icon}</div>
                 <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>Step {step.number}</p>
                 <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.3 }}>{step.title}</p>
                 <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.7 }}>{step.desc}</p>
               </div>
             ))}
           </div>
-
           <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.08), rgba(232,93,32,0.03))', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '22px 32px', textAlign: 'center' }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              "The smarter way to job search."
+              Less manual busywork. More progress.
             </p>
           </div>
         </div>
       </div>
 
-      {/* ── AGENT IN ACTION ── */}
+      {/* ── PRODUCT PROOF ── */}
       <div style={{ padding: '88px 24px', maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px' }}>⚡ AGENT IN ACTION</p>
-        <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 40px' }}>
-          The Agent manages your entire search
+        {sectionLabel('See it in action')}
+        <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '14px 0 16px' }}>
+          Everything in one place.
         </h2>
-
-        {/* Agent capabilities list */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 32px', marginBottom: 28, textAlign: 'left' }}>
-          {[
-            { icon: '📄', text: 'Upload your resume once' },
-            { icon: '✨', text: 'Get modern, tailored versions for every job' },
-            { icon: '📊', text: 'Track all applications automatically with smart reminders' },
-            { icon: '🤝', text: 'Get outreach support when it makes sense' },
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-              <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
-              <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>{item.text}</p>
-            </div>
-          ))}
-        </div>
+        <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 520 }}>
+          Fast Forward helps you move from searching to applying to following up without losing track of where everything stands.
+        </p>
 
         {/* Mock screen */}
-        <div style={{ background: 'linear-gradient(135deg, #111827, #1a1f2e)', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)', marginBottom: 24 }}>
+        <div style={{ background: 'linear-gradient(135deg, #111827, #1a1f2e)', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)', marginBottom: 24, textAlign: 'left' }}>
           <div style={{ background: '#0d1117', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{ display: 'flex', gap: 6 }}>
               {['#ff5f57','#febc2e','#28c840'].map((c, i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
             </div>
             <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '4px 12px', fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
-              ⚡ College Fast Forward — AI Job Search Agent
+              ⚡ Fast Forward — Job Search Dashboard
             </div>
           </div>
           <div style={{ padding: '28px 28px 24px' }}>
-            <div style={{ background: 'rgba(34,211,238,0.05)', border: '1px solid rgba(34,211,238,0.2)', borderRadius: 12, padding: '14px 18px', marginBottom: 24, textAlign: 'left' }}>
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: '#fff', margin: 0 }}>🔍 Find Penn State alumni in marketing at Disney and draft an outreach message.</p>
-            </div>
-            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 16px', textAlign: 'left' }}>✓ Found 3 people from your school — message drafted</p>
-            {[
-              { initials: 'JM', name: 'Jennifer Martinez', title: 'VP Marketing · Disney', grad: "Penn State '98", cta: 'Message drafted →', ctaColor: true },
-              { initials: 'RC', name: 'Ryan Chen', title: 'Brand Marketing · Disney+', grad: "Penn State '03", cta: 'Connect →', ctaColor: false },
-            ].map((r, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #E85D20, #c9471a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#fff' }}>{r.initials}</div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>{r.name}</p>
-                  <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>{r.title} · {r.grad}</p>
+            {PROOF_CALLOUTS.map((text, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22d3ee' }} />
                 </div>
-                <div style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#fff', background: r.ctaColor ? '#E85D20' : 'rgba(34,211,238,0.1)', border: r.ctaColor ? 'none' : '1px solid rgba(34,211,238,0.25)', borderRadius: 8, padding: '6px 12px', whiteSpace: 'nowrap' }}>{r.cta}</div>
+                <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>{text}</p>
               </div>
             ))}
-            <div style={{ marginTop: 20, background: 'rgba(34,211,238,0.05)', border: '1px solid rgba(34,211,238,0.15)', borderRadius: 10, padding: '14px 16px', textAlign: 'left' }}>
-              <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>✍️ Draft message ready</p>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6, fontStyle: 'italic' }}>
-                "Hi Jennifer — I'm a Penn State marketing senior hoping to break into entertainment. I'd love 15 minutes to hear about your path at Disney..."
-              </p>
-            </div>
           </div>
         </div>
 
-        {/* Real result */}
-        <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
-          <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
-          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.65 }}>
-            <strong style={{ color: '#fff' }}>Real result:</strong> Students using the Agent go from ghosted applications to landing interviews faster.
-          </p>
-        </div>
+        <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>
+          Built to reduce the chaos of job searching and help students keep momentum.
+        </p>
       </div>
 
-      {/* ── SUCCESS STORIES ── */}
-      <div style={{ background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
+      {/* ── SOCIAL PROOF ── */}
+      <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>SUCCESS STORIES</p>
+          {sectionLabel('Students like you')}
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 40px', textAlign: 'center' }}>
-            Students just like you.
+            Real relief from real job search stress.
           </h2>
           <StoriesCarousel />
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '32px 0 0', lineHeight: 1.7 }}>
+            Students use Fast Forward to stay organized, reduce stress, and move through the search with more traction.
+          </p>
         </div>
       </div>
 
       {/* ── PRICING ── */}
       <div style={{ padding: '88px 24px', maxWidth: 860, margin: '0 auto' }}>
-        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>PRICING</p>
+        {sectionLabel('Pricing')}
         <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 52px', textAlign: 'center' }}>
-          Choose your advantage.
+          Start free. Upgrade when you need more.
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           {/* Free */}
           <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '32px 28px' }}>
-            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>FREE</p>
+            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>FREE</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
               <span style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: '#fff' }}>$0</span>
             </div>
@@ -405,7 +354,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <button onClick={go} style={{ marginTop: 28, width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.13)'}
               onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-            >Get started free</button>
+            >Start free</button>
           </div>
 
           {/* Pro */}
@@ -413,7 +362,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.35)', borderRadius: 100, padding: '4px 12px' }}>
               <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 800, color: '#22d3ee', letterSpacing: '0.1em', textTransform: 'uppercase' }}>RECOMMENDED</span>
             </div>
-            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>AI AGENT</p>
+            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>ACCELERATOR</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
               <span style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: '#22d3ee' }}>$29</span>
               <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>/mo</span>
@@ -424,29 +373,32 @@ export default function StudentLandingPage({ onParentClick }) {
                 <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                   <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
                 </div>
-                <p style={{ fontFamily: dmSans, fontSize: 14, color: i === PRO_FEATURES.length - 1 ? '#22d3ee' : 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5, fontStyle: i === PRO_FEATURES.length - 1 ? 'italic' : 'normal', fontWeight: i === PRO_FEATURES.length - 1 ? 600 : 400 }}>{f}</p>
+                <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5 }}>{f}</p>
               </div>
             ))}
             <button onClick={go} style={{ marginTop: 28, width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.35)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(232,93,32,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.35)'; }}
-            >Start Free – Upgrade Anytime →</button>
+            >Start free, upgrade anytime →</button>
           </div>
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: '24px 0 0' }}>
-          One-click upgrade anytime. Cancel anytime.
+          Cancel anytime. No credit card required to get started.
         </p>
       </div>
 
       {/* ── FINAL CTA ── */}
-      <div style={{ padding: '96px 24px 110px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ padding: '96px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.12) 0%, transparent 55%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4.5vw, 58px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 44px' }}>
-            Get Hired<br />
-            <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Faster.</span>
+        <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4.5vw, 56px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
+            Get organized. Get moving.<br />
+            <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Get more traction.</span>
           </h2>
+          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, margin: '0 0 40px' }}>
+            Start your job search with AI support, smarter tracking, and trusted connections that can help open doors.
+          </p>
           <button onClick={go} style={{
             fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none',
             borderRadius: 14, padding: '20px 52px', cursor: 'pointer', minHeight: 'auto',
@@ -456,12 +408,27 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >
-            Start Free Today
+            Start free
           </button>
           <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: 0 }}>
-            Free to start. No credit card required.
+            Built for students. No credit card required.
           </p>
         </div>
+      </div>
+
+      {/* ── FOOTER ── */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px', textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginBottom: 16, flexWrap: 'wrap' }}>
+          {[['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
+            <a key={label} href={href} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'none', transition: 'color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+            >{label}</a>
+          ))}
+        </div>
+        <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: 0 }}>
+          Fast Forward helps students manage the job search with less stress and more structure.
+        </p>
       </div>
 
     </div>
