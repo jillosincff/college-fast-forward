@@ -21,13 +21,13 @@ const HOW_IT_WORKS = [
     number: '03',
     icon: '📋',
     title: 'Stay on Track & Get Replies',
-    desc: 'Track every application, get smart reminders, and use the Agent to reach parents & alumni with messages that work.',
+    desc: 'Track every application, get smart reminders, and send outreach that works.',
   },
 ];
 
 const STORIES = [
   {
-    quote: "I was overwhelmed and getting ghosted everywhere. The Agent organized everything and helped me reach the right people. Landed an internship in 3 weeks.",
+    quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized my search, fixed my resume, and helped me get real responses. Landed an internship in 3 weeks.",
     name: "Marcus",
     school: "Penn State '27 · Finance",
     initials: "M",
@@ -69,9 +69,9 @@ const FREE_FEATURES = [
 
 const PRO_FEATURES = [
   'Unlimited AI Agent',
-  'Full warm network access via Agent',
-  'Unlimited tailoring + modern templates',
+  'Advanced tailoring + modern templates',
   'Smart reminders + interview prep',
+  'Most students upgrade once they see real results',
 ];
 
 function StoriesCarousel() {
@@ -222,8 +222,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.45, maxWidth: 560, margin: '0 auto 12px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Your 24/7 Job Search Agent + Your School Network.<br />
-          We've got you covered from resume to offer.
+          Your 24/7 AI Job Search Agent that manages the entire process — tailored resumes, smart opportunity matching, application tracking, reminders, and outreach that gets results. All in one organized workspace.
         </p>
 
         {/* CTAs */}
@@ -314,7 +313,7 @@ export default function StudentLandingPage({ onParentClick }) {
             { icon: '📄', text: 'Upload your resume once' },
             { icon: '✨', text: 'Get modern, tailored versions for every job' },
             { icon: '📊', text: 'Track all applications automatically with smart reminders' },
-            { icon: '🤝', text: 'Get warm outreach to parents & alumni when it makes sense' },
+            { icon: '🤝', text: 'Get outreach support when it makes sense' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
               <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
@@ -425,7 +424,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                   <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
                 </div>
-                <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5 }}>{f}</p>
+                <p style={{ fontFamily: dmSans, fontSize: 14, color: i === PRO_FEATURES.length - 1 ? '#22d3ee' : 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5, fontStyle: i === PRO_FEATURES.length - 1 ? 'italic' : 'normal', fontWeight: i === PRO_FEATURES.length - 1 ? 600 : 400 }}>{f}</p>
               </div>
             ))}
             <button onClick={go} style={{ marginTop: 28, width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.35)', transition: 'all 0.2s' }}
