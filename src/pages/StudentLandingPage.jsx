@@ -227,9 +227,9 @@ export default function StudentLandingPage({ onParentClick }) {
           borderRadius: 100, padding: '7px 18px', marginBottom: 36,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
-          <span style={{ fontSize: 13 }}>🤖</span>
+          <span style={{ fontSize: 13 }}>⚡</span>
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            AI Agent for College Students
+            The College Fast Forward AI Agent
           </span>
         </div>
 
@@ -265,7 +265,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.65, maxWidth: 500, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Don't get sucked in. Get seen, get interviewed, and get hired.
+          Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed, and get hired.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 24, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
