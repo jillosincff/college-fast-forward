@@ -15,13 +15,13 @@ const HOW_IT_WORKS = [
     number: '02',
     icon: '✨',
     title: 'Stand Out',
-    desc: 'Modern resumes and LinkedIn optimization that actually get noticed.',
+    desc: 'Modern resumes and LinkedIn optimization that get noticed.',
   },
   {
     number: '03',
     icon: '📋',
     title: 'Stay on Track & Get Replies',
-    desc: 'Track every application, get smart reminders, and send outreach that works.',
+    desc: 'Track every application, get smart reminders, and reach the right connections.',
   },
 ];
 
@@ -199,7 +199,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#E85D20' }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            AI Job Search Agent for College Students
+            Powered by AI and Parent Connections
           </span>
         </div>
 
@@ -211,8 +211,8 @@ export default function StudentLandingPage({ onParentClick }) {
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Get Hired<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Faster</span>
+          Job Search Platform<br />
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Built For College Students</span>
         </h1>
 
         {/* Sub-headline */}
@@ -222,7 +222,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.45, maxWidth: 560, margin: '0 auto 12px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Your 24/7 AI Job Search Agent that manages the entire process — tailored resumes, smart opportunity matching, application tracking, reminders, and outreach that gets results. All in one organized workspace.
+          College Fast Forward is a powerful, personalized AI agent that optimizes your entire job search — so you get hired faster.
         </p>
 
         {/* CTAs */}
@@ -294,7 +294,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
           <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.08), rgba(232,93,32,0.03))', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '22px 32px', textAlign: 'center' }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              "The Agent handles the chaos so you can focus on getting hired."
+              "The smarter way to job search."
             </p>
           </div>
         </div>
