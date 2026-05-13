@@ -240,7 +240,7 @@ export default function StudentLandingPage({ onParentClick }) {
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Search Smarter,
+          Job Boards are a
         </h1>
         <div style={{
           fontFamily: satoshi,
@@ -256,7 +256,7 @@ export default function StudentLandingPage({ onParentClick }) {
           filter: 'drop-shadow(0 0 40px rgba(34,211,238,0.45))',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.1s',
         }}>
-          Not Harder.
+          Black Hole.
         </div>
 
         <p style={{
@@ -265,7 +265,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.65, maxWidth: 500, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Your AI agent that turns the chaotic, overwhelming job search into something focused and actually manageable.
+          Don't get sucked in. Get seen, get interviewed, and get hired.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 24, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
