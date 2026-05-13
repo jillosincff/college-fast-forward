@@ -9,19 +9,19 @@ const HOW_IT_WORKS = [
     number: '01',
     icon: '🎯',
     title: 'Know What to Apply For',
-    desc: 'Smart opportunity matching + daily hiring signals so you always know your next best move.',
+    desc: 'Smart matching + daily opportunities tailored to you.',
   },
   {
     number: '02',
     icon: '✨',
     title: 'Stand Out',
-    desc: 'AI agents for resume versions, cover letters & LinkedIn optimization that actually get noticed.',
+    desc: 'Modern resumes, LinkedIn optimization, and tailored materials for every role.',
   },
   {
     number: '03',
     icon: '📋',
-    title: 'Stay Organized & Move Forward',
-    desc: 'Track every application, manage resume versions per company, send outreach, and prepare for interviews — all in one workspace.',
+    title: 'Stay on Track & Get Replies',
+    desc: 'Track every application in one place, get follow-up reminders, and use the Agent to reach parents & alumni with messages that work.',
   },
 ];
 
@@ -206,32 +206,32 @@ export default function StudentLandingPage({ onParentClick }) {
 
         {/* Headline */}
         <h1 style={{
-          fontFamily: playfair, fontSize: 'clamp(40px, 7vw, 88px)',
+          fontFamily: playfair, fontSize: 'clamp(44px, 7.5vw, 96px)',
           fontWeight: 700, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.03em',
-          margin: '0 0 16px', maxWidth: 760,
+          margin: '0 0 24px', maxWidth: 760,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Your Job Search<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Workspace</span>
+          Get Hired<br />
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Faster</span>
         </h1>
 
         {/* Sub-headline */}
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)',
-          fontWeight: 700, color: 'rgba(255,255,255,0.85)',
-          lineHeight: 1.4, maxWidth: 500, margin: '0 auto 10px',
+          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
+          fontWeight: 700, color: 'rgba(255,255,255,0.9)',
+          lineHeight: 1.45, maxWidth: 560, margin: '0 auto 12px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          One organized workspace with built-in AI agents.
+          AI + a warm school-powered network of parents and alumni that supercharges your job search.
         </p>
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 17px)',
-          fontWeight: 400, color: 'rgba(255,255,255,0.55)',
-          lineHeight: 1.7, maxWidth: 600, margin: '0 auto 44px',
+          fontFamily: dmSans, fontSize: 'clamp(14px, 1.6vw, 15px)',
+          fontWeight: 400, color: 'rgba(255,255,255,0.5)',
+          lineHeight: 1.75, maxWidth: 600, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          Manage applications, track resume versions per job, write outreach, optimize LinkedIn, and prep for interviews — everything in one dashboard.
+          The Agent manages your entire job search from resume to offer — tailoring materials, tracking applications, sending smart reminders, finding connections, and drafting outreach so you actually land interviews.
         </p>
 
         {/* CTAs */}
@@ -286,7 +286,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>HOW IT WORKS</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 52px', textAlign: 'center' }}>
-            Your workspace. Built-in agents. Real progress.
+            One Agent. Everything organized. Real progress.
           </h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 40 }}>
@@ -303,7 +303,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
           <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.08), rgba(232,93,32,0.03))', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '22px 32px', textAlign: 'center' }}>
             <p style={{ fontFamily: playfair, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              "Stop jumping between tabs and docs. Keep your entire job search in one organized workspace."
+              "The Agent handles the chaos so you can focus on getting hired."
             </p>
           </div>
         </div>
@@ -311,13 +311,26 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── AGENT IN ACTION ── */}
       <div style={{ padding: '88px 24px', maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px' }}>⚡ SEE THE AGENT IN ACTION</p>
-        <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 14px' }}>
-          Watch the workspace in action
+        <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px' }}>⚡ AGENT IN ACTION</p>
+        <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 40px' }}>
+          The Agent manages your entire search
         </h2>
-        <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', margin: '0 0 40px', lineHeight: 1.65 }}>
-          Upload your resume → Tell the Agent the job → Get a tailored version that's automatically saved and tracked in your dashboard.
-        </p>
+
+        {/* Agent capabilities list */}
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 32px', marginBottom: 28, textAlign: 'left' }}>
+          {[
+            { icon: '📄', text: 'Upload your resume once' },
+            { icon: '✨', text: 'Get modern, tailored versions for every job' },
+            { icon: '📊', text: 'Track all applications automatically' },
+            { icon: '🔔', text: 'Receive smart reminders so you never miss a follow-up' },
+            { icon: '🤝', text: 'Get warm outreach to parents & alumni when it makes sense' },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+              <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
+              <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>{item.text}</p>
+            </div>
+          ))}
+        </div>
 
         {/* Mock screen */}
         <div style={{ background: 'linear-gradient(135deg, #111827, #1a1f2e)', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)', marginBottom: 24 }}>
@@ -360,7 +373,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 14, padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}>
           <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
           <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.65 }}>
-            <strong style={{ color: '#fff' }}>The real advantage:</strong> Never wonder which resume you sent to which company. Every version, every application, every message — all organized and searchable in your personal workspace.
+            <strong style={{ color: '#fff' }}>Real result:</strong> Students using the Agent go from ghosted applications to landing interviews faster.
           </p>
         </div>
       </div>
