@@ -182,26 +182,43 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 700, background: 'radial-gradient(ellipse, rgba(232,93,32,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '30%', left: '25%', width: 500, height: 400, background: 'radial-gradient(ellipse, rgba(34,211,238,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: '20%', right: '15%', width: 400, height: 350, background: 'radial-gradient(ellipse, rgba(34,211,238,0.04) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        {/* Student energy floating accents */}
+        {/* Subtle background network lines SVG */}
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.04 }} xmlns="http://www.w3.org/2000/svg">
+          <line x1="10%" y1="20%" x2="35%" y2="55%" stroke="#22d3ee" strokeWidth="1" />
+          <line x1="35%" y1="55%" x2="65%" y2="35%" stroke="#22d3ee" strokeWidth="1" />
+          <line x1="65%" y1="35%" x2="90%" y2="70%" stroke="#22d3ee" strokeWidth="1" />
+          <line x1="20%" y1="75%" x2="50%" y2="50%" stroke="#E85D20" strokeWidth="1" />
+          <line x1="50%" y1="50%" x2="80%" y2="25%" stroke="#E85D20" strokeWidth="1" />
+          <circle cx="10%" cy="20%" r="3" fill="#22d3ee" />
+          <circle cx="35%" cy="55%" r="3" fill="#22d3ee" />
+          <circle cx="65%" cy="35%" r="3" fill="#22d3ee" />
+          <circle cx="90%" cy="70%" r="3" fill="#22d3ee" />
+          <circle cx="20%" cy="75%" r="2.5" fill="#E85D20" />
+          <circle cx="50%" cy="50%" r="2.5" fill="#E85D20" />
+          <circle cx="80%" cy="25%" r="2.5" fill="#E85D20" />
+        </svg>
+
+        {/* Playful floating accents */}
         {[
           { emoji: '🎓', top: '12%', left: '7%', size: 28, delay: '0s', rot: '-8deg' },
-          { emoji: '💼', top: '22%', right: '8%', size: 24, delay: '0.4s', rot: '6deg' },
-          { emoji: '📄', top: '58%', left: '5%', size: 22, delay: '0.8s', rot: '4deg' },
-          { emoji: '✨', top: '65%', right: '6%', size: 20, delay: '0.2s', rot: '-5deg' },
-          { emoji: '🚀', top: '38%', left: '3%', size: 20, delay: '1s', rot: '10deg' },
-          { emoji: '💡', top: '30%', right: '4%', size: 22, delay: '0.6s', rot: '-4deg' },
+          { emoji: '💻', top: '22%', right: '8%', size: 26, delay: '0.4s', rot: '6deg' },
+          { emoji: '☕', top: '58%', left: '5%', size: 24, delay: '0.8s', rot: '4deg' },
+          { emoji: '🎓', top: '65%', right: '6%', size: 20, delay: '0.2s', rot: '-5deg' },
+          { emoji: '📝', top: '38%', left: '3%', size: 22, delay: '1s', rot: '10deg' },
+          { emoji: '☕', top: '30%', right: '4%', size: 22, delay: '0.6s', rot: '-4deg' },
+          { emoji: '💻', top: '75%', right: '10%', size: 20, delay: '1.2s', rot: '8deg' },
+          { emoji: '🎒', top: '15%', right: '20%', size: 18, delay: '0.9s', rot: '-6deg' },
         ].map((item, i) => (
           <div key={i} style={{
             position: 'absolute', top: item.top, left: item.left, right: item.right,
-            fontSize: item.size, opacity: 0.18, pointerEvents: 'none',
-            transform: `rotate(${item.rot})`,
+            fontSize: item.size, opacity: 0.2, pointerEvents: 'none',
             animation: `heroFloat${i % 2 === 0 ? 'A' : 'B'} 6s ease-in-out infinite`,
             animationDelay: item.delay,
           }}>{item.emoji}</div>
         ))}
         <style>{`
-          @keyframes heroFloatA { 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-10px) rotate(-8deg)} }
-          @keyframes heroFloatB { 0%,100%{transform:translateY(0) rotate(6deg)} 50%{transform:translateY(-8px) rotate(6deg)} }
+          @keyframes heroFloatA { 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-12px) rotate(-8deg)} }
+          @keyframes heroFloatB { 0%,100%{transform:translateY(0) rotate(6deg)} 50%{transform:translateY(-9px) rotate(6deg)} }
         `}</style>
 
         <div style={{
@@ -210,46 +227,54 @@ export default function StudentLandingPage({ onParentClick }) {
           borderRadius: 100, padding: '7px 18px', marginBottom: 36,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee' }} />
+          <span style={{ fontSize: 13 }}>🤖</span>
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            Built for College Students
+            AI Agent for College Students
           </span>
         </div>
 
         <h1 style={{
           fontFamily: satoshi, fontSize: 'clamp(52px, 9vw, 108px)',
           fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: '-0.05em',
-          margin: '0 0 32px', maxWidth: 900,
+          margin: '0 0 0px', maxWidth: 900,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Search Smarter,<br />
-          <span style={{
-            color: '#22d3ee',
-            fontWeight: 900,
-            fontSize: 'clamp(64px, 11vw, 136px)',
-            letterSpacing: '-0.06em',
-            display: 'inline-block',
-            textShadow: '0 0 60px rgba(34,211,238,0.35)',
-          }}>Not Harder.</span>
+          Search Smarter,
         </h1>
+        <div style={{
+          fontFamily: satoshi,
+          fontWeight: 900,
+          fontSize: 'clamp(68px, 12vw, 148px)',
+          letterSpacing: '-0.06em',
+          lineHeight: 1.0,
+          margin: '4px 0 44px',
+          background: 'linear-gradient(90deg, #22d3ee 0%, #67e8f9 60%, #a5f3fc 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          filter: 'drop-shadow(0 0 40px rgba(34,211,238,0.45))',
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.1s',
+        }}>
+          Not Harder.
+        </div>
 
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(16px, 1.9vw, 19px)',
           fontWeight: 400, color: 'rgba(255,255,255,0.65)',
-          lineHeight: 1.65, maxWidth: 500, margin: '0 auto 36px',
+          lineHeight: 1.65, maxWidth: 500, margin: '0 auto 48px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Your AI agent that turns the overwhelming, chaotic job search into something focused and actually manageable — tailored resumes, smart tracking, and outreach that gets replies.
+          Your AI agent that turns the chaotic, overwhelming job search into something focused and actually manageable.
         </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 24, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
           {ctaBtn('Start Free')}
           {ctaBtn('Watch 45-second demo →', false)}
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
-          No credit card required. Used by students at UF, UCF, Penn State, USC &amp; more.
+          No credit card required. Built for college students at UF, UCF, Penn State, USC &amp; more.
         </p>
 
         <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 28, transition: 'color 0.15s' }}
