@@ -27,10 +27,10 @@ const HOW_IT_WORKS = [
 
 const STORIES = [
   {
-    quote: "I was overwhelmed applying to everything and getting ghosted. The Agent organized my search, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.",
-    name: "Sarah K.",
-    school: "University of Michigan '27 · Engineering",
-    initials: "SK",
+    quote: "I was overwhelmed and getting ghosted everywhere. The Agent organized everything and helped me reach the right people. Landed an internship in 3 weeks.",
+    name: "Marcus",
+    school: "Penn State '27 · Finance",
+    initials: "M",
     tag: "Internship landed",
     tagIcon: "🎯",
   },
@@ -72,7 +72,6 @@ const PRO_FEATURES = [
   'Full warm network access via Agent',
   'Unlimited tailoring + modern templates',
   'Smart reminders + interview prep',
-  'Most students upgrade once they see real results',
 ];
 
 function StoriesCarousel() {
@@ -223,7 +222,8 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.45, maxWidth: 560, margin: '0 auto 12px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          The AI Agent + your school's warm network that supercharges your entire job search — from tailored resumes and application tracking to smart reminders and outreach that gets results.
+          Your 24/7 Job Search Agent + Your School Network.<br />
+          We've got you covered from resume to offer.
         </p>
 
         {/* CTAs */}
@@ -254,7 +254,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
         {/* Trust line */}
         <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
-          Free to start &nbsp;•&nbsp; No credit card needed &nbsp;•&nbsp; Used by students from UF, UCF, Penn State, USC & more
+          Free to start &nbsp;•&nbsp; No credit card needed &nbsp;•&nbsp; Built for UF, UCF, Penn State, USC & more
         </p>
 
         {/* Helper link */}
@@ -425,7 +425,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                   <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
                 </div>
-                <p style={{ fontFamily: dmSans, fontSize: 14, color: i === PRO_FEATURES.length - 1 ? '#22d3ee' : 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5, fontStyle: i === PRO_FEATURES.length - 1 ? 'italic' : 'normal', fontWeight: i === PRO_FEATURES.length - 1 ? 600 : 400 }}>{f}</p>
+                <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5 }}>{f}</p>
               </div>
             ))}
             <button onClick={go} style={{ marginTop: 28, width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.35)', transition: 'all 0.2s' }}
