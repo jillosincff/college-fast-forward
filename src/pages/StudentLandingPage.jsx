@@ -204,7 +204,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Fast Forward helps you tailor resumes, surface relevant opportunities, track applications, send follow-ups, optimize your LinkedIn, and find warm intros through alumni and parent connections when available.
+          College Fast Forward helps you tailor resumes, surface relevant opportunities, track applications, send follow-ups, optimize your LinkedIn, and find warm intros through alumni and parent connections when available.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
@@ -284,7 +284,7 @@ export default function StudentLandingPage({ onParentClick }) {
           Everything in one place.
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 520 }}>
-          Fast Forward helps you move from searching to applying to following up without losing track of where everything stands.
+          College Fast Forward helps you move from searching to applying to following up without losing track of where everything stands.
         </p>
 
         {/* Mock screen */}
@@ -427,7 +427,7 @@ export default function StudentLandingPage({ onParentClick }) {
           ))}
         </div>
         <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-          Fast Forward helps students manage the job search with less stress and more structure.
+          College Fast Forward helps students manage the job search with less stress and more structure.
         </p>
       </div>
 
