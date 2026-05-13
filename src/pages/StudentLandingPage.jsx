@@ -15,7 +15,7 @@ const BENEFIT_CARDS = [
 ];
 
 const HOW_IT_WORKS = [
-  { number: '01', icon: '📁', title: 'Upload your resume', desc: 'Add your background once and let Fast Forward do the setup work.' },
+  { number: '01', icon: '📁', title: 'Upload your resume', desc: 'Add your background once and let College Fast Forward do the setup work.' },
   { number: '02', icon: '✨', title: 'Get personalized support', desc: 'Receive tailored resume help, relevant job matches, and LinkedIn guidance.' },
   { number: '03', icon: '📋', title: 'Stay organized and follow up', desc: 'Track applications, reminders, and outreach without juggling spreadsheets.' },
 ];
@@ -276,7 +276,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── BENEFIT CARDS ── */}
       <div style={{ padding: '88px 24px', maxWidth: 980, margin: '0 auto' }}>
-        {sectionLabel('Why students use Fast Forward')}
+        {sectionLabel('Why students use College Fast Forward')}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16, marginTop: 40 }}>
           {BENEFIT_CARDS.map((card, i) => (
             <div key={i} style={{
@@ -327,7 +327,7 @@ export default function StudentLandingPage({ onParentClick }) {
           Everything in one place.
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 520 }}>
-          College Fast Forward helps you move from searching to applying to following up without losing track of where everything stands.
+          College College Fast Forward helps you move from searching to applying to following up without losing track of where everything stands.
         </p>
 
         {/* Mock screen */}
@@ -337,7 +337,7 @@ export default function StudentLandingPage({ onParentClick }) {
               {['#ff5f57','#febc2e','#28c840'].map((c, i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
             </div>
             <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '4px 12px', fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
-              ⚡ Fast Forward — Job Search Dashboard
+              ⚡ College Fast Forward — Job Search Dashboard
             </div>
           </div>
           <div style={{ padding: '28px 28px 24px' }}>
@@ -366,7 +366,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </h2>
           <StoriesCarousel />
           <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '32px 0 0', lineHeight: 1.7 }}>
-            Students use Fast Forward to stay organized, reduce stress, and move through the search with more traction.
+            Students use College Fast Forward to stay organized, reduce stress, and move through the search with more traction.
           </p>
         </div>
       </div>
@@ -470,7 +470,7 @@ export default function StudentLandingPage({ onParentClick }) {
           ))}
         </div>
         <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-          College Fast Forward helps students manage the job search with less stress and more structure.
+          College College Fast Forward helps students manage the job search with less stress and more structure.
         </p>
       </div>
 
