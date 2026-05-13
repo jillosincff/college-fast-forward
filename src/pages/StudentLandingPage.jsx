@@ -21,7 +21,7 @@ const HOW_IT_WORKS = [
 ];
 
 const STORIES = [
-  { quote: "Fast Forward helped me stop losing track of applications and follow-ups.", name: "Jordan T.", school: "Computer Science student", initials: "JT", tag: "Stayed organized" },
+  { quote: "I was applying to everything and hearing nothing back. The Agent helped me fix my resume, stay organized, and actually reach people who could help. Landed an internship two weeks later.", name: "Sarah K.", school: "University of Michigan '27", initials: "SK", tag: "Landed an internship" },
   { quote: "I finally felt like I had a system instead of a mess.", name: "Maya R.", school: "Business student", initials: "MR", tag: "Less stress" },
   { quote: "The warm intro feature made networking feel less random.", name: "Alex P.", school: "Marketing student", initials: "AP", tag: "Better outreach" },
 ];
@@ -240,7 +240,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          College Fast Forward is your AI agent that turns the chaotic, overwhelming job search into a focused, strategic process — tailored resumes, smart tracking, and outreach that actually gets replies.
+          College Fast Forward is your AI agent that turns the overwhelming job search into something focused and actually manageable — tailored resumes, smart tracking, and outreach that gets replies.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
@@ -268,7 +268,7 @@ export default function StudentLandingPage({ onParentClick }) {
             Applying shouldn't feel this exhausting.
           </h2>
           <p style={{ fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: 0 }}>
-            Students are sending out hundreds of applications, getting rejected, or hearing nothing back. The process is tiring, frustrating, and hard to manage without a system that actually keeps up.
+            You're not alone. Students are sending hundreds of applications, getting ghosted or rejected, and burning out. We built a smarter system so you don't have to do it all manually.
           </p>
         </div>
       </div>
