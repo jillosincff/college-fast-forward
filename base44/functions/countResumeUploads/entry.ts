@@ -19,10 +19,15 @@ Deno.serve(async (req) => {
     byPersona[u.persona] = (byPersona[u.persona] || 0) + 1;
   }
 
+  const withAlumniSearch = students.filter(u => u.has_searched_alumni === true);
+
   return Response.json({
     total_students: students.length,
     students_with_resume: withResume.length,
-    pct: ((withResume.length / students.length) * 100).toFixed(1) + '%',
+    resume_pct: ((withResume.length / students.length) * 100).toFixed(1) + '%',
     by_persona: byPersona,
+    students_searched_alumni: withAlumniSearch.length,
+    alumni_search_pct: ((withAlumniSearch.length / students.length) * 100).toFixed(1) + '%',
+    alumni_search_samples: withAlumniSearch.slice(0, 10).map(u => ({ email: u.email, persona: u.persona, school: u.school_name || u.school })),
   });
 });
