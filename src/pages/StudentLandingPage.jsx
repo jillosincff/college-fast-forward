@@ -204,7 +204,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          College Fast Forward helps you tailor resumes, surface relevant opportunities, track applications, send follow-ups, optimize your LinkedIn, and find warm intros through alumni and parent connections when available.
+          College Fast Forward transforms your job search from chaotic to strategic: tailor resumes, surface relevant opportunities, track applications, send personalized follow-ups, optimize your LinkedIn, and find warm intros through trusted connections.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
