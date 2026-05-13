@@ -183,7 +183,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee' }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            Powered by AI and trusted connections
+            AI Job Search Agent for College Students
           </span>
         </div>
 
@@ -204,7 +204,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          College Fast Forward transforms your job search from chaotic to strategic: tailor resumes, surface relevant opportunities, track applications, send personalized follow-ups, optimize your LinkedIn, and find warm intros through trusted connections.
+          College Fast Forward is your AI agent that turns a chaotic job search into a focused, strategic process — tailored resumes, smart opportunities, organized tracking, and outreach that actually gets replies.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
