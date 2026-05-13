@@ -194,8 +194,8 @@ export default function StudentLandingPage({ onParentClick }) {
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
-          Job search support for students<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>who are tired of getting ignored.</span>
+          Search Smarter,<br />
+          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Not Harder.</span>
         </h1>
 
         <p style={{
