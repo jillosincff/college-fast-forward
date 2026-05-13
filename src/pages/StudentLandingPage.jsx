@@ -198,7 +198,7 @@ export default function StudentLandingPage({ onParentClick }) {
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#E85D20' }} />
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             Powered by AI and Parent Connections
           </span>
         </div>
