@@ -81,7 +81,7 @@ function StatusBadge({ status }) {
     done:        { label: 'Done ✓',            bg: '#DCFCE7', color: '#15803D' },
     in_progress: { label: 'In Progress',        bg: '#FFF5F0', color: '#E85D20' },
     not_started: { label: 'Not Started',        bg: '#F5F5F5', color: '#999999' },
-    locked:      { label: 'Requires AI Agent 🔒', bg: '#1A1A1A', color: '#ffffff' },
+    locked:      { label: 'Requires FastIQ 🔒', bg: '#1A1A1A', color: '#ffffff' },
   }[status] || {};
   return (
     <span style={{ background: cfg.bg, color: cfg.color, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100, whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -140,7 +140,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
 
   const allStatuses = [step1, step2, step3, step4, step5, step6];
   const nextActionable = allStatuses.map((s, i) => ({ s, i })).find(({ s }) => s !== 'done' && s !== 'locked');
-  const stepTitles = ['Set Your Search Goals', 'Build & Optimize Your Materials', 'Track Applications', 'Find Opportunities', 'Prepare for Interviews', 'Outreach & Follow-ups'];
+  const stepTitles = ['Set Your Career Goals', 'Connect with a Parent in Your Network', 'Upload & Optimize Your Resume', 'Research Companies & Industries', 'Find Alumni at Target Companies', 'Draft Outreach & Track Replies'];
 
   const summaryText = completedCount === 0
     ? 'Your roadmap is ready. Step 1 starts now.'
@@ -186,11 +186,11 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
   const activeStepNumber = parseInt(Object.entries(completedSteps).find(([_, done]) => !done)?.[0] || '7');
 
   const upNextSteps = [
-    { n: 2, label: 'Build & Optimize Your Materials', tag: 'Free', tabKey: null, page: 'ResumeTailoring', description: 'Resume versions, cover letters, and LinkedIn optimization.' },
-    { n: 3, label: 'Track Applications', tag: 'Free', tabKey: 'career_path', description: "Never lose track of which resume you sent to which job and what happened next." },
-    { n: 4, label: 'Find Opportunities', tag: 'Free', tabKey: 'company_intel', description: 'Smart matching + daily hiring signals.' },
-    { n: 5, label: 'Prepare for Interviews', tag: 'Free · 1 session', tabKey: 'mock_interview', description: 'Mock interviews with AI feedback.' },
-    { n: 6, label: 'Outreach & Follow-ups', tag: 'AI Agent', tabKey: 'outreach_drafts', description: 'Draft messages and track replies when you\'re ready.' },
+    { n: 2, label: 'Connect with a Parent in Your Network', tag: 'Free', tabKey: 'directory', description: "Browse parents from your school who've offered to help. Send one message — that's all it takes to get a warm intro.", isFeatured: true },
+    { n: 3, label: 'Upload & Optimize Your Resume', tag: 'Free', tabKey: null, page: 'ResumeTailoring' },
+    { n: 4, label: 'Research Companies & Industries', tag: 'Free', tabKey: 'company_intel' },
+    { n: 5, label: 'Find Alumni at Target Companies', tag: 'Free · 1 search', tabKey: 'alumni_search' },
+    { n: 6, label: 'Draft Outreach & Track Replies', tag: 'FastIQ', tabKey: null },
   ];
 
   return (
@@ -202,7 +202,8 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           fontSize: 15, color: '#555',
           lineHeight: 1.7, margin: 0
         }}>
-          Most students apply to dozens of jobs and hear nothing back. That's not a you problem — it's a strategy problem. Here's your organized plan. Work through it in any order. Your workspace will automatically track your progress.
+          Most students apply to 50 jobs and hear nothing back. That's not a you problem —
+          it's a strategy problem. Here's your plan. Work through it in order.
         </p>
       </div>
 
@@ -230,7 +231,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 17, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-              Set Your Search Goals
+              Set Your Career Goals
             </p>
             <span style={{ background: '#E8F5E9', color: '#2E7D32', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, letterSpacing: '0.05em' }}>FREE</span>
           </div>
@@ -255,7 +256,8 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
           ) : (
             <>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#666', margin: '0 0 16px', lineHeight: 1.6 }}>
-                Takes 2 minutes. Tell us what you're targeting so the Agent can personalize your entire workspace.
+                Takes 3 minutes. Tell us what you're studying, where you want to work,
+                and what's holding you back. We'll build your plan around it.
               </p>
               <button
                 onClick={() => onTabChange('career_goals')}
@@ -335,7 +337,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
                         cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto',
                       }}
                     >
-                      Let's do it →
+                      Browse Parent Network →
                     </button>
                   </div>
                 </div>
@@ -408,7 +410,7 @@ export default function CareerRoadmap({ user, onTabChange, onOpenUpgrade }) {
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: isCompleted ? '#AAAAAA' : '#666', margin: 0, flex: 1, textDecoration: isCompleted ? 'line-through' : 'none' }}>
                 {step.label}
               </p>
-              <span style={{ fontSize: 11, color: step.tag === 'AI Agent' ? '#E85D20' : '#22C55E', fontWeight: 600, fontFamily: "'DM Sans', sans-serif", opacity: isLocked ? 0.5 : 1 }}>
+              <span style={{ fontSize: 11, color: step.tag === 'FastIQ' ? '#E85D20' : '#22C55E', fontWeight: 600, fontFamily: "'DM Sans', sans-serif", opacity: isLocked ? 0.5 : 1 }}>
                 {step.tag}
               </span>
             </div>

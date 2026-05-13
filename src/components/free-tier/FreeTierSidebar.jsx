@@ -12,24 +12,18 @@ const NAV_GROUPS = [
     label: 'MY CAREER',
     items: [
       { label: 'Home', tab: 'home', icon: Home },
-      { label: 'My Search Goals', tab: 'career_goals', icon: Target },
+      { label: 'Career Goals', tab: 'career_goals', icon: Target },
       { label: 'Resume', tab: 'resume', icon: FileText },
-      { label: 'Opportunities', tab: 'company_intel', icon: Building2 },
+      { label: 'Company Intel', tab: 'company_intel', icon: Building2 },
     ]
   },
   {
-    label: 'MY WORKSPACE',
+    label: 'MY NETWORK',
     items: [
-      { label: 'Application Tracker', tab: 'application_tracker', icon: FileText },
+      { label: 'Parent Network', tab: 'directory', icon: Users },
+      { label: 'Alumni Search', tab: 'alumni_search', icon: Search },
       { label: 'Outreach Drafts', tab: 'outreach_drafts', icon: Mail },
       { label: 'Messages', tab: 'messages', icon: MessageSquare },
-    ]
-  },
-  {
-    label: 'NETWORK',
-    items: [
-      { label: 'Find Connections', tab: 'alumni_search', icon: Search },
-      { label: 'Directory', tab: 'directory', icon: Users },
     ]
   },
 ];
@@ -46,7 +40,7 @@ const FASTIQ_ITEMS = [
     ]
   },
   { label: 'Career Assessment', tab: 'career_assessment', icon: Brain },
-  { label: 'AI Agent', tab: 'fastiq_dashboard', icon: Zap },
+  { label: 'FastIQ', tab: 'fastiq_dashboard', icon: Zap },
 ];
 
 export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUpgrade }) {
@@ -191,7 +185,7 @@ export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUp
           color: isFastIQ ? '#E85D20' : '#BBBBBB',
           margin: '0 0 6px 4px',
         }}>
-          {isFastIQ ? '⚡' : '🔒'} AI AGENT TOOLS
+          {isFastIQ ? '⚡' : '🔒'} FASTIQ FEATURES
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -345,13 +339,13 @@ export default function FreeTierSidebar({ currentTab, onNavigate, user, onOpenUp
             fontSize: 11, fontWeight: 700,
             color: '#E85D20', margin: '0 0 4px',
             textTransform: 'uppercase', letterSpacing: '0.08em',
-          }}>⚡ Unlock AI Agent</p>
+          }}>⚡ Unlock FastIQ</p>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
             fontSize: 11, color: 'rgba(255,255,255,0.5)',
             margin: '0 0 10px', lineHeight: 1.5,
           }}>
-            AI interviews, LinkedIn review, unlimited connections & more.
+            AI interviews, LinkedIn review, unlimited alumni search & more.
           </p>
           <button
             onClick={() => onOpenUpgrade?.()}

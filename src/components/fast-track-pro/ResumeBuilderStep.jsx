@@ -5,7 +5,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Send, Download, Pencil, Check, Sparkles, ArrowLeft } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
-import ResumeBuilderIntro from '@/components/resume-tailor/ResumeBuilderIntro.jsx';
 
 const BUILDER_STEPS = [
   {
@@ -62,15 +61,7 @@ const formatResumeText = (text) => {
 };
 
 export default function ResumeBuilderStep({ user, onResumeReady, onBack }) {
-  const [phase, setPhase] = useState('intro'); // 'intro', 'linkedin_prompt', 'import_linkedin', 'questions', 'generating', 'done'
   const [currentStep, setCurrentStep] = useState(0);
-  const [linkedinSections, setLinkedinSections] = useState({
-    experience: '',
-    education: '',
-    extra: '',
-  });
-  const [importing, setImporting] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [answers, setAnswers] = useState({
     name: user?.full_name || '',
     phone: '',
@@ -127,7 +118,7 @@ export default function ResumeBuilderStep({ user, onResumeReady, onBack }) {
     setGenerating(true);
     try {
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an AI Resume Assistant helping a student build their first resume. Generate a complete, professionally formatted resume from this information. Strengthen weak bullet points — make them quantified and impactful.
+        prompt: `You are FASTIQ, helping a UF student build their first resume. Generate a complete, professionally formatted resume from this information. Strengthen weak bullet points — make them quantified and impactful.
 
 STUDENT INFO:
 - Name: ${answers.name || user?.full_name || 'Student'}
@@ -213,183 +204,6 @@ Return the full resume text and a brief encouraging summary.`,
     URL.revokeObjectURL(url);
   };
 
-  const handleImportLinkedin = async () => {
-    if (!linkedinSections.experience.trim()) {
-      alert('Please paste your Experience section.');
-      return;
-    }
-    setImporting(true);
-    try {
-      setAnswers(prev => ({
-        ...prev,
-        experience_text: linkedinSections.experience,
-        major: linkedinSections.education ? linkedinSections.education.split('\n')[0] : '',
-        skills_text: linkedinSections.extra,
-      }));
-      setPhase('questions');
-    } catch (err) {
-      console.error('LinkedIn import error:', err);
-      alert('Error processing sections. Please try again.');
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  // Intro phase
-  if (phase === 'intro') {
-    return (
-      <ResumeBuilderIntro
-        user={user}
-        onStart={() => setPhase('linkedin_prompt')}
-        onUpload={onBack}
-        onSkip={onBack}
-      />
-    );
-  }
-
-  // LinkedIn prompt phase
-  if (phase === 'linkedin_prompt') {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
-      >
-        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="text-3xl">💼</div>
-            <div>
-              <h2 className="text-white font-bold text-lg mb-2">Do you have a LinkedIn profile?</h2>
-              <p className="text-white/60 text-sm">We can import your experience, education, and skills to get started faster.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={() => setPhase('import_linkedin')}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all"
-            style={{ minHeight: 'auto' }}
-          >
-            ✓ Yes – Import from LinkedIn (Recommended)
-          </button>
-          <button
-            onClick={() => setPhase('questions')}
-            className="w-full bg-white/5 hover:bg-white/10 border border-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-all"
-            style={{ minHeight: 'auto' }}
-          >
-            No – I'll enter manually
-          </button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // Import LinkedIn phase
-  if (phase === 'import_linkedin') {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
-      >
-        <button
-          onClick={() => setPhase('linkedin_prompt')}
-          className="text-white/40 text-xs hover:text-white/60 underline flex items-center gap-1"
-          style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
-        >
-          <ArrowLeft className="w-3 h-3" /> Back
-        </button>
-
-        <div>
-          <h2 className="text-white font-bold text-xl mb-2">Let's pull in your experience</h2>
-          <p className="text-white/60 text-sm">Copy and paste the sections from your LinkedIn profile below. The Agent will turn them into a clean, professional resume.</p>
-        </div>
-
-        {/* Experience Section */}
-        <div className="space-y-2">
-          <label className="text-white text-sm font-semibold">Paste your Experience section</label>
-          <p className="text-white/50 text-xs">Go to your LinkedIn → Click "Add profile section" → Experience → Copy everything under your roles</p>
-          <textarea
-            value={linkedinSections.experience}
-            onChange={(e) => setLinkedinSections(prev => ({ ...prev, experience: e.target.value }))}
-            placeholder="Paste Experience section here..."
-            className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/30 rounded-lg p-3 h-24 resize-none"
-            disabled={importing}
-          />
-        </div>
-
-        {/* Education Section */}
-        <div className="space-y-2">
-          <label className="text-white text-sm font-semibold">Paste your Education section (optional)</label>
-          <textarea
-            value={linkedinSections.education}
-            onChange={(e) => setLinkedinSections(prev => ({ ...prev, education: e.target.value }))}
-            placeholder="Paste Education section here..."
-            className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/30 rounded-lg p-3 h-20 resize-none"
-            disabled={importing}
-          />
-        </div>
-
-        {/* Skills/Projects */}
-        <div className="space-y-2">
-          <label className="text-white text-sm font-semibold">Skills, Projects, or Certifications (optional)</label>
-          <textarea
-            value={linkedinSections.extra}
-            onChange={(e) => setLinkedinSections(prev => ({ ...prev, extra: e.target.value }))}
-            placeholder="Paste any other relevant sections..."
-            className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/30 rounded-lg p-3 h-20 resize-none"
-            disabled={importing}
-          />
-        </div>
-
-        {/* Help Section */}
-        <button
-          onClick={() => setShowHelp(!showHelp)}
-          className="text-blue-400 text-xs hover:text-blue-300 underline flex items-center gap-1"
-          style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
-        >
-          {showHelp ? '▼' : '▶'} How to copy from LinkedIn
-        </button>
-
-        {showHelp && (
-          <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-xs text-white/70 space-y-1">
-            <p>• Open your LinkedIn profile in a new tab</p>
-            <p>• Scroll to Experience → Click the three dots → "Show all"</p>
-            <p>• Highlight and copy the text (including bullet points)</p>
-            <p>• Paste above</p>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3 pt-2">
-          <Button
-            onClick={handleImportLinkedin}
-            disabled={!linkedinSections.experience.trim() || importing}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white h-11 font-semibold"
-            style={{ minHeight: 'auto' }}
-          >
-            {importing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building your resume...
-              </>
-            ) : (
-              <>Build My Resume →</>
-            )}
-          </Button>
-          <button
-            onClick={() => setPhase('questions')}
-            className="text-white/40 text-xs hover:text-white/60 underline"
-            style={{ minHeight: 'auto' }}
-            disabled={importing}
-          >
-            I'll enter manually instead
-          </button>
-        </div>
-      </motion.div>
-    );
-  }
-
   // Generating state
   if (generating) {
     return (
@@ -472,15 +286,12 @@ Return the full resume text and a brief encouraging summary.`,
             onClick={handleSaveResume}
             className="flex-1 bg-[#FA4616] hover:bg-orange-600 text-white h-11 font-semibold"
           >
-            <Check className="w-4 h-4 mr-2" /> Save & Activate
+            <Check className="w-4 h-4 mr-2" /> Save & Activate FASTIQ
           </Button>
         </div>
       </motion.div>
     );
   }
-
-  // Questions phase
-  if (phase !== 'questions') return null;
 
   // Conversational builder steps
   return (

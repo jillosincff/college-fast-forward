@@ -32,7 +32,7 @@ const STORIES = [
     tagIcon: "🎯"
   },
   {
-    quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked. I used the Agent to fix my resume and find alumni at the companies I wanted — landed an internship in 3 weeks. Definitely relieved.",
+    quote: "Honestly, my parents were literally tweaking. I sent my resume to a bunch of jobs but nothing worked out. I used FastIQ and reached out to an alumni who totally hooked me up with an internship for the summer. Definitely relieved.",
     name: "Chris C.",
     school: "USC · '27 grad",
     initials: "CC",

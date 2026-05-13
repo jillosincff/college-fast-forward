@@ -166,53 +166,94 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </div>
       )}
 
-      {/* HERO — Welcome Briefing Box */}
+      {/* HERO — Dynamic AI Briefing */}
       <div style={{
         background: '#fff',
         border: '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 16,
-        padding: '24px 28px',
+        borderLeft: '3px solid #E85D20',
+        borderRadius: '0 12px 12px 0',
+        padding: '20px 24px',
         margin: '20px 24px',
         boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
-          <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 18, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-            Welcome to Your Job Search Workspace
-          </h2>
-          {trialNotStarted && (
-            <button onClick={() => onOpenUpgrade?.()} style={{
+        {briefingLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ height: 12, background: 'rgba(0,0,0,0.06)', borderRadius: 6, width: '40%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 15, background: 'rgba(0,0,0,0.05)', borderRadius: 6, width: '85%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 15, background: 'rgba(0,0,0,0.04)', borderRadius: 6, width: '70%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 15, background: 'rgba(0,0,0,0.03)', borderRadius: 6, width: '55%', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Header row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: '#E85D20',
+              }}>
+                ⚡ FastIQ Briefing
+              </span>
+              <span style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 11, color: 'rgba(0,0,0,0.25)',
+              }}>
+                Updated just now
+              </span>
+            </div>
+
+            {/* Briefing text */}
+            <p style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: 12, fontWeight: 600, color: '#E85D20',
-              background: 'rgba(232,93,32,0.08)',
-              border: '1px solid rgba(232,93,32,0.2)',
-              borderRadius: 100, padding: '6px 16px',
-              cursor: 'pointer', minHeight: 'auto', flexShrink: 0,
+              fontSize: 15, fontWeight: 400,
+              color: '#1a1a1a', lineHeight: 1.65, margin: 0,
             }}>
-              🎁 Start Free Trial
-            </button>
-          )}
-          {trialActive && (
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(0,0,0,0.35)', flexShrink: 0, paddingTop: 4 }}>
-              ⚡ {trialDaysRemaining} days left in trial
-            </span>
-          )}
-        </div>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#444', lineHeight: 1.7, margin: '0 0 20px' }}>
-          Hey {firstName} — welcome! Your personal job search workspace is ready. The fastest way to get momentum is to tell us a bit about your goals so the Agent can personalize everything for you.
-        </p>
-        <button
-          onClick={() => onTabChange('career_goals')}
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, fontWeight: 700,
-            background: '#E85D20', color: '#fff',
-            border: 'none', borderRadius: 10,
-            padding: '12px 24px', cursor: 'pointer',
-            minHeight: 'auto',
-          }}
-        >
-          Set My Search Goals →
-        </button>
+              {briefing?.greeting || `Hey ${firstName} — ready to move your career forward today?`}
+            </p>
+
+            {/* CTA row */}
+            {briefing?.cta_label && (
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)',
+              }}>
+                <button
+                  onClick={() => navigate(briefing.cta_page)}
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 14, fontWeight: 600,
+                    color: '#E85D20', background: 'none',
+                    border: 'none', cursor: 'pointer',
+                    padding: 0, minHeight: 'auto',
+                  }}
+                >
+                  {briefing.cta_label} →
+                </button>
+                {trialNotStarted && (
+                  <button onClick={() => onOpenUpgrade?.()} style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 12, fontWeight: 600, color: '#E85D20',
+                    background: 'rgba(232,93,32,0.08)',
+                    border: '1px solid rgba(232,93,32,0.2)',
+                    borderRadius: 100, padding: '5px 14px',
+                    cursor: 'pointer', minHeight: 'auto',
+                  }}>
+                    🎁 Start Free Trial
+                  </button>
+                )}
+                {trialActive && (
+                  <span style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 11, color: 'rgba(0,0,0,0.35)',
+                  }}>
+                    ⚡ {trialDaysRemaining} days left in trial
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
 
@@ -245,14 +286,15 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
       )}
 
       {/* Roadmap section header */}
-      <div style={{ padding: '0 24px', marginBottom: 8, marginTop: 8 }}>
-        <h3 style={{
+      <div style={{ padding: '0 24px', marginBottom: 16, marginTop: 8 }}>
+        <p style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: 17, fontWeight: 700,
-          color: '#1A1A1A', margin: '0 0 6px',
+          fontSize: 12, fontWeight: 700,
+          letterSpacing: '0.08em', textTransform: 'uppercase',
+          color: 'rgba(0,0,0,0.35)', margin: 0,
         }}>
-          Your Job Search Roadmap
-        </h3>
+          Your Career Roadmap
+        </p>
       </div>
 
       {/* Roadmap — always shown */}
