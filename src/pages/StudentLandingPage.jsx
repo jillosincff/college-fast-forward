@@ -15,37 +15,36 @@ const BENEFIT_CARDS = [
 ];
 
 const HOW_IT_WORKS = [
-  { number: '01', icon: '📁', title: 'Upload your resume', desc: 'Add your background once and let College Fast Forward do the setup work.' },
-  { number: '02', icon: '✨', title: 'Get personalized support', desc: 'Receive tailored resume help, relevant job matches, and LinkedIn guidance.' },
-  { number: '03', icon: '📋', title: 'Stay organized and follow up', desc: 'Track applications, reminders, and outreach without juggling spreadsheets.' },
+  { number: '01', icon: '🎯', title: 'Know What to Apply For', desc: 'Smart matching + daily opportunities tailored to your goals.' },
+  { number: '02', icon: '✨', title: 'Stand Out', desc: 'Modern resumes and LinkedIn optimization that actually get noticed.' },
+  { number: '03', icon: '📋', title: 'Stay on Track & Move Forward', desc: 'Track every application, get smart reminders, and reach the right connections.' },
 ];
 
 const STORIES = [
-  { quote: "I was applying to everything and hearing nothing back. The Agent helped me fix my resume, stay organized, and actually reach people who could help. Landed an internship two weeks later.", name: "Sarah K.", school: "University of Michigan '27", initials: "SK", tag: "Landed an internship" },
+  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", initials: "M", tag: "Landed an internship" },
   { quote: "I finally felt like I had a system instead of a mess.", name: "Maya R.", school: "Business student", initials: "MR", tag: "Less stress" },
   { quote: "The warm intro feature made networking feel less random.", name: "Alex P.", school: "Marketing student", initials: "AP", tag: "Better outreach" },
 ];
 
 const FREE_FEATURES = [
   'Basic resume tools',
-  'Limited AI usage',
+  'Limited Agent usage',
   'Application tracker',
-  'Good for getting started',
+  'Perfect for getting started',
 ];
 
 const PRO_FEATURES = [
-  'Unlimited AI support',
-  'Advanced tailoring',
-  'Smart reminders and follow-ups',
-  'LinkedIn optimization',
-  'Warm intro support',
+  'Unlimited AI Agent',
+  'Advanced tailoring + modern templates',
+  'Smart reminders + interview prep',
+  'Most students upgrade once they see real results',
 ];
 
 const PROOF_CALLOUTS = [
-  'Track every application automatically.',
-  'Draft better outreach faster.',
-  'Get reminders before deadlines and follow-ups.',
-  'Find alumni and trusted connections worth reaching out to.',
+  'Upload your resume once.',
+  'Get modern, tailored versions for every job.',
+  'Track all applications automatically with smart reminders.',
+  'Get outreach support when it makes sense.',
 ];
 
 function StoriesCarousel() {
@@ -213,7 +212,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee' }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            AI Agent for College Students
+            Built for College Students
           </span>
         </div>
 
@@ -241,7 +240,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.65, maxWidth: 500, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Your AI agent that turns the overwhelming job search into something focused and actually manageable — tailored resumes, smart tracking, and outreach that gets replies.
+          Your AI agent that turns the overwhelming, chaotic job search into something focused and actually manageable — tailored resumes, smart tracking, and outreach that gets replies.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
@@ -250,7 +249,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
-          No credit card required. Built for college students at UF, UCF, Penn State, USC &amp; more.
+          No credit card required. Used by students at UF, UCF, Penn State, USC &amp; more.
         </p>
 
         <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 28, transition: 'color 0.15s' }}
@@ -298,8 +297,8 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
           {sectionLabel('How it works')}
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 52px', textAlign: 'center' }}>
-            Three steps to a smarter search.
+          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 52px', textAlign: 'center' }}>
+            One Agent. Everything organized. Real progress.
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 40 }}>
             {HOW_IT_WORKS.map((step) => (
@@ -313,8 +312,8 @@ export default function StudentLandingPage({ onParentClick }) {
             ))}
           </div>
           <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.08), rgba(232,93,32,0.03))', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '22px 32px', textAlign: 'center' }}>
-            <p style={{ fontFamily: playfair, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              Less manual busywork. More progress.
+            <p style={{ fontFamily: satoshi, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
+              "The Agent handles the chaos so you can focus on getting hired."
             </p>
           </div>
         </div>
@@ -323,11 +322,11 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── PRODUCT PROOF ── */}
       <div style={{ padding: '88px 24px', maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
         {sectionLabel('See it in action')}
-        <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '14px 0 16px' }}>
-          Everything in one place.
+        <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '14px 0 16px' }}>
+          The Agent manages your entire search.
         </h2>
         <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 520 }}>
-          College College Fast Forward helps you move from searching to applying to following up without losing track of where everything stands.
+          Real result: Students using the Agent go from feeling lost and ghosted to landing interviews faster.
         </p>
 
         {/* Mock screen */}
@@ -353,7 +352,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>
-          Built to reduce the chaos of job searching and help students keep momentum.
+          Built to reduce the chaos of job searching and help students get hired faster.
         </p>
       </div>
 
@@ -361,8 +360,8 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           {sectionLabel('Students like you')}
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 40px', textAlign: 'center' }}>
-            Real relief from real job search stress.
+          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 40px', textAlign: 'center' }}>
+            Students just like you.
           </h2>
           <StoriesCarousel />
           <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '32px 0 0', lineHeight: 1.7 }}>
@@ -374,8 +373,8 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── PRICING ── */}
       <div style={{ padding: '88px 24px', maxWidth: 860, margin: '0 auto' }}>
         {sectionLabel('Pricing')}
-        <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em', margin: '0 0 52px', textAlign: 'center' }}>
-          Start free. Upgrade when you need more.
+        <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 52px', textAlign: 'center' }}>
+          Choose your advantage.
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
@@ -435,13 +434,10 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ padding: '96px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.12) 0%, transparent 55%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4.5vw, 56px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
-            Get organized. Get moving.<br />
-            <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Get more traction.</span>
+          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4.5vw, 56px)', fontWeight: 900, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.04em', margin: '0 0 36px' }}>
+            Search Smarter,<br />
+            <span style={{ color: '#22d3ee', textShadow: '0 0 40px rgba(34,211,238,0.3)' }}>Not Harder.</span>
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, margin: '0 0 40px' }}>
-            Start your job search with AI support, smarter tracking, and trusted connections that can help open doors.
-          </p>
           <button onClick={go} style={{
             fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none',
             borderRadius: 14, padding: '20px 52px', cursor: 'pointer', minHeight: 'auto',
@@ -451,7 +447,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
           >
-            Start free
+            Start Free Today
           </button>
           <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: 0 }}>
             Built for students. No credit card required.
@@ -470,7 +466,7 @@ export default function StudentLandingPage({ onParentClick }) {
           ))}
         </div>
         <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-          College College Fast Forward helps students manage the job search with less stress and more structure.
+          College Fast Forward helps students manage the job search with less stress and more structure.
         </p>
       </div>
 
