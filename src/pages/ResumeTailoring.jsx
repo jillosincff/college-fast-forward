@@ -149,32 +149,38 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
     setFileName(file.name);
     setPhase('uploading');
     try {
+      // Upload file
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.auth.updateMe({ resume_url: file_url });
-      let parsed_text = '';
-      try {
-        const extracted = await base44.integrations.Core.InvokeLLM({
-          prompt: 'Extract all text content from this resume document. Return only the raw text, preserving structure but no JSON or formatting.',
-          file_urls: [file_url],
-          model: 'gemini_3_flash',
-        });
-        parsed_text = typeof extracted === 'string' ? extracted : '';
-      } catch (e) {
-        console.warn('Text extraction failed:', e);
-      }
+      await base44.auth.updateMe({ resume_url: file_url }).catch(() => {});
+      
+      // Create resume record immediately (don't wait for text extraction)
       const newResume = await base44.entities.Resume.create({
         student_email: user.email,
         original_file_name: file.name,
         original_file_url: file_url,
-        parsed_text,
+        parsed_text: '',
         is_active: resumes.length === 0,
       });
+      
       setResumes(prev => [...prev, newResume]);
       setResumeId(newResume.id);
-      // New resume — clear any cached analysis so it runs fresh
       localStorage.removeItem(`resume_analysis_${newResume.id}`);
       setAnalysis(null);
       setAnalysisError(false);
+      setPhase('hub');
+      
+      // Extract text asynchronously in background
+      base44.integrations.Core.InvokeLLM({
+        prompt: 'Extract all text content from this resume document. Return only the raw text, preserving structure but no JSON or formatting.',
+        file_urls: [file_url],
+        model: 'gemini_3_flash',
+      })
+        .then(extracted => {
+          const parsed_text = typeof extracted === 'string' ? extracted : '';
+          return base44.entities.Resume.update(newResume.id, { parsed_text });
+        })
+        .catch(e => console.warn('Text extraction failed:', e));
+        
     } catch (e) {
       console.error('Upload failed:', e);
       setPhase(hasResumes ? 'hub' : 'entry');
@@ -291,30 +297,81 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>
         <button
           onClick={() => setPhase(hasResumes ? 'hub' : 'uploaded')}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 24, padding: 0, minHeight: 'auto' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 32, padding: 0, minHeight: 'auto' }}
         >
           ← Back
         </button>
-        {selectedResume && (
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', marginBottom: 16 }}>
-            Tailoring: <strong style={{ color: '#1A1A1A' }}>{selectedResume.name || selectedResume.original_file_name || 'My Resume'}</strong>
+
+        {/* Header */}
+        <div style={{ marginBottom: 40 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>Optimize Resume</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
+            Let the Agent optimize your resume
+          </h1>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>
+            Based on your career goals, the Agent will strengthen your bullet points, improve clarity, and better align your experience with what employers are looking for.
           </p>
+        </div>
+
+        {/* Current File */}
+        {selectedResume && (
+          <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 32 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 6px' }}>Current File</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: 0 }}>
+              {selectedResume.name || selectedResume.original_file_name || 'My Resume'}
+            </p>
+          </div>
         )}
+
         {error && (
-          <div style={{ background: 'rgba(229,57,53,0.08)', border: '1px solid rgba(229,57,53,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
+          <div style={{ background: 'rgba(229,57,53,0.08)', border: '1px solid rgba(229,57,53,0.2)', borderRadius: 12, padding: '12px 16px', marginBottom: 24 }}>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#e53935', margin: 0 }}>{error}</p>
           </div>
         )}
-        <JobDescriptionStep
-          companyName={companyName}
-          jobTitle={jobTitle}
-          jobDescription={jobDescription}
-          resumeText={resumeText}
-          onCompanyChange={setCompanyName}
-          onJobTitleChange={setJobTitle}
-          onJobDescriptionChange={setJobDescription}
-          onTailor={handleDoTailor}
-        />
+
+        {/* Primary: Optimize by Career Goals */}
+        <div style={{ marginBottom: 40 }}>
+          <button
+            onClick={() => {
+              setCompanyName('');
+              setJobTitle('');
+              setJobDescription('');
+              handleDoTailor();
+            }}
+            style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%', minHeight: 'auto' }}
+          >
+            Optimize My Resume →
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
+          <div style={{ flex: 1, height: '1px', background: '#E5E5E5' }} />
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAA' }}>or</span>
+          <div style={{ flex: 1, height: '1px', background: '#E5E5E5' }} />
+        </div>
+
+        {/* Secondary: Tailor to Specific Job */}
+        <div>
+          <div style={{ marginBottom: 16 }}>
+            <h3 style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 600, color: '#1A1A1A', margin: '0 0 8px' }}>
+              Want to tailor it to a specific job?
+            </h3>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: 0, lineHeight: 1.5 }}>
+              Paste a job description and the Agent will customize your resume for that exact role.
+            </p>
+          </div>
+          <JobDescriptionStep
+            companyName={companyName}
+            jobTitle={jobTitle}
+            jobDescription={jobDescription}
+            resumeText={resumeText}
+            onCompanyChange={setCompanyName}
+            onJobTitleChange={setJobTitle}
+            onJobDescriptionChange={setJobDescription}
+            onTailor={handleDoTailor}
+          />
+        </div>
       </div>
     );
   }
@@ -391,7 +448,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: window.innerWidth < 600 ? 'wrap' : 'nowrap' }}>
             <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>RESUME HUB</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>Resume</p>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 700, color: '#1A1A1A', margin: 0 }}>Your Resumes</h1>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -413,7 +470,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   onClick={() => onOpenUpgrade()}
                   style={{ background: 'none', border: '1px solid #E85D20', borderRadius: 10, padding: window.innerWidth < 600 ? '10px 16px' : '10px 20px', fontSize: window.innerWidth < 600 ? 'clamp(12px, 2.5vw, 13px)' : 13, fontWeight: 600, color: '#E85D20', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto', width: window.innerWidth < 600 ? '100%' : 'auto' }}
                 >
-                  + Add Resume · FastIQ
+                  + Add Resume
                 </button>
               )}
             </div>
@@ -423,10 +480,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
           {!isFastIQ && resumes.length >= 1 && (
             <div style={{ background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#1A1A1A', margin: 0 }}>
-                Free accounts include 1 master resume. Upgrade to store unlimited versions.
+                Free accounts can have 1 master resume. Upgrade to store unlimited versions and get advanced tailoring.
               </p>
               <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>
-                Unlock FastIQ →
+                Unlock Accelerator →
               </button>
             </div>
           )}
@@ -438,7 +495,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                 <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 16, padding: '28px 32px', display: 'flex', alignItems: 'center', gap: 16 }}>
                   <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #F0F0F0', borderTop: '3px solid #E85D20', animation: 'spin 1s linear infinite', flexShrink: 0 }} />
                   <div>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>FastIQ is reviewing your resume...</p>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px' }}>The Agent is reviewing your resume...</p>
                     <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: 0 }}>Scoring against your career goals</p>
                   </div>
                 </div>
@@ -453,7 +510,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
 
               {analysis && !analyzing && (
                 <div style={{ background: '#0A0A0A', borderRadius: 16, padding: '28px 32px' }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>RESUME ANALYSIS · MATCHED TO YOUR GOALS</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 20px' }}>Resume Analysis • Matched to Your Goals</p>
 
                   <div style={{ display: 'flex', flexDirection: window.innerWidth < 600 ? 'column' : 'row', gap: 24, alignItems: window.innerWidth < 600 ? 'center' : 'flex-start', marginBottom: 24, flexWrap: 'wrap' }}>
                     <div style={{ textAlign: 'center', flexShrink: 0 }}>
@@ -465,11 +522,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                     </div>
 
                     <div style={{ flex: 1, minWidth: 200 }}>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#fff', margin: '0 0 16px', lineHeight: 1.6 }}>{analysis.summary}</p>
-                      <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '12px 16px' }}>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>⚡ TOP PRIORITY</p>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
-                      </div>
+                      <div style={{ background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 16 }}>
+                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#E85D20', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Top Priority</p>
+                         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.5 }}>{analysis.top_fix}</p>
+                       </div>
                     </div>
                   </div>
 
@@ -497,10 +553,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
                   {!isFastIQ && (
                     <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                       <div>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>FastIQ can fix every one of these gaps.</p>
-                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Tailor your resume to any job description in 60 seconds.</p>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', margin: '0 0 4px' }}>The Agent can help fix these gaps.</p>
+                        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Tell it your target job or company and it will tailor your resume in seconds.</p>
                       </div>
-                      <button onClick={() => onOpenUpgrade()} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Unlock FastIQ to Optimize →</button>
+                      <button onClick={() => handleTailor(resumes.find(r => r.is_active) || resumes[0])} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}>Let the Agent Optimize This Resume →</button>
                     </div>
                   )}
 
@@ -624,57 +680,87 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         )}
 
         <div style={{ marginBottom: 40, textAlign: 'center' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>RESUME</p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>
-            Your resume is your first impression.
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>Resume</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 16px', lineHeight: 1.2 }}>
+          Your resume is your first impression.
           </h1>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: '#666', margin: 0, lineHeight: 1.6 }}>
             Let's make it count. Do you have one already?
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 16, marginBottom: 32 }}>
-          {/* Path A — Upload */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 20, marginBottom: 32 }}>
+          {/* Left Card: Yes, I have one (Recommended) */}
           <div
             onDragOver={e => e.preventDefault()}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            style={{ background: '#fff', border: '2px dashed #E85D20', borderRadius: 16, padding: '36px 24px', textAlign: 'center', cursor: 'pointer' }}
+            style={{ background: '#fff', border: '2px dashed #E85D20', borderRadius: 16, padding: '32px 24px', textAlign: 'center', cursor: 'pointer', transition: 'transform 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
           >
             <div style={{ width: 56, height: 56, borderRadius: 12, background: '#FFF5F0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>📄</div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Yes, I have one</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 20px', lineHeight: 1.5 }}>
-              Upload your resume and FastIQ will review it, score it, and help you tailor it to any job.
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 24px', lineHeight: 1.5 }}>
+              Upload your resume and the Agent will review it, score it, and help you tailor it to any job.
             </p>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600 }}>Drop PDF or Word doc here or click to upload →</span>
+            <div style={{
+              background: '#FFF5F0', border: '1px dashed rgba(232,93,32,0.4)',
+              borderRadius: 12, padding: '24px 16px', marginBottom: '16px',
+              fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#E85D20', fontWeight: 500,
+            }}>
+              Drop PDF or Word doc here or click to upload
+            </div>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#AAA', margin: 0, letterSpacing: '0.03em' }}>
+              Supported formats: PDF, Word (.docx)
+            </p>
             <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }} onChange={handleFileSelect} />
           </div>
 
-          {/* Path B — Build with FastIQ */}
+          {/* Right Card: Help me build one */}
           <div
-            onClick={() => isFastIQ ? setPhase('builder') : onOpenUpgrade()}
-            style={{ background: isFastIQ ? '#fff' : '#FAFAFA', border: '1px solid #E0E0E0', borderRadius: 16, padding: '36px 24px', textAlign: 'center', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+            onClick={() => setPhase('builder')}
+            style={{
+              background: '#fff', border: '1px solid #E0E0E0', borderRadius: 16, padding: '32px 24px', textAlign: 'center', cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
           >
-            {!isFastIQ && (
-              <div style={{ position: 'absolute', top: 12, right: 12, background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 20, padding: '3px 10px', fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.08em' }}>FASTIQ</div>
-            )}
-            <div style={{ width: 56, height: 56, borderRadius: 12, background: '#F5F5F5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>✨</div>
+
+            <div style={{ width: 56, height: 56, borderRadius: 12, background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 24 }}>✨</div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Help me build one</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 20px', lineHeight: 1.5 }}>
-              Answer a few questions and FastIQ will build a professional resume for you.
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#666', margin: '0 0 24px', lineHeight: 1.5 }}>
+              Answer a few quick questions and the Agent will build a strong, professional resume for you from scratch.
             </p>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: isFastIQ ? '#E85D20' : '#AAAAAA', fontWeight: 600 }}>
-              {isFastIQ ? 'Build my resume →' : 'Unlock with FastIQ →'}
-            </span>
+            <button style={{
+              background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px 24px',
+              fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#fff',
+              cursor: 'pointer', minHeight: 'auto', width: '100%'
+            }}>
+              Start Building →
+            </button>
           </div>
         </div>
 
-        <p
-          onClick={() => navigate('FreeTierDashboard')}
-          style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#AAAAAA', cursor: 'pointer', textAlign: 'center', margin: 0 }}
-        >
-          Skip for now — go to dashboard →
-        </p>
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <button
+            onClick={() => navigate('FreeTierDashboard')}
+            style={{
+              background: 'none', border: 'none', fontFamily: "'DM Sans', sans-serif",
+              fontSize: 13, color: '#888', cursor: 'pointer', padding: 0, minHeight: 'auto',
+              textDecoration: 'underline'
+            }}
+          >
+            Skip for now — go to dashboard →
+          </button>
+        </div>
       </div>
     </>
   );

@@ -187,7 +187,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#1a1a1a', lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 8px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.1s', position: 'relative' }}>
           Your student needs a job.
         </h1>
-        <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', fontFamily: playfair, lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 32px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.15s', position: 'relative' }}>
+        <h1 style={{ fontFamily: playfair, fontSize: 'clamp(40px, 6.5vw, 76px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.0, letterSpacing: '-0.03em', margin: '0 0 32px', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.7s ease 0.15s', position: 'relative' }}>
           You have connections.
         </h1>
 
@@ -392,7 +392,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         <div style={{ maxWidth: 500, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.16em', textTransform: 'uppercase', margin: '0 0 24px' }}>Your best move</p>
           <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 8px' }}>One introduction from you</h2>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', fontFamily: playfair, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can lead to an interview — or even a job.</h2>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(34px, 5vw, 64px)', fontWeight: 700, color: '#E85D20', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 28px' }}>can lead to an interview — or even a job.</h2>
           <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.65)', lineHeight: 1.75, margin: '0 auto 40px' }}>
             Free. 2 minutes. No obligation.<br />Students at your school genuinely need you.
           </p>

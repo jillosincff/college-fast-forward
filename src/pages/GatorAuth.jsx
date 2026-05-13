@@ -198,8 +198,8 @@ export default function GatorAuth() {
       if (role === 'parent') {
         navigate('/ParentOnboarding');
       } else {
-        // Always go to GatorWelcome for role selection — never show the auth form again
-        navigate('/GatorWelcome');
+        // Send new users to the student welcome/onboarding flow
+        navigate('/StudentWelcome');
       }
       return;
     }
