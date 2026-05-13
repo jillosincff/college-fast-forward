@@ -174,6 +174,27 @@ export default function StudentLandingPage({ onParentClick }) {
         padding: '100px 20px 80px', position: 'relative', overflow: 'hidden', textAlign: 'center',
       }}>
         <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 700, background: 'radial-gradient(ellipse, rgba(232,93,32,0.09) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        {/* Student energy floating accents */}
+        {[
+          { emoji: '🎓', top: '12%', left: '7%', size: 28, delay: '0s', rot: '-8deg' },
+          { emoji: '💼', top: '22%', right: '8%', size: 24, delay: '0.4s', rot: '6deg' },
+          { emoji: '📄', top: '58%', left: '5%', size: 22, delay: '0.8s', rot: '4deg' },
+          { emoji: '✨', top: '65%', right: '6%', size: 20, delay: '0.2s', rot: '-5deg' },
+          { emoji: '🚀', top: '38%', left: '3%', size: 20, delay: '1s', rot: '10deg' },
+          { emoji: '💡', top: '30%', right: '4%', size: 22, delay: '0.6s', rot: '-4deg' },
+        ].map((item, i) => (
+          <div key={i} style={{
+            position: 'absolute', top: item.top, left: item.left, right: item.right,
+            fontSize: item.size, opacity: 0.18, pointerEvents: 'none',
+            transform: `rotate(${item.rot})`,
+            animation: `heroFloat${i % 2 === 0 ? 'A' : 'B'} 6s ease-in-out infinite`,
+            animationDelay: item.delay,
+          }}>{item.emoji}</div>
+        ))}
+        <style>{`
+          @keyframes heroFloatA { 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-10px) rotate(-8deg)} }
+          @keyframes heroFloatB { 0%,100%{transform:translateY(0) rotate(6deg)} 50%{transform:translateY(-8px) rotate(6deg)} }
+        `}</style>
 
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -188,14 +209,14 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <h1 style={{
-          fontFamily: playfair, fontSize: 'clamp(38px, 6.5vw, 80px)',
-          fontWeight: 700, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.03em',
-          margin: '0 0 24px', maxWidth: 760,
+          fontFamily: playfair, fontSize: 'clamp(40px, 7vw, 88px)',
+          fontWeight: 700, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.04em',
+          margin: '0 0 24px', maxWidth: 820,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
           Search Smarter,<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Not Harder.</span>
+          <span style={{ color: '#E85D20', fontStyle: 'italic', fontSize: 'clamp(48px, 8.5vw, 108px)', letterSpacing: '-0.05em' }}>Not Harder.</span>
         </h1>
 
         <p style={{
@@ -204,7 +225,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          College Fast Forward is your AI agent that turns a chaotic job search into a focused, strategic process — tailored resumes, smart opportunities, organized tracking, and outreach that actually gets replies.
+          College Fast Forward is your AI agent that turns a chaotic job search into a focused, strategic process — so you finally get replies instead of getting ghosted.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
