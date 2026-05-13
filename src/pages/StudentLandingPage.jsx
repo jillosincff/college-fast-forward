@@ -91,9 +91,9 @@ function StoriesCarousel() {
           "{s.quote}"
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #E85D20, #c9471a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#fff' }}>{s.initials}</div>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #22d3ee, #0891b2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: satoshi, fontSize: 14, fontWeight: 900, color: '#fff', boxShadow: '0 0 20px rgba(34,211,238,0.3)' }}>{s.initials}</div>
           <div>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>{s.name}</p>
+            <p style={{ fontFamily: satoshi, fontSize: 15, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.01em' }}>{s.name}</p>
             <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>{s.school}</p>
           </div>
         </div>
@@ -180,7 +180,9 @@ export default function StudentLandingPage({ onParentClick }) {
         alignItems: 'center', justifyContent: 'center',
         padding: '100px 20px 80px', position: 'relative', overflow: 'hidden', textAlign: 'center',
       }}>
-        <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 700, background: 'radial-gradient(ellipse, rgba(232,93,32,0.09) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 900, height: 700, background: 'radial-gradient(ellipse, rgba(232,93,32,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '30%', left: '25%', width: 500, height: 400, background: 'radial-gradient(ellipse, rgba(34,211,238,0.06) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '20%', right: '15%', width: 400, height: 350, background: 'radial-gradient(ellipse, rgba(34,211,238,0.04) 0%, transparent 65%)', pointerEvents: 'none' }} />
         {/* Student energy floating accents */}
         {[
           { emoji: '🎓', top: '12%', left: '7%', size: 28, delay: '0s', rot: '-8deg' },
@@ -216,31 +218,30 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <h1 style={{
-          fontFamily: satoshi, fontSize: 'clamp(44px, 7.5vw, 92px)',
-          fontWeight: 800, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.04em',
-          margin: '0 0 28px', maxWidth: 840,
-          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+          fontFamily: satoshi, fontSize: 'clamp(52px, 9vw, 108px)',
+          fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: '-0.05em',
+          margin: '0 0 32px', maxWidth: 900,
+          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
           Search Smarter,<br />
           <span style={{
-            background: 'linear-gradient(90deg, #E85D20 0%, #ff8c4a 100%)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            color: '#22d3ee',
             fontWeight: 900,
-            fontSize: 'clamp(56px, 9.5vw, 120px)',
-            letterSpacing: '-0.05em',
+            fontSize: 'clamp(64px, 11vw, 136px)',
+            letterSpacing: '-0.06em',
             display: 'inline-block',
+            textShadow: '0 0 60px rgba(34,211,238,0.35)',
           }}>Not Harder.</span>
         </h1>
 
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)',
-          fontWeight: 400, color: 'rgba(255,255,255,0.7)',
-          lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
+          fontFamily: dmSans, fontSize: 'clamp(16px, 1.9vw, 19px)',
+          fontWeight: 400, color: 'rgba(255,255,255,0.65)',
+          lineHeight: 1.65, maxWidth: 500, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          College Fast Forward is your AI agent that turns the overwhelming job search into something focused and actually manageable — tailored resumes, smart tracking, and outreach that gets replies.
+          Your AI agent that turns the overwhelming job search into something focused and actually manageable.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
@@ -264,10 +265,10 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '80px 24px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
           {sectionLabel('You are not alone')}
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 700, color: '#fff', lineHeight: 1.15, letterSpacing: '-0.02em', margin: '0 0 24px' }}>
-            Applying shouldn't feel this exhausting.
+          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(34px, 5.5vw, 64px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 28px' }}>
+            Applying shouldn't feel<br />this exhausting.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: 0 }}>
+          <p style={{ fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
             You're not alone. Students are sending hundreds of applications, getting ghosted or rejected, and burning out. We built a smarter system so you don't have to do it all manually.
           </p>
         </div>
@@ -276,12 +277,18 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── BENEFIT CARDS ── */}
       <div style={{ padding: '88px 24px', maxWidth: 980, margin: '0 auto' }}>
         {sectionLabel('Why students use Fast Forward')}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginTop: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16, marginTop: 40 }}>
           {BENEFIT_CARDS.map((card, i) => (
-            <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '28px 26px' }}>
-              <div style={{ fontSize: 26, marginBottom: 14 }}>{card.icon}</div>
-              <p style={{ fontFamily: playfair, fontSize: 18, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.3 }}>{card.title}</p>
+            <div key={i} style={{
+              gridColumn: i === 0 ? 'span 4' : i === 1 ? 'span 2' : i === 2 || i === 3 ? 'span 3' : 'span 2',
+              background: i === 0 ? 'linear-gradient(135deg, rgba(34,211,238,0.07), rgba(34,211,238,0.02))' : 'rgba(255,255,255,0.04)',
+              border: i === 0 ? '1px solid rgba(34,211,238,0.18)' : '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 20, padding: i === 0 ? '36px 32px' : '28px 26px',
+            }}>
+              <div style={{ fontSize: i === 0 ? 32 : 26, marginBottom: 14 }}>{card.icon}</div>
+              <p style={{ fontFamily: satoshi, fontSize: i === 0 ? 22 : 17, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.25, letterSpacing: '-0.02em' }}>{card.title}</p>
               <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.7 }}>{card.desc}</p>
+              {i === 0 && <p style={{ fontFamily: dmSans, fontSize: 12, fontStyle: 'italic', color: 'rgba(34,211,238,0.7)', margin: '14px 0 0' }}>"This alone saved me hours." — UF '26</p>}
             </div>
           ))}
         </div>
