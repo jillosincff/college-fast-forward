@@ -9,29 +9,29 @@ const HOW_IT_WORKS = [
     number: '01',
     icon: '🎯',
     title: 'Know What to Apply For',
-    desc: 'Smart matching + daily opportunities tailored to you.',
+    desc: 'Smart matching + daily opportunities tailored to your goals.',
   },
   {
     number: '02',
     icon: '✨',
     title: 'Stand Out',
-    desc: 'Modern resumes, LinkedIn optimization, and tailored materials for every role.',
+    desc: 'Modern resumes and LinkedIn optimization that actually get noticed.',
   },
   {
     number: '03',
     icon: '📋',
     title: 'Stay on Track & Get Replies',
-    desc: 'Track every application in one place, get follow-up reminders, and use the Agent to reach parents & alumni with messages that work.',
+    desc: 'Track every application, get smart reminders, and use the Agent to reach parents & alumni with messages that work.',
   },
 ];
 
 const STORIES = [
   {
-    quote: "I finally had one place for everything — all my applications, resume versions, and outreach. The Agent helped me stay organized and I landed an internship in 3 weeks.",
-    name: "Chris C.",
-    school: "USC '27",
-    initials: "CC",
-    tag: "Internship locked",
+    quote: "I was overwhelmed applying everywhere and getting nowhere. The Agent organized everything, helped with my resume, and reached out to the right people. Landed an internship in 3 weeks.",
+    name: "Marcus",
+    school: "Penn State '27 · Finance",
+    initials: "M",
+    tag: "Internship landed",
     tagIcon: "🎯",
   },
   {
@@ -43,14 +43,6 @@ const STORIES = [
     tagIcon: "✉️",
   },
   {
-    quote: "I literally had no clue how to start my job search. The Agent gave me a clear plan and kept everything organized.",
-    name: "Marcus",
-    school: "Penn State · Senior · Finance",
-    initials: "M",
-    tag: "3 interviews booked",
-    tagIcon: "📅",
-  },
-  {
     quote: "I applied to over 100 jobs and got zero responses. I reached out to one parent from my school and he got me an interview by the following Monday.",
     name: "Sarah K.",
     school: "University of Michigan · Junior · Engineering",
@@ -58,21 +50,29 @@ const STORIES = [
     tag: "Got the role",
     tagIcon: "🎯",
   },
+  {
+    quote: "I finally had one place for everything — all my applications, resume versions, and outreach. The Agent kept me organized and I stopped second-guessing myself.",
+    name: "Chris C.",
+    school: "USC '27",
+    initials: "CC",
+    tag: "3 interviews booked",
+    tagIcon: "📅",
+  },
 ];
 
 const FREE_FEATURES = [
-  'Basic resume help',
+  'Basic resume tools',
   'Limited Agent usage',
-  'Application tracker + workspace',
+  'Application tracker',
   'Perfect for getting started',
 ];
 
 const PRO_FEATURES = [
-  'Unlimited AI agents',
-  'Full resume version history & tracking',
-  'Advanced optimization + outreach',
-  'Mock interviews + daily signals',
-  'Most students upgrade once they experience the organized workspace',
+  'Unlimited AI Agent',
+  'Full warm network access via Agent',
+  'Unlimited tailoring + modern templates',
+  'Smart reminders + interview prep',
+  'Most students upgrade once they see real results',
 ];
 
 function StoriesCarousel() {
@@ -231,7 +231,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.75, maxWidth: 600, margin: '0 auto 44px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
         }}>
-          The Agent manages your entire job search from resume to offer — tailoring materials, tracking applications, sending smart reminders, finding connections, and drafting outreach so you actually land interviews.
+          The Agent manages your entire job search — from tailored resumes and application tracking to smart reminders and outreach — so you actually land interviews and offers.
         </p>
 
         {/* CTAs */}
@@ -262,7 +262,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
         {/* Trust line */}
         <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
-          Free to start &nbsp;•&nbsp; No credit card needed &nbsp;•&nbsp; Built for students at UF, UCF, Penn State, USC & more
+          Free to start &nbsp;•&nbsp; No credit card needed &nbsp;•&nbsp; Used by students from UF, UCF, Penn State, USC & more
         </p>
 
         {/* Helper link */}
@@ -321,11 +321,10 @@ export default function StudentLandingPage({ onParentClick }) {
           {[
             { icon: '📄', text: 'Upload your resume once' },
             { icon: '✨', text: 'Get modern, tailored versions for every job' },
-            { icon: '📊', text: 'Track all applications automatically' },
-            { icon: '🔔', text: 'Receive smart reminders so you never miss a follow-up' },
+            { icon: '📊', text: 'Track all applications automatically with smart reminders' },
             { icon: '🤝', text: 'Get warm outreach to parents & alumni when it makes sense' },
           ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
               <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
               <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>{item.text}</p>
             </div>
@@ -453,13 +452,10 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ padding: '96px 24px 110px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.12) 0%, transparent 55%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 520, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4.5vw, 58px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 28px' }}>
-            Your job search workspace<br />
-            <span style={{ color: '#E85D20', fontStyle: 'italic' }}>with built-in agents.</span>
+          <h2 style={{ fontFamily: playfair, fontSize: 'clamp(28px, 4.5vw, 58px)', fontWeight: 700, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 44px' }}>
+            Get Hired<br />
+            <span style={{ color: '#E85D20', fontStyle: 'italic' }}>Faster.</span>
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 17, color: 'rgba(255,255,255,0.55)', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 420 }}>
-            Join thousands of students using College Fast Forward to stay organized and get hired faster.
-          </p>
           <button onClick={go} style={{
             fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none',
             borderRadius: 14, padding: '20px 52px', cursor: 'pointer', minHeight: 'auto',
