@@ -213,7 +213,7 @@ export default function StudentLandingPage({ onParentClick }) {
         }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee' }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            Built for College Students
+            AI Agent for College Students
           </span>
         </div>
 
@@ -241,16 +241,16 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.65, maxWidth: 500, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          Your AI agent that turns the overwhelming job search into something focused and actually manageable.
+          Your AI agent that turns the overwhelming job search into something focused and actually manageable — tailored resumes, smart tracking, and outreach that gets replies.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
-          {ctaBtn('Start free')}
+          {ctaBtn('Start Free')}
           {ctaBtn('Watch 45-second demo →', false)}
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
-          No credit card required. Used by students at UF, UCF, Penn State, USC &amp; more.
+          No credit card required. Built for college students at UF, UCF, Penn State, USC &amp; more.
         </p>
 
         <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 28, transition: 'color 0.15s' }}
