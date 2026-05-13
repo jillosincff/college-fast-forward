@@ -3,6 +3,7 @@ import { navigate } from '@/components/utils/navigation';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
+const satoshi = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
 const BENEFIT_CARDS = [
   { icon: '📄', title: 'Tailored resumes', desc: 'Automatically adapt your resume for each role so you can apply faster and with more confidence.' },
@@ -126,7 +127,13 @@ export default function StudentLandingPage({ onParentClick }) {
       link.id = 'slp-fonts';
       link.rel = 'stylesheet';
       link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap';
-      document.head.appendChild(link);
+    }
+    if (!document.getElementById('slp-satoshi')) {
+      const satoshiLink = document.createElement('link');
+      satoshiLink.id = 'slp-satoshi';
+      satoshiLink.rel = 'stylesheet';
+      satoshiLink.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@700,800,900&display=swap';
+      document.head.appendChild(satoshiLink);
     }
   }, []);
 
@@ -204,19 +211,27 @@ export default function StudentLandingPage({ onParentClick }) {
         }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22d3ee' }} />
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            AI Job Search Agent for College Students
+            Built for College Students
           </span>
         </div>
 
         <h1 style={{
-          fontFamily: playfair, fontSize: 'clamp(40px, 7vw, 88px)',
-          fontWeight: 700, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.04em',
-          margin: '0 0 24px', maxWidth: 820,
+          fontFamily: satoshi, fontSize: 'clamp(44px, 7.5vw, 92px)',
+          fontWeight: 800, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.04em',
+          margin: '0 0 28px', maxWidth: 840,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.7s ease 0.1s',
         }}>
           Search Smarter,<br />
-          <span style={{ color: '#E85D20', fontStyle: 'italic', fontSize: 'clamp(48px, 8.5vw, 108px)', letterSpacing: '-0.05em' }}>Not Harder.</span>
+          <span style={{
+            background: 'linear-gradient(90deg, #E85D20 0%, #ff8c4a 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            fontWeight: 900,
+            fontSize: 'clamp(56px, 9.5vw, 120px)',
+            letterSpacing: '-0.05em',
+            display: 'inline-block',
+          }}>Not Harder.</span>
         </h1>
 
         <p style={{
@@ -225,7 +240,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.7, maxWidth: 580, margin: '0 auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          College Fast Forward is your AI agent that turns a chaotic job search into a focused, strategic process — so you finally get replies instead of getting ghosted.
+          College Fast Forward is your AI agent that turns the chaotic, overwhelming job search into a focused, strategic process — tailored resumes, smart tracking, and outreach that actually gets replies.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
@@ -234,7 +249,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s' }}>
-          No credit card required. Built for college students.
+          No credit card required. Used by students at UF, UCF, Penn State, USC &amp; more.
         </p>
 
         <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 28, transition: 'color 0.15s' }}
