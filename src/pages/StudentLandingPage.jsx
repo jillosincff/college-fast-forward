@@ -27,10 +27,10 @@ const HOW_IT_WORKS = [
 
 const STORIES = [
   {
-    quote: "I was overwhelmed applying everywhere and getting nowhere. The Agent organized everything, helped with my resume, and reached out to the right people. Landed an internship in 3 weeks.",
-    name: "Marcus",
-    school: "Penn State '27 · Finance",
-    initials: "M",
+    quote: "I was overwhelmed applying to everything and getting ghosted. The Agent organized my search, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.",
+    name: "Sarah K.",
+    school: "University of Michigan '27 · Engineering",
+    initials: "SK",
     tag: "Internship landed",
     tagIcon: "🎯",
   },
@@ -223,15 +223,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.45, maxWidth: 560, margin: '0 auto 12px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
-          AI + a warm school-powered network of parents and alumni that supercharges your job search.
-        </p>
-        <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(14px, 1.6vw, 15px)',
-          fontWeight: 400, color: 'rgba(255,255,255,0.5)',
-          lineHeight: 1.75, maxWidth: 600, margin: '0 auto 44px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s',
-        }}>
-          The Agent manages your entire job search — from tailored resumes and application tracking to smart reminders and outreach — so you actually land interviews and offers.
+          The AI Agent + your school's warm network that supercharges your entire job search — from tailored resumes and application tracking to smart reminders and outreach that gets results.
         </p>
 
         {/* CTAs */}
@@ -439,7 +431,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <button onClick={go} style={{ marginTop: 28, width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.35)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(232,93,32,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.35)'; }}
-            >Start free, upgrade anytime →</button>
+            >Start Free – Upgrade Anytime →</button>
           </div>
         </div>
 
