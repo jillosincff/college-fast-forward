@@ -79,7 +79,7 @@ export default function OnboardingFlow({ onClose }) {
   const [resumeUrl, setResumeUrl] = useState('');
   const fileRef = useRef();
 
-  const TOTAL = 7;
+  const TOTAL = 8;
   const go = (n) => setScreen(n);
   const next = () => setScreen(s => s + 1);
   const back = () => setScreen(s => s - 1);
@@ -330,17 +330,62 @@ export default function OnboardingFlow({ onClose }) {
         </div>
       )}
 
-      {/* ── SCREEN 7: Wow Moment ── */}
+      {/* ── SCREEN 7: Resume Upload ── */}
       {screen === 7 && (
+        <div style={{ ...card, maxWidth: 520 }}>
+          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={async (e) => { await handleFileUpload(e); if (e.target.files?.[0]) next(); }} style={{ display: 'none' }} />
+
+          <div style={{ width: 72, height: 72, borderRadius: 22, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 28px' }}>📄</div>
+          <h1 style={h1}>Upload your resume</h1>
+          <p style={sub}>The Agent will instantly show you a stronger, modern version — and build your personalized plan.</p>
+
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            style={{
+              width: '100%', padding: '28px 24px', borderRadius: 20,
+              border: '2px dashed rgba(34,197,94,0.35)',
+              background: uploading ? 'rgba(34,197,94,0.08)' : 'rgba(34,197,94,0.04)',
+              cursor: uploading ? 'wait' : 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+              transition: 'all 0.2s', minHeight: 'auto', marginBottom: 20,
+            }}
+            onMouseEnter={e => { if (!uploading) { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; e.currentTarget.style.background = 'rgba(34,197,94,0.1)'; } }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.35)'; e.currentTarget.style.background = uploading ? 'rgba(34,197,94,0.08)' : 'rgba(34,197,94,0.04)'; }}
+          >
+            <span style={{ fontSize: 32 }}>{uploading ? '⏳' : '⬆️'}</span>
+            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 700, color: GREEN, margin: 0 }}>
+              {uploading ? 'Analyzing your resume...' : 'Upload PDF or Word'}
+            </p>
+            <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0 }}>We'll create your optimized version instantly</p>
+          </button>
+
+          <div style={{ textAlign: 'center' }}>
+            <button onClick={next} style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, textDecoration: 'underline' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+            >
+              Skip for now — I'll upload later
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 20 }}>
+            <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── SCREEN 8: Wow Moment ── */}
+      {screen === 8 && (
         <div style={{ maxWidth: 680, width: '100%', animation: 'fadeUp 0.35s ease', overflowY: 'auto' }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 100, padding: '5px 16px', marginBottom: 16 }}>
-              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Resume Analysis</span>
+              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase' }}>✨ Resume Upgraded</span>
             </div>
-            <h1 style={{ ...h1, fontSize: 'clamp(22px, 4vw, 36px)' }}>Your Improved Resume</h1>
+            <h1 style={{ ...h1, fontSize: 'clamp(22px, 4vw, 36px)' }}>Here's your upgraded resume</h1>
             {/* Score bar */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginTop: 12 }}>
               <div style={{ textAlign: 'center' }}>
@@ -417,17 +462,18 @@ export default function OnboardingFlow({ onClose }) {
             </div>
           </div>
 
-          {/* Key Improvements */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 24 }}>
+          {/* Agent Feedback */}
+          <div style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 16, padding: '18px 20px', marginBottom: 20 }}>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px' }}>Agent Feedback</p>
             {[
-              { icon: '✅', text: 'Achievement-focused bullet points' },
-              { icon: '🎨', text: 'Modern design recruiters notice' },
-              { icon: '🔍', text: 'Better ATS keywords throughout' },
-              { icon: '🎯', text: `Tailored to ${seeking === 'internship' ? 'internship' : seeking === 'fulltime' ? 'full-time' : 'your'} target roles` },
-            ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 10, padding: '10px 12px' }}>
-                <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
-                <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.4 }}>{item.text}</p>
+              'Strengthened your bullet points to focus on results, not tasks',
+              'Added clear sections for projects and leadership experience',
+              'Made it ATS-friendly while keeping it visually standout',
+              `Score improved from 42/100 → 87/100`,
+            ].map((line, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '7px 0', borderTop: i > 0 ? '1px solid rgba(34,197,94,0.08)' : 'none' }}>
+                <span style={{ color: GREEN, fontSize: 13, flexShrink: 0, marginTop: 1 }}>✓</span>
+                <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>{line}</p>
               </div>
             ))}
           </div>
@@ -455,75 +501,60 @@ export default function OnboardingFlow({ onClose }) {
             ))}
           </div>
 
-          {/* Upload nudge (if no resume uploaded yet) */}
-          {!resumeUrl && (
-            <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ width: '100%', padding: '14px', borderRadius: 12, border: '1.5px dashed rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.04)', cursor: 'pointer', fontFamily: dm, fontSize: 14, fontWeight: 600, color: GREEN, marginBottom: 20, minHeight: 'auto', transition: 'all 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.09)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.04)'}
-            >
-              {uploading ? '⏳ Uploading...' : '📄 Upload your resume to personalize this plan'}
-            </button>
-          )}
-          {resumeUrl && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 10, padding: '10px 14px', marginBottom: 20 }}>
-              <span>✅</span>
-              <p style={{ fontFamily: dm, fontSize: 13, color: GREEN, margin: 0, fontWeight: 600 }}>Resume uploaded — plan personalized!</p>
-              <button onClick={() => setResumeUrl('')} style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, marginLeft: 'auto', textDecoration: 'underline' }}>change</button>
-            </div>
-          )}
-
-          {/* Paywall */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.1), rgba(232,93,32,0.04))', border: '1.5px solid rgba(232,93,32,0.3)', borderRadius: 20, padding: '24px 22px' }}>
-            <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.02em' }}>Ready to unlock the full power of the Agent?</p>
-            <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '0 0 18px' }}>Everything you need to land interviews faster.</p>
+          {/* Pricing + CTA */}
+          <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.1), rgba(232,93,32,0.04))', border: '1.5px solid rgba(232,93,32,0.3)', borderRadius: 20, padding: '24px 22px', marginBottom: 12 }}>
+            <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 800, color: '#fff', margin: '0 0 6px', letterSpacing: '-0.02em' }}>Unlock Unlimited Resumes + Full Agent</p>
+            <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.45)', margin: '0 0 16px' }}>Everything you need to land interviews faster.</p>
 
             {[
               '✨ Unlimited resume versions & tailoring for any job',
               '📋 Full application tracker + smart reminders',
               '✉️ Personalized outreach + warm connection help',
             ].map((f, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0 }}>{f}</p>
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.8)', margin: 0 }}>{f}</p>
               </div>
             ))}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, margin: '18px 0' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, margin: '16px 0 18px' }}>
               {[
-                { price: '$9.99', period: '/week', label: 'Weekly' },
-                { price: '$19', period: '/30 days', label: 'Most Popular 🔥', hot: true },
-                { price: '$29', period: '/mo', label: 'Monthly' },
+                { price: '$9.99', period: '/week', label: 'Weekly', hot: false },
+                { price: '$19', period: '/30 days', label: '🔥 Most Popular', hot: true },
               ].map((plan, i) => (
                 <div key={i} onClick={saveAndAuth} style={{
                   background: plan.hot ? 'rgba(232,93,32,0.15)' : 'rgba(255,255,255,0.05)',
                   border: `1.5px solid ${plan.hot ? 'rgba(232,93,32,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                  borderRadius: 12, padding: '12px 8px', textAlign: 'center', cursor: 'pointer',
-                  transition: 'transform 0.15s',
+                  borderRadius: 12, padding: '14px 10px', textAlign: 'center', cursor: 'pointer', transition: 'transform 0.15s',
                 }}
                   onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                 >
-                  <p style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: plan.hot ? ORANGE : '#fff', margin: 0, lineHeight: 1 }}>{plan.price}</p>
-                  <p style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: '2px 0 4px' }}>{plan.period}</p>
-                  <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: plan.hot ? ORANGE : 'rgba(255,255,255,0.5)', margin: 0 }}>{plan.label}</p>
+                  <p style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: plan.hot ? ORANGE : '#fff', margin: 0, lineHeight: 1 }}>{plan.price}</p>
+                  <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '3px 0 4px' }}>{plan.period}</p>
+                  <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: plan.hot ? ORANGE : 'rgba(255,255,255,0.5)', margin: 0 }}>{plan.label}</p>
                 </div>
               ))}
             </div>
 
-            <button onClick={saveAndAuth} style={{ width: '100%', fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff', background: ORANGE, border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.4)', transition: 'all 0.2s', marginBottom: 12 }}
+            <button onClick={saveAndAuth} style={{ width: '100%', fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff', background: ORANGE, border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.4)', transition: 'all 0.2s', marginBottom: 10 }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(232,93,32,0.55)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.4)'; }}
             >
               Unlock Full Agent →
             </button>
 
-            <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', margin: 0 }}>
-              No credit card required for trial.{' '}
-              <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, textDecoration: 'underline' }}>Skip for now (limited access)</button>
-            </p>
+            <button onClick={saveAndAuth} style={{ width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s', marginBottom: 12 }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+            >
+              Use This Version &amp; Continue (limited free access)
+            </button>
+
+            <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.25)', textAlign: 'center', margin: 0 }}>No credit card required for trial. Cancel anytime.</p>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
-            <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
+          <div style={{ textAlign: 'center', marginTop: 12, marginBottom: 8 }}>
+            <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
           </div>
         </div>
       )}
