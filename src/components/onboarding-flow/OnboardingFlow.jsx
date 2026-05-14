@@ -105,8 +105,61 @@ export default function OnboardingFlow({ onClose }) {
         </div>
       )}
 
-      {/* Screens 2–5: Placeholder — coming soon */}
-      {screen > 1 && (
+      {/* Screen 2: Built by Experts */}
+      {screen === 2 && (
+        <div style={{ textAlign: 'center', maxWidth: 560, animation: 'fadeSlideIn 0.4s ease' }}>
+          <style>{`@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+
+          {/* Icon cluster */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 40 }}>
+            {[
+              { emoji: '🎓', label: 'Career Coach' },
+              { emoji: '💼', label: 'Recruiter' },
+              { emoji: '🏢', label: 'Hiring Manager' },
+            ].map((item) => (
+              <div key={item.label} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 16, padding: '20px 24px',
+              }}>
+                <span style={{ fontSize: 32 }}>{item.emoji}</span>
+                <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>{item.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <h1 style={{
+            fontFamily: satoshi, fontSize: 'clamp(30px, 6vw, 52px)',
+            fontWeight: 900, color: '#fff', lineHeight: 1.08,
+            letterSpacing: '-0.04em', margin: '0 0 20px',
+          }}>
+            Built by Hiring Experts
+          </h1>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)',
+            color: 'rgba(255,255,255,0.6)', lineHeight: 1.65,
+            margin: '0 auto 48px', maxWidth: 440,
+          }}>
+            Designed with career coaches and recruiters who know exactly what gets candidates hired.
+          </p>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => setScreen(1)} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}>
+              ← Back
+            </button>
+            <button onClick={goNext} style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff', background: '#22c55e', border: 'none', borderRadius: 14, padding: '16px 48px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(34,197,94,0.4)', transition: 'all 0.2s ease' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(34,197,94,0.55)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(34,197,94,0.4)'; }}
+            >
+              Continue →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Screens 3–5: Placeholder — coming soon */}
+      {screen > 2 && (
         <div style={{ textAlign: 'center', maxWidth: 540, animation: 'fadeSlideIn 0.4s ease' }}>
           <style>{`@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#22c55e', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>
@@ -124,7 +177,7 @@ export default function OnboardingFlow({ onClose }) {
             </button>
             {screen < 5 ? (
               <button onClick={goNext} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 800, color: '#fff', background: '#22c55e', border: 'none', borderRadius: 12, padding: '14px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 24px rgba(34,197,94,0.35)', transition: 'all 0.2s' }}>
-                Next →
+                Continue →
               </button>
             ) : (
               <button onClick={goToAuth} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 800, color: '#fff', background: '#22c55e', border: 'none', borderRadius: 12, padding: '14px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 6px 24px rgba(34,197,94,0.35)', transition: 'all 0.2s' }}>
