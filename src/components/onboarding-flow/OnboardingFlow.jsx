@@ -158,8 +158,53 @@ export default function OnboardingFlow({ onClose }) {
         </div>
       )}
 
-      {/* Screens 3–5: Placeholder — coming soon */}
-      {screen > 2 && (
+      {/* Screen 3: Answer Smart Questions */}
+      {screen === 3 && (
+        <div style={{ textAlign: 'center', maxWidth: 560, animation: 'fadeSlideIn 0.4s ease' }}>
+
+          {/* Icon */}
+          <div style={{
+            width: 80, height: 80, borderRadius: 24,
+            background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 36, margin: '0 auto 40px',
+          }}>
+            🧠
+          </div>
+
+          <h1 style={{
+            fontFamily: satoshi, fontSize: 'clamp(30px, 6vw, 52px)',
+            fontWeight: 900, color: '#fff', lineHeight: 1.08,
+            letterSpacing: '-0.04em', margin: '0 0 20px',
+          }}>
+            Answer Smart Questions
+          </h1>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 19px)',
+            color: 'rgba(255,255,255,0.6)', lineHeight: 1.65,
+            margin: '0 auto 48px', maxWidth: 460,
+          }}>
+            College Fast Forward will ask you questions so we can know you better. This helps us find the right jobs for you.
+          </p>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => setScreen(2)} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}>
+              ← Back
+            </button>
+            <button onClick={goNext}
+              style={{ fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff', background: '#22c55e', border: 'none', borderRadius: 14, padding: '16px 48px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(34,197,94,0.4)', transition: 'all 0.2s ease' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(34,197,94,0.55)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(34,197,94,0.4)'; }}
+            >
+              Continue →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Screens 4–5: Placeholder — coming soon */}
+      {screen > 3 && (
         <div style={{ textAlign: 'center', maxWidth: 540, animation: 'fadeSlideIn 0.4s ease' }}>
           <style>{`@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 700, color: '#22c55e', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>
