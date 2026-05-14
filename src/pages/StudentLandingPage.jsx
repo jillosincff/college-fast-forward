@@ -201,7 +201,7 @@ export default function StudentLandingPage({ onParentClick }) {
         {/* Faces row — human social proof above the headline */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center',
-          marginBottom: 28, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
+          marginBottom: 42, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
           position: 'relative', zIndex: 1,
         }}>
           <div style={{ display: 'flex' }}>
@@ -225,7 +225,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)',
-          borderRadius: 100, padding: '8px 20px', marginBottom: 36,
+          borderRadius: 100, padding: '8px 20px', marginBottom: 48,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
           position: 'relative', zIndex: 1,
         }}>
