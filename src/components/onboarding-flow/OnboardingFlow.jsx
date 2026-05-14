@@ -10,6 +10,7 @@ export default function OnboardingFlow({ onClose }) {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [locationQuery, setLocationQuery] = useState('');
   const [remoteOnly, setRemoteOnly] = useState(false);
+  const [collegeQuery, setCollegeQuery] = useState('');
 
   const goNext = () => {
     setScreen(s => s + 1);
@@ -33,6 +34,11 @@ export default function OnboardingFlow({ onClose }) {
       localStorage.setItem('cff_job_location', remoteOnly ? 'remote' : locationQuery.trim());
       localStorage.setItem('cff_remote_only', remoteOnly ? 'true' : 'false');
     } catch (e) {}
+    setScreen(8);
+  };
+
+  const submitCollege = () => {
+    try { localStorage.setItem('cff_college', collegeQuery.trim()); } catch (e) {}
     navigate('GatorAuth');
   };
 
@@ -62,7 +68,7 @@ export default function OnboardingFlow({ onClose }) {
 
       {/* Progress dots */}
       <div style={{ position: 'absolute', top: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8 }}>
-        {[1, 2, 3, 4, 5, 6, 7].map(i => (
+        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
           <div key={i} style={{
             width: i === screen ? 24 : 8, height: 8, borderRadius: 4,
             background: i === screen ? '#22c55e' : i < screen ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.15)',
@@ -428,6 +434,82 @@ export default function OnboardingFlow({ onClose }) {
               Continue →
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Screen 8: College */}
+      {screen === 8 && (
+        <div style={{ textAlign: 'center', maxWidth: 520, animation: 'fadeSlideIn 0.4s ease' }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: 20,
+            background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 32, margin: '0 auto 28px',
+          }}>🎓</div>
+
+          <h1 style={{
+            fontFamily: satoshi, fontSize: 'clamp(24px, 4vw, 40px)',
+            fontWeight: 900, color: '#fff', lineHeight: 1.1,
+            letterSpacing: '-0.04em', margin: '0 0 10px',
+          }}>
+            Where do (or did) you go to college?
+          </h1>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 15,
+            color: 'rgba(255,255,255,0.45)', margin: '0 auto 32px', maxWidth: 400,
+          }}>
+            This helps us find alumni and parents who can make warm intros on your behalf.
+          </p>
+
+          <div style={{ position: 'relative', marginBottom: 36 }}>
+            <span style={{
+              position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+              fontSize: 18, pointerEvents: 'none',
+            }}>🏛️</span>
+            <input
+              type="text"
+              placeholder="e.g. University of Florida, Penn State..."
+              value={collegeQuery}
+              onChange={e => setCollegeQuery(e.target.value)}
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                fontFamily: dmSans, fontSize: 16, fontWeight: 500,
+                color: '#fff',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: 14, padding: '16px 16px 16px 48px',
+                outline: 'none', transition: 'all 0.15s',
+              }}
+              onFocus={e => { e.target.style.borderColor = 'rgba(34,197,94,0.5)'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.18)'; }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => setScreen(7)} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto' }}>
+              ← Back
+            </button>
+            <button
+              onClick={submitCollege}
+              disabled={collegeQuery.trim().length === 0}
+              style={{
+                fontFamily: dmSans, fontSize: 16, fontWeight: 800,
+                color: '#fff',
+                background: collegeQuery.trim().length > 0 ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                border: 'none', borderRadius: 14, padding: '14px 40px',
+                cursor: collegeQuery.trim().length > 0 ? 'pointer' : 'default', minHeight: 'auto',
+                boxShadow: collegeQuery.trim().length > 0 ? '0 8px 32px rgba(34,197,94,0.4)' : 'none',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Let's Go →
+            </button>
+          </div>
+
+          <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 20 }}>
+            You can always update this later in your profile.
+          </p>
         </div>
       )}
 
