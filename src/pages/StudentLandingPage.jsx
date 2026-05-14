@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -120,6 +121,7 @@ function StoriesCarousel() {
 
 export default function StudentLandingPage({ onParentClick }) {
   const [mounted, setMounted] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -138,7 +140,7 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  const go = () => navigate('GatorAuth');
+  const go = () => setShowOnboarding(true);
 
   const parent = () => {
     if (onParentClick) { onParentClick(); return; }
@@ -174,6 +176,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
   return (
     <div style={{ background: '#06070d', fontFamily: dmSans, color: '#fff', overflowX: 'hidden', position: 'relative' }}>
+      {showOnboarding && <OnboardingFlow onClose={() => setShowOnboarding(false)} />}
       {/* Global film grain — sits over everything, non-interactive */}
       <style>{`
         @keyframes grainMove { 0%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)} 40%{transform:translate(2px,-2px)} 60%{transform:translate(-1px,2px)} 80%{transform:translate(1px,-1px)} 100%{transform:translate(0,0)} }
