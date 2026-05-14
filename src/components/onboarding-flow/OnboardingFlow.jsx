@@ -77,6 +77,7 @@ export default function OnboardingFlow({ onClose }) {
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
+  const [resumeData, setResumeData] = useState(null); // parsed resume from AI
   const [showPaywall, setShowPaywall] = useState(false);
   const fileRef = useRef();
 
@@ -104,9 +105,66 @@ export default function OnboardingFlow({ onClose }) {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setResumeUrl(file_url);
-      setScreen(8); // auto-advance to wow moment
+
+      // Parse the resume content via AI so we can display Before/After accurately
+      const parsed = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a resume parser. Extract the EXACT content from this resume — do not invent anything. Return a JSON object with:
+- name (string)
+- email (string)
+- phone (string)
+- linkedin (string, or "")
+- location (string, or "")
+- summary (string, or "")
+- education: array of { school, degree, dates, gpa, honors }
+- experience: array of { title, company, location, dates, bullets: string[] }
+- skills: string[]
+- activities: array of { name, role, dates }
+
+IMPORTANT: Only use content that is literally on the resume. Do not add, invent, or embellish anything.`,
+        file_urls: [file_url],
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string' },
+            phone: { type: 'string' },
+            linkedin: { type: 'string' },
+            location: { type: 'string' },
+            summary: { type: 'string' },
+            education: { type: 'array', items: { type: 'object', properties: { school: { type: 'string' }, degree: { type: 'string' }, dates: { type: 'string' }, gpa: { type: 'string' }, honors: { type: 'string' } } } },
+            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, location: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } },
+            skills: { type: 'array', items: { type: 'string' } },
+            activities: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' }, dates: { type: 'string' } } } },
+          }
+        }
+      });
+
+      // Now generate optimized bullets — same facts, stronger language
+      const optimized = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are an expert resume writer. Given these resume experience entries, rewrite ONLY the bullet points to be stronger, more results-oriented, and ATS-friendly. 
+
+CRITICAL RULES:
+- Do NOT change any company names, job titles, dates, or locations
+- Do NOT invent metrics or facts that aren't implied by the original
+- Only improve the language, action verbs, and structure of each bullet
+- Return JSON with the same experience array, each entry having improved "bullets"
+
+Original experience:
+${JSON.stringify(parsed.experience)}`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, location: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } }
+          }
+        }
+      });
+
+      setResumeData({ original: parsed, optimized: { ...parsed, experience: optimized.experience } });
+      setScreen(8);
     } catch (err) {
       console.error(err);
+      // Still advance even if AI fails
+      setScreen(8);
     }
     setUploading(false);
   };
@@ -401,172 +459,175 @@ export default function OnboardingFlow({ onClose }) {
           </div>
 
           {/* Before / After side by side */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28, alignItems: 'start' }}>
-
-            {/* BEFORE */}
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
-                <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
+          {(() => {
+            const orig = resumeData?.original;
+            const opt = resumeData?.optimized;
+            const secDivider = (label) => (
+              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                <span>{label}</span>
+                <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
               </div>
-              <div style={{ borderRadius: 12, overflow: 'hidden', height: 620, background: '#fff' }}>
-                {resumeUrl ? (
-                  <iframe
-                    src={resumeUrl}
-                    title="Your Resume"
-                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-                  />
-                ) : (
-                  /* Realistic plain-text mock of an "unformatted" resume */
-                  <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}>
-                    <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>Jordan Martinez</p>
-                    <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>jordan.martinez@gmail.com | (786) 555-0192 | linkedin.com/in/jordanm | Miami, FL</p>
-                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EDUCATION</p>
-                    <p style={{ margin: '0 0 2px', fontWeight: 600 }}>University of Florida — B.S. Marketing</p>
-                    <p style={{ margin: '0 0 10px', color: '#555', fontSize: 11 }}>Aug 2021 – May 2025 | GPA: 3.6</p>
-                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EXPERIENCE</p>
-                    <p style={{ margin: '0 0 2px', fontWeight: 600 }}>Marketing Intern — SunTrust Brands, Miami FL</p>
-                    <p style={{ margin: '0 0 4px', color: '#555', fontSize: 11 }}>May 2023 – Aug 2023</p>
-                    <p style={{ margin: '0 0 2px' }}>- Helped with social media posts and scheduling content</p>
-                    <p style={{ margin: '0 0 2px' }}>- Assisted team with email campaigns</p>
-                    <p style={{ margin: '0 0 2px' }}>- Worked on presentations for manager</p>
-                    <p style={{ margin: '0 0 2px' }}>- Did various tasks to support the marketing department</p>
-                    <p style={{ margin: '12px 0 2px', fontWeight: 600 }}>Campus Ambassador — Red Bull</p>
-                    <p style={{ margin: '0 0 4px', color: '#555', fontSize: 11 }}>Sep 2022 – May 2023</p>
-                    <p style={{ margin: '0 0 2px' }}>- Promoted brand on campus</p>
-                    <p style={{ margin: '0 0 2px' }}>- Organized events and distributed product</p>
-                    <p style={{ margin: '0 0 2px' }}>- Managed a small team of volunteers</p>
-                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>SKILLS</p>
-                    <p style={{ margin: '0 0 10px' }}>Social Media, Canva, Excel, Google Analytics, Email Marketing, Public Speaking</p>
-                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>ACTIVITIES</p>
-                    <p style={{ margin: '0 0 2px' }}>American Marketing Association — VP of Events</p>
-                    <p style={{ margin: '0 0 2px' }}>UF Honors Program</p>
+            );
+            return (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28, alignItems: 'start' }}>
+
+                {/* BEFORE */}
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
+                    <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* AFTER — same content, dramatically better format */}
-            <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 24, padding: '20px', position: 'relative' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent Optimized Version</p>
-                <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 12px' }}>OPTIMIZED</span>
-              </div>
-              <div style={{ background: '#fff', borderRadius: 12, height: 620, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
-                {/* Header stripe */}
-                <div style={{ background: '#0f172a', padding: '20px 22px 16px' }}>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>Jordan Martinez</div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>jordan.martinez@gmail.com · (786) 555-0192 · linkedin.com/in/jordanm · Miami, FL</div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {['Marketing', 'Brand Strategy', 'Digital Campaigns'].map(tag => (
-                      <span key={tag} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>{tag}</span>
-                    ))}
+                  <div style={{ borderRadius: 12, overflow: 'hidden', height: 620, background: '#fff' }}>
+                    {resumeUrl ? (
+                      <iframe src={resumeUrl} title="Your Resume" style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} />
+                    ) : orig ? (
+                      /* Render parsed original in plain text style */
+                      <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}>
+                        <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
+                        <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, orig.linkedin, orig.location].filter(Boolean).join(' | ')}</p>
+                        {orig.education?.length > 0 && <>
+                          <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EDUCATION</p>
+                          {orig.education.map((e, i) => <div key={i}>
+                            <p style={{ margin: '0 0 2px', fontWeight: 600 }}>{e.school} — {e.degree}</p>
+                            <p style={{ margin: '0 0 8px', color: '#555', fontSize: 11 }}>{e.dates}{e.gpa ? ` | GPA: ${e.gpa}` : ''}{e.honors ? ` | ${e.honors}` : ''}</p>
+                          </div>)}
+                        </>}
+                        {orig.experience?.length > 0 && <>
+                          <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EXPERIENCE</p>
+                          {orig.experience.map((ex, i) => <div key={i} style={{ marginBottom: 10 }}>
+                            <p style={{ margin: '0 0 2px', fontWeight: 600 }}>{ex.title} — {ex.company}{ex.location ? `, ${ex.location}` : ''}</p>
+                            <p style={{ margin: '0 0 4px', color: '#555', fontSize: 11 }}>{ex.dates}</p>
+                            {ex.bullets?.map((b, j) => <p key={j} style={{ margin: '0 0 2px' }}>- {b}</p>)}
+                          </div>)}
+                        </>}
+                        {orig.skills?.length > 0 && <>
+                          <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>SKILLS</p>
+                          <p style={{ margin: '0 0 10px' }}>{orig.skills.join(', ')}</p>
+                        </>}
+                        {orig.activities?.length > 0 && <>
+                          <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>ACTIVITIES</p>
+                          {orig.activities.map((a, i) => <p key={i} style={{ margin: '0 0 2px' }}>{a.name}{a.role ? ` — ${a.role}` : ''}{a.dates ? ` (${a.dates})` : ''}</p>)}
+                        </>}
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontFamily: dm, fontSize: 13 }}>Upload a resume to see the before view</div>
+                    )}
                   </div>
                 </div>
 
-                <div style={{ padding: '18px 22px' }}>
-                  {/* Summary */}
-                  <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                      <span>Professional Summary</span>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                    </div>
-                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: '#374151', margin: 0, lineHeight: 1.7 }}>
-                      Results-driven marketing student at the University of Florida with hands-on experience growing brand presence and executing multi-channel campaigns. Proven ability to drive measurable engagement and lead cross-functional initiatives — seeking a full-time marketing role in Miami.
-                    </p>
+                {/* AFTER — same facts, dramatically better format */}
+                <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 24, padding: '20px', position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent Optimized Version</p>
+                    <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 12px' }}>OPTIMIZED</span>
                   </div>
-
-                  {/* Education */}
-                  <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                      <span>Education</span>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>University of Florida</div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>Aug 2021 – May 2025</div>
-                    </div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#475569', marginTop: 1 }}>B.S. Marketing · GPA: 3.6 · Honors Program</div>
-                  </div>
-
-                  {/* Experience */}
-                  <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                      <span>Experience</span>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                    </div>
-
-                    {/* Job 1 */}
-                    <div style={{ marginBottom: 14 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>Marketing Intern</div>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>May – Aug 2023</div>
-                      </div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>SunTrust Brands · Miami, FL</div>
-                      {[
-                        'Managed social media content calendar across 4 platforms, increasing average post engagement by 28%',
-                        'Executed 3 end-to-end email campaigns reaching 12,000+ subscribers with a 22% open rate',
-                        'Produced weekly performance decks for senior marketing leadership, synthesizing data from Google Analytics',
-                      ].map((b, i) => (
-                        <div key={i} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
-                          <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
-                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
+                  <div style={{ background: '#fff', borderRadius: 12, height: 620, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
+                    {opt ? (
+                      <>
+                        {/* Dark header with real name */}
+                        <div style={{ background: '#0f172a', padding: '20px 22px 16px' }}>
+                          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{opt.name}</div>
+                          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>
+                            {[opt.email, opt.phone, opt.linkedin, opt.location].filter(Boolean).join(' · ')}
+                          </div>
+                          {opt.skills?.length > 0 && (
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              {opt.skills.slice(0, 3).map(tag => (
+                                <span key={tag} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>{tag}</span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      ))}
-                    </div>
 
-                    {/* Job 2 */}
-                    <div style={{ marginBottom: 6 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>Campus Brand Ambassador</div>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>Sep 2022 – May 2023</div>
-                      </div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>Red Bull · University of Florida</div>
-                      {[
-                        'Led a team of 6 campus volunteers to execute 10+ brand activation events, reaching 2,000+ students',
-                        'Grew local brand awareness by coordinating product sampling and guerrilla marketing campaigns on campus',
-                      ].map((b, i) => (
-                        <div key={i} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
-                          <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
-                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
+                        <div style={{ padding: '18px 22px' }}>
+                          {/* Summary */}
+                          {opt.summary && (
+                            <div style={{ marginBottom: 18 }}>
+                              {secDivider('Professional Summary')}
+                              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: '#374151', margin: 0, lineHeight: 1.7 }}>{opt.summary}</p>
+                            </div>
+                          )}
+
+                          {/* Education */}
+                          {opt.education?.length > 0 && (
+                            <div style={{ marginBottom: 18 }}>
+                              {secDivider('Education')}
+                              {opt.education.map((e, i) => (
+                                <div key={i} style={{ marginBottom: 6 }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{e.school}</div>
+                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{e.dates}</div>
+                                  </div>
+                                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#475569', marginTop: 1 }}>
+                                    {[e.degree, e.gpa ? `GPA: ${e.gpa}` : null, e.honors].filter(Boolean).join(' · ')}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Experience */}
+                          {opt.experience?.length > 0 && (
+                            <div style={{ marginBottom: 18 }}>
+                              {secDivider('Experience')}
+                              {opt.experience.map((ex, i) => (
+                                <div key={i} style={{ marginBottom: 14 }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{ex.title}</div>
+                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{ex.dates}</div>
+                                  </div>
+                                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>
+                                    {ex.company}{ex.location ? ` · ${ex.location}` : ''}
+                                  </div>
+                                  {ex.bullets?.map((b, j) => (
+                                    <div key={j} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
+                                      <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
+                                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Skills */}
+                          {opt.skills?.length > 0 && (
+                            <div style={{ marginBottom: 14 }}>
+                              {secDivider('Skills')}
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                {opt.skills.map(s => (
+                                  <span key={s} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 9px' }}>{s}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Activities */}
+                          {opt.activities?.length > 0 && (
+                            <div>
+                              {secDivider('Leadership & Activities')}
+                              {opt.activities.map((a, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#0f172a' }}>{a.name}{a.role ? ` — ${a.role}` : ''}</div>
+                                  {a.dates && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{a.dates}</div>}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Skills */}
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                      <span>Skills</span>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                    </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {['Google Analytics', 'Canva', 'Email Marketing', 'Social Media Strategy', 'Excel', 'Public Speaking', 'Campaign Management'].map(s => (
-                        <span key={s} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 9px' }}>{s}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Activities */}
-                  <div>
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                      <span>Leadership & Activities</span>
-                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#0f172a' }}>VP of Events — American Marketing Association</div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>2023–2024</div>
-                    </div>
+                      </>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
+                        <div style={{ width: 36, height: 36, border: '3px solid #d1fae5', borderTop: '3px solid #16a34a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>Optimizing your resume...</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Agent Feedback */}
           <div style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 24, padding: '24px 28px', marginBottom: 28 }}>
