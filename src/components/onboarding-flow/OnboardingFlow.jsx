@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
+import { INDUSTRIES } from '@/components/onboarding/onboardingOptions';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const satoshi = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
 export default function OnboardingFlow({ onClose }) {
   const [screen, setScreen] = useState(1);
-  const [jobIntent, setJobIntent] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const goNext = () => {
     setScreen(s => s + 1);
@@ -14,9 +15,14 @@ export default function OnboardingFlow({ onClose }) {
 
   const goToAuth = () => setScreen(6);
 
-  const selectIntent = (intent) => {
-    setJobIntent(intent);
-    try { localStorage.setItem('cff_job_intent', intent); } catch (e) {}
+  const toggleCategory = (id) => {
+    setSelectedCategories(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : prev.length < 3 ? [...prev, id] : prev
+    );
+  };
+
+  const submitCategories = () => {
+    try { localStorage.setItem('cff_job_categories', JSON.stringify(selectedCategories)); } catch (e) {}
     navigate('GatorAuth');
   };
 
@@ -251,58 +257,73 @@ export default function OnboardingFlow({ onClose }) {
         </div>
       )}
 
-      {/* Screen 6: Intent Selection (shown after "Get Started" on screen 5) */}
+      {/* Screen 6: Job Category Selector */}
       {screen === 6 && (
-        <div style={{ textAlign: 'center', maxWidth: 520, animation: 'fadeSlideIn 0.4s ease' }}>
+        <div style={{ textAlign: 'center', maxWidth: 600, animation: 'fadeSlideIn 0.4s ease' }}>
 
           <h1 style={{
-            fontFamily: satoshi, fontSize: 'clamp(28px, 5vw, 46px)',
+            fontFamily: satoshi, fontSize: 'clamp(24px, 4vw, 40px)',
             fontWeight: 900, color: '#fff', lineHeight: 1.1,
-            letterSpacing: '-0.04em', margin: '0 0 12px',
+            letterSpacing: '-0.04em', margin: '0 0 10px',
           }}>
-            Hi there! 👋
+            What kind of job are you looking for?
           </h1>
 
           <p style={{
-            fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 20px)',
-            color: 'rgba(255,255,255,0.65)', lineHeight: 1.55,
-            margin: '0 auto 40px', maxWidth: 420,
+            fontFamily: dmSans, fontSize: 15,
+            color: 'rgba(255,255,255,0.45)', margin: '0 auto 32px',
           }}>
-            What are you looking for?
+            Select up to 3 categories that interest you.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 400, margin: '0 auto' }}>
-            {[
-              { label: '🎓  An internship', value: 'internship' },
-              { label: '💼  A full-time job', value: 'full_time' },
-              { label: '👀  Neither, just browsing', value: 'browsing' },
-            ].map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => selectIntent(opt.value)}
-                style={{
-                  fontFamily: dmSans, fontSize: 17, fontWeight: 700,
-                  color: '#fff', textAlign: 'left',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.14)',
-                  borderRadius: 16, padding: '18px 24px',
-                  cursor: 'pointer', minHeight: 'auto',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.12)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; }}
-              >
-                {opt.label}
-              </button>
-            ))}
+          <div style={{
+            display: 'flex', flexWrap: 'wrap', gap: 10,
+            justifyContent: 'center', marginBottom: 36,
+          }}>
+            {INDUSTRIES.map((ind) => {
+              const selected = selectedCategories.includes(ind.id);
+              const maxed = selectedCategories.length >= 3 && !selected;
+              return (
+                <button
+                  key={ind.id}
+                  onClick={() => toggleCategory(ind.id)}
+                  disabled={maxed}
+                  style={{
+                    fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+                    color: selected ? '#fff' : maxed ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.75)',
+                    background: selected ? 'rgba(34,197,94,0.18)' : 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${selected ? 'rgba(34,197,94,0.55)' : 'rgba(255,255,255,0.12)'}`,
+                    borderRadius: 12, padding: '12px 18px',
+                    cursor: maxed ? 'default' : 'pointer', minHeight: 'auto',
+                    transition: 'all 0.15s ease',
+                    opacity: maxed ? 0.45 : 1,
+                  }}
+                >
+                  {ind.emoji} {ind.label}
+                </button>
+              );
+            })}
           </div>
 
-          <button onClick={() => setScreen(5)} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.35)', background: 'transparent', border: 'none', cursor: 'pointer', minHeight: 'auto', marginTop: 28, transition: 'color 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
-          >
-            ← Back
-          </button>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => setScreen(5)} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto' }}>
+              ← Back
+            </button>
+            <button
+              onClick={submitCategories}
+              disabled={selectedCategories.length === 0}
+              style={{
+                fontFamily: dmSans, fontSize: 16, fontWeight: 800,
+                color: '#fff', background: selectedCategories.length > 0 ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                border: 'none', borderRadius: 14, padding: '14px 40px',
+                cursor: selectedCategories.length > 0 ? 'pointer' : 'default', minHeight: 'auto',
+                boxShadow: selectedCategories.length > 0 ? '0 8px 32px rgba(34,197,94,0.4)' : 'none',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Continue → {selectedCategories.length > 0 ? `(${selectedCategories.length} selected)` : ''}
+            </button>
+          </div>
         </div>
       )}
 
