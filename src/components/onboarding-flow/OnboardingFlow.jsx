@@ -8,6 +8,8 @@ const satoshi = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 export default function OnboardingFlow({ onClose }) {
   const [screen, setScreen] = useState(1);
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [locationQuery, setLocationQuery] = useState('');
+  const [remoteOnly, setRemoteOnly] = useState(false);
 
   const goNext = () => {
     setScreen(s => s + 1);
@@ -23,6 +25,14 @@ export default function OnboardingFlow({ onClose }) {
 
   const submitCategories = () => {
     try { localStorage.setItem('cff_job_categories', JSON.stringify(selectedCategories)); } catch (e) {}
+    setScreen(7);
+  };
+
+  const submitLocation = () => {
+    try {
+      localStorage.setItem('cff_job_location', remoteOnly ? 'remote' : locationQuery.trim());
+      localStorage.setItem('cff_remote_only', remoteOnly ? 'true' : 'false');
+    } catch (e) {}
     navigate('GatorAuth');
   };
 
@@ -52,7 +62,7 @@ export default function OnboardingFlow({ onClose }) {
 
       {/* Progress dots */}
       <div style={{ position: 'absolute', top: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8 }}>
-        {[1, 2, 3, 4, 5, 6].map(i => (
+        {[1, 2, 3, 4, 5, 6, 7].map(i => (
           <div key={i} style={{
             width: i === screen ? 24 : 8, height: 8, borderRadius: 4,
             background: i === screen ? '#22c55e' : i < screen ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.15)',
@@ -322,6 +332,100 @@ export default function OnboardingFlow({ onClose }) {
               }}
             >
               Continue → {selectedCategories.length > 0 ? `(${selectedCategories.length} selected)` : ''}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Screen 7: Location */}
+      {screen === 7 && (
+        <div style={{ textAlign: 'center', maxWidth: 520, animation: 'fadeSlideIn 0.4s ease' }}>
+          <h1 style={{
+            fontFamily: satoshi, fontSize: 'clamp(24px, 4vw, 40px)',
+            fontWeight: 900, color: '#fff', lineHeight: 1.1,
+            letterSpacing: '-0.04em', margin: '0 0 10px',
+          }}>
+            Where do you want to work?
+          </h1>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 15,
+            color: 'rgba(255,255,255,0.45)', margin: '0 auto 32px',
+          }}>
+            Search for a city or area so we can find jobs nearby.
+          </p>
+
+          {/* Search input */}
+          <div style={{ position: 'relative', marginBottom: 16 }}>
+            <span style={{
+              position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+              fontSize: 18, pointerEvents: 'none',
+            }}>📍</span>
+            <input
+              type="text"
+              placeholder="e.g. New York, Austin, Chicago..."
+              value={remoteOnly ? '' : locationQuery}
+              onChange={e => setLocationQuery(e.target.value)}
+              disabled={remoteOnly}
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                fontFamily: dmSans, fontSize: 16, fontWeight: 500,
+                color: remoteOnly ? 'rgba(255,255,255,0.25)' : '#fff',
+                background: remoteOnly ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.06)',
+                border: `1px solid ${remoteOnly ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.18)'}`,
+                borderRadius: 14, padding: '16px 16px 16px 48px',
+                outline: 'none', transition: 'all 0.15s',
+              }}
+              onFocus={e => { if (!remoteOnly) e.target.style.borderColor = 'rgba(34,197,94,0.5)'; }}
+              onBlur={e => { e.target.style.borderColor = remoteOnly ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.18)'; }}
+            />
+          </div>
+
+          {/* Remote only toggle */}
+          <button
+            onClick={() => { setRemoteOnly(r => !r); setLocationQuery(''); }}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              display: 'flex', alignItems: 'center', gap: 14,
+              fontFamily: dmSans, fontSize: 15, fontWeight: 600,
+              color: remoteOnly ? '#fff' : 'rgba(255,255,255,0.65)',
+              background: remoteOnly ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${remoteOnly ? 'rgba(34,197,94,0.45)' : 'rgba(255,255,255,0.12)'}`,
+              borderRadius: 14, padding: '16px 20px',
+              cursor: 'pointer', minHeight: 'auto',
+              transition: 'all 0.2s ease', marginBottom: 36,
+            }}
+          >
+            <span style={{
+              width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+              background: remoteOnly ? '#22c55e' : 'rgba(255,255,255,0.1)',
+              border: `2px solid ${remoteOnly ? '#22c55e' : 'rgba(255,255,255,0.25)'}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, transition: 'all 0.15s',
+            }}>
+              {remoteOnly ? '✓' : ''}
+            </span>
+            🌐 I only want remote jobs
+          </button>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button onClick={() => setScreen(6)} style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)', background: 'transparent', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px 28px', cursor: 'pointer', minHeight: 'auto' }}>
+              ← Back
+            </button>
+            <button
+              onClick={submitLocation}
+              disabled={!remoteOnly && locationQuery.trim().length === 0}
+              style={{
+                fontFamily: dmSans, fontSize: 16, fontWeight: 800,
+                color: '#fff',
+                background: (remoteOnly || locationQuery.trim().length > 0) ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                border: 'none', borderRadius: 14, padding: '14px 40px',
+                cursor: (remoteOnly || locationQuery.trim().length > 0) ? 'pointer' : 'default', minHeight: 'auto',
+                boxShadow: (remoteOnly || locationQuery.trim().length > 0) ? '0 8px 32px rgba(34,197,94,0.4)' : 'none',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Continue →
             </button>
           </div>
         </div>
