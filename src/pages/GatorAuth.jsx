@@ -194,9 +194,13 @@ export default function GatorAuth() {
       const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
       const safariType = sessionStorage.getItem('cff_onboarding_type');
       const role = pendingRole || safariType;
+      const hasOnboardingQuestions = localStorage.getItem('cff_onboarding_questions_pending') === 'true';
 
       if (role === 'parent') {
         navigate('/ParentOnboarding');
+      } else if (hasOnboardingQuestions) {
+        // Coming from the landing page onboarding flow — continue with questions
+        navigate('/OnboardingQuestions');
       } else {
         // Send new users to the student welcome/onboarding flow
         navigate('/StudentWelcome');

@@ -21,6 +21,7 @@ export default function OnboardingFlow({ onClose }) {
     try {
       localStorage.setItem('pending_invite_role', 'student');
       sessionStorage.setItem('cff_onboarding_type', 'student');
+      localStorage.setItem('cff_onboarding_questions_pending', 'true');
     } catch (e) {}
     base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };

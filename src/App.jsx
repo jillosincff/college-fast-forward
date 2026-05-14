@@ -39,6 +39,7 @@ import ParentLandingPage from '@/pages/ParentLandingPage';
 import ParentHome from '@/pages/ParentHome';
 import StudentLandingPage from '@/pages/StudentLandingPage';
 import RegistrationSuccess from '@/pages/RegistrationSuccess';
+import OnboardingQuestions from '@/pages/OnboardingQuestions';
 
 import PostJoinUpsell from '@/pages/PostJoinUpsell';
 import Profile from '@/pages/Profile';
@@ -109,6 +110,7 @@ const AuthenticatedApp = () => {
           <Route path="/ParentDashboard" element={<Navigate to="/ParentHome" replace />} />
           <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
           <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
+          <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />
           <Route path="/GatorAuth" element={<GatorAuth />} />
           <Route path="/GatorWelcome" element={<StudentWelcome />} />
           <Route path="/StudentWelcome" element={<StudentWelcome />} />
