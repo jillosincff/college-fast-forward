@@ -103,6 +103,7 @@ export default function OnboardingFlow({ onClose }) {
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setResumeUrl(file_url);
+      setScreen(8); // auto-advance to wow moment
     } catch (err) {
       console.error(err);
     }
@@ -154,6 +155,7 @@ export default function OnboardingFlow({ onClose }) {
     <div style={shell}>
       <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         input::placeholder { color: rgba(255,255,255,0.3); }
       `}</style>
 
@@ -333,45 +335,57 @@ export default function OnboardingFlow({ onClose }) {
       {/* ── SCREEN 7: Resume Upload ── */}
       {screen === 7 && (
         <div style={{ ...card, maxWidth: 520 }}>
-          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={async (e) => { await handleFileUpload(e); if (e.target.files?.[0]) next(); }} style={{ display: 'none' }} />
+          <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
-          <div style={{ width: 72, height: 72, borderRadius: 22, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 28px' }}>📄</div>
-          <h1 style={h1}>Upload your resume</h1>
-          <p style={sub}>The Agent will instantly show you a stronger, modern version — and build your personalized plan.</p>
+          <div style={{ width: 72, height: 72, borderRadius: 22, background: uploading ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 28px', transition: 'all 0.3s' }}>
+            {uploading ? '⏳' : '📄'}
+          </div>
+          <h1 style={h1}>{uploading ? 'Analyzing your resume...' : 'Upload your resume'}</h1>
+          <p style={sub}>{uploading ? 'The Agent is creating your upgraded version. This takes just a moment.' : 'The Agent will instantly show you a stronger, modern version — and build your personalized plan.'}</p>
 
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            style={{
-              width: '100%', padding: '28px 24px', borderRadius: 20,
-              border: '2px dashed rgba(34,197,94,0.35)',
-              background: uploading ? 'rgba(34,197,94,0.08)' : 'rgba(34,197,94,0.04)',
-              cursor: uploading ? 'wait' : 'pointer',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-              transition: 'all 0.2s', minHeight: 'auto', marginBottom: 20,
-            }}
-            onMouseEnter={e => { if (!uploading) { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; e.currentTarget.style.background = 'rgba(34,197,94,0.1)'; } }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.35)'; e.currentTarget.style.background = uploading ? 'rgba(34,197,94,0.08)' : 'rgba(34,197,94,0.04)'; }}
-          >
-            <span style={{ fontSize: 32 }}>{uploading ? '⏳' : '⬆️'}</span>
-            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 700, color: GREEN, margin: 0 }}>
-              {uploading ? 'Analyzing your resume...' : 'Upload PDF or Word'}
-            </p>
-            <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0 }}>We'll create your optimized version instantly</p>
-          </button>
-
-          <div style={{ textAlign: 'center' }}>
-            <button onClick={next} style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, textDecoration: 'underline' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+          {!uploading && (
+            <button
+              onClick={() => fileRef.current?.click()}
+              style={{
+                width: '100%', padding: '32px 24px', borderRadius: 20,
+                border: '2px dashed rgba(34,197,94,0.4)',
+                background: 'rgba(34,197,94,0.05)',
+                cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+                transition: 'all 0.2s', minHeight: 'auto', marginBottom: 20,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.7)'; e.currentTarget.style.background = 'rgba(34,197,94,0.12)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; e.currentTarget.style.background = 'rgba(34,197,94,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}
             >
-              Skip for now — I'll upload later
+              <span style={{ fontSize: 40 }}>⬆️</span>
+              <p style={{ fontFamily: dm, fontSize: 17, fontWeight: 700, color: GREEN, margin: 0 }}>Upload PDF or Word</p>
+              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>We'll create your optimized version instantly</p>
             </button>
-          </div>
+          )}
 
-          <div style={{ textAlign: 'center', marginTop: 20 }}>
-            <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
-          </div>
+          {uploading && (
+            <div style={{ width: '100%', padding: '32px 24px', borderRadius: 20, border: '2px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+              <div style={{ width: 40, height: 40, border: '3px solid rgba(34,197,94,0.2)', borderTop: `3px solid ${GREEN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              <p style={{ fontFamily: dm, fontSize: 15, color: GREEN, margin: 0, fontWeight: 600 }}>Building your optimized resume...</p>
+              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>Strengthening bullets · Adding ATS keywords · Modernizing layout</p>
+            </div>
+          )}
+
+          {!uploading && (
+            <>
+              <div style={{ textAlign: 'center' }}>
+                <button onClick={next} style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, textDecoration: 'underline' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                >
+                  Skip for now — I'll upload later
+                </button>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: 20 }}>
+                <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
+              </div>
+            </>
+          )}
         </div>
       )}
 
