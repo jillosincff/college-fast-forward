@@ -224,7 +224,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.2)',
-          borderRadius: 100, padding: '7px 18px', marginBottom: 36,
+          borderRadius: 100, padding: '8px 24px', marginBottom: 36,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
           <span style={{ fontSize: 13 }}>⚡</span>
@@ -260,16 +260,25 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(16px, 1.9vw, 19px)',
+          fontFamily: dmSans, fontSize: 'clamp(15px, 1.75vw, 18px)',
           fontWeight: 400, color: 'rgba(255,255,255,0.65)',
-          lineHeight: 1.65, maxWidth: 500, margin: '0 auto 48px',
+          lineHeight: 1.65, maxWidth: 640, margin: '0 auto 40px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
         }}>
           Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed, and get hired.
         </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 24, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.3s' }}>
-          {ctaBtn('Start Free')}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 8, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s' }}>
+          <button onClick={go} style={{
+            fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff',
+            background: '#E85D20', border: 'none',
+            borderRadius: 14, padding: '18px 44px',
+            cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease',
+            boxShadow: '0 8px 32px rgba(232,93,32,0.5)',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.65)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.5)'; }}
+          >Escape the Black Hole →</button>
           {ctaBtn('Watch 45-second demo →', false)}
         </div>
 
