@@ -252,10 +252,10 @@ export default function StudentWelcome() {
         <ProgressBar n={3} />
         <StepLabel n={3} />
         <h1 style={S.h1}>Quick info to personalize your workspace</h1>
-        <p style={S.sub}>All optional — skip any field you prefer.</p>
+        <p style={S.sub}>This helps us connect you with alumni and parents for warm intros.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label style={S.label}>School</label>
+            <label style={S.label}>School <span style={{ color: '#E85D20' }}>*</span></label>
             <input style={S.input} placeholder="e.g. University of Florida" value={school} onChange={e => setSchool(e.target.value)}
               onFocus={e => e.currentTarget.style.borderColor='#E85D20'} onBlur={e => e.currentTarget.style.borderColor='rgba(255,255,255,0.09)'} />
           </div>
@@ -274,7 +274,7 @@ export default function StudentWelcome() {
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 28 }}>
           <button onClick={() => setStep(2)} style={S.btnBack}>←</button>
-          <button onClick={finish} disabled={saving} style={{ ...S.btnPrimary, marginTop: 0, flex: 1, opacity: saving ? 0.6 : 1 }}>
+          <button onClick={finish} disabled={saving || !school.trim()} style={{ ...S.btnPrimary, marginTop: 0, flex: 1, opacity: (saving || !school.trim()) ? 0.4 : 1 }}>
             {saving ? 'Setting up...' : 'Build My Workspace →'}
           </button>
         </div>
