@@ -193,7 +193,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.2)',
-          borderRadius: 100, padding: '9px 28px', marginBottom: 36,
+          borderRadius: 100, padding: '9px 36px', marginBottom: 36,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
           position: 'relative', zIndex: 1,
         }}>
@@ -205,8 +205,8 @@ export default function StudentLandingPage({ onParentClick }) {
 
         <h1 style={{
           fontFamily: satoshi, fontSize: 'clamp(52px, 9vw, 108px)',
-          fontWeight: 900, color: '#fff', lineHeight: 0.95, letterSpacing: '-0.05em',
-          margin: '0 0 0px', maxWidth: 900,
+          fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.05em',
+          margin: '0 0 8px', maxWidth: 900,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)',
           transition: 'all 0.7s ease 0.1s', position: 'relative', zIndex: 1,
         }}>
@@ -217,8 +217,9 @@ export default function StudentLandingPage({ onParentClick }) {
           fontWeight: 900,
           fontSize: 'clamp(68px, 12vw, 148px)',
           letterSpacing: '-0.06em',
-          lineHeight: 1.0,
-          margin: '4px 0 44px',
+          lineHeight: 1.05,
+          margin: '0 0 44px',
+          maxWidth: 760,
           background: 'linear-gradient(90deg, #22d3ee 0%, #67e8f9 60%, #a5f3fc 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
@@ -232,12 +233,13 @@ export default function StudentLandingPage({ onParentClick }) {
 
         <p style={{
           fontFamily: dmSans, fontSize: 'clamp(15px, 1.75vw, 18px)',
-          fontWeight: 400, color: 'rgba(255,255,255,0.65)',
-          lineHeight: 1.65, maxWidth: 680, margin: '0 auto 40px',
+          fontWeight: 500, color: 'rgba(255,255,255,0.7)',
+          lineHeight: 1.65, maxWidth: 600, margin: '0 auto 40px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
           position: 'relative', zIndex: 1,
         }}>
-          Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed, and get hired.
+          Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed,
+          and get hired.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 8, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative', zIndex: 1 }}>
