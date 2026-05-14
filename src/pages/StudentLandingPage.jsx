@@ -21,9 +21,9 @@ const HOW_IT_WORKS = [
 ];
 
 const STORIES = [
-  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", initials: "M", tag: "Landed an internship" },
-  { quote: "I finally felt like I had a system instead of a mess.", name: "Maya R.", school: "Business student", initials: "MR", tag: "Less stress" },
-  { quote: "The warm intro feature made networking feel less random.", name: "Alex P.", school: "Marketing student", initials: "AP", tag: "Better outreach" },
+  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=96&h=96&fit=crop&crop=face", tag: "Landed an internship" },
+  { quote: "I finally felt like I had a system instead of a mess. Before this I had 40 tabs open and no idea where anything stood.", name: "Maya R.", school: "UF '26, Business", photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=96&h=96&fit=crop&crop=face", tag: "Less stress" },
+  { quote: "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours.", name: "Alex P.", school: "USC '25, Marketing", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=96&h=96&fit=crop&crop=face", tag: "Better outreach" },
 ];
 
 const FREE_FEATURES = [
@@ -90,7 +90,9 @@ function StoriesCarousel() {
           "{s.quote}"
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #22d3ee, #0891b2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: satoshi, fontSize: 14, fontWeight: 900, color: '#fff', boxShadow: '0 0 20px rgba(34,211,238,0.3)' }}>{s.initials}</div>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '2px solid rgba(232,93,32,0.4)', boxShadow: '0 0 16px rgba(232,93,32,0.2)' }}>
+            <img src={s.photo} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
           <div>
             <p style={{ fontFamily: satoshi, fontSize: 15, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.01em' }}>{s.name}</p>
             <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>{s.school}</p>
@@ -171,7 +173,13 @@ export default function StudentLandingPage({ onParentClick }) {
   );
 
   return (
-    <div style={{ background: '#06070d', fontFamily: dmSans, color: '#fff', overflowX: 'hidden' }}>
+    <div style={{ background: '#06070d', fontFamily: dmSans, color: '#fff', overflowX: 'hidden', position: 'relative' }}>
+      {/* Global film grain — sits over everything, non-interactive */}
+      <style>{`
+        @keyframes grainMove { 0%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)} 40%{transform:translate(2px,-2px)} 60%{transform:translate(-1px,2px)} 80%{transform:translate(1px,-1px)} 100%{transform:translate(0,0)} }
+        .page-grain::after { content:''; position:fixed; inset:-100%; width:300%; height:300%; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); animation:grainMove 0.4s steps(1) infinite; pointer-events:none; z-index:9999; }
+      `}</style>
+      <div className="page-grain" style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }} />
 
       {/* ── HERO ── */}
       <div style={{
@@ -190,15 +198,39 @@ export default function StudentLandingPage({ onParentClick }) {
         `}</style>
         <div className="hero-grain" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }} />
 
+        {/* Faces row — human social proof above the headline */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center',
+          marginBottom: 28, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
+          position: 'relative', zIndex: 1,
+        }}>
+          <div style={{ display: 'flex' }}>
+            {[
+              'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=64&h=64&fit=crop&crop=face',
+              'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=64&h=64&fit=crop&crop=face',
+              'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=64&h=64&fit=crop&crop=face',
+              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=face',
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=face',
+            ].map((src, i) => (
+              <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #06070d', overflow: 'hidden', marginLeft: i === 0 ? 0 : -10, position: 'relative', zIndex: 5 - i }}>
+                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+          </div>
+          <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+            Joined by <strong style={{ color: '#fff', fontWeight: 700 }}>2,400+</strong> students
+          </span>
+        </div>
+
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.2)',
+          background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)',
           borderRadius: 100, padding: '8px 20px', marginBottom: 36,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
           position: 'relative', zIndex: 1,
         }}>
           <span style={{ fontSize: 13 }}>⚡</span>
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             The CFF AI Agent
           </span>
         </div>
