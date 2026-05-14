@@ -424,26 +424,27 @@ export default function OnboardingFlow({ onClose }) {
           {/* Before / After Resume Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
             {/* BEFORE */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '16px', opacity: 0.65 }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '16px', opacity: 0.75 }}>
               <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 10px', textAlign: 'center' }}>Your Current Resume</p>
-              <div style={{ background: '#fff', borderRadius: 8, padding: '12px 10px', minHeight: 180 }}>
-                <div style={{ height: 8, background: '#ddd', borderRadius: 2, marginBottom: 6, width: '70%' }} />
-                <div style={{ height: 5, background: '#eee', borderRadius: 2, marginBottom: 3, width: '50%' }} />
-                <div style={{ height: 5, background: '#eee', borderRadius: 2, marginBottom: 10, width: '40%' }} />
-                <div style={{ height: 4, background: '#ccc', borderRadius: 1, marginBottom: 6, width: '60%' }} />
-                {['Responsible for managing tasks', 'Helped team with projects', 'Worked on various assignments'].map((t, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#ccc', marginTop: 4, flexShrink: 0 }} />
-                    <div style={{ height: 4, background: '#e5e5e5', borderRadius: 1, flex: 1 }} />
+              <div style={{ background: '#fff', borderRadius: 8, overflow: 'hidden', minHeight: 180, display: 'flex', alignItems: 'stretch' }}>
+                {resumeUrl ? (
+                  <iframe
+                    src={resumeUrl}
+                    title="Your Resume"
+                    style={{ width: '100%', height: 220, border: 'none', display: 'block' }}
+                  />
+                ) : (
+                  <div style={{ flex: 1, padding: '12px 10px' }}>
+                    <div style={{ height: 8, background: '#ddd', borderRadius: 2, marginBottom: 6, width: '70%' }} />
+                    <div style={{ height: 5, background: '#eee', borderRadius: 2, marginBottom: 10, width: '50%' }} />
+                    {[1,2,3].map(i => (
+                      <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                        <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#ccc', marginTop: 4, flexShrink: 0 }} />
+                        <div style={{ height: 4, background: '#e5e5e5', borderRadius: 1, flex: 1 }} />
+                      </div>
+                    ))}
                   </div>
-                ))}
-                <div style={{ height: 4, background: '#ccc', borderRadius: 1, margin: '8px 0 5px', width: '55%' }} />
-                {[1, 2].map(i => (
-                  <div key={i} style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#ccc', marginTop: 4, flexShrink: 0 }} />
-                    <div style={{ height: 4, background: '#e5e5e5', borderRadius: 1, flex: 1 }} />
-                  </div>
-                ))}
+                )}
               </div>
             </div>
 
