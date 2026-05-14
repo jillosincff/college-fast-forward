@@ -193,18 +193,18 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.2)',
-          borderRadius: 100, padding: '9px 36px', marginBottom: 36,
+          borderRadius: 100, padding: '8px 20px', marginBottom: 36,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
           position: 'relative', zIndex: 1,
         }}>
           <span style={{ fontSize: 13 }}>⚡</span>
           <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            The College Fast Forward AI Agent
+            The CFF AI Agent
           </span>
         </div>
 
         <h1 style={{
-          fontFamily: satoshi, fontSize: 'clamp(52px, 9vw, 108px)',
+          fontFamily: satoshi, fontSize: 'clamp(36px, 8vw, 108px)',
           fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.05em',
           margin: '0 0 8px', maxWidth: 900,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)',
@@ -215,7 +215,7 @@ export default function StudentLandingPage({ onParentClick }) {
         <div style={{
           fontFamily: satoshi,
           fontWeight: 900,
-          fontSize: 'clamp(68px, 12vw, 148px)',
+          fontSize: 'clamp(48px, 12vw, 148px)',
           letterSpacing: '-0.06em',
           lineHeight: 1.05,
           margin: '0 0 44px',
