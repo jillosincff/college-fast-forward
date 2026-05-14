@@ -496,36 +496,51 @@ export default function OnboardingFlow({ onClose }) {
 
           {/* Personalized Plan */}
           {(() => {
-            const firstName = 'there';
             const frustrationDesc = frustration >= 8 ? 'super frustrated' : frustration >= 6 ? 'pretty discouraged' : frustration >= 4 ? 'feeling the pressure' : 'ready to level up';
             const schoolDisplay = college || 'your school';
-            const planSteps = [
-              'First, we\'ll use this upgraded resume as your new standard',
-              'We\'ll find the right roles that actually match your background',
-              'We\'ll help you apply smarter (not harder) and reach the right people',
-              'We\'ll track everything so nothing falls through the cracks',
+            const seekingLabel = seeking === 'internship' ? 'internships' : seeking === 'fulltime' ? 'full-time positions' : seeking === 'both' ? 'internships and full-time roles' : 'opportunities';
+            const roleType = seeking === 'internship' ? 'internship' : 'role';
+            const blockerDesc = blockers.includes('resume') ? 'resume' : blockers.includes('ghosted') ? 'applications' : 'job search';
+
+            const roadmap = [
+              { week: 'Week 1', text: `Lock in this upgraded resume as your new standard and tailor it for your top ${seekingLabel}.` },
+              { week: 'Week 2', text: `Start applying smarter (not harder) — the Agent finds better-fitting roles and drafts outreach messages for you.` },
+              { week: 'Week 3', text: `Reach out to relevant ${schoolDisplay} alumni and parents at target companies — they're 10× more likely to help.` },
+              { week: 'Week 4', text: `Track every application, get smart reminders, and prep for interviews so nothing falls through the cracks.` },
             ];
+
             return (
-              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 24, padding: '28px 28px', marginBottom: 28 }}>
-                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 10px' }}>Your Personalized Plan</p>
-                <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 900, color: '#fff', margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-                  Hey {firstName}, here's your personalized plan
+              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 24, padding: '32px 28px', marginBottom: 28 }}>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 10px' }}>Your Personalized Plan</p>
+                <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 900, color: '#fff', margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+                  Here's your personalized plan
                 </h2>
-                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 6px', lineHeight: 1.7 }}>
-                  Sounds like you're <span style={{ color: '#fff', fontWeight: 600 }}>{frustrationDesc}</span>.
+
+                <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: '0 0 6px', lineHeight: 1.75 }}>
+                  We know you're <span style={{ color: '#fff', fontWeight: 600 }}>{frustrationDesc}</span> right now.
                 </p>
-                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 20px', lineHeight: 1.7 }}>
-                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student, applying to jobs and not hearing back feels especially discouraging. Here's exactly what we're going to do to change that:
+                <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.75 }}>
+                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student looking for <span style={{ color: '#fff', fontWeight: 600 }}>{seekingLabel}</span>, applying and not hearing back feels incredibly discouraging. Here's exactly what we're going to do together:
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  {planSteps.map((step, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                      <span style={{ fontFamily: sat, fontSize: 13, fontWeight: 900, color: GREEN, flexShrink: 0, minWidth: 20 }}>0{i + 1}</span>
-                      <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0, lineHeight: 1.5 }}>{step}</p>
+
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>Your 30-Day Roadmap</p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 24 }}>
+                  {roadmap.map((item, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '14px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                      <div style={{ flexShrink: 0, minWidth: 68 }}>
+                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, padding: '3px 8px', whiteSpace: 'nowrap' }}>{item.week}</span>
+                      </div>
+                      <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0, lineHeight: 1.6 }}>{item.text}</p>
                     </div>
                   ))}
                 </div>
-                <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: '20px 0 0', textAlign: 'center' }}>Ready to get moving?</p>
+
+                <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14, padding: '14px 18px' }}>
+                  <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.6 }}>
+                    <span style={{ color: GREEN, fontWeight: 700 }}>Goal:</span> Get you closer to landing that {roleType} — without the overwhelm.
+                  </p>
+                </div>
               </div>
             );
           })()}
@@ -538,12 +553,12 @@ export default function OnboardingFlow({ onClose }) {
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(232,93,32,0.6)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.45)'; }}
             >
-              Unlock Unlimited Resumes + Full Agent
+              Unlock the Full Agent & Start This Plan
             </button>
             <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
               Use this version for now and continue
             </button>
-            <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: '12px 0 0' }}>$9.99/week or $19 for 30 days</p>
+            <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: '12px 0 0' }}>$9.99/week or $19 for 30 days — cancel anytime</p>
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
