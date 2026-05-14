@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { INDUSTRIES } from '@/components/onboarding/onboardingOptions';
+import { base44 } from '@/api/base44Client';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const satoshi = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -16,7 +17,13 @@ export default function OnboardingFlow({ onClose }) {
     setScreen(s => s + 1);
   };
 
-  const goToAuth = () => setScreen(6);
+  const goToAuth = () => {
+    try {
+      localStorage.setItem('pending_invite_role', 'student');
+      sessionStorage.setItem('cff_onboarding_type', 'student');
+    } catch (e) {}
+    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+  };
 
   const toggleCategory = (id) => {
     setSelectedCategories(prev =>
