@@ -401,7 +401,7 @@ export default function OnboardingFlow({ onClose }) {
           </div>
 
           {/* Before / After side by side */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28, alignItems: 'start' }}>
 
             {/* BEFORE */}
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px' }}>
@@ -409,69 +409,159 @@ export default function OnboardingFlow({ onClose }) {
                 <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
                 <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
               </div>
-              <div style={{ background: '#2a2a2a', borderRadius: 16, overflow: 'hidden', minHeight: 480 }}>
+              <div style={{ borderRadius: 12, overflow: 'hidden', height: 620, background: '#fff' }}>
                 {resumeUrl ? (
-                  <iframe src={resumeUrl} title="Your Resume" style={{ width: '100%', height: 480, border: 'none', display: 'block' }} />
+                  <iframe
+                    src={resumeUrl}
+                    title="Your Resume"
+                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                  />
                 ) : (
-                  <div style={{ padding: '24px 20px', opacity: 0.5 }}>
-                    <div style={{ height: 10, background: '#555', borderRadius: 2, marginBottom: 8, width: '65%' }} />
-                    <div style={{ height: 6, background: '#444', borderRadius: 2, marginBottom: 18, width: '45%' }} />
-                    {[1,2,3,4].map(i => (
-                      <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 7 }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#555', marginTop: 5, flexShrink: 0 }} />
-                        <div style={{ height: 6, background: '#3a3a3a', borderRadius: 2, flex: 1 }} />
-                      </div>
-                    ))}
-                    <div style={{ height: 1, background: '#3a3a3a', margin: '18px 0' }} />
-                    <div style={{ height: 8, background: '#555', borderRadius: 2, marginBottom: 12, width: '50%' }} />
-                    {[1,2,3].map(i => (
-                      <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 7 }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#555', marginTop: 5, flexShrink: 0 }} />
-                        <div style={{ height: 6, background: '#3a3a3a', borderRadius: 2, flex: 1 }} />
-                      </div>
-                    ))}
+                  /* Realistic plain-text mock of an "unformatted" resume */
+                  <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}>
+                    <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>Jordan Martinez</p>
+                    <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>jordan.martinez@gmail.com | (786) 555-0192 | linkedin.com/in/jordanm | Miami, FL</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EDUCATION</p>
+                    <p style={{ margin: '0 0 2px', fontWeight: 600 }}>University of Florida — B.S. Marketing</p>
+                    <p style={{ margin: '0 0 10px', color: '#555', fontSize: 11 }}>Aug 2021 – May 2025 | GPA: 3.6</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EXPERIENCE</p>
+                    <p style={{ margin: '0 0 2px', fontWeight: 600 }}>Marketing Intern — SunTrust Brands, Miami FL</p>
+                    <p style={{ margin: '0 0 4px', color: '#555', fontSize: 11 }}>May 2023 – Aug 2023</p>
+                    <p style={{ margin: '0 0 2px' }}>- Helped with social media posts and scheduling content</p>
+                    <p style={{ margin: '0 0 2px' }}>- Assisted team with email campaigns</p>
+                    <p style={{ margin: '0 0 2px' }}>- Worked on presentations for manager</p>
+                    <p style={{ margin: '0 0 2px' }}>- Did various tasks to support the marketing department</p>
+                    <p style={{ margin: '12px 0 2px', fontWeight: 600 }}>Campus Ambassador — Red Bull</p>
+                    <p style={{ margin: '0 0 4px', color: '#555', fontSize: 11 }}>Sep 2022 – May 2023</p>
+                    <p style={{ margin: '0 0 2px' }}>- Promoted brand on campus</p>
+                    <p style={{ margin: '0 0 2px' }}>- Organized events and distributed product</p>
+                    <p style={{ margin: '0 0 2px' }}>- Managed a small team of volunteers</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>SKILLS</p>
+                    <p style={{ margin: '0 0 10px' }}>Social Media, Canva, Excel, Google Analytics, Email Marketing, Public Speaking</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>ACTIVITIES</p>
+                    <p style={{ margin: '0 0 2px' }}>American Marketing Association — VP of Events</p>
+                    <p style={{ margin: '0 0 2px' }}>UF Honors Program</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* AFTER */}
+            {/* AFTER — same content, dramatically better format */}
             <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 24, padding: '20px', position: 'relative' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                 <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent Optimized Version</p>
                 <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 12px' }}>OPTIMIZED</span>
               </div>
-              <div style={{ background: '#fff', borderRadius: 16, padding: '24px 20px', minHeight: 480, color: '#111', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
-                <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontFamily: sat, fontSize: 22, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>Amanda Senft</div>
-                  <div style={{ fontFamily: dm, fontSize: 12, color: '#64748b' }}>amandajsenft@gmail.com · (305) 606-0279 · linkedin.com/in/asenft</div>
-                  <div style={{ height: 2, background: '#22c55e', marginTop: 12, borderRadius: 1 }} />
-                </div>
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Professional Summary</div>
-                  <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.65 }}>Results-driven account manager with a proven track record of growing client portfolios and driving measurable outcomes. Expert at building strong partnerships and leading cross-functional initiatives in fast-paced environments.</p>
-                </div>
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}>Experience</div>
-                  <div style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 1 }}>Account Manager — TechCorp Inc.</div>
-                  <div style={{ fontFamily: dm, fontSize: 11, color: '#64748b', marginBottom: 8 }}>Jan 2022 – Present</div>
-                  {[
-                    'Grew key account revenue by 34% YoY through proactive relationship management',
-                    'Led cross-functional project with 12 stakeholders, delivered 3 weeks early',
-                    'Resolved 95% of escalated client issues within 24 hours, improving NPS by 18 pts',
-                  ].map((b, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 7, marginBottom: 6 }}>
-                      <span style={{ color: '#16a34a', fontSize: 12, flexShrink: 0, marginTop: 1 }}>•</span>
-                      <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.55 }}>{b}</p>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}>Skills</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {['Salesforce CRM', 'Client Retention', 'Data Analysis', 'Negotiation', 'Project Mgmt'].map(s => (
-                      <span key={s} style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 8px' }}>{s}</span>
+              <div style={{ background: '#fff', borderRadius: 12, height: 620, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
+                {/* Header stripe */}
+                <div style={{ background: '#0f172a', padding: '20px 22px 16px' }}>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>Jordan Martinez</div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>jordan.martinez@gmail.com · (786) 555-0192 · linkedin.com/in/jordanm · Miami, FL</div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {['Marketing', 'Brand Strategy', 'Digital Campaigns'].map(tag => (
+                      <span key={tag} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>{tag}</span>
                     ))}
+                  </div>
+                </div>
+
+                <div style={{ padding: '18px 22px' }}>
+                  {/* Summary */}
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                      <span>Professional Summary</span>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                    </div>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: '#374151', margin: 0, lineHeight: 1.7 }}>
+                      Results-driven marketing student at the University of Florida with hands-on experience growing brand presence and executing multi-channel campaigns. Proven ability to drive measurable engagement and lead cross-functional initiatives — seeking a full-time marketing role in Miami.
+                    </p>
+                  </div>
+
+                  {/* Education */}
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                      <span>Education</span>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>University of Florida</div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>Aug 2021 – May 2025</div>
+                    </div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#475569', marginTop: 1 }}>B.S. Marketing · GPA: 3.6 · Honors Program</div>
+                  </div>
+
+                  {/* Experience */}
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                      <span>Experience</span>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                    </div>
+
+                    {/* Job 1 */}
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>Marketing Intern</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>May – Aug 2023</div>
+                      </div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>SunTrust Brands · Miami, FL</div>
+                      {[
+                        'Managed social media content calendar across 4 platforms, increasing average post engagement by 28%',
+                        'Executed 3 end-to-end email campaigns reaching 12,000+ subscribers with a 22% open rate',
+                        'Produced weekly performance decks for senior marketing leadership, synthesizing data from Google Analytics',
+                      ].map((b, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
+                          <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
+                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Job 2 */}
+                    <div style={{ marginBottom: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>Campus Brand Ambassador</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>Sep 2022 – May 2023</div>
+                      </div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>Red Bull · University of Florida</div>
+                      {[
+                        'Led a team of 6 campus volunteers to execute 10+ brand activation events, reaching 2,000+ students',
+                        'Grew local brand awareness by coordinating product sampling and guerrilla marketing campaigns on campus',
+                      ].map((b, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
+                          <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
+                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Skills */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                      <span>Skills</span>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {['Google Analytics', 'Canva', 'Email Marketing', 'Social Media Strategy', 'Excel', 'Public Speaking', 'Campaign Management'].map(s => (
+                        <span key={s} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 9px' }}>{s}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Activities */}
+                  <div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: '#16a34a', letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                      <span>Leadership & Activities</span>
+                      <div style={{ flex: 1, height: 1, background: '#d1fae5' }} />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#0f172a' }}>VP of Events — American Marketing Association</div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>2023–2024</div>
+                    </div>
                   </div>
                 </div>
               </div>
