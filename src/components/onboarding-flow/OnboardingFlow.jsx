@@ -397,7 +397,7 @@ export default function OnboardingFlow({ onClose }) {
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <h1 style={{ ...h1, fontSize: 'clamp(24px, 4vw, 40px)', marginBottom: 8 }}>Here's Your Upgraded Resume</h1>
-            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0 }}>The CFF Agent just made it significantly stronger</p>
+            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>The CFF Agent strengthened your content while keeping every fact 100% accurate.</p>
           </div>
 
           {/* Before / After side by side */}
@@ -482,9 +482,9 @@ export default function OnboardingFlow({ onClose }) {
           <div style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 24, padding: '24px 28px', marginBottom: 28 }}>
             <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>✓ Agent Feedback</p>
             {[
-              'Strengthened bullet points to focus on results, not tasks',
-              'Improved layout and visual hierarchy',
-              'Made it ATS-friendly while looking modern',
+              'Strengthened your bullet points to focus on results instead of tasks',
+              'Improved formatting and visual hierarchy for a modern, professional look',
+              'Made it ATS-friendly while keeping it visually standout',
               <>Score improved from <span style={{ textDecoration: 'line-through', color: '#f87171', margin: '0 4px' }}>42/100</span> → <span style={{ color: GREEN, fontWeight: 700, marginLeft: 4 }}>87/100</span></>,
             ].map((line, i) => (
               <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderTop: i > 0 ? '1px solid rgba(34,197,94,0.08)' : 'none' }}>
@@ -493,6 +493,42 @@ export default function OnboardingFlow({ onClose }) {
               </div>
             ))}
           </div>
+
+          {/* Personalized Plan */}
+          {(() => {
+            const firstName = 'there';
+            const frustrationDesc = frustration >= 8 ? 'super frustrated' : frustration >= 6 ? 'pretty discouraged' : frustration >= 4 ? 'feeling the pressure' : 'ready to level up';
+            const schoolDisplay = college || 'your school';
+            const planSteps = [
+              'First, we\'ll use this upgraded resume as your new standard',
+              'We\'ll find the right roles that actually match your background',
+              'We\'ll help you apply smarter (not harder) and reach the right people',
+              'We\'ll track everything so nothing falls through the cracks',
+            ];
+            return (
+              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 24, padding: '28px 28px', marginBottom: 28 }}>
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 10px' }}>Your Personalized Plan</p>
+                <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 900, color: '#fff', margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+                  Hey {firstName}, here's your personalized plan
+                </h2>
+                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 6px', lineHeight: 1.7 }}>
+                  Sounds like you're <span style={{ color: '#fff', fontWeight: 600 }}>{frustrationDesc}</span>.
+                </p>
+                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.6)', margin: '0 0 20px', lineHeight: 1.7 }}>
+                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student, applying to jobs and not hearing back feels especially discouraging. Here's exactly what we're going to do to change that:
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  {planSteps.map((step, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                      <span style={{ fontFamily: sat, fontSize: 13, fontWeight: 900, color: GREEN, flexShrink: 0, minWidth: 20 }}>0{i + 1}</span>
+                      <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0, lineHeight: 1.5 }}>{step}</p>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: '20px 0 0', textAlign: 'center' }}>Ready to get moving?</p>
+              </div>
+            );
+          })()}
 
           {/* CTA */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -505,8 +541,9 @@ export default function OnboardingFlow({ onClose }) {
               Unlock Unlimited Resumes + Full Agent
             </button>
             <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
-              Use this version for now
+              Use this version for now and continue
             </button>
+            <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: '12px 0 0' }}>$9.99/week or $19 for 30 days</p>
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
