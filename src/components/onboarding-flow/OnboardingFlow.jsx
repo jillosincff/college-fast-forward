@@ -6,16 +6,19 @@ const satoshi = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
 export default function OnboardingFlow({ onClose }) {
   const [screen, setScreen] = useState(1);
+  const [jobIntent, setJobIntent] = useState(null);
 
   const goNext = () => {
-    if (screen < 5) {
-      setScreen(s => s + 1);
-    } else {
-      navigate('GatorAuth');
-    }
+    setScreen(s => s + 1);
   };
 
-  const goToAuth = () => navigate('GatorAuth');
+  const goToAuth = () => setScreen(6);
+
+  const selectIntent = (intent) => {
+    setJobIntent(intent);
+    try { localStorage.setItem('cff_job_intent', intent); } catch (e) {}
+    navigate('GatorAuth');
+  };
 
   return (
     <div style={{
@@ -43,7 +46,7 @@ export default function OnboardingFlow({ onClose }) {
 
       {/* Progress dots */}
       <div style={{ position: 'absolute', top: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8 }}>
-        {[1, 2, 3, 4, 5].map(i => (
+        {[1, 2, 3, 4, 5, 6].map(i => (
           <div key={i} style={{
             width: i === screen ? 24 : 8, height: 8, borderRadius: 4,
             background: i === screen ? '#22c55e' : i < screen ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.15)',
@@ -245,6 +248,61 @@ export default function OnboardingFlow({ onClose }) {
               Continue →
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Screen 6: Intent Selection (shown after "Get Started" on screen 5) */}
+      {screen === 6 && (
+        <div style={{ textAlign: 'center', maxWidth: 520, animation: 'fadeSlideIn 0.4s ease' }}>
+
+          <h1 style={{
+            fontFamily: satoshi, fontSize: 'clamp(28px, 5vw, 46px)',
+            fontWeight: 900, color: '#fff', lineHeight: 1.1,
+            letterSpacing: '-0.04em', margin: '0 0 12px',
+          }}>
+            Hi there! 👋
+          </h1>
+
+          <p style={{
+            fontFamily: dmSans, fontSize: 'clamp(17px, 2vw, 20px)',
+            color: 'rgba(255,255,255,0.65)', lineHeight: 1.55,
+            margin: '0 auto 40px', maxWidth: 420,
+          }}>
+            What are you looking for?
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 400, margin: '0 auto' }}>
+            {[
+              { label: '🎓  An internship', value: 'internship' },
+              { label: '💼  A full-time job', value: 'full_time' },
+              { label: '👀  Neither, just browsing', value: 'browsing' },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => selectIntent(opt.value)}
+                style={{
+                  fontFamily: dmSans, fontSize: 17, fontWeight: 700,
+                  color: '#fff', textAlign: 'left',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  borderRadius: 16, padding: '18px 24px',
+                  cursor: 'pointer', minHeight: 'auto',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.12)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <button onClick={() => setScreen(5)} style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.35)', background: 'transparent', border: 'none', cursor: 'pointer', minHeight: 'auto', marginTop: 28, transition: 'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+          >
+            ← Back
+          </button>
         </div>
       )}
 
