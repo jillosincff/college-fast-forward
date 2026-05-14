@@ -77,6 +77,7 @@ export default function OnboardingFlow({ onClose }) {
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
+  const [showPaywall, setShowPaywall] = useState(false);
   const fileRef = useRef();
 
   const TOTAL = 8;
@@ -399,35 +400,34 @@ export default function OnboardingFlow({ onClose }) {
             <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0 }}>The CFF Agent just made it significantly stronger</p>
           </div>
 
-          {/* Before / After — full width side by side */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 28 }}>
+          {/* Before / After side by side */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28 }}>
 
             {/* BEFORE */}
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                 <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
                 <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
               </div>
-              <div style={{ background: '#f5f5f5', borderRadius: 12, overflow: 'hidden', minHeight: 420, opacity: 0.75 }}>
+              <div style={{ background: '#2a2a2a', borderRadius: 16, overflow: 'hidden', minHeight: 480 }}>
                 {resumeUrl ? (
-                  <iframe src={resumeUrl} title="Your Resume" style={{ width: '100%', height: 420, border: 'none', display: 'block' }} />
+                  <iframe src={resumeUrl} title="Your Resume" style={{ width: '100%', height: 480, border: 'none', display: 'block' }} />
                 ) : (
-                  <div style={{ padding: '20px 16px' }}>
-                    <div style={{ height: 10, background: '#ccc', borderRadius: 2, marginBottom: 8, width: '65%' }} />
-                    <div style={{ height: 6, background: '#ddd', borderRadius: 2, marginBottom: 4, width: '50%' }} />
-                    <div style={{ height: 6, background: '#ddd', borderRadius: 2, marginBottom: 18, width: '40%' }} />
-                    {['Responsible for managing tasks', 'Helped team with various projects', 'Worked on assignments as needed', 'Assisted with deliverables'].map((_, i) => (
-                      <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#bbb', marginTop: 5, flexShrink: 0 }} />
-                        <div style={{ height: 6, background: '#e0e0e0', borderRadius: 2, flex: 1 }} />
+                  <div style={{ padding: '24px 20px', opacity: 0.5 }}>
+                    <div style={{ height: 10, background: '#555', borderRadius: 2, marginBottom: 8, width: '65%' }} />
+                    <div style={{ height: 6, background: '#444', borderRadius: 2, marginBottom: 18, width: '45%' }} />
+                    {[1,2,3,4].map(i => (
+                      <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 7 }}>
+                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#555', marginTop: 5, flexShrink: 0 }} />
+                        <div style={{ height: 6, background: '#3a3a3a', borderRadius: 2, flex: 1 }} />
                       </div>
                     ))}
-                    <div style={{ height: 1, background: '#e0e0e0', margin: '16px 0' }} />
-                    <div style={{ height: 8, background: '#ccc', borderRadius: 2, marginBottom: 10, width: '50%' }} />
+                    <div style={{ height: 1, background: '#3a3a3a', margin: '18px 0' }} />
+                    <div style={{ height: 8, background: '#555', borderRadius: 2, marginBottom: 12, width: '50%' }} />
                     {[1,2,3].map(i => (
-                      <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#bbb', marginTop: 5, flexShrink: 0 }} />
-                        <div style={{ height: 6, background: '#e0e0e0', borderRadius: 2, flex: 1 }} />
+                      <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 7 }}>
+                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#555', marginTop: 5, flexShrink: 0 }} />
+                        <div style={{ height: 6, background: '#3a3a3a', borderRadius: 2, flex: 1 }} />
                       </div>
                     ))}
                   </div>
@@ -436,44 +436,41 @@ export default function OnboardingFlow({ onClose }) {
             </div>
 
             {/* AFTER */}
-            <div style={{ background: 'rgba(34,197,94,0.06)', border: '1.5px solid rgba(34,197,94,0.4)', borderRadius: 20, padding: '20px', position: 'relative' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent-Optimized Version</p>
+            <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 24, padding: '20px', position: 'relative' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent Optimized Version</p>
                 <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 12px' }}>OPTIMIZED</span>
               </div>
-              <div style={{ background: '#fff', borderRadius: 12, padding: '24px 20px', minHeight: 420, color: '#111' }}>
-                {/* Name + contact */}
+              <div style={{ background: '#fff', borderRadius: 16, padding: '24px 20px', minHeight: 480, color: '#111', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
                 <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontFamily: sat, fontSize: 20, fontWeight: 800, color: '#0f172a', marginBottom: 3 }}>Amanda Senft</div>
+                  <div style={{ fontFamily: sat, fontSize: 22, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>Amanda Senft</div>
                   <div style={{ fontFamily: dm, fontSize: 12, color: '#64748b' }}>amandajsenft@gmail.com · (305) 606-0279 · linkedin.com/in/asenft</div>
+                  <div style={{ height: 2, background: '#22c55e', marginTop: 12, borderRadius: 1 }} />
                 </div>
-                {/* Summary */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Professional Summary</div>
-                  <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.6 }}>Results-driven account manager with a track record of growing client portfolios and driving measurable outcomes. Proven ability to build strong partnerships, resolve complex issues, and lead cross-functional initiatives in fast-paced environments.</p>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.65 }}>Results-driven account manager with a proven track record of growing client portfolios and driving measurable outcomes. Expert at building strong partnerships and leading cross-functional initiatives in fast-paced environments.</p>
                 </div>
-                {/* Experience */}
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Experience</div>
-                  <div style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>Account Manager — TechCorp Inc.</div>
-                  <div style={{ fontFamily: dm, fontSize: 11, color: '#64748b', marginBottom: 6 }}>Jan 2022 – Present</div>
+                  <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}>Experience</div>
+                  <div style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 1 }}>Account Manager — TechCorp Inc.</div>
+                  <div style={{ fontFamily: dm, fontSize: 11, color: '#64748b', marginBottom: 8 }}>Jan 2022 – Present</div>
                   {[
                     'Grew key account revenue by 34% YoY through proactive relationship management',
-                    'Led cross-functional project with 12 stakeholders, delivering 3 weeks ahead of schedule',
+                    'Led cross-functional project with 12 stakeholders, delivered 3 weeks early',
                     'Resolved 95% of escalated client issues within 24 hours, improving NPS by 18 pts',
                   ].map((b, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 5 }}>
-                      <span style={{ color: '#16a34a', fontSize: 11, flexShrink: 0, marginTop: 1 }}>•</span>
-                      <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.5 }}>{b}</p>
+                    <div key={i} style={{ display: 'flex', gap: 7, marginBottom: 6 }}>
+                      <span style={{ color: '#16a34a', fontSize: 12, flexShrink: 0, marginTop: 1 }}>•</span>
+                      <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, lineHeight: 1.55 }}>{b}</p>
                     </div>
                   ))}
                 </div>
-                {/* Skills */}
                 <div>
-                  <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>Skills</div>
+                  <div style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}>Skills</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {['Salesforce CRM', 'Client Retention', 'Data Analysis', 'Negotiation', 'Project Management'].map(s => (
-                      <span key={s} style={{ fontFamily: dm, fontSize: 10, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 8px' }}>{s}</span>
+                    {['Salesforce CRM', 'Client Retention', 'Data Analysis', 'Negotiation', 'Project Mgmt'].map(s => (
+                      <span key={s} style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 8px' }}>{s}</span>
                     ))}
                   </div>
                 </div>
@@ -482,40 +479,84 @@ export default function OnboardingFlow({ onClose }) {
           </div>
 
           {/* Agent Feedback */}
-          <div style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 20, padding: '24px 28px', marginBottom: 24 }}>
-            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>✓</span> Agent Feedback
-            </p>
+          <div style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 24, padding: '24px 28px', marginBottom: 28 }}>
+            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>✓ Agent Feedback</p>
             {[
               'Strengthened bullet points to focus on results, not tasks',
-              'Added clear sections for projects and leadership experience',
-              'Made it ATS-friendly while keeping it visually standout',
+              'Improved layout and visual hierarchy',
+              'Made it ATS-friendly while looking modern',
               <>Score improved from <span style={{ textDecoration: 'line-through', color: '#f87171', margin: '0 4px' }}>42/100</span> → <span style={{ color: GREEN, fontWeight: 700, marginLeft: 4 }}>87/100</span></>,
             ].map((line, i) => (
               <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderTop: i > 0 ? '1px solid rgba(34,197,94,0.08)' : 'none' }}>
-                <span style={{ color: GREEN, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
+                <span style={{ color: GREEN, fontSize: 14, flexShrink: 0 }}>✓</span>
                 <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>{line}</p>
               </div>
             ))}
           </div>
 
-          {/* Paywall CTA */}
+          {/* CTA */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <button onClick={saveAndAuth} style={{ width: '100%', maxWidth: 480, fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff', background: ORANGE, border: 'none', borderRadius: 16, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.45)', transition: 'all 0.2s', display: 'block', margin: '0 auto 16px' }}
+            <button
+              onClick={() => setShowPaywall(true)}
+              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 12px', fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff', background: ORANGE, border: 'none', borderRadius: 20, padding: '22px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.45)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(232,93,32,0.6)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.45)'; }}
             >
               Unlock Unlimited Resumes + Full Agent
             </button>
-            <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.4)', margin: '0 0 20px' }}>$9.99/week or $19 for 30 days</p>
-            <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
-              Use this version for now and continue
+            <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
+              Use this version for now
             </button>
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 8, marginBottom: 16 }}>
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
           </div>
+
+          {/* Paywall Modal */}
+          {showPaywall && (
+            <div
+              onClick={() => setShowPaywall(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: 24 }}
+            >
+              <div onClick={e => e.stopPropagation()} style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 28, padding: '40px 32px', maxWidth: 440, width: '100%', animation: 'fadeUp 0.25s ease' }}>
+                <h2 style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: '#fff', textAlign: 'center', margin: '0 0 8px', letterSpacing: '-0.03em' }}>Unlock the Full Agent</h2>
+                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 28px', lineHeight: 1.6 }}>Get unlimited resumes, tailoring for any job, tracking, and outreach help.</p>
+
+                {/* Weekly plan */}
+                <button
+                  onClick={saveAndAuth}
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 18, padding: '20px 22px', marginBottom: 12, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+                >
+                  <div>
+                    <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>$9.99 / week</p>
+                    <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '3px 0 0' }}>Cancel anytime</p>
+                  </div>
+                  <span style={{ fontFamily: dm, fontSize: 12, color: GREEN, fontWeight: 600 }}>Most flexible</span>
+                </button>
+
+                {/* 30-day plan */}
+                <button
+                  onClick={saveAndAuth}
+                  style={{ width: '100%', background: 'rgba(34,197,94,0.12)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 18, padding: '20px 22px', marginBottom: 24, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.2)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.12)'}
+                >
+                  <div>
+                    <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>$19 for 30 days</p>
+                    <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '3px 0 0' }}>Best value for most students</p>
+                  </div>
+                  <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 10px' }}>POPULAR</span>
+                </button>
+
+                <button onClick={() => setShowPaywall(false)} style={{ width: '100%', fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', textAlign: 'center' }}>
+                  Maybe later
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
