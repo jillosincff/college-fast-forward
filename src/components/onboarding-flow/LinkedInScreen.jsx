@@ -321,7 +321,7 @@ Return valid JSON.`,
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(14,165,233,0.65), 0 2px 8px rgba(0,0,0,0.3)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(14,165,233,0.5), 0 2px 8px rgba(0,0,0,0.3)'; }}
         >
-          Unlock Full Profile + Alumni DM Access →
+          Unlock My 14-Day Action Plan & Start Applying →
         </button>
         <button
           onClick={saveAndAuth}
