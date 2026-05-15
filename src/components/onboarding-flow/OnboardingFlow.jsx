@@ -466,11 +466,48 @@ Return valid JSON matching the schema exactly.`,
       {/* ── SCREEN 4: What Are You Looking For ── */}
       {screen === 4 && (
         <div style={{ ...card, maxWidth: 520 }}>
+          {/* Agent framing badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F0FDF4', border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 14px', marginBottom: 20 }}>
+            <span style={{ fontSize: 11 }}>🎯</span>
+            <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Setting your career coordinates</span>
+          </div>
+
           <h1 style={h1style}>What are you mainly looking for right now?</h1>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 4, textAlign: 'left' }}>
-            {SEEKING_OPTIONS.map(opt => (
-              <OptionBtn key={opt.key} active={seeking === opt.key} onClick={() => setSeeking(opt.key)} emoji={opt.emoji} label={opt.label} sub={opt.sub} />
-            ))}
+          <p style={{ ...substyle, marginBottom: 28 }}>This is the first coordinate your Agent needs to lock in your target.</p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 4, textAlign: 'left' }}>
+            {SEEKING_OPTIONS.map(opt => {
+              const isActive = seeking === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  onClick={() => setSeeking(opt.key)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 16, width: '100%',
+                    background: isActive ? BLUE_LIGHT : CARD,
+                    border: `2px solid ${isActive ? BLUE : '#E8EFF6'}`,
+                    borderRadius: 14, padding: '18px 20px', cursor: 'pointer',
+                    textAlign: 'left', minHeight: 'auto',
+                    boxShadow: isActive
+                      ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)`
+                      : '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)',
+                    transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
+                    transition: 'all 0.18s ease',
+                  }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 14px 24px rgba(0,0,0,0.10)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = BLUE_BORDER; } }}
+                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#E8EFF6'; } }}
+                >
+                  <span style={{ fontSize: 24, flexShrink: 0, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isActive ? '#fff' : BG, borderRadius: 10, border: `1px solid ${isActive ? BLUE_BORDER : '#E2E8F0'}` }}>{opt.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: isActive ? BLUE : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: isActive ? '#3B82F6' : TEXT2, margin: 0 }}>{opt.sub}</p>
+                  </div>
+                  <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${isActive ? BLUE : '#CBD5E1'}`, background: isActive ? BLUE : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, transition: 'all 0.18s ease' }}>
+                    {isActive && '✓'}
+                  </div>
+                </button>
+              );
+            })}
           </div>
           <Nav onBack={back} onNext={next} nextDisabled={!seeking} />
         </div>
