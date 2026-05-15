@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import LinkedInScreen from './LinkedInScreen';
 import PlanScreen from './PlanScreen';
+import Screen6School from './Screen6School';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -676,34 +677,14 @@ Return valid JSON matching the schema exactly.`,
         );
       })()}
 
-      {/* ── SCREEN 6: School ── */}
+      {/* ── SCREEN 6: School (Alumni Advantage) ── */}
       {screen === 6 && (
-        <div style={{ ...card, maxWidth: 500 }}>
-          <div style={{ width: 60, height: 60, borderRadius: 14, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, margin: '0 auto 24px', boxShadow: SHADOW }}>🎓</div>
-          <h1 style={h1style}>Alumni from your school are 10x more likely to help you.</h1>
-          <p style={substyle}>We'll use this to find warm connections when it makes sense.</p>
-
-          <div style={{ position: 'relative', textAlign: 'left' }}>
-            <InputField
-              label="What college do you go to?"
-              placeholder="e.g. University of Florida, Penn State..."
-              value={college}
-              onChange={e => handleCollegeInput(e.target.value)}
-              icon="🏛️"
-            />
-            {collegeSuggestions.length > 0 && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: CARD, border: '1px solid #E2E8F0', borderRadius: R, overflow: 'hidden', zIndex: 10, marginTop: 4, boxShadow: SHADOW_MD }}>
-                {collegeSuggestions.map(s => (
-                  <button key={s} onClick={() => { setCollege(s); setCollegeSuggestions([]); }} style={{ display: 'block', width: '100%', textAlign: 'left', fontFamily: FONT, fontSize: 14, color: TEXT, background: 'transparent', border: 'none', borderBottom: '1px solid #F1F5F9', padding: '12px 16px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.1s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = BLUE_LIGHT}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                  >{s}</button>
-                ))}
-              </div>
-            )}
-          </div>
-          <Nav onBack={back} onNext={next} nextDisabled={college.trim().length === 0} />
-        </div>
+        <Screen6School
+          college={college}
+          onCollegeChange={setCollege}
+          onBack={back}
+          onNext={next}
+        />
       )}
 
       {/* ── SCREEN 7: Work Location ── */}
