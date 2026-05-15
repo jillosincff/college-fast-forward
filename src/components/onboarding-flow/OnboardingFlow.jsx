@@ -549,9 +549,9 @@ Return valid JSON matching the schema exactly.`,
         <div style={{ maxWidth: 900, width: '100%', animation: 'fadeUp 0.35s ease' }}>
 
           {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <h1 style={{ ...h1, fontSize: 'clamp(24px, 4vw, 40px)', marginBottom: 8 }}>Here's Your Upgraded Resume</h1>
-            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>The CFF Agent strengthened your content while keeping every fact 100% accurate.</p>
+            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>The CFF Agent just made it significantly stronger</p>
           </div>
 
           {/* Before / After side by side */}
@@ -566,18 +566,17 @@ Return valid JSON matching the schema exactly.`,
               </div>
             );
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 48 }}>
 
                 {/* BEFORE */}
-                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0 }}>
-                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
-                    <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
+                <div style={{ background: '#1a1d24', border: '1px solid #374151', borderRadius: 24, padding: 24 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#9ca3af', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Your Current Resume</h2>
+                    <span style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: '#1f2937', borderRadius: 100, padding: '4px 12px' }}>Original</span>
                   </div>
-                  <div style={{ borderRadius: 12, overflow: 'hidden', background: '#fff', flex: 1, minHeight: '300px', overflowY: 'auto' }}>
+                  <div style={{ background: '#1f2937', borderRadius: 16, padding: 32, minHeight: 460 }}>
                     {orig ? (
-                      /* Render parsed original in plain-text style */
-                      <div style={{ padding: '16px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, boxSizing: 'border-box' }}>
+                      <div style={{ padding: 0, fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6 }}>
                         <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
                         <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, orig.linkedin, orig.location].filter(Boolean).join(' | ')}</p>
                         {orig.education?.length > 0 && <>
@@ -605,141 +604,149 @@ Return valid JSON matching the schema exactly.`,
                         </>}
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
-                        <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTop: '3px solid #94a3b8', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                        <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>Parsing your resume...</p>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300, flexDirection: 'column', gap: 12 }}>
+                        <div style={{ width: 36, height: 36, border: '3px solid #374151', borderTop: '3px solid #6b7280', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0 }}>Parsing your resume...</p>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* AFTER — same facts, dramatically better format */}
-                <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 24, padding: '20px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexShrink: 0 }}>
-                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent Optimized Version</p>
-                    <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 12px' }}>OPTIMIZED</span>
+                {/* AFTER */}
+                <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid #10b981', borderRadius: 24, padding: 24, position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#34d399', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Agent Optimized Version</h2>
+                    <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: '#10b981', borderRadius: 100, padding: '4px 16px' }}>OPTIMIZED</span>
                   </div>
-                  <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.25)', flex: 1, minHeight: '300px', overflowY: 'auto' }}>
-                    {opt ? (
-                      <>
-                        {/* Dark header with real name */}
-                        <div style={{ background: '#0f172a', padding: '24px 22px 18px', flexShrink: 0 }}>
-                          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{opt.name}</div>
-                          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>
-                            {[opt.email, opt.phone, opt.linkedin, opt.location].filter(Boolean).join(' · ')}
-                          </div>
-                          {opt.skills?.length > 0 && (
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                              {opt.skills.slice(0, 3).map(tag => (
-                                <span key={tag} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>{tag}</span>
-                              ))}
-                            </div>
-                          )}
+                  
+                  {/* Loading state */}
+                  {!opt && (
+                    <div style={{ background: '#1f2937', borderRadius: 16, padding: 32, minHeight: 460, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ width: 40, height: 40, border: '4px solid #10b981', borderTop: '4px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+                        <p style={{ fontFamily: dm, fontSize: 14, color: '#34d399', margin: '0 0 4px' }}>The Agent is optimizing your resume...</p>
+                        <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>This usually takes 10-20 seconds</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Optimized content */}
+                  {opt && (
+                    <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 460, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                      {/* Dark header */}
+                      <div style={{ background: '#0f172a', padding: '24px 22px 18px', margin: '-32px -32px 24px', borderRadius: '16px 16px 0 0' }}>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{opt.name}</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>
+                          {[opt.email, opt.phone, opt.linkedin, opt.location].filter(Boolean).join(' · ')}
                         </div>
+                        {opt.skills?.length > 0 && (
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            {opt.skills.slice(0, 3).map(tag => (
+                              <span key={tag} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-                        <div style={{ padding: '16px 22px' }}>
-                          {/* Summary */}
-                          {opt.summary && (
-                            <div style={{ marginBottom: 18 }}>
-                              {secDivider('Professional Summary')}
-                              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: '#374151', margin: 0, lineHeight: 1.7 }}>{opt.summary}</p>
-                            </div>
-                          )}
+                      {/* Summary */}
+                      {opt.summary && (
+                        <div style={{ marginBottom: 24 }}>
+                          {secDivider('Professional Summary')}
+                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: '#374151', margin: 0, lineHeight: 1.7 }}>{opt.summary}</p>
+                        </div>
+                      )}
 
-                          {/* Education */}
-                          {opt.education?.length > 0 && (
-                            <div style={{ marginBottom: 18 }}>
-                              {secDivider('Education')}
-                              {opt.education.map((e, i) => (
-                                <div key={i} style={{ marginBottom: 6 }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{e.school}</div>
-                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{e.dates}</div>
-                                  </div>
-                                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#475569', marginTop: 1 }}>
-                                    {[e.degree, e.gpa ? `GPA: ${e.gpa}` : null, e.honors].filter(Boolean).join(' · ')}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Experience */}
-                          {opt.experience?.length > 0 && (
-                            <div style={{ marginBottom: 18 }}>
-                              {secDivider('Experience')}
-                              {opt.experience.map((ex, i) => (
-                                <div key={i} style={{ marginBottom: 14 }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{ex.title}</div>
-                                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{ex.dates}</div>
-                                  </div>
-                                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>
-                                    {ex.company}{ex.location ? ` · ${ex.location}` : ''}
-                                  </div>
-                                  {ex.bullets?.map((b, j) => (
-                                    <div key={j} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
-                                      <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
-                                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Skills */}
-                          {opt.skills?.length > 0 && (
-                            <div style={{ marginBottom: 14 }}>
-                              {secDivider('Skills')}
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                                {opt.skills.map(s => (
-                                  <span key={s} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 9px' }}>{s}</span>
-                                ))}
+                      {/* Education */}
+                      {opt.education?.length > 0 && (
+                        <div style={{ marginBottom: 24 }}>
+                          {secDivider('Education')}
+                          {opt.education.map((e, i) => (
+                            <div key={i} style={{ marginBottom: 8 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{e.school}</div>
+                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{e.dates}</div>
+                              </div>
+                              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#475569', marginTop: 1 }}>
+                                {[e.degree, e.gpa ? `GPA: ${e.gpa}` : null, e.honors].filter(Boolean).join(' · ')}
                               </div>
                             </div>
-                          )}
+                          ))}
+                        </div>
+                      )}
 
-                          {/* Activities */}
-                          {opt.activities?.length > 0 && (
-                            <div>
-                              {secDivider('Leadership & Activities')}
-                              {opt.activities.map((a, i) => (
-                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#0f172a' }}>{a.name}{a.role ? ` — ${a.role}` : ''}</div>
-                                  {a.dates && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{a.dates}</div>}
+                      {/* Experience */}
+                      {opt.experience?.length > 0 && (
+                        <div style={{ marginBottom: 24 }}>
+                          {secDivider('Experience')}
+                          {opt.experience.map((ex, i) => (
+                            <div key={i} style={{ marginBottom: 16 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{ex.title}</div>
+                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{ex.dates}</div>
+                              </div>
+                              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>
+                                {ex.company}{ex.location ? ` · ${ex.location}` : ''}
+                              </div>
+                              {ex.bullets?.map((b, j) => (
+                                <div key={j} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
+                                  <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
+                                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
                                 </div>
                               ))}
                             </div>
-                          )}
+                          ))}
                         </div>
-                      </>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
-                        <div style={{ width: 36, height: 36, border: '3px solid #d1fae5', borderTop: '3px solid #16a34a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                        <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>Optimizing your resume...</p>
-                      </div>
-                    )}
-                  </div>
+                      )}
+
+                      {/* Skills */}
+                      {opt.skills?.length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                          {secDivider('Skills')}
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                            {opt.skills.map(s => (
+                              <span key={s} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 9px' }}>{s}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Activities */}
+                      {opt.activities?.length > 0 && (
+                        <div>
+                          {secDivider('Leadership & Activities')}
+                          {opt.activities.map((a, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#0f172a' }}>{a.name}{a.role ? ` — ${a.role}` : ''}</div>
+                              {a.dates && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{a.dates}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })()}
 
           {/* Agent Feedback */}
-          <div style={{ background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 24, padding: '24px 28px', marginBottom: 28 }}>
-            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>✓ Agent Feedback</p>
-            {[
-              'Strengthened your bullet points to focus on results instead of tasks',
-              'Improved formatting and visual hierarchy for a modern, professional look',
-              'Made it ATS-friendly while keeping it visually standout',
-              <>Score improved from <span style={{ textDecoration: 'line-through', color: '#f87171', margin: '0 4px' }}>42/100</span> → <span style={{ color: GREEN, fontWeight: 700, marginLeft: 4 }}>87/100</span></>,
-            ].map((line, i) => (
-              <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderTop: i > 0 ? '1px solid rgba(34,197,94,0.08)' : 'none' }}>
-                <span style={{ color: GREEN, fontSize: 14, flexShrink: 0 }}>✓</span>
-                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.5 }}>{line}</p>
-              </div>
-            ))}
+          <div style={{ background: '#1a1d24', border: '1px solid #374151', borderRadius: 24, padding: '32px 28px', marginBottom: 48 }}>
+            <h3 style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#34d399', letterSpacing: '0.05em', textTransform: 'uppercase', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>✓</span> AGENT FEEDBACK
+            </h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[
+                'Strengthened your bullet points to focus on results, not tasks',
+                'Improved formatting and visual hierarchy for a modern look',
+                'Made it ATS-friendly while keeping it visually standout',
+                <>Score improved from <span style={{ textDecoration: 'line-through', color: '#f87171', margin: '0 6px' }}>42/100</span> → <span style={{ fontWeight: 700, color: '#34d399', marginLeft: 6 }}>87/100</span></>,
+              ].map((line, i) => (
+                <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontFamily: dm, fontSize: 14, color: '#d1d5db', lineHeight: 1.6 }}>
+                  <span style={{ color: '#34d399', fontSize: 16, flexShrink: 0, marginTop: 1 }}>✓</span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Personalized Plan */}
@@ -795,64 +802,65 @@ Return valid JSON matching the schema exactly.`,
           })()}
 
           {/* CTA */}
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <button
               onClick={() => setShowPaywall(true)}
-              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 12px', fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff', background: ORANGE, border: 'none', borderRadius: 20, padding: '22px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(232,93,32,0.45)', transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(232,93,32,0.6)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.45)'; }}
+              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 16px', fontFamily: dm, fontSize: 18, fontWeight: 700, color: '#fff', background: '#f97316', border: 'none', borderRadius: 16, padding: '24px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 40px rgba(249,115,22,0.4)', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(249,115,22,0.5)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(249,115,22,0.4)'; }}
             >
-              Unlock the Full Agent & Start This Plan
+              Unlock Unlimited Resumes + Full Agent
             </button>
-            <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
+            <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 14, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
               Use this version for now and continue
             </button>
-            <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: '12px 0 0' }}>$9.99/week or $19 for 30 days — cancel anytime</p>
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
+            <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: '#4b5563', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
           </div>
 
           {/* Paywall Modal */}
           {showPaywall && (
             <div
               onClick={() => setShowPaywall(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: 24 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: 24 }}
             >
-              <div onClick={e => e.stopPropagation()} style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 28, padding: '40px 32px', maxWidth: 440, width: '100%', animation: 'fadeUp 0.25s ease' }}>
-                <h2 style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: '#fff', textAlign: 'center', margin: '0 0 8px', letterSpacing: '-0.03em' }}>Unlock the Full Agent</h2>
-                <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.45)', textAlign: 'center', margin: '0 0 28px', lineHeight: 1.6 }}>Get unlimited resumes, tailoring for any job, tracking, and outreach help.</p>
+              <div onClick={e => e.stopPropagation()} style={{ background: '#1f2937', borderRadius: 24, padding: 40, maxWidth: 440, width: '100%', animation: 'fadeUp 0.25s ease' }}>
+                <h2 style={{ fontFamily: sat, fontSize: 24, fontWeight: 900, color: '#fff', textAlign: 'center', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Unlock the Full Agent</h2>
+                <p style={{ fontFamily: dm, fontSize: 14, color: '#9ca3af', textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>Get unlimited modern resumes, tailoring for any job, tracking, reminders, and more.</p>
 
-                {/* Weekly plan */}
-                <button
-                  onClick={saveAndAuth}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 18, padding: '20px 22px', marginBottom: 12, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-                >
-                  <div>
-                    <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>$9.99 / week</p>
-                    <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '3px 0 0' }}>Cancel anytime</p>
-                  </div>
-                  <span style={{ fontFamily: dm, fontSize: 12, color: GREEN, fontWeight: 600 }}>Most flexible</span>
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Weekly plan */}
+                  <button
+                    onClick={saveAndAuth}
+                    style={{ width: '100%', background: '#374151', border: '1px solid #4b5563', borderRadius: 16, padding: '24px 20px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#4b5563'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#374151'}
+                  >
+                    <div>
+                      <p style={{ fontFamily: sat, fontSize: 17, fontWeight: 700, color: '#fff', margin: 0 }}>$9.99 / week</p>
+                      <p style={{ fontFamily: dm, fontSize: 13, color: '#9ca3af', margin: '4px 0 0' }}>Cancel anytime</p>
+                    </div>
+                    <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: '#34d399', background: 'rgba(34,197,94,0.15)', borderRadius: 100, padding: '4px 10px' }}>Most flexible</span>
+                  </button>
 
-                {/* 30-day plan */}
-                <button
-                  onClick={saveAndAuth}
-                  style={{ width: '100%', background: 'rgba(34,197,94,0.12)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 18, padding: '20px 22px', marginBottom: 24, cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.2)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(34,197,94,0.12)'}
-                >
-                  <div>
-                    <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 700, color: '#fff', margin: 0 }}>$19 for 30 days</p>
-                    <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '3px 0 0' }}>Best value for most students</p>
-                  </div>
-                  <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 10px' }}>POPULAR</span>
-                </button>
+                  {/* 30-day plan */}
+                  <button
+                    onClick={saveAndAuth}
+                    style={{ width: '100%', background: '#059669', border: '2px solid #34d399', borderRadius: 16, padding: '24px 20px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s', position: 'relative' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#10b981'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#059669'}
+                  >
+                    <div>
+                      <p style={{ fontFamily: sat, fontSize: 17, fontWeight: 700, color: '#fff', margin: 0 }}>$19 for 30 days</p>
+                      <p style={{ fontFamily: dm, fontSize: 13, color: '#d1fae5', margin: '4px 0 0' }}>Best value • Most students choose this</p>
+                    </div>
+                    <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#000', background: '#fff', borderRadius: 100, padding: '4px 12px', position: 'absolute', top: -8, right: -8 }}>POPULAR</span>
+                  </button>
+                </div>
 
-                <button onClick={() => setShowPaywall(false)} style={{ width: '100%', fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', textAlign: 'center' }}>
+                <button onClick={() => setShowPaywall(false)} style={{ width: '100%', fontFamily: dm, fontSize: 14, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', textAlign: 'center', marginTop: 32 }}>
                   Maybe later
                 </button>
               </div>
