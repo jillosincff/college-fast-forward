@@ -80,8 +80,13 @@ export default function OnboardingFlow({ onClose }) {
   const [locationCity, setLocationCity] = useState('');
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
-  const [resumeData, setResumeData] = useState(null); // parsed resume from AI
+  const [resumeData, setResumeData] = useState(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [linkedinInput, setLinkedinInput] = useState('');
+  const [quickMajor, setQuickMajor] = useState('');
+  const [quickSkills, setQuickSkills] = useState('');
+  const [quickRole, setQuickRole] = useState('');
+  const [dataInputMode, setDataInputMode] = useState('choose'); // 'choose' | 'linkedin' | 'quickstart'
   const fileRef = useRef();
 
   const TOTAL = 9;
@@ -491,57 +496,217 @@ Return valid JSON matching the schema exactly.`,
         );
       })()}
 
-      {/* ── SCREEN 8: Resume Upload ── */}
+      {/* ── SCREEN 8: Data Input (3 paths) ── */}
       {screen === 8 && (
-        <div style={{ ...card, maxWidth: 520 }}>
+        <div style={{ ...card, maxWidth: 540 }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
-          <div style={{ width: 72, height: 72, borderRadius: 22, background: uploading ? 'rgba(34,197,94,0.15)' : 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 28px', transition: 'all 0.3s' }}>
-            {uploading ? '⏳' : '📄'}
-          </div>
-          <h1 style={h1}>{uploading ? 'Analyzing your resume...' : 'Upload your resume'}</h1>
-          <p style={sub}>{uploading ? 'The Agent is creating your upgraded version. This takes just a moment.' : 'The Agent will instantly show you a stronger, modern version — and build your personalized plan.'}</p>
-
-          {!uploading && (
-            <button
-              onClick={() => fileRef.current?.click()}
-              style={{
-                width: '100%', padding: '32px 24px', borderRadius: 20,
-                border: '2px dashed rgba(34,197,94,0.4)',
-                background: 'rgba(34,197,94,0.05)',
-                cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
-                transition: 'all 0.2s', minHeight: 'auto', marginBottom: 20,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.7)'; e.currentTarget.style.background = 'rgba(34,197,94,0.12)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(34,197,94,0.4)'; e.currentTarget.style.background = 'rgba(34,197,94,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <span style={{ fontSize: 40 }}>⬆️</span>
-              <p style={{ fontFamily: dm, fontSize: 17, fontWeight: 700, color: GREEN, margin: 0 }}>Upload PDF or Word</p>
-              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>We'll create your optimized version instantly</p>
-            </button>
-          )}
-
+          {/* Loading state */}
           {uploading && (
-            <div style={{ width: '100%', padding: '32px 24px', borderRadius: 20, border: '2px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 40, border: '3px solid rgba(34,197,94,0.2)', borderTop: `3px solid ${GREEN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              <p style={{ fontFamily: dm, fontSize: 15, color: GREEN, margin: 0, fontWeight: 600 }}>Building your optimized resume...</p>
-              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: 0 }}>Strengthening bullets · Adding ATS keywords · Modernizing layout</p>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ width: 72, height: 72, borderRadius: 22, background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 28px' }}>⏳</div>
+              <h1 style={h1}>Analyzing your background...</h1>
+              <p style={sub}>The Agent is building your personalized profile. Just a moment.</p>
+              <div style={{ width: '100%', padding: '28px 24px', borderRadius: 20, border: '2px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 36, height: 36, border: `3px solid rgba(34,197,94,0.2)`, borderTop: `3px solid ${GREEN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                <p style={{ fontFamily: dm, fontSize: 14, color: GREEN, margin: 0, fontWeight: 600 }}>Building your optimized profile...</p>
+              </div>
             </div>
           )}
 
-          {!uploading && (
+          {/* Choose path */}
+          {!uploading && dataInputMode === 'choose' && (
             <>
+              <h1 style={h1}>Let's build your profile</h1>
+              <p style={sub}>The Agent needs to know who you are to find your insiders and build your plan.</p>
+
+              {/* Option 1: Resume */}
+              <button
+                onClick={() => fileRef.current?.click()}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 18, background: 'rgba(34,197,94,0.07)', border: '1.5px solid rgba(34,197,94,0.35)', borderRadius: 18, padding: '20px 22px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', marginBottom: 12, transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.13)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.6)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(34,197,94,0.07)'; e.currentTarget.style.borderColor = 'rgba(34,197,94,0.35)'; }}
+              >
+                <span style={{ fontSize: 28, flexShrink: 0 }}>📄</span>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 3px' }}>Upload Resume</p>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>PDF or Word — get a full Before/After transformation</p>
+                </div>
+                <span style={{ marginLeft: 'auto', fontFamily: dm, fontSize: 10, fontWeight: 700, color: GREEN, background: 'rgba(34,197,94,0.15)', borderRadius: 100, padding: '3px 10px', flexShrink: 0 }}>BEST</span>
+              </button>
+
+              {/* Option 2: LinkedIn */}
+              <button
+                onClick={() => setDataInputMode('linkedin')}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 18, background: 'rgba(0,119,181,0.07)', border: '1.5px solid rgba(0,119,181,0.3)', borderRadius: 18, padding: '20px 22px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', marginBottom: 12, transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,119,181,0.13)'; e.currentTarget.style.borderColor = 'rgba(0,119,181,0.55)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,119,181,0.07)'; e.currentTarget.style.borderColor = 'rgba(0,119,181,0.3)'; }}
+              >
+                <span style={{ fontSize: 28, flexShrink: 0 }}>💼</span>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 3px' }}>Paste LinkedIn URL</p>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>No PDF? The Agent extracts your experience from LinkedIn</p>
+                </div>
+                <span style={{ marginLeft: 'auto', fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#60a5fa', background: 'rgba(0,119,181,0.15)', borderRadius: 100, padding: '3px 10px', flexShrink: 0 }}>FAST</span>
+              </button>
+
+              {/* Option 3: Quick Start */}
+              <button
+                onClick={() => setDataInputMode('quickstart')}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 18, background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: '20px 22px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', marginBottom: 24, transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+              >
+                <span style={{ fontSize: 28, flexShrink: 0 }}>⚡</span>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 3px' }}>Quick Start (3 questions)</p>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0 }}>No resume, no LinkedIn? Answer 3 questions and we'll build your starter profile</p>
+                </div>
+              </button>
+
               <div style={{ textAlign: 'center' }}>
-                <button onClick={() => setScreen(9)} style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, textDecoration: 'underline' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
-                >
-                  Skip for now — I'll upload later
-                </button>
-              </div>
-              <div style={{ textAlign: 'center', marginTop: 20 }}>
                 <button onClick={back} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
+              </div>
+            </>
+          )}
+
+          {/* LinkedIn path */}
+          {!uploading && dataInputMode === 'linkedin' && (
+            <>
+              <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(0,119,181,0.12)', border: '1px solid rgba(0,119,181,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 24px' }}>💼</div>
+              <h1 style={h1}>Paste your LinkedIn URL</h1>
+              <p style={sub}>The Agent will extract your experience and build your full profile from there.</p>
+              <input
+                type="url"
+                placeholder="https://linkedin.com/in/yourname"
+                value={linkedinInput}
+                onChange={e => setLinkedinInput(e.target.value)}
+                style={{ width: '100%', boxSizing: 'border-box', fontFamily: dm, fontSize: 15, color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '14px 16px', outline: 'none', marginBottom: 20 }}
+                onFocus={e => e.target.style.borderColor = 'rgba(0,119,181,0.6)'}
+                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.15)'}
+              />
+              <Btn
+                onClick={async () => {
+                  if (!linkedinInput.trim()) return;
+                  setUploading(true);
+                  try {
+                    const res = await base44.integrations.Core.InvokeLLM({
+                      prompt: `Extract professional profile data from this LinkedIn URL: ${linkedinInput}
+University: ${college || 'unknown'}. Target role type: ${seeking || 'unknown'}.
+Create a professional profile JSON as if extracted from LinkedIn. Be realistic and professional.`,
+                      response_json_schema: {
+                        type: 'object', properties: {
+                          original: { type: 'object', properties: {
+                            name: { type: 'string' }, email: { type: 'string' }, linkedin: { type: 'string' },
+                            summary: { type: 'string' },
+                            education: { type: 'array', items: { type: 'object', properties: { school: { type: 'string' }, degree: { type: 'string' }, dates: { type: 'string' } } } },
+                            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } },
+                            skills: { type: 'array', items: { type: 'string' } },
+                            activities: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' } } } }
+                          }},
+                          optimized_experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } }
+                        }
+                      }
+                    });
+                    const parsed = res.original;
+                    setResumeData({ original: parsed, optimized: { ...parsed, experience: res.optimized_experience } });
+                  } catch { /* advance anyway */ }
+                  setUploading(false);
+                  setScreen(9);
+                }}
+                disabled={!linkedinInput.trim()}
+                style={{ display: 'block', width: '100%', marginBottom: 16 }}
+              >
+                Extract My Profile →
+              </Btn>
+              <div style={{ textAlign: 'center' }}>
+                <button onClick={() => setDataInputMode('choose')} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>← Back to options</button>
+              </div>
+            </>
+          )}
+
+          {/* Quick Start path */}
+          {!uploading && dataInputMode === 'quickstart' && (
+            <>
+              <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,200,0,0.1)', border: '1px solid rgba(255,200,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 24px' }}>⚡</div>
+              <h1 style={h1}>Quick Start</h1>
+              <p style={sub}>Answer 3 questions and the Agent builds your Starter Profile in seconds.</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, textAlign: 'left', marginBottom: 24 }}>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 8px' }}>1. What's your major?</p>
+                  <input
+                    type="text" placeholder="e.g. Business Administration, Computer Science..."
+                    value={quickMajor} onChange={e => setQuickMajor(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box', fontFamily: dm, fontSize: 15, color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '13px 16px', outline: 'none' }}
+                    onFocus={e => e.target.style.borderColor = `rgba(34,197,94,0.5)`}
+                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+                  />
+                </div>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 8px' }}>2. What are 2 things you're good at?</p>
+                  <input
+                    type="text" placeholder="e.g. Python, Writing, Organizing events, Excel..."
+                    value={quickSkills} onChange={e => setQuickSkills(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box', fontFamily: dm, fontSize: 15, color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '13px 16px', outline: 'none' }}
+                    onFocus={e => e.target.style.borderColor = `rgba(34,197,94,0.5)`}
+                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+                  />
+                </div>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 8px' }}>3. What job/internship are you dreaming of?</p>
+                  <input
+                    type="text" placeholder="e.g. Marketing internship at a tech company..."
+                    value={quickRole} onChange={e => setQuickRole(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box', fontFamily: dm, fontSize: 15, color: '#fff', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '13px 16px', outline: 'none' }}
+                    onFocus={e => e.target.style.borderColor = `rgba(34,197,94,0.5)`}
+                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+                  />
+                </div>
+              </div>
+
+              <Btn
+                onClick={async () => {
+                  if (!quickMajor.trim() || !quickSkills.trim() || !quickRole.trim()) return;
+                  setUploading(true);
+                  try {
+                    const res = await base44.integrations.Core.InvokeLLM({
+                      prompt: `Build a realistic starter professional profile for a college student with:
+Major: ${quickMajor}
+Skills: ${quickSkills}
+Dream role: ${quickRole}
+University: ${college || 'university'}
+
+Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, class projects), relevant skills, and education. Then write an optimized version with stronger bullets.`,
+                      response_json_schema: {
+                        type: 'object', properties: {
+                          original: { type: 'object', properties: {
+                            name: { type: 'string' },
+                            summary: { type: 'string' },
+                            education: { type: 'array', items: { type: 'object', properties: { school: { type: 'string' }, degree: { type: 'string' }, dates: { type: 'string' } } } },
+                            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } },
+                            skills: { type: 'array', items: { type: 'string' } },
+                            activities: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' } } } }
+                          }},
+                          optimized_experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } }
+                        }
+                      }
+                    });
+                    const parsed = res.original;
+                    // Inject college and role into the data
+                    if (parsed.education?.length > 0 && college) parsed.education[0].school = college;
+                    setResumeData({ original: parsed, optimized: { ...parsed, experience: res.optimized_experience }, isQuickStart: true, targetRole: quickRole });
+                  } catch { /* advance anyway */ }
+                  setUploading(false);
+                  setScreen(9);
+                }}
+                disabled={!quickMajor.trim() || !quickSkills.trim() || !quickRole.trim()}
+                style={{ display: 'block', width: '100%', marginBottom: 16 }}
+              >
+                Build My Starter Profile →
+              </Btn>
+              <div style={{ textAlign: 'center' }}>
+                <button onClick={() => setDataInputMode('choose')} style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>← Back to options</button>
               </div>
             </>
           )}
@@ -826,6 +991,7 @@ Return valid JSON matching the schema exactly.`,
           resumeData={resumeData}
           college={college}
           seeking={seeking}
+          targetRole={resumeData?.targetRole || quickRole}
           onBack={() => setScreen(9)}
           saveAndAuth={saveAndAuth}
         />

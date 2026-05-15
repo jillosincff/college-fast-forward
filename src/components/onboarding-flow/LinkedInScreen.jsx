@@ -55,14 +55,14 @@ function CardLabel({ icon, label, badge }) {
   );
 }
 
-export default function LinkedInScreen({ resumeData, college, seeking, onBack, saveAndAuth }) {
+export default function LinkedInScreen({ resumeData, college, seeking, targetRole, onBack, saveAndAuth }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [typingDone, setTypingDone] = useState(false);
   const [activeHeadline, setActiveHeadline] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
 
-  const seekingLabel = seeking === 'internship' ? 'Remote Internship' : seeking === 'fulltime' ? 'Remote Full-Time Role' : 'Remote Opportunity';
+  const seekingLabel = targetRole || (seeking === 'internship' ? 'Remote Internship' : seeking === 'fulltime' ? 'Remote Full-Time Role' : 'Remote Opportunity');
 
   useEffect(() => { generateLinkedIn(); }, []);
 
@@ -119,9 +119,9 @@ Return valid JSON.`,
     } catch {
       setResult({
         headlines: [
-          `Project Coordinator | Agile & Notion | Operations Optimizer | ${college || 'University of Florida'} '26`,
-          `Digital Marketing Strategist | SEO & Analytics | Content & Brand | ${college || 'University of Florida'} '26`,
-          `Data Analyst | Python & SQL | Remote-First Insights | ${college || 'University of Florida'} '26`,
+          `${seekingLabel} | Results-Driven | Problem Solver | ${college || 'University of Florida'} '26`,
+          `${seekingLabel} | Collaborative & Data-Informed | ${college || 'University of Florida'} '26`,
+          `${seekingLabel} | Remote-Ready | Fast Learner | ${college || 'University of Florida'} '26`,
         ],
         about_full: `I build systems that make teams faster and clients happier. As a ${college || 'UF'} senior entering the remote workforce, I focus on turning ambiguous problems into structured, scalable solutions.\n\nDuring my internship at [Company], I redesigned our project tracking workflow, reducing missed deadlines by 30% and saving the team ~5 hours per week. I thrive at the intersection of strategy and execution.\n\nI'm actively targeting remote roles in project coordination and operations. If you're a recruiter or ${college || 'UF'} alum at a remote-first company, I'd love to connect and learn about your team's culture.`,
         keywords: ['Project Management', 'Remote Collaboration', 'Agile', 'Notion', 'Asana', 'Data Analysis', 'Cross-functional Teams', 'Process Improvement', 'Google Workspace', 'Communication'],
