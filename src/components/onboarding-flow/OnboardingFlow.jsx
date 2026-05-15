@@ -720,8 +720,12 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h1 style={{ ...h1, fontSize: 'clamp(24px, 4vw, 40px)', marginBottom: 8 }}>Your Resume Just Leveled Up</h1>
-            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>The CFF Agent rewrote your bullets, fixed the layout, and made it look professional — without losing your story.</p>
+            <h1 style={{ ...h1, fontSize: 'clamp(24px, 4vw, 40px)', marginBottom: 8 }}>
+              {dataInputMode === 'linkedin' ? 'Your Profile Just Got Optimized' : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : 'Your Resume Just Leveled Up'}
+            </h1>
+            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
+              {dataInputMode === 'linkedin' ? 'The CFF Agent extracted your experience from LinkedIn and built you an optimized professional profile.' : dataInputMode === 'quickstart' ? 'The CFF Agent built your starter profile and showed you what it could look like with stronger positioning.' : 'The CFF Agent rewrote your bullets, fixed the layout, and made it look professional — without losing your story.'}
+            </p>
           </div>
 
           {/* Before / After side by side */}
@@ -742,7 +746,9 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                 {/* BEFORE */}
                 <div style={{ background: '#1a1d24', border: '1px solid #374151', borderRadius: 24, padding: 32 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                    <h2 style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: '#9ca3af', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Your Current Resume</h2>
+                    <h2 style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: '#9ca3af', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                      {dataInputMode === 'linkedin' ? 'Your LinkedIn Profile' : dataInputMode === 'quickstart' ? 'Your Starter Profile' : 'Your Current Resume'}
+                    </h2>
                   </div>
                   <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 520, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.1)' }}>
                     {orig ? (
