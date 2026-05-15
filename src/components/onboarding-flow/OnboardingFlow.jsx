@@ -127,6 +127,8 @@ export default function OnboardingFlow({ onClose }) {
   const [quickSkills, setQuickSkills] = useState('');
   const [quickRole, setQuickRole] = useState('');
   const [dataInputMode, setDataInputMode] = useState('choose');
+  const [hoveredExpert, setHoveredExpert] = useState(null);
+  const [selectedExpert, setSelectedExpert] = useState(null);
   const fileRef = useRef();
 
   const TOTAL = 9;
@@ -288,21 +290,115 @@ Return valid JSON matching the schema exactly.`,
       )}
 
       {/* ── SCREEN 2: Built by Experts ── */}
-      {screen === 2 && (
-        <div style={card}>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 32 }}>
-            {[{ emoji: '🎓', label: 'Career Coach' }, { emoji: '💼', label: 'Recruiter' }, { emoji: '🏢', label: 'Hiring Manager' }].map(item => (
-              <div key={item.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, background: CARD, border: '1px solid #E2E8F0', borderRadius: R, padding: '20px 18px', boxShadow: SHADOW }}>
-                <span style={{ fontSize: 26 }}>{item.emoji}</span>
-                <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 600, color: TEXT2, whiteSpace: 'nowrap' }}>{item.label}</span>
+      {screen === 2 && (() => {
+        const EXPERTS = [
+          {
+            key: 'coach',
+            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&crop=face',
+            name: 'Priya S.',
+            role: 'Career Strategist',
+            teaser: 'Structures your story to land more first-round calls.',
+            color: '#7C3AED',
+            colorLight: '#F5F3FF',
+            colorBorder: '#DDD6FE',
+          },
+          {
+            key: 'recruiter',
+            avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face',
+            name: 'Marcus T.',
+            role: 'Ex-Google Recruiter',
+            teaser: 'Optimized to beat the ATS and catch a human eye.',
+            color: BLUE,
+            colorLight: BLUE_LIGHT,
+            colorBorder: BLUE_BORDER,
+          },
+          {
+            key: 'hm',
+            avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face',
+            name: 'Sarah K.',
+            role: 'Hiring Manager',
+            teaser: 'Focuses on the skills that prove you can do the job.',
+            color: GREEN,
+            colorLight: GREEN_LIGHT,
+            colorBorder: GREEN_BORDER,
+          },
+        ];
+
+        const LOGOS = ['Goldman Sachs', 'Google', 'Meta', 'McKinsey', 'Amazon'];
+
+        return (
+          <div style={{ ...card, maxWidth: 600, position: 'relative' }}>
+            {/* Blob accent */}
+            <div style={{ position: 'absolute', top: -60, right: -80, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,102,255,0.07) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              {/* Step micro-copy */}
+              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 20px' }}>
+                Step 2 of 8 · Meet Your Team
+              </p>
+
+              <h1 style={h1style}>Built by Hiring Experts</h1>
+              <p style={{ ...substyle, marginBottom: 28 }}>These are the real people whose playbooks power your plan. Tap one to learn more.</p>
+
+              {/* Expert cards */}
+              <style>{`
+                @media (max-width: 600px) { .expert-grid { flex-direction: column !important; } }
+              `}</style>
+              <div className="expert-grid" style={{ display: 'flex', gap: 12, marginBottom: 28, justifyContent: 'center' }}>
+                {EXPERTS.map(ex => {
+                  const isActive = selectedExpert === ex.key;
+                  const isHov = hoveredExpert === ex.key;
+                  return (
+                    <div
+                      key={ex.key}
+                      onClick={() => setSelectedExpert(isActive ? null : ex.key)}
+                      onMouseEnter={() => setHoveredExpert(ex.key)}
+                      onMouseLeave={() => setHoveredExpert(null)}
+                      style={{
+                        flex: 1, minWidth: 140, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                        gap: 10, background: isActive ? ex.colorLight : CARD,
+                        border: `2px solid ${isActive ? ex.color : isHov ? ex.colorBorder : '#E2E8F0'}`,
+                        borderRadius: 16, padding: '20px 14px 16px', cursor: 'pointer',
+                        boxShadow: isActive ? `0 8px 24px ${ex.color}22` : isHov ? SHADOW_MD : SHADOW,
+                        transform: isActive || isHov ? 'translateY(-4px)' : 'translateY(0)',
+                        transition: 'all 0.2s ease',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <img
+                        src={ex.avatar}
+                        alt={ex.name}
+                        style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isActive ? ex.color : '#E2E8F0'}`, transition: 'border-color 0.2s' }}
+                        onError={e => { e.target.style.display = 'none'; }}
+                      />
+                      <div>
+                        <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: isActive ? ex.color : TEXT, margin: '0 0 2px' }}>{ex.name}</p>
+                        <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, margin: 0 }}>{ex.role}</p>
+                      </div>
+                      {isActive && (
+                        <p style={{ fontFamily: FONT, fontSize: 12, color: ex.color, margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+                          "{ex.teaser}"
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ))}
+
+              {/* Trust logos */}
+              <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 20, marginBottom: 8 }}>
+                <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 12px' }}>Optimized for roles at</p>
+                <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+                  {LOGOS.map(l => (
+                    <span key={l} style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#CBD5E1', letterSpacing: '-0.01em' }}>{l}</span>
+                  ))}
+                </div>
+              </div>
+
+              <Nav onBack={back} onNext={next} />
+            </div>
           </div>
-          <h1 style={h1style}>Built by Hiring Experts</h1>
-          <p style={substyle}>Designed with career coaches and recruiters who know exactly what gets candidates hired.</p>
-          <Nav onBack={back} onNext={next} />
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── SCREEN 3: Frustration Slider ── */}
       {screen === 3 && (
