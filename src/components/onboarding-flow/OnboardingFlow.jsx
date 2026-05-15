@@ -569,15 +569,15 @@ Return valid JSON matching the schema exactly.`,
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28, alignItems: 'stretch' }}>
 
                 {/* BEFORE */}
-                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexShrink: 0 }}>
+                <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '24px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexShrink: 0 }}>
                     <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
                     <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px', flexShrink: 0 }}>Original</span>
                   </div>
                   <div style={{ borderRadius: 12, overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column', flex: 1, minHeight: '400px' }}>
                     {orig ? (
                       /* Render parsed original in plain-text style */
-                      <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, boxSizing: 'border-box', overflowY: 'auto', flex: 1 }}>
+                      <div style={{ padding: '24px 18px 20px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, boxSizing: 'border-box', overflowY: 'auto', flex: 1 }}>
                         <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
                         <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, orig.linkedin, orig.location].filter(Boolean).join(' | ')}</p>
                         {orig.education?.length > 0 && <>
@@ -614,8 +614,8 @@ Return valid JSON matching the schema exactly.`,
                 </div>
 
                 {/* AFTER — same facts, dramatically better format */}
-                <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 24, padding: '20px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexShrink: 0 }}>
+                <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid rgba(34,197,94,0.5)', borderRadius: 24, padding: '24px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexShrink: 0 }}>
                     <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent Optimized Version</p>
                     <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 12px' }}>OPTIMIZED</span>
                   </div>
@@ -623,7 +623,7 @@ Return valid JSON matching the schema exactly.`,
                     {opt ? (
                       <>
                         {/* Dark header with real name */}
-                        <div style={{ background: '#0f172a', padding: '20px 22px 16px', flexShrink: 0 }}>
+                        <div style={{ background: '#0f172a', padding: '24px 22px 18px', flexShrink: 0 }}>
                           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{opt.name}</div>
                           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>
                             {[opt.email, opt.phone, opt.linkedin, opt.location].filter(Boolean).join(' · ')}
@@ -637,7 +637,7 @@ Return valid JSON matching the schema exactly.`,
                           )}
                         </div>
 
-                        <div style={{ padding: '18px 22px', flex: 1, overflowY: 'auto' }}>
+                        <div style={{ padding: '20px 22px', flex: 1, overflowY: 'auto' }}>
                           {/* Summary */}
                           {opt.summary && (
                             <div style={{ marginBottom: 18 }}>
