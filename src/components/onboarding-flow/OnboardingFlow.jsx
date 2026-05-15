@@ -574,7 +574,7 @@ Return valid JSON matching the schema exactly.`,
                     <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
                     <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
                   </div>
-                  <div style={{ borderRadius: 12, overflow: 'hidden', height: 620, background: '#fff' }}>
+                  <div style={{ borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
                     {orig ? (
                       /* Render parsed original in plain-text style */
                       <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}>
@@ -605,7 +605,7 @@ Return valid JSON matching the schema exactly.`,
                         </>}
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
                         <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTop: '3px solid #94a3b8', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                         <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>Parsing your resume...</p>
                       </div>
@@ -619,7 +619,7 @@ Return valid JSON matching the schema exactly.`,
                     <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Agent Optimized Version</p>
                     <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: GREEN, borderRadius: 100, padding: '3px 12px' }}>OPTIMIZED</span>
                   </div>
-                  <div style={{ background: '#fff', borderRadius: 12, height: 620, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
+                  <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
                     {opt ? (
                       <>
                         {/* Dark header with real name */}
@@ -715,7 +715,7 @@ Return valid JSON matching the schema exactly.`,
                         </div>
                       </>
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
                         <div style={{ width: 36, height: 36, border: '3px solid #d1fae5', borderTop: '3px solid #16a34a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                         <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>Optimizing your resume...</p>
                       </div>
