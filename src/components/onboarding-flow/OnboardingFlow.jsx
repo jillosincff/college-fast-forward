@@ -577,7 +577,7 @@ Return valid JSON matching the schema exactly.`,
                   <div style={{ borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
                     {orig ? (
                       /* Render parsed original in plain-text style */
-                      <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}>
+                      <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, boxSizing: 'border-box' }}>
                         <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
                         <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, orig.linkedin, orig.location].filter(Boolean).join(' | ')}</p>
                         {orig.education?.length > 0 && <>
