@@ -726,6 +726,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
 
           {/* Before / After side by side */}
           {(() => {
+            const toStr = (v) => (v && typeof v === 'object') ? (v.url || v.text || v.value || JSON.stringify(v)) : (v || '');
             const orig = resumeData?.original;
             const opt = resumeData?.optimized;
             const secDivider = (label) => (
@@ -746,30 +747,30 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                   <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 520, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.1)' }}>
                     {orig ? (
                       <div style={{ padding: 0, fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6 }}>
-                        <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
-                        <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, typeof orig.linkedin === 'string' ? orig.linkedin : '', orig.location].filter(Boolean).join(' | ')}</p>
+                        <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{toStr(orig.name)}</p>
+                        <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[toStr(orig.email), toStr(orig.phone), toStr(orig.linkedin), toStr(orig.location)].filter(Boolean).join(' | ')}</p>
                         {orig.education?.length > 0 && <>
                           <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EDUCATION</p>
                           {orig.education.map((e, i) => <div key={i}>
-                            <p style={{ margin: '0 0 2px', fontWeight: 600 }}>{e.school} — {e.degree}</p>
-                            <p style={{ margin: '0 0 8px', color: '#555', fontSize: 11 }}>{e.dates}{e.gpa ? ` | GPA: ${e.gpa}` : ''}{e.honors ? ` | ${e.honors}` : ''}</p>
+                            <p style={{ margin: '0 0 2px', fontWeight: 600 }}>{toStr(e.school)} — {toStr(e.degree)}</p>
+                            <p style={{ margin: '0 0 8px', color: '#555', fontSize: 11 }}>{toStr(e.dates)}{e.gpa ? ` | GPA: ${toStr(e.gpa)}` : ''}{e.honors ? ` | ${toStr(e.honors)}` : ''}</p>
                           </div>)}
                         </>}
                         {orig.experience?.length > 0 && <>
                           <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EXPERIENCE</p>
                           {orig.experience.map((ex, i) => <div key={i} style={{ marginBottom: 10 }}>
-                            <p style={{ margin: '0 0 2px', fontWeight: 600 }}>{ex.title} — {ex.company}{ex.location ? `, ${ex.location}` : ''}</p>
-                            <p style={{ margin: '0 0 4px', color: '#555', fontSize: 11 }}>{ex.dates}</p>
-                            {ex.bullets?.map((b, j) => <p key={j} style={{ margin: '0 0 2px' }}>- {b}</p>)}
+                            <p style={{ margin: '0 0 2px', fontWeight: 600 }}>{toStr(ex.title)} — {toStr(ex.company)}{ex.location ? `, ${toStr(ex.location)}` : ''}</p>
+                            <p style={{ margin: '0 0 4px', color: '#555', fontSize: 11 }}>{toStr(ex.dates)}</p>
+                            {ex.bullets?.map((b, j) => <p key={j} style={{ margin: '0 0 2px' }}>- {toStr(b)}</p>)}
                           </div>)}
                         </>}
                         {orig.skills?.length > 0 && <>
                           <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>SKILLS</p>
-                          <p style={{ margin: '0 0 10px' }}>{orig.skills.join(', ')}</p>
+                          <p style={{ margin: '0 0 10px' }}>{orig.skills.map(toStr).join(', ')}</p>
                         </>}
                         {orig.activities?.length > 0 && <>
                           <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>ACTIVITIES</p>
-                          {orig.activities.map((a, i) => <p key={i} style={{ margin: '0 0 2px' }}>{a.name}{a.role ? ` — ${a.role}` : ''}{a.dates ? ` (${a.dates})` : ''}</p>)}
+                          {orig.activities.map((a, i) => <p key={i} style={{ margin: '0 0 2px' }}>{toStr(a.name)}{a.role ? ` — ${toStr(a.role)}` : ''}{a.dates ? ` (${toStr(a.dates)})` : ''}</p>)}
                         </>}
                       </div>
                     ) : (
@@ -804,14 +805,14 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                     <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 520, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
                       {/* Dark header */}
                       <div style={{ background: '#0f172a', padding: '24px 22px 18px', margin: '-32px -32px 24px', borderRadius: '16px 16px 0 0' }}>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{opt.name}</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{toStr(opt.name)}</div>
                         <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>
-                          {[opt.email, opt.phone, typeof opt.linkedin === 'string' ? opt.linkedin : '', opt.location].filter(Boolean).join(' · ')}
+                          {[toStr(opt.email), toStr(opt.phone), toStr(opt.linkedin), toStr(opt.location)].filter(Boolean).join(' · ')}
                         </div>
                         {opt.skills?.length > 0 && (
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            {opt.skills.slice(0, 3).map(tag => (
-                              <span key={tag} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>{tag}</span>
+                            {opt.skills.slice(0, 3).map((tag, i) => (
+                              <span key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>{toStr(tag)}</span>
                             ))}
                           </div>
                         )}
@@ -821,7 +822,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                       {opt.summary && (
                         <div style={{ marginBottom: 24 }}>
                           {secDivider('Professional Summary')}
-                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: '#374151', margin: 0, lineHeight: 1.7 }}>{opt.summary}</p>
+                          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: '#374151', margin: 0, lineHeight: 1.7 }}>{toStr(opt.summary)}</p>
                         </div>
                       )}
 
@@ -831,14 +832,14 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                           {secDivider('Education')}
                           {opt.education.map((e, i) => (
                             <div key={i} style={{ marginBottom: 8 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{e.school}</div>
-                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{e.dates}</div>
-                              </div>
-                              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#475569', marginTop: 1 }}>
-                                {[e.degree, e.gpa ? `GPA: ${e.gpa}` : null, e.honors].filter(Boolean).join(' · ')}
-                              </div>
-                            </div>
+                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{toStr(e.school)}</div>
+                                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{toStr(e.dates)}</div>
+                               </div>
+                               <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#475569', marginTop: 1 }}>
+                                 {[toStr(e.degree), e.gpa ? `GPA: ${toStr(e.gpa)}` : null, toStr(e.honors)].filter(Boolean).join(' · ')}
+                               </div>
+                             </div>
                           ))}
                         </div>
                       )}
@@ -850,16 +851,16 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                           {opt.experience.map((ex, i) => (
                             <div key={i} style={{ marginBottom: 16 }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{ex.title}</div>
-                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{ex.dates}</div>
+                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{toStr(ex.title)}</div>
+                                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{toStr(ex.dates)}</div>
                               </div>
                               <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#16a34a', fontWeight: 600, marginBottom: 6 }}>
-                                {ex.company}{ex.location ? ` · ${ex.location}` : ''}
+                                {toStr(ex.company)}{ex.location ? ` · ${toStr(ex.location)}` : ''}
                               </div>
                               {ex.bullets?.map((b, j) => (
                                 <div key={j} style={{ display: 'flex', gap: 7, marginBottom: 4 }}>
                                   <span style={{ color: '#22c55e', fontSize: 11, flexShrink: 0, marginTop: 1 }}>▸</span>
-                                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{b}</p>
+                                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#374151', margin: 0, lineHeight: 1.6 }}>{toStr(b)}</p>
                                 </div>
                               ))}
                             </div>
@@ -872,8 +873,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                         <div style={{ marginBottom: 16 }}>
                           {secDivider('Skills')}
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                            {opt.skills.map(s => (
-                              <span key={s} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 9px' }}>{s}</span>
+                            {opt.skills.map((s, i) => (
+                              <span key={i} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '3px 9px' }}>{toStr(s)}</span>
                             ))}
                           </div>
                         </div>
@@ -885,8 +886,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                           {secDivider('Leadership & Activities')}
                           {opt.activities.map((a, i) => (
                             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#0f172a' }}>{a.name}{a.role ? ` — ${a.role}` : ''}</div>
-                              {a.dates && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{a.dates}</div>}
+                              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, color: '#0f172a' }}>{toStr(a.name)}{a.role ? ` — ${toStr(a.role)}` : ''}</div>
+                              {a.dates && <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: '#64748b' }}>{toStr(a.dates)}</div>}
                             </div>
                           ))}
                         </div>
