@@ -397,32 +397,71 @@ Return valid JSON matching the schema exactly.`,
       />}
 
       {/* ── SCREEN 3: Frustration Slider ── */}
-      {screen === 3 && (
-        <div style={{ ...card, maxWidth: 520 }}>
-          <h1 style={h1style}>How frustrated are you with your job search right now?</h1>
-          <p style={substyle}>Most students feel overwhelmed, ghosted, or stuck. Be honest — this shapes your plan.</p>
+      {screen === 3 && (() => {
+        const frustEmoji = frustration <= 3 ? '😌' : frustration <= 5 ? '😐' : frustration <= 7 ? '😟' : frustration <= 9 ? '😰' : '🆘';
+        const frustColor = frustration <= 3 ? GREEN : frustration <= 6 ? '#F59E0B' : '#EF4444';
+        const glowColor = frustration <= 3 ? 'rgba(16,185,129,0.08)' : frustration <= 6 ? 'rgba(245,158,11,0.09)' : 'rgba(239,68,68,0.11)';
+        const microCopy = frustration <= 3
+          ? "You've got a head start. Let's sharpen your edge."
+          : frustration <= 7
+          ? "You're feeling the heat. Most students are right here with you—we'll take the weight off."
+          : "Deep breaths. The 'Black Hole' is real, but we have the ladder to get you out.";
+        const pct = ((frustration - 1) / 9) * 100;
+        return (
+          <div style={{ ...card, maxWidth: 520, paddingTop: 40 }}>
+            <h1 style={{ ...h1style, marginBottom: 10 }}>How frustrated are you with your job search right now?</h1>
+            <p style={{ ...substyle, marginBottom: 32 }}>Be honest — we're building your strategy around your specific roadblocks.</p>
 
-          <div style={{ background: CARD, border: '1px solid #E2E8F0', borderRadius: R, padding: '28px 24px', marginBottom: 8, boxShadow: SHADOW }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontFamily: FONT, fontSize: 12, color: TEXT3 }}>Not at all</span>
-              <span style={{ fontFamily: FONT, fontSize: 12, color: TEXT3 }}>I'm losing my mind</span>
+            <div style={{ background: CARD, border: `1.5px solid ${frustColor}33`, borderRadius: R, padding: '32px 28px 28px', marginBottom: 12, boxShadow: `0 0 40px ${glowColor}, ${SHADOW}`, transition: 'box-shadow 0.4s ease, border-color 0.4s ease' }}>
+              {/* Emoji indicator */}
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                <span style={{ fontSize: 40, lineHeight: 1, transition: 'all 0.2s ease', display: 'inline-block' }}>{frustEmoji}</span>
+              </div>
+
+              {/* Labels */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                <span style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, fontWeight: 600 }}>Not at all</span>
+                <span style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, fontWeight: 600 }}>I'm losing my mind</span>
+              </div>
+
+              {/* Custom styled slider */}
+              <div style={{ position: 'relative', marginBottom: 4 }}>
+                <style>{`
+                  .frustration-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 100px; outline: none; cursor: pointer; background: linear-gradient(to right, ${frustColor} 0%, ${frustColor} ${pct}%, #E2E8F0 ${pct}%, #E2E8F0 100%); transition: background 0.15s ease; }
+                  .frustration-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2.5px solid ${frustColor}; box-shadow: 0 2px 10px rgba(0,0,0,0.16); cursor: grab; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+                  .frustration-slider::-webkit-slider-thumb:active { cursor: grabbing; box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
+                  .frustration-slider::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2.5px solid ${frustColor}; box-shadow: 0 2px 10px rgba(0,0,0,0.16); cursor: grab; }
+                `}</style>
+                <input
+                  type="range" min="1" max="10" value={frustration}
+                  onChange={e => setFrustration(Number(e.target.value))}
+                  className="frustration-slider"
+                />
+              </div>
+
+              {/* Score display */}
+              <div style={{ textAlign: 'center', marginTop: 24 }}>
+                <span style={{ fontFamily: FONT, fontSize: 64, fontWeight: 800, color: frustColor, lineHeight: 1, letterSpacing: '-0.04em', transition: 'color 0.3s ease' }}>{frustration}</span>
+                <span style={{ fontFamily: FONT, fontSize: 18, color: TEXT3, marginLeft: 6 }}>/10</span>
+                <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, marginTop: 14, lineHeight: 1.6, minHeight: 44, transition: 'all 0.2s ease' }}>
+                  {microCopy}
+                </p>
+              </div>
             </div>
-            <input
-              type="range" min="1" max="10" value={frustration}
-              onChange={e => setFrustration(Number(e.target.value))}
-              style={{ width: '100%', accentColor: frustration >= 7 ? '#EF4444' : GREEN, cursor: 'pointer', height: 6 }}
-            />
-            <div style={{ textAlign: 'center', marginTop: 20 }}>
-              <span style={{ fontFamily: FONT, fontSize: 52, fontWeight: 800, color: frustration >= 7 ? '#EF4444' : GREEN, lineHeight: 1, letterSpacing: '-0.03em' }}>{frustration}</span>
-              <span style={{ fontFamily: FONT, fontSize: 16, color: TEXT3, marginLeft: 6 }}>/10</span>
-              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, marginTop: 10 }}>
-                {frustration <= 3 ? "Things are going okay — let's make them even better." : frustration <= 6 ? "You're feeling the pressure. We've got you." : "We hear you. That's exactly why CFF exists."}
-              </p>
+
+            {/* Custom nav — subtle back, bold continue */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, marginTop: 8 }}>
+              <button
+                onClick={next}
+                style={{ width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(0,102,255,0.2)', transition: 'all 0.25s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(0,102,255,0.32)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,102,255,0.2)'; }}
+              >Continue →</button>
+              <button onClick={back} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 8px', textDecoration: 'underline', textUnderlineOffset: 3 }}>← Back</button>
             </div>
           </div>
-          <Nav onBack={back} onNext={next} />
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── SCREEN 4: What Are You Looking For ── */}
       {screen === 4 && (
