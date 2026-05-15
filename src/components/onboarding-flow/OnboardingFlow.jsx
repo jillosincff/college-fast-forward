@@ -258,7 +258,7 @@ Return valid JSON matching the schema exactly.`,
     display: 'flex', flexDirection: 'column',
     alignItems: 'center',
     justifyContent: isFullPageScreen ? 'flex-start' : 'center',
-    padding: isFullPageScreen ? '0 24px 40px' : '60px 24px 40px',
+    padding: isFullPageScreen ? '0 24px 40px' : '80px 24px 60px',
     fontFamily: FONT,
     overflowY: 'auto',
   };
