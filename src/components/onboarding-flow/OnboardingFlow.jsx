@@ -106,60 +106,44 @@ export default function OnboardingFlow({ onClose }) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setResumeUrl(file_url);
 
-      // Parse the resume content via AI so we can display Before/After accurately
-      const parsed = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a resume parser. Extract the EXACT content from this resume — do not invent anything. Return a JSON object with:
-- name (string)
-- email (string)
-- phone (string)
-- linkedin (string, or "")
-- location (string, or "")
-- summary (string, or "")
-- education: array of { school, degree, dates, gpa, honors }
-- experience: array of { title, company, location, dates, bullets: string[] }
-- skills: string[]
-- activities: array of { name, role, dates }
+      // Single AI call: parse original AND generate optimized bullets simultaneously
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a resume parser and expert resume writer. Analyze this resume and return TWO versions:
 
-IMPORTANT: Only use content that is literally on the resume. Do not add, invent, or embellish anything.`,
+1. "original": Extract the EXACT content — name, contact info, education, experience with original bullets, skills, activities. Do NOT invent or change anything.
+
+2. "optimized_experience": The same experience entries but with bullet points rewritten to be stronger, results-oriented, and ATS-friendly. Keep all company names, titles, dates, and locations EXACTLY the same. Only improve bullet language with stronger action verbs.
+
+Return valid JSON matching the schema exactly.`,
         file_urls: [file_url],
         response_json_schema: {
           type: 'object',
           properties: {
-            name: { type: 'string' },
-            email: { type: 'string' },
-            phone: { type: 'string' },
-            linkedin: { type: 'string' },
-            location: { type: 'string' },
-            summary: { type: 'string' },
-            education: { type: 'array', items: { type: 'object', properties: { school: { type: 'string' }, degree: { type: 'string' }, dates: { type: 'string' }, gpa: { type: 'string' }, honors: { type: 'string' } } } },
-            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, location: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } },
-            skills: { type: 'array', items: { type: 'string' } },
-            activities: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' }, dates: { type: 'string' } } } },
+            original: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                email: { type: 'string' },
+                phone: { type: 'string' },
+                linkedin: { type: 'string' },
+                location: { type: 'string' },
+                summary: { type: 'string' },
+                education: { type: 'array', items: { type: 'object', properties: { school: { type: 'string' }, degree: { type: 'string' }, dates: { type: 'string' }, gpa: { type: 'string' }, honors: { type: 'string' } } } },
+                experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, location: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } },
+                skills: { type: 'array', items: { type: 'string' } },
+                activities: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' }, dates: { type: 'string' } } } },
+              }
+            },
+            optimized_experience: {
+              type: 'array',
+              items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, location: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } }
+            }
           }
         }
       });
 
-      // Now generate optimized bullets — same facts, stronger language
-      const optimized = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert resume writer. Given these resume experience entries, rewrite ONLY the bullet points to be stronger, more results-oriented, and ATS-friendly. 
-
-CRITICAL RULES:
-- Do NOT change any company names, job titles, dates, or locations
-- Do NOT invent metrics or facts that aren't implied by the original
-- Only improve the language, action verbs, and structure of each bullet
-- Return JSON with the same experience array, each entry having improved "bullets"
-
-Original experience:
-${JSON.stringify(parsed.experience)}`,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            experience: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, company: { type: 'string' }, location: { type: 'string' }, dates: { type: 'string' }, bullets: { type: 'array', items: { type: 'string' } } } } }
-          }
-        }
-      });
-
-      setResumeData({ original: parsed, optimized: { ...parsed, experience: optimized.experience } });
+      const parsed = result.original;
+      setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
       setScreen(8);
     } catch (err) {
       console.error(err);
