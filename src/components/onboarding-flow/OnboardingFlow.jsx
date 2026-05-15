@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import LinkedInScreen from './LinkedInScreen';
+import PlanScreen from './PlanScreen';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -1001,6 +1002,23 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           seeking={seeking}
           targetRole={resumeData?.targetRole || quickRole}
           onBack={() => setScreen(9)}
+          saveAndAuth={saveAndAuth}
+          onNext={() => setScreen(11)}
+        />
+      )}
+
+      {/* ── SCREEN 11: Your 14-Day Plan ── */}
+      {screen === 11 && (
+        <PlanScreen
+          resumeData={resumeData}
+          college={college}
+          seeking={seeking}
+          blockers={blockers}
+          frustration={frustration}
+          locationPref={locationPref}
+          locationCity={locationCity}
+          quickRole={quickRole}
+          onBack={() => setScreen(10)}
           saveAndAuth={saveAndAuth}
         />
       )}

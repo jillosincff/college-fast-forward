@@ -55,7 +55,7 @@ function CardLabel({ icon, label, badge }) {
   );
 }
 
-export default function LinkedInScreen({ resumeData, college, seeking, targetRole, onBack, saveAndAuth }) {
+export default function LinkedInScreen({ resumeData, college, seeking, targetRole, onBack, saveAndAuth, onNext }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [typingDone, setTypingDone] = useState(false);
@@ -309,7 +309,7 @@ Return valid JSON.`,
       {/* ── Master CTA ── */}
       <div style={{ textAlign: 'center', marginTop: 36, marginBottom: 20 }}>
         <button
-          onClick={() => { setStep3Active(true); setShowPaywall(true); }}
+          onClick={() => { setStep3Active(true); if (onNext) { onNext(); } else { setShowPaywall(true); } }}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 14px',
             fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff',
