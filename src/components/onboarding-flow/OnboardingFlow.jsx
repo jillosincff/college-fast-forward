@@ -39,12 +39,48 @@ const SEEKING_OPTIONS = [
 ];
 
 const BLOCKERS = [
-  { key: 'resume', label: "My resume isn't getting responses" },
-  { key: 'ghosted', label: "I'm getting ghosted after applying" },
-  { key: 'which_jobs', label: "I don't know which jobs to apply for" },
-  { key: 'outreach', label: "I don't know how to reach the right people" },
-  { key: 'disorganized', label: "I'm disorganized and losing track" },
-  { key: 'interviews', label: 'Interviewing makes me nervous' },
+  {
+    key: 'resume',
+    icon: '📄',
+    label: "My resume isn't getting responses",
+    solution: "We'll optimize for ATS and recruiter-readability.",
+    tool: 'Resume Optimizer',
+  },
+  {
+    key: 'ghosted',
+    icon: '👻',
+    label: "I'm getting ghosted after applying",
+    solution: "Switch to our verified 'Fast Track' job feed.",
+    tool: 'Fast Track Feed',
+  },
+  {
+    key: 'which_jobs',
+    icon: '🔍',
+    label: "I don't know which jobs to apply for",
+    solution: "Your Agent scouts roles that match your profile daily.",
+    tool: 'Job Scout Agent',
+  },
+  {
+    key: 'outreach',
+    icon: '🤝',
+    label: "I don't know how to reach the right people",
+    solution: "We'll surface alumni insiders at your target companies.",
+    tool: 'Alumni Network',
+  },
+  {
+    key: 'disorganized',
+    icon: '🗂️',
+    label: "I'm disorganized and losing track",
+    solution: "We'll prioritize your Personal Hiring CRM to keep you on track.",
+    tool: 'Hiring CRM',
+  },
+  {
+    key: 'interviews',
+    icon: '🎤',
+    label: 'Interviewing makes me nervous',
+    solution: "Unlock AI mock interviews with real-time feedback.",
+    tool: 'Mock Interview Coach',
+  },
 ];
 
 // ── Screen 2: Built by Experts (extracted to avoid conditional hooks) ───────
@@ -515,22 +551,130 @@ Return valid JSON matching the schema exactly.`,
       )}
 
       {/* ── SCREEN 5: What's Holding You Back ── */}
-      {screen === 5 && (
-        <div style={{ ...card, maxWidth: 520 }}>
-          <h1 style={h1style}>What's the biggest thing holding you back?</h1>
-          <p style={substyle}>Select up to 2 options.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'left' }}>
-            {BLOCKERS.map(opt => {
-              const active = blockers.includes(opt.key);
-              const maxed = blockers.length >= 2 && !active;
-              return (
-                <OptionBtn key={opt.key} active={active} onClick={() => !maxed && toggleBlocker(opt.key)} label={opt.label} disabled={maxed} shape="square" />
-              );
-            })}
+      {screen === 5 && (() => {
+        const activeBlocker = BLOCKERS.find(b => blockers[blockers.length - 1] === b.key);
+        const dynamicHint = activeBlocker ? `✦ We'll unlock your ${activeBlocker.tool} based on this.` : null;
+        const [limitToast, setLimitToast] = [false, () => {}]; // placeholder to avoid useState inside IIFE
+
+        const handleBlockerClick = (key) => {
+          const active = blockers.includes(key);
+          if (!active && blockers.length >= 2) {
+            // show toast by setting a temp DOM message
+            const el = document.getElementById('blocker-limit-toast');
+            if (el) { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(-6px)'; }, 2200); }
+            return;
+          }
+          toggleBlocker(key);
+        };
+
+        return (
+          <div style={{ ...card, maxWidth: 540 }}>
+            {/* Limit toast */}
+            <div id="blocker-limit-toast" style={{ position: 'fixed', top: 56, left: '50%', transform: 'translateX(-50%) translateY(-6px)', background: '#1E293B', color: '#fff', fontFamily: FONT, fontSize: 13, fontWeight: 600, padding: '10px 20px', borderRadius: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.18)', zIndex: 20000, opacity: 0, transition: 'opacity 0.25s ease, transform 0.25s ease', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+              Focusing on your top 2 priorities ensures the fastest results.
+            </div>
+
+            {/* Badge */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 100, padding: '5px 14px', marginBottom: 20 }}>
+              <span style={{ fontSize: 11 }}>🩺</span>
+              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#EA580C', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Career Diagnostic</span>
+            </div>
+
+            <h1 style={h1style}>What's the biggest thing holding you back?</h1>
+
+            {/* Dynamic consultation hint */}
+            <div style={{ minHeight: 36, marginBottom: 16 }}>
+              {dynamicHint ? (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '8px 14px', animation: 'fadeUp 0.2s ease' }}>
+                  <span style={{ fontSize: 14 }}>🤖</span>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', fontWeight: 600, margin: 0 }}>{dynamicHint}</p>
+                </div>
+              ) : (
+                <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, margin: 0 }}>Select up to 2 — your Agent unlocks a tool for each.</p>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
+              {BLOCKERS.map(opt => {
+                const active = blockers.includes(opt.key);
+                const maxed = blockers.length >= 2 && !active;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => handleBlockerClick(opt.key)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                      background: active ? GREEN_LIGHT : CARD,
+                      border: `2px solid ${active ? GREEN : maxed ? '#F1F5F9' : '#E2E8F0'}`,
+                      borderRadius: 14, padding: '16px 18px', cursor: maxed ? 'default' : 'pointer',
+                      textAlign: 'left', minHeight: 'auto',
+                      boxShadow: active
+                        ? `0 0 0 3px ${GREEN_BORDER}, 0 8px 20px rgba(16,185,129,0.12)`
+                        : maxed ? 'none' : '0 4px 12px rgba(0,0,0,0.05)',
+                      opacity: maxed ? 0.45 : 1,
+                      transform: active ? 'translateY(-1px)' : 'translateY(0)',
+                      transition: 'all 0.18s ease',
+                    }}
+                    onMouseEnter={e => { if (!active && !maxed) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = '#CBD5E1'; } }}
+                    onMouseLeave={e => { if (!active && !maxed) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E2E8F0'; } }}
+                  >
+                    {/* Icon box */}
+                    <span style={{
+                      fontSize: 20, flexShrink: 0, width: 42, height: 42,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: active ? 'rgba(16,185,129,0.12)' : BG,
+                      borderRadius: 10, border: `1px solid ${active ? GREEN_BORDER : '#E2E8F0'}`,
+                      filter: maxed ? 'grayscale(1)' : 'none',
+                      transition: 'all 0.18s',
+                    }}>{opt.icon}</span>
+
+                    {/* Text block */}
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: active ? '#065F46' : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
+                      <p style={{ fontFamily: FONT, fontSize: 12, color: active ? '#059669' : TEXT3, margin: 0, fontStyle: 'italic' }}>{opt.solution}</p>
+                    </div>
+
+                    {/* Animated checkmark circle */}
+                    <div style={{
+                      width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                      border: `2px solid ${active ? GREEN : '#CBD5E1'}`,
+                      background: active ? GREEN : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, color: '#fff', fontWeight: 800,
+                      transition: 'all 0.18s ease',
+                      boxShadow: active ? '0 2px 8px rgba(16,185,129,0.35)' : 'none',
+                    }}>
+                      {active && '✓'}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Continue button — disabled until at least 1 selection */}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32 }}>
+              <Btn primary={false} onClick={back} small>← Back</Btn>
+              <button
+                onClick={next}
+                disabled={blockers.length === 0}
+                style={{
+                  fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
+                  background: blockers.length === 0 ? '#CBD5E1' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`,
+                  border: 'none', borderRadius: 8, padding: '15px 36px',
+                  cursor: blockers.length === 0 ? 'not-allowed' : 'pointer',
+                  minHeight: 'auto',
+                  boxShadow: blockers.length === 0 ? 'none' : '0 4px 14px rgba(0,102,255,0.30)',
+                  transition: 'all 0.25s ease',
+                }}
+                onMouseEnter={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.40)'; }}}
+                onMouseLeave={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.30)'; }}}
+              >
+                {blockers.length === 0 ? 'Select at least 1 →' : `Build My Plan →`}
+              </button>
+            </div>
           </div>
-          <Nav onBack={back} onNext={next} nextDisabled={blockers.length === 0} />
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── SCREEN 6: School ── */}
       {screen === 6 && (
