@@ -14,50 +14,21 @@ const BLOCKER_LABELS = {
   interviews: 'interview nerves',
 };
 
-function LockedCard({ icon, title, caption, children }) {
+function JobRow({ title, company, risk, blurred = false }) {
+  const isLow = risk < 30;
   return (
-    <div style={{ background: '#1a1d24', border: '1px solid #2d3748', borderRadius: 20, overflow: 'hidden', position: 'relative' }}>
-      {/* Lock overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, #07080f 85%)', zIndex: 2, borderRadius: 20, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 3, textAlign: 'center' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(15,15,25,0.9)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 100, padding: '6px 16px', backdropFilter: 'blur(8px)' }}>
-          <span style={{ fontSize: 13 }}>🔒</span>
-          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.6)' }}>Unlock to access</span>
-        </div>
-      </div>
-      {/* Header */}
-      <div style={{ padding: '18px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 18 }}>{icon}</span>
-          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#60a5fa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{title}</span>
-        </div>
-      </div>
-      {/* Content (blurred) */}
-      <div style={{ padding: '16px 20px 48px', filter: 'blur(3px)', userSelect: 'none', pointerEvents: 'none' }}>
-        {children}
-      </div>
-      {/* Caption */}
-      <div style={{ position: 'relative', zIndex: 4, padding: '0 20px 18px', textAlign: 'center' }}>
-        <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.5 }}>{caption}</p>
-      </div>
-    </div>
-  );
-}
-
-function GhostJobRow({ title, company, risk, priority }) {
-  const isHigh = risk > 50;
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '10px 12px', marginBottom: 8 }}>
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '11px 14px', marginBottom: 8,
+      filter: blurred ? 'blur(4px)' : 'none', userSelect: blurred ? 'none' : 'auto',
+    }}>
       <div style={{ flex: 1 }}>
         <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#e2e8f0', margin: 0 }}>{title}</p>
         <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '2px 0 0' }}>{company}</p>
       </div>
-      <div style={{ textAlign: 'right' }}>
-        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: isHigh ? '#f87171' : '#34d399', background: isHigh ? 'rgba(248,113,113,0.1)' : 'rgba(52,211,153,0.1)', border: `1px solid ${isHigh ? 'rgba(248,113,113,0.3)' : 'rgba(52,211,153,0.3)'}`, borderRadius: 100, padding: '3px 10px' }}>
-          {risk}% Ghost Risk
-        </span>
-        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: isHigh ? '#f87171' : '#34d399', margin: '4px 0 0' }}>{priority}</p>
-      </div>
+      <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: isLow ? '#34d399' : '#f87171', background: isLow ? 'rgba(52,211,153,0.1)' : 'rgba(248,113,113,0.1)', border: `1px solid ${isLow ? 'rgba(52,211,153,0.3)' : 'rgba(248,113,113,0.3)'}`, borderRadius: 100, padding: '3px 10px', flexShrink: 0 }}>
+        {risk}% Ghost Risk
+      </span>
     </div>
   );
 }
@@ -154,50 +125,116 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </div>
       </div>
 
-      {/* ── Section 3: Locked Preview Cards ── */}
+      {/* ── Section 3: Glass-Lock Preview Cards ── */}
       <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>What You're Unlocking</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
 
-        {/* Card A: Ghost Radar */}
-        <LockedCard icon="👻" title="Ghost-Radar Application Feed" caption="Stop wasting hours on dead-end leads. We tell you which jobs are real and which are ghosts.">
-          <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 12px' }}>Live {targetRole} roles in {location}:</p>
-          <GhostJobRow title="Marketing Coordinator" company="Sunshine Media · Miami, FL" risk={82} priority="⚠️ Skip" />
-          <GhostJobRow title="Brand Associate" company="Nova Agency · Miami, FL" risk={12} priority="✅ High Priority" />
-          <GhostJobRow title="Growth Marketing Intern" company="Futura Co · Remote" risk={9} priority="✅ High Priority" />
-        </LockedCard>
+        {/* Card A: Ghost Radar — Spotlight first row, fade + blur rest */}
+        <div style={{ background: '#1a1d24', border: '1px solid #2d3748', borderRadius: 20, overflow: 'hidden' }}>
+          {/* Card Header */}
+          <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>👻</span>
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#60a5fa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Ghost-Radar Application Feed</span>
+          </div>
+          {/* Spotlight row — fully visible */}
+          <div style={{ padding: '14px 20px 10px' }}>
+            <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', margin: '0 0 10px', letterSpacing: '0.05em' }}>Live {targetRole} roles · {location}</p>
+            <JobRow title="Marketing Coordinator" company="Nova Agency · Miami, FL" risk={12} />
+          </div>
+          {/* Blurred rows + gradient fade overlay */}
+          <div style={{ position: 'relative', padding: '0 20px', paddingBottom: 0 }}>
+            <div style={{ pointerEvents: 'none', userSelect: 'none' }}>
+              <JobRow title="Brand Strategy Intern" company="Futura Co · Miami, FL" risk={8} blurred />
+              <JobRow title="Growth Marketing Associate" company="Sunlight Media · Remote" risk={19} blurred />
+            </div>
+            {/* Gradient fade to solid */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(26,29,36,0) 0%, rgba(26,29,36,0.85) 50%, rgba(26,29,36,1) 100%)', pointerEvents: 'none' }} />
+          </div>
+          {/* Clean solid unlock area */}
+          <div style={{ background: '#1a1d24', padding: '12px 20px 20px', textAlign: 'center' }}>
+            <button onClick={() => setShowPaywall(true)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#60a5fa', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 100, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              🔒 Unlock 14 More Active Leads
+            </button>
+          </div>
+        </div>
 
-        {/* Card B: Alumni Outreach */}
-        <LockedCard icon="🤝" title="Alumni Outreach Command" caption={`No more cold DMs. We find your ${schoolName} insiders and write the messages that actually get replies.`}>
-          <div style={{ background: 'rgba(0,119,181,0.08)', border: '1px solid rgba(0,119,181,0.2)', borderRadius: 12, padding: '14px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,119,181,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>👤</div>
-              <div>
+        {/* Card B: Alumni Outreach — Spotlight name, fade DM preview */}
+        <div style={{ background: '#1a1d24', border: '1px solid #2d3748', borderRadius: 20, overflow: 'hidden' }}>
+          <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>🤝</span>
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#60a5fa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Alumni Outreach Command</span>
+          </div>
+          {/* Spotlight: alum name + headline — fully visible */}
+          <div style={{ padding: '14px 20px 10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(0,119,181,0.2)', border: '1px solid rgba(0,119,181,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>👤</div>
+              <div style={{ flex: 1 }}>
                 <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', margin: 0 }}>Sarah K. · {schoolName} Alum</p>
-                <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: 0 }}>Senior Marketing Manager · Top Miami Agency</p>
+                <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Senior Marketing Manager · Top {location} Agency</p>
               </div>
-              <span style={{ marginLeft: 'auto', fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 100, padding: '2px 8px', flexShrink: 0 }}>WARM</span>
-            </div>
-            <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '10px 12px' }}>
-              <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6, fontStyle: 'italic' }}>"Hi Sarah — fellow {schoolName} alum here! I noticed you're at [Agency] and I'd love to hear about the team culture. I'm targeting marketing roles in Miami — any chance you have 5 minutes?"</p>
+              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#34d399', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 100, padding: '2px 9px', flexShrink: 0 }}>WARM</span>
             </div>
           </div>
-        </LockedCard>
+          {/* DM preview — first few words clear, rest fades */}
+          <div style={{ position: 'relative', padding: '0 20px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '12px 14px', userSelect: 'none', pointerEvents: 'none' }}>
+              <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.65, fontStyle: 'italic' }}>
+                "Hi Sarah — fellow {schoolName} alum here! I noticed you're at [Agency]..."
+              </p>
+              <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '6px 0 0', lineHeight: 1.65, fontStyle: 'italic', filter: 'blur(3.5px)' }}>
+                I'm targeting marketing roles in {location} and would love 5 minutes to hear about your team. Any chance you're open to a quick chat this week?
+              </p>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%', background: 'linear-gradient(to bottom, rgba(26,29,36,0), rgba(26,29,36,1))', pointerEvents: 'none' }} />
+          </div>
+          <div style={{ background: '#1a1d24', padding: '12px 20px 20px', textAlign: 'center' }}>
+            <button onClick={() => setShowPaywall(true)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#60a5fa', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 100, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              🔒 Unlock 3 Alumni Connections
+            </button>
+          </div>
+        </div>
 
-        {/* Card C: Hiring CRM */}
-        <LockedCard icon="📊" title="Your Personal Hiring CRM" caption="Your personal career agent tracks everything. You just show up to the interviews.">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
-            {[{ n: '7', label: 'Jobs Applied', color: '#60a5fa' }, { n: '2', label: 'Interviews Scheduled', color: '#34d399' }, { n: '3', label: 'Follow-ups Due Today', color: '#f97316' }].map((s, i) => (
-              <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 10px', textAlign: 'center' }}>
-                <p style={{ fontFamily: sat, fontSize: 24, fontWeight: 900, color: s.color, margin: '0 0 4px' }}>{s.n}</p>
-                <p style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.3 }}>{s.label}</p>
-              </div>
-            ))}
+        {/* Card C: Hiring CRM — numbers fully visible, company names faded */}
+        <div style={{ background: '#1a1d24', border: '1px solid #2d3748', borderRadius: 20, overflow: 'hidden' }}>
+          <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>📊</span>
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#60a5fa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Personal Hiring CRM</span>
           </div>
-          <div style={{ background: 'rgba(249,115,22,0.07)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 10, padding: '10px 14px' }}>
-            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#f97316', margin: '0 0 4px' }}>⏰ Today's Priority</p>
-            <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Follow up with Nova Agency application (Day 5)</p>
+          {/* Stats — always fully visible */}
+          <div style={{ padding: '16px 20px 12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
+              {[{ n: '7', label: 'Jobs Applied', color: '#60a5fa' }, { n: '2', label: 'Interviews Scheduled', color: '#34d399' }, { n: '3', label: 'Follow-ups Due', color: '#f97316' }].map((s, i) => (
+                <div key={i} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 8px', textAlign: 'center' }}>
+                  <p style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: s.color, margin: '0 0 3px' }}>{s.n}</p>
+                  <p style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.3 }}>{s.label}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 10 }}>
+              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#34d399', margin: 0 }}>
+                🎯 You have 2 interviews waiting to be scheduled.
+              </p>
+            </div>
           </div>
-        </LockedCard>
+          {/* Company list — faded */}
+          <div style={{ position: 'relative', padding: '0 20px' }}>
+            <div style={{ userSelect: 'none', pointerEvents: 'none', filter: 'blur(4px)' }}>
+              {['Nova Agency — Follow-up sent · Day 3', 'Futura Co — Interview prep notes ready', 'Sunlight Media — Application pending review'].map((line, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: i === 1 ? '#34d399' : '#60a5fa', flexShrink: 0 }} />
+                  <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: 0 }}>{line}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(26,29,36,0) 10%, rgba(26,29,36,1) 75%)', pointerEvents: 'none' }} />
+          </div>
+          <div style={{ background: '#1a1d24', padding: '12px 20px 20px', textAlign: 'center' }}>
+            <button onClick={() => setShowPaywall(true)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#60a5fa', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 100, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              🔒 Access My Activity Tracker
+            </button>
+          </div>
+        </div>
+
       </div>
 
       {/* ── Section 4: Final CTA ── */}
