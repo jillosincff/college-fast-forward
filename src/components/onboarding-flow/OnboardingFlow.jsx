@@ -172,12 +172,15 @@ Return valid JSON matching the schema exactly.`,
     base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };
 
+  const isFullPageScreen = screen >= 9;
+
   const shell = {
     position: 'fixed', inset: 0, zIndex: 10000,
     background: '#07080f',
     display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center',
-    padding: '60px 24px 40px',
+    alignItems: 'center',
+    justifyContent: isFullPageScreen ? 'flex-start' : 'center',
+    padding: isFullPageScreen ? '0 24px 40px' : '60px 24px 40px',
     fontFamily: dm,
     overflowY: 'auto',
   };
