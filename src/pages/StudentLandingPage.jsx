@@ -2,23 +2,38 @@ import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 
-const dmSans = "'DM Sans', system-ui, sans-serif";
-const playfair = "'Playfair Display', Georgia, serif";
-const satoshi = "'Satoshi', 'DM Sans', system-ui, sans-serif";
+// ── Design Tokens ──────────────────────────────────────────────
+const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
+const BG = '#F8FAFC';
+const CARD = '#FFFFFF';
+const TEXT = '#0F172A';
+const TEXT2 = '#64748B';
+const TEXT3 = '#94A3B8';
+const BLUE = '#0066FF';
+const BLUE_LIGHT = '#EFF6FF';
+const BLUE_BORDER = '#BFDBFE';
+const GREEN = '#10B981';
+const GREEN_LIGHT = '#F0FDF4';
+const GREEN_BORDER = '#BBF7D0';
+const ORANGE = '#F97316';
+const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
+const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
+const SHADOW_LG = '0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04)';
+const R = 12;
 
 const BENEFIT_CARDS = [
-  { icon: '📄', title: 'Tailored resumes', desc: 'Automatically adapt your resume for each role so you can apply faster and with more confidence.' },
-  { icon: '🎯', title: 'Relevant opportunities', desc: 'Surface jobs that better match your background, goals, and interests.' },
-  { icon: '📊', title: 'Application tracking', desc: 'Keep every application organized in one place with clear status updates.' },
-  { icon: '🔔', title: 'Follow-up reminders', desc: 'Never miss the right time to check in again.' },
-  { icon: '💼', title: 'LinkedIn optimization', desc: 'Improve your profile so recruiters and connections can find you more easily.' },
-  { icon: '🤝', title: 'Warm intros', desc: 'Find alumni and parent connections who may help create warmer paths into companies.' },
+  { icon: '📄', title: 'Tailored Resumes', desc: 'Automatically adapt your resume for each role so you apply faster and with more confidence.' },
+  { icon: '🎯', title: 'Relevant Opportunities', desc: 'Surface jobs that better match your background, goals, and interests.' },
+  { icon: '📊', title: 'Application Tracking', desc: 'Keep every application organized in one place with clear status updates.' },
+  { icon: '🔔', title: 'Follow-Up Reminders', desc: 'Never miss the right moment to check in again.' },
+  { icon: '💼', title: 'LinkedIn Optimization', desc: 'Improve your profile so recruiters and connections can find you more easily.' },
+  { icon: '🤝', title: 'Warm Intros', desc: 'Find alumni and parent connections who can open warmer paths into companies.' },
 ];
 
 const HOW_IT_WORKS = [
   { number: '01', icon: '🎯', title: 'Know What to Apply For', desc: 'Smart matching + daily opportunities tailored to your goals.' },
-  { number: '02', icon: '✨', title: 'Stand Out', desc: 'Modern resumes and LinkedIn optimization that actually get noticed.' },
-  { number: '03', icon: '📋', title: 'Stay on Track & Move Forward', desc: 'Track every application, get smart reminders, and reach the right connections.' },
+  { number: '02', icon: '✨', title: 'Stand Out', desc: 'Modern resumes and LinkedIn optimization that actually get noticed by recruiters.' },
+  { number: '03', icon: '📋', title: 'Stay on Track', desc: 'Track every application, get smart reminders, and reach the right connections.' },
 ];
 
 const STORIES = [
@@ -27,20 +42,8 @@ const STORIES = [
   { quote: "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours.", name: "Alex P.", school: "USC '25, Marketing", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=96&h=96&fit=crop&crop=face", tag: "Better outreach" },
 ];
 
-const FREE_FEATURES = [
-  'Basic resume tools',
-  'Limited Agent usage',
-  'Application tracker',
-  'Perfect for getting started',
-];
-
-const PRO_FEATURES = [
-  'Unlimited AI Agent',
-  'Advanced tailoring + modern templates',
-  'Smart reminders + interview prep',
-  'Most students upgrade once they see real results',
-];
-
+const FREE_FEATURES = ['Basic resume tools', 'Limited Agent usage', 'Application tracker', 'Perfect for getting started'];
+const PRO_FEATURES = ['Unlimited AI Agent', 'Advanced tailoring + modern templates', 'Smart reminders + interview prep', 'Most students upgrade once they see results'];
 const PROOF_CALLOUTS = [
   'Upload your resume once.',
   'Get modern, tailored versions for every job.',
@@ -76,41 +79,40 @@ function StoriesCarousel() {
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
         style={{
-          background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-          borderLeft: '4px solid #E85D20', borderRadius: '0 20px 20px 0',
-          padding: '36px 36px 32px', cursor: dragging ? 'grabbing' : 'grab',
-          transform: `translateX(${offset * 0.07}px)`, transition: dragging ? 'none' : 'transform 0.3s ease',
-          minHeight: 170, position: 'relative', overflow: 'hidden',
+          background: CARD, borderRadius: R, boxShadow: SHADOW_MD,
+          borderLeft: `4px solid ${BLUE}`,
+          padding: '32px 32px 28px', cursor: dragging ? 'grabbing' : 'grab',
+          transform: `translateX(${offset * 0.06}px)`, transition: dragging ? 'none' : 'transform 0.3s ease',
+          minHeight: 160, position: 'relative',
         }}
       >
-        <div style={{ position: 'absolute', top: 12, right: 20, fontFamily: playfair, fontSize: 90, lineHeight: 1, color: 'rgba(255,255,255,0.05)', fontWeight: 700, pointerEvents: 'none' }}>"</div>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.15)', border: '1px solid rgba(232,93,32,0.3)', borderRadius: 100, padding: '4px 12px', marginBottom: 18 }}>
-          <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{s.tag}</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '4px 12px', marginBottom: 16 }}>
+          <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{s.tag}</span>
         </div>
-        <p style={{ fontFamily: dmSans, fontSize: 'clamp(16px, 2vw, 20px)', fontStyle: 'italic', fontWeight: 600, color: '#fff', lineHeight: 1.6, margin: '0 0 24px', position: 'relative', zIndex: 1 }}>
+        <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 500, color: TEXT, lineHeight: 1.7, margin: '0 0 20px', fontStyle: 'italic' }}>
           "{s.quote}"
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '2px solid rgba(232,93,32,0.4)', boxShadow: '0 0 16px rgba(232,93,32,0.2)' }}>
+          <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: `2px solid ${BLUE_BORDER}` }}>
             <img src={s.photo} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
-            <p style={{ fontFamily: satoshi, fontSize: 15, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.01em' }}>{s.name}</p>
-            <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: 0 }}>{s.school}</p>
+            <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0, letterSpacing: '-0.01em' }}>{s.name}</p>
+            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0 }}>{s.school}</p>
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
         <div style={{ display: 'flex', gap: 6 }}>
           {STORIES.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 24 : 6, height: 6, borderRadius: 3, background: i === active ? '#E85D20' : 'rgba(255,255,255,0.2)', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', transition: 'all 0.3s ease' }} />
+            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 20 : 6, height: 6, borderRadius: 3, background: i === active ? BLUE : '#CBD5E1', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', transition: 'all 0.3s ease' }} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {['←', '→'].map((arrow, i) => (
-            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', fontSize: 14, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.2)'; e.currentTarget.style.borderColor = '#E85D20'; e.currentTarget.style.color = '#E85D20'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff'; }}
+            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 32, height: 32, borderRadius: '50%', background: '#F1F5F9', border: `1px solid #E2E8F0`, fontSize: 13, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = BLUE_LIGHT; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.color = BLUE; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; }}
             >{arrow}</button>
           ))}
         </div>
@@ -125,18 +127,12 @@ export default function StudentLandingPage({ onParentClick }) {
 
   useEffect(() => {
     setMounted(true);
-    if (!document.getElementById('slp-fonts')) {
+    if (!document.getElementById('slp-inter')) {
       const link = document.createElement('link');
-      link.id = 'slp-fonts';
+      link.id = 'slp-inter';
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap';
-    }
-    if (!document.getElementById('slp-satoshi')) {
-      const satoshiLink = document.createElement('link');
-      satoshiLink.id = 'slp-satoshi';
-      satoshiLink.rel = 'stylesheet';
-      satoshiLink.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@700,800,900&display=swap';
-      document.head.appendChild(satoshiLink);
+      link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
+      document.head.appendChild(link);
     }
   }, []);
 
@@ -149,63 +145,82 @@ export default function StudentLandingPage({ onParentClick }) {
     navigate('ParentLandingPage');
   };
 
-  const sectionLabel = (text) => (
-    <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>{text}</p>
+  const SectionLabel = ({ text }) => (
+    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
 
-  const ctaBtn = (label, primary = true, onClick = go) => (
-    <button onClick={onClick} style={{
-      fontFamily: dmSans, fontSize: primary ? 16 : 15, fontWeight: primary ? 800 : 600,
-      color: primary ? '#fff' : 'rgba(255,255,255,0.75)',
-      background: primary ? '#E85D20' : 'rgba(255,255,255,0.06)',
-      border: primary ? 'none' : '1px solid rgba(255,255,255,0.15)',
-      borderRadius: 14, padding: primary ? '18px 40px' : '18px 28px',
-      cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease',
-      boxShadow: primary ? '0 8px 32px rgba(232,93,32,0.4)' : 'none',
-    }}
-      onMouseEnter={e => {
-        if (primary) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }
-        else { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }
+  const CTAButton = ({ label, onClick = go, variant = 'primary', fullWidth = false }) => {
+    const isPrimary = variant === 'primary';
+    const isGreen = variant === 'green';
+    return (
+      <button onClick={onClick} style={{
+        fontFamily: FONT,
+        fontSize: 15, fontWeight: 700,
+        color: '#fff',
+        background: isGreen
+          ? `linear-gradient(to bottom, ${GREEN}, #059669)`
+          : isPrimary
+            ? `linear-gradient(to bottom, ${BLUE}, #0052CC)`
+            : '#F1F5F9',
+        border: isPrimary || isGreen ? 'none' : `1px solid #E2E8F0`,
+        borderRadius: 8,
+        padding: '16px 36px',
+        cursor: 'pointer', minHeight: 'auto',
+        transition: 'all 0.2s ease',
+        boxShadow: isPrimary
+          ? '0 8px 24px rgba(0,102,255,0.3)'
+          : isGreen
+            ? '0 8px 24px rgba(16,185,129,0.3)'
+            : 'none',
+        width: fullWidth ? '100%' : 'auto',
+        color: isPrimary || isGreen ? '#fff' : TEXT2,
       }}
-      onMouseLeave={e => {
-        if (primary) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }
-        else { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }
-      }}
-    >{label}</button>
-  );
+        onMouseEnter={e => {
+          if (isPrimary || isGreen) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = isPrimary ? '0 14px 32px rgba(0,102,255,0.4)' : '0 14px 32px rgba(16,185,129,0.4)'; }
+          else { e.currentTarget.style.background = '#E2E8F0'; }
+        }}
+        onMouseLeave={e => {
+          if (isPrimary || isGreen) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = isPrimary ? '0 8px 24px rgba(0,102,255,0.3)' : '0 8px 24px rgba(16,185,129,0.3)'; }
+          else { e.currentTarget.style.background = '#F1F5F9'; }
+        }}
+      >{label}</button>
+    );
+  };
 
   return (
-    <div style={{ background: '#06070d', fontFamily: dmSans, color: '#fff', overflowX: 'hidden', position: 'relative' }}>
+    <div style={{ background: BG, fontFamily: FONT, color: TEXT, overflowX: 'hidden' }}>
       {showOnboarding && <OnboardingFlow onClose={() => setShowOnboarding(false)} />}
-      {/* Global film grain — sits over everything, non-interactive */}
+
       <style>{`
-        @keyframes grainMove { 0%{transform:translate(0,0)} 20%{transform:translate(-2px,1px)} 40%{transform:translate(2px,-2px)} 60%{transform:translate(-1px,2px)} 80%{transform:translate(1px,-1px)} 100%{transform:translate(0,0)} }
-        .page-grain::after { content:''; position:fixed; inset:-100%; width:300%; height:300%; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); animation:grainMove 0.4s steps(1) infinite; pointer-events:none; z-index:9999; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,102,255,0.15)} 50%{box-shadow:0 0 0 8px rgba(0,102,255,0)} }
       `}</style>
-      <div className="page-grain" style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999 }} />
+
+      {/* ── NAV ── */}
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(248,250,252,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E2E8F0', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontFamily: FONT, fontSize: 17, fontWeight: 800, color: TEXT, letterSpacing: '-0.02em' }}>
+          College <span style={{ color: BLUE }}>Fast Forward</span>
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={parent} style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '8px 12px' }}>For Parents</button>
+          <button onClick={go} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 12px rgba(0,102,255,0.25)', transition: 'all 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >Get Started →</button>
+        </div>
+      </nav>
 
       {/* ── HERO ── */}
       <div style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        padding: '100px 20px 80px', position: 'relative', overflow: 'hidden', textAlign: 'center',
+        padding: '120px 24px 80px', textAlign: 'center',
+        background: 'linear-gradient(180deg, #EFF6FF 0%, #F8FAFC 60%)',
       }}>
-        {/* Deep void radial gradient — dark navy to true black */}
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 40%, #0c1a2e 0%, #06070d 70%)', pointerEvents: 'none' }} />
-        {/* Cyan glow behind the text — the only "light source" */}
-        <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translateX(-50%)', width: 800, height: 500, background: 'radial-gradient(ellipse, rgba(34,211,238,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        {/* Subtle grain texture overlay */}
-        <style>{`
-          @keyframes grainShift { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-1px,1px)} 50%{transform:translate(1px,-1px)} 75%{transform:translate(-1px,-1px)} }
-          .hero-grain::before { content:''; position:absolute; inset:-50%; width:200%; height:200%; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); opacity:0.35; animation:grainShift 0.5s steps(1) infinite; pointer-events:none; }
-        `}</style>
-        <div className="hero-grain" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }} />
-
-        {/* Faces row — human social proof above the headline */}
+        {/* Avatar row */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center',
-          marginBottom: 42, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease',
-          position: 'relative', zIndex: 1,
+          marginBottom: 36, opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
           <div style={{ display: 'flex' }}>
             {[
@@ -215,304 +230,269 @@ export default function StudentLandingPage({ onParentClick }) {
               'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=face',
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=face',
             ].map((src, i) => (
-              <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #06070d', overflow: 'hidden', marginLeft: i === 0 ? 0 : -10, position: 'relative', zIndex: 5 - i }}>
+              <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${BG}`, overflow: 'hidden', marginLeft: i === 0 ? 0 : -10, position: 'relative', zIndex: 5 - i, boxShadow: SHADOW }}>
                 <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             ))}
           </div>
-          <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
-            Joined by <strong style={{ color: '#fff', fontWeight: 700 }}>2,400+</strong> students
+          <span style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, fontWeight: 500 }}>
+            Joined by <strong style={{ color: TEXT, fontWeight: 700 }}>2,400+</strong> students
           </span>
         </div>
 
+        {/* Badge */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(232,93,32,0.1)', border: '1px solid rgba(232,93,32,0.25)',
-          borderRadius: 100, padding: '8px 20px', marginBottom: 48,
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
-          position: 'relative', zIndex: 1,
+          background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`,
+          borderRadius: 100, padding: '7px 18px', marginBottom: 32,
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
         }}>
           <span style={{ fontSize: 13 }}>⚡</span>
-          <span style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-            The CFF AI Agent
-          </span>
+          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>The CFF AI Agent</span>
         </div>
 
         <h1 style={{
-          fontFamily: satoshi, fontSize: 'clamp(36px, 8vw, 108px)',
-          fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.05em',
-          margin: '0 0 8px', maxWidth: 900,
-          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)',
-          transition: 'all 0.7s ease 0.1s', position: 'relative', zIndex: 1,
+          fontFamily: FONT, fontSize: 'clamp(36px, 7vw, 80px)',
+          fontWeight: 800, color: TEXT, lineHeight: 1.05, letterSpacing: '-0.03em',
+          margin: '0 0 8px', maxWidth: 820,
+          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.6s ease 0.1s',
         }}>
-          Job Boards are a
+          Job Boards Are a<br />
+          <span style={{ color: BLUE }}>Black Hole.</span>
         </h1>
-        <div style={{
-          fontFamily: satoshi,
-          fontWeight: 900,
-          fontSize: 'clamp(48px, 12vw, 148px)',
-          letterSpacing: '-0.06em',
-          lineHeight: 1.05,
-          margin: '0 0 44px',
-          maxWidth: 760,
-          background: 'linear-gradient(90deg, #22d3ee 0%, #67e8f9 60%, #a5f3fc 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          filter: 'drop-shadow(0 0 40px rgba(34,211,238,0.45))',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.1s',
-          position: 'relative', zIndex: 1,
-        }}>
-          Black Hole.
-        </div>
 
         <p style={{
-          fontFamily: dmSans, fontSize: 'clamp(15px, 1.75vw, 18px)',
-          fontWeight: 500, color: 'rgba(255,255,255,0.7)',
-          lineHeight: 1.65, maxWidth: 600, margin: '0 auto 40px',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.15s',
-          position: 'relative', zIndex: 1,
+          fontFamily: FONT, fontSize: 'clamp(15px, 1.8vw, 19px)',
+          fontWeight: 400, color: TEXT2,
+          lineHeight: 1.7, maxWidth: 560, margin: '20px auto 36px',
+          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed,
-          and get hired.
+          Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed, and get hired — without the chaos.
         </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 8, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.2s', position: 'relative', zIndex: 1 }}>
-          <button onClick={go} style={{
-            fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff',
-            background: '#E85D20', border: 'none',
-            borderRadius: 14, padding: '18px 44px',
-            cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s ease',
-            boxShadow: '0 8px 32px rgba(232,93,32,0.5)',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.65)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.5)'; }}
-          >Escape the Black Hole →</button>
-          {ctaBtn('Watch 45-second demo →', false)}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
+          <CTAButton label="Get My Career Plan →" />
+          <button onClick={() => {}} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 500, color: TEXT2, background: CARD, border: `1px solid #E2E8F0`, borderRadius: 8, padding: '16px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: SHADOW }}>Watch 45-sec demo</button>
         </div>
 
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.28)', margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.4s', position: 'relative', zIndex: 1 }}>
-          No credit card required. Built for college students at UF, UCF, Penn State, USC &amp; more.
+        <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.4s' }}>
+          No credit card required · Built for students at UF, UCF, Penn State, USC &amp; more
         </p>
 
-        <button onClick={parent} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.2)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', marginTop: 28, transition: 'color 0.15s', position: 'relative', zIndex: 1 }}
-          onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.2)'}
-        >
-          I'm here to help students →
-        </button>
+        {/* Hero Card Preview */}
+        <div style={{
+          marginTop: 56, maxWidth: 560, width: '100%',
+          background: CARD, borderRadius: 16, boxShadow: SHADOW_LG, padding: '24px',
+          textAlign: 'left', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.5s',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>⚡</div>
+            <div>
+              <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>The Agent is working for you</p>
+              <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, margin: 0 }}>Updated just now</p>
+            </div>
+            <div style={{ marginLeft: 'auto', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
+              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN }}>Live</span>
+            </div>
+          </div>
+          {PROOF_CALLOUTS.map((text, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #F1F5F9` : 'none' }}>
+              <div style={{ width: 18, height: 18, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 9, color: GREEN }}>✓</span>
+              </div>
+              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT, margin: 0, fontWeight: 500 }}>{text}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── PROBLEM STRIP ── */}
-      <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '80px 24px' }}>
-        <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center' }}>
-          {sectionLabel('You are not alone')}
-          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(34px, 5.5vw, 64px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 28px' }}>
+      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '72px 24px' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
+          <SectionLabel text="You are not alone" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
             Applying shouldn't feel<br />this exhausting.
           </h2>
-          <p style={{ fontFamily: dmSans, fontSize: 'clamp(15px, 1.8vw, 18px)', color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-            You're not alone. Students are sending hundreds of applications, getting ghosted or rejected, and burning out. We built a smarter system so you don't have to do it all manually.
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.6vw, 17px)', color: TEXT2, lineHeight: 1.75, margin: '0 auto', maxWidth: 520 }}>
+            Students are sending hundreds of applications, getting ghosted, and burning out. We built a smarter system so you don't have to do it all manually.
           </p>
         </div>
       </div>
 
       {/* ── BENEFIT CARDS ── */}
-      <div style={{ padding: '88px 24px', maxWidth: 980, margin: '0 auto' }}>
-        {sectionLabel('Why students use College Fast Forward')}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16, marginTop: 40 }}>
+      <div style={{ padding: '80px 24px', maxWidth: 980, margin: '0 auto' }}>
+        <SectionLabel text="Why students use College Fast Forward" />
+        <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 40px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 40px', lineHeight: 1.2 }}>
+          Everything you need to get hired.
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           {BENEFIT_CARDS.map((card, i) => (
             <div key={i} style={{
-              gridColumn: i === 0 ? 'span 4' : i === 1 ? 'span 2' : i === 2 || i === 3 ? 'span 3' : 'span 2',
-              background: i === 0 ? 'linear-gradient(135deg, rgba(34,211,238,0.07), rgba(34,211,238,0.02))' : 'rgba(255,255,255,0.04)',
-              border: i === 0 ? '1px solid rgba(34,211,238,0.18)' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 20, padding: i === 0 ? '36px 32px' : '28px 26px',
-            }}>
-              <div style={{ fontSize: i === 0 ? 32 : 26, marginBottom: 14 }}>{card.icon}</div>
-              <p style={{ fontFamily: satoshi, fontSize: i === 0 ? 22 : 17, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.25, letterSpacing: '-0.02em' }}>{card.title}</p>
-              <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.7 }}>{card.desc}</p>
-              {i === 0 && <p style={{ fontFamily: dmSans, fontSize: 12, fontStyle: 'italic', color: 'rgba(34,211,238,0.7)', margin: '14px 0 0' }}>"This alone saved me hours." — UF '26</p>}
+              background: CARD, borderRadius: R, boxShadow: SHADOW,
+              padding: '24px',
+              border: i === 0 ? `1.5px solid ${BLUE_BORDER}` : 'none',
+              transition: 'box-shadow 0.2s, transform 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = SHADOW_MD; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = SHADOW; e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 16 }}>{card.icon}</div>
+              <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.01em' }}>{card.title}</p>
+              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.7 }}>{card.desc}</p>
+              {i === 0 && (
+                <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '10px 12px', marginTop: 14 }}>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', margin: 0, fontWeight: 500, fontStyle: 'italic' }}>"This alone saved me hours." — UF '26</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
+      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          {sectionLabel('How it works')}
-          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 52px', textAlign: 'center' }}>
-            One Agent. Everything organized. Real progress.
+          <SectionLabel text="How it works" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 48px', textAlign: 'center' }}>
+            One Agent. Everything organized.<br />Real progress.
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 40 }}>
-            {HOW_IT_WORKS.map((step) => (
-              <div key={step.number} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, padding: '32px 28px', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: -16, right: -8, fontSize: 72, opacity: 0.04, lineHeight: 1, pointerEvents: 'none', fontFamily: playfair, fontWeight: 700 }}>{step.number}</div>
-                <div style={{ fontSize: 28, marginBottom: 14 }}>{step.icon}</div>
-                <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px' }}>Step {step.number}</p>
-                <p style={{ fontFamily: playfair, fontSize: 19, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.3 }}>{step.title}</p>
-                <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.7 }}>{step.desc}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 32 }}>
+            {HOW_IT_WORKS.map((step, idx) => (
+              <div key={step.number} style={{ background: BG, borderRadius: R, padding: '28px 24px', position: 'relative', overflow: 'hidden', boxShadow: SHADOW }}>
+                <div style={{ position: 'absolute', top: -12, right: 12, fontSize: 64, opacity: 0.06, lineHeight: 1, fontWeight: 800, pointerEvents: 'none', color: BLUE }}>{step.number}</div>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 14 }}>{step.icon}</div>
+                <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px' }}>Step {step.number}</p>
+                <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.01em' }}>{step.title}</p>
+                <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.7 }}>{step.desc}</p>
               </div>
             ))}
           </div>
-          <div style={{ background: 'linear-gradient(135deg, rgba(232,93,32,0.08), rgba(232,93,32,0.03))', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 16, padding: '22px 32px', textAlign: 'center' }}>
-            <p style={{ fontFamily: satoshi, fontSize: 'clamp(17px, 2.2vw, 22px)', fontStyle: 'italic', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              "The Agent handles the chaos so you can focus on getting hired."
+          <div style={{ background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: R, padding: '20px 28px', textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.8vw, 17px)', fontWeight: 600, color: BLUE, margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+              💡 "The Agent handles the chaos so you can focus on getting hired."
             </p>
           </div>
         </div>
       </div>
 
-      {/* ── PRODUCT PROOF ── */}
-      <div style={{ padding: '88px 24px', maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-        {sectionLabel('See it in action')}
-        <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '14px 0 16px' }}>
-          The Agent manages your entire search.
-        </h2>
-        <p style={{ fontFamily: dmSans, fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 520 }}>
-          Real result: Students using the Agent go from feeling lost and ghosted to landing interviews faster.
-        </p>
-
-        {/* Mock screen */}
-        <div style={{ background: 'linear-gradient(135deg, #111827, #1a1f2e)', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.5)', marginBottom: 24, textAlign: 'left' }}>
-          <div style={{ background: '#0d1117', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {['#ff5f57','#febc2e','#28c840'].map((c, i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
-            </div>
-            <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '4px 12px', fontFamily: dmSans, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
-              ⚡ College Fast Forward — Job Search Dashboard
-            </div>
-          </div>
-          <div style={{ padding: '28px 28px 24px' }}>
-            {PROOF_CALLOUTS.map((text, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#22d3ee' }} />
-                </div>
-                <p style={{ fontFamily: dmSans, fontSize: 15, color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500 }}>{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.3)', margin: 0, fontStyle: 'italic' }}>
-          Built to reduce the chaos of job searching and help students get hired faster.
-        </p>
-      </div>
-
       {/* ── SOCIAL PROOF ── */}
-      <div style={{ background: 'rgba(255,255,255,0.025)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '88px 24px' }}>
+      <div style={{ padding: '80px 24px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          {sectionLabel('Students like you')}
-          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4vw, 50px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 40px', textAlign: 'center' }}>
-            Students just like you.
+          <SectionLabel text="Students like you" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 36px', textAlign: 'center' }}>
+            Real results. Real students.
           </h2>
           <StoriesCarousel />
-          <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.35)', textAlign: 'center', margin: '32px 0 0', lineHeight: 1.7 }}>
-            Students use College Fast Forward to stay organized, reduce stress, and move through the search with more traction.
+          <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, textAlign: 'center', margin: '24px 0 0', lineHeight: 1.7 }}>
+            Students use CFF to stay organized, reduce stress, and move through the search with more traction.
           </p>
         </div>
       </div>
 
       {/* ── PRICING ── */}
-      <div style={{ padding: '88px 24px', maxWidth: 860, margin: '0 auto' }}>
-        {sectionLabel('Pricing')}
-        <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.05, letterSpacing: '-0.04em', margin: '0 0 52px', textAlign: 'center' }}>
-          Choose your advantage.
-        </h2>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-          {/* Free */}
-          <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '32px 28px' }}>
-            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>FREE</p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
-              <span style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: '#fff' }}>$0</span>
-            </div>
-            <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 24px' }}>The Foundation</p>
-            {FREE_FEATURES.map((f, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(255,255,255,0.35)' }} />
-                </div>
-                <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: 0, lineHeight: 1.5 }}>{f}</p>
-              </div>
-            ))}
-            <button onClick={go} style={{ marginTop: 28, width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#fff', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12, padding: '14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.13)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-            >Start free</button>
-          </div>
-
-          {/* Pro */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(34,211,238,0.07), rgba(34,211,238,0.02))', border: '2px solid rgba(34,211,238,0.28)', borderRadius: 20, padding: '32px 28px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(34,211,238,0.15)', border: '1px solid rgba(34,211,238,0.35)', borderRadius: 100, padding: '4px 12px' }}>
-              <span style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 800, color: '#22d3ee', letterSpacing: '0.1em', textTransform: 'uppercase' }}>RECOMMENDED</span>
-            </div>
-            <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 700, color: '#22d3ee', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px' }}>ACCELERATOR</p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
-              <span style={{ fontFamily: playfair, fontSize: 38, fontWeight: 700, color: '#22d3ee' }}>$29</span>
-              <span style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>/mo</span>
-            </div>
-            <p style={{ fontFamily: playfair, fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 24px' }}>The Accelerator</p>
-            {PRO_FEATURES.map((f, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22d3ee' }} />
-                </div>
-                <p style={{ fontFamily: dmSans, fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.5 }}>{f}</p>
-              </div>
-            ))}
-            <button onClick={go} style={{ marginTop: 28, width: '100%', fontFamily: dmSans, fontSize: 14, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(232,93,32,0.35)', transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(232,93,32,0.5)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(232,93,32,0.35)'; }}
-            >Start free, upgrade anytime →</button>
-          </div>
-        </div>
-
-        <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: '24px 0 0' }}>
-          Cancel anytime. No credit card required to get started.
-        </p>
-      </div>
-
-      {/* ── FINAL CTA ── */}
-      <div style={{ padding: '96px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(232,93,32,0.12) 0%, transparent 55%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontFamily: satoshi, fontSize: 'clamp(28px, 4.5vw, 56px)', fontWeight: 900, color: '#fff', lineHeight: 1.0, letterSpacing: '-0.04em', margin: '0 0 36px' }}>
-            Search Smarter,<br />
-            <span style={{ color: '#22d3ee', textShadow: '0 0 40px rgba(34,211,238,0.3)' }}>Not Harder.</span>
+      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
+        <div style={{ maxWidth: 820, margin: '0 auto' }}>
+          <SectionLabel text="Pricing" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 48px', textAlign: 'center' }}>
+            Choose your advantage.
           </h2>
-          <button onClick={go} style={{
-            fontFamily: dmSans, fontSize: 17, fontWeight: 800, color: '#fff', background: '#E85D20', border: 'none',
-            borderRadius: 14, padding: '20px 52px', cursor: 'pointer', minHeight: 'auto',
-            boxShadow: '0 8px 32px rgba(232,93,32,0.4)', display: 'block', margin: '0 auto 16px',
-            transition: 'all 0.2s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(232,93,32,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(232,93,32,0.4)'; }}
-          >
-            Start Free Today
-          </button>
-          <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.25)', margin: 0 }}>
-            Built for students. No credit card required.
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            {/* Free */}
+            <div style={{ background: BG, borderRadius: R, padding: '32px 28px', boxShadow: SHADOW }}>
+              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>FREE</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
+                <span style={{ fontFamily: FONT, fontSize: 40, fontWeight: 800, color: TEXT, letterSpacing: '-0.03em' }}>$0</span>
+              </div>
+              <p style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: TEXT, margin: '0 0 24px' }}>The Foundation</p>
+              {FREE_FEATURES.map((f, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#F1F5F9', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: TEXT3 }} />
+                  </div>
+                  <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>{f}</p>
+                </div>
+              ))}
+              <button onClick={go} style={{ marginTop: 24, width: '100%', fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, background: CARD, border: `1px solid #E2E8F0`, borderRadius: 8, padding: '14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s', boxShadow: SHADOW }}
+                onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
+                onMouseLeave={e => e.currentTarget.style.background = CARD}
+              >Start free</button>
+            </div>
+
+            {/* Pro */}
+            <div style={{ background: CARD, borderRadius: R, padding: '32px 28px', boxShadow: SHADOW_MD, border: `2px solid ${BLUE_BORDER}`, position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -12, right: 16, background: BLUE, borderRadius: 6, padding: '4px 12px' }}>
+                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: '0.08em', textTransform: 'uppercase' }}>RECOMMENDED</span>
+              </div>
+              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>ACCELERATOR</p>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
+                <span style={{ fontFamily: FONT, fontSize: 40, fontWeight: 800, color: TEXT, letterSpacing: '-0.03em' }}>$29</span>
+                <span style={{ fontFamily: FONT, fontSize: 13, color: TEXT3 }}>/mo</span>
+              </div>
+              <p style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: TEXT, margin: '0 0 24px' }}>The Accelerator</p>
+              {PRO_FEATURES.map((f, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
+                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                    <span style={{ fontSize: 8, color: GREEN, fontWeight: 700 }}>✓</span>
+                  </div>
+                  <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT, margin: 0, lineHeight: 1.6 }}>{f}</p>
+                </div>
+              ))}
+              <button onClick={go} style={{ marginTop: 24, width: '100%', fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 8, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 20px rgba(0,102,255,0.3)', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,102,255,0.4)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.3)'; }}
+              >Start free, upgrade anytime →</button>
+            </div>
+          </div>
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '20px 0 0' }}>
+            Cancel anytime. No credit card required to get started.
           </p>
         </div>
       </div>
 
+      {/* ── FINAL CTA ── */}
+      <div style={{ padding: '88px 24px 72px', textAlign: 'center', background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%)' }}>
+        <div style={{ maxWidth: 520, margin: '0 auto' }}>
+          <SectionLabel text="Ready to escape the black hole?" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px' }}>
+            Search Smarter,<br />
+            <span style={{ color: BLUE }}>Not Harder.</span>
+          </h2>
+          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 0 32px', lineHeight: 1.7 }}>
+            Join 2,400+ students who stopped applying blindly and started getting results.
+          </p>
+          <button onClick={go} style={{
+            fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff',
+            background: `linear-gradient(to bottom, ${GREEN}, #059669)`,
+            border: 'none', borderRadius: 8, padding: '20px 52px',
+            cursor: 'pointer', minHeight: 'auto',
+            boxShadow: '0 8px 24px rgba(16,185,129,0.35)',
+            display: 'block', margin: '0 auto 16px', transition: 'all 0.2s ease',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.45)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.35)'; }}
+          >
+            Get My Free Career Plan →
+          </button>
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>Built for students. No credit card required.</p>
+        </div>
+      </div>
+
       {/* ── FOOTER ── */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px', textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ borderTop: '1px solid #E2E8F0', padding: '28px 24px', textAlign: 'center', background: CARD }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginBottom: 12, flexWrap: 'wrap' }}>
           {[['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
-            <a key={label} href={href} style={{ fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
+            <a key={label} href={href} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, textDecoration: 'none', transition: 'color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.color = TEXT2}
+              onMouseLeave={e => e.currentTarget.style.color = TEXT3}
             >{label}</a>
           ))}
         </div>
-        <p style={{ fontFamily: dmSans, fontSize: 12, color: 'rgba(255,255,255,0.2)', margin: 0 }}>
-          College Fast Forward helps students manage the job search with less stress and more structure.
+        <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>
+          © {new Date().getFullYear()} College Fast Forward · Helping students land faster with less stress.
         </p>
       </div>
-
     </div>
   );
 }
