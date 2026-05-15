@@ -221,13 +221,17 @@ ${JSON.stringify(parsed.experience)}`,
       {/* Close */}
       <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 38, height: 38, minHeight: 'auto', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.5)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
 
-      {/* Progress bar */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'rgba(255,255,255,0.06)' }}>
-        <div style={{ height: '100%', width: `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
-      </div>
-      <div style={{ position: 'absolute', top: 18, left: 24, fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-        {screen} / {TOTAL}
-      </div>
+      {/* Progress bar — hidden on final screen */}
+      {screen < 8 && (
+        <>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.06)' }}>
+            <div style={{ height: '100%', width: `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
+          </div>
+          <div style={{ position: 'absolute', top: 18, left: 24, fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+            {screen} / {TOTAL}
+          </div>
+        </>
+      )}
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
