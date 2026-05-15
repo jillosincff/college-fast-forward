@@ -608,8 +608,9 @@ Create a professional profile JSON as if extracted from LinkedIn. Be realistic a
                         }
                       }
                     });
-                    const parsed = res.original;
-                    setResumeData({ original: parsed, optimized: { ...parsed, experience: res.optimized_experience } });
+                    const parsed = res.original || res;
+                    const optimizedExp = res.optimized_experience || parsed.experience || [];
+                    setResumeData({ original: parsed, optimized: { ...parsed, experience: optimizedExp } });
                   } catch { /* advance anyway */ }
                   setUploading(false);
                   setScreen(9);
@@ -746,7 +747,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                     {orig ? (
                       <div style={{ padding: 0, fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6 }}>
                         <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
-                        <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, orig.linkedin, orig.location].filter(Boolean).join(' | ')}</p>
+                        <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, typeof orig.linkedin === 'string' ? orig.linkedin : '', orig.location].filter(Boolean).join(' | ')}</p>
                         {orig.education?.length > 0 && <>
                           <p style={{ fontSize: 12, fontWeight: 700, margin: '10px 0 4px', borderBottom: '1px solid #ccc', paddingBottom: 3 }}>EDUCATION</p>
                           {orig.education.map((e, i) => <div key={i}>
@@ -805,7 +806,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                       <div style={{ background: '#0f172a', padding: '24px 22px 18px', margin: '-32px -32px 24px', borderRadius: '16px 16px 0 0' }}>
                         <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{opt.name}</div>
                         <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 10 }}>
-                          {[opt.email, opt.phone, opt.linkedin, opt.location].filter(Boolean).join(' · ')}
+                          {[opt.email, opt.phone, typeof opt.linkedin === 'string' ? opt.linkedin : '', opt.location].filter(Boolean).join(' · ')}
                         </div>
                         {opt.skills?.length > 0 && (
                           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
