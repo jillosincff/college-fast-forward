@@ -75,13 +75,15 @@ export default function OnboardingFlow({ onClose }) {
   const [blockers, setBlockers] = useState([]);
   const [college, setCollege] = useState('');
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
+  const [locationPref, setLocationPref] = useState(''); // 'remote' or a city string
+  const [locationCity, setLocationCity] = useState('');
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
   const [resumeData, setResumeData] = useState(null); // parsed resume from AI
   const [showPaywall, setShowPaywall] = useState(false);
   const fileRef = useRef();
 
-  const TOTAL = 8;
+  const TOTAL = 9;
   const go = (n) => setScreen(n);
   const next = () => setScreen(s => s + 1);
   const back = () => setScreen(s => s - 1);
@@ -144,11 +146,11 @@ Return valid JSON matching the schema exactly.`,
 
       const parsed = result.original;
       setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
-      setScreen(8);
+      setScreen(9);
     } catch (err) {
       console.error(err);
       // Still advance even if AI fails
-      setScreen(8);
+      setScreen(9);
     }
     setUploading(false);
   };
@@ -163,6 +165,8 @@ Return valid JSON matching the schema exactly.`,
       if (blockers.length) localStorage.setItem('cff_blockers', JSON.stringify(blockers));
       if (frustration) localStorage.setItem('cff_frustration', String(frustration));
       if (resumeUrl) localStorage.setItem('cff_resume_url', resumeUrl);
+      const loc = locationPref === 'remote' ? 'remote' : locationCity;
+      if (loc) localStorage.setItem('cff_location', loc);
     } catch (e) {}
     base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };
@@ -206,7 +210,7 @@ Return valid JSON matching the schema exactly.`,
       <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 38, height: 38, minHeight: 'auto', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.5)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
 
       {/* Progress bar — hidden on final screen */}
-      {screen < 8 && (
+      {screen < 9 && (
         <>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.06)' }}>
             <div style={{ height: '100%', width: `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
@@ -379,8 +383,112 @@ Return valid JSON matching the schema exactly.`,
         </div>
       )}
 
-      {/* ── SCREEN 7: Resume Upload ── */}
-      {screen === 7 && (
+      {/* ── SCREEN 7: Work Location ── */}
+      {screen === 7 && (() => {
+        const TOP_CITIES = [
+          'New York, NY', 'San Francisco, CA', 'Los Angeles, CA', 'Chicago, IL',
+          'Austin, TX', 'Boston, MA', 'Seattle, WA', 'Washington, DC',
+          'Miami, FL', 'Atlanta, GA', 'Dallas, TX', 'Denver, CO',
+          'Philadelphia, PA', 'Houston, TX', 'Charlotte, NC', 'Nashville, TN',
+          'Minneapolis, MN', 'Portland, OR', 'San Diego, CA', 'Phoenix, AZ',
+        ];
+        const citySuggestions = locationCity.length >= 2
+          ? TOP_CITIES.filter(c => c.toLowerCase().includes(locationCity.toLowerCase())).slice(0, 6)
+          : [];
+        const isRemote = locationPref === 'remote';
+        const hasCity = locationPref === 'city' && locationCity.trim().length > 0;
+        const canContinue = isRemote || hasCity;
+
+        return (
+          <div style={{ ...card, maxWidth: 520 }}>
+            <div style={{ width: 68, height: 68, borderRadius: 20, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30, margin: '0 auto 28px' }}>📍</div>
+            <h1 style={h1}>Where are you looking to work?</h1>
+            <p style={sub}>This helps the Agent find the right opportunities and connections for you.</p>
+
+            {/* Remote option */}
+            <button
+              onClick={() => setLocationPref('remote')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 16, width: '100%',
+                background: isRemote ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)',
+                border: `1.5px solid ${isRemote ? 'rgba(34,197,94,0.5)' : 'rgba(255,255,255,0.09)'}`,
+                borderRadius: 16, padding: '16px 20px', cursor: 'pointer',
+                textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', marginBottom: 12,
+              }}
+            >
+              <span style={{ fontSize: 22, flexShrink: 0 }}>🌐</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 600, color: isRemote ? '#fff' : 'rgba(255,255,255,0.8)', margin: 0 }}>Remote</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: '3px 0 0' }}>Open to fully remote positions anywhere</p>
+              </div>
+              <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${isRemote ? GREEN : 'rgba(255,255,255,0.2)'}`, background: isRemote ? GREEN : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700 }}>
+                {isRemote && '✓'}
+              </div>
+            </button>
+
+            {/* City option */}
+            <button
+              onClick={() => setLocationPref('city')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 16, width: '100%',
+                background: locationPref === 'city' ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)',
+                border: `1.5px solid ${locationPref === 'city' ? 'rgba(34,197,94,0.5)' : 'rgba(255,255,255,0.09)'}`,
+                borderRadius: 16, padding: '16px 20px', cursor: 'pointer',
+                textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', marginBottom: 12,
+              }}
+            >
+              <span style={{ fontSize: 22, flexShrink: 0 }}>🏙️</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 600, color: locationPref === 'city' ? '#fff' : 'rgba(255,255,255,0.8)', margin: 0 }}>A specific city</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.35)', margin: '3px 0 0' }}>I have a target location in mind</p>
+              </div>
+              <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${locationPref === 'city' ? GREEN : 'rgba(255,255,255,0.2)'}`, background: locationPref === 'city' ? GREEN : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700 }}>
+                {locationPref === 'city' && '✓'}
+              </div>
+            </button>
+
+            {/* City search input */}
+            {locationPref === 'city' && (
+              <div style={{ position: 'relative', marginBottom: 8 }}>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 16, pointerEvents: 'none' }}>🔍</span>
+                  <input
+                    type="text"
+                    placeholder="e.g. New York, NY or Austin, TX..."
+                    value={locationCity}
+                    onChange={e => setLocationCity(e.target.value)}
+                    autoFocus
+                    style={{
+                      width: '100%', boxSizing: 'border-box',
+                      fontFamily: dm, fontSize: 15, color: '#fff',
+                      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: 12, padding: '14px 14px 14px 44px',
+                      outline: 'none', transition: 'border-color 0.15s',
+                    }}
+                    onFocus={e => e.target.style.borderColor = 'rgba(34,197,94,0.5)'}
+                    onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.15)'}
+                  />
+                </div>
+                {citySuggestions.length > 0 && (
+                  <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#14161f', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, overflow: 'hidden', zIndex: 10, marginTop: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}>
+                    {citySuggestions.map(c => (
+                      <button key={c} onClick={() => { setLocationCity(c); }} style={{ display: 'block', width: '100%', textAlign: 'left', fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.8)', background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '12px 16px', cursor: 'pointer', minHeight: 'auto' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(34,197,94,0.1)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >{c}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <Nav onBack={back} onNext={next} nextDisabled={!canContinue} />
+          </div>
+        );
+      })()}
+
+      {/* ── SCREEN 8: Resume Upload ── */}
+      {screen === 8 && (
         <div style={{ ...card, maxWidth: 520 }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
@@ -421,7 +529,7 @@ Return valid JSON matching the schema exactly.`,
           {!uploading && (
             <>
               <div style={{ textAlign: 'center' }}>
-                <button onClick={next} style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, textDecoration: 'underline' }}
+                <button onClick={() => setScreen(9)} style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, textDecoration: 'underline' }}
                   onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
                   onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
                 >
@@ -436,8 +544,8 @@ Return valid JSON matching the schema exactly.`,
         </div>
       )}
 
-      {/* ── SCREEN 8: Wow Moment ── */}
-      {screen === 8 && (
+      {/* ── SCREEN 9: Wow Moment ── */}
+      {screen === 9 && (
         <div style={{ maxWidth: 900, width: '100%', animation: 'fadeUp 0.35s ease' }}>
 
           {/* Header */}
@@ -639,6 +747,7 @@ Return valid JSON matching the schema exactly.`,
             const frustrationDesc = frustration >= 8 ? 'super frustrated' : frustration >= 6 ? 'pretty discouraged' : frustration >= 4 ? 'feeling the pressure' : 'ready to level up';
             const schoolDisplay = college || 'your school';
             const seekingLabel = seeking === 'internship' ? 'internships' : seeking === 'fulltime' ? 'full-time positions' : seeking === 'both' ? 'internships and full-time roles' : 'opportunities';
+            const locationDisplay = locationPref === 'remote' ? 'remote' : locationCity || null;
             const roleType = seeking === 'internship' ? 'internship' : 'role';
             const blockerDesc = blockers.includes('resume') ? 'resume' : blockers.includes('ghosted') ? 'applications' : 'job search';
 
@@ -660,7 +769,7 @@ Return valid JSON matching the schema exactly.`,
                   We know you're <span style={{ color: '#fff', fontWeight: 600 }}>{frustrationDesc}</span> right now.
                 </p>
                 <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.75 }}>
-                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student looking for <span style={{ color: '#fff', fontWeight: 600 }}>{seekingLabel}</span>, applying and not hearing back feels incredibly discouraging. Here's exactly what we're going to do together:
+                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student looking for <span style={{ color: '#fff', fontWeight: 600 }}>{seekingLabel}</span>{locationDisplay ? <> in <span style={{ color: '#fff', fontWeight: 600 }}>{locationDisplay}</span></> : ''}, applying and not hearing back feels incredibly discouraging. Here's exactly what we're going to do together:
                 </p>
 
                 <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>Your 30-Day Roadmap</p>
