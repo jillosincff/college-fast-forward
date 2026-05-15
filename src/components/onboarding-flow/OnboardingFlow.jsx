@@ -546,7 +546,7 @@ Return valid JSON matching the schema exactly.`,
 
       {/* ── SCREEN 9: Wow Moment ── */}
       {screen === 9 && (
-        <div style={{ maxWidth: 900, width: '100%', animation: 'fadeUp 0.35s ease' }}>
+        <div className="resume-wow-page" style={{ maxWidth: 900, width: '100%', animation: 'fadeUp 0.35s ease', paddingTop: 100, minHeight: '100vh', boxSizing: 'border-box' }}>
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
@@ -569,12 +569,11 @@ Return valid JSON matching the schema exactly.`,
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 48 }}>
 
                 {/* BEFORE */}
-                <div style={{ background: '#1a1d24', border: '1px solid #374151', borderRadius: 24, padding: 24 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <h2 style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#9ca3af', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Your Current Resume</h2>
-                    <span style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: '#1f2937', borderRadius: 100, padding: '4px 12px' }}>Original</span>
+                <div style={{ background: '#1a1d24', border: '1px solid #374151', borderRadius: 24, padding: 32 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                    <h2 style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: '#9ca3af', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Your Current Resume</h2>
                   </div>
-                  <div style={{ background: '#1f2937', borderRadius: 16, padding: 32, minHeight: 460 }}>
+                  <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 520, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.1)' }}>
                     {orig ? (
                       <div style={{ padding: 0, fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6 }}>
                         <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
@@ -613,15 +612,15 @@ Return valid JSON matching the schema exactly.`,
                 </div>
 
                 {/* AFTER */}
-                <div style={{ background: 'rgba(34,197,94,0.06)', border: '2px solid #10b981', borderRadius: 24, padding: 24, position: 'relative' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <h2 style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#34d399', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Agent Optimized Version</h2>
-                    <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#000', background: '#10b981', borderRadius: 100, padding: '4px 16px' }}>OPTIMIZED</span>
+                <div style={{ background: '#1a1d24', border: '2px solid #10b981', borderRadius: 24, padding: 32, position: 'relative' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                    <h2 style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: '#34d399', margin: 0, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Agent Optimized Version</h2>
+                    <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#000', background: '#10b981', borderRadius: 100, padding: '4px 16px' }}>OPTIMIZED</span>
                   </div>
                   
                   {/* Loading state */}
                   {!opt && (
-                    <div style={{ background: '#1f2937', borderRadius: 16, padding: 32, minHeight: 460, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 520, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ width: 40, height: 40, border: '4px solid #10b981', borderTop: '4px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
                         <p style={{ fontFamily: dm, fontSize: 14, color: '#34d399', margin: '0 0 4px' }}>The Agent is optimizing your resume...</p>
@@ -632,7 +631,7 @@ Return valid JSON matching the schema exactly.`,
                   
                   {/* Optimized content */}
                   {opt && (
-                    <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 460, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                    <div style={{ background: '#fff', borderRadius: 16, padding: 32, minHeight: 520, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
                       {/* Dark header */}
                       <div style={{ background: '#0f172a', padding: '24px 22px 18px', margin: '-32px -32px 24px', borderRadius: '16px 16px 0 0' }}>
                         <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 4 }}>{opt.name}</div>
