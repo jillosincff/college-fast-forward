@@ -669,7 +669,7 @@ Return valid JSON matching the schema exactly.`,
                 onMouseEnter={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.40)'; }}}
                 onMouseLeave={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.30)'; }}}
               >
-                {blockers.length === 0 ? 'Select at least 1 →' : `Build My Plan →`}
+                {blockers.length === 0 ? 'Select at least 1 →' : 'Continue →'}
               </button>
             </div>
           </div>
