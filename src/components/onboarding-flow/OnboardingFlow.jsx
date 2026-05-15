@@ -117,6 +117,7 @@ export default function OnboardingFlow({ onClose }) {
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
   const [locationPref, setLocationPref] = useState('');
   const [locationCity, setLocationCity] = useState('');
+  const [citySuggestionsClosed, setCitySuggestionsClosed] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [resumeUrl, setResumeUrl] = useState('');
   const [resumeData, setResumeData] = useState(null);
@@ -395,7 +396,7 @@ Return valid JSON matching the schema exactly.`,
       {/* ── SCREEN 7: Work Location ── */}
       {screen === 7 && (() => {
         const TOP_CITIES = ['New York, NY', 'San Francisco, CA', 'Los Angeles, CA', 'Chicago, IL', 'Austin, TX', 'Boston, MA', 'Seattle, WA', 'Washington, DC', 'Miami, FL', 'Atlanta, GA', 'Dallas, TX', 'Denver, CO', 'Philadelphia, PA', 'Houston, TX', 'Charlotte, NC', 'Nashville, TN', 'Minneapolis, MN', 'Portland, OR', 'San Diego, CA', 'Phoenix, AZ'];
-        const citySuggestions = locationCity.length >= 2 ? TOP_CITIES.filter(c => c.toLowerCase().includes(locationCity.toLowerCase())).slice(0, 6) : [];
+        const citySuggestions = !citySuggestionsClosed && locationCity.length >= 2 ? TOP_CITIES.filter(c => c.toLowerCase().includes(locationCity.toLowerCase())).slice(0, 6) : [];
         const isRemote = locationPref === 'remote';
         const hasCity = locationPref === 'city' && locationCity.trim().length > 0;
         return (
@@ -409,11 +410,11 @@ Return valid JSON matching the schema exactly.`,
             </div>
             {locationPref === 'city' && (
               <div style={{ position: 'relative', marginTop: 10 }}>
-                <InputField placeholder="e.g. New York, NY or Austin, TX..." value={locationCity} onChange={e => setLocationCity(e.target.value)} icon="🔍" autoFocus />
+                <InputField placeholder="e.g. New York, NY or Austin, TX..." value={locationCity} onChange={e => { setLocationCity(e.target.value); setCitySuggestionsClosed(false); }} icon="🔍" autoFocus />
                 {citySuggestions.length > 0 && (
                   <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: CARD, border: '1px solid #E2E8F0', borderRadius: R, overflow: 'hidden', zIndex: 10, marginTop: 4, boxShadow: SHADOW_MD }}>
                     {citySuggestions.map(c => (
-                      <button key={c} onClick={() => setLocationCity(c)} style={{ display: 'block', width: '100%', textAlign: 'left', fontFamily: FONT, fontSize: 14, color: TEXT, background: 'transparent', border: 'none', borderBottom: '1px solid #F1F5F9', padding: '12px 16px', cursor: 'pointer', minHeight: 'auto' }}
+                      <button key={c} onClick={() => { setLocationCity(c); setLocationPref('city'); setCitySuggestionsClosed(true); }} style={{ display: 'block', width: '100%', textAlign: 'left', fontFamily: FONT, fontSize: 14, color: TEXT, background: 'transparent', border: 'none', borderBottom: '1px solid #F1F5F9', padding: '12px 16px', cursor: 'pointer', minHeight: 'auto' }}
                         onMouseEnter={e => e.currentTarget.style.background = BLUE_LIGHT}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >{c}</button>
