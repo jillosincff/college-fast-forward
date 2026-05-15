@@ -479,10 +479,8 @@ ${JSON.stringify(parsed.experience)}`,
                     <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
                   </div>
                   <div style={{ borderRadius: 12, overflow: 'hidden', height: 620, background: '#fff' }}>
-                    {resumeUrl ? (
-                      <iframe src={resumeUrl} title="Your Resume" style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} />
-                    ) : orig ? (
-                      /* Render parsed original in plain text style */
+                    {orig ? (
+                      /* Render parsed original in plain-text style */
                       <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}>
                         <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
                         <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, orig.linkedin, orig.location].filter(Boolean).join(' | ')}</p>
@@ -511,7 +509,10 @@ ${JSON.stringify(parsed.experience)}`,
                         </>}
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', fontFamily: dm, fontSize: 13 }}>Upload a resume to see the before view</div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', flexDirection: 'column', gap: 12, color: '#999', padding: 24 }}>
+                        <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTop: '3px solid #94a3b8', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>Parsing your resume...</p>
+                      </div>
                     )}
                   </div>
                 </div>
