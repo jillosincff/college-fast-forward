@@ -550,8 +550,8 @@ Return valid JSON matching the schema exactly.`,
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <h1 style={{ ...h1, fontSize: 'clamp(24px, 4vw, 40px)', marginBottom: 8 }}>Here's Your Upgraded Resume</h1>
-            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>The CFF Agent just made it significantly stronger</p>
+            <h1 style={{ ...h1, fontSize: 'clamp(24px, 4vw, 40px)', marginBottom: 8 }}>Your Resume Just Leveled Up</h1>
+            <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.45)', margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>The CFF Agent rewrote your bullets, fixed the layout, and made it look professional — without losing your story.</p>
           </div>
 
           {/* Before / After side by side */}
