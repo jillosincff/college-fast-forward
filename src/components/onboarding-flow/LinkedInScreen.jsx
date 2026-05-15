@@ -61,6 +61,7 @@ export default function LinkedInScreen({ resumeData, college, seeking, targetRol
   const [typingDone, setTypingDone] = useState(false);
   const [activeHeadline, setActiveHeadline] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [step3Active, setStep3Active] = useState(false);
 
   const seekingLabel = targetRole || (seeking === 'internship' ? 'Remote Internship' : seeking === 'fulltime' ? 'Remote Full-Time Role' : 'Remote Opportunity');
 
@@ -169,10 +170,18 @@ Return valid JSON.`,
           {['Resume Wow', 'LinkedIn Identity', 'Your Plan'].map((label, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: i === 1 ? BLUE : i < 1 ? '#22c55e' : 'rgba(255,255,255,0.1)', border: `2px solid ${i === 1 ? BLUE : i < 1 ? '#22c55e' : 'rgba(255,255,255,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', fontFamily: dm }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  background: i === 1 ? BLUE : i < 1 ? '#22c55e' : (i === 2 && step3Active) ? '#3b82f6' : 'rgba(255,255,255,0.1)',
+                  border: `2px solid ${i === 1 ? BLUE : i < 1 ? '#22c55e' : (i === 2 && step3Active) ? '#60a5fa' : 'rgba(255,255,255,0.15)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', fontFamily: dm,
+                  boxShadow: (i === 2 && step3Active) ? '0 0 0 4px rgba(59,130,246,0.3), 0 0 16px rgba(59,130,246,0.5)' : 'none',
+                  animation: (i === 2 && step3Active) ? 'step3pulse 1.2s ease-in-out infinite' : 'none',
+                  transition: 'all 0.4s ease',
+                }}>
                   {i < 1 ? '✓' : i + 1}
                 </div>
-                <span style={{ fontFamily: dm, fontSize: 10, color: i === 1 ? '#93c5fd' : i < 1 ? '#86efac' : 'rgba(255,255,255,0.25)', fontWeight: i === 1 ? 700 : 400, whiteSpace: 'nowrap' }}>{label}</span>
+                <span style={{ fontFamily: dm, fontSize: 10, color: i === 1 ? '#93c5fd' : i < 1 ? '#86efac' : (i === 2 && step3Active) ? '#93c5fd' : 'rgba(255,255,255,0.25)', fontWeight: (i === 1 || (i === 2 && step3Active)) ? 700 : 400, whiteSpace: 'nowrap', transition: 'color 0.4s' }}>{label}</span>
               </div>
               {i < 2 && <div style={{ width: 40, height: 2, background: i < 1 ? '#22c55e' : 'rgba(255,255,255,0.1)', borderRadius: 2, marginBottom: 18 }} />}
             </div>
@@ -260,7 +269,7 @@ Return valid JSON.`,
             </button>
           </div>
         )}
-        <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
+        <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} } @keyframes step3pulse { 0%,100%{box-shadow:0 0 0 4px rgba(59,130,246,0.3),0 0 16px rgba(59,130,246,0.5)} 50%{box-shadow:0 0 0 8px rgba(59,130,246,0.15),0 0 28px rgba(59,130,246,0.7)} }`}</style>
       </SectionCard>
 
       {/* ── CARD 3: Keywords ── */}
@@ -300,7 +309,7 @@ Return valid JSON.`,
       {/* ── Master CTA ── */}
       <div style={{ textAlign: 'center', marginTop: 36, marginBottom: 20 }}>
         <button
-          onClick={() => setShowPaywall(true)}
+          onClick={() => { setStep3Active(true); setShowPaywall(true); }}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 14px',
             fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff',
