@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import LinkedInScreen from './LinkedInScreen';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -751,7 +752,7 @@ Return valid JSON matching the schema exactly.`,
           {/* CTA */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <button
-              onClick={() => setShowPaywall(true)}
+              onClick={() => setScreen(10)}
               style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 16px', fontFamily: dm, fontSize: 18, fontWeight: 700, color: '#fff', background: '#f97316', border: 'none', borderRadius: 16, padding: '24px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 40px rgba(249,115,22,0.4)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(249,115,22,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(249,115,22,0.4)'; }}
@@ -816,6 +817,16 @@ Return valid JSON matching the schema exactly.`,
         </div>
       )}
 
+      {/* ── SCREEN 10: LinkedIn Identity Architect ── */}
+      {screen === 10 && (
+        <LinkedInScreen
+          resumeData={resumeData}
+          college={college}
+          seeking={seeking}
+          onBack={() => setScreen(9)}
+          saveAndAuth={saveAndAuth}
+        />
+      )}
 
     </div>
   );
