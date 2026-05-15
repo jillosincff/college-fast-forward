@@ -613,7 +613,7 @@ Create a professional profile JSON as if extracted from LinkedIn. Be realistic a
                     setResumeData({ original: parsed, optimized: { ...parsed, experience: optimizedExp } });
                   } catch { /* advance anyway */ }
                   setUploading(false);
-                  setScreen(9);
+                  setScreen(10);
                 }}
                 disabled={!linkedinInput.trim()}
                 style={{ display: 'block', width: '100%', marginBottom: 16 }}
