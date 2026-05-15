@@ -54,12 +54,40 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
   const mainBlocker = blockers[0] ? BLOCKER_LABELS[blockers[0]] : 'not knowing which roles are real';
 
   return (
-    <div style={{ maxWidth: 780, width: '100%', paddingTop: 100, paddingBottom: 80, boxSizing: 'border-box' }}>
+    <div style={{ maxWidth: 780, width: '100%', paddingTop: 100, paddingBottom: 120, boxSizing: 'border-box' }}>
       <style>{`
         @keyframes fadUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulseBlue { 0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0.35)} 50%{box-shadow:0 0 0 8px rgba(37,99,235,0.0)} }
         @keyframes notifIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .plan-sticky-cta { display: none; }
+        @media (max-width: 767px) {
+          .plan-sticky-cta { display: flex; }
+        }
       `}</style>
+
+      {/* ── Mobile Sticky CTA ── */}
+      <div className="plan-sticky-cta" style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000,
+        background: '#fff', borderTop: '1px solid #E2E8F0',
+        padding: '12px 16px calc(12px + env(safe-area-inset-bottom))',
+        flexDirection: 'column', alignItems: 'stretch', gap: 8,
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+      }}>
+        <button
+          onClick={() => setShowPaywall(true)}
+          style={{
+            width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff',
+            background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
+            border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
+            boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
+          }}
+        >
+          Unlock My 14-Day Action Plan →
+        </button>
+        <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textAlign: 'center', textDecoration: 'underline' }}>
+          Save progress and continue for free
+        </button>
+      </div>
 
       {/* ── Progress Header ── */}
       <div style={{ textAlign: 'center', marginBottom: 44 }}>
