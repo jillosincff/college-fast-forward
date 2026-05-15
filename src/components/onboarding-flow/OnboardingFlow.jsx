@@ -750,41 +750,35 @@ Return valid JSON matching the schema exactly.`,
 
           {/* Personalized Plan */}
           {(() => {
-            const frustrationDesc = frustration >= 8 ? 'super frustrated' : frustration >= 6 ? 'pretty discouraged' : frustration >= 4 ? 'feeling the pressure' : 'ready to level up';
             const schoolDisplay = college || 'your school';
-            const seekingLabel = seeking === 'internship' ? 'internships' : seeking === 'fulltime' ? 'full-time positions' : seeking === 'both' ? 'internships and full-time roles' : 'opportunities';
-            const locationDisplay = locationPref === 'remote' ? 'remote' : locationCity || null;
-            const roleType = seeking === 'internship' ? 'internship' : 'role';
-            const blockerDesc = blockers.includes('resume') ? 'resume' : blockers.includes('ghosted') ? 'applications' : 'job search';
-
-            const roadmap = [
-              { week: 'Week 1', text: `Lock in this upgraded resume as your new standard and tailor it for your top ${seekingLabel}.` },
-              { week: 'Week 2', text: `Start applying smarter (not harder) — the Agent finds better-fitting roles and drafts outreach messages for you.` },
-              { week: 'Week 3', text: `Reach out to relevant ${schoolDisplay} alumni and parents at target companies — they're 10× more likely to help.` },
-              { week: 'Week 4', text: `Track every application, get smart reminders, and prep for interviews so nothing falls through the cracks.` },
-            ];
+            const locationDisplay = locationPref === 'remote' ? 'remote' : locationCity || 'your target location';
 
             return (
               <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 24, padding: '32px 28px', marginBottom: 28 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 10px' }}>Your Personalized Plan</p>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 10px' }}>Your Personalized Action Plan</p>
                 <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 900, color: '#fff', margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-                  Here's your personalized plan
+                  Here is Your Personalized Action Plan
                 </h2>
 
                 <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: '0 0 6px', lineHeight: 1.75 }}>
-                  We know you're <span style={{ color: '#fff', fontWeight: 600 }}>{frustrationDesc}</span> right now.
+                  We know you're <span style={{ color: '#fff', fontWeight: 600 }}>feeling the pressure</span> right now.
                 </p>
                 <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.75 }}>
-                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student looking for <span style={{ color: '#fff', fontWeight: 600 }}>{seekingLabel}</span>{locationDisplay ? <> in <span style={{ color: '#fff', fontWeight: 600 }}>{locationDisplay}</span></> : ''}, applying and not hearing back feels incredibly discouraging. Here's exactly what we're going to do together:
+                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student looking for <span style={{ color: '#fff', fontWeight: 600 }}>remote roles</span>, applying and not hearing back is a waste of your time. Here is exactly what we're going to do starting today:
                 </p>
 
-                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>Your 30-Day Roadmap</p>
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>Our Immediate Next Steps</p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 24 }}>
-                  {roadmap.map((item, i) => (
+                  {[
+                    { label: 'Today', text: "We'll start using this upgraded, recruiter-vetted resume as our new standard." },
+                    { label: 'This Week', text: "We'll target 8–10 high-quality roles identified by the Agent (with versions tailored for each)." },
+                    { label: 'This Week', text: "We'll initiate warm outreach to 3–5 UF Alumni at your target companies to bypass the portals." },
+                    { label: 'Ongoing', text: "The Agent handles the tracking and follow-ups so you can focus on the interviews." },
+                  ].map((item, i) => (
                     <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '14px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
                       <div style={{ flexShrink: 0, minWidth: 68 }}>
-                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, padding: '3px 8px', whiteSpace: 'nowrap' }}>{item.week}</span>
+                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, padding: '3px 8px', whiteSpace: 'nowrap' }}>{item.label}</span>
                       </div>
                       <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0, lineHeight: 1.6 }}>{item.text}</p>
                     </div>
@@ -793,7 +787,7 @@ Return valid JSON matching the schema exactly.`,
 
                 <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14, padding: '14px 18px' }}>
                   <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.6 }}>
-                    <span style={{ color: GREEN, fontWeight: 700 }}>Goal:</span> Get you closer to landing that {roleType} — without the overwhelm.
+                    <span style={{ color: GREEN, fontWeight: 700 }}>Goal:</span> Build real momentum and land interviews in the next 7–14 days.
                   </p>
                 </div>
               </div>
