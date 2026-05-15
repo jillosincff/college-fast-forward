@@ -767,7 +767,7 @@ Return valid JSON matching the schema exactly.`,
                   As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student looking for <span style={{ color: '#fff', fontWeight: 600 }}>remote roles</span>, applying and not hearing back is a waste of your time. Here is exactly what we're going to do starting today:
                 </p>
 
-                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>Our Immediate Next Steps</p>
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 18px' }}>Our Immediate Next Steps</p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 24 }}>
                   {[
@@ -776,11 +776,11 @@ Return valid JSON matching the schema exactly.`,
                     { label: 'This Week', text: "We'll initiate warm outreach to 3–5 UF Alumni at your target companies to bypass the portals." },
                     { label: 'Ongoing', text: "The Agent handles the tracking and follow-ups so you can focus on the interviews." },
                   ].map((item, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '14px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                    <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '16px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
                       <div style={{ flexShrink: 0, minWidth: 68 }}>
-                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, padding: '3px 8px', whiteSpace: 'nowrap' }}>{item.label}</span>
+                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, padding: '4px 10px', whiteSpace: 'nowrap' }}>{item.label}</span>
                       </div>
-                      <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.8)', margin: 0, lineHeight: 1.6 }}>{item.text}</p>
+                      <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.7 }}>{item.text}</p>
                     </div>
                   ))}
                 </div>
