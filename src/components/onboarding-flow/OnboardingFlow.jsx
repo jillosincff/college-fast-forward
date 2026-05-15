@@ -324,15 +324,62 @@ Return valid JSON matching the schema exactly.`,
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
-        <div style={card}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px', marginBottom: 28 }}>
-            <span style={{ fontSize: 12 }}>⚡</span>
-            <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>College Fast Forward</span>
+        <div style={{ ...card, position: 'relative', overflow: 'visible' }}>
+          {/* Teaser background ghost cards */}
+          <div style={{ position: 'absolute', left: '-18%', top: '8%', width: 160, height: 100, borderRadius: 12, background: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', opacity: 0.07, transform: 'rotate(-6deg)', pointerEvents: 'none', padding: '10px 14px', overflow: 'hidden' }}>
+            <div style={{ width: '60%', height: 8, background: '#0066FF', borderRadius: 4, marginBottom: 6 }} />
+            <div style={{ width: '90%', height: 5, background: '#CBD5E1', borderRadius: 3, marginBottom: 4 }} />
+            <div style={{ width: '75%', height: 5, background: '#CBD5E1', borderRadius: 3, marginBottom: 4 }} />
+            <div style={{ width: '80%', height: 5, background: '#CBD5E1', borderRadius: 3 }} />
           </div>
-          <h1 style={h1style}>Welcome to College<br />Fast Forward.</h1>
-          <p style={substyle}>Your job search co-pilot — built to learn who you are and get you interviews quickly.</p>
-          <Btn onClick={next} style={{ display: 'block', margin: '0 auto', padding: '17px 52px', fontSize: 16 }}>Let's Get Started →</Btn>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, marginTop: 16 }}>Takes about 2 minutes. No credit card required.</p>
+          <div style={{ position: 'absolute', right: '-15%', top: '20%', width: 150, height: 90, borderRadius: 12, background: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', opacity: 0.07, transform: 'rotate(5deg)', pointerEvents: 'none', padding: '10px 14px', overflow: 'hidden' }}>
+            <div style={{ width: '50%', height: 8, background: '#10B981', borderRadius: 4, marginBottom: 6 }} />
+            <div style={{ width: '85%', height: 5, background: '#CBD5E1', borderRadius: 3, marginBottom: 4 }} />
+            <div style={{ width: '70%', height: 5, background: '#CBD5E1', borderRadius: 3 }} />
+          </div>
+
+          {/* Badge pill */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px', marginBottom: 24 }}>
+            <span style={{ fontSize: 12 }}>⚡</span>
+            <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Career Agent</span>
+          </div>
+
+          {/* Headline — gradient on brand name */}
+          <h1 style={{ fontFamily: FONT, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px', fontSize: 'clamp(26px, 5vw, 44px)', color: TEXT }}>
+            Welcome to<br />
+            <span style={{ background: 'linear-gradient(135deg, #0066FF 0%, #0F172A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>College Fast Forward.</span>
+          </h1>
+
+          <p style={{ ...substyle, color: '#334155', marginBottom: 32 }}>Your job search co-pilot — built to learn who you are and get you interviews quickly.</p>
+
+          {/* CTA button with glow */}
+          <button
+            onClick={next}
+            style={{ display: 'block', margin: '0 auto 6px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '17px 52px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(0,102,255,0.2)', transition: 'all 0.2s ease' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(0,102,255,0.32)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,102,255,0.2)'; }}
+          >Let's Get Started →</button>
+
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, marginBottom: 4 }}>Takes about 2 minutes. No credit card required.</p>
+          <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, fontWeight: 600, margin: '0 0 28px' }}>Your first interview is closer than you think.</p>
+
+          {/* Social proof trust bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {[
+                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&crop=face',
+                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face',
+                'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face',
+                'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face',
+                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop&crop=face',
+              ].map((src, i) => (
+                <img key={i} src={src} alt="" style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid #fff', objectFit: 'cover', marginLeft: i === 0 ? 0 : -8, boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }} onError={e => { e.target.style.display = 'none'; }} />
+              ))}
+            </div>
+            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.4 }}>
+              Joining <strong style={{ color: TEXT }}>2,400+ students</strong> from UF, Penn State &amp; USC this week.
+            </p>
+          </div>
         </div>
       )}
 
