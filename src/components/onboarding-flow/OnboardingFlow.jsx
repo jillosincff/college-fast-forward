@@ -182,7 +182,7 @@ Return valid JSON matching the schema exactly.`,
 
   const shell = {
     position: 'fixed', inset: 0, zIndex: 10000,
-    background: '#07080f',
+    background: screen === 11 ? '#f8f9fc' : '#07080f',
     display: 'flex', flexDirection: 'column',
     alignItems: 'center',
     justifyContent: isFullPageScreen ? 'flex-start' : 'center',
@@ -217,7 +217,7 @@ Return valid JSON matching the schema exactly.`,
       `}</style>
 
       {/* Close */}
-      <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 38, height: 38, minHeight: 'auto', borderRadius: '50%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.5)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+      <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 38, height: 38, minHeight: 'auto', borderRadius: '50%', background: screen === 11 ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.07)', border: `1px solid ${screen === 11 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.12)'}`, color: screen === 11 ? '#6b7280' : 'rgba(255,255,255,0.5)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
 
       {/* Progress bar — hidden on final screen */}
       {screen < 9 && (
