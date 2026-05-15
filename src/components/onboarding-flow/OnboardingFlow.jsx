@@ -738,7 +738,7 @@ Return valid JSON matching the schema exactly.`,
                 'Strengthened your bullet points to focus on results, not tasks',
                 'Improved formatting and visual hierarchy for a modern look',
                 'Made it ATS-friendly while keeping it visually standout',
-                <>Score improved from <span style={{ textDecoration: 'line-through', color: '#f87171', margin: '0 6px' }}>42/100</span> → <span style={{ fontWeight: 700, color: '#34d399', marginLeft: 6 }}>87/100</span></>,
+                <>Score improved from <span style={{ textDecoration: 'line-through', color: '#f87171', margin: '0 6px' }}>51/100</span> → <span style={{ fontWeight: 700, color: '#34d399', marginLeft: 6 }}>97/100</span></>,
               ].map((line, i) => (
                 <li key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontFamily: dm, fontSize: 14, color: '#d1d5db', lineHeight: 1.6 }}>
                   <span style={{ color: '#34d399', fontSize: 16, flexShrink: 0, marginTop: 1 }}>✓</span>
@@ -748,52 +748,6 @@ Return valid JSON matching the schema exactly.`,
             </ul>
           </div>
 
-          {/* Personalized Plan */}
-          {(() => {
-            const schoolDisplay = college || 'your school';
-            const locationDisplay = locationPref === 'remote' ? 'remote' : locationCity || 'your target location';
-
-            return (
-              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 24, padding: '32px 28px', marginBottom: 28 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 10px' }}>Your Personalized Action Plan</p>
-                <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 900, color: '#fff', margin: '0 0 20px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-                  Here is Your Personalized Action Plan
-                </h2>
-
-                <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: '0 0 6px', lineHeight: 1.75 }}>
-                  We know you're <span style={{ color: '#fff', fontWeight: 600 }}>feeling the pressure</span> right now.
-                </p>
-                <p style={{ fontFamily: dm, fontSize: 15, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.75 }}>
-                  As a <span style={{ color: '#fff', fontWeight: 600 }}>{schoolDisplay}</span> student looking for <span style={{ color: '#fff', fontWeight: 600 }}>remote roles</span>, applying and not hearing back is a waste of your time. Here is exactly what we're going to do starting today:
-                </p>
-
-                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 18px' }}>Our Immediate Next Steps</p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 24 }}>
-                  {[
-                    { label: 'Today', text: "We'll start using this upgraded, recruiter-vetted resume as our new standard." },
-                    { label: 'This Week', text: "We'll target 8–10 high-quality roles identified by the Agent (with versions tailored for each)." },
-                    { label: 'This Week', text: "We'll initiate warm outreach to 3–5 UF Alumni at your target companies to bypass the portals." },
-                    { label: 'Ongoing', text: "The Agent handles the tracking and follow-ups so you can focus on the interviews." },
-                  ].map((item, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', padding: '16px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                      <div style={{ flexShrink: 0, minWidth: 68 }}>
-                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, padding: '4px 10px', whiteSpace: 'nowrap' }}>{item.label}</span>
-                      </div>
-                      <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.7 }}>{item.text}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14, padding: '14px 18px' }}>
-                  <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: 0, lineHeight: 1.6 }}>
-                    <span style={{ color: GREEN, fontWeight: 700 }}>Goal:</span> Build real momentum and land interviews in the next 7–14 days.
-                  </p>
-                </div>
-              </div>
-            );
-          })()}
-
           {/* CTA */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <button
@@ -802,7 +756,7 @@ Return valid JSON matching the schema exactly.`,
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(249,115,22,0.5)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(249,115,22,0.4)'; }}
             >
-              Unlock Unlimited Resumes + Full Agent
+              Next: Optimize My Online Presence →
             </button>
             <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 14, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
               Use this version for now and continue
