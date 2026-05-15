@@ -566,7 +566,7 @@ Return valid JSON matching the schema exactly.`,
               </div>
             );
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28, gridAutoRows: 'minmax(auto, max-content)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28 }}>
 
                 {/* BEFORE */}
                 <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px' }}>
@@ -574,10 +574,10 @@ Return valid JSON matching the schema exactly.`,
                     <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>Your Current Resume</p>
                     <span style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.07)', borderRadius: 100, padding: '3px 10px' }}>Original</span>
                   </div>
-                  <div style={{ borderRadius: 12, overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ borderRadius: 12, overflow: 'hidden', background: '#fff', display: 'flex', flexDirection: 'column', maxHeight: '600px' }}>
                     {orig ? (
                       /* Render parsed original in plain-text style */
-                      <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, boxSizing: 'border-box', flex: 1 }}>
+                      <div style={{ padding: '20px 18px', fontFamily: 'Georgia, serif', fontSize: 12, color: '#222', lineHeight: 1.6, boxSizing: 'border-box', overflowY: 'auto', flex: 1 }}>
                         <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{orig.name}</p>
                         <p style={{ fontSize: 11, color: '#555', margin: '0 0 12px' }}>{[orig.email, orig.phone, orig.linkedin, orig.location].filter(Boolean).join(' | ')}</p>
                         {orig.education?.length > 0 && <>
