@@ -566,7 +566,7 @@ Return valid JSON matching the schema exactly.`,
               </div>
             );
             return (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28, alignItems: 'start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 28, gridAutoRows: 'minmax(auto, max-content)' }}>
 
                 {/* BEFORE */}
                 <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 24, padding: '20px' }}>
