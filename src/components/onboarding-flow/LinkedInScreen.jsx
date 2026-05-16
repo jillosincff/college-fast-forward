@@ -15,7 +15,8 @@ const BLUE_BORDER = '#BFDBFE';
 const GREEN = '#10B981';
 const GREEN_LIGHT = '#F0FDF4';
 const GREEN_BORDER = '#BBF7D0';
-const BORDER_R = 12;
+const BORDER_R = 8;
+const LI_BORDER = '1px solid #E0E0E0';
 
 function TypewriterText({ text, delay = 22, onDone }) {
   const [displayed, setDisplayed] = useState('');
@@ -40,31 +41,111 @@ function TypewriterText({ text, delay = 22, onDone }) {
   return <span>{displayed}</span>;
 }
 
-function Card({ children, style = {}, accent }) {
-  return (
-    <div style={{
-      background: CARD,
-      borderRadius: BORDER_R,
-      boxShadow: SHADOW,
-      padding: '24px',
-      marginBottom: 16,
-      border: accent ? `1.5px solid ${BLUE_BORDER}` : 'none',
-      ...style,
-    }}>
-      {children}
-    </div>
-  );
-}
+// LinkedIn-style profile card
+function LinkedInProfileCard({ name, headline, college, expanded, onExpand, aboutFull, typingDone, setTypingDone, onPaywall }) {
+  const ABOUT_PREVIEW_LEN = 200;
+  const aboutPreview = aboutFull?.slice(0, ABOUT_PREVIEW_LEN) || '';
+  const aboutRest = aboutFull?.slice(ABOUT_PREVIEW_LEN) || '';
 
-function CardHeader({ icon, label, badge }) {
+  const initials = (name || 'S U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-      <span style={{ fontSize: 15 }}>{icon}</span>
-      <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</span>
-      {badge && (
-        <span style={{ fontFamily: FONT, fontSize: 10, color: TEXT2, marginLeft: 'auto', background: '#F1F5F9', borderRadius: 6, padding: '2px 8px' }}>{badge}</span>
-      )}
-    </div>
+    <>
+      {/* ── Header Card ── */}
+      <div style={{ background: CARD, border: LI_BORDER, borderRadius: BORDER_R, overflow: 'hidden', marginBottom: 12 }}>
+        {/* Banner */}
+        <div style={{
+          height: 96,
+          background: 'linear-gradient(135deg, #0052CC 0%, #0066FF 45%, #0891B2 100%)',
+          position: 'relative',
+        }} />
+
+        {/* Avatar overlapping banner */}
+        <div style={{ padding: '0 24px 20px', position: 'relative' }}>
+          <div style={{
+            width: 88, height: 88, borderRadius: '50%',
+            border: '4px solid #FFFFFF',
+            background: 'linear-gradient(135deg, #1D4ED8 0%, #0066FF 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginTop: -44, marginBottom: 10,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            flexShrink: 0,
+          }}>
+            <span style={{ fontFamily: FONT, fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{initials}</span>
+          </div>
+
+          {/* Identity */}
+          <h2 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 700, color: '#1F2937', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+            {name || 'Your Name'}
+          </h2>
+          <p style={{ fontFamily: FONT, fontSize: 16, color: '#1F2937', margin: '0 0 6px', lineHeight: 1.5 }}>
+            {headline}
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 14, color: '#6B7280', margin: '0 0 14px' }}>
+            Greater {college ? college.split(' ').slice(-2).join(' ') : 'University'} Area • {college || 'University of Florida'}
+          </p>
+
+          {/* Connection strip */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ display: 'flex' }}>
+              {['#4F46E5','#0891B2','#059669'].map((c, i) => (
+                <div key={i} style={{ width: 22, height: 22, borderRadius: '50%', background: c, border: '2px solid #fff', marginLeft: i === 0 ? 0 : -6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>{['A','B','C'][i]}</span>
+                </div>
+              ))}
+            </div>
+            <span style={{ fontFamily: FONT, fontSize: 12, color: BLUE, fontWeight: 600 }}>
+              87 connections • 500+ in network
+            </span>
+          </div>
+
+          {/* Action buttons row */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+            <div style={{ flex: 1, background: BLUE, borderRadius: 100, padding: '8px 0', textAlign: 'center' }}>
+              <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff' }}>Open to</span>
+            </div>
+            <div style={{ flex: 1, background: 'transparent', border: `1.5px solid #0A66C2`, borderRadius: 100, padding: '8px 0', textAlign: 'center' }}>
+              <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#0A66C2' }}>Message</span>
+            </div>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', border: `1.5px solid #0A66C2`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default' }}>
+              <span style={{ fontSize: 16, color: '#0A66C2' }}>⋯</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── About Card ── */}
+      <div style={{ background: CARD, border: LI_BORDER, borderRadius: BORDER_R, padding: '20px 24px', marginBottom: 12 }}>
+        <h3 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 700, color: '#1F2937', margin: '0 0 12px' }}>About</h3>
+        <div style={{ position: 'relative', overflow: 'hidden' }}>
+          <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT, margin: 0, lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>
+            <TypewriterText text={aboutPreview} delay={16} onDone={() => setTypingDone(true)} />
+            {!typingDone && (
+              <span style={{ display: 'inline-block', width: 2, height: 14, background: BLUE, marginLeft: 2, animation: 'liBlinkCursor 1s step-end infinite', verticalAlign: 'middle' }} />
+            )}
+          </p>
+
+          {typingDone && expanded && aboutRest && (
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT, margin: '4px 0 0', lineHeight: 1.75, whiteSpace: 'pre-wrap', animation: 'liExpandAbout 0.35s ease' }}>
+              {aboutRest}
+            </p>
+          )}
+
+          {typingDone && !expanded && aboutRest && (
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1))', pointerEvents: 'none' }} />
+          )}
+        </div>
+
+        {typingDone && !expanded && aboutRest && (
+          <button
+            onClick={onExpand}
+            style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: BLUE, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 0', marginTop: 4, display: 'inline-block' }}
+          >
+            ...see more
+          </button>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -75,8 +156,10 @@ export default function LinkedInScreen({ resumeData, college, seeking, targetRol
   const [activeHeadline, setActiveHeadline] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   const [step3Active, setStep3Active] = useState(false);
+  const [aboutExpanded, setAboutExpanded] = useState(false);
 
   const firstName = resumeData?.original?.name?.split(' ')[0] || null;
+  const fullName = resumeData?.original?.name || null;
   const seekingLabel = targetRole || (seeking === 'internship' ? 'Internship' : seeking === 'fulltime' ? 'Full-Time Role' : 'Opportunity');
 
   useEffect(() => { generateLinkedIn(); }, []);
@@ -84,6 +167,7 @@ export default function LinkedInScreen({ resumeData, college, seeking, targetRol
   const generateLinkedIn = async () => {
     setLoading(true);
     setTypingDone(false);
+    setAboutExpanded(false);
     try {
       const resumeSummary = resumeData?.original
         ? `Name: ${resumeData.original.name || 'Student'}
@@ -155,10 +239,10 @@ Return valid JSON.`,
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.02em' }}>
             {firstName ? `Building ${firstName}'s LinkedIn Identity...` : 'Building Your LinkedIn Identity...'}
           </h2>
-          <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 36px', lineHeight: 1.6 }}>Crafting headlines, bio, and alumni outreach template.</p>
+          <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 36px', lineHeight: 1.6 }}>Crafting headlines, bio, and ATS keywords.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 340, margin: '0 auto' }}>
-            {['Analyzing your experience & skills...', 'Writing recruiter-magnet headlines...', 'Crafting your story-driven bio...', 'Generating alumni DM template...'].map((step, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: CARD, borderRadius: BORDER_R, padding: '12px 16px', boxShadow: SHADOW }}>
+            {['Analyzing your experience & skills...', 'Writing recruiter-magnet headlines...', 'Crafting your story-driven bio...', 'Building your ATS keyword list...'].map((step, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: CARD, borderRadius: 10, padding: '12px 16px', boxShadow: SHADOW }}>
                 <div style={{ width: 16, height: 16, border: `2px solid ${BLUE_BORDER}`, borderTop: `2px solid ${BLUE}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
                 <span style={{ fontFamily: FONT, fontSize: 13, color: TEXT2 }}>{step}</span>
               </div>
@@ -171,22 +255,21 @@ Return valid JSON.`,
 
   if (!result) return null;
 
-  const ABOUT_PREVIEW = result.about_full?.slice(0, 220) || '';
-  const ABOUT_REST = result.about_full?.slice(220) || '';
   const selectedHeadline = (result.headlines || [])[activeHeadline] || '';
 
   return (
-    <div style={{ maxWidth: 720, width: '100%', paddingTop: 100, paddingBottom: 80, boxSizing: 'border-box' }}>
+    <div style={{ maxWidth: 780, width: '100%', paddingTop: 100, paddingBottom: 80, boxSizing: 'border-box' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes liBlinkCursor { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes liExpandAbout { from{opacity:0;max-height:0} to{opacity:1;max-height:600px} }
         @keyframes step3pulse { 0%,100%{box-shadow:0 0 0 3px rgba(0,102,255,0.2)} 50%{box-shadow:0 0 0 6px rgba(0,102,255,0.08)} }
         @keyframes fadUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
 
       {/* ── Progress Header ── */}
-      <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, justifyContent: 'center' }}>
           {['Resume Wow', 'LinkedIn Identity', 'Your Plan'].map((label, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
@@ -196,53 +279,59 @@ Return valid JSON.`,
                   border: `2px solid ${i < 1 ? GREEN : i === 1 ? BLUE : (step3Active ? BLUE : '#CBD5E1')}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 11, fontWeight: 700, color: i > 1 && !step3Active ? '#94A3B8' : '#fff', fontFamily: FONT,
-                  boxShadow: i === 1 ? `0 0 0 4px rgba(0,102,255,0.15)` : (i === 2 && step3Active) ? `0 0 0 4px rgba(0,102,255,0.2)` : 'none',
+                  boxShadow: i === 1 ? `0 0 0 4px rgba(0,102,255,0.15)` : 'none',
                   animation: (i === 2 && step3Active) ? 'step3pulse 1.4s ease-in-out infinite' : 'none',
                   transition: 'all 0.4s ease',
                 }}>
                   {i < 1 ? '✓' : i + 1}
                 </div>
-                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: i < 1 ? GREEN : i === 1 ? BLUE : (step3Active ? BLUE : '#94A3B8'), whiteSpace: 'nowrap', transition: 'color 0.4s' }}>{label}</span>
+                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: i < 1 ? GREEN : i === 1 ? BLUE : (step3Active ? BLUE : '#94A3B8'), whiteSpace: 'nowrap' }}>{label}</span>
               </div>
               {i < 2 && <div style={{ width: 40, height: 2, background: i < 1 ? GREEN_BORDER : '#E2E8F0', borderRadius: 2, marginBottom: 18 }} />}
             </div>
           ))}
         </div>
 
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 16 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
           <span style={{ fontSize: 13 }}>💼</span>
-          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Step 2 — LinkedIn Identity Architect</span>
+          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>LinkedIn Identity Architect</span>
         </div>
-        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 34px)', fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-          {firstName ? `${firstName}'s LinkedIn Profile,` : 'Your LinkedIn Profile,'}<br />
-          <span style={{ color: BLUE }}>Rebuilt for Recruiters</span>
+        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 700, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+          {firstName ? `${firstName}'s LinkedIn Profile,` : 'Your LinkedIn Profile,'} <span style={{ color: BLUE }}>Rebuilt for Recruiters</span>
         </h1>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
-          Headlines, a story-driven bio, 10 ATS keywords, and a ready-to-send alumni DM — all written by the Agent.
+          See exactly how your profile will appear — then choose your headline track.
         </p>
       </div>
 
-      {/* ── CARD 1: Headline Selector ── */}
-      <Card accent>
-        <CardHeader icon="🏷️" label="Your New High-Authority Headline" />
+      {/* ── LinkedIn Profile Simulator ── */}
+      <LinkedInProfileCard
+        name={fullName}
+        headline={selectedHeadline}
+        college={college}
+        expanded={aboutExpanded}
+        onExpand={() => setAboutExpanded(true)}
+        aboutFull={result.about_full}
+        typingDone={typingDone}
+        setTypingDone={setTypingDone}
+        onPaywall={() => setShowPaywall(true)}
+      />
 
-        <div style={{ background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: BORDER_R, padding: '16px 18px', marginBottom: 14 }}>
-          <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT, margin: 0, lineHeight: 1.6, letterSpacing: '-0.01em' }}>
-            {selectedHeadline}
-          </p>
-        </div>
-
-        <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, margin: '0 0 10px', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 600 }}>Choose your version:</p>
+      {/* ── Headline Switcher (outside the card) ── */}
+      <div style={{ background: CARD, border: LI_BORDER, borderRadius: BORDER_R, padding: '20px 24px', marginBottom: 12 }}>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 14px' }}>
+          Select Your Headline Track:
+        </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {(result.headlines || []).map((h, i) => (
             <button
               key={i}
-              onClick={() => setActiveHeadline(i)}
+              onClick={() => { setActiveHeadline(i); }}
               style={{
                 display: 'flex', alignItems: 'flex-start', gap: 12, textAlign: 'left', width: '100%',
-                background: activeHeadline === i ? BLUE_LIGHT : '#F8FAFC',
+                background: activeHeadline === i ? BLUE_LIGHT : BG,
                 border: `1.5px solid ${activeHeadline === i ? BLUE_BORDER : '#E2E8F0'}`,
-                borderRadius: BORDER_R, padding: '12px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
+                borderRadius: 10, padding: '12px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
               }}
             >
               <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${activeHeadline === i ? BLUE : '#CBD5E1'}`, background: activeHeadline === i ? BLUE : 'transparent', flexShrink: 0, marginTop: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: '#fff', fontWeight: 700 }}>
@@ -252,85 +341,42 @@ Return valid JSON.`,
             </button>
           ))}
         </div>
-      </Card>
+      </div>
 
-      {/* ── CARD 2: About Section ── */}
-      <Card>
-        <CardHeader icon="📝" label="Your Story-Driven About Section" badge="Agent Writing" />
-
-        <div style={{ background: '#F8FAFC', border: `1px solid #E2E8F0`, borderRadius: BORDER_R, padding: '16px 18px', overflow: 'hidden', position: 'relative' }}>
-          <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT, margin: 0, lineHeight: 1.75 }}>
-            <TypewriterText text={ABOUT_PREVIEW} delay={22} onDone={() => setTypingDone(true)} />
-            {!typingDone && (
-              <span style={{ display: 'inline-block', width: 2, height: 14, background: BLUE, marginLeft: 2, animation: 'blink 1s step-end infinite', verticalAlign: 'middle' }} />
-            )}
-          </p>
-          {typingDone && ABOUT_REST && (
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT, margin: 0, lineHeight: 1.75, filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
-              {ABOUT_REST}
-            </p>
-          )}
-          {typingDone && ABOUT_REST && (
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to bottom, rgba(248,250,252,0), rgba(248,250,252,1))', pointerEvents: 'none' }} />
-          )}
+      {/* ── Keywords Card ── */}
+      <div style={{ background: CARD, border: LI_BORDER, borderRadius: BORDER_R, padding: '20px 24px', marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <span style={{ fontSize: 15 }}>🎯</span>
+          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Top 10 LinkedIn ATS Keywords</span>
         </div>
-
-        {typingDone && ABOUT_REST && (
-          <div style={{ textAlign: 'center', marginTop: 12 }}>
-            <button onClick={() => setShowPaywall(true)} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto' }}>
-              🔓 Unlock full bio →
-            </button>
-          </div>
-        )}
-      </Card>
-
-      {/* ── CARD 3: Keywords ── */}
-      <Card>
-        <CardHeader icon="🎯" label="Top 10 LinkedIn ATS Keywords" />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {(result.keywords || []).map((kw, i) => (
             <span key={i} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8, padding: '6px 14px' }}>{kw}</span>
           ))}
         </div>
-        <div style={{ background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: BORDER_R, padding: '12px 14px', marginTop: 14 }}>
+        <div style={{ background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8, padding: '12px 14px', marginTop: 14 }}>
           <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
             💡 Agent Tip: Add these to your LinkedIn Skills section to pass the recruiter algorithm for {seekingLabel} roles.
           </p>
         </div>
-      </Card>
-
-      {/* ── CARD 4: Alumni DM ── */}
-      <Card>
-        <CardHeader icon="📨" label="Ready-to-Send Alumni DM" />
-        <div style={{ background: '#F8FAFC', border: `1px solid #E2E8F0`, borderRadius: BORDER_R, padding: '16px 18px', position: 'relative', overflow: 'hidden' }}>
-          <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT, margin: 0, lineHeight: 1.8 }}>
-            {result.alumni_dm}
-          </p>
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(to bottom, rgba(248,250,252,0), rgba(248,250,252,1))', pointerEvents: 'none' }} />
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 12 }}>
-          <button onClick={() => setShowPaywall(true)} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto' }}>
-            🔓 Copy full DM template →
-          </button>
-        </div>
-      </Card>
+      </div>
 
       {/* ── Master CTA ── */}
-      <div style={{ textAlign: 'center', marginTop: 32, marginBottom: 20 }}>
+      <div style={{ textAlign: 'center', marginTop: 36, marginBottom: 20 }}>
         <button
           onClick={() => { setStep3Active(true); if (onNext) { onNext(); } else { setShowPaywall(true); } }}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 14px',
             fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff',
             background: `linear-gradient(to bottom, #10B981, #059669)`,
-            border: 'none', borderRadius: 8, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto',
+            border: 'none', borderRadius: 10, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto',
             boxShadow: '0 8px 24px rgba(16,185,129,0.35)',
             letterSpacing: '-0.01em', transition: 'all 0.2s',
           }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.45)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.35)'; }}
         >
-          Unlock My 14-Day Action Plan & Start Applying →
+          Next: Unlock My Backdoor Opportunities ➔
         </button>
         <button onClick={saveAndAuth} style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
           Save progress and continue for free
@@ -350,7 +396,7 @@ Return valid JSON.`,
             <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 24px', lineHeight: 1.6 }}>Full bio, all 3 headlines, alumni DM, unlimited resume versions, and the full Agent.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button onClick={saveAndAuth} style={{ width: '100%', background: '#F8FAFC', border: `1px solid #E2E8F0`, borderRadius: BORDER_R, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
+              <button onClick={saveAndAuth} style={{ width: '100%', background: '#F8FAFC', border: `1px solid #E2E8F0`, borderRadius: 10, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
                 onMouseLeave={e => e.currentTarget.style.background = '#F8FAFC'}
               >
@@ -361,7 +407,7 @@ Return valid JSON.`,
                 <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '3px 10px' }}>Flexible</span>
               </button>
 
-              <button onClick={saveAndAuth} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: BORDER_R, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s', position: 'relative' }}
+              <button onClick={saveAndAuth} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: 10, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s', position: 'relative' }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.92'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >
