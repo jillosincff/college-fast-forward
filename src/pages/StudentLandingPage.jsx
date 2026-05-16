@@ -271,7 +271,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
-          <CTAButton label="Get My Career Plan →" />
+          <CTAButton label="Get Hired →" />
           <button onClick={() => {}} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 500, color: TEXT2, background: CARD, border: `1px solid #E2E8F0`, borderRadius: 8, padding: '16px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: SHADOW }}>Watch 45-sec demo</button>
         </div>
 
