@@ -271,11 +271,20 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       // Safely parse: if original is a string (LLM returned raw JSON string), parse it
       let parsed = result.original;
       if (typeof parsed === 'string') { try { parsed = JSON.parse(parsed); } catch {} }
-      // Sanitize each field: if any top-level field is an object, convert to string
+      // Sanitize each field: if any top-level field is an object or stringified JSON, extract string value
       if (parsed && typeof parsed === 'object') {
         ['name','email','phone','linkedin','location','summary'].forEach(k => {
-          if (parsed[k] && typeof parsed[k] === 'object') {
-            parsed[k] = parsed[k].value || parsed[k].text || JSON.stringify(parsed[k]);
+          if (parsed[k]) {
+            if (typeof parsed[k] === 'object') {
+              parsed[k] = parsed[k].value || parsed[k].text || JSON.stringify(parsed[k]);
+            }
+            // If it's a string that looks like JSON, try to extract the actual value
+            if (typeof parsed[k] === 'string' && parsed[k].startsWith('{')) {
+              try {
+                const nested = JSON.parse(parsed[k]);
+                parsed[k] = nested[k] || nested.name || nested.value || nested.text || parsed[k];
+              } catch {}
+            }
           }
         });
       }
