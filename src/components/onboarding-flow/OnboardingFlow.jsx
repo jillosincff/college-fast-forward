@@ -4,6 +4,7 @@ import LinkedInScreen from './LinkedInScreen';
 import PlanScreen from './PlanScreen';
 import Screen6School from './Screen6School';
 import ATSScoreRing from './ATSScoreRing';
+import LiveEngineLoader from './LiveEngineLoader';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -728,17 +729,7 @@ Return valid JSON matching the schema exactly.`,
         <div style={{ ...card, maxWidth: 520 }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
-          {uploading && (
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ width: 64, height: 64, borderRadius: 16, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 24px', boxShadow: SHADOW }}>⏳</div>
-              <h1 style={h1style}>Analyzing your background...</h1>
-              <p style={substyle}>The Agent is building your personalized profile. Just a moment.</p>
-              <div style={{ background: CARD, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: R, padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, boxShadow: SHADOW }}>
-                <div style={{ width: 32, height: 32, border: `3px solid ${GREEN_BORDER}`, borderTop: `3px solid ${GREEN}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                <p style={{ fontFamily: FONT, fontSize: 14, color: GREEN, margin: 0, fontWeight: 600 }}>Building your optimized profile...</p>
-              </div>
-            </div>
-          )}
+          {uploading && <LiveEngineLoader />}
 
           {!uploading && dataInputMode === 'choose' && (
             <>
