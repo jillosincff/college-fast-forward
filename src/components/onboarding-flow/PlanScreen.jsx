@@ -237,12 +237,12 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       <div style={{ textAlign: 'center', marginBottom: 28, padding: '0 8px' }}>
         <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
           {firstName ? firstName.toUpperCase() + ',' : ''}{' '}
-          let's stop guessing{' '}
+          let's stop blindly applying{' '}
           <span style={{ color: BLUE }}>and start interviewing.</span>
         </h1>
         <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: '0 auto', maxWidth: 580 }}>
           The Agent scoured internal company networks and bypassed the public job boards.{' '}
-          <strong style={{ color: TEXT }}>Look what we found for you in {location}:</strong>
+          <strong style={{ color: TEXT }}>Look what we found for you near {location}:</strong>
         </p>
       </div>
 
@@ -265,7 +265,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
           ✅ What We've Already Built For You
         </p>
-        <div className="proof-hub" style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
+        <div className="proof-hub" style={{ display: 'flex', gap: 14, alignItems: 'stretch', alignContent: 'stretch' }}>
           {/* Left: Mini LinkedIn */}
           <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
             <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -281,7 +281,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           </div>
 
           {/* Right: ATS Ring */}
-          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, alignSelf: 'stretch' }}>
             <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: '0 0 6px', textAlign: 'center' }}>Resume Optimized</p>
             <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 14px', textAlign: 'center' }}>Passes Fortune 500 ATS filters instantly</p>
             <ATSScoreRing />
@@ -319,7 +319,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </p>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 24 }}>
           <span style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: GREEN }}>$4.99</span>
-          <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2, fontWeight: 500 }}>/week · Cancel anytime</span>
+          <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2, fontWeight: 500 }}>/week · ✨ Cancel in 1-click anytime</span>
         </div>
 
         <button
