@@ -191,12 +191,15 @@ export default function GatorAuth() {
     if (user.persona && !user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentOnboarding');
+        return;
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
         navigate('/AlumniOnboarding');
+        return;
       } else {
-        navigate('/StudentOnboarding');
+        // Student with incomplete onboarding → run them through the funnel
+        setStep('onboarding');
+        return;
       }
-      return;
     }
 
     // Logged in but no persona yet — show the onboarding funnel
