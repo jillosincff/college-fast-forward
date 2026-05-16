@@ -202,8 +202,14 @@ export default function GatorAuth() {
         // Coming from the landing page onboarding flow — continue with questions
         navigate('/OnboardingQuestions');
       } else {
-        // Send new users to the student welcome/onboarding flow
-        navigate('/StudentWelcome');
+        // New student from AuthGate — set persona and go directly to dashboard
+        base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true })
+          .then(() => {
+            base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
+            base44.functions.invoke('notifyNewUserJoined', { user_email: user?.email, user_name: user?.full_name, user_persona: 'student', user_id: user?.id }).catch(() => {});
+            navigate('/FreeTierDashboard');
+          })
+          .catch(() => navigate('/StudentWelcome'));
       }
       return;
     }
