@@ -248,7 +248,7 @@ export default function OnboardingFlow({ onClose }) {
         prompt: `You are a resume parser and expert resume writer. Analyze this resume and return TWO versions:
 1. "original": Extract the EXACT content — name, contact info, education, experience with original bullets, skills, activities. Do NOT invent or change anything.
 2. "optimized_experience": The same experience entries but with bullet points rewritten to be stronger, results-oriented, and ATS-friendly. Keep all company names, titles, dates, and locations EXACTLY the same. Only improve bullet language.
-Return valid JSON matching the schema exactly.`,
+IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, NOT a JSON object or nested structure. Return valid JSON matching the schema exactly.`,
         file_urls: [file_url],
         response_json_schema: {
           type: 'object',
@@ -268,7 +268,17 @@ Return valid JSON matching the schema exactly.`,
           }
         }
       });
-      const parsed = result.original;
+      // Safely parse: if original is a string (LLM returned raw JSON string), parse it
+      let parsed = result.original;
+      if (typeof parsed === 'string') { try { parsed = JSON.parse(parsed); } catch {} }
+      // Sanitize each field: if any top-level field is an object, convert to string
+      if (parsed && typeof parsed === 'object') {
+        ['name','email','phone','linkedin','location','summary'].forEach(k => {
+          if (parsed[k] && typeof parsed[k] === 'object') {
+            parsed[k] = parsed[k].value || parsed[k].text || JSON.stringify(parsed[k]);
+          }
+        });
+      }
       setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
       setScreen(9);
     } catch (err) {
