@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { registerUser } from '@/functions/registerUser';
 import { signInWithPassword } from '@/functions/signInWithPassword';
 import { sendMagicLink } from '@/functions/sendMagicLink';
+import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 
 console.log('🔵 [GatorAuth] Module loaded');
 
@@ -189,29 +190,17 @@ export default function GatorAuth() {
       return;
     }
 
-    // Logged in but no persona yet — route to role selection, never loop back to auth form
+    // Logged in but no persona yet — show the onboarding funnel
     if (user && !user.persona) {
       const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      const safariType = sessionStorage.getItem('cff_onboarding_type');
-      const role = pendingRole || safariType;
-      const hasOnboardingQuestions = localStorage.getItem('cff_onboarding_questions_pending') === 'true';
 
-      if (role === 'parent') {
+      if (pendingRole === 'parent') {
         navigate('/ParentOnboarding');
-      } else if (hasOnboardingQuestions) {
-        // Coming from the landing page onboarding flow — continue with questions
-        navigate('/OnboardingQuestions');
-      } else {
-        // New student from AuthGate — set persona and go directly to dashboard
-        base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true })
-          .then(async () => {
-            base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
-            base44.functions.invoke('notifyNewUserJoined', { user_email: user?.email, user_name: user?.full_name, user_persona: 'student', user_id: user?.id }).catch(() => {});
-            if (refreshUser) await refreshUser();
-            navigate('/FreeTierDashboard');
-          })
-          .catch(() => navigate('/FreeTierDashboard'));
+        return;
       }
+
+      // Show the white-background onboarding funnel (Screen 1: Welcome to CFF)
+      setStep('onboarding');
       return;
     }
   }, [user, isLoading]);
@@ -224,6 +213,21 @@ export default function GatorAuth() {
     fontFamily: dmSans, outline: 'none',
     boxSizing: 'border-box',
   };
+
+  // New user — show the white-background onboarding funnel
+  if (step === 'onboarding') {
+    const handleOnboardingComplete = async () => {
+      // After funnel, set persona and go to dashboard
+      try {
+        await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
+        base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
+        base44.functions.invoke('notifyNewUserJoined', { user_email: user?.email, user_name: user?.full_name, user_persona: 'student', user_id: user?.id }).catch(() => {});
+        if (refreshUser) await refreshUser();
+      } catch (e) {}
+      navigate('/FreeTierDashboard');
+    };
+    return <OnboardingFlow onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} />;
+  }
 
   // While determining what to show, render a visible loading screen (not blank)
   if (step !== 'auth') {

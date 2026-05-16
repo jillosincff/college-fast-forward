@@ -200,7 +200,7 @@ const InputField = ({ label, placeholder, value, onChange, type = 'text', icon, 
   </div>
 );
 
-export default function OnboardingFlow({ onClose }) {
+export default function OnboardingFlow({ onClose, onAlreadyAuthed }) {
   const [screen, setScreen] = useState(1);
   const [frustration, setFrustration] = useState(5);
   const [seeking, setSeeking] = useState('');
@@ -314,7 +314,12 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
     } catch (e) {}
-    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+    // If user is already authenticated, call the post-auth callback instead of re-triggering login
+    if (onAlreadyAuthed) {
+      onAlreadyAuthed();
+    } else {
+      base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+    }
   };
 
   const isFullPageScreen = screen >= 10;
