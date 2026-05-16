@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
-import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
+import AuthGate from '@/components/onboarding-flow/AuthGate';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -123,7 +123,7 @@ function StoriesCarousel() {
 
 export default function StudentLandingPage({ onParentClick }) {
   const [mounted, setMounted] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAuthGate, setShowAuthGate] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -136,7 +136,7 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  const go = () => setShowOnboarding(true);
+  const go = () => setShowAuthGate(true);
 
   const parent = () => {
     if (onParentClick) { onParentClick(); return; }
@@ -166,7 +166,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
   return (
     <div style={{ background: BG, fontFamily: FONT, color: TEXT, overflowX: 'hidden' }}>
-      {showOnboarding && <OnboardingFlow onClose={() => setShowOnboarding(false)} />}
+      {showAuthGate && <AuthGate onClose={() => setShowAuthGate(false)} />}
 
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
