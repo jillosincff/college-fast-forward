@@ -104,15 +104,22 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ── Hero Headline ── */}
-      <div style={{ textAlign: 'center', marginBottom: 32, padding: '0 8px' }}>
-        <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-          {firstName ? `${firstName}, let's stop guessing` : "Let's stop guessing"}{' '}
-          <span style={{ color: BLUE }}>and start interviewing.</span>
+      <div style={{ textAlign: 'center', marginBottom: 28, padding: '0 8px' }}>
+        <h1 style={{ fontFamily: sat, fontSize: 'clamp(26px, 4.5vw, 44px)', fontWeight: 900, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.05 }}>
+          The Front Door is Clogged.{' '}
+          <span style={{ color: GREEN }}>Take the Backdoor.</span>
         </h1>
-        <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: '0 auto', maxWidth: 560 }}>
-          We didn't just fix your resume. We found the open doors.{' '}
-          Right now, there are <strong style={{ color: TEXT }}>14 active {targetRole} roles in {location}</strong> that match your profile — and they're hiring <strong style={{ color: TEXT }}>this week.</strong>
+        <p style={{ fontFamily: dm, fontSize: 'clamp(14px, 1.6vw, 16px)', color: TEXT2, lineHeight: 1.75, margin: '0 auto 20px', maxWidth: 580 }}>
+          98% of college applications get swallowed by automated corporate filters. College Fast Forward bypasses the queues, surfaces non-advertised roles, and automatically hooks you up with alumni insiders who can refer you.
         </p>
+
+        {/* Live signal counter widget */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: 14, padding: '10px 18px', boxShadow: '0 2px 12px rgba(22,163,74,0.12)', animation: 'notifIn 0.5s ease' }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN, flexShrink: 0, animation: 'pulseBlue 1.8s infinite' }} />
+          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: GREEN }}>
+            ⚡ 14 active internal signals detected in {location} this morning
+          </span>
+        </div>
       </div>
 
       {/* ── Mock Interview Notification (The Visual Prize) ── */}
