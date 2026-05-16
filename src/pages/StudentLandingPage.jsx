@@ -368,6 +368,52 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
       </div>
 
+      {/* ── SUCCESS METRICS COMPARISON ── */}
+      <div style={{ padding: '80px 24px', background: BG }}>
+        <div style={{ maxWidth: 820, margin: '0 auto' }}>
+          <SectionLabel text="Why the old way isn't working" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 40px', textAlign: 'center' }}>
+            The numbers don't lie.
+          </h2>
+          <style>{`
+            @media (max-width: 640px) { .metrics-grid { flex-direction: column !important; } }
+          `}</style>
+          <div className="metrics-grid" style={{ display: 'flex', gap: 16, alignItems: 'stretch' }}>
+
+            {/* Left: Old Way */}
+            <div style={{ flex: 1, background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#991B1B', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>❌ The Old Way — Blind Numbers Game</p>
+              {[
+                { stat: '2%', label: 'Response rate plugging generic resumes into public job boards and praying.' },
+                { stat: '40+', label: 'Hours wasted on application screens, spreadsheets, and cover letters written from scratch.' },
+                { stat: '~75%', label: 'Of resumes auto-rejected by corporate ATS filters before a human ever reads them.' },
+              ].map(({ stat, label }, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#991B1B', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Right: Fast Forward */}
+            <div style={{ flex: 1, background: '#F0FDF4', border: '1px solid #6EE7B7', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#065F46', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>🎉 The Fast Forward Sprint — The Backdoor Route</p>
+              {[
+                { stat: '18%+', label: 'Response rate via unadvertised portals and direct warm alumni introductions.' },
+                { stat: '4 hrs', label: 'Total — the Agent automates tracking, sources internal leads, and drafts outreach for you.' },
+                { stat: '98%', label: 'ATS match score — profiles restructured by AI to completely bypass automated screening filters.' },
+              ].map(({ stat, label }, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#065F46', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       {/* ── PRICING ── */}
       <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
