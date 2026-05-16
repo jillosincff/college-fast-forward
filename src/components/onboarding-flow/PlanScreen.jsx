@@ -1,20 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import BackdoorOpportunityCard from './BackdoorOpportunityCard';
+import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
-const BLOCKER_LABELS = {
-  resume: 'your resume not getting responses',
-  ghosted: 'being ghosted after applying',
-  which_jobs: 'not knowing which jobs to apply for',
-  outreach: 'not knowing how to reach the right people',
-  disorganized: 'feeling disorganized',
-  interviews: 'interview nerves',
-};
-
-// Light theme tokens
 const BG = '#f8f9fc';
 const CARD = '#ffffff';
 const BORDER = '#e5e7eb';
@@ -26,22 +17,162 @@ const BLUE_BORDER = '#bfdbfe';
 const GREEN = '#16a34a';
 const GREEN_LIGHT = '#f0fdf4';
 const GREEN_BORDER = '#bbf7d0';
+const LI_BG = '#F3F2EE';
+const LI_CARD = '#FFFFFF';
+const LI_BORDER_COLOR = '#E0DFDB';
 
-function JobRow({ title, company, signal, blurred = false }) {
+/* ── Mini LinkedIn profile card (static, no typing animation) ── */
+function MiniLinkedInCard({ name, college }) {
+  const initials = (name || 'S U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const schoolShort = college ? college.split(' ').slice(-2).join(' ') : 'University';
+
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
-      background: blurred ? '#f3f4f6' : '#f8f9fc',
-      border: `1px solid ${BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 8,
-      filter: blurred ? 'blur(4px)' : 'none', userSelect: blurred ? 'none' : 'auto',
-    }}>
-      <div style={{ flex: 1 }}>
-        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: TEXT, margin: 0 }}>{title}</p>
-        <p style={{ fontFamily: dm, fontSize: 11, color: TEXT2, margin: '2px 0 0' }}>{company}</p>
+    <div style={{ background: LI_BG, border: `1px solid ${LI_BORDER_COLOR}`, borderRadius: 12, overflow: 'hidden', fontSize: 0 }}>
+      {/* Banner */}
+      <div style={{ height: 56, background: 'linear-gradient(135deg, #0052CC 0%, #0066FF 45%, #0891B2 100%)' }} />
+      {/* Body */}
+      <div style={{ background: LI_CARD, padding: '0 14px 14px', borderTop: `1px solid ${LI_BORDER_COLOR}` }}>
+        {/* Avatar */}
+        <div style={{
+          width: 52, height: 52, borderRadius: '50%',
+          border: '3px solid #fff',
+          background: 'linear-gradient(135deg, #1D4ED8, #0066FF)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginTop: -26, marginBottom: 6,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+        }}>
+          <span style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff' }}>{initials}</span>
+        </div>
+        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#1F2937', margin: '0 0 2px' }}>{name || 'Your Name'}</p>
+        <p style={{ fontFamily: dm, fontSize: 11, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.4 }}>
+          Marketing Coordinator | Digital Strategy | {schoolShort} '26
+        </p>
+        {/* Stats row */}
+        <div style={{ display: 'flex', gap: 12, borderTop: `1px solid ${LI_BORDER_COLOR}`, paddingTop: 10 }}>
+          {[['87', 'Connections'], ['500+', 'Impressions'], ['Open', 'to Work']].map(([v, l], i) => (
+            <div key={i} style={{ flex: 1, textAlign: 'center' }}>
+              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0A66C2', margin: 0 }}>{v}</p>
+              <p style={{ fontFamily: dm, fontSize: 9, color: '#6B7280', margin: 0, lineHeight: 1.3 }}>{l}</p>
+            </div>
+          ))}
+        </div>
       </div>
-      <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '3px 10px', flexShrink: 0, whiteSpace: 'nowrap' }}>
-        {signal}
-      </span>
+      {/* Keywords strip */}
+      <div style={{ background: BLUE_LIGHT, borderTop: `1px solid ${LI_BORDER_COLOR}`, padding: '8px 14px' }}>
+        <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: BLUE, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 5px' }}>ATS Keywords Active</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {['Digital Marketing', 'SEO/SEM', 'Content Strategy', 'Analytics'].map(kw => (
+            <span key={kw} style={{ fontFamily: dm, fontSize: 9, fontWeight: 600, color: BLUE, background: '#fff', border: `1px solid ${BLUE_BORDER}`, borderRadius: 4, padding: '2px 7px' }}>{kw}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 3-Day Sprint Roadmap ── */
+function SprintRoadmap({ targetRole, location, schoolName }) {
+  const days = [
+    {
+      day: 'Day 1',
+      color: BLUE,
+      bgColor: BLUE_LIGHT,
+      borderColor: BLUE_BORDER,
+      icon: '🚀',
+      title: 'Deploy to Sarah K.',
+      tasks: [
+        'Send AI-crafted alumni intro DM to Sarah K. at Nexo Agency',
+        'Agent monitors her LinkedIn for a reply signal',
+        'Apply to 2 verified "active hiring" roles from your Feed',
+      ],
+    },
+    {
+      day: 'Day 2',
+      color: '#7c3aed',
+      bgColor: '#f5f3ff',
+      borderColor: '#ddd6fe',
+      icon: '🔍',
+      title: 'Run Hiring Signal Scan',
+      tasks: [
+        'Agent scans Nexo Agency + 2 adjacent companies for new openings',
+        'Get notified if Sarah K. views your profile',
+        'Deploy follow-up message if no reply within 24 hrs',
+      ],
+    },
+    {
+      day: 'Day 3',
+      color: GREEN,
+      bgColor: GREEN_LIGHT,
+      borderColor: GREEN_BORDER,
+      icon: '📅',
+      title: 'Interview Prep Mode',
+      tasks: [
+        'If Sarah K. replies → Agent generates your interview brief',
+        'Practice 5 predicted questions with AI feedback',
+        'CRM auto-updates with interview status & next steps',
+      ],
+    },
+  ];
+
+  return (
+    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', marginBottom: 24 }}>
+      <div style={{ padding: '18px 22px 14px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 16 }}>⚡</span>
+        <div>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Your 3-Day Sprint Roadmap</p>
+          <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>Exactly what to do — and the Agent handles the rest.</p>
+        </div>
+      </div>
+      <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {days.map((d, i) => (
+          <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', position: 'relative', paddingBottom: i < days.length - 1 ? 14 : 0 }}>
+            {i < days.length - 1 && (
+              <div style={{ position: 'absolute', left: 18, top: 38, bottom: 0, width: 2, background: `linear-gradient(to bottom, ${d.borderColor}, ${days[i + 1].borderColor})` }} />
+            )}
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: d.bgColor, border: `1.5px solid ${d.borderColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>
+              {d.icon}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: d.color, background: d.bgColor, border: `1px solid ${d.borderColor}`, borderRadius: 100, padding: '2px 10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.day}</span>
+                <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT }}>{d.title}</span>
+              </div>
+              {d.tasks.map((t, ti) => (
+                <div key={ti} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 4 }}>
+                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: d.color, flexShrink: 0, marginTop: 6 }} />
+                  <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{t}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Old Way vs Fast Forward ── */
+function ComparisonTable() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
+      <div style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: 16, padding: '18px 16px' }}>
+        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#ef4444', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>❌ The Old Way</p>
+        {[['2%', 'response rate on cold apps'], ['40 hrs', 'of searching per week'], ['~60%', 'of postings are ghost jobs']].map(([n, l], i) => (
+          <div key={i} style={{ marginBottom: 10 }}>
+            <p style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: '#ef4444', margin: '0 0 1px' }}>{n}</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>{l}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 16, padding: '18px 16px' }}>
+        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>✅ Fast Forward Way</p>
+        {[['18%', 'avg response on our leads'], ['4 hrs', 'of focused work per week'], ['100%', 'verified active hiring signals']].map(([n, l], i) => (
+          <div key={i} style={{ marginBottom: 10 }}>
+            <p style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: GREEN, margin: '0 0 1px' }}>{n}</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>{l}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -50,20 +181,21 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
   const [showPaywall, setShowPaywall] = useState(false);
 
   const firstName = resumeData?.original?.name?.split(' ')[0] || null;
+  const fullName = resumeData?.original?.name || null;
   const location = locationPref === 'remote' ? 'Remote' : locationCity || resumeData?.original?.location?.split(',')[0] || 'your city';
   const targetRole = quickRole || (seeking === 'internship' ? 'internship' : seeking === 'fulltime' ? 'full-time role' : 'opportunity');
   const schoolName = college || 'your university';
-  const mainBlocker = blockers[0] ? BLOCKER_LABELS[blockers[0]] : 'not knowing which roles are real';
 
   return (
     <div style={{ maxWidth: 780, width: '100%', paddingTop: 100, paddingBottom: 120, boxSizing: 'border-box' }}>
       <style>{`
         @keyframes fadUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulseBlue { 0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0.35)} 50%{box-shadow:0 0 0 8px rgba(37,99,235,0.0)} }
-        @keyframes notifIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .plan-sticky-cta { display: none; }
-        @media (max-width: 767px) {
-          .plan-sticky-cta { display: flex; }
+        @media (max-width: 767px) { .plan-sticky-cta { display: flex; } }
+        @media (max-width: 640px) {
+          .proof-hub { flex-direction: column !important; }
+          .proof-hub-col { width: 100% !important; }
         }
       `}</style>
 
@@ -75,15 +207,12 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         flexDirection: 'column', alignItems: 'stretch', gap: 8,
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
       }}>
-        <button
-          onClick={() => setShowPaywall(true)}
-          style={{
-            width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff',
-            background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-            border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
-            boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
-          }}
-        >
+        <button onClick={() => setShowPaywall(true)} style={{
+          width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff',
+          background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
+          border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
+          boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
+        }}>
           Unlock My 14-Day Action Plan →
         </button>
         <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textAlign: 'center', textDecoration: 'underline' }}>
@@ -92,182 +221,106 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ── Progress Header ── */}
-      <div style={{ textAlign: 'center', marginBottom: 44 }}>
-        <div style={{ marginBottom: 28 }}>
+      <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <div style={{ marginBottom: 24 }}>
           <FunnelProgress activeStep={2} />
         </div>
-
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 20 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 18 }}>
           <span style={{ fontSize: 13 }}>🗺️</span>
           <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Step 3 — Your 14-Day Action Plan</span>
         </div>
       </div>
 
-      {/* ── Hero Headline ── */}
-      <div style={{ textAlign: 'center', marginBottom: 32, padding: '0 8px' }}>
+      {/* ─────────────────────────────────────────────────────
+          1. HERO HEADER — Personal, urgent, action-focused
+      ───────────────────────────────────────────────────── */}
+      <div style={{ textAlign: 'center', marginBottom: 28, padding: '0 8px' }}>
         <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-          {firstName ? `${firstName}, let's stop guessing` : "Let's stop guessing"}{' '}
+          {firstName ? firstName.toUpperCase() + ',' : ''}{' '}
+          let's stop guessing{' '}
           <span style={{ color: BLUE }}>and start interviewing.</span>
         </h1>
-        <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: '0 auto', maxWidth: 560 }}>
-          We didn't just fix your resume. We found the open doors.{' '}
-          Right now, there are <strong style={{ color: TEXT }}>14 active {targetRole} roles in {location}</strong> that match your profile — and they're hiring <strong style={{ color: TEXT }}>this week.</strong>
+        <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: '0 auto', maxWidth: 580 }}>
+          The Agent scoured internal company networks and bypassed the public job boards.{' '}
+          <strong style={{ color: TEXT }}>Look what we found for you in {location}:</strong>
         </p>
       </div>
 
-      {/* ── Mock Interview Notification (The Visual Prize) ── */}
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 24px', marginBottom: 24, boxShadow: '0 4px 24px rgba(0,0,0,0.06)', animation: 'notifIn 0.6s ease' }}>
-        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>🎯 This is what your plan is designed to generate:</p>
-        <div style={{ background: '#f0fdf4', border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 18px', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: GREEN, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>📅</div>
-          <div>
-            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: GREEN, margin: '0 0 2px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Interview Request Received</p>
-            <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: TEXT, margin: '0 0 4px' }}>Nova Agency — Monday at 10:00 AM</p>
-            <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Marketing Coordinator · {location} · In-Person</p>
-          </div>
-          <div style={{ marginLeft: 'auto', flexShrink: 0, background: GREEN, color: '#fff', fontFamily: dm, fontSize: 10, fontWeight: 700, borderRadius: 100, padding: '4px 10px' }}>NEW</div>
-        </div>
-        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '12px 0 0', lineHeight: 1.6 }}>
-          We've already identified the <strong style={{ color: TEXT }}>3 companies most likely to send you this notification</strong> by next Friday.
-          {firstName ? ` Your plan shows you exactly how, ${firstName}.` : ' Your plan shows you exactly how.'}
-        </p>
-      </div>
-
-      {/* ── Old Way vs Fast Forward Comparison ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-        <div style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: 16, padding: '20px 18px' }}>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#ef4444', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>❌ The Old Way</p>
-          {[
-            ['2%', 'response rate on applications'],
-            ['40 hrs', 'of searching per week'],
-            ['~60%', 'of postings are ghost jobs'],
-          ].map(([n, l], i) => (
-            <div key={i} style={{ marginBottom: 10 }}>
-              <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 900, color: '#ef4444', margin: '0 0 1px' }}>{n}</p>
-              <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>{l}</p>
-            </div>
-          ))}
-        </div>
-        <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 16, padding: '20px 18px' }}>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>✅ The Fast Forward Way</p>
-          {[
-            ['18%', 'avg response rate on our leads'],
-            ['4 hrs', 'of focused work per week'],
-            ['100%', 'verified active hiring signals'],
-          ].map(([n, l], i) => (
-            <div key={i} style={{ marginBottom: 10 }}>
-              <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 900, color: GREEN, margin: '0 0 1px' }}>{n}</p>
-              <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>{l}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Free Sample Insight ── */}
-      <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 20, padding: '22px 24px', marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <span style={{ fontSize: 16 }}>🎁</span>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Your Free Insider Tip — No Sign-Up Needed</p>
-        </div>
-        <p style={{ fontFamily: dm, fontSize: 14, color: TEXT, lineHeight: 1.7, margin: '0 0 10px' }}>
-          The <strong>top actively-hiring agency in {location} right now</strong> is Nova Agency. They have <strong>2 open {targetRole} roles</strong> and their lead recruiter has a 78% LinkedIn reply rate.
-        </p>
-        <p style={{ fontFamily: dm, fontSize: 13, color: BLUE, margin: 0, fontWeight: 600 }}>
-          → We've already drafted your intro message to her. It's waiting inside your plan.
-        </p>
-      </div>
-
-      {/* ── Vested Timeline ── */}
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '24px', marginBottom: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 20px' }}>✓ What We've Already Done For You</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {[
-            { icon: '📄', color: GREEN, borderColor: '#10b981', label: 'RESUME OPTIMIZED', desc: 'Your draft is now a 97/100 recruiter-ready asset.' },
-            { icon: '💼', color: BLUE, borderColor: '#3b82f6', label: 'LINKEDIN REBUILT', desc: 'Your digital identity is keyword-optimized and searchable.' },
-            { icon: '🗺️', color: '#7c3aed', borderColor: '#7c3aed', label: 'PLAN GENERATED', desc: `14-day ${targetRole} sprint mapped for ${location}.` },
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start', position: 'relative', paddingBottom: i < 2 ? 22 : 0 }}>
-              {i < 2 && <div style={{ position: 'absolute', left: 19, top: 40, bottom: 0, width: 2, background: BORDER }} />}
-              <div style={{ width: 40, height: 40, borderRadius: '50%', border: `2px solid ${item.borderColor}`, background: `${item.borderColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
-                {item.icon}
-              </div>
-              <div style={{ flex: 1, paddingTop: 6 }}>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: item.color, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 3px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>✓</span> {item.label}
-                </p>
-                <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Glass-Lock Preview Cards ── */}
-      <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>What's Inside Your Plan</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32 }}>
-
-        {/* Card A+B: Unified Backdoor Opportunity Card */}
+      {/* ─────────────────────────────────────────────────────
+          2. THE CROWN JEWEL — Backdoor Opportunity Card
+      ───────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 28, animation: 'fadUp 0.5s ease' }}>
         <BackdoorOpportunityCard
           schoolName={schoolName}
           location={location}
           targetRole={targetRole}
           onUnlock={() => setShowPaywall(true)}
         />
+      </div>
 
-        {/* Card C: Hiring CRM */}
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-          <div style={{ padding: '16px 20px 12px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 16 }}>📊</span>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, display: 'block' }}>Your Personal Hiring CRM</span>
-              <span style={{ fontFamily: dm, fontSize: 11, color: TEXT2 }}>Your agent tracks everything. You just show up to interviews.</span>
+      {/* ─────────────────────────────────────────────────────
+          3. PROOF HUB — Mini LinkedIn + ATS Ring
+      ───────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 24 }}>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
+          ✅ What We've Already Built For You
+        </p>
+        <div className="proof-hub" style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
+          {/* Left: Mini LinkedIn */}
+          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+            <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 14 }}>💼</span>
+              <div>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: 0 }}>LinkedIn Rebuilt</p>
+                <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: 0 }}>Keyword-optimized for recruiters</p>
+              </div>
+            </div>
+            <div style={{ padding: '14px 16px' }}>
+              <MiniLinkedInCard name={fullName} college={college} />
             </div>
           </div>
-          <div style={{ padding: '16px 20px 12px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 12 }}>
-              {[{ n: '7', label: 'Jobs Applied', color: BLUE }, { n: '2', label: 'Interviews Scheduled', color: GREEN }, { n: '3', label: 'Follow-ups Due', color: '#f97316' }].map((s, i) => (
-                <div key={i} style={{ background: '#f8f9fc', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '12px 8px', textAlign: 'center' }}>
-                  <p style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: s.color, margin: '0 0 3px' }}>{s.n}</p>
-                  <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: 0, lineHeight: 1.3 }}>{s.label}</p>
-                </div>
-              ))}
-            </div>
-            <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 10, padding: '11px 14px', marginBottom: 8 }}>
-              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: GREEN, margin: 0 }}>
-                🎯 You have 2 interviews waiting to be scheduled. Unlock to see the companies and your prep notes.
-              </p>
-            </div>
-          </div>
-          <div style={{ position: 'relative', padding: '0 20px' }}>
-            <div style={{ userSelect: 'none', pointerEvents: 'none', filter: 'blur(4px)' }}>
-              {['Nova Agency — Interview prep notes ready', 'Futura Co — Follow-up sent · Day 3', 'Sunlight Media — Application pending review'].map((line, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', borderTop: i > 0 ? `1px solid ${BORDER}` : 'none' }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: i === 0 ? GREEN : BLUE, flexShrink: 0 }} />
-                  <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>{line}</p>
-                </div>
-              ))}
-            </div>
-            <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, rgba(255,255,255,0) 10%, ${CARD} 75%)`, pointerEvents: 'none' }} />
-          </div>
-          <div style={{ background: CARD, padding: '10px 20px 18px', textAlign: 'center' }}>
-            <button onClick={() => setShowPaywall(true)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              🔒 Access My Activity Tracker
-            </button>
+
+          {/* Right: ATS Ring */}
+          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: '0 0 6px', textAlign: 'center' }}>Resume Optimized</p>
+            <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 14px', textAlign: 'center' }}>Passes Fortune 500 ATS filters instantly</p>
+            <ATSScoreRing />
           </div>
         </div>
       </div>
 
-      {/* ── Final CTA ── */}
+      {/* ─────────────────────────────────────────────────────
+          4. 3-DAY SPRINT ROADMAP
+      ───────────────────────────────────────────────────── */}
+      <SprintRoadmap targetRole={targetRole} location={location} schoolName={schoolName} />
+
+      {/* ─────────────────────────────────────────────────────
+          5. VALUE CONTRAST — Old Way vs Fast Forward
+      ───────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 4 }}>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
+          Why the old way is failing you
+        </p>
+        <ComparisonTable />
+      </div>
+
+      {/* ─────────────────────────────────────────────────────
+          6. THE CLOSE — Final Checkout Card
+      ───────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
         <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, margin: '0 0 6px' }}>
-          You don't have to do this alone anymore.
+          Real Job ➔ Elite Profile ➔ 3-Day Execution Plan.
         </p>
         <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
           {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."} 🎯
         </h2>
-        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 24px', lineHeight: 1.6 }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 8px', lineHeight: 1.6 }}>
           The Verified Feed · The Insider DM · Your Daily 14-Day Sprint
         </p>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 24 }}>
+          <span style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: GREEN }}>$4.99</span>
+          <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2, fontWeight: 500 }}>/week · Cancel anytime</span>
+        </div>
 
         <button
           onClick={() => setShowPaywall(true)}
