@@ -242,7 +242,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </h1>
         <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: '0 auto', maxWidth: 580 }}>
           The Agent scoured internal company networks and bypassed the public job boards.{' '}
-          <strong style={{ color: TEXT }}>Look what we found for you near {location}:</strong>
+          <strong style={{ color: TEXT }}>{locationPref === 'remote' ? 'Look what we found for you:' : `Look what we found for you near ${location}:`}</strong>
         </p>
       </div>
 
