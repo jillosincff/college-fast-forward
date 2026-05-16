@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BackdoorOpportunityCard from './BackdoorOpportunityCard';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -221,69 +222,13 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>What's Inside Your Plan</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 32 }}>
 
-        {/* Card A: Fast Track Feed */}
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-          <div style={{ padding: '16px 20px 12px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 16 }}>⚡</span>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, display: 'block' }}>The "Fast Track" Feed</span>
-              <span style={{ fontFamily: dm, fontSize: 11, color: TEXT2 }}>We found 12 jobs where the hiring manager is actively interviewing right now.</span>
-            </div>
-          </div>
-          <div style={{ padding: '14px 20px 10px' }}>
-            <p style={{ fontFamily: dm, fontSize: 11, color: TEXT2, margin: '0 0 10px' }}>Live {targetRole} roles · {location} · Verified hiring signals</p>
-            <JobRow title="Marketing Coordinator" company="Nova Agency · Miami, FL" signal="✅ Actively Hiring" />
-          </div>
-          <div style={{ position: 'relative', padding: '0 20px' }}>
-            <div style={{ pointerEvents: 'none', userSelect: 'none' }}>
-              <JobRow title="Brand Strategy Intern" company="Futura Co · Miami, FL" signal="✅ Actively Hiring" blurred />
-              <JobRow title="Growth Marketing Associate" company="Sunlight Media · Remote" signal="✅ Actively Hiring" blurred />
-            </div>
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(248,249,252,0) 0%, rgba(248,249,252,0.85) 55%, rgba(248,249,252,1) 100%)', pointerEvents: 'none' }} />
-          </div>
-          <div style={{ background: CARD, padding: '10px 20px 18px', textAlign: 'center' }}>
-            <button onClick={() => setShowPaywall(true)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              🔒 Unlock 11 More Active Leads
-            </button>
-          </div>
-        </div>
-
-        {/* Card B: Insider Bridge */}
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-          <div style={{ padding: '16px 20px 12px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 16 }}>🤝</span>
-            <div style={{ flex: 1 }}>
-              <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, display: 'block' }}>The "Insider" Bridge</span>
-              <span style={{ fontFamily: dm, fontSize: 11, color: TEXT2 }}>3 {schoolName} alumni are ready to skip you to the front of the line.</span>
-            </div>
-          </div>
-          <div style={{ padding: '14px 20px 10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f8f9fc', border: `1px solid ${BORDER}`, borderRadius: 12, padding: '12px 14px' }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>👤</div>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>Sarah K. · {schoolName} Alum</p>
-                <p style={{ fontFamily: dm, fontSize: 11, color: TEXT2, margin: '2px 0 0' }}>Senior Marketing Manager · Top {location} Agency</p>
-              </div>
-              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: GREEN, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '3px 9px', flexShrink: 0 }}>WARM</span>
-            </div>
-          </div>
-          <div style={{ position: 'relative', padding: '0 20px 0' }}>
-            <div style={{ background: '#f8f9fc', border: `1px solid ${BORDER}`, borderRadius: 10, padding: '12px 14px', userSelect: 'none', pointerEvents: 'none' }}>
-              <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.65, fontStyle: 'italic' }}>
-                "Hi Sarah — fellow {schoolName} alum here! I noticed you're at [Agency]..."
-              </p>
-              <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '6px 0 0', lineHeight: 1.65, fontStyle: 'italic', filter: 'blur(3.5px)' }}>
-                I'm targeting {targetRole} roles in {location} and would love 5 minutes to hear about the team. Any chance for a quick chat?
-              </p>
-            </div>
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: `linear-gradient(to bottom, rgba(255,255,255,0), ${CARD})`, pointerEvents: 'none' }} />
-          </div>
-          <div style={{ background: CARD, padding: '10px 20px 18px', textAlign: 'center' }}>
-            <button onClick={() => setShowPaywall(true)} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '9px 22px', cursor: 'pointer', minHeight: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              🔒 Unlock 3 Alumni Connections
-            </button>
-          </div>
-        </div>
+        {/* Card A+B: Unified Backdoor Opportunity Card */}
+        <BackdoorOpportunityCard
+          schoolName={schoolName}
+          location={location}
+          targetRole={targetRole}
+          onUnlock={() => setShowPaywall(true)}
+        />
 
         {/* Card C: Hiring CRM */}
         <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
