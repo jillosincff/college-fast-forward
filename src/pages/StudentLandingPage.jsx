@@ -149,42 +149,20 @@ export default function StudentLandingPage({ onParentClick }) {
     <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
 
-  const CTAButton = ({ label, onClick = go, variant = 'primary', fullWidth = false }) => {
-    const isPrimary = variant === 'primary';
-    const isGreen = variant === 'green';
-    return (
-      <button onClick={onClick} style={{
-        fontFamily: FONT,
-        fontSize: 15, fontWeight: 700,
-        color: isPrimary || isGreen ? '#fff' : TEXT2,
-        background: isGreen
-          ? `linear-gradient(to bottom, ${GREEN}, #059669)`
-          : isPrimary
-            ? `linear-gradient(to bottom, ${BLUE}, #0052CC)`
-            : '#F1F5F9',
-        border: isPrimary || isGreen ? 'none' : `1px solid #E2E8F0`,
-        borderRadius: 8,
-        padding: '16px 36px',
-        cursor: 'pointer', minHeight: 'auto',
-        transition: 'all 0.2s ease',
-        boxShadow: isPrimary
-          ? '0 8px 24px rgba(0,102,255,0.3)'
-          : isGreen
-            ? '0 8px 24px rgba(16,185,129,0.3)'
-            : 'none',
-        width: fullWidth ? '100%' : 'auto',
-      }}
-        onMouseEnter={e => {
-          if (isPrimary || isGreen) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = isPrimary ? '0 14px 32px rgba(0,102,255,0.4)' : '0 14px 32px rgba(16,185,129,0.4)'; }
-          else { e.currentTarget.style.background = '#E2E8F0'; }
-        }}
-        onMouseLeave={e => {
-          if (isPrimary || isGreen) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = isPrimary ? '0 8px 24px rgba(0,102,255,0.3)' : '0 8px 24px rgba(16,185,129,0.3)'; }
-          else { e.currentTarget.style.background = '#F1F5F9'; }
-        }}
-      >{label}</button>
-    );
-  };
+  const CTAButton = ({ label = 'Get Hired →', onClick = go, fullWidth = false }) => (
+    <button onClick={onClick} style={{
+      fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
+      background: `linear-gradient(to bottom, ${GREEN}, #059669)`,
+      border: 'none', borderRadius: 8, padding: '16px 36px',
+      cursor: 'pointer', minHeight: 'auto',
+      transition: 'all 0.2s ease',
+      boxShadow: '0 8px 24px rgba(16,185,129,0.3)',
+      width: fullWidth ? '100%' : 'auto',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.4)'; e.currentTarget.style.background = `linear-gradient(to bottom, #059669, #047857)`; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.3)'; e.currentTarget.style.background = `linear-gradient(to bottom, ${GREEN}, #059669)`; }}
+    >{label}</button>
+  );
 
   return (
     <div style={{ background: BG, fontFamily: FONT, color: TEXT, overflowX: 'hidden' }}>
@@ -276,7 +254,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.4s' }}>
-          No credit card required · Built for students at UF, UCF, Penn State, USC &amp; more
+          No credit card required to start · Built for students at UF, UCF, Penn State, USC &amp; more
         </p>
 
         {/* Hero Card Preview */}
@@ -392,61 +370,53 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── PRICING ── */}
       <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
-        <div style={{ maxWidth: 820, margin: '0 auto' }}>
+        <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <SectionLabel text="Pricing" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 48px', textAlign: 'center' }}>
-            Choose your advantage.
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 40px', textAlign: 'center' }}>
+            One focused sprint.<br />Real results.
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {/* Free */}
-            <div style={{ background: BG, borderRadius: R, padding: '32px 28px', boxShadow: SHADOW }}>
-              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>FREE</p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
-                <span style={{ fontFamily: FONT, fontSize: 40, fontWeight: 800, color: TEXT, letterSpacing: '-0.03em' }}>$0</span>
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: TEXT, margin: '0 0 24px' }}>The Foundation</p>
-              {FREE_FEATURES.map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#F1F5F9', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: TEXT3 }} />
-                  </div>
-                  <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>{f}</p>
-                </div>
-              ))}
-              <button onClick={go} style={{ marginTop: 24, width: '100%', fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT, background: CARD, border: `1px solid #E2E8F0`, borderRadius: 8, padding: '14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s', boxShadow: SHADOW }}
-                onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
-                onMouseLeave={e => e.currentTarget.style.background = CARD}
-              >Start free</button>
+
+          {/* Sprint Card */}
+          <div style={{ background: CARD, borderRadius: 16, padding: '36px 32px', boxShadow: '0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)', border: `1px solid ${BLUE_BORDER}`, position: 'relative' }}>
+
+            {/* Badge */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 14px', marginBottom: 24 }}>
+              <span style={{ fontSize: 12 }}>🎓</span>
+              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Graduation Sprint Plan</span>
             </div>
 
-            {/* Pro */}
-            <div style={{ background: CARD, borderRadius: R, padding: '32px 28px', boxShadow: SHADOW_MD, border: `2px solid ${BLUE_BORDER}`, position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -12, right: 16, background: BLUE, borderRadius: 6, padding: '4px 12px' }}>
-                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: '0.08em', textTransform: 'uppercase' }}>RECOMMENDED</span>
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>ACCELERATOR</p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
-                <span style={{ fontFamily: FONT, fontSize: 40, fontWeight: 800, color: TEXT, letterSpacing: '-0.03em' }}>$29</span>
-                <span style={{ fontFamily: FONT, fontSize: 13, color: TEXT3 }}>/mo</span>
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 17, fontWeight: 700, color: TEXT, margin: '0 0 24px' }}>The Accelerator</p>
+            {/* Comparison badge */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 100, padding: '5px 14px', marginBottom: 20, marginLeft: 8 }}>
+              <span style={{ fontSize: 12 }}>⚡</span>
+              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: '#92400E' }}>Less than a single delivery meal for 14 days</span>
+            </div>
+
+            {/* Price */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
+              <span style={{ fontFamily: FONT, fontSize: 52, fontWeight: 800, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
+              <span style={{ fontFamily: FONT, fontSize: 16, color: TEXT3, fontWeight: 400 }}>/week</span>
+            </div>
+            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 28px' }}>
+              Billed monthly ($19.96) · Cancel in 1-tap anytime
+            </p>
+
+            {/* Features */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
               {PRO_FEATURES.map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-                    <span style={{ fontSize: 8, color: GREEN, fontWeight: 700 }}>✓</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                    <span style={{ fontSize: 9, color: GREEN, fontWeight: 700 }}>✓</span>
                   </div>
                   <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT, margin: 0, lineHeight: 1.6 }}>{f}</p>
                 </div>
               ))}
-              <button onClick={go} style={{ marginTop: 24, width: '100%', fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 8, padding: '16px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 20px rgba(0,102,255,0.3)', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(0,102,255,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.3)'; }}
-              >Start free, upgrade anytime →</button>
             </div>
+
+            <CTAButton label="Get Hired →" fullWidth />
+            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '14px 0 0' }}>
+              No credit card required to start.
+            </p>
           </div>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '20px 0 0' }}>
-            Cancel anytime. No credit card required to get started.
-          </p>
         </div>
       </div>
 
@@ -461,20 +431,10 @@ export default function StudentLandingPage({ onParentClick }) {
           <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 0 32px', lineHeight: 1.7 }}>
             Join 2,400+ students who stopped applying blindly and started getting results.
           </p>
-          <button onClick={go} style={{
-            fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff',
-            background: `linear-gradient(to bottom, ${GREEN}, #059669)`,
-            border: 'none', borderRadius: 8, padding: '20px 52px',
-            cursor: 'pointer', minHeight: 'auto',
-            boxShadow: '0 8px 24px rgba(16,185,129,0.35)',
-            display: 'block', margin: '0 auto 16px', transition: 'all 0.2s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.45)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.35)'; }}
-          >
-            Get My Free Career Plan →
-          </button>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>Built for students. No credit card required.</p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <CTAButton label="Get Hired →" />
+          </div>
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>No credit card required to start.</p>
         </div>
       </div>
 
