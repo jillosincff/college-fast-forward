@@ -734,7 +734,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             // Trigger Google Auth right after school — highest-converting moment
             saveAndAuth();
           }}
-          nextLabel="Connect Google & Continue →"
+          nextLabel="Continue →"
         />
       )}
 
