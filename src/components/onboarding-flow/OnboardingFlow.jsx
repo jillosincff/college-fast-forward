@@ -90,7 +90,7 @@ const BLOCKERS = [
 
 // ── Screen 2: Built by Experts (extracted to avoid conditional hooks) ───────
 const SCREEN2_EXPERTS = [
-  { key: 'coach', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=80&h=80&fit=crop&crop=face', name: 'Priya S.', role: 'Career Strategist', teaser: 'Structures your story to land more first-round calls.', color: '#7C3AED', colorLight: '#F5F3FF', colorBorder: '#DDD6FE' },
+  { key: 'coach', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/fe0568933_image.png', name: 'Anna V.', role: 'ex-SAP, Global Early Talent', teaser: 'Structures your story to land more first-round calls.', color: '#7C3AED', colorLight: '#F5F3FF', colorBorder: '#DDD6FE' },
   { key: 'recruiter', avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face', name: 'Marcus T.', role: 'Ex-Google Recruiter', teaser: 'Optimized to beat the ATS and catch a human eye.', color: '#0066FF', colorLight: '#EFF6FF', colorBorder: '#BFDBFE' },
   { key: 'hm', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face', name: 'Sarah K.', role: 'Hiring Manager', teaser: 'Focuses on the skills that prove you can do the job.', color: '#10B981', colorLight: '#F0FDF4', colorBorder: '#BBF7D0' },
 ];
