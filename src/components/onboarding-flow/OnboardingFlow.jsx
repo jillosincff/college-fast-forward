@@ -294,7 +294,8 @@ Return valid JSON matching the schema exactly.`,
   };
 
   const isFullPageScreen = screen >= 9;
-  const firstName = resumeData?.original?.name?.split(' ')[0] || null;
+  const rawName = resumeData?.original?.name;
+  const firstName = (typeof rawName === 'string' ? rawName : null)?.split(' ')[0] || null;
 
   const shell = {
     position: 'fixed', inset: 0, zIndex: 10000,
