@@ -4,10 +4,11 @@ const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
 
 export default function AuthGate({ onClose }) {
   const handleGoogle = () => {
-    // Save state so after OAuth callback we know to start onboarding
-    localStorage.setItem('pending_invite_role', 'student');
-    sessionStorage.setItem('cff_onboarding_type', 'student');
-    base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
+    try {
+      localStorage.setItem('pending_invite_role', 'student');
+      sessionStorage.setItem('cff_onboarding_type', 'student');
+    } catch (e) { /* private browsing */ }
+    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };
 
   return (
