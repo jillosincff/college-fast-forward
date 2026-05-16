@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import FunnelProgress from './FunnelProgress';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -269,28 +270,9 @@ Return valid JSON.`,
 
       {/* ── Progress Header ── */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, justifyContent: 'center' }}>
-          {['Resume Wow', 'LinkedIn Identity', 'Your Plan'].map((label, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: i < 1 ? GREEN : i === 1 ? BLUE : (step3Active ? BLUE : '#E2E8F0'),
-                  border: `2px solid ${i < 1 ? GREEN : i === 1 ? BLUE : (step3Active ? BLUE : '#CBD5E1')}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 700, color: i > 1 && !step3Active ? '#94A3B8' : '#fff', fontFamily: FONT,
-                  boxShadow: i === 1 ? `0 0 0 4px rgba(0,102,255,0.15)` : 'none',
-                  animation: (i === 2 && step3Active) ? 'step3pulse 1.4s ease-in-out infinite' : 'none',
-                  transition: 'all 0.4s ease',
-                }}>
-                  {i < 1 ? '✓' : i + 1}
-                </div>
-                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: i < 1 ? GREEN : i === 1 ? BLUE : (step3Active ? BLUE : '#94A3B8'), whiteSpace: 'nowrap' }}>{label}</span>
-              </div>
-              {i < 2 && <div style={{ width: 40, height: 2, background: i < 1 ? GREEN_BORDER : '#E2E8F0', borderRadius: 2, marginBottom: 18 }} />}
-            </div>
-          ))}
-        </div>
+      <div style={{ marginBottom: 20 }}>
+        <FunnelProgress activeStep={1} />
+      </div>
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
           <span style={{ fontSize: 13 }}>💼</span>

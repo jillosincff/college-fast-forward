@@ -5,6 +5,7 @@ import PlanScreen from './PlanScreen';
 import Screen6School from './Screen6School';
 import ATSScoreRing from './ATSScoreRing';
 import LiveEngineLoader from './LiveEngineLoader';
+import FunnelTransition from './FunnelTransition';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -134,30 +135,34 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
 }
 
 // ── Shared Components ──────────────────────────────────────────
-const Btn = ({ children, onClick, disabled, primary = true, small = false, style: extra = {} }) => (
+const Btn = ({ children, onClick, disabled, primary = true, small = false, loading = false, style: extra = {} }) => (
   <button
     onClick={onClick}
-    disabled={disabled}
+    disabled={disabled || loading}
     style={{
       fontFamily: FONT,
       fontSize: small ? 13 : 15,
       fontWeight: 700,
       color: primary ? '#fff' : TEXT2,
       background: primary
-        ? disabled ? '#CBD5E1' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`
+        ? (disabled || loading) ? '#CBD5E1' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`
         : CARD,
       border: primary ? 'none' : `1px solid #E2E8F0`,
       borderRadius: 8,
       padding: small ? '10px 20px' : '15px 36px',
-      cursor: disabled ? 'not-allowed' : 'pointer',
+      cursor: (disabled || loading) ? 'not-allowed' : 'pointer',
       minHeight: 'auto',
-      boxShadow: primary && !disabled ? '0 4px 14px rgba(0,102,255,0.25)' : SHADOW,
+      boxShadow: primary && !disabled && !loading ? '0 4px 14px rgba(0,102,255,0.25)' : SHADOW,
       transition: 'all 0.2s ease',
+      display: 'inline-flex', alignItems: 'center', gap: 8,
       ...extra,
     }}
-    onMouseEnter={e => { if (!disabled && primary) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.35)'; } }}
-    onMouseLeave={e => { if (!disabled && primary) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.25)'; } }}
+    onMouseEnter={e => { if (!disabled && !loading && primary) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.35)'; } }}
+    onMouseLeave={e => { if (!disabled && !loading && primary) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.25)'; } }}
   >
+    {loading && (
+      <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+    )}
     {children}
   </button>
 );
@@ -361,6 +366,9 @@ Return valid JSON matching the schema exactly.`,
           </div>
         </>
       )}
+
+      {/* ── Screen Transition Wrapper ── */}
+      <FunnelTransition screenKey={screen}>
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
@@ -1071,6 +1079,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           saveAndAuth={saveAndAuth}
         />
       )}
+
+      </FunnelTransition>
     </div>
   );
 }

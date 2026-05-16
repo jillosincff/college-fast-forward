@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import BackdoorOpportunityCard from './BackdoorOpportunityCard';
+import FunnelProgress from './FunnelProgress';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -92,25 +93,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
       {/* ── Progress Header ── */}
       <div style={{ textAlign: 'center', marginBottom: 44 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28, justifyContent: 'center' }}>
-          {['Resume Wow', 'LinkedIn Identity', 'Your Plan'].map((label, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: i < 2 ? GREEN : BLUE,
-                  border: `2px solid ${i < 2 ? GREEN : BLUE}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', fontFamily: dm,
-                  boxShadow: i === 2 ? '0 0 0 4px rgba(37,99,235,0.2), 0 0 16px rgba(37,99,235,0.4)' : 'none',
-                  animation: i === 2 ? 'pulseBlue 2s ease-in-out infinite' : 'none',
-                }}>
-                  {i < 2 ? '✓' : '3'}
-                </div>
-                <span style={{ fontFamily: dm, fontSize: 10, color: i === 2 ? BLUE : GREEN, fontWeight: 700, whiteSpace: 'nowrap' }}>{label}</span>
-              </div>
-              {i < 2 && <div style={{ width: 40, height: 2, background: GREEN_BORDER, borderRadius: 2, marginBottom: 18 }} />}
-            </div>
-          ))}
+        <div style={{ marginBottom: 28 }}>
+          <FunnelProgress activeStep={2} />
         </div>
 
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 20 }}>
