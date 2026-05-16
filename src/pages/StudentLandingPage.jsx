@@ -156,7 +156,7 @@ export default function StudentLandingPage({ onParentClick }) {
       <button onClick={onClick} style={{
         fontFamily: FONT,
         fontSize: 15, fontWeight: 700,
-        color: '#fff',
+        color: isPrimary || isGreen ? '#fff' : TEXT2,
         background: isGreen
           ? `linear-gradient(to bottom, ${GREEN}, #059669)`
           : isPrimary
@@ -173,7 +173,6 @@ export default function StudentLandingPage({ onParentClick }) {
             ? '0 8px 24px rgba(16,185,129,0.3)'
             : 'none',
         width: fullWidth ? '100%' : 'auto',
-        color: isPrimary || isGreen ? '#fff' : TEXT2,
       }}
         onMouseEnter={e => {
           if (isPrimary || isGreen) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = isPrimary ? '0 14px 32px rgba(0,102,255,0.4)' : '0 14px 32px rgba(16,185,129,0.4)'; }

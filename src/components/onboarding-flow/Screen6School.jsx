@@ -31,7 +31,7 @@ const TOP_SCHOOLS = [
 function AlumniBarChart({ pulse }) {
   const [alumniHeight, setAlumniHeight] = useState(0);
   const [coldHeight, setColdHeight] = useState(0);
-  const MAX = 160; // px for 10x bar
+  const MAX = 160; // px for 10x bar — capped at 180px per mobile spec
 
   useEffect(() => {
     const t1 = setTimeout(() => setColdHeight(16), 150);   // 1x = 16px
@@ -40,12 +40,18 @@ function AlumniBarChart({ pulse }) {
   }, []);
 
   return (
-    <div style={{ background: CARD, borderRadius: 16, boxShadow: SHADOW_MD, padding: '28px 32px 24px', marginBottom: 28, border: '1px solid #E8EFF6' }}>
+    <div className="alumni-chart-wrap" style={{ background: CARD, borderRadius: 16, boxShadow: SHADOW_MD, padding: '28px 32px 24px', marginBottom: 28, border: '1px solid #E8EFF6' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .alumni-chart-wrap { padding: 18px 16px 16px !important; }
+          .alumni-bars-area { height: 180px !important; }
+        }
+      `}</style>
       {/* Chart title */}
       <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 24px', textAlign: 'center' }}>Response Rate Comparison</p>
 
       {/* Bars */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 40, height: MAX + 20, marginBottom: 16 }}>
+      <div className="alumni-bars-area" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 40, height: MAX + 20, marginBottom: 16 }}>
         {/* Cold bar */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 52, height: coldHeight, background: '#E2E8F0', borderRadius: '6px 6px 0 0', transition: 'height 0.6s ease', position: 'relative' }}>
@@ -81,10 +87,10 @@ function AlumniBarChart({ pulse }) {
       {/* X-axis baseline */}
       <div style={{ borderTop: '2px solid #E2E8F0', marginBottom: 12 }} />
 
-      {/* Labels */}
+      {/* Labels — wrap naturally on mobile */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 48 }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 600, color: TEXT3, margin: 0, textAlign: 'center' }}>Cold<br />Connections</p>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, margin: 0, textAlign: 'center' }}>Alumni<br />Connections</p>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 600, color: TEXT3, margin: 0, textAlign: 'center', wordBreak: 'break-word', maxWidth: 80 }}>Cold<br />Connections</p>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, margin: 0, textAlign: 'center', wordBreak: 'break-word', maxWidth: 80 }}>Alumni<br />Connections</p>
       </div>
 
       <style>{`
@@ -119,7 +125,12 @@ export default function Screen6School({ college, onCollegeChange, onBack, onNext
   const isValid = college.trim().length > 0;
 
   return (
-    <div style={{ textAlign: 'center', maxWidth: 520, width: '100%', animation: 'fadeUp 0.4s ease' }}>
+    <div style={{ textAlign: 'center', maxWidth: 520, width: '100%', animation: 'fadeUp 0.4s ease', padding: '0 4px', boxSizing: 'border-box' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .school-screen-inner { padding: 0 !important; }
+        }
+      `}</style>
       {/* Badge */}
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 20 }}>
         <span style={{ fontSize: 11 }}>🏛️</span>
@@ -150,6 +161,10 @@ export default function Screen6School({ college, onCollegeChange, onBack, onNext
           <input
             ref={inputRef}
             type="text"
+            inputMode="text"
+            autoComplete="organization"
+            autoCorrect="on"
+            spellCheck={false}
             placeholder="e.g. University of Florida, Penn State..."
             value={college}
             onChange={e => handleInput(e.target.value)}
@@ -189,17 +204,24 @@ export default function Screen6School({ college, onCollegeChange, onBack, onNext
         </div>
       )}
 
-      {/* Nav */}
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 28 }}>
-        <button onClick={onBack} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT2, background: CARD, border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: SHADOW }}>← Back</button>
+      {/* Nav — full-width continue on mobile, inline on desktop */}
+      <style>{`
+        @media (max-width: 640px) {
+          .school-nav-wrap { flex-direction: column-reverse !important; gap: 10px !important; }
+          .school-nav-continue { width: 100% !important; padding: 16px 20px !important; min-height: 52px !important; }
+        }
+      `}</style>
+      <div className="school-nav-wrap" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 28 }}>
+        <button onClick={onBack} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: TEXT2, background: CARD, border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 48, boxShadow: SHADOW }}>← Back</button>
         <button
+          className="school-nav-continue"
           onClick={onNext}
           disabled={!isValid}
           style={{
             fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
             background: isValid ? `linear-gradient(to bottom, ${BLUE}, #0052CC)` : '#CBD5E1',
             border: 'none', borderRadius: 8, padding: '15px 36px',
-            cursor: isValid ? 'pointer' : 'not-allowed', minHeight: 'auto',
+            cursor: isValid ? 'pointer' : 'not-allowed', minHeight: 48,
             boxShadow: isValid ? '0 4px 14px rgba(0,102,255,0.30)' : 'none',
             transition: 'all 0.25s ease',
           }}
