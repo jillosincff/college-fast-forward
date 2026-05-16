@@ -115,6 +115,23 @@ export default function GatorWelcome() {
       return;
     }
 
+    // Coming from the new AuthGate on the landing page — skip old dark onboarding
+    const onboardingType = sessionStorage.getItem('cff_onboarding_type');
+    const hasOnboardingQuestions = localStorage.getItem('cff_onboarding_questions_pending') === 'true';
+    if (onboardingType === 'student' && !hasOnboardingQuestions) {
+      sessionStorage.removeItem('cff_onboarding_type');
+      localStorage.removeItem('pending_invite_role');
+      sessionStorage.removeItem('pending_invite_role');
+      base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true })
+        .then(() => {
+          base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
+          base44.functions.invoke('notifyNewUserJoined', { user_email: user?.email, user_name: user?.full_name, user_persona: 'student', user_id: user?.id }).catch(() => {});
+          navigate('FreeTierDashboard');
+        })
+        .catch(() => navigate('FreeTierDashboard'));
+      return;
+    }
+
     // Pre-stored intent from landing page CTA
     const pendingIntent = localStorage.getItem('pending_intent');
     if (pendingIntent === 'seeker') {
