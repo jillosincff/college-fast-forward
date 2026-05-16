@@ -166,8 +166,17 @@ export default function GatorAuth() {
       return;
     }
 
-    // Fully onboarded — send to the right dashboard
+    // Check if they came from the new onboarding funnel
+    const cameFromFunnel = sessionStorage.getItem('cff_onboarding_type') === 'student';
+
+    // Fully onboarded returning user — send to dashboard
+    // BUT if they came from the landing page funnel, send to dashboard and clear funnel flags
     if (user.persona && user.onboarding_completed) {
+      if (cameFromFunnel) {
+        try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
+        navigate('/FreeTierDashboard');
+        return;
+      }
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentHome');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
@@ -217,11 +226,11 @@ export default function GatorAuth() {
   // New user — show the white-background onboarding funnel
   if (step === 'onboarding') {
     const handleOnboardingComplete = async () => {
+      // Clear funnel flags so returning visits don't re-trigger funnel
+      try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
       // After funnel, set persona and go to dashboard
       try {
         await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
-        base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
-        base44.functions.invoke('notifyNewUserJoined', { user_email: user?.email, user_name: user?.full_name, user_persona: 'student', user_id: user?.id }).catch(() => {});
         if (refreshUser) await refreshUser();
       } catch (e) {}
       navigate('/FreeTierDashboard');
