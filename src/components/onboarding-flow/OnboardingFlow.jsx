@@ -6,6 +6,7 @@ import Screen6School from './Screen6School';
 import ATSScoreRing from './ATSScoreRing';
 import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
+import IndustryScreen from './IndustryScreen';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -220,9 +221,11 @@ export default function OnboardingFlow({ onClose }) {
   const [dataInputMode, setDataInputMode] = useState('choose');
   const [hoveredExpert, setHoveredExpert] = useState(null);
   const [selectedExpert, setSelectedExpert] = useState(null);
+  const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const [targetRoles, setTargetRoles] = useState([]);
   const fileRef = useRef();
 
-  const TOTAL = 9;
+  const TOTAL = 10;
   const go = (n) => setScreen(n);
   const next = () => setScreen(s => s + 1);
   const back = () => setScreen(s => s - 1);
@@ -289,9 +292,9 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         });
       }
       setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
-      setScreen(9);
+      setScreen(10);
     } catch (err) {
-      setScreen(9);
+      setScreen(10);
     }
     setUploading(false);
   };
@@ -304,6 +307,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       if (college) localStorage.setItem('cff_college', college);
       if (seeking) localStorage.setItem('cff_seeking', seeking);
       if (blockers.length) localStorage.setItem('cff_blockers', JSON.stringify(blockers));
+      if (selectedIndustries.length) localStorage.setItem('cff_industries', JSON.stringify(selectedIndustries));
+      if (targetRoles.length) localStorage.setItem('cff_target_roles', JSON.stringify(targetRoles));
       if (frustration) localStorage.setItem('cff_frustration', String(frustration));
       if (resumeUrl) localStorage.setItem('cff_resume_url', resumeUrl);
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
@@ -312,7 +317,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
     base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };
 
-  const isFullPageScreen = screen >= 9;
+  const isFullPageScreen = screen >= 10;
   const rawName = resumeData?.original?.name;
   const firstName = (typeof rawName === 'string' ? rawName : null)?.split(' ')[0] || null;
 
@@ -376,7 +381,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
 
       {/* ── Progress Bar (screens 1–8) ── */}
-      {screen < 9 && (
+      {screen < 10 && (
         <>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#E2E8F0' }}>
             <div style={{ height: '100%', width: `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
@@ -581,8 +586,20 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         </div>
       )}
 
-      {/* ── SCREEN 5: What's Holding You Back ── */}
-      {screen === 5 && (() => {
+      {/* ── SCREEN 5: Industry & Role Picker ── */}
+      {screen === 5 && (
+        <IndustryScreen
+          selectedIndustries={selectedIndustries}
+          setSelectedIndustries={setSelectedIndustries}
+          targetRoles={targetRoles}
+          setTargetRoles={setTargetRoles}
+          onBack={back}
+          onNext={next}
+        />
+      )}
+
+      {/* ── SCREEN 6: What's Holding You Back ── */}
+      {screen === 6 && (() => {
         const activeBlocker = BLOCKERS.find(b => blockers[blockers.length - 1] === b.key);
         const dynamicHint = activeBlocker ? `✦ We'll unlock your ${activeBlocker.tool} based on this.` : null;
         const [limitToast, setLimitToast] = [false, () => {}]; // placeholder to avoid useState inside IIFE
@@ -707,18 +724,22 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         );
       })()}
 
-      {/* ── SCREEN 6: School (Alumni Advantage) ── */}
-      {screen === 6 && (
+      {/* ── SCREEN 7: School (Alumni Advantage) ── */}
+      {screen === 7 && (
         <Screen6School
           college={college}
           onCollegeChange={setCollege}
           onBack={back}
-          onNext={next}
+          onNext={() => {
+            // Trigger Google Auth right after school — highest-converting moment
+            saveAndAuth();
+          }}
+          nextLabel="Connect Google & Continue →"
         />
       )}
 
-      {/* ── SCREEN 7: Work Location ── */}
-      {screen === 7 && (() => {
+      {/* ── SCREEN 8: Work Location ── */}
+      {screen === 8 && (() => {
         const TOP_CITIES = ['New York, NY', 'San Francisco, CA', 'Los Angeles, CA', 'Chicago, IL', 'Austin, TX', 'Boston, MA', 'Seattle, WA', 'Washington, DC', 'Miami, FL', 'Atlanta, GA', 'Dallas, TX', 'Denver, CO', 'Philadelphia, PA', 'Houston, TX', 'Charlotte, NC', 'Nashville, TN', 'Minneapolis, MN', 'Portland, OR', 'San Diego, CA', 'Phoenix, AZ'];
         const citySuggestions = !citySuggestionsClosed && locationCity.length >= 2 ? TOP_CITIES.filter(c => c.toLowerCase().includes(locationCity.toLowerCase())).slice(0, 6) : [];
         const isRemote = locationPref === 'remote';
@@ -752,8 +773,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         );
       })()}
 
-      {/* ── SCREEN 8: Data Input ── */}
-      {screen === 8 && (
+      {/* ── SCREEN 9: Data Input ── */}
+      {screen === 9 && (
         <div style={{ ...card, maxWidth: 520 }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
@@ -838,9 +859,9 @@ Create a professional profile JSON as if extracted from LinkedIn.`,
                     setResumeData({ original: parsed, optimized: { ...parsed, experience: res.optimized_experience || parsed.experience || [] } });
                   } catch { /* advance anyway */ }
                   setUploading(false);
-                  setScreen(10);
-                }}
-                disabled={!linkedinInput.trim()}
+                  setScreen(11);
+                  }}
+                  disabled={!linkedinInput.trim()}
                 style={{ display: 'block', width: '100%', marginBottom: 12, marginTop: 8 }}
               >Extract My Profile →</Btn>
               <div style={{ textAlign: 'center' }}>
@@ -886,7 +907,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                     setResumeData({ original: parsed, optimized: { ...parsed, experience: res.optimized_experience }, isQuickStart: true, targetRole: quickRole });
                   } catch { /* advance anyway */ }
                   setUploading(false);
-                  setScreen(9);
+                  setScreen(10);
                 }}
                 disabled={!quickMajor.trim() || !quickSkills.trim() || !quickRole.trim()}
                 style={{ display: 'block', width: '100%', marginBottom: 12 }}
@@ -899,8 +920,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         </div>
       )}
 
-      {/* ── SCREEN 9: Wow Moment (Resume Before/After) ── */}
-      {screen === 9 && (
+      {/* ── SCREEN 10: Wow Moment (Resume Before/After) ── */}
+      {screen === 10 && (
         <div style={{ maxWidth: 900, width: '100%', animation: 'fadeUp 0.35s ease', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
@@ -1024,7 +1045,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           {/* CTA */}
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <button
-              onClick={() => setScreen(10)}
+              onClick={() => setScreen(11)}
               style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 14px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 8, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(0,102,255,0.3)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(0,102,255,0.4)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,102,255,0.3)'; }}
@@ -1071,21 +1092,21 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         </div>
       )}
 
-      {/* ── SCREEN 10: LinkedIn Identity Architect ── */}
-      {screen === 10 && (
+      {/* ── SCREEN 11: LinkedIn Identity Architect ── */}
+      {screen === 11 && (
         <LinkedInScreen
           resumeData={resumeData}
           college={college}
           seeking={seeking}
-          targetRole={resumeData?.targetRole || quickRole}
-          onBack={() => setScreen(9)}
+          targetRole={resumeData?.targetRole || quickRole || targetRoles[0]}
+          onBack={() => setScreen(10)}
           saveAndAuth={saveAndAuth}
-          onNext={() => setScreen(11)}
+          onNext={() => setScreen(12)}
         />
       )}
 
-      {/* ── SCREEN 11: Your 14-Day Plan ── */}
-      {screen === 11 && (
+      {/* ── SCREEN 12: Your 14-Day Plan ── */}
+      {screen === 12 && (
         <PlanScreen
           resumeData={resumeData}
           college={college}
@@ -1094,8 +1115,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           frustration={frustration}
           locationPref={locationPref}
           locationCity={locationCity}
-          quickRole={quickRole}
-          onBack={() => setScreen(10)}
+          quickRole={quickRole || targetRoles[0]}
+          onBack={() => setScreen(11)}
           saveAndAuth={saveAndAuth}
         />
       )}
