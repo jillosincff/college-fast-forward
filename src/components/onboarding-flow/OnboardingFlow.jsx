@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import LinkedInScreen from './LinkedInScreen';
 import PlanScreen from './PlanScreen';
 import Screen6School from './Screen6School';
+import ATSScoreRing from './ATSScoreRing';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -974,23 +975,30 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             );
           })()}
 
-          {/* Agent Feedback Card */}
+          {/* Agent Feedback Card — 2-col layout */}
           <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px 28px', marginBottom: 32, border: `1px solid ${GREEN_BORDER}` }}>
-            <h3 style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
               ✓ Agent Feedback
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                'Strengthened bullet points to focus on results, not tasks',
-                'Improved formatting and visual hierarchy for a modern look',
-                'Made it ATS-friendly while keeping it visually standout',
-                <span>Score improved from <span style={{ textDecoration: 'line-through', color: '#EF4444', margin: '0 4px' }}>51/100</span> → <span style={{ fontWeight: 700, color: GREEN, marginLeft: 4 }}>97/100</span></span>,
-              ].map((line, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: FONT, fontSize: 13, color: TEXT, lineHeight: 1.6 }}>
-                  <span style={{ color: GREEN, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
-                  <span>{line}</span>
-                </div>
-              ))}
+            <div style={{ display: 'flex', gap: 28, alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* Left: checklist (65%) */}
+              <div style={{ flex: '0 0 calc(65% - 14px)', minWidth: 200, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[
+                  'Strengthened bullet points to focus on results, not tasks',
+                  'Improved formatting and visual hierarchy for a modern look',
+                  'Made it ATS-friendly while keeping it visually standout',
+                  <span key="score">Score improved from <span style={{ textDecoration: 'line-through', color: '#EF4444', margin: '0 4px' }}>51/100</span> → <span style={{ fontWeight: 700, color: GREEN, marginLeft: 4 }}>98/100</span></span>,
+                ].map((line, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: FONT, fontSize: 13, color: TEXT, lineHeight: 1.6 }}>
+                    <span style={{ color: GREEN, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
+                    <span>{line}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Right: ATS Score Ring (35%) */}
+              <div style={{ flex: '0 0 35%', minWidth: 160, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <ATSScoreRing />
+              </div>
             </div>
           </div>
 
