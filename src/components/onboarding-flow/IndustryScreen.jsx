@@ -107,8 +107,8 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
   const handleBucketClick = (key) => {
     const isSelected = selectedIndustries.includes(key);
     if (isSelected) {
-      // Toggle expand/collapse without deselecting
-      setExpandedBucket(prev => prev === key ? null : key);
+      // Deselect bucket and its subs
+      toggleBucket(key);
     } else {
       toggleBucket(key);
     }
