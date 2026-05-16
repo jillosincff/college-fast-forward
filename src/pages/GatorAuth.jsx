@@ -40,7 +40,7 @@ function GoogleIcon() {
 }
 
 export default function GatorAuth() {
-  const { user, isLoadingAuth: isLoading } = useAuth();
+  const { user, isLoadingAuth: isLoading, refreshUser } = useAuth();
   const [step, setStep] = useState(null);
   const [activeTab, setActiveTab] = useState('signin');
   const [isMigration] = useState(() => {
@@ -204,12 +204,13 @@ export default function GatorAuth() {
       } else {
         // New student from AuthGate — set persona and go directly to dashboard
         base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true })
-          .then(() => {
+          .then(async () => {
             base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
             base44.functions.invoke('notifyNewUserJoined', { user_email: user?.email, user_name: user?.full_name, user_persona: 'student', user_id: user?.id }).catch(() => {});
+            if (refreshUser) await refreshUser();
             navigate('/FreeTierDashboard');
           })
-          .catch(() => navigate('/StudentWelcome'));
+          .catch(() => navigate('/FreeTierDashboard'));
       }
       return;
     }
@@ -223,6 +224,18 @@ export default function GatorAuth() {
     fontFamily: dmSans, outline: 'none',
     boxSizing: 'border-box',
   };
+
+  // While determining what to show, render a visible loading screen (not blank)
+  if (step !== 'auth') {
+    return (
+      <AuthPageShell>
+        <div style={{ textAlign: 'center' }}>
+          <Loader2 className="w-10 h-10 animate-spin" style={{ color: ACCENT, margin: '0 auto 16px' }} />
+          <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>Setting up your account...</p>
+        </div>
+      </AuthPageShell>
+    );
+  }
 
   if (step === 'auth') {
     return (
@@ -361,14 +374,6 @@ export default function GatorAuth() {
     );
   }
 
-  return (
-    <AuthPageShell>
-      <div style={{ textAlign: 'center' }}>
-        <Loader2 className="w-10 h-10 animate-spin" style={{ color: ACCENT, margin: '0 auto 16px' }} />
-        <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: 'rgba(255,255,255,0.45)' }}>Loading...</p>
-      </div>
-    </AuthPageShell>
-  );
 }
 
 GatorAuth.isPublic = true;
