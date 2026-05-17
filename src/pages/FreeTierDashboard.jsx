@@ -8,15 +8,55 @@ import CareerAssetsCard from '@/components/free-tier/CareerAssetsCard';
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import { getThemeForSchool } from '@/lib/campusThemes';
 
+const dm = "'DM Sans', system-ui, sans-serif";
+
+function FirstVisitToast({ firstName, onDismiss }) {
+  return (
+    <div style={{
+      position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+      zIndex: 9999, background: '#111827', color: '#fff', borderRadius: 16,
+      padding: '16px 22px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+      display: 'flex', alignItems: 'flex-start', gap: 14, maxWidth: 480, width: 'calc(100% - 40px)',
+      animation: 'toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
+    }}>
+      <style>{`@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }`}</style>
+      <span style={{ fontSize: 22, flexShrink: 0 }}>👋</span>
+      <div style={{ flex: 1 }}>
+        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+          Welcome to your Command Center, {firstName}!
+        </p>
+        <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: 0, lineHeight: 1.6 }}>
+          We've saved your onboarding data. Track up to 5 jobs below. Your AI-optimized assets and active campus signals are locked and updating live in the sidebar whenever you're ready to sprint.
+        </p>
+      </div>
+      <button
+        onClick={onDismiss}
+        style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 18, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: 0, flexShrink: 0, lineHeight: 1 }}
+      >×</button>
+    </div>
+  );
+}
+
 export default function FreeTierDashboard() {
   const [user, setUser] = useState(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState('');
   const [parentCount, setParentCount] = useState(null);
+  const [showWelcomeToast, setShowWelcomeToast] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(u => {
       setUser(u);
+      // Show first-visit toast once per session
+      const key = 'cff_ftd_welcomed';
+      try {
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+          setTimeout(() => setShowWelcomeToast(true), 800);
+          setTimeout(() => setShowWelcomeToast(false), 8000);
+        }
+      } catch {}
+
       // Count parents matching this exact school — no regional fallbacks
       const school = u?.school_code || u?.school || null;
       if (school) {
@@ -154,6 +194,10 @@ export default function FreeTierDashboard() {
           </div>
         </div>
       </div>
+
+      {showWelcomeToast && (
+        <FirstVisitToast firstName={firstName} onDismiss={() => setShowWelcomeToast(false)} />
+      )}
 
       {showUpgrade && (
         <UpgradeModal

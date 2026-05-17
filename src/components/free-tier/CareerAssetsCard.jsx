@@ -211,8 +211,8 @@ export default function CareerAssetsCard({ onUpgrade }) {
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 0 }}>
           {[
-            { id: 'ats', label: '📊 ATS Diagnostics' },
-            { id: 'premium', label: '⚡ Premium Assets' },
+            { id: 'ats', label: '📊 ATS Matcher' },
+            { id: 'premium', label: '⚡ AI Optimizations' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -249,18 +249,18 @@ export default function CareerAssetsCard({ onUpgrade }) {
 
           <LockedAssetRow
             icon="📄"
-            title="Master Resume (AI-Optimized)"
-            subtitle="98% ATS score · Tailored to your targets"
-            buttonLabel="Preview Changes"
+            title="AI Perfected Resume"
+            subtitle="Locked (98% ATS Score Target)"
+            buttonLabel="Unlock PDF"
             onUnlock={onUpgrade}
             previewContent={<ResumePreviewContent />}
           />
 
           <LockedAssetRow
             icon="🔗"
-            title="LinkedIn Optimization Map"
-            subtitle="Headline, About & Keywords upgraded"
-            buttonLabel="View Headline Upgrades"
+            title="LinkedIn Header Blueprint"
+            subtitle="Locked (Recruiter Signal Sync)"
+            buttonLabel="Unlock Copy"
             onUnlock={onUpgrade}
             previewContent={<LinkedInPreviewContent />}
           />
