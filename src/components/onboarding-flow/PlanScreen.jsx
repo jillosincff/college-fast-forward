@@ -229,7 +229,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         flexDirection: 'column', alignItems: 'stretch', gap: 8,
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
       }}>
-        <button onClick={goToPaidDashboard} style={{
+        <button onClick={() => setShowPaywall(true)} style={{
           width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff',
           background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
           border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
@@ -276,7 +276,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           schoolName={schoolName}
           location={location}
           targetRole={targetRole}
-          onUnlock={goToPaidDashboard}
+          onUnlock={() => setShowPaywall(true)}
         />
       </div>
 
@@ -345,7 +345,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </div>
 
         <button
-          onClick={goToPaidDashboard}
+          onClick={() => setShowPaywall(true)}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 12px',
             fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
@@ -375,52 +375,87 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ── Paywall Modal ── */}
-      {showPaywall && (
-        <div
-          onClick={() => setShowPaywall(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: 24 }}
-        >
-          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: 24, padding: '40px 36px', maxWidth: 420, width: '100%', animation: 'fadUp 0.25s ease', boxShadow: '0 24px 64px rgba(0,0,0,0.15)' }}>
-            <div style={{ width: 56, height: 56, borderRadius: 18, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, margin: '0 auto 20px' }}>🗺️</div>
-            <h2 style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: TEXT, textAlign: 'center', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Unlock Your 14-Day Plan</h2>
-            <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 28px', lineHeight: 1.6 }}>The Fast Track Feed, Insider Alumni Bridge, Personal Hiring CRM, and unlimited AI coaching.</p>
+      {showPaywall && (() => {
+        const roadblockTextMap = {
+          ghosted: 'getting completely ghosted after applying to jobs',
+          resume: 'your resume not getting the responses it deserves',
+          which_jobs: 'struggling to find roles that actually fit your background',
+          outreach: 'the dread of not knowing how to reach the right people',
+          disorganized: 'feeling disorganized and losing track of opportunities',
+          interviews: 'interview anxiety holding you back from landing the role',
+        };
+        const primaryBlocker = blockers?.[0];
+        const selectedPain = roadblockTextMap[primaryBlocker] || 'the broken, old-school job hunt';
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        const assetGrid = [
+          { icon: '📄', label: 'Resume Wow', sub: 'ATS-optimized, recruiter-ready' },
+          { icon: '💼', label: 'LinkedIn Mirror Map', sub: 'Keyword-matched to your targets' },
+          { icon: '🤝', label: 'Parent Network', sub: 'Warm intros to hiring insiders' },
+          { icon: '📡', label: 'Hidden Signals', sub: 'Verified active hiring feed' },
+        ];
+
+        return (
+          <div
+            onClick={() => setShowPaywall(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: 16, overflowY: 'auto' }}
+          >
+            <div onClick={e => e.stopPropagation()} style={{ background: '#fff', border: `1px solid ${BORDER}`, borderRadius: 24, padding: '36px 32px', maxWidth: 480, width: '100%', animation: 'fadUp 0.25s ease', boxShadow: '0 24px 64px rgba(0,0,0,0.18)', maxHeight: '90vh', overflowY: 'auto' }}>
+
+              {/* Eyebrow */}
+              <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: BLUE, letterSpacing: '0.14em', textTransform: 'uppercase', textAlign: 'center', margin: '0 0 14px' }}>
+                College Fast Forward · Premium Sprint
+              </p>
+
+              {/* Headline */}
+              <h2 style={{ fontFamily: sat, fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 900, color: TEXT, textAlign: 'center', margin: '0 0 20px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                {firstName ? `Let's stop blindly applying, ${firstName}. Start interviewing.` : "Let's stop blindly applying. Start interviewing."}
+              </h2>
+
+              {/* Empathy Block */}
+              <div style={{ borderLeft: `4px solid ${BLUE}`, background: 'rgba(15,23,42,0.02)', borderRadius: '0 12px 12px 0', padding: '16px 20px', marginBottom: 24 }}>
+                <p style={{ fontFamily: dm, fontSize: 13, color: TEXT, lineHeight: 1.7, margin: 0 }}>
+                  <strong>{firstName ? `${firstName}, we` : 'We'} noticed you're dealing with {selectedPain}.</strong>
+                  <br /><br />
+                  We get it — it's incredibly deflating to spend hours tailoring an application, hit submit, and get completely ghosted. We've all been there, staring at an empty inbox wondering if a human even looked at your resume.
+                  <br /><br />
+                  That's exactly why we built this. The traditional application system is a black hole. <strong style={{ color: BLUE }}>College Fast Forward bypasses it entirely</strong> by plugging you directly into the people who actually want to hire you.
+                </p>
+              </div>
+
+              {/* 2x2 Asset Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
+                {assetGrid.map((a, i) => (
+                  <div key={i} style={{ background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 14, padding: '14px 14px' }}>
+                    <span style={{ fontSize: 20 }}>{a.icon}</span>
+                    <p style={{ fontFamily: sat, fontSize: 13, fontWeight: 700, color: TEXT, margin: '6px 0 2px' }}>{a.label}</p>
+                    <p style={{ fontFamily: dm, fontSize: 11, color: TEXT2, margin: 0, lineHeight: 1.4 }}>{a.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Primary CTA */}
               <button
-                onClick={saveAndAuth}
-                style={{ width: '100%', background: '#f9fafb', border: `1px solid ${BORDER}`, borderRadius: 14, padding: '20px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
-                onMouseLeave={e => e.currentTarget.style.background = '#f9fafb'}
+                onClick={goToPaidDashboard}
+                style={{ width: '100%', fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)', border: 'none', borderRadius: 14, padding: '20px', cursor: 'pointer', minHeight: 'auto', marginBottom: 10, boxShadow: '0 8px 24px rgba(22,163,74,0.35)', letterSpacing: '-0.01em', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(22,163,74,0.5)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(22,163,74,0.35)'; }}
               >
-                <div>
-                  <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 700, color: TEXT, margin: 0 }}>$4.99 / week</p>
-                  <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '3px 0 0' }}>Cancel anytime</p>
-                </div>
-                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '3px 10px' }}>Most flexible</span>
+                Deploy My Career Agent Now →
               </button>
 
+              {/* Secondary link */}
               <button
-                onClick={saveAndAuth}
-                style={{ width: '100%', background: 'linear-gradient(135deg, #16a34a, #15803d)', border: `2px solid ${GREEN}`, borderRadius: 14, padding: '20px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s', position: 'relative' }}
-                onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                onClick={continueForFree}
+                style={{ width: '100%', fontFamily: dm, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', textAlign: 'center' }}
               >
-                <div>
-                  <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 700, color: '#fff', margin: 0 }}>$19 for 30 days</p>
-                  <p style={{ fontFamily: dm, fontSize: 12, color: '#d1fae5', margin: '3px 0 0' }}>Best value · Most students choose this</p>
-                </div>
-                <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#000', background: '#fff', borderRadius: 100, padding: '4px 10px', position: 'absolute', top: -10, right: 12 }}>POPULAR</span>
+                Save progress, continue for free
               </button>
+
+              <p style={{ fontFamily: dm, fontSize: 11, color: TEXT2, textAlign: 'center', margin: '14px 0 0' }}>🎁 Invite a friend — get your first week free</p>
             </div>
-
-            <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, textAlign: 'center', margin: '16px 0 0' }}>🎁 Invite a friend — get your first week free</p>
-
-            <button onClick={() => setShowPaywall(false)} style={{ width: '100%', fontFamily: dm, fontSize: 14, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', textAlign: 'center', marginTop: 20 }}>
-              Maybe later
-            </button>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
