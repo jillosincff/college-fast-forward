@@ -77,9 +77,19 @@ export default function FreeTierDashboard() {
   })();
   const campusTheme = getThemeForSchool(college);
 
+  // Show loader while user hasn't loaded yet
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f9fc' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid #e5e7eb', borderTop: '3px solid #111827', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
+  }
+
   // Render premium dashboard if user has paid access
   const isPremium = checkIsFastIQ(user);
-  if (user && isPremium) {
+  if (isPremium) {
     return (
       <>
         <FreeTierNav user={user} onUpgrade={() => {}} />
