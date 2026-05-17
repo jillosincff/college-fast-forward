@@ -166,17 +166,17 @@ export default function GatorAuth() {
       return;
     }
 
-    // Check if they came from the new onboarding funnel
+    // Check if they came from the new onboarding funnel (landing page "Get Hired" button)
     const cameFromFunnel = sessionStorage.getItem('cff_onboarding_type') === 'student';
 
-    // Fully onboarded returning user — send to dashboard
-    // BUT if they came from the landing page funnel, send to dashboard and clear funnel flags
+    // If they came from the funnel, always show it — regardless of existing onboarding status
+    if (cameFromFunnel) {
+      setStep('onboarding');
+      return;
+    }
+
+    // Fully onboarded returning user (no funnel flag) — send straight to dashboard
     if (user.persona && user.onboarding_completed) {
-      if (cameFromFunnel) {
-        try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
-        navigate('/FreeTierDashboard');
-        return;
-      }
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentHome');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
