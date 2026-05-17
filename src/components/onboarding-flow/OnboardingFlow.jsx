@@ -200,8 +200,14 @@ const InputField = ({ label, placeholder, value, onChange, type = 'text', icon, 
   </div>
 );
 
-export default function OnboardingFlow({ onClose, onAlreadyAuthed }) {
+// Post-auth funnel screen map: blueprint steps 1→4→6→7→analyzing→done
+// When postAuth=true, we use a simplified 4-step flow (no resume upload, no LinkedIn, no paywall)
+const POST_AUTH_STEPS = [1, 4, 6, 7]; // Welcome, Goals, Roadblocks, University
+
+export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false }) {
   const [screen, setScreen] = useState(1);
+  const [postAuthStep, setPostAuthStep] = useState(0); // index into POST_AUTH_STEPS
+  const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
   const [frustration, setFrustration] = useState(5);
   const [seeking, setSeeking] = useState('');
   const [blockers, setBlockers] = useState([]);
@@ -225,10 +231,33 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed }) {
   const [targetRoles, setTargetRoles] = useState([]);
   const fileRef = useRef();
 
-  const TOTAL = 10;
+  const TOTAL = postAuth ? POST_AUTH_STEPS.length : 10;
+
+  // postAuth navigation helpers
+  const postAuthNext = () => {
+    const nextStep = postAuthStep + 1;
+    if (nextStep >= POST_AUTH_STEPS.length) {
+      // After university — show analyzing loader, then complete
+      setAnalyzing(true);
+      setTimeout(() => {
+        setAnalyzing(false);
+        if (onClose) onClose();
+      }, 3500);
+    } else {
+      setPostAuthStep(nextStep);
+      setScreen(POST_AUTH_STEPS[nextStep]);
+    }
+  };
+  const postAuthBack = () => {
+    const prevStep = postAuthStep - 1;
+    if (prevStep < 0) return;
+    setPostAuthStep(prevStep);
+    setScreen(POST_AUTH_STEPS[prevStep]);
+  };
+
   const go = (n) => setScreen(n);
-  const next = () => setScreen(s => s + 1);
-  const back = () => setScreen(s => s - 1);
+  const next = () => postAuth ? postAuthNext() : setScreen(s => s + 1);
+  const back = () => postAuth ? postAuthBack() : setScreen(s => s - 1);
 
   const toggleBlocker = (key) => {
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
@@ -314,9 +343,10 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
     } catch (e) {}
-    // If user is already authenticated, call the post-auth callback instead of re-triggering login
-    if (onAlreadyAuthed) {
-      onAlreadyAuthed();
+    // In postAuth mode or if user is already authenticated, complete directly
+    if (postAuth || onAlreadyAuthed) {
+      if (onAlreadyAuthed) onAlreadyAuthed();
+      else if (onClose) onClose();
     } else {
       base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
     }
@@ -385,20 +415,27 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       {/* ── Close Button ── */}
       <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
 
-      {/* ── Progress Bar (screens 1–8) ── */}
-      {screen < 10 && (
+      {/* ── Analyzing Loader (postAuth only) ── */}
+      {analyzing && (
+        <div style={{ textAlign: 'center', maxWidth: 520, width: '100%', animation: 'fadeUp 0.3s ease' }}>
+          <LiveEngineLoader />
+        </div>
+      )}
+
+      {/* ── Progress Bar (screens 1–8, or postAuth steps) ── */}
+      {!analyzing && screen < 10 && (
         <>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#E2E8F0' }}>
-            <div style={{ height: '100%', width: `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
+            <div style={{ height: '100%', width: postAuth ? `${((postAuthStep + 1) / POST_AUTH_STEPS.length) * 100}%` : `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
           </div>
           <div style={{ position: 'absolute', top: 18, left: 24, fontFamily: FONT, fontSize: 12, color: TEXT3, fontWeight: 600 }}>
-            {screen} / {TOTAL}
+            {postAuth ? `${postAuthStep + 1} / ${POST_AUTH_STEPS.length}` : `${screen} / ${TOTAL}`}
           </div>
         </>
       )}
 
       {/* ── Screen Transition Wrapper ── */}
-      <FunnelTransition screenKey={screen}>
+      {!analyzing && <FunnelTransition screenKey={screen}>
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
@@ -1126,7 +1163,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         />
       )}
 
-      </FunnelTransition>
+      </FunnelTransition>}
     </div>
   );
 }

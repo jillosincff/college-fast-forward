@@ -226,7 +226,7 @@ export default function GatorAuth() {
     boxSizing: 'border-box',
   };
 
-  // New user — show the white-background onboarding funnel
+  // New user — show the white-background onboarding funnel (postAuth=true since user is already signed in)
   if (step === 'onboarding') {
     const handleOnboardingComplete = async () => {
       // Clear funnel flags so returning visits don't re-trigger funnel
@@ -238,7 +238,7 @@ export default function GatorAuth() {
       } catch (e) {}
       navigate('/FreeTierDashboard');
     };
-    return <OnboardingFlow onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} />;
+    return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} />;
   }
 
   // While determining what to show, render a visible loading screen (not blank)
