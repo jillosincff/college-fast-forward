@@ -8,43 +8,142 @@ function AtsDiagnosticsTab() {
   const [jd, setJd] = useState('');
   const [score, setScore] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [ghostCheckMode, setGhostCheckMode] = useState(false);
+  const [ghostCompany, setGhostCompany] = useState('');
+  const [ghostDate, setGhostDate] = useState('');
+  const [ghostResult, setGhostResult] = useState(null);
 
   const runCheck = () => {
-    if (!jd.trim()) return;
+    if (!jd.trim() && !ghostCheckMode) return;
+    if (ghostCheckMode && (!ghostCompany.trim() || !ghostDate)) return;
+    
     setLoading(true);
     setTimeout(() => {
-      setScore(Math.floor(Math.random() * 20) + 78); // Premium: higher scores
+      if (ghostCheckMode) {
+        // Ghost Check logic
+        const riskScore = Math.floor(Math.random() * 40) + 60;
+        setGhostResult({
+          riskScore,
+          riskLevel: riskScore >= 80 ? 'HIGH' : riskScore >= 60 ? 'MEDIUM' : 'LOW',
+          message: riskScore >= 80 
+            ? `${ghostCompany} has paused internal recruiter activity for this pipeline. Stop waiting on their portal—deploy an automated outreach message to a verified parent or alum on this team instead.`
+            : riskScore >= 60
+            ? `${ghostCompany} shows reduced hiring activity. Consider following up with a warm connection.`
+            : `${ghostCompany} is actively reviewing applications. Your submission is in good standing.`
+        });
+      } else {
+        setScore(Math.floor(Math.random() * 20) + 78);
+      }
       setLoading(false);
     }, 2000);
   };
+
+  const scoreColor = score !== null ? (score >= 85 ? GREEN : score >= 70 ? '#f59e0b' : '#ef4444') : null;
+  const ghostColor = ghostResult?.riskScore >= 80 ? '#ef4444' : ghostResult?.riskScore >= 60 ? '#f59e0b' : GREEN;
 
   const scoreColor = score >= 85 ? GREEN : score >= 70 ? '#f59e0b' : '#ef4444';
 
   return (
     <div style={{ padding: '16px 20px' }}>
-      {!score ? (
+      {!score && !ghostResult ? (
         <>
-          <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>
-            ✅ Uncapped usage — paste any job description to check your score:
-          </p>
-          <textarea
-            value={jd}
-            onChange={e => setJd(e.target.value)}
-            placeholder="Paste job description here..."
-            style={{ width: '100%', fontFamily: dm, fontSize: 12, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 12px', minHeight: 90, resize: 'vertical', outline: 'none', boxSizing: 'border-box' }}
-          />
-          <button
-            onClick={runCheck}
-            disabled={!jd.trim() || loading}
-            style={{ marginTop: 10, width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: jd.trim() && !loading ? `linear-gradient(135deg, ${GREEN}, #15803d)` : '#d1d5db', border: 'none', borderRadius: 10, padding: '11px 0', cursor: jd.trim() && !loading ? 'pointer' : 'not-allowed', minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          >
-            {loading ? (
-              <>
-                <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinAts 0.7s linear infinite' }} />
-                <style>{`@keyframes spinAts { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
-                Running ATS Check...
-              </>
-            ) : 'Run ATS Check →'}
+          {/* Mode toggle */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+            <button
+              onClick={() => setGhostCheckMode(false)}
+              style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: !ghostCheckMode ? '#fff' : '#6b7280', background: !ghostCheckMode ? GREEN : '#f9fafb', border: !ghostCheckMode ? 'none' : '1px solid #e5e7eb', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
+            >
+              📊 ATS Matcher
+            </button>
+            <button
+              onClick={() => setGhostCheckMode(true)}
+              style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: ghostCheckMode ? '#fff' : '#6b7280', background: ghostCheckMode ? '#ef4444' : '#f9fafb', border: ghostCheckMode ? 'none' : '1px solid #e5e7eb', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
+            >
+              👻 Ghost Check
+            </button>
+          </div>
+
+          {!ghostCheckMode ? (
+            <>
+              <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>
+                ✅ Uncapped usage — paste any job description to check your score:
+              </p>
+              <textarea
+                value={jd}
+                onChange={e => setJd(e.target.value)}
+                placeholder="Paste job description here..."
+                style={{ width: '100%', fontFamily: dm, fontSize: 12, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 12px', minHeight: 90, resize: 'vertical', outline: 'none', boxSizing: 'border-box' }}
+              />
+              <button
+                onClick={runCheck}
+                disabled={!jd.trim() || loading}
+                style={{ marginTop: 10, width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: jd.trim() && !loading ? `linear-gradient(135deg, ${GREEN}, #15803d)` : '#d1d5db', border: 'none', borderRadius: 10, padding: '11px 0', cursor: jd.trim() && !loading ? 'pointer' : 'not-allowed', minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              >
+                {loading ? (
+                  <>
+                    <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinAts 0.7s linear infinite' }} />
+                    <style>{`@keyframes spinAts { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
+                    Running ATS Check...
+                  </>
+                ) : 'Run ATS Check →'}
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>
+                👻 Track an application you've already submitted:
+              </p>
+              <input
+                value={ghostCompany}
+                onChange={e => setGhostCompany(e.target.value)}
+                placeholder="Company name (e.g. Salesforce)"
+                style={{ width: '100%', fontFamily: dm, fontSize: 12, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 12px', marginBottom: 8, outline: 'none', boxSizing: 'border-box' }}
+              />
+              <input
+                type="date"
+                value={ghostDate}
+                onChange={e => setGhostDate(e.target.value)}
+                style={{ width: '100%', fontFamily: dm, fontSize: 12, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 12px', marginBottom: 10, outline: 'none', boxSizing: 'border-box' }}
+              />
+              <button
+                onClick={runCheck}
+                disabled={!ghostCompany.trim() || !ghostDate || loading}
+                style={{ width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: ghostCompany.trim() && ghostDate && !loading ? `linear-gradient(135deg, #ef4444, #dc2626)` : '#d1d5db', border: 'none', borderRadius: 10, padding: '11px 0', cursor: ghostCompany.trim() && ghostDate && !loading ? 'pointer' : 'not-allowed', minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              >
+                {loading ? (
+                  <>
+                    <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinGhost 0.7s linear infinite' }} />
+                    <style>{`@keyframes spinGhost { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
+                    Running Ghost Check...
+                  </>
+                ) : '👻 Run Application Ghost Check'}
+              </button>
+            </>
+          )}
+        </>
+      ) : ghostResult ? (
+        <>
+          <div style={{ textAlign: 'center', marginBottom: 14 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${ghostColor}15`, border: `1px solid ${ghostColor}40`, borderRadius: 14, padding: '12px 20px', marginBottom: 10 }}>
+              <span style={{ fontFamily: dm, fontSize: 32, fontWeight: 900, color: ghostColor, lineHeight: 1 }}>{ghostResult.riskScore}%</span>
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: 0 }}>Ghost Risk: {ghostResult.riskLevel}</p>
+                <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
+                  {ghostResult.riskLevel === 'HIGH' ? '🚨 Immediate action needed' : ghostResult.riskLevel === 'MEDIUM' ? '⚠️ Follow-up recommended' : '✅ Application healthy'}
+                </p>
+              </div>
+            </div>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 14px', lineHeight: 1.6 }}>
+              {ghostResult.message}
+            </p>
+            {ghostResult.riskScore >= 80 && (
+              <button style={{ width: '100%', fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, #ef4444, #dc2626)`, border: 'none', borderRadius: 10, padding: '11px 0', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 2px 8px rgba(239,68,68,0.25)' }}>
+                🚀 Deploy Automated Outreach →
+              </button>
+            )}
+          </div>
+          <button onClick={() => { setGhostResult(null); setGhostCompany(''); setGhostDate(''); }} style={{ width: '100%', fontFamily: dm, fontSize: 12, color: '#6b7280', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 0', cursor: 'pointer', minHeight: 'auto' }}>
+            Run another Ghost Check ↺
           </button>
         </>
       ) : (

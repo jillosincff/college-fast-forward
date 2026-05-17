@@ -13,6 +13,8 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [tailoring, setTailoring] = useState(false);
+  const [tailoredResume, setTailoredResume] = useState(null);
 
   const recruiterName = lead?.recruiter?.split(',')[0] || '[Name]';
   const userFirstName = user?.full_name?.split(' ')[0] || '[Your Name]';
@@ -44,6 +46,21 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
       ? `https://www.linkedin.com/in/${lead.parentLinkedInId}/`
       : `https://www.linkedin.com/company/${encodeURIComponent(lead?.company?.toLowerCase().replace(/\s+/g, '-'))}/people/`;
     window.open(linkedinUrl, '_blank');
+  };
+
+  const handleTailorResume = async () => {
+    setTailoring(true);
+    // Simulate AI tailoring — in production this calls a backend function
+    await new Promise(r => setTimeout(r, 2500));
+    const lastName = user?.full_name?.split(' ')[1] || user?.full_name?.split(' ')[0] || 'Resume';
+    const fileName = `Resume_${lastName}_${lead?.company?.replace(/\s+/g, '')}.pdf`;
+    setTailoredResume({
+      fileName,
+      tailoredFor: lead?.company,
+      tailoredForRole: lead?.role,
+      tailoredAt: new Date().toISOString(),
+    });
+    setTailoring(false);
   };
 
   // Close on Escape
@@ -117,6 +134,50 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
             <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '0 0 14px', lineHeight: 1.6 }}>
               Our agent will format your <strong style={{ color: '#111827' }}>98% optimized Master Resume</strong>, bypass the standard HR portal, and route your profile directly into the internal referral tracking system.
             </p>
+            
+            {/* Tailored Resume Button */}
+            {!tailoredResume ? (
+              <button
+                onClick={handleTailorResume}
+                disabled={tailoring}
+                style={{
+                  width: '100%', fontFamily: dm, fontSize: 13, fontWeight: 700,
+                  color: '#fff', border: 'none', borderRadius: 12, padding: '12px 0', marginBottom: 10,
+                  cursor: tailoring ? 'not-allowed' : 'pointer', minHeight: 'auto',
+                  background: tailoring ? '#9ca3af' : `linear-gradient(135deg, #8b5cf6, #7c3aed)`,
+                  boxShadow: tailoring ? 'none' : '0 4px 16px rgba(139,92,246,0.3)',
+                  transition: 'background 0.2s',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                {tailoring ? (
+                  <>
+                    <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinTailor 0.7s linear infinite' }} />
+                    <style>{`@keyframes spinTailor{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+                    ✂️ Tailoring Resume for {lead?.company}...
+                  </>
+                ) : (
+                  <>✂️ Tailor Resume for this Role</>
+                )}
+              </button>
+            ) : (
+              <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 12, padding: '12px 14px', marginBottom: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 16 }}>✅</span>
+                  <div>
+                    <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#166534', margin: 0 }}>Resume Tailored!</p>
+                    <p style={{ fontFamily: dm, fontSize: 11, color: '#15803d', margin: 0 }}>{tailoredResume.fileName}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => alert(`Downloading ${tailoredResume.fileName}...`)}
+                  style={{ width: '100%', fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#16a34a', border: 'none', borderRadius: 8, padding: '8px 0', cursor: 'pointer', minHeight: 'auto' }}
+                >
+                  📥 Download Tailored Resume
+                </button>
+              </div>
+            )}
+
             <button
               onClick={handleAutoApply}
               disabled={applying || applied}

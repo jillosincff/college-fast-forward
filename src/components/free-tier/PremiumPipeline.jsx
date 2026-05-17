@@ -53,6 +53,12 @@ function LeadCard({ lead, onOpen }) {
         <p style={{ fontFamily: dm, fontSize: 11, color: '#16a34a', margin: 0, fontWeight: 600 }}>🔍 {lead.source}</p>
       </div>
       <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>📋 {lead.posted}</p>
+      {lead.tailoredResume && (
+        <div style={{ marginTop: 8, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 12 }}>📄</span>
+          <p style={{ fontFamily: dm, fontSize: 9, color: '#15803d', margin: 0, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{lead.tailoredResume.fileName}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -68,6 +74,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     'OFFER 🎉': [],
   });
   const [selectedLead, setSelectedLead] = useState(null);
+  const [selectedCard, setSelectedCard] = useState(null);
 
   const handleLeadOpen = (lead) => {
     setSelectedLead(lead);
@@ -75,10 +82,18 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   };
 
   const handleApplied = (lead) => {
+    const lastName = user?.full_name?.split(' ')[1] || user?.full_name?.split(' ')[0] || 'Resume';
+    const tailoredResume = {
+      fileName: `Resume_${lastName}_${lead.company.replace(/\s+/g, '')}.pdf`,
+      tailoredAt: new Date().toISOString(),
+      tailoredFor: lead.company,
+      tailoredForRole: lead.role,
+    };
+    
     setCards(prev => ({
       ...prev,
       'OPPORTUNITIES': prev['OPPORTUNITIES'].filter(l => l.company !== lead.company || l.role !== lead.role),
-      'APPLIED': [...prev['APPLIED'], lead],
+      'APPLIED': [...prev['APPLIED'], { ...lead, appliedDate: new Date().toISOString(), tailoredResume }],
     }));
     setSelectedLead(null);
   };
@@ -103,6 +118,50 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           parentCount={parentCount}
         />
       )}
+      
+      {/* Card Details Modal */}
+      {selectedCard && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setSelectedCard(null)}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: '24px', maxWidth: 420, width: '90%', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+              <div>
+                <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: '0 0 4px' }}>{selectedCard.role}</p>
+                <p style={{ fontFamily: dm, fontSize: 13, color: '#2563eb', margin: 0 }}>{selectedCard.company}</p>
+              </div>
+              <button onClick={() => setSelectedCard(null)} style={{ background: 'none', border: 'none', fontSize: 20, color: '#6b7280', cursor: 'pointer', padding: 0, lineHeight: 1 }}>×</button>
+            </div>
+            
+            {selectedCard.appliedDate && (
+              <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '12px', marginBottom: 12 }}>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', margin: '0 0 4px', textTransform: 'uppercase' }}>Application Status</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#111827', margin: 0 }}>Applied on {new Date(selectedCard.appliedDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+              </div>
+            )}
+            
+            {selectedCard.tailoredResume && (
+              <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 10, padding: '12px', marginBottom: 12 }}>
+                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#15803d', margin: '0 0 6px', textTransform: 'uppercase' }}>Submitted Resume</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 16 }}>📄</span>
+                  <p style={{ fontFamily: dm, fontSize: 11, color: '#166534', margin: 0, fontWeight: 600 }}>{selectedCard.tailoredResume.fileName}</p>
+                </div>
+                <p style={{ fontFamily: dm, fontSize: 10, color: '#15803d', margin: '0 0 10px' }}>Tailored for {selectedCard.tailoredResume.tailoredFor} • {selectedCard.tailoredResume.tailoredForRole}</p>
+                <button
+                  onClick={() => alert(`Downloading ${selectedCard.tailoredResume.fileName}...`)}
+                  style={{ width: '100%', fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#16a34a', border: 'none', borderRadius: 8, padding: '8px 0', cursor: 'pointer', minHeight: 'auto' }}
+                >
+                  📥 Download Resume
+                </button>
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setSelectedCard(null)} style={{ flex: 1, fontFamily: dm, fontSize: 12, color: '#6b7280', background: '#f3f4f6', border: 'none', borderRadius: 8, padding: '10px 0', cursor: 'pointer', minHeight: 'auto' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
@@ -125,9 +184,24 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
                   {col === 'OPPORTUNITIES'
                     ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} onOpen={handleLeadOpen} />)
                     : cards[col].map((item, i) => (
-                      <div key={i} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 14px' }}>
+                      <div
+                        key={i}
+                        onClick={() => setSelectedCard(item)}
+                        style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 14px', cursor: 'pointer', transition: 'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'; e.currentTarget.style.borderColor = '#bfdbfe'; }}
+                        onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
+                      >
                         <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>{item.role}</p>
                         <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>{item.company}</p>
+                        {item.appliedDate && (
+                          <p style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af', margin: '4px 0 0' }}>Applied: {new Date(item.appliedDate).toLocaleDateString()}</p>
+                        )}
+                        {item.tailoredResume && (
+                          <div style={{ marginTop: 6, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '5px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontSize: 11 }}>📄</span>
+                            <p style={{ fontFamily: dm, fontSize: 9, color: '#15803d', margin: 0, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{item.tailoredResume.fileName}</p>
+                          </div>
+                        )}
                       </div>
                     ))
                   }
