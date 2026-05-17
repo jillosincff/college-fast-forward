@@ -258,6 +258,9 @@ export default function GatorAuth() {
       <AuthPageShell>
         <div style={{ maxWidth: 500, width: '100%' }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 20, minHeight: 'auto', padding: 0, display: 'block', margin: '0 auto 20px' }}>
+              ← Back to home
+            </button>
             <h1 style={{ fontFamily: playfair, fontSize: 36, fontWeight: 700, color: '#fff', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
               COLLEGE FAST FORWARD
             </h1>
