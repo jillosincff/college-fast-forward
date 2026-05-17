@@ -180,6 +180,11 @@ function ComparisonTable() {
 export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
 
+  const goToPaidDashboard = () => {
+    // TEST MODE: skip payment, go straight to paid dashboard
+    window.location.hash = '#FastIQDashboard';
+  };
+
   const continueForFree = () => {
     // Persist onboarding data so it pre-populates on upgrade
     try {
@@ -224,7 +229,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         flexDirection: 'column', alignItems: 'stretch', gap: 8,
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
       }}>
-        <button onClick={() => setShowPaywall(true)} style={{
+        <button onClick={goToPaidDashboard} style={{
           width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff',
           background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
           border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
@@ -271,7 +276,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           schoolName={schoolName}
           location={location}
           targetRole={targetRole}
-          onUnlock={() => setShowPaywall(true)}
+          onUnlock={goToPaidDashboard}
         />
       </div>
 
@@ -340,7 +345,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </div>
 
         <button
-          onClick={() => setShowPaywall(true)}
+          onClick={goToPaidDashboard}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 12px',
             fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
