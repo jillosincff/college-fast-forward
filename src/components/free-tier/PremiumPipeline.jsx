@@ -32,32 +32,87 @@ const BACKDOOR_LEADS = [
 
 const COLUMNS = ['OPPORTUNITIES', 'APPLIED', 'INTERVIEWING', 'OFFER 🎉'];
 
-function LeadCard({ lead, onOpen }) {
+function LeadCard({ lead, onOpen, columnId }) {
+  const emailSyncActive = lead.emailSyncStatus === 'active';
+  
   return (
     <div
       onClick={() => onOpen(lead)}
-      style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '14px 16px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)'; e.currentTarget.style.borderColor = '#bfdbfe'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
+      style={{ 
+        background: '#fff', 
+        border: '1px solid #e5e7eb', 
+        borderRadius: 12, 
+        padding: '14px 16px', 
+        cursor: 'pointer', 
+        transition: 'all 0.2s', 
+        boxShadow: emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
+        position: 'relative',
+        minHeight: 110,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+      }}
+      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = '#bfdbfe'; }}
+      onMouseLeave={e => { e.currentTarget.style.boxShadow = emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
-        <div style={{ width: 36, height: 36, borderRadius: 8, background: '#eff6ff', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+      {emailSyncActive && (
+        <div style={{ position: 'absolute', top: 10, right: 10, width: 8, height: 8, borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s infinite' }}>
+          <style>{`@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }`}</style>
+        </div>
+      )}
+      
+      {/* Top Row: Logo + Title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <div style={{ width: 32, height: 32, borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
           {lead.logo}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>{lead.role}</p>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: '#2563eb', margin: 0 }}>{lead.company}</p>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.role}</p>
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: '2px 0 0' }}>{lead.company}</p>
         </div>
       </div>
-      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 10px', marginBottom: 8 }}>
-        <p style={{ fontFamily: dm, fontSize: 11, color: '#16a34a', margin: 0, fontWeight: 600 }}>🔍 {lead.source}</p>
-      </div>
-      <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>📋 {lead.posted}</p>
-      {lead.tailoredResume && (
-        <div style={{ marginTop: 8, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '6px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 12 }}>📄</span>
-          <p style={{ fontFamily: dm, fontSize: 9, color: '#15803d', margin: 0, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{lead.tailoredResume.fileName}</p>
-        </div>
+      
+      {/* Middle & Bottom Rows: Column-Specific Metadata */}
+      {columnId === 'opportunities' && (
+        <>
+          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '6px 10px', marginBottom: 8 }}>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#2563eb', margin: 0, fontWeight: 600 }}>💡 {lead.connectionsCount || 3} UF Connections</p>
+          </div>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#3b82f6', margin: 0, fontWeight: 500 }}>Click to open Backdoor Access →</p>
+        </>
+      )}
+      
+      {columnId === 'applied' && (
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+            <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📅 Applied: {lead.appliedDate ? new Date(lead.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Auto-detecting...'}</p>
+            {lead.tailoredResume && (
+              <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📄 Version: {lead.tailoredResume.fileName.replace('.pdf', '').split('_').pop() || 'Tailored'}</p>
+            )}
+          </div>
+          <p style={{ fontFamily: dm, fontSize: 9, color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#e2e8f0', display: 'inline-block' }} />
+            Email Agent Syncing...
+          </p>
+        </>
+      )}
+      
+      {columnId === 'interviewing' && (
+        <>
+          <div style={{ background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 6, padding: '6px 10px', marginBottom: 8 }}>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#7c3aed', margin: 0, fontWeight: 600 }}>📅 {lead.interviewRound || 'Round 1'}: {lead.interviewDate ? new Date(lead.interviewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}</p>
+          </div>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#6366f1', margin: 0, fontWeight: 500 }}>🔗 View Sent Resume</p>
+        </>
+      )}
+      
+      {columnId === 'offer' && (
+        <>
+          <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '6px 10px', marginBottom: 8 }}>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#15803d', margin: 0, fontWeight: 700 }}>🎉 Offer Unlocked</p>
+          </div>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#16a34a', margin: 0, fontWeight: 500 }}>💰 View Negotiation Tools →</p>
+        </>
       )}
     </div>
   );
@@ -182,27 +237,14 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
                   {col === 'OPPORTUNITIES'
-                    ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} onOpen={handleLeadOpen} />)
+                    ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} />)
                     : cards[col].map((item, i) => (
-                      <div
-                        key={i}
-                        onClick={() => setSelectedCard(item)}
-                        style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 14px', cursor: 'pointer', transition: 'all 0.2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'; e.currentTarget.style.borderColor = '#bfdbfe'; }}
-                        onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
-                      >
-                        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>{item.role}</p>
-                        <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>{item.company}</p>
-                        {item.appliedDate && (
-                          <p style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af', margin: '4px 0 0' }}>Applied: {new Date(item.appliedDate).toLocaleDateString()}</p>
-                        )}
-                        {item.tailoredResume && (
-                          <div style={{ marginTop: 6, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '5px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 11 }}>📄</span>
-                            <p style={{ fontFamily: dm, fontSize: 9, color: '#15803d', margin: 0, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>{item.tailoredResume.fileName}</p>
-                          </div>
-                        )}
-                      </div>
+                      <LeadCard 
+                        key={i} 
+                        lead={item} 
+                        columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'}
+                        onOpen={setSelectedCard} 
+                      />
                     ))
                   }
 
