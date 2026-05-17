@@ -348,7 +348,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       if (onAlreadyAuthed) onAlreadyAuthed();
       else if (onClose) onClose();
     } else {
-      base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+      base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
     }
   };
 

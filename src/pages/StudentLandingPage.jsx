@@ -139,7 +139,7 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  // Smart "Get Hired" handler — returning users go straight to their dashboard, new users hit Google auth immediately
+  // Smart "Get Hired" handler — returning users go straight to their dashboard, new users see the funnel
   const go = () => {
     if (!isLoadingAuth && user && user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
@@ -150,12 +150,7 @@ export default function StudentLandingPage({ onParentClick }) {
         navigate('/FreeTierDashboard');
       }
     } else {
-      try {
-        localStorage.setItem('pending_invite_role', 'student');
-        sessionStorage.setItem('cff_onboarding_type', 'student');
-      } catch (e) {}
-      // Go directly to Google OAuth
-      base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
+      setShowFunnel(true);
     }
   };
 
