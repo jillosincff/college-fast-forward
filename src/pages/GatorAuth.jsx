@@ -154,7 +154,7 @@ export default function GatorAuth() {
       localStorage.setItem('pending_invite_role', role);
       sessionStorage.setItem('cff_onboarding_type', role);
     } catch (e) { /* private browsing */ }
-    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+    base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
   };
 
   useEffect(() => {
