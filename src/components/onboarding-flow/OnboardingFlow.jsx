@@ -202,7 +202,7 @@ const InputField = ({ label, placeholder, value, onChange, type = 'text', icon, 
 
 // Post-auth funnel: full flow including resume wow, LinkedIn, and plan
 // Screens: Welcome → Goals → Roadblocks → University → Resume Input → Resume Wow → LinkedIn → Plan
-const POST_AUTH_STEPS = [1, 4, 6, 7, 9, 10, 11, 12];
+const POST_AUTH_STEPS = [1, 4, 6, 7, 8, 9, 10, 11, 12];
 
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false }) {
   const [screen, setScreen] = useState(1);
@@ -776,12 +776,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           onCollegeChange={setCollege}
           onBack={back}
           onNext={() => {
-            // postAuth: continue to resume input; pre-auth: trigger Google Auth
-            if (postAuth) {
-              next();
-            } else {
-              saveAndAuth();
-            }
+            next();
           }}
           nextLabel="Continue →"
         />
@@ -817,7 +812,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                 )}
               </div>
             )}
-            <Nav onBack={back} onNext={next} nextDisabled={!(isRemote || hasCity)} />
+            <Nav onBack={back} onNext={() => { if (postAuth) { next(); } else { saveAndAuth(); } }} nextDisabled={!(isRemote || hasCity)} />
           </div>
         );
       })()}
