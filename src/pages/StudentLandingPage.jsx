@@ -138,7 +138,7 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  // Smart "Get Hired" handler — returning users go straight to their dashboard
+  // Smart "Get Hired" handler — returning users go straight to their dashboard, new users go to auth
   const go = () => {
     if (!isLoadingAuth && user && user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
@@ -149,7 +149,7 @@ export default function StudentLandingPage({ onParentClick }) {
         navigate('/FreeTierDashboard');
       }
     } else {
-      setShowFunnel(true);
+      navigate('/GetStarted');
     }
   };
 
