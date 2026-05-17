@@ -5,6 +5,8 @@ import FreeTierNav from '@/components/free-tier/FreeTierNav';
 import ApplicationTracker from '@/components/free-tier/ApplicationPipeline';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 import ResumeAtsTeaser from '@/components/free-tier/ResumeAtsTeaser';
+import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
+import { getThemeForSchool } from '@/lib/campusThemes';
 
 export default function FreeTierDashboard() {
   const [user, setUser] = useState(null);
@@ -24,6 +26,7 @@ export default function FreeTierDashboard() {
   const college = (() => {
     try { return localStorage.getItem('cff_college') || user?.school || 'your university'; } catch { return 'your university'; }
   })();
+  const campusTheme = getThemeForSchool(college);
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
@@ -43,7 +46,7 @@ export default function FreeTierDashboard() {
           </div>
           <button
             onClick={() => triggerUpgrade('Premium Sprint')}
-            style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 12, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 14px rgba(37,99,235,0.3)', whiteSpace: 'nowrap' }}
+            style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, whiteSpace: 'nowrap' }}
           >
             ⚡ Upgrade to Premium — $4.99/wk
           </button>
@@ -54,13 +57,8 @@ export default function FreeTierDashboard() {
 
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-            {/* Application Pipeline */}
             <ApplicationTracker onUpgrade={triggerUpgrade} />
-
-            {/* Teaser: Backdoor Signals */}
-            <TeaserSignalsCard onUnlock={() => triggerUpgrade('Backdoor Lead Signals')} />
-
+            <TeaserSignalsCard onUnlock={() => triggerUpgrade('Backdoor Lead Signals')} college={college} theme={campusTheme} />
           </div>
 
           {/* ── Right Column ── */}
@@ -69,40 +67,47 @@ export default function FreeTierDashboard() {
             {/* Resume ATS Check */}
             <ResumeAtsTeaser onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
 
-            {/* Outreach Block */}
+            {/* Alumni Outreach Generator — campus-themed */}
             <div
               onClick={() => triggerUpgrade('AI Outreach Generator')}
-              style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.08)'}
+              style={{ background: '#fff', border: `1px solid ${campusTheme.primary}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.boxShadow = `0 6px 20px ${campusTheme.primary}22`}
               onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'}
             >
-              <div style={{ background: 'linear-gradient(135deg, #eff6ff, #f0fdf4)', padding: '16px 20px', borderBottom: '1px solid #e5e7eb' }}>
+              <div style={{ background: `linear-gradient(135deg, ${campusTheme.bgTint}, rgba(255,255,255,0.8))`, padding: '16px 20px', borderBottom: `1px solid ${campusTheme.primary}33` }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 18 }}>✉️</span>
                     <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 13, fontWeight: 700, color: '#111827', margin: 0 }}>Alumni Outreach Generator</p>
                   </div>
-                  <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 10, fontWeight: 700, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 100, padding: '3px 10px' }}>PREMIUM</span>
+                  <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 10, fontWeight: 700, color: campusTheme.primary, background: campusTheme.bgTint, border: `1px solid ${campusTheme.primary}44`, borderRadius: 100, padding: '3px 10px' }}>PREMIUM</span>
                 </div>
               </div>
-              <div style={{ padding: '16px 20px', opacity: 0.65, position: 'relative' }}>
-                <div style={{ background: '#f8f9fc', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
+              <div style={{ padding: '16px 20px', opacity: 0.7, position: 'relative' }}>
+                <div style={{ background: campusTheme.bgTint, borderRadius: 10, padding: '12px 14px', marginBottom: 10, border: `1px solid ${campusTheme.primary}22` }}>
                   <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, fontWeight: 600, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>
-                    Hi Sarah, I noticed you graduated from <strong style={{ color: '#1d4ed8' }}>{college}</strong> and currently work as a Product Manager at <span style={{ background: '#e5e7eb', borderRadius: 3, padding: '0 6px', filter: 'blur(4px)', userSelect: 'none' }}>████████ Co</span>. I'm a senior at <strong style={{ color: '#1d4ed8' }}>{college}</strong> studying...
+                    Hi Sarah, I noticed you graduated from <strong style={{ color: campusTheme.primary }}>{college}</strong> and currently work as a Product Manager at <span style={{ background: '#e5e7eb', borderRadius: 3, padding: '0 6px', filter: 'blur(4px)', userSelect: 'none' }}>████████ Co</span>. I'm a senior at <strong style={{ color: campusTheme.primary }}>{college}</strong> studying...
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     {[1, 2, 3].map((_, i) => (
-                      <div key={i} style={{ height: 8, background: '#e5e7eb', borderRadius: 4, width: i === 2 ? '60%' : '100%' }} />
+                      <div key={i} style={{ height: 8, background: `${campusTheme.primary}22`, borderRadius: 4, width: i === 2 ? '60%' : '100%' }} />
                     ))}
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, color: '#2563eb', fontWeight: 600, margin: 0 }}>Click to unlock personalized scripts →</p>
+                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, color: campusTheme.secondary, fontWeight: 700, margin: 0 }}>Click to unlock personalized scripts →</p>
                 </div>
               </div>
             </div>
 
-            {/* Expert Chat — read only teaser */}
+            {/* Parent Network Widget */}
+            <ParentNetworkWidget
+              onUnlock={() => triggerUpgrade('Parent Network Introductions')}
+              college={college}
+              theme={campusTheme}
+            />
+
+            {/* Hiring Experts Chat */}
             <div
               onClick={() => triggerUpgrade('Hiring Expert Chat')}
               style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', cursor: 'pointer' }}
@@ -142,7 +147,6 @@ export default function FreeTierDashboard() {
           onClose={() => setShowUpgrade(false)}
           onUpgrade={() => {
             setShowUpgrade(false);
-            // saveAndAuth would handle checkout — for now redirect to GatorAuth with upgrade flag
             base44.auth.redirectToLogin('/#FreeTierDashboard');
           }}
         />
