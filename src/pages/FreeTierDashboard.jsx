@@ -21,6 +21,9 @@ export default function FreeTierDashboard() {
   };
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const college = (() => {
+    try { return localStorage.getItem('cff_college') || user?.school || 'your university'; } catch { return 'your university'; }
+  })();
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
@@ -82,11 +85,15 @@ export default function FreeTierDashboard() {
                   <span style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 10, fontWeight: 700, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 100, padding: '3px 10px' }}>PREMIUM</span>
                 </div>
               </div>
-              <div style={{ padding: '16px 20px', opacity: 0.55, filter: 'blur(0px)', position: 'relative' }}>
+              <div style={{ padding: '16px 20px', opacity: 0.65, position: 'relative' }}>
                 <div style={{ background: '#f8f9fc', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
-                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, fontWeight: 600, color: '#374151', margin: '0 0 4px' }}>Hi Sarah, I noticed you work at...</p>
+                  <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, fontWeight: 600, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>
+                    Hi Sarah, I noticed you graduated from <strong style={{ color: '#1d4ed8' }}>{college}</strong> and currently work as a Product Manager at{' '}
+                    <span style={{ background: '#e5e7eb', borderRadius: 3, padding: '0 6px', filter: 'blur(4px)', userSelect: 'none' }}>████████ Co</span>.
+                    {' '}I'm a senior at <strong style={{ color: '#1d4ed8' }}>{college}</strong> studying...
+                  </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    {['████████████ ████', '████ ██████████████████', '███████████████'].map((line, i) => (
+                    {[1, 2, 3].map((_, i) => (
                       <div key={i} style={{ height: 8, background: '#e5e7eb', borderRadius: 4, width: i === 2 ? '60%' : '100%' }} />
                     ))}
                   </div>

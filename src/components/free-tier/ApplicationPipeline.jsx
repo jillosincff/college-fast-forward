@@ -28,7 +28,6 @@ export default function ApplicationPipeline({ onUpgrade }) {
 
   const addJob = () => {
     if (!newTitle.trim()) return;
-    if (atLimit) { onUpgrade('Unlimited Tracking'); return; }
     setJobs(prev => [...prev, { id: Date.now(), title: newTitle, company: newCompany, stage: 'to_apply', url: newUrl }]);
     setNewTitle(''); setNewCompany(''); setNewUrl('');
     setShowAdd(false);
@@ -57,8 +56,14 @@ export default function ApplicationPipeline({ onUpgrade }) {
           </p>
         </div>
         <button
-          onClick={() => atLimit ? onUpgrade('Unlimited Tracking') : setShowAdd(true)}
-          style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: atLimit ? '#fff' : BLUE, background: atLimit ? '#ef4444' : BLUE_LIGHT, border: `1px solid ${atLimit ? '#ef4444' : BLUE_BORDER}`, borderRadius: 10, padding: '9px 16px', cursor: 'pointer', minHeight: 'auto' }}
+          onClick={() => {
+            if (atLimit) {
+              onUpgrade('Unlimited Tracking');
+            } else {
+              setShowAdd(true);
+            }
+          }}
+          style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: atLimit ? '#fff' : BLUE, background: atLimit ? 'linear-gradient(135deg, #ef4444, #dc2626)' : BLUE_LIGHT, border: `1px solid ${atLimit ? '#dc2626' : BLUE_BORDER}`, borderRadius: 10, padding: '9px 16px', cursor: 'pointer', minHeight: 'auto', boxShadow: atLimit ? '0 4px 12px rgba(239,68,68,0.3)' : 'none' }}
         >
           {atLimit ? '⚡ Unlock Unlimited' : '+ Add Job'}
         </button>
@@ -141,12 +146,19 @@ export default function ApplicationPipeline({ onUpgrade }) {
       {atLimit && (
         <div
           onClick={() => onUpgrade('Unlimited Tracking')}
-          style={{ background: 'linear-gradient(135deg, #eff6ff, #f0fdf4)', borderTop: '1px solid #e5e7eb', padding: '12px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+          style={{ background: 'linear-gradient(135deg, #fef2f2, #eff6ff)', borderTop: '2px solid #fca5a5', padding: '16px 22px', cursor: 'pointer', transition: 'all 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(135deg, #fee2e2, #dbeafe)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, #fef2f2, #eff6ff)'}
         >
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0 }}>
-            ⚡ You've hit your 5-job free limit. Unlock unlimited tracking.
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#991b1b', margin: '0 0 4px' }}>
+            🚫 You've hit the manual limit.
           </p>
-          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: BLUE, flexShrink: 0 }}>Upgrade →</span>
+          <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 10px', lineHeight: 1.5 }}>
+            Stop tracking jobs by hand. Let our automated crawler track unlimited roles and find hidden listings before they hit job boards.
+          </p>
+          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', borderRadius: 8, padding: '8px 18px', display: 'inline-block', boxShadow: '0 4px 12px rgba(37,99,235,0.3)' }}>
+            ⚡ Automate for $4.99/wk →
+          </span>
         </div>
       )}
     </div>
