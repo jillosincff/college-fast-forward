@@ -180,6 +180,23 @@ function ComparisonTable() {
 export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
 
+  const continueForFree = () => {
+    // Persist onboarding data so it pre-populates on upgrade
+    try {
+      if (college) localStorage.setItem('cff_college', college);
+      if (seeking) localStorage.setItem('cff_seeking', seeking);
+      if (blockers?.length) localStorage.setItem('cff_blockers', JSON.stringify(blockers));
+      if (frustration) localStorage.setItem('cff_frustration', String(frustration));
+      if (locationPref) localStorage.setItem('cff_location_pref', locationPref);
+      if (locationCity) localStorage.setItem('cff_location_city', locationCity);
+      if (quickRole) localStorage.setItem('cff_quick_role', quickRole);
+      if (resumeData?.original?.name) localStorage.setItem('cff_resume_name', resumeData.original.name);
+      localStorage.setItem('cff_plan_type', 'free');
+    } catch (e) {}
+    // saveAndAuth completes the auth flow; it will route to FreeTierDashboard via GatorAuth
+    if (saveAndAuth) saveAndAuth('free');
+  };
+
   const firstName = resumeData?.original?.name?.split(' ')[0] || null;
   const fullName = resumeData?.original?.name || null;
   const location = locationPref === 'remote' ? 'Remote' : locationCity || resumeData?.original?.location?.split(',')[0] || 'your city';
@@ -215,7 +232,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         }}>
           Unlock My 14-Day Action Plan →
         </button>
-        <button onClick={saveAndAuth} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textAlign: 'center', textDecoration: 'underline' }}>
+        <button onClick={continueForFree} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textAlign: 'center', textDecoration: 'underline' }}>
           Save progress and continue for free
         </button>
       </div>
@@ -341,7 +358,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           🎁 Invite a friend and your first week is on us.
         </p>
         <button
-          onClick={saveAndAuth}
+          onClick={continueForFree}
           style={{ fontFamily: dm, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}
         >
           Save progress and continue for free

@@ -86,7 +86,7 @@ const AuthenticatedApp = () => {
           <Route path="/MigrationSignIn" element={<MigrationSignIn />} />
 
           {/* Explicit routes first for higher priority */}
-          <Route path="/FreeTierDashboard" element={<LayoutWrapper currentPageName="FreeTierDashboard"><FreeTierDashboard /></LayoutWrapper>} />
+          <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
           <Route path="/Directory" element={<LayoutWrapper currentPageName="Directory"><Directory /></LayoutWrapper>} />
           <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
           <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />

@@ -324,7 +324,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
     setUploading(false);
   };
 
-  const saveAndAuth = () => {
+  const saveAndAuth = (planType) => {
     try {
       localStorage.setItem('pending_invite_role', 'student');
       sessionStorage.setItem('cff_onboarding_type', 'student');
@@ -338,13 +338,20 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       if (resumeUrl) localStorage.setItem('cff_resume_url', resumeUrl);
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
+      if (planType === 'free') localStorage.setItem('cff_plan_type', 'free');
     } catch (e) {}
     // In postAuth mode or if user is already authenticated, complete directly
     if (postAuth || onAlreadyAuthed) {
-      if (onAlreadyAuthed) onAlreadyAuthed();
-      else if (onClose) onClose();
+      if (planType === 'free') {
+        // Route to free tier dashboard
+        window.location.hash = '#FreeTierDashboard';
+      } else {
+        if (onAlreadyAuthed) onAlreadyAuthed();
+        else if (onClose) onClose();
+      }
     } else {
-      base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
+      const redirectPath = planType === 'free' ? '/#FreeTierDashboard' : '/#GatorAuth';
+      base44.auth.loginWithProvider('google', window.location.origin + redirectPath);
     }
   };
 
