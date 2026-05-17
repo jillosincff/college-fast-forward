@@ -139,6 +139,20 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
+  // Redirect returning users who already completed the funnel straight to their dashboard
+  useEffect(() => {
+    if (isLoadingAuth || !user) return;
+    if (user.onboarding_completed) {
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        navigate('ParentHome');
+      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+        navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
+      } else {
+        navigate('FreeTierDashboard');
+      }
+    }
+  }, [user, isLoadingAuth]);
+
   // Smart "Get Hired" handler — returning users go straight to their dashboard, new users hit Google auth immediately → funnel runs post-auth in GatorAuth
   const go = () => {
     if (!isLoadingAuth && user && user.onboarding_completed) {
