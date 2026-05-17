@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
+import { base44 } from '@/api/base44Client';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -138,7 +139,7 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  // Smart "Get Hired" handler — returning users go straight to their dashboard, new users go to auth
+  // Smart "Get Hired" handler — returning users go straight to their dashboard, new users hit Google auth immediately
   const go = () => {
     if (!isLoadingAuth && user && user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
@@ -149,7 +150,11 @@ export default function StudentLandingPage({ onParentClick }) {
         navigate('/FreeTierDashboard');
       }
     } else {
-      navigate('/GetStarted');
+      try {
+        localStorage.setItem('pending_invite_role', 'student');
+        sessionStorage.setItem('cff_onboarding_type', 'student');
+      } catch (e) {}
+      base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
     }
   };
 
