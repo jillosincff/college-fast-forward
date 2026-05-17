@@ -41,8 +41,6 @@ function AtsDiagnosticsTab() {
   const scoreColor = score !== null ? (score >= 85 ? GREEN : score >= 70 ? '#f59e0b' : '#ef4444') : null;
   const ghostColor = ghostResult?.riskScore >= 80 ? '#ef4444' : ghostResult?.riskScore >= 60 ? '#f59e0b' : GREEN;
 
-  const scoreColor = score >= 85 ? GREEN : score >= 70 ? '#f59e0b' : '#ef4444';
-
   return (
     <div style={{ padding: '16px 20px' }}>
       {!score && !ghostResult ? (
