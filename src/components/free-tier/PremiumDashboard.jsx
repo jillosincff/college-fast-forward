@@ -9,6 +9,25 @@ import PremiumHiringChat from './PremiumHiringChat';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
+function PremiumNav({ user }) {
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  return (
+    <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
+            <span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span>
+          </div>
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 100, padding: '3px 12px', boxShadow: '0 2px 6px rgba(37,99,235,0.2)' }}>Sprint Active</span>
+        </div>
+        <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>
+          {user?.full_name || user?.email}
+        </span>
+      </div>
+    </header>
+  );
+}
+
 function StatPill({ emoji, label, value, theme }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '12px 18px', flex: 1, minWidth: 0 }}>
@@ -36,6 +55,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
+      <PremiumNav user={user} />
 
       {/* ── Premium Welcome Banner ── */}
       <div style={{
