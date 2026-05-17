@@ -228,6 +228,9 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         position: 'relative',
         boxShadow: pulseActive ? '0 0 0 4px rgba(245, 158, 11, 0.2), 0 4px 12px rgba(0,0,0,0.08)' : isMobile ? '0 2px 8px rgba(0,0,0,0.06)' : '0 2px 8px rgba(0,0,0,0.04)',
         animation: pulseActive ? 'cardPulse 0.8s ease-in-out' : 'none',
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
       }}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
@@ -239,7 +242,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
           100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
       `}</style>
-      {/* Header */}
+      {/* Header - Optimized for mobile readability */}
       <div style={{ display: 'flex', gap: isMobile ? 8 : 10, marginBottom: isMobile ? 8 : 8 }}>
         <div style={{
           width: isMobile ? 36 : 40, height: isMobile ? 36 : 40, borderRadius: isMobile ? 8 : 10,
@@ -249,11 +252,25 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         }}>
           🏢
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 700, color: '#1e293b', margin: '0 0 2px', lineHeight: 1.3 }}>
+        <div style={{ flex: 1, minWidth: 0, paddingRight: isMobile ? 24 : 0 }}>
+          <p style={{ 
+            fontFamily: dm, 
+            fontSize: isMobile ? 12 : 13, 
+            fontWeight: 700, 
+            color: '#1e293b', 
+            margin: '0 0 2px', 
+            lineHeight: 1.3,
+            wordBreak: 'break-word',
+          }}>
             {job.title}
           </p>
-          <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 11, color: '#64748b', margin: 0 }}>
+          <p style={{ 
+            fontFamily: dm, 
+            fontSize: isMobile ? 10 : 11, 
+            color: '#64748b', 
+            margin: 0,
+            wordBreak: 'break-word',
+          }}>
             {job.company} {job.location && `· ${job.location}`}
           </p>
         </div>
@@ -273,26 +290,26 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         </button>
       </div>
       
-      {/* Network & Sync Indicators */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+      {/* Network & Sync Indicators - Wrap properly on mobile */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: isMobile ? 6 : 8 }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4,
           background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`,
-          borderRadius: 6, padding: '3px 8px', flexShrink: 0,
+          borderRadius: 6, padding: isMobile ? '2px 6px' : '3px 8px', flexShrink: 0,
         }}>
-          <span style={{ fontSize: 10 }}>🎓</span>
-          <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 600, color: BLUE, margin: 0 }}>
-            {alumniOnTeam} {alumniOnTeam === 1 ? 'Alumni' : 'Alumni'} on Team
+          <span style={{ fontSize: isMobile ? 9 : 10 }}>🎓</span>
+          <p style={{ fontFamily: dm, fontSize: isMobile ? 8 : 9, fontWeight: 600, color: BLUE, margin: 0 }}>
+            {alumniOnTeam} {alumniOnTeam === 1 ? 'Alumni' : 'Alumni'}
           </p>
         </div>
         {emailSynced && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 4,
             background: '#f0fdf4', border: '1px solid #86efac',
-            borderRadius: 6, padding: '3px 8px', flexShrink: 0,
+            borderRadius: 6, padding: isMobile ? '2px 6px' : '3px 8px', flexShrink: 0,
           }}>
-            <span style={{ fontSize: 10 }}>📩</span>
-            <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 600, color: '#166534', margin: 0 }}>
+            <span style={{ fontSize: isMobile ? 9 : 10 }}>📩</span>
+            <p style={{ fontFamily: dm, fontSize: isMobile ? 8 : 9, fontWeight: 600, color: '#166534', margin: 0 }}>
               Auto-Tracked
             </p>
           </div>
@@ -329,19 +346,31 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         </div>
       )}
       
-      {/* Stage Actions */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10, paddingTop: 10, borderTop: '1px solid #f1f5f9' }}>
+      {/* Stage Actions - Full width buttons on mobile */}
+      <div style={{ 
+        display: 'flex', 
+        gap: isMobile ? 6 : 6, 
+        flexWrap: 'wrap', 
+        marginTop: isMobile ? 8 : 10, 
+        paddingTop: isMobile ? 8 : 10, 
+        borderTop: '1px solid #f1f5f9',
+        width: '100%',
+      }}>
         {STAGES.filter(s => s.key !== job.stage).map(s => (
           <button
             key={s.key}
             onClick={() => onMove(job.id, s.key)}
             style={{
-              fontFamily: dm, fontSize: 9, fontWeight: 600,
+              fontFamily: dm, fontSize: isMobile ? 9 : 9, fontWeight: 600,
               color: s.color, background: s.bg,
               border: `1px solid ${s.border}`,
-              borderRadius: 6, padding: '4px 8px',
+              borderRadius: 6, padding: isMobile ? '5px 8px' : '4px 8px',
               cursor: 'pointer', minHeight: 'auto',
               transition: 'all 0.15s',
+              flex: isMobile ? '1 1 calc(50% - 3px)' : 'none',
+              minWidth: isMobile ? 'calc(50% - 3px)' : 'auto',
+              maxWidth: isMobile ? 'calc(50% - 3px)' : 'none',
+              textAlign: 'center',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.background = s.color;
@@ -363,6 +392,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
 export default function ApplicationPipeline({ onUpgrade, userSchool = 'University of Florida', alumniCount = 847 }) {
   const [activeTab, setActiveTab] = useState('to_apply');
   const [isMobile, setIsMobile] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const [jobs, setJobs] = useState([
     { id: 1, title: 'Marketing Coordinator', company: 'TechCorp', stage: 'to_apply', url: '', location: 'Austin, TX', appliedDate: 'May 15', resumeVersion: 'Master_v2.pdf' },
     { id: 2, title: 'Growth Analyst Intern', company: 'Startup Co', stage: 'applied', url: '', location: 'Remote', appliedDate: 'May 12', resumeVersion: 'Startup_Tailored.pdf' },
@@ -381,6 +411,11 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Close sidebar when switching to desktop
+  useEffect(() => {
+    if (!isMobile) setShowSidebar(false);
+  }, [isMobile]);
 
   const totalJobs = jobs.length;
   const atLimit = totalJobs >= FREE_LIMIT;
@@ -416,21 +451,42 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
   };
 
   return (
-    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-      {/* School Pride Banner */}
-      <div style={{ padding: '16px 22px', background: '#f8fafc' }}>
+    <div style={{ 
+      background: '#fff', 
+      border: '1px solid #e5e7eb', 
+      borderRadius: isMobile ? 16 : 20, 
+      overflow: 'hidden', 
+      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+    }}>
+      {/* Mobile-first CSS resets */}
+      <style>{`
+        @media (max-width: 767px) {
+          * {
+            box-sizing: border-box;
+          }
+          body, html {
+            overflow-x: hidden;
+            width: 100%;
+          }
+        }
+      `}</style>
+      {/* School Pride Banner - Mobile Optimized */}
+      <div style={{ padding: isMobile ? '12px 16px' : '16px 22px', background: '#f8fafc' }}>
         <SchoolPrideBanner schoolName={userSchool} alumniCount={alumniCount} />
         
-        {/* Pipeline Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div>
-            <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#111827', margin: 0 }}>
+        {/* Pipeline Header - Stacks on mobile */}
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: isMobile ? 12 : 0, marginBottom: isMobile ? 12 : 12 }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontFamily: dm, fontSize: isMobile ? 14 : 15, fontWeight: 800, color: '#111827', margin: 0 }}>
               My Application Pipeline
             </p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#059669', margin: '3px 0 0', fontWeight: 600, letterSpacing: '0.02em' }}>
+            <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 11, color: '#059669', margin: '3px 0 0', fontWeight: 600, letterSpacing: '0.02em' }}>
               🐊 Synced Network: {userSchool} Alumni & Parent Grid Active
             </p>
-            <p style={{ fontFamily: dm, fontSize: 10, color: '#6b7280', margin: '3px 0 0' }}>
+            <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#6b7280', margin: '3px 0 0' }}>
               {totalJobs}/{FREE_LIMIT} jobs ·{' '}
               {atLimit
                 ? <span style={{ color: '#ef4444', fontWeight: 600 }}>Limit reached</span>
@@ -447,13 +503,14 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               }
             }}
             style={{
-              fontFamily: dm, fontSize: 13, fontWeight: 700,
+              fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 700,
               color: atLimit ? '#fff' : BLUE,
               background: atLimit ? 'linear-gradient(135deg, #ef4444, #dc2626)' : BLUE_LIGHT,
               border: `1px solid ${atLimit ? '#dc2626' : BLUE_BORDER}`,
-              borderRadius: 10, padding: '9px 16px',
+              borderRadius: 10, padding: isMobile ? '8px 14px' : '9px 16px',
               cursor: 'pointer', minHeight: 'auto',
               boxShadow: atLimit ? '0 4px 12px rgba(239,68,68,0.3)' : 'none',
+              width: isMobile ? '100%' : 'auto',
             }}
           >
             {atLimit ? '⚡ Unlock Unlimited' : '+ Add Job'}
@@ -461,16 +518,15 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         </div>
       </div>
 
-      {/* Tab Navigation - Responsive */}
+      {/* Tab Navigation - Mobile: Compact Top Tabs, Desktop: Full Width */}
       <div style={{
-        display: 'flex', gap: 0, borderBottom: '1px solid #e5e7eb',
-        overflowX: isMobile ? 'auto' : 'hidden',
-        scrollbarWidth: 'none', msOverflowStyle: 'none',
-        flexWrap: isMobile ? 'nowrap' : 'wrap',
+        display: 'flex',
+        gap: 0,
+        borderBottom: '1px solid #e5e7eb',
+        overflowX: 'hidden',
+        flexWrap: 'nowrap',
+        justifyContent: isMobile ? 'space-between' : 'stretch',
       }}>
-        <style>{`
-          div::-webkit-scrollbar { display: none; }
-        `}</style>
         {STAGES.map((stage) => {
           const count = jobs.filter(j => j.stage === stage.key).length;
           const isActive = activeTab === stage.key;
@@ -479,32 +535,34 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               key={stage.key}
               onClick={() => setActiveTab(stage.key)}
               style={{
-                flex: isMobile ? '0 0 auto' : '1 1 0',
-                padding: isMobile ? '10px 12px' : '12px 16px',
+                flex: 1,
+                padding: isMobile ? '10px 4px' : '12px 16px',
                 background: isActive ? stage.bg : '#fff',
-                borderBottom: isMobile ? `2px solid ${isActive ? stage.color : 'transparent'}` : `2px solid ${isActive ? stage.color : 'transparent'}`,
+                borderBottom: `2px solid ${isActive ? stage.color : 'transparent'}`,
                 border: 'none',
                 cursor: 'pointer',
                 minHeight: 'auto',
                 transition: 'all 0.2s',
                 whiteSpace: 'nowrap',
-                maxWidth: isMobile ? 'none' : 'none',
+                minWidth: isMobile ? '70px' : 'auto',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: isMobile ? 'center' : 'center' }}>
-                <span style={{ fontSize: isMobile ? 11 : 12 }}>{stage.icon}</span>
-                <p style={{
-                  fontFamily: dm, fontSize: isMobile ? 10 : 11, fontWeight: isActive ? 700 : 500,
-                  color: isActive ? stage.color : '#6b7280',
-                  margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em',
-                }}>
-                  {isMobile ? stage.label.substring(0, 3) : stage.label}
-                </p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: isMobile ? 12 : 13 }}>{stage.icon}</span>
+                  <p style={{
+                    fontFamily: dm, fontSize: isMobile ? 9 : 11, fontWeight: isActive ? 700 : 500,
+                    color: isActive ? stage.color : '#6b7280',
+                    margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em',
+                  }}>
+                    {isMobile ? stage.label.substring(0, 3).toUpperCase() : stage.label}
+                  </p>
+                </div>
                 <span style={{
-                  fontFamily: dm, fontSize: 9, fontWeight: 700,
+                  fontFamily: dm, fontSize: isMobile ? 8 : 9, fontWeight: 700,
                   color: isActive ? stage.color : '#9ca3af',
-                  background: isActive ? 'rgba(255,255,255,0.6)' : '#f3f4f6',
-                  borderRadius: '50%', width: 18, height: 18,
+                  background: isActive ? 'rgba(255,255,255,0.8)' : '#f3f4f6',
+                  borderRadius: '50%', width: isMobile ? 16 : 18, height: isMobile ? 16 : 18,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   {count}
@@ -515,49 +573,108 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         })}
       </div>
 
-      {/* Add Job Form */}
+      {/* Add Job Form - Mobile: Stacked inputs, Desktop: Inline */}
       {showAdd && (
-        <div style={{ padding: '16px 22px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+        <div style={{ padding: isMobile ? '12px 16px' : '16px 22px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 10 : 10, marginBottom: 10 }}>
             <input
               placeholder="Job title *"
               value={newTitle}
               onChange={e => setNewTitle(e.target.value)}
-              style={{ flex: '1 1 160px', fontFamily: dm, fontSize: 13, color: '#111827', background: '#fff', border: '1px solid #d1d5db', borderRadius: 8, padding: '9px 12px', outline: 'none' }}
+              style={{ 
+                flex: isMobile ? '1 1 100%' : '1 1 160px', 
+                fontFamily: dm, 
+                fontSize: isMobile ? 14 : 13, 
+                color: '#111827', 
+                background: '#fff', 
+                border: '1px solid #d1d5db', 
+                borderRadius: 8, 
+                padding: isMobile ? '10px 12px' : '9px 12px', 
+                outline: 'none',
+                width: isMobile ? '100%' : 'auto',
+                boxSizing: 'border-box',
+              }}
             />
             <input
               placeholder="Company"
               value={newCompany}
               onChange={e => setNewCompany(e.target.value)}
-              style={{ flex: '1 1 130px', fontFamily: dm, fontSize: 13, color: '#111827', background: '#fff', border: '1px solid #d1d5db', borderRadius: 8, padding: '9px 12px', outline: 'none' }}
+              style={{ 
+                flex: isMobile ? '1 1 100%' : '1 1 130px', 
+                fontFamily: dm, 
+                fontSize: isMobile ? 14 : 13, 
+                color: '#111827', 
+                background: '#fff', 
+                border: '1px solid #d1d5db', 
+                borderRadius: 8, 
+                padding: isMobile ? '10px 12px' : '9px 12px', 
+                outline: 'none',
+                width: isMobile ? '100%' : 'auto',
+                boxSizing: 'border-box',
+              }}
             />
             <input
               placeholder="Location"
               value={newLocation}
               onChange={e => setNewLocation(e.target.value)}
-              style={{ flex: '1 1 120px', fontFamily: dm, fontSize: 13, color: '#111827', background: '#fff', border: '1px solid #d1d5db', borderRadius: 8, padding: '9px 12px', outline: 'none' }}
+              style={{ 
+                flex: isMobile ? '1 1 100%' : '1 1 120px', 
+                fontFamily: dm, 
+                fontSize: isMobile ? 14 : 13, 
+                color: '#111827', 
+                background: '#fff', 
+                border: '1px solid #d1d5db', 
+                borderRadius: 8, 
+                padding: isMobile ? '10px 12px' : '9px 12px', 
+                outline: 'none',
+                width: isMobile ? '100%' : 'auto',
+                boxSizing: 'border-box',
+              }}
             />
             <input
               placeholder="Job URL (optional)"
               value={newUrl}
               onChange={e => setNewUrl(e.target.value)}
-              style={{ flex: '2 1 200px', fontFamily: dm, fontSize: 13, color: '#111827', background: '#fff', border: '1px solid #d1d5db', borderRadius: 8, padding: '9px 12px', outline: 'none' }}
+              style={{ 
+                flex: isMobile ? '1 1 100%' : '2 1 200px', 
+                fontFamily: dm, 
+                fontSize: isMobile ? 14 : 13, 
+                color: '#111827', 
+                background: '#fff', 
+                border: '1px solid #d1d5db', 
+                borderRadius: 8, 
+                padding: isMobile ? '10px 12px' : '9px 12px', 
+                outline: 'none',
+                width: isMobile ? '100%' : 'auto',
+                boxSizing: 'border-box',
+              }}
             />
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={addJob} style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 8, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto' }}>Save</button>
-            <button onClick={() => setShowAdd(false)} style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>Cancel</button>
+          <div style={{ display: 'flex', gap: 8, flexDirection: isMobile ? 'column' : 'row' }}>
+            <button onClick={addJob} style={{ 
+              fontFamily: dm, fontSize: isMobile ? 13 : 13, fontWeight: 700, 
+              color: '#fff', background: BLUE, border: 'none', 
+              borderRadius: 8, padding: isMobile ? '10px 18px' : '9px 18px', 
+              cursor: 'pointer', minHeight: 'auto',
+              flex: isMobile ? '1 1 100%' : 'none',
+            }}>Save</button>
+            <button onClick={() => setShowAdd(false)} style={{ 
+              fontFamily: dm, fontSize: isMobile ? 13 : 13, 
+              color: '#6b7280', background: 'none', border: 'none', 
+              cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline',
+              flex: isMobile ? '1 1 100%' : 'none',
+            }}>Cancel</button>
           </div>
         </div>
       )}
 
-      {/* Job Cards Feed - Responsive Layout */}
+      {/* Job Cards Feed - True Single Column on Mobile */}
       <div style={{ 
         padding: isMobile ? '12px 16px' : '16px 22px', 
         minHeight: 200,
-        display: isMobile ? 'block' : 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: isMobile ? '12px' : '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: isMobile ? 10 : 12,
       }}>
         {activeTabJobs.length > 0 ? (
           activeTabJobs.map(job => (
@@ -572,14 +689,14 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
           ))
         ) : (
           <div style={{
-            textAlign: 'center', padding: '40px 20px',
-            background: '#f8fafc', borderRadius: 12,
+            textAlign: 'center', padding: isMobile ? '30px 16px' : '40px 20px',
+            background: '#f8fafc', borderRadius: isMobile ? 10 : 12,
             border: '2px dashed #e2e8f0',
           }}>
-            <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: '#475569', margin: '0 0 4px' }}>
+            <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 14, fontWeight: 600, color: '#475569', margin: '0 0 4px' }}>
               No {activeStage?.label.toLowerCase()} yet
             </p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#94a3b8', margin: 0 }}>
+            <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 11, color: '#94a3b8', margin: 0 }}>
               {activeTab === 'to_apply' ? 'Jobs you mark will appear here' : 'Move jobs here as you progress'}
             </p>
           </div>
@@ -592,26 +709,150 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
           onClick={() => onUpgrade('Unlimited Tracking')}
           style={{
             background: 'linear-gradient(135deg, #fef2f2, #eff6ff)',
-            borderTop: '2px solid #fca5a5', padding: '16px 22px',
+            borderTop: '2px solid #fca5a5', padding: isMobile ? '12px 16px' : '16px 22px',
             cursor: 'pointer', transition: 'all 0.2s',
           }}
           onMouseEnter={e => e.currentTarget.style.background = 'linear-gradient(135deg, #fee2e2, #dbeafe)'}
           onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, #fef2f2, #eff6ff)'}
         >
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#991b1b', margin: '0 0 4px' }}>
+          <p style={{ fontFamily: dm, fontSize: isMobile ? 11 : 13, fontWeight: 700, color: '#991b1b', margin: '0 0 4px' }}>
             🚫 You've hit the manual limit.
           </p>
-          <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 10px', lineHeight: 1.5 }}>
+          <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 12, color: '#374151', margin: '0 0 10px', lineHeight: 1.5 }}>
             Stop tracking jobs by hand. Let our automated crawler track unlimited roles and find hidden listings before they hit job boards.
           </p>
           <span style={{
-            fontFamily: dm, fontSize: 13, fontWeight: 700,
+            fontFamily: dm, fontSize: isMobile ? 11 : 13, fontWeight: 700,
             color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-            borderRadius: 8, padding: '8px 18px', display: 'inline-block',
+            borderRadius: 8, padding: isMobile ? '6px 14px' : '8px 18px', display: 'inline-block',
             boxShadow: '0 4px 12px rgba(37,99,235,0.3)',
           }}>
             ⚡ Automate for $4.99/wk →
           </span>
+        </div>
+      )}
+
+      {/* Mobile Sidebar Toggle - Only visible on mobile */}
+      {isMobile && (
+        <div style={{
+          borderTop: '1px solid #e5e7eb',
+          padding: '12px 16px',
+          background: '#f8fafc',
+        }}>
+          <button
+            onClick={() => setShowSidebar(true)}
+            style={{
+              fontFamily: dm, fontSize: 12, fontWeight: 700,
+              color: BLUE, background: BLUE_LIGHT,
+              border: `1px solid ${BLUE_BORDER}`,
+              borderRadius: 8, padding: '10px 16px',
+              cursor: 'pointer', minHeight: 'auto',
+              width: '100%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}
+          >
+            📄 View Career Assets & Tools
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Bottom Sheet for Sidebar Widgets */}
+      {isMobile && showSidebar && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: '#fff',
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+          zIndex: 1000,
+          maxHeight: '85vh',
+          overflowY: 'auto',
+          animation: 'slideUp 0.3s ease-out',
+        }}>
+          <style>{`
+            @keyframes slideUp {
+              from { transform: translateY(100%); }
+              to { transform: translateY(0); }
+            }
+          `}</style>
+          
+          {/* Handle bar */}
+          <div style={{
+            padding: '12px',
+            display: 'flex',
+            justifyContent: 'center',
+            borderBottom: '1px solid #e5e7eb',
+          }}>
+            <div style={{
+              width: 40, height: 4,
+              background: '#cbd5e1',
+              borderRadius: 2,
+            }} />
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={() => setShowSidebar(false)}
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 8,
+              fontSize: 20,
+              color: '#64748b',
+            }}
+          >
+            ✕
+          </button>
+
+          {/* Sidebar content placeholder - in production, render actual widgets here */}
+          <div style={{ padding: '20px 16px 80px' }}>
+            <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 8 }}>
+              Career Tools
+            </p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', marginBottom: 16 }}>
+              My Career Assets · Alumni Outreach · Hiring Chat
+            </p>
+            
+            {/* Widget placeholders */}
+            {[
+              { icon: '📄', title: 'My Career Assets', desc: 'ATS Score, Ghost Monitor, Resumes' },
+              { icon: '🎓', title: 'Alumni Outreach', desc: 'Generate personalized scripts' },
+              { icon: '💬', title: 'Hiring Experts Chat', desc: 'Get instant career advice' },
+            ].map((widget, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 12,
+                  padding: '14px 16px',
+                  marginBottom: 12,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                onClick={() => onUpgrade(widget.title)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <span style={{ fontSize: 20 }}>{widget.icon}</span>
+                  <div>
+                    <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#1e293b', margin: 0 }}>
+                      {widget.title}
+                    </p>
+                    <p style={{ fontFamily: dm, fontSize: 10, color: '#64748b', margin: '4px 0 0' }}>
+                      {widget.desc}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
