@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const BLUE = '#2563eb';
@@ -197,8 +197,18 @@ function SchoolPrideBanner({ schoolName, alumniCount }) {
   );
 }
 
-function PipelineCard({ job, onMove, onRemove, onBypassGhost }) {
+function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing }) {
   const [showActions, setShowActions] = useState(false);
+  const [pulseActive, setPulseActive] = useState(isPulsing || false);
+
+  useEffect(() => {
+    if (isPulsing) {
+      setPulseActive(true);
+      // Pulse for 2 seconds then fade
+      const timer = setTimeout(() => setPulseActive(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isPulsing]);
   
   // Mock data - in production, calculate from email sync & activity
   const ghostRisk = job.stage === 'applied' ? Math.floor(Math.random() * 100) : 0;
@@ -208,13 +218,26 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost }) {
   return (
     <div
       style={{
-        background: '#fff', border: '2px solid #e2e8f0',
-        borderRadius: 14, padding: '14px 16px', marginBottom: 12,
-        transition: 'all 0.2s', position: 'relative',
+        background: '#fff',
+        border: pulseActive ? '2px solid #f59e0b' : '2px solid #e2e8f0',
+        borderRadius: 14,
+        padding: '14px 16px',
+        marginBottom: 12,
+        transition: 'all 0.2s',
+        position: 'relative',
+        boxShadow: pulseActive ? '0 0 0 4px rgba(245, 158, 11, 0.2), 0 4px 12px rgba(0,0,0,0.08)' : 'none',
+        animation: pulseActive ? 'cardPulse 0.8s ease-in-out' : 'none',
       }}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
+      <style>{`
+        @keyframes cardPulse {
+          0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+          50% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.1); }
+          100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+      `}</style>
       {/* Header */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
         <div style={{
