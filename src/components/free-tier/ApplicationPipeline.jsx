@@ -20,7 +20,7 @@ const SCHOOL_THEMES = {
   'default': { primary: BLUE, secondary: '#16a34a', name: 'Network' },
 };
 
-function GhostRiskGauge({ risk, companyName }) {
+function GhostRiskGauge({ risk, companyName, isMobile }) {
   // Don't show if risk is very low
   if (risk < 20) return null;
   
@@ -34,7 +34,7 @@ function GhostRiskGauge({ risk, companyName }) {
       emoji: '👻',
       label: 'Ghost Risk',
       reasonPhrase: `Recruiter activity paused at ${companyName}.`,
-      actionAdvice: 'We suggest applying but keeping your eyes open elsewhere.',
+      actionAdvice: 'We suggest applying but keep looking elsewhere.',
       barColor: '#ef4444',
       bgColor: '#fef2f2',
       borderColor: '#fca5a5',
@@ -71,22 +71,23 @@ function GhostRiskGauge({ risk, companyName }) {
     <div style={{
       background: data.bgColor,
       border: `1px solid ${data.borderColor}`,
-      borderRadius: 10, padding: '10px 12px', marginTop: 8,
+      borderRadius: isMobile ? 8 : 10, 
+      padding: isMobile ? '8px 10px' : '10px 12px',
     }}>
       {/* Header with percentage */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: data.textColor, margin: 0 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 4 : 6 }}>
+        <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 11, fontWeight: 700, color: data.textColor, margin: 0 }}>
           {data.emoji} {data.label}: {risk}%
         </p>
       </div>
       
       {/* Progress bar */}
       <div style={{
-        width: '100%', height: 4,
+        width: '100%', height: isMobile ? 3 : 4,
         background: '#e2e8f0',
         borderRadius: 100,
         overflow: 'hidden',
-        marginBottom: 8,
+        marginBottom: isMobile ? 6 : 8,
       }}>
         <div style={{
           width: `${risk}%`, height: '100%',
@@ -98,9 +99,9 @@ function GhostRiskGauge({ risk, companyName }) {
       
       {/* Contextual copy */}
       <p style={{
-        fontFamily: dm, fontSize: 10,
+        fontFamily: dm, fontSize: isMobile ? 8 : 10,
         color: data.subTextColor,
-        margin: 0, lineHeight: 1.5,
+        margin: 0, lineHeight: isMobile ? 1.4 : 1.5,
       }}>
         {data.reasonPhrase}{' '}
         <span style={{ fontWeight: 600, color: data.textColor }}>
@@ -111,10 +112,10 @@ function GhostRiskGauge({ risk, companyName }) {
       {/* Bypass button for high risk */}
       {isHigh && (
         <button style={{
-          fontFamily: dm, fontSize: 9, fontWeight: 700,
+          fontFamily: dm, fontSize: isMobile ? 8 : 9, fontWeight: 700,
           color: '#fff', background: '#E85D20', border: 'none',
-          borderRadius: 6, padding: '6px 12px', cursor: 'pointer',
-          minHeight: 'auto', marginTop: 8,
+          borderRadius: 6, padding: isMobile ? '5px 10px' : '6px 12px', cursor: 'pointer',
+          minHeight: 'auto', marginTop: isMobile ? 6 : 8,
           boxShadow: '0 2px 6px rgba(232,93,32,0.3)',
         }}>
           🎯 Bypass Silence →
@@ -197,7 +198,7 @@ function SchoolPrideBanner({ schoolName, alumniCount }) {
   );
 }
 
-function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing }) {
+function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobile }) {
   const [showActions, setShowActions] = useState(false);
   const [pulseActive, setPulseActive] = useState(isPulsing || false);
 
@@ -220,12 +221,12 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing }) {
       style={{
         background: '#fff',
         border: pulseActive ? '2px solid #f59e0b' : '2px solid #e2e8f0',
-        borderRadius: 14,
-        padding: '14px 16px',
-        marginBottom: 12,
+        borderRadius: isMobile ? 12 : 14,
+        padding: isMobile ? '12px' : '14px 16px',
+        marginBottom: isMobile ? 10 : 12,
         transition: 'all 0.2s',
         position: 'relative',
-        boxShadow: pulseActive ? '0 0 0 4px rgba(245, 158, 11, 0.2), 0 4px 12px rgba(0,0,0,0.08)' : 'none',
+        boxShadow: pulseActive ? '0 0 0 4px rgba(245, 158, 11, 0.2), 0 4px 12px rgba(0,0,0,0.08)' : isMobile ? '0 2px 8px rgba(0,0,0,0.06)' : '0 2px 8px rgba(0,0,0,0.04)',
         animation: pulseActive ? 'cardPulse 0.8s ease-in-out' : 'none',
       }}
       onMouseEnter={() => setShowActions(true)}
@@ -239,20 +240,20 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing }) {
         }
       `}</style>
       {/* Header */}
-      <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
+      <div style={{ display: 'flex', gap: isMobile ? 8 : 10, marginBottom: isMobile ? 8 : 8 }}>
         <div style={{
-          width: 40, height: 40, borderRadius: 10,
+          width: isMobile ? 36 : 40, height: isMobile ? 36 : 40, borderRadius: isMobile ? 8 : 10,
           background: '#f1f5f9', flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 18,
+          fontSize: isMobile ? 16 : 18,
         }}>
           🏢
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#1e293b', margin: '0 0 2px', lineHeight: 1.3 }}>
+          <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 700, color: '#1e293b', margin: '0 0 2px', lineHeight: 1.3 }}>
             {job.title}
           </p>
-          <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: 0 }}>
+          <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 11, color: '#64748b', margin: 0 }}>
             {job.company} {job.location && `· ${job.location}`}
           </p>
         </div>
@@ -298,16 +299,34 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing }) {
         )}
       </div>
       
-      {/* Email Sync Details */}
-      <EmailSyncBadge
-        synced={emailSynced}
-        date={job.appliedDate || 'recently'}
-        resumeName={job.resumeVersion}
-      />
+      {/* Email Sync Details - Enhanced for Applied stage */}
+      {job.stage === 'applied' && emailSynced && (
+        <div style={{
+          background: '#f8fafc', border: '1px solid #e2e8f0',
+          borderRadius: isMobile ? 6 : 8, padding: isMobile ? '6px 8px' : '8px', marginTop: 8,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <span style={{ fontSize: isMobile ? 11 : 12 }}>📩</span>
+            <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#475569', margin: 0, fontWeight: 500 }}>
+              Synced via Inbox {job.appliedDate && `(${job.appliedDate})`}
+            </p>
+          </div>
+          {job.resumeVersion && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: isMobile ? 10 : 11 }}>📄</span>
+              <p style={{ fontFamily: dm, fontSize: isMobile ? 8 : 9, color: '#64748b', margin: 0 }}>
+                {job.resumeVersion}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
       
-      {/* Ghost Risk */}
-      {job.stage === 'applied' && (
-        <GhostRiskGauge risk={ghostRisk} companyName={job.company} />
+      {/* Ghost Risk - Inline for Applied stage */}
+      {job.stage === 'applied' && ghostRisk >= 20 && (
+        <div style={{ marginTop: isMobile ? 8 : 10 }}>
+          <GhostRiskGauge risk={ghostRisk} companyName={job.company} isMobile={isMobile} />
+        </div>
       )}
       
       {/* Stage Actions */}
@@ -343,6 +362,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing }) {
 
 export default function ApplicationPipeline({ onUpgrade, userSchool = 'University of Florida', alumniCount = 847 }) {
   const [activeTab, setActiveTab] = useState('to_apply');
+  const [isMobile, setIsMobile] = useState(false);
   const [jobs, setJobs] = useState([
     { id: 1, title: 'Marketing Coordinator', company: 'TechCorp', stage: 'to_apply', url: '', location: 'Austin, TX', appliedDate: 'May 15', resumeVersion: 'Master_v2.pdf' },
     { id: 2, title: 'Growth Analyst Intern', company: 'Startup Co', stage: 'applied', url: '', location: 'Remote', appliedDate: 'May 12', resumeVersion: 'Startup_Tailored.pdf' },
@@ -353,6 +373,14 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
   const [newCompany, setNewCompany] = useState('');
   const [newUrl, setNewUrl] = useState('');
   const [newLocation, setNewLocation] = useState('');
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const totalJobs = jobs.length;
   const atLimit = totalJobs >= FREE_LIMIT;
@@ -399,7 +427,10 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
             <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#111827', margin: 0 }}>
               My Application Pipeline
             </p>
-            <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '2px 0 0' }}>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#059669', margin: '3px 0 0', fontWeight: 600, letterSpacing: '0.02em' }}>
+              🐊 Synced Network: {userSchool} Alumni & Parent Grid Active
+            </p>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#6b7280', margin: '3px 0 0' }}>
               {totalJobs}/{FREE_LIMIT} jobs ·{' '}
               {atLimit
                 ? <span style={{ color: '#ef4444', fontWeight: 600 }}>Limit reached</span>
@@ -430,10 +461,12 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         </div>
       </div>
 
-      {/* Mobile Tab Navigation */}
+      {/* Tab Navigation - Responsive */}
       <div style={{
         display: 'flex', gap: 0, borderBottom: '1px solid #e5e7eb',
-        overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none',
+        overflowX: isMobile ? 'auto' : 'hidden',
+        scrollbarWidth: 'none', msOverflowStyle: 'none',
+        flexWrap: isMobile ? 'nowrap' : 'wrap',
       }}>
         <style>{`
           div::-webkit-scrollbar { display: none; }
@@ -446,25 +479,26 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               key={stage.key}
               onClick={() => setActiveTab(stage.key)}
               style={{
-                flex: '0 0 auto',
-                padding: '12px 16px',
+                flex: isMobile ? '0 0 auto' : '1 1 0',
+                padding: isMobile ? '10px 12px' : '12px 16px',
                 background: isActive ? stage.bg : '#fff',
-                borderBottom: `2px solid ${isActive ? stage.color : 'transparent'}`,
+                borderBottom: isMobile ? `2px solid ${isActive ? stage.color : 'transparent'}` : `2px solid ${isActive ? stage.color : 'transparent'}`,
                 border: 'none',
                 cursor: 'pointer',
                 minHeight: 'auto',
                 transition: 'all 0.2s',
                 whiteSpace: 'nowrap',
+                maxWidth: isMobile ? 'none' : 'none',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 12 }}>{stage.icon}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: isMobile ? 'center' : 'center' }}>
+                <span style={{ fontSize: isMobile ? 11 : 12 }}>{stage.icon}</span>
                 <p style={{
-                  fontFamily: dm, fontSize: 11, fontWeight: isActive ? 700 : 500,
+                  fontFamily: dm, fontSize: isMobile ? 10 : 11, fontWeight: isActive ? 700 : 500,
                   color: isActive ? stage.color : '#6b7280',
                   margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em',
                 }}>
-                  {stage.label}
+                  {isMobile ? stage.label.substring(0, 3) : stage.label}
                 </p>
                 <span style={{
                   fontFamily: dm, fontSize: 9, fontWeight: 700,
@@ -517,8 +551,14 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         </div>
       )}
 
-      {/* Job Cards Feed */}
-      <div style={{ padding: '16px 22px', minHeight: 200 }}>
+      {/* Job Cards Feed - Responsive Layout */}
+      <div style={{ 
+        padding: isMobile ? '12px 16px' : '16px 22px', 
+        minHeight: 200,
+        display: isMobile ? 'block' : 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(320px, 1fr))',
+        gap: isMobile ? '12px' : '16px',
+      }}>
         {activeTabJobs.length > 0 ? (
           activeTabJobs.map(job => (
             <PipelineCard
@@ -527,6 +567,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               onMove={moveStage}
               onRemove={removeJob}
               onBypassGhost={(jobId) => console.log('Bypass ghost for', jobId)}
+              isMobile={isMobile}
             />
           ))
         ) : (
