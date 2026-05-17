@@ -5,6 +5,8 @@ const dm = "'DM Sans', system-ui, sans-serif";
 export default function OpportunityDrawer({ lead, onClose, onApplied, user, college, theme, parentCount }) {
   const t = theme || { primary: '#2563eb', secondary: '#1d4ed8', bgTint: '#eff6ff' };
   const shortName = t.shortName || college || 'your university';
+  const mascot = t.mascot || 'Gator';
+  const mascotSlang = t.mascotSlang || `${mascot}s`;
   const showParentTab = parentCount === null || parentCount >= 20;
 
   const [activeTab, setActiveTab] = useState('alumni');
@@ -13,11 +15,13 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
   const [copied, setCopied] = useState(false);
 
   const recruiterName = lead?.recruiter?.split(',')[0] || '[Name]';
-  const schoolRef = lead?.source?.includes('UF') ? 'UF' : shortName;
+  const userFirstName = user?.full_name?.split(' ')[0] || '[Your Name]';
+  const userMajor = user?.student_major || '[Your Major]';
+  const targetIndustry = user?.target_industries?.[0] || lead?.industry || '[Target Industry]';
 
   const alumniScript = `Hi ${recruiterName},\n\nI came across the ${lead?.role} opportunity at ${lead?.company} through the College Fast Forward alumni network. I was thrilled to see that ${lead?.source} — that connection immediately stood out.\n\nI'm a current ${shortName} student actively pursuing this type of role, and I'd love to connect briefly to learn more about the opportunity and share how my background aligns.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
 
-  const parentScript = `Hi [Parent Name],\n\nI'm a ${shortName} student and came across your name through the College Fast Forward parent network. I noticed your connection to ${lead?.company} and was hoping you might be open to a quick introduction.\n\nI'm pursuing a ${lead?.role} role and believe my background is a strong fit. Any guidance or a warm word would mean the world to me.\n\nThank you so much,\n${user?.full_name || '[Your Name]'}`;
+  const parentScript = `Subject: Connecting with a fellow ${mascot} / Opportunity at ${lead?.company}\n\nHi [Parent First Name],\n\nI hope you're having a great week! I'm a senior at ${shortName} studying ${userMajor}, and I'm currently preparing to launch my career in ${targetIndustry}.\n\nI came across the ${lead?.role} opening on your team at ${lead?.company}. I noticed your connection to the ${shortName} family and wanted to reach out. I know how incredibly supportive the ${mascot} parent network is when it comes to helping students find their footing.\n\nIf you have just 5 minutes sometime soon, I would be incredibly grateful to get your perspective on what it takes to stand out on the team at ${lead?.company}.\n\nGo ${mascotSlang}!\n\nBest,\n${userFirstName}`;
 
   const activeScript = activeTab === 'alumni' ? alumniScript : parentScript;
 
@@ -36,7 +40,9 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
     try { await navigator.clipboard.writeText(activeScript); } catch {}
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
-    const linkedinUrl = `https://www.linkedin.com/company/${encodeURIComponent(lead?.company?.toLowerCase().replace(/\s+/g, '-'))}/people/`;
+    const linkedinUrl = activeTab === 'parent' && lead?.parentLinkedInId
+      ? `https://www.linkedin.com/in/${lead.parentLinkedInId}/`
+      : `https://www.linkedin.com/company/${encodeURIComponent(lead?.company?.toLowerCase().replace(/\s+/g, '-'))}/people/`;
     window.open(linkedinUrl, '_blank');
   };
 
@@ -187,7 +193,12 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}
             >
-              {copied ? '✅ Copied! LinkedIn opened →' : '📋 Copy & Open LinkedIn Profile'}
+              {copied
+                ? '✅ Copied! LinkedIn opened →'
+                : activeTab === 'parent'
+                  ? '📋 Copy & Message Parent on LinkedIn'
+                  : '📋 Copy & Open LinkedIn Profile'
+              }
             </button>
           </div>
 
