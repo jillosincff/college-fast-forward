@@ -91,15 +91,12 @@ export default function FreeTierDashboard() {
   const isPremium = checkIsFastIQ(user);
   if (isPremium) {
     return (
-      <>
-        <FreeTierNav user={user} onUpgrade={() => {}} />
-        <PremiumDashboard
-          user={user}
-          parentCount={parentCount}
-          college={college}
-          theme={campusTheme}
-        />
-      </>
+      <PremiumDashboard
+        user={user}
+        parentCount={parentCount}
+        college={college}
+        theme={campusTheme}
+      />
     );
   }
 
