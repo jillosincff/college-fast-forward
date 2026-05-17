@@ -80,6 +80,53 @@ export default function FreeTierDashboard() {
   })();
   const campusTheme = getThemeForSchool(college);
 
+  // Dynamic empathy banner driven by onboarding blocker selection
+  const primaryBlocker = (() => {
+    try {
+      const stored = localStorage.getItem('cff_blockers');
+      return stored ? JSON.parse(stored)[0] : null;
+    } catch { return null; }
+  })();
+
+  const empathyMap = {
+    ghosted: {
+      text: "We know how deflating it is to get ghosted after applying. While you track applications here, our background agent is hunting for unadvertised roles to get you real replies.",
+      cta: '✨ Unlock the Backdoor Network',
+      feature: 'Backdoor Lead Signals',
+    },
+    outreach: {
+      text: "Cold-messaging strangers on LinkedIn is exhausting. We're mapping out your school's warm alumni connections below so you never have to guess what to write.",
+      cta: '✨ Unlock Warm Scripts',
+      feature: 'AI Outreach Generator',
+    },
+    resume: {
+      text: "Beating corporate ATS resume bots is a broken game. Drop a job description on the right to run your free match check — and see exactly what to fix.",
+      cta: '✨ Fix My Resume Instantly',
+      feature: 'Resume Wow Rewrite',
+    },
+    which_jobs: {
+      text: "Not knowing which roles to apply for wastes weeks. Your background agent is scanning for openings that actually match your profile — upgraded members see them first.",
+      cta: '✨ Unlock My Job Feed',
+      feature: 'Backdoor Lead Signals',
+    },
+    disorganized: {
+      text: "Losing track of where you applied is more common than you think. Use this board to stay organized — and upgrade to let the agent auto-log every application for you.",
+      cta: '✨ Unlock Auto-Tracking',
+      feature: 'Hiring CRM',
+    },
+    interviews: {
+      text: "Interview anxiety is real, but preparation kills it. Your free dashboard has a mock interview tool in the sidebar — upgrade to get instant AI feedback after every answer.",
+      cta: '✨ Unlock AI Interview Coach',
+      feature: 'Mock Interview Coach',
+    },
+  };
+
+  const empathy = empathyMap[primaryBlocker] || {
+    text: "Track your applications here while our agent works in the background on unadvertised roles and warm alumni connections.",
+    cta: '⚡ Upgrade to Premium — $4.99/wk',
+    feature: 'Premium Sprint',
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} />
@@ -87,21 +134,24 @@ export default function FreeTierDashboard() {
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px 80px' }}>
 
         {/* ── Welcome Banner ── */}
-        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '24px 28px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <div>
-            <h1 style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 22, fontWeight: 800, color: '#111827', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            <h1 style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
               Welcome back, {firstName} 👋
             </h1>
-            <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, color: '#6b7280', margin: 0 }}>
-              Free Tier · Track up to 5 applications manually
+            <button
+              onClick={() => triggerUpgrade(empathy.feature)}
+              style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              {empathy.cta}
+            </button>
+          </div>
+          {/* Dynamic Empathy Banner */}
+          <div style={{ borderLeft: `4px solid ${campusTheme.primary}`, background: `${campusTheme.bgTint || 'rgba(15,23,42,0.02)'}`, borderRadius: '0 10px 10px 0', padding: '12px 16px', marginTop: 16 }}>
+            <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.7 }}>
+              {empathy.text}
             </p>
           </div>
-          <button
-            onClick={() => triggerUpgrade('Premium Sprint')}
-            style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 14, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, whiteSpace: 'nowrap' }}
-          >
-            ⚡ Upgrade to Premium — $4.99/wk
-          </button>
         </div>
 
         {/* ── Main Grid ── */}
