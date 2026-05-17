@@ -200,9 +200,9 @@ const InputField = ({ label, placeholder, value, onChange, type = 'text', icon, 
   </div>
 );
 
-// Post-auth funnel screen map: blueprint steps 1→4→6→7→analyzing→done
-// When postAuth=true, we use a simplified 4-step flow (no resume upload, no LinkedIn, no paywall)
-const POST_AUTH_STEPS = [1, 4, 6, 7]; // Welcome, Goals, Roadblocks, University
+// Post-auth funnel: full flow including resume wow, LinkedIn, and plan
+// Screens: Welcome → Goals → Roadblocks → University → Resume Input → Resume Wow → LinkedIn → Plan
+const POST_AUTH_STEPS = [1, 4, 6, 7, 9, 10, 11, 12];
 
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false }) {
   const [screen, setScreen] = useState(1);
@@ -231,18 +231,14 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [targetRoles, setTargetRoles] = useState([]);
   const fileRef = useRef();
 
-  const TOTAL = postAuth ? POST_AUTH_STEPS.length : 10;
+  const TOTAL = postAuth ? POST_AUTH_STEPS.length : 12;
 
   // postAuth navigation helpers
   const postAuthNext = () => {
     const nextStep = postAuthStep + 1;
     if (nextStep >= POST_AUTH_STEPS.length) {
-      // After university — show analyzing loader, then complete
-      setAnalyzing(true);
-      setTimeout(() => {
-        setAnalyzing(false);
-        if (onClose) onClose();
-      }, 3500);
+      // Reached end of funnel — complete onboarding
+      if (onClose) onClose();
     } else {
       setPostAuthStep(nextStep);
       setScreen(POST_AUTH_STEPS[nextStep]);
@@ -773,8 +769,12 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           onCollegeChange={setCollege}
           onBack={back}
           onNext={() => {
-            // Trigger Google Auth right after school — highest-converting moment
-            saveAndAuth();
+            // postAuth: continue to resume input; pre-auth: trigger Google Auth
+            if (postAuth) {
+              next();
+            } else {
+              saveAndAuth();
+            }
           }}
           nextLabel="Continue →"
         />
