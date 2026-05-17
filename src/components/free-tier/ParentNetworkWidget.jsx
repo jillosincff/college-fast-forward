@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import ParentUnlockModal from './ParentUnlockModal';
+
 const dm = "'DM Sans', system-ui, sans-serif";
 
 const SAMPLE_PARENTS = [
@@ -51,10 +54,21 @@ function AvatarCluster() {
 export default function ParentNetworkWidget({ onUnlock, college, theme }) {
   const t = theme || { primary: '#1E293B', secondary: '#475569', bgTint: 'rgba(30,41,59,0.03)' };
   const shortName = t.shortName || college || 'Campus';
+  const [showModal, setShowModal] = useState(false);
+
+  const handleUnlock = () => setShowModal(true);
 
   return (
+    <>
+    {showModal && (
+      <ParentUnlockModal
+        onClose={() => setShowModal(false)}
+        theme={t}
+        college={college}
+      />
+    )}
     <div
-      onClick={onUnlock}
+      onClick={handleUnlock}
       style={{
         background: '#fff',
         border: `1px solid ${t.primary}`,
@@ -123,11 +137,12 @@ export default function ParentNetworkWidget({ onUnlock, college, theme }) {
             minHeight: 'auto',
             letterSpacing: '0.01em',
           }}
-          onClick={e => { e.stopPropagation(); onUnlock(); }}
+          onClick={e => { e.stopPropagation(); handleUnlock(); }}
         >
           ⚡ Unlock Parent Introductions
         </button>
       </div>
     </div>
+    </>
   );
 }
