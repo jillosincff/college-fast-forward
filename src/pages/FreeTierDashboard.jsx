@@ -12,9 +12,21 @@ export default function FreeTierDashboard() {
   const [user, setUser] = useState(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState('');
+  const [parentCount, setParentCount] = useState(null);
 
   useEffect(() => {
-    base44.auth.me().then(u => setUser(u)).catch(() => {});
+    base44.auth.me().then(u => {
+      setUser(u);
+      // Count parents matching this exact school — no regional fallbacks
+      const school = u?.school_code || u?.school || null;
+      if (school) {
+        base44.entities.User.filter({ persona: 'parent', school_code: school })
+          .then(results => setParentCount(results?.length ?? 0))
+          .catch(() => setParentCount(0));
+      } else {
+        setParentCount(0);
+      }
+    }).catch(() => {});
   }, []);
 
   const triggerUpgrade = (featureName) => {
@@ -100,12 +112,14 @@ export default function FreeTierDashboard() {
               </div>
             </div>
 
-            {/* Parent Network Widget */}
-            <ParentNetworkWidget
-              onUnlock={() => triggerUpgrade('Parent Network Introductions')}
-              college={college}
-              theme={campusTheme}
-            />
+            {/* Parent Network Widget — only shown when ≥20 parents from this exact school */}
+            {parentCount >= 20 && (
+              <ParentNetworkWidget
+                onUnlock={() => triggerUpgrade('Parent Network Introductions')}
+                college={college}
+                theme={campusTheme}
+              />
+            )}
 
             {/* Hiring Experts Chat */}
             <div
