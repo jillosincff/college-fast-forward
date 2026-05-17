@@ -51,15 +51,7 @@ function LeadCard({ lead, onOpen }) {
       <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '6px 10px', marginBottom: 8 }}>
         <p style={{ fontFamily: dm, fontSize: 11, color: '#16a34a', margin: 0, fontWeight: 600 }}>🔍 {lead.source}</p>
       </div>
-      <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '0 0 10px' }}>📋 {lead.posted}</p>
-      <div style={{ display: 'flex', gap: 6 }}>
-        <button style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 8, padding: '7px 0', cursor: 'pointer', minHeight: 'auto' }}>
-          ⚡ Auto-Apply
-        </button>
-        <button style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '7px 0', cursor: 'pointer', minHeight: 'auto' }}>
-          ✉️ Outreach Script
-        </button>
-      </div>
+      <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>📋 {lead.posted}</p>
     </div>
   );
 }
@@ -126,7 +118,7 @@ function LeadDetailModal({ lead, onClose }) {
   );
 }
 
-export default function PremiumPipeline({ theme }) {
+export default function PremiumPipeline({ theme, onLeadSelect }) {
   const t = theme || { primary: '#2563eb' };
   const [cards, setCards] = useState({
     'OPPORTUNITIES': BACKDOOR_LEADS,
@@ -135,6 +127,11 @@ export default function PremiumPipeline({ theme }) {
     'OFFER 🎉': [],
   });
   const [selectedLead, setSelectedLead] = useState(null);
+
+  const handleLeadOpen = (lead) => {
+    setSelectedLead(lead);
+    if (onLeadSelect) onLeadSelect(lead);
+  };
   const [newCard, setNewCard] = useState({ col: null, text: '' });
 
   const addCard = (col) => {
@@ -166,7 +163,7 @@ export default function PremiumPipeline({ theme }) {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
                   {col === 'OPPORTUNITIES'
-                    ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} onOpen={setSelectedLead} />)
+                    ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} onOpen={handleLeadOpen} />)
                     : cards[col].map((item, i) => (
                       <div key={i} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 14px' }}>
                         <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>{item.role}</p>

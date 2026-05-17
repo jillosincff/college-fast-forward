@@ -25,11 +25,13 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const t = theme || getThemeForSchool(college || 'UF');
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';
+  const [selectedLead, setSelectedLead] = useState(null);
 
+  const showParentStat = parentCount === null || parentCount >= 20;
   const stats = [
     { emoji: '🚀', label: '24/7 Active Crawlers', value: 'ON' },
     { emoji: '📄', label: 'Resume Match Target', value: '98%' },
-    { emoji: '🤝', label: `${shortName} Parents Online`, value: `${parentCount ?? 247}` },
+    ...(showParentStat ? [{ emoji: '🤝', label: `${shortName} Parents Online`, value: parentCount === null ? '247' : `${parentCount}` }] : []),
   ];
 
   return (
@@ -75,7 +77,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <PremiumPipeline theme={t} />
+            <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} />
             <PremiumSignalsFeed college={college} theme={t} />
           </div>
 
@@ -83,8 +85,8 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar">
             <PremiumCareerAssetsCard user={user} />
 
-            {/* Alumni Outreach Generator — fully unlocked */}
-            <PremiumAlumniOutreach college={college} theme={t} user={user} />
+            {/* Alumni Outreach Generator — fully unlocked, auto-populates on card click */}
+            <PremiumAlumniOutreach college={college} theme={t} user={user} selectedLead={selectedLead} />
 
             {/* Parent Network — unlocked if ≥20 parents */}
             {(parentCount === null || parentCount >= 20) && (
@@ -100,13 +102,23 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 }
 
 // Inline alumni outreach (unlocked version)
-function PremiumAlumniOutreach({ college, theme, user }) {
+function PremiumAlumniOutreach({ college, theme, user, selectedLead }) {
   const t = theme || { primary: '#2563eb', bgTint: '#eff6ff' };
   const shortName = t.shortName || college || 'your university';
   const [target, setTarget] = useState('');
   const [script, setScript] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Auto-populate script when a pipeline lead is selected
+  useEffect(() => {
+    if (!selectedLead) return;
+    const recruiterName = selectedLead.recruiter?.split(',')[0] || '[Name]';
+    const autoScript = `Hi ${recruiterName},\n\nI came across the ${selectedLead.role} opportunity at ${selectedLead.company} through the College Fast Forward alumni network. I'm a ${shortName} student actively pursuing this exact type of role, and was thrilled to see that ${selectedLead.source}.\n\nI'd love to connect briefly to learn more about the opportunity and share how my background aligns.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
+    setTarget(selectedLead.company);
+    setScript(autoScript);
+    setCopied(false);
+  }, [selectedLead]);
 
   const generate = async () => {
     if (!target.trim()) return;
