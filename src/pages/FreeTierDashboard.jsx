@@ -4,7 +4,7 @@ import UpgradeModal from '@/components/free-tier/UpgradeModal';
 import FreeTierNav from '@/components/free-tier/FreeTierNav';
 import ApplicationTracker from '@/components/free-tier/ApplicationPipeline';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
-import ResumeAtsTeaser from '@/components/free-tier/ResumeAtsTeaser';
+import CareerAssetsCard from '@/components/free-tier/CareerAssetsCard';
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import { getThemeForSchool } from '@/lib/campusThemes';
 
@@ -76,8 +76,8 @@ export default function FreeTierDashboard() {
           {/* ── Right Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar">
 
-            {/* Resume ATS Check */}
-            <ResumeAtsTeaser onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
+            {/* Career Assets (ATS Check + Premium assets) */}
+            <CareerAssetsCard onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
 
             {/* Alumni Outreach Generator — campus-themed */}
             <div
