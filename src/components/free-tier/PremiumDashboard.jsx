@@ -77,7 +77,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} />
+            <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} />
             <PremiumSignalsFeed college={college} theme={t} />
           </div>
 

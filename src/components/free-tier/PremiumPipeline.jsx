@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import OpportunityDrawer from './OpportunityDrawer';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -56,69 +57,9 @@ function LeadCard({ lead, onOpen }) {
   );
 }
 
-function LeadDetailModal({ lead, onClose }) {
-  const [copied, setCopied] = useState(false);
 
-  const script = `Hi ${lead.recruiter.split(',')[0]},\n\nI came across the ${lead.role} opportunity at ${lead.company} through the College Fast Forward alumni network. I'm a senior actively pursuing this exact type of role, and was thrilled to see that several ${lead.source.includes('UF') ? 'UF' : 'campus'} alumni are already on your team.\n\nI'd love to connect briefly to learn more about the opportunity and share how my background aligns.\n\nThank you for your time,\n[Your Name]`;
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(script);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    } catch { alert(script); }
-  };
-
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 20000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 20, padding: '28px 28px 24px', maxWidth: 460, width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.2)', animation: 'fadeUp 0.2s ease' }}>
-        <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 10, background: '#eff6ff', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>{lead.logo}</div>
-          <div>
-            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: '0 0 2px' }}>{lead.role}</p>
-            <p style={{ fontFamily: dm, fontSize: 13, color: '#2563eb', fontWeight: 600, margin: 0 }}>{lead.company}</p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
-          {[
-            { label: '🔍 Source', value: lead.source },
-            { label: '👤 Internal Contact', value: lead.recruiter },
-            { label: '📋 Listing Status', value: lead.posted },
-          ].map(row => (
-            <div key={row.label} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 14px', display: 'flex', gap: 10 }}>
-              <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', margin: 0, flexShrink: 0, minWidth: 120 }}>{row.label}</p>
-              <p style={{ fontFamily: dm, fontSize: 12, color: '#111827', margin: 0, lineHeight: 1.5 }}>{row.value}</p>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 14px', marginBottom: 14 }}>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Outreach Script</p>
-          <pre style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.7, maxHeight: 160, overflowY: 'auto' }}>{script}</pre>
-        </div>
-
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button
-            onClick={handleCopy}
-            style={{ flex: 1, fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: copied ? '#6b7280' : 'linear-gradient(135deg, #16a34a, #15803d)', border: 'none', borderRadius: 10, padding: '12px 0', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.2s' }}
-          >
-            {copied ? '✅ Copied!' : '📋 Copy Script'}
-          </button>
-          <button
-            onClick={onClose}
-            style={{ flex: 1, fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 10, padding: '12px 0', cursor: 'pointer', minHeight: 'auto' }}
-          >
-            ⚡ Auto-Apply
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function PremiumPipeline({ theme, onLeadSelect }) {
+export default function PremiumPipeline({ theme, onLeadSelect, user, college, parentCount }) {
   const t = theme || { primary: '#2563eb' };
   const [cards, setCards] = useState({
     'OPPORTUNITIES': BACKDOOR_LEADS,
@@ -132,6 +73,15 @@ export default function PremiumPipeline({ theme, onLeadSelect }) {
     setSelectedLead(lead);
     if (onLeadSelect) onLeadSelect(lead);
   };
+
+  const handleApplied = (lead) => {
+    setCards(prev => ({
+      ...prev,
+      'OPPORTUNITIES': prev['OPPORTUNITIES'].filter(l => l.company !== lead.company || l.role !== lead.role),
+      'APPLIED': [...prev['APPLIED'], lead],
+    }));
+    setSelectedLead(null);
+  };
   const [newCard, setNewCard] = useState({ col: null, text: '' });
 
   const addCard = (col) => {
@@ -142,7 +92,17 @@ export default function PremiumPipeline({ theme, onLeadSelect }) {
 
   return (
     <>
-      {selectedLead && <LeadDetailModal lead={selectedLead} onClose={() => setSelectedLead(null)} />}
+      {selectedLead && (
+        <OpportunityDrawer
+          lead={selectedLead}
+          onClose={() => setSelectedLead(null)}
+          onApplied={handleApplied}
+          user={user}
+          college={college}
+          theme={t}
+          parentCount={parentCount}
+        />
+      )}
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
