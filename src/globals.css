@@ -624,3 +624,13 @@ footer,
     overflow-y: auto;
   }
 }
+
+/* Free Tier Dashboard — responsive grid */
+@media (max-width: 1024px) {
+  .ftd-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .ftd-sidebar {
+    width: 100%;
+  }
+}

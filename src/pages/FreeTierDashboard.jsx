@@ -50,10 +50,10 @@ export default function FreeTierDashboard() {
         </div>
 
         {/* ── Main Grid ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 20, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="ftd-grid">
 
           {/* ── Left Column ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
             {/* Application Pipeline */}
             <ApplicationTracker onUpgrade={triggerUpgrade} />
@@ -64,7 +64,7 @@ export default function FreeTierDashboard() {
           </div>
 
           {/* ── Right Column ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar">
 
             {/* Resume ATS Check */}
             <ResumeAtsTeaser onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
@@ -88,9 +88,7 @@ export default function FreeTierDashboard() {
               <div style={{ padding: '16px 20px', opacity: 0.65, position: 'relative' }}>
                 <div style={{ background: '#f8f9fc', borderRadius: 10, padding: '12px 14px', marginBottom: 10 }}>
                   <p style={{ fontFamily: "'DM Sans', system-ui, sans-serif", fontSize: 12, fontWeight: 600, color: '#374151', margin: '0 0 6px', lineHeight: 1.5 }}>
-                    Hi Sarah, I noticed you graduated from <strong style={{ color: '#1d4ed8' }}>{college}</strong> and currently work as a Product Manager at{' '}
-                    <span style={{ background: '#e5e7eb', borderRadius: 3, padding: '0 6px', filter: 'blur(4px)', userSelect: 'none' }}>████████ Co</span>.
-                    {' '}I'm a senior at <strong style={{ color: '#1d4ed8' }}>{college}</strong> studying...
+                    Hi Sarah, I noticed you graduated from <strong style={{ color: '#1d4ed8' }}>{college}</strong> and currently work as a Product Manager at <span style={{ background: '#e5e7eb', borderRadius: 3, padding: '0 6px', filter: 'blur(4px)', userSelect: 'none' }}>████████ Co</span>. I'm a senior at <strong style={{ color: '#1d4ed8' }}>{college}</strong> studying...
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                     {[1, 2, 3].map((_, i) => (

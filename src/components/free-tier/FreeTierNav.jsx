@@ -8,7 +8,11 @@ export default function FreeTierNav({ user, onUpgrade }) {
           <div style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
             <span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span>
           </div>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 100, padding: '3px 10px' }}>Free</span>
+          {user?.fastiq_active || user?.membership_tier === 'premium' ? (
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#166534', background: '#dcfce7', border: '1px solid #86efac', borderRadius: 100, padding: '3px 10px' }}>Premium</span>
+          ) : (
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 100, padding: '3px 10px' }}>Free</span>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {user && (
