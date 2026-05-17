@@ -6,7 +6,9 @@ import ApplicationTracker from '@/components/free-tier/ApplicationPipeline';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 import CareerAssetsCard from '@/components/free-tier/CareerAssetsCard';
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
+import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
 import { getThemeForSchool } from '@/lib/campusThemes';
+import { checkIsFastIQ } from '@/utils/isFastIQ';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -69,16 +71,32 @@ export default function FreeTierDashboard() {
     }).catch(() => {});
   }, []);
 
-  const triggerUpgrade = (featureName) => {
-    setUpgradeFeature(featureName);
-    setShowUpgrade(true);
-  };
-
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const college = (() => {
     try { return localStorage.getItem('cff_college') || user?.school || 'your university'; } catch { return 'your university'; }
   })();
   const campusTheme = getThemeForSchool(college);
+
+  // Render premium dashboard if user has paid access
+  const isPremium = checkIsFastIQ(user);
+  if (user && isPremium) {
+    return (
+      <>
+        <FreeTierNav user={user} onUpgrade={() => {}} />
+        <PremiumDashboard
+          user={user}
+          parentCount={parentCount}
+          college={college}
+          theme={campusTheme}
+        />
+      </>
+    );
+  }
+
+  const triggerUpgrade = (featureName) => {
+    setUpgradeFeature(featureName);
+    setShowUpgrade(true);
+  };
 
   // Dynamic empathy banner driven by onboarding blocker selection
   const primaryBlocker = (() => {
