@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
+import { useAuth } from '@/lib/AuthContext';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -124,6 +125,7 @@ function StoriesCarousel() {
 export default function StudentLandingPage({ onParentClick }) {
   const [mounted, setMounted] = useState(false);
   const [showFunnel, setShowFunnel] = useState(false);
+  const { user, isLoadingAuth } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -136,7 +138,20 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  const go = () => setShowFunnel(true);
+  // Smart "Get Hired" handler — returning users go straight to their dashboard
+  const go = () => {
+    if (!isLoadingAuth && user && user.onboarding_completed) {
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        navigate('/ParentHome');
+      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+        navigate(user.alumni_intent === 'giving_help' ? '/AlumniHome' : '/FreeTierDashboard');
+      } else {
+        navigate('/FreeTierDashboard');
+      }
+    } else {
+      setShowFunnel(true);
+    }
+  };
 
   const parent = () => {
     if (onParentClick) { onParentClick(); return; }
@@ -183,7 +198,7 @@ export default function StudentLandingPage({ onParentClick }) {
           <button onClick={go} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 12px rgba(0,102,255,0.25)', transition: 'all 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-          >Get Started →</button>
+          >{!isLoadingAuth && user && user.onboarding_completed ? 'Go to Dashboard →' : 'Get Started →'}</button>
         </div>
       </nav>
 
