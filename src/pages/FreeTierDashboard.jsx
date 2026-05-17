@@ -156,7 +156,27 @@ export default function FreeTierDashboard() {
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px 80px' }}>
+      {/* Mobile-first responsive container */}
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px 80px' }} className="main-dashboard-container">
+        <style>{`
+          @media (max-width: 768px) {
+            .main-dashboard-container {
+              padding: 12px !important;
+            }
+            .ftd-grid {
+              grid-template-columns: 1fr !important;
+            }
+            .ftd-sidebar {
+              display: none !important;
+            }
+            .mobile-bottom-nav {
+              display: flex !important;
+            }
+            .desktop-only {
+              display: none !important;
+            }
+          }
+        `}</style>
 
         {/* ── Welcome Banner ── */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -179,6 +199,23 @@ export default function FreeTierDashboard() {
           </div>
         </div>
 
+        {/* ── School Pride Network Anchor ── */}
+        <div style={{ 
+          background: campusTheme.bgTint || '#eff6ff', 
+          border: `1px solid ${campusTheme.primary}33`, 
+          borderRadius: 12, 
+          padding: '14px 18px', 
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+        }}>
+          <span style={{ fontSize: 20 }}>🐊</span>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: campusTheme.primary, margin: 0 }}>
+            Synced: {college || 'UF'} Alumni & Parent Grid
+          </p>
+        </div>
+
         {/* ── Main Grid ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="ftd-grid">
 
@@ -188,8 +225,8 @@ export default function FreeTierDashboard() {
             <TeaserSignalsCard onUnlock={() => triggerUpgrade('Backdoor Lead Signals')} college={college} theme={campusTheme} />
           </div>
 
-          {/* ── Right Column ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar">
+          {/* ── Right Column (Desktop Only) ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar desktop-only">
 
             {/* Career Assets (ATS Check + Premium assets) */}
             <CareerAssetsCard onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
@@ -284,6 +321,22 @@ export default function FreeTierDashboard() {
           }}
         />
       )}
+
+      {/* Mobile Bottom Navigation */}
+      <div className="mobile-bottom-nav" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '12px 20px', gap: 12, boxShadow: '0 -2px 12px rgba(0,0,0,0.06)', zIndex: 999 }}>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: 8 }}>
+          <span style={{ fontSize: 20 }}>📋</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Pipeline</span>
+        </button>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
+          <span style={{ fontSize: 20 }}>📄</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Assets</span>
+        </button>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
+          <span style={{ fontSize: 20 }}>💬</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Chat</span>
+        </button>
+      </div>
     </div>
   );
 }

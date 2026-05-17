@@ -45,6 +45,15 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';
   const [selectedLead, setSelectedLead] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const showParentStat = parentCount === null || parentCount >= 20;
   const stats = [
@@ -57,10 +66,28 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
       <PremiumNav user={user} />
 
+      {/* Mobile-first responsive container */}
+      <style>{`
+        @media (max-width: 768px) {
+          .premium-dashboard-container {
+            padding: 12px !important;
+          }
+          .premium-ftd-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .premium-ftd-sidebar {
+            display: none !important;
+          }
+          .premium-mobile-bottom-nav {
+            display: flex !important;
+          }
+        }
+      `}</style>
+
       {/* ── Premium Welcome Banner ── */}
       <div style={{
         background: `linear-gradient(135deg, #0A0A0A 0%, #0d1a3a 50%, ${t.primary}33 100%)`,
-        padding: '28px 24px 32px',
+        padding: isMobile ? '20px 16px 24px' : '28px 24px 32px',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -91,9 +118,27 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
         </div>
       </div>
 
+      {/* ── School Pride Network Anchor ── */}
+      <div style={{ 
+        background: t.bgTint || '#eff6ff', 
+        border: `1px solid ${t.primary}33`, 
+        borderRadius: 12, 
+        padding: isMobile ? '12px 16px' : '14px 20px', 
+        margin: isMobile ? '16px 0 16px' : '24px auto 24px',
+        maxWidth: 1100,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+      }}>
+        <span style={{ fontSize: 20 }}>🐊</span>
+        <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: t.primary, margin: 0 }}>
+          Synced: {college || 'UF'} Alumni & Parent Grid
+        </p>
+      </div>
+
       {/* ── Main Content ── */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '28px 20px 80px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="ftd-grid">
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="premium-ftd-grid">
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -101,8 +146,8 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
             <PremiumSignalsFeed college={college} theme={t} />
           </div>
 
-          {/* Right Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar">
+          {/* Right Column (Desktop Only) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="premium-ftd-sidebar desktop-only">
             <PremiumCareerAssetsCard user={user} />
 
             {/* Alumni Outreach Generator — fully unlocked, auto-populates on card click */}
@@ -116,6 +161,22 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
             <PremiumHiringChat user={user} />
           </div>
         </div>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="premium-mobile-bottom-nav" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '12px 20px', gap: 12, boxShadow: '0 -2px 12px rgba(0,0,0,0.06)', zIndex: 999 }}>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: 8 }}>
+          <span style={{ fontSize: 20 }}>📋</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Pipeline</span>
+        </button>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
+          <span style={{ fontSize: 20 }}>📄</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Assets</span>
+        </button>
+        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
+          <span style={{ fontSize: 20 }}>💬</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Chat</span>
+        </button>
       </div>
     </div>
   );
