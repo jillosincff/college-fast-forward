@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import UpgradeModal from '@/components/free-tier/UpgradeModal';
 import FreeTierNav from '@/components/free-tier/FreeTierNav';
-import ApplicationTracker from '@/components/free-tier/ApplicationPipeline';
+import ApplicationTracker from '@/components/free-tier/ApplicationPipeline?v=2';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 import CareerAssetsCard from '@/components/free-tier/CareerAssetsCard';
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
