@@ -20,36 +20,104 @@ const SCHOOL_THEMES = {
   'default': { primary: BLUE, secondary: '#16a34a', name: 'Network' },
 };
 
-function GhostRiskBadge({ risk, companyName }) {
-  if (risk < 40) return null;
+function GhostRiskGauge({ risk, companyName }) {
+  // Don't show if risk is very low
+  if (risk < 20) return null;
   
-  const isHigh = risk >= 70;
-  const isMedium = risk >= 40 && risk < 70;
+  const isHigh = risk >= 75;
+  const isMedium = risk >= 40 && risk < 75;
+  const isLow = risk >= 20 && risk < 40;
+  
+  // Dynamic copy based on risk level
+  const copyData = {
+    high: {
+      emoji: '👻',
+      label: 'Ghost Risk',
+      reasonPhrase: `Recruiter activity paused at ${companyName}.`,
+      actionAdvice: 'We suggest applying but keeping your eyes open elsewhere.',
+      barColor: '#ef4444',
+      bgColor: '#fef2f2',
+      borderColor: '#fca5a5',
+      textColor: '#991b1b',
+      subTextColor: '#7f1d1d',
+    },
+    medium: {
+      emoji: '⚠️',
+      label: 'Ghost Risk',
+      reasonPhrase: 'Application viewed by HR, but no interview invites sent this week.',
+      actionAdvice: 'Keep your pipeline moving!',
+      barColor: '#f59e0b',
+      bgColor: '#fffbeb',
+      borderColor: '#fcd34d',
+      textColor: '#92400e',
+      subTextColor: '#78350f',
+    },
+    low: {
+      emoji: '✅',
+      label: 'Ghost Risk',
+      reasonPhrase: `${companyName} is actively interviewing for this role right now.`,
+      actionAdvice: 'Stand by your inbox.',
+      barColor: '#16a34a',
+      bgColor: '#f0fdf4',
+      borderColor: '#86efac',
+      textColor: '#166534',
+      subTextColor: '#14532d',
+    },
+  };
+  
+  const data = isHigh ? copyData.high : isMedium ? copyData.medium : copyData.low;
   
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 6,
-      background: isHigh ? '#fef2f2' : isMedium ? '#fffbeb' : '#f0fdf4',
-      border: `1px solid ${isHigh ? '#fca5a5' : isMedium ? '#fcd34d' : '#86efac'}`,
-      borderRadius: 8, padding: '8px 10px', marginTop: 8,
+      background: data.bgColor,
+      border: `1px solid ${data.borderColor}`,
+      borderRadius: 10, padding: '10px 12px', marginTop: 8,
     }}>
-      <span style={{ fontSize: 14 }}>{isHigh ? '👻' : isMedium ? '⚠️' : '✅'}</span>
-      <div style={{ flex: 1 }}>
-        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: isHigh ? '#991b1b' : isMedium ? '#92400e' : '#166534', margin: 0 }}>
-          {isHigh ? 'HIGH GHOST RISK' : isMedium ? 'MODERATE GHOST RISK' : 'LOW RISK'}
-        </p>
-        <p style={{ fontFamily: dm, fontSize: 10, color: isHigh ? '#7f1d1d' : isMedium ? '#78350f' : '#14532d', margin: '2px 0 0' }}>
-          {risk}% · {isHigh ? 'Recruiter activity paused' : isMedium ? 'Slow response pattern' : 'Recruiter active'}
+      {/* Header with percentage */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: data.textColor, margin: 0 }}>
+          {data.emoji} {data.label}: {risk}%
         </p>
       </div>
+      
+      {/* Progress bar */}
+      <div style={{
+        width: '100%', height: 4,
+        background: '#e2e8f0',
+        borderRadius: 100,
+        overflow: 'hidden',
+        marginBottom: 8,
+      }}>
+        <div style={{
+          width: `${risk}%`, height: '100%',
+          background: data.barColor,
+          borderRadius: 100,
+          transition: 'width 0.3s ease',
+        }} />
+      </div>
+      
+      {/* Contextual copy */}
+      <p style={{
+        fontFamily: dm, fontSize: 10,
+        color: data.subTextColor,
+        margin: 0, lineHeight: 1.5,
+      }}>
+        {data.reasonPhrase}{' '}
+        <span style={{ fontWeight: 600, color: data.textColor }}>
+          {data.actionAdvice}
+        </span>
+      </p>
+      
+      {/* Bypass button for high risk */}
       {isHigh && (
         <button style={{
           fontFamily: dm, fontSize: 9, fontWeight: 700,
           color: '#fff', background: '#E85D20', border: 'none',
-          borderRadius: 6, padding: '4px 8px', cursor: 'pointer',
-          minHeight: 'auto', whiteSpace: 'nowrap',
+          borderRadius: 6, padding: '6px 12px', cursor: 'pointer',
+          minHeight: 'auto', marginTop: 8,
+          boxShadow: '0 2px 6px rgba(232,93,32,0.3)',
         }}>
-          🎯 Bypass
+          🎯 Bypass Silence →
         </button>
       )}
     </div>
@@ -216,7 +284,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost }) {
       
       {/* Ghost Risk */}
       {job.stage === 'applied' && (
-        <GhostRiskBadge risk={ghostRisk} companyName={job.company} />
+        <GhostRiskGauge risk={ghostRisk} companyName={job.company} />
       )}
       
       {/* Stage Actions */}
