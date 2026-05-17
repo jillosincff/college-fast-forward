@@ -49,9 +49,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(232,93,32,0.2)', border: '1px solid rgba(232,93,32,0.4)', borderRadius: 100, padding: '4px 14px', marginBottom: 16 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#E85D20', boxShadow: '0 0 6px rgba(232,93,32,0.8)' }} />
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#E85D20', letterSpacing: '0.1em', textTransform: 'uppercase' }}>FastIQ Premium Active</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(37,99,235,0.35)', borderRadius: 100, padding: '4px 14px', marginBottom: 16 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb', boxShadow: '0 0 6px rgba(37,99,235,0.8)' }} />
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#60a5fa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>CFF Sprint Active</span>
           </div>
 
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
