@@ -91,29 +91,37 @@ function LeadCard({ lead, onOpen, columnId }) {
       )}
       
       {columnId === 'applied' && (
-        <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-            <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📅 Applied: {lead.appliedDate ? new Date(lead.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Auto-detecting...'}</p>
-            {lead.tailoredResume && (
-              <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📄 Version: {lead.tailoredResume.fileName.replace('.pdf', '').split('_').pop() || 'Tailored'}</p>
-            )}
-          </div>
-          <p style={{ fontFamily: dm, fontSize: 9, color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#e2e8f0', display: 'inline-block' }} />
-            Email Agent Syncing...
-          </p>
-        </>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📩 Tracked via Inbox • {lead.appliedDate ? new Date(lead.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Auto-detecting...'}</p>
+          {lead.tailoredResume && (
+            <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📄 Version: {lead.tailoredResume.fileName.replace('.pdf', '').split('_').pop() || 'Master'}</p>
+          )}
+          {lead.ghostRisk && (
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '6px 8px', marginTop: 2 }}>
+              <p style={{ fontFamily: dm, fontSize: 9, color: '#dc2626', margin: 0, fontWeight: 600 }}>👻 Ghost Risk: {lead.ghostRisk}%</p>
+              <p style={{ fontFamily: dm, fontSize: 8, color: '#991b1b', margin: '2px 0 0' }}>Recruiter activity paused. Keep looking elsewhere.</p>
+            </div>
+          )}
+        </div>
       )}
       
       {columnId === 'interviewing' && (
-        <div style={{ background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 6, padding: '6px 10px' }}>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#7c3aed', margin: 0, fontWeight: 600 }}>📅 {lead.interviewRound || 'Round 1'}: {lead.interviewDate ? new Date(lead.interviewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 6, padding: '6px 10px' }}>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#7c3aed', margin: 0, fontWeight: 700 }}>📅 {lead.interviewRound || 'Round 1'}: {lead.interviewDate ? new Date(lead.interviewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}</p>
+          </div>
+          {lead.tailoredResume && (
+            <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0, textDecoration: 'underline', cursor: 'pointer' }}>📄 Sent Asset: {lead.tailoredResume.fileName.replace('.pdf', '').split('_').pop() || 'Master'}</p>
+          )}
         </div>
       )}
       
       {columnId === 'offer' && (
-        <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '6px 10px' }}>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#15803d', margin: 0, fontWeight: 700 }}>🎉 Offer Unlocked</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '6px 10px' }}>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#15803d', margin: 0, fontWeight: 700 }}>💰 Offer Received</p>
+          </div>
+          <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0, textDecoration: 'underline', cursor: 'pointer' }}>📈 View Salary Negotiation Comp Data</p>
         </div>
       )}
     </div>
