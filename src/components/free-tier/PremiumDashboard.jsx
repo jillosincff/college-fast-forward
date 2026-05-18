@@ -218,7 +218,8 @@ function PremiumAlumniOutreach({ college, theme, user, selectedLead }) {
   useEffect(() => {
     if (!selectedLead) return;
     const recruiterName = formatGreetingName(selectedLead.recruiter?.split(',')[0]);
-    const autoScript = `Hi ${recruiterName},\n\nI came across the ${selectedLead.role} opportunity at ${selectedLead.company} through the College Fast Forward alumni network. I'm a ${shortName} student actively pursuing this exact type of role, and was thrilled to see that ${selectedLead.source}.\n\nI'd love to connect briefly to learn more about the opportunity and share how my background aligns.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
+    const alumCount = selectedLead.alumCount || 5;
+    const autoScript = `Hi ${recruiterName},\n\nI came across the ${selectedLead.role} opportunity at ${selectedLead.company} through College Fast Forward. Seeing that there is a strong community of ${alumCount} ${shortName} alumni on the team — that connection immediately stood out to me.\n\nI'm a current ${shortName} student actively pursuing this type of role, and I'd love to connect briefly to learn more about the opportunity and what it's like to transition from campus to the team.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
     setTarget(selectedLead.company);
     setScript(autoScript);
     setCopied(false);
