@@ -30,7 +30,7 @@ function PremiumNav({ user }) {
 
 function StatPill({ emoji, label, value, theme }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '12px 18px', flex: 1, minWidth: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '12px 18px', flex: '1 1 0', minWidth: 0 }}>
       <span style={{ fontSize: 22, flexShrink: 0 }}>{emoji}</span>
       <div style={{ minWidth: 0 }}>
         <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</p>
@@ -58,8 +58,8 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const showParentStat = parentCount === null || parentCount >= 20;
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'FULLY DEPLOYED' },
-    { emoji: '🎯', label: 'Resume Match', value: '98% (ATS Proof)' },
-    { emoji: '🐊', label: 'Synced Network', value: `${shortName} Network Active` },
+    { emoji: '🎯', label: 'Resume Match', value: '98% ATS Proof' },
+    { emoji: '🐊', label: 'Synced Network', value: `${shortName} Active` },
   ];
 
   return (

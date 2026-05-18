@@ -241,7 +241,8 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} className="pipeline-scroll">
+          <style>{`.pipeline-scroll::-webkit-scrollbar { display: none; }`}</style>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(200px, 1fr))', gap: 0, minWidth: 720 }}>
             {COLUMNS.map((col, ci) => (
               <div key={col} style={{ borderRight: ci < 3 ? '1px solid #f3f4f6' : 'none', padding: '14px 14px 16px' }}>
