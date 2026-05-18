@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Fast Forward - Technical Specifications</title>
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --accent-color: #4f46e5;
+            --text-color: #333333;
+            --bg-light: #f9fafb;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px;
+            background-color: #ffffff;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: Georgia, serif;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-family: Georgia, serif;
+            font-size: 1.75rem;
+            color: var(--primary-color);
+            margin-top: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: 20px;
+        }
+
+        p, li {
+            font-size: 1rem;
+            color: #4b5563;
+        }
+
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: var(--bg-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+
+        pre {
+            background-color: var(--bg-light);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--bg-light);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+            z-index: 999;
+        }
+        .print-btn:hover { background: #4338ca; }
+
+        .page-break { page-break-before: always; }
+
+        @media print {
+            body { padding: 0; }
+            .container { max-width: 100%; }
+            pre { white-space: pre-wrap; word-wrap: break-word; }
+            .print-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+<div class="container">
+    <h1>College Fast Forward: Product Architecture &amp; Technical Specifications</h1>
+    <p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Status:</strong> Approved for Implementation</p>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 30px 0;">
+
+    <h2>1. Live Career Signals Feed vs. Application Pipeline</h2>
+    <p>To prevent user fatigue from high-velocity data ingestion, the architecture strictly decouples the asynchronous discovery feed from actionable tracking columns.</p>
+
+    <h3>Ingestion Layer (Signals Feed)</h3>
+    <ul>
+        <li><strong>Behavior:</strong> Real-time background processing engine aggregates hiring signals, recruiter profile views, and structural company changes.</li>
+        <li><strong>State Mutability:</strong> Events in the feed are transient, read-only instances until explicit user graduation occurs.</li>
+    </ul>
+
+    <h3>Action Layer (Application Pipeline)</h3>
+    <ul>
+        <li><strong>Behavior:</strong> A strict state-machine tracking active application progress (e.g., <em>Staging, Applied, Interviewing, Offered</em>).</li>
+        <li><strong>Transition:</strong> Upgrading a transient signal creates a persistent entry in the primary application state database, triggering the generation of localized outreach workflows.</li>
+    </ul>
+
+    <h2>2. Inline Log Accordion State Management</h2>
+    <p>The <code>"Reveal ›"</code> interface element expands inline table rows to showcase underlying metadata verification logs (e.g., verifying private staging directories or logging back-office interactions).</p>
+
+    <h3>Frontend State Blueprint (React/TypeScript)</h3>
+    <pre><code>interface AccordionState {
+  expandedRowId: string | null;
+  isLoadingMetadata: boolean;
+  activeLogs: VerificationLog[];
+}
+
+// State transition rule:
+const handleToggleRow = async (rowId: string) => {
+  if (expandedRowId === rowId) {
+    setExpandedRowId(null);
+  } else {
+    setExpandedRowId(rowId);
+    await fetchRowMetadata(rowId);
+  }
+};</code></pre>
+
+    <div class="page-break"></div>
+
+    <h2>3. Dynamic Network Relevancy Suite</h2>
+    <p>Calculates the optimal internal organizational path within a target enterprise to surface high-conversion warm connections.</p>
+
+    <h3>Algorithmic Weighting Function</h3>
+    <p>The structural strength score (R_score) of a given company contact is evaluated using the following matrix parameters:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter Variable</th>
+                <th>Target Metric Category</th>
+                <th>Assigned Weight (W)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>D_align</code></td>
+                <td>Departmental Alignment (e.g., Engineering, Product)</td>
+                <td>40%</td>
+            </tr>
+            <tr>
+                <td><code>S_bond</code></td>
+                <td>Institutional Bond Affinity (Alumni/Affiliate status)</td>
+                <td>35%</td>
+            </tr>
+            <tr>
+                <td><code>P_prox</code></td>
+                <td>Network Proximity &amp; Hierarchy Level</td>
+                <td>25%</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Visual Pinning &amp; Variant Script Logic</h3>
+    <ul>
+        <li><strong>Fire Pin Trigger:</strong> A <code>🔥</code> icon is programmatically appended to rows where R_score ≥ 0.85. This automatically pins the asset to the top of the user dashboard view.</li>
+        <li><strong>Variant Copy Delivery:</strong> Contacts with the <code>🔥</code> pin bypass standard icebreakers and are assigned the <em>High-Affinity Fire Script</em>. Lower-scoring nodes are assigned the standard <em>Culture-Focus Script</em>.</li>
+    </ul>
+
+    <h2>4. Pre-Flight Application Sanity Gates</h2>
+    <p>Guards against mistaken submittals during heavy automation cycles by inserting synchronous system validations before irreversible external actions take place.</p>
+
+    <h3>Workflow Sequence</h3>
+    <ol>
+        <li>User executes an action that triggers an auto-submit sequence.</li>
+        <li>The system halts execution and forces rendering of the <strong>Asynchronous Resume Tailoring Preview</strong>.</li>
+        <li>The frontend displays a side-by-side match variance comparison.</li>
+        <li>User confirmation dispatches an absolute confirmation interceptor modal, which exposes the structural warning gates prior to final external delivery.</li>
+    </ol>
+
+    <h2>5. Onboarding Segments &amp; Archetype Paywall</h2>
+    <p>Optimizes new user conversions by routing profile setups based on immediate structural confidence metrics.</p>
+
+    <h3>Funnel Architecture</h3>
+    <ul>
+        <li><strong>Determined Segment:</strong> Users with explicit career intent immediately skip discovery modules and launch straight into baseline profile construction.</li>
+        <li><strong>Undecided Segment (Archetype Test):</strong> Users missing targeted intent pass through the comprehensive <em>Career Archetype Assessment</em>.</li>
+        <li><strong>Teaser Monetization Gate:</strong> Upon test completion, primary archetype titles are exposed for free. Granular sub-metric breakdowns, matching structural roles, and direct industry network lists are locked behind a <strong>$4.99/week conversion screen</strong>.</li>
+    </ul>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 40px 0 20px 0;">
+    <p style="text-align:center; font-size: 0.85rem; color: #9ca3af; font-style: italic;">
+        College Fast Forward — Technical Specifications v1.0.0 — Approved for Implementation
+    </p>
+</div>
+
+</body>
+</html>
