@@ -7,6 +7,8 @@ import ATSScoreRing from './ATSScoreRing';
 import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
 import IndustryScreen from './IndustryScreen';
+import ArchetypeAssessment from './ArchetypeAssessment';
+import ArchetypeUnlockScreen from './ArchetypeUnlockScreen';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -57,6 +59,13 @@ const BLOCKERS = [
     label: "I'm getting ghosted after applying",
     solution: "Switch to our verified 'Fast Track' job feed.",
     tool: 'Fast Track Feed',
+  },
+  {
+    key: 'no_direction',
+    icon: '🧩',
+    label: "I'm not exactly sure what I want to do yet",
+    solution: "Unlock your Career Archetype to discover your ideal path.",
+    tool: 'Career Archetype Assessment',
   },
   {
     key: 'which_jobs',
@@ -255,8 +264,23 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const next = () => postAuth ? postAuthNext() : setScreen(s => s + 1);
   const back = () => postAuth ? postAuthBack() : setScreen(s => s - 1);
 
+  const [showArchetypeAssessment, setShowArchetypeAssessment] = useState(false);
+  const [archetypeResult, setArchetypeResult] = useState(null);
+
   const toggleBlocker = (key) => {
+    // If selecting 'no_direction', trigger archetype assessment immediately
+    if (key === 'no_direction' && !blockers.includes(key)) {
+      setShowArchetypeAssessment(true);
+      return;
+    }
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
+  };
+
+  const handleArchetypeComplete = (result) => {
+    setArchetypeResult(result);
+    setShowArchetypeAssessment(false);
+    // Continue onboarding after assessment
+    next();
   };
 
   const handleCollegeInput = (val) => {
@@ -437,8 +461,41 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         </>
       )}
 
+      {/* ── Archetype Assessment Modal ── */}
+      {showArchetypeAssessment && (
+        <div style={{ position: 'fixed', inset: 0, background: BG, zIndex: 15000, overflowY: 'auto', padding: '60px 24px' }}>
+          <button
+            onClick={() => setShowArchetypeAssessment(false)}
+            style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW, zIndex: 15001 }}
+          >
+            ✕
+          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', justifyContent: 'center' }}>
+            <ArchetypeAssessment onComplete={handleArchetypeComplete} onBack={() => setShowArchetypeAssessment(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* ── Archetype Unlock Paywall (after assessment) ── */}
+      {archetypeResult && !showArchetypeAssessment && (
+        <div style={{ ...shell, zIndex: 16000 }}>
+          <button
+            onClick={() => { setArchetypeResult(null); setBlockers(prev => prev.filter(k => k !== 'no_direction')); }}
+            style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW, zIndex: 16001 }}
+          >
+            ✕
+          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', justifyContent: 'center' }}>
+            <ArchetypeUnlockScreen
+              archetypeResult={archetypeResult}
+              userFirstName={firstName}
+            />
+          </div>
+        </div>
+      )}
+
       {/* ── Screen Transition Wrapper ── */}
-      {!analyzing && <FunnelTransition screenKey={screen}>
+      {!analyzing && !showArchetypeAssessment && !archetypeResult && <FunnelTransition screenKey={screen}>
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (

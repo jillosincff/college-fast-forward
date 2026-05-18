@@ -1,107 +1,145 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+
+const ARCHETYPE_MAPPING = {
+  analyzing_independent_mastery: {
+    archetype: 'The Analyst',
+    description: 'You excel at deep technical work, breaking down complex systems, and becoming a subject matter expert. Think data scientist, quantitative analyst, or research scientist.',
+    top_industries: ['Technology & Software', 'Finance & FinTech', 'Research & Academia'],
+    ideal_roles: ['Data Scientist', 'Quantitative Analyst', 'Research Scientist', 'Business Intelligence Analyst'],
+    strengths: ['Critical thinking', 'Pattern recognition', 'Independent problem-solving', 'Technical mastery'],
+    blind_spots: ['May avoid leadership roles', 'Can over-analyze decisions', 'Prefers working alone'],
+  },
+  analyzing_structured_wealth: {
+    archetype: 'The Strategist',
+    description: 'You combine analytical rigor with systematic execution to drive business outcomes. Natural fit for consulting, operations, or strategic finance.',
+    top_industries: ['Management Consulting', 'Investment Banking', 'Corporate Strategy'],
+    ideal_roles: ['Management Consultant', 'Strategy Analyst', 'Operations Manager', 'Financial Analyst'],
+    strengths: ['Systems thinking', 'Data-driven decisions', 'Process optimization', 'Strategic planning'],
+    blind_spots: ['May prioritize logic over relationships', 'Can be overly critical', 'Risk-averse'],
+  },
+  creating_flexible_impact: {
+    archetype: 'The Innovator',
+    description: 'You thrive in dynamic environments where you can build new products, experiment with ideas, and make a tangible impact through creation.',
+    top_industries: ['Startups & Venture Capital', 'Product & Design', 'Media & Entertainment'],
+    ideal_roles: ['Product Manager', 'UX Designer', 'Content Creator', 'Entrepreneur'],
+    strengths: ['Creative problem-solving', 'Adaptability', 'Vision thinking', 'Rapid prototyping'],
+    blind_spots: ['May struggle with routine tasks', 'Can start but not finish', 'Impatient with bureaucracy'],
+  },
+  creating_collaborative_balance: {
+    archetype: 'The Collaborator',
+    description: 'You bring teams together to create something greater than the sum of its parts. Excel in roles that blend creativity with people leadership.',
+    top_industries: ['Marketing & Advertising', 'Human Resources', 'Education Technology'],
+    ideal_roles: ['Marketing Manager', 'HR Business Partner', 'Team Lead', 'Program Manager'],
+    strengths: ['Team building', 'Communication', 'Creative facilitation', 'Work-life harmony'],
+    blind_spots: ['May avoid difficult conversations', 'Can prioritize harmony over results', 'Dislikes conflict'],
+  },
+  helping_collaborative_impact: {
+    archetype: 'The Advocate',
+    description: 'You are driven by making a difference in peoples lives through direct support, advocacy, and community building.',
+    top_industries: ['Healthcare & Biotech', 'Non-Profit & Social Impact', 'Education'],
+    ideal_roles: ['Patient Advocate', 'Community Manager', 'Social Worker', 'Healthcare Administrator'],
+    strengths: ['Empathy', 'Active listening', 'Relationship building', 'Mission-driven'],
+    blind_spots: ['May burn out from over-giving', 'Can take things personally', 'Avoids self-promotion'],
+  },
+  leading_structured_wealth: {
+    archetype: 'The Executive',
+    description: 'You are built for leadership, driving teams toward ambitious goals with clear structure and accountability. Natural CEO material.',
+    top_industries: ['Corporate Leadership', 'Private Equity', 'Real Estate'],
+    ideal_roles: ['General Manager', 'VP of Operations', 'Private Equity Associate', 'Real Estate Developer'],
+    strengths: ['Decisive leadership', 'Strategic vision', 'Team motivation', 'Results orientation'],
+    blind_spots: ['May be overly demanding', 'Can micromanage', 'Impatient with slower performers'],
+  },
+  leading_flexible_wealth: {
+    archetype: 'The Entrepreneur',
+    description: 'You thrive in uncertainty, building ventures from the ground up and leading through vision and adaptability.',
+    top_industries: ['Entrepreneurship & Startups', 'Sales & Business Development', 'Consulting'],
+    ideal_roles: ['Founder', 'Business Development Manager', 'Sales Director', 'Growth Hacker'],
+    strengths: ['Risk tolerance', 'Persuasion', 'Opportunity recognition', 'Resilience'],
+    blind_spots: ['May chase too many ideas', 'Can neglect details', 'Impatient with processes'],
+  },
+  independent_mastery_balance: {
+    archetype: 'The Craftsman',
+    description: 'You value deep expertise and autonomy above all. Excel in specialized roles where mastery is rewarded and bureaucracy is minimal.',
+    top_industries: ['Software Engineering', 'Creative Arts', 'Skilled Trades'],
+    ideal_roles: ['Software Engineer', 'Graphic Designer', 'Technical Writer', 'Specialized Consultant'],
+    strengths: ['Deep focus', 'Quality orientation', 'Self-management', 'Continuous learning'],
+    blind_spots: ['May resist feedback', 'Can isolate from team', 'Avoids visibility'],
+  },
+};
+
+// Helper to combine answers into a key
+const getArchetypeKey = (answers) => {
+  const { energy_source, work_style, success_metric } = answers;
+  return `${energy_source}_${work_style}_${success_metric}`;
+};
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { responses, careerGoals, major, name } = await req.json();
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    const responseSummary = responses.map((r, i) =>
-      `Q${i + 1}: "${r.question}" → Score: ${r.score}/5 (${r.score <= 2 ? 'Disagree' : r.score === 3 ? 'Neutral' : 'Agree'})`
-    ).join('\n');
+    const { answers } = await req.json();
 
-    const prompt = `You are an expert career psychologist and coach. Based on this student's assessment responses, generate their unique Career Archetype.
+    if (!answers || typeof answers !== 'object') {
+      return Response.json({ error: 'Invalid answers' }, { status: 400 });
+    }
 
-STUDENT PROFILE:
-- Name: ${name || 'Student'}
-- Major: ${major || 'Undeclared'}
-- Target Roles: ${careerGoals?.target_roles?.join(', ') || 'Not specified'}
-- Target Industries: ${careerGoals?.target_industries?.join(', ') || 'Not specified'}
-- Graduating: ${careerGoals?.graduation_year || 'Not specified'}
+    // Get archetype from mapping
+    const key = getArchetypeKey(answers);
+    let archetype = ARCHETYPE_MAPPING[key];
 
-ASSESSMENT RESPONSES (1=Strongly Disagree, 5=Strongly Agree):
-${responseSummary}
+    // If no exact match, use LLM to generate custom archetype
+    if (!archetype) {
+      const llmResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Based on these career assessment answers, generate a personalized career archetype:
+        - Energy Source: ${answers.energy_source}
+        - Work Style: ${answers.work_style}
+        - Success Metric: ${answers.success_metric}
 
-Based on these responses, analyze across 6 dimensions:
-1. Thinking Style: Analytical/Systematic vs. Intuitive/Creative
-2. Work Style: Independent/Autonomous vs. Collaborative/Team-oriented  
-3. Motivation: Achievement/Results vs. Impact/Mission vs. Stability/Security
-4. Leadership: Directive/Decisive vs. Supportive/Facilitative
-5. Risk Appetite: Builder/Creator/Risk-taker vs. Optimizer/Executor/Risk-averse
-6. Orientation: People-focused vs. Ideas/Concepts-focused vs. Systems/Process-focused
+        Return a JSON object with:
+        - archetype: A compelling 2-3 word title (e.g. "The Growth Strategist", "The Creative Technologist")
+        - description: 2-3 sentence description of who they are and what they excel at
+        - top_industries: Array of 3 industry names
+        - ideal_roles: Array of 4 specific job titles
+        - strengths: Array of 4 strength descriptions
+        - blind_spots: Array of 3 potential weaknesses to watch`,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            archetype: { type: 'string' },
+            description: { type: 'string' },
+            top_industries: { type: 'array', items: { type: 'string' } },
+            ideal_roles: { type: 'array', items: { type: 'string' } },
+            strengths: { type: 'array', items: { type: 'string' } },
+            blind_spots: { type: 'array', items: { type: 'string' } }
+          }
+        }
+      });
+      archetype = llmResult;
+    }
 
-Generate a UNIQUE custom archetype name (not from PrinciplesYou — create something original and memorable like "The Strategic Connector" or "The Empathetic Builder" or "The Analytical Visionary").
-
-Respond ONLY with valid JSON (no markdown, no preamble):
-{
-  "archetype_name": "<unique memorable name>",
-  "archetype_tagline": "<one sentence that captures their essence>",
-  "archetype_emoji": "<single emoji>",
-  "summary": "<3-4 sentences describing who they are, how they think, and what drives them>",
-  "dimensions": {
-    "thinking": { "label": "<e.g. Analytical Thinker>", "score": <1-10>, "description": "<2 sentences>" },
-    "work_style": { "label": "<e.g. Collaborative Leader>", "score": <1-10>, "description": "<2 sentences>" },
-    "motivation": { "label": "<e.g. Impact-Driven>", "score": <1-10>, "description": "<2 sentences>" },
-    "leadership": { "label": "<e.g. Facilitative Leader>", "score": <1-10>, "description": "<2 sentences>" },
-    "risk": { "label": "<e.g. Calculated Risk-Taker>", "score": <1-10>, "description": "<2 sentences>" },
-    "orientation": { "label": "<e.g. People-First>", "score": <1-10>, "description": "<2 sentences>" }
-  },
-  "superpowers": ["<strength 1>", "<strength 2>", "<strength 3>"],
-  "watch_out_for": ["<growth area 1>", "<growth area 2>"],
-  "ideal_roles": ["<role 1>", "<role 2>", "<role 3>", "<role 4>", "<role 5>"],
-  "ideal_environments": ["<environment 1>", "<environment 2>", "<environment 3>"],
-  "career_path_insight": "<2-3 sentences connecting their archetype to their specific target roles/industries>",
-  "famous_archetype": "<a well-known person who shares this archetype and why>",
-  "advice": "<3-4 sentences of honest, specific career advice for this exact person>"
-}`;
-
-    const archetypeResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt,
-      model: 'claude_sonnet_4_6',
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          archetype_name: { type: 'string' },
-          archetype_tagline: { type: 'string' },
-          archetype_emoji: { type: 'string' },
-          summary: { type: 'string' },
-          dimensions: {
-            type: 'object',
-            additionalProperties: {
-              type: 'object',
-              properties: {
-                label: { type: 'string' },
-                score: { type: 'number' },
-                description: { type: 'string' },
-              },
-              required: ['label', 'score', 'description'],
-            },
-          },
-          superpowers: { type: 'array', items: { type: 'string' } },
-          watch_out_for: { type: 'array', items: { type: 'string' } },
-          ideal_roles: { type: 'array', items: { type: 'string' } },
-          ideal_environments: { type: 'array', items: { type: 'string' } },
-          career_path_insight: { type: 'string' },
-          famous_archetype: { type: 'string' },
-          advice: { type: 'string' },
-        },
-        required: ['archetype_name', 'archetype_tagline', 'archetype_emoji', 'summary', 'dimensions', 'superpowers', 'watch_out_for', 'ideal_roles', 'ideal_environments', 'career_path_insight', 'famous_archetype', 'advice'],
-      },
+    // Save to user profile
+    await base44.auth.updateMe({
+      career_archetype: archetype.archetype,
+      career_archetype_data: archetype,
     });
 
-    console.log('LLM Response:', JSON.stringify(archetypeResponse, null, 2));
+    return Response.json({
+      success: true,
+      archetype: archetype.archetype,
+      description: archetype.description,
+      top_industries: archetype.top_industries,
+      ideal_roles: archetype.ideal_roles,
+      strengths: archetype.strengths,
+      blind_spots: archetype.blind_spots,
+    });
 
-    // Handle the response structure (may be wrapped in 'response' key)
-    const archetype = archetypeResponse.response || archetypeResponse;
-
-    if (!archetype || !archetype.archetype_name) {
-      return Response.json({ success: false, error: 'Invalid LLM response structure', details: archetype }, { status: 400 });
-    }
-    return Response.json({ success: true, archetype });
   } catch (error) {
-    console.error('generateCareerArchetype error:', error);
-    return Response.json({ success: false, error: error.message }, { status: 500 });
+    console.error('Career archetype generation failed:', error);
+    return Response.json({ error: error.message }, { status: 500 });
   }
 });
