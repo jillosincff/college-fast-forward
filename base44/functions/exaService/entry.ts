@@ -272,45 +272,7 @@ Deno.serve(async (req) => {
         }).catch(() => {});
       }
 
-      // FastIQ only — enrich with Proxycurl
-      if (isFastIQ && profiles.length > 0) {
-        const enriched = await Promise.all(
-          profiles.map(async (profile) => {
-            try {
-              const px = await base44.asServiceRole.functions.invoke('proxycurlService', {
-                action: 'enrichParentProfile',
-                params: { linkedinUrl: profile.linkedin_url }
-              });
-              const px_data = px?.data || px || {};
-              return {
-                ...profile,
-                full_name: px_data.full_name || profile.full_name,
-                headline: px_data.current_title || px_data.headline || profile.headline,
-                company: px_data.current_company || '',
-                location: px_data.location || '',
-                photo_url: px_data.profile_pic || '',
-                industry: px_data.industry || '',
-                skills: px_data.skills || [],
-                verified_school: (px_data.summary || '').toLowerCase().includes(universityName.toLowerCase()) ||
-                                profile.headline.toLowerCase().includes(universityName.toLowerCase()),
-                source: 'exa_proxycurl',
-              };
-            } catch (e) {
-              console.error('Proxycurl enrichment failed for', profile.linkedin_url, e.message);
-              return profile; // graceful fallback to Exa data
-            }
-          })
-        );
-
-        return Response.json({ 
-          success: true, 
-          profiles: enriched, 
-          total_count: enriched.length, 
-          source: 'exa_proxycurl' 
-        });
-      }
-
-      // Free tier — Exa only
+      // Exa-only profiles (Proxycurl/NinjaPear is sunset)
       return Response.json({ 
         success: true, 
         profiles, 

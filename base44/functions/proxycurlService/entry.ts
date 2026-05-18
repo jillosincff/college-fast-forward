@@ -1,17 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const BASE_URL = 'https://nubela.co/api';
-
-async function proxycurlFetch(path, key) {
-  const resp = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Authorization': `Bearer ${key}` },
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`NinjaPear HTTP ${resp.status}: ${text}`);
-  }
-  return resp.json();
-}
+// Proxycurl/NinjaPear API is sunset. All alumni lookups now route through Exa.
+// This service is kept as a thin proxy to exaService for backward compatibility.
 
 Deno.serve(async (req) => {
   try {
@@ -20,110 +10,117 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { action, params } = await req.json();
-    const PROXYCURL_KEY = Deno.env.get('PROXYCURL_API_KEY');
-    if (!PROXYCURL_KEY) return Response.json({ error: 'PROXYCURL_API_KEY not set' }, { status: 500 });
 
-    // ── Get alumni COUNT at a company from a university (cheap — no profile enrichment)
+    // ── getAlumniCount → Exa alumni search (count only)
     if (action === 'getAlumniCount') {
       const { companyLinkedInUrl, universityName, companyName } = params;
-      const qs = new URLSearchParams({
-        current_company_linkedin_profile_url: companyLinkedInUrl,
-        education_school_name: universityName,
-        enrich_profiles: 'skip',
-        page_size: '1',
+
+      const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
+      if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
+
+      const universityShortName = universityName
+        .replace(/^University of /i, '')
+        .replace(/ University$/i, '')
+        .replace(/ College$/i, '')
+        .trim();
+
+      const query = `${universityShortName} alumni graduate works at ${companyName} site:linkedin.com/in`;
+
+      const res = await fetch('https://api.exa.ai/search', {
+        method: 'POST',
+        headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          type: 'auto',
+          category: 'people',
+          numResults: 10,
+          contents: { highlights: { maxCharacters: 200 } },
+        }),
       });
-      const data = await proxycurlFetch(`/v2/search/person?${qs}`, PROXYCURL_KEY);
+      const data = await res.json();
+      const count = (data.results || []).length;
+
       return Response.json({
         company: companyName,
-        alumni_count: data.total_result_count || 0,
-        confidence: 'verified',
-        source: 'linkedin_proxycurl',
+        alumni_count: count,
+        confidence: count > 0 ? 'estimated' : 'none',
+        source: 'exa',
       });
     }
 
-    // ── Get actual alumni PROFILES at a company (costs credits per profile)
+    // ── getAlumniProfiles → Exa alumni search with profiles
     if (action === 'getAlumniProfiles') {
-      const { companyLinkedInUrl, universityName, companyName, maxResults = 10 } = params;
-      const qs = new URLSearchParams({
-        current_company_linkedin_profile_url: companyLinkedInUrl,
-        education_school_name: universityName,
-        enrich_profiles: 'enrich',
-        page_size: String(maxResults),
+      const { universityName, companyName, maxResults = 10 } = params;
+
+      const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
+      if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
+
+      const universityShortName = universityName
+        .replace(/^University of /i, '')
+        .replace(/ University$/i, '')
+        .replace(/ College$/i, '')
+        .trim();
+
+      const res = await fetch('https://api.exa.ai/search', {
+        method: 'POST',
+        headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `${universityShortName} alumnus alumna graduate works at ${companyName} site:linkedin.com/in`,
+          type: 'auto',
+          category: 'people',
+          numResults: maxResults,
+          contents: { highlights: { maxCharacters: 400 } },
+        }),
       });
-      const data = await proxycurlFetch(`/v2/search/person?${qs}`, PROXYCURL_KEY);
-      const profiles = (data.results || []).map(p => ({
-        full_name: p.profile?.full_name || '',
-        headline: p.profile?.headline || '',
-        current_title: p.profile?.experiences?.[0]?.title || '',
-        graduation_year: p.profile?.education
-          ?.find(e => e.school?.name?.toLowerCase().includes(universityName.toLowerCase()))
-          ?.ends_at?.year || null,
-        linkedin_url: p.linkedin_profile_url || '',
-        location: p.profile?.city || '',
-      }));
+      const data = await res.json();
+
+      const profiles = (data.results || []).map(r => {
+        const parts = (r.title || '').split(/[|\-·]/).map(s => s.trim()).filter(Boolean);
+        return {
+          full_name: parts[0]?.trim() || 'Unknown',
+          headline: parts.slice(1).join(' · ') || '',
+          linkedin_url: r.url || '',
+          source: 'exa',
+        };
+      }).filter(p => p.full_name !== 'Unknown');
+
       return Response.json({
         company: companyName,
         profiles,
-        total_count: data.total_result_count || 0,
-        confidence: 'verified',
-        source: 'linkedin_proxycurl',
+        total_count: profiles.length,
+        confidence: 'estimated',
+        source: 'exa',
       });
     }
 
-    // ── Enrich a single profile from their LinkedIn URL (on-demand, costs 1 credit)
+    // ── enrichParentProfile → graceful no-op (Proxycurl is sunset)
     if (action === 'enrichParentProfile') {
-      const { linkedinUrl } = params;
-      if (!linkedinUrl) return Response.json({ error: 'No LinkedIn URL provided' }, { status: 400 });
-      const qs = new URLSearchParams({
-        linkedin_profile_url: linkedinUrl,
-        extra: 'include',
-        skills: 'include',
-      });
-      const profile = await proxycurlFetch(`/v2/linkedin?${qs}`, PROXYCURL_KEY);
       return Response.json({
-        full_name: profile.full_name || '',
-        headline: profile.headline || '',
-        current_title: profile.experiences?.[0]?.title || '',
-        current_company: profile.experiences?.[0]?.company || '',
-        industry: profile.industry || '',
-        location: profile.city || '',
-        summary: profile.summary || '',
-        skills: (profile.skills || []).slice(0, 10).map(s => s.name || s),
-        profile_pic: profile.profile_pic_url || null,
+        full_name: '',
+        headline: '',
+        current_title: '',
+        current_company: '',
+        industry: '',
+        location: '',
+        summary: '',
+        skills: [],
+        profile_pic: null,
         enriched_at: new Date().toISOString(),
+        source: 'unavailable',
+        note: 'Profile enrichment via Proxycurl is no longer available.',
       });
     }
 
-    // ── Get alumni with a specific job title/role from a university
+    // ── getAlumniByRole → delegate to exaService searchAlumni
     if (action === 'getAlumniByRole') {
       const { jobTitle, universityName, location, maxResults = 10 } = params;
-      const qs = new URLSearchParams({
-        headline: jobTitle,
-        education_school_name: universityName,
-        enrich_profiles: 'enrich',
-        page_size: String(maxResults),
+      const result = await base44.asServiceRole.functions.invoke('exaService', {
+        action: 'searchAlumni',
+        query: `${jobTitle} ${location || ''}`.trim(),
+        universityName,
+        maxResults,
       });
-      if (location && location.toLowerCase() !== 'open to anything') {
-        qs.append('city', location);
-      }
-      const data = await proxycurlFetch(`/v2/search/person?${qs}`, PROXYCURL_KEY);
-      const profiles = (data.results || []).map(p => ({
-        full_name: p.profile?.full_name || '',
-        current_title: p.profile?.experiences?.[0]?.title || '',
-        current_company: p.profile?.experiences?.[0]?.company || '',
-        graduation_year: p.profile?.education
-          ?.find(e => e.school?.name?.toLowerCase().includes(universityName.toLowerCase()))
-          ?.ends_at?.year || null,
-        linkedin_url: p.linkedin_profile_url || '',
-        location: p.profile?.city || '',
-      }));
-      return Response.json({
-        job_title: jobTitle,
-        profiles,
-        total_count: data.total_result_count || 0,
-        confidence: 'verified',
-        source: 'linkedin_proxycurl',
-      });
+      return Response.json(result?.data || result);
     }
 
     return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
