@@ -10,8 +10,9 @@ const STARTER_PROMPTS = [
 ];
 
 export default function PremiumHiringChat({ user }) {
+  const firstName = user?.full_name?.split(' ')[0] || 'there';
   const [messages, setMessages] = useState([
-    { role: 'agent', text: `Hi ${user?.full_name?.split(' ')[0] || 'there'}! 👋 I'm your Hiring Expert Assistant. Ask me anything — tricky interview emails, salary negotiation, how to approach a recruiter, or anything else on your job search. I'm here 24/7.` }
+    { role: 'agent', text: `Hi ${firstName}! 📎 I'm CliFF, your CFF Career Agent. Ask me anything — tricky interview follow-ups, salary negotiations, or how to reach out to that alum at your target company. I'm locked in 24/7.` }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,17 +41,18 @@ export default function PremiumHiringChat({ user }) {
   return (
     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
       {/* Header */}
-      <div style={{ padding: '14px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#0A0A0A' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 18 }}>💬</span>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 22, animation: 'clipBounce 2s ease-in-out infinite' }}>📎</span>
+          <style>{`@keyframes clipBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }`}</style>
           <div>
-            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', margin: 0 }}>Hiring Experts Chat</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.5)', margin: 0 }}>AI trained by real recruiters</p>
+            <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: 0 }}>Chat with CliFF</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#94a3b8', margin: 0 }}>Your CFF Career Agent</p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.8)' }} />
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#22c55e' }}>LIVE EXPERT ASSISTANT</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(6,78,59,0.5)', border: '1px solid #065f46', borderRadius: 6, padding: '4px 10px' }}>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#34d399', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Online 24/7</span>
         </div>
       </div>
 
