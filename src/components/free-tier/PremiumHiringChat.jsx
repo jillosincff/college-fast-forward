@@ -136,7 +136,9 @@ export default function PremiumHiringChat({ user, selectedSignal }) {
                   <button
                     onClick={() => {
                       setInterviewDismissed(true);
-                      window.location.hash = `#MockInterview?company=${encodeURIComponent(interviewData.company)}`;
+                      const params = new URLSearchParams({ company: interviewData.company });
+                      if (interviewData.role) params.set('role', interviewData.role);
+                      window.location.hash = `#MockInterview?${params.toString()}`;
                     }}
                     style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}

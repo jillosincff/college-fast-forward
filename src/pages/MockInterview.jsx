@@ -36,30 +36,38 @@ function SideNav() {
   );
 }
 
-const buildSystemPrompt = (user) => `You are a professional interviewer conducting a behavioral mock interview using the STAR method (Situation, Task, Action, Result).
+const buildSystemPrompt = (user, prefillCompany, prefillRole) => {
+  const companyLine = prefillCompany ? `\nTarget Company: ${prefillCompany} — adopt the persona of a senior hiring manager at ${prefillCompany} and tailor ALL questions to this company's culture, values, and known interview style.` : '';
+  const roleLine = prefillRole ? `\nTarget Role: ${prefillRole} — every question must be specifically relevant to this exact position.` : '';
+
+  return `You are a professional interviewer${prefillCompany ? ` at ${prefillCompany}` : ''} conducting a realistic mock interview.${companyLine}${roleLine}
 
 Student profile:
 - Name: ${user?.full_name?.split(' ')[0] || 'the student'}
 - Major: ${user?.major || 'undeclared'}
-- Target roles: ${user?.career_goals?.target_roles?.join(', ') || 'not specified'}
+- Target roles: ${prefillRole || user?.career_goals?.target_roles?.join(', ') || 'not specified'}
 - Target industries: ${user?.career_goals?.target_industries?.join(', ') || 'not specified'}
 - Graduating: ${user?.career_goals?.graduation_year || 'not specified'}
-- Biggest struggle: ${user?.career_goals?.biggest_struggle || 'not specified'}
 
 Interview rules:
-1. Start with a warm professional greeting and "Tell me about yourself"
-2. Ask ONE question at a time — never multiple questions
+1. Introduce yourself by name as a hiring manager${prefillCompany ? ` at ${prefillCompany}` : ''}, acknowledge the specific role${prefillRole ? ` (${prefillRole})` : ''}, then immediately ask "Tell me about yourself"
+2. Ask ONE highly specific question at a time — never multiple questions
 3. After each answer, give brief constructive STAR feedback (2-3 sentences max): what they did well, what was missing, one specific improvement tip
-4. Then ask the next behavioral question
-5. Cover: Tell me about yourself, Teamwork, Challenge/failure, Leadership, Why this industry/role, Strength and weakness
+4. If their answer is vague or misses STAR structure, dig deeper exactly as a real recruiter would
+5. Cover: Tell me about yourself, Teamwork, Challenge/failure, Leadership, Why this company/role, Strength and weakness
 6. After 6-7 questions, wrap up with encouragement and an overall score out of 10
-7. Keep tone warm, professional, encouraging — like a mentor not a judge
-8. Tailor questions to their target role and industry when possible`;
+7. Keep tone warm, professional, and pressured — like a real interview not a casual chat`;
+};
 
 export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   const { user, refreshUser } = useAuth();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const onOpenUpgrade = onOpenUpgradeProp || (() => setShowUpgradeModal(true));
+
+  // Read company + role from URL params (injected by CliFF's proactive button)
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const urlCompany = hashParams.get('company') || '';
+  const urlRole = hashParams.get('role') || '';
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -79,13 +87,20 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
   }, [messages]);
 
   const buildPrompt = (history, newUserMessage) => {
-    const system = buildSystemPrompt(user);
+    const system = buildSystemPrompt(user, urlCompany, urlRole);
     const historyText = history.map(m =>
       `${m.role === 'user' ? 'Student' : 'Interviewer'}: ${m.content}`
     ).join('\n\n');
     const userPart = newUserMessage ? `\n\nStudent: ${newUserMessage}` : '\n\nStudent: Please start the interview.';
     return `${system}\n\n--- CONVERSATION SO FAR ---\n${historyText}${userPart}\n\nInterviewer:`;
   };
+
+  // Auto-start when company+role are pre-loaded from CliFF's proactive button
+  useEffect(() => {
+    if (urlCompany && urlRole && user && isFastIQ && !started && !loading) {
+      startInterview();
+    }
+  }, [user, isFastIQ]);
 
   const startInterview = async () => {
     // Try to activate trial if not yet a FastIQ member
@@ -182,8 +197,16 @@ export default function MockInterview({ onOpenUpgrade: onOpenUpgradeProp }) {
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>
           Let's practice, {firstName}.
         </h1>
+        {urlCompany && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.2)', borderRadius: 10, padding: '8px 14px', marginBottom: 16 }}>
+            <span style={{ fontSize: 14 }}>🎯</span>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#4f46e5' }}>
+              {urlRole ? `${urlRole} at ${urlCompany}` : urlCompany} — questions tailored to this role
+            </span>
+          </div>
+        )}
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 40px', lineHeight: 1.6 }}>
-          Your AI interviewer will ask behavioral questions tailored to your target role and give you real STAR method feedback after every answer. About 15 minutes.
+          Your AI interviewer will ask questions tailored to your target role and give you real STAR method feedback after every answer. About 15 minutes.
         </p>
 
         <div style={{ background: '#F5F5F5', borderRadius: 14, padding: '24px 28px', marginBottom: 32 }}>
