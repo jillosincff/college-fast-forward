@@ -11,6 +11,8 @@ const BACKDOOR_LEADS = [
     recruiter: 'Sarah M., Campus Recruiter',
     posted: 'Not yet public',
     logo: '☁️',
+    alumCount: 3,
+    jobDescriptionText: `Salesforce is looking for a high-energy Business Development Representative to join our commercial sales team. You'll be the first point of contact for new mid-market accounts, sourcing pipeline, and qualifying leads.\n\nWhat You'll Do:\n• Outbound prospecting via phone, email, and social channels\n• Partner with Account Executives to strategize target accounts\n• Achieve monthly quotas of qualified opportunities\n\nWhat They're Looking For:\n• Strong communication skills and thick skin for cold outreach\n• Competitive mindset (former athletes, student leaders, or sales club grads excel here)\n• Bachelor's degree from an accredited university`,
   },
   {
     company: 'Amazon',
@@ -19,6 +21,8 @@ const BACKDOOR_LEADS = [
     recruiter: 'James K., University Relations',
     posted: 'Soft-listed internally',
     logo: '📦',
+    alumCount: 2,
+    jobDescriptionText: `Join Amazon's Operations team as a Summer Intern and gain hands-on experience optimizing supply chain processes. You'll work on real projects that impact millions of customers.\n\nWhat You'll Do:\n• Analyze operational data to identify process improvements\n• Collaborate with cross-functional teams on workflow optimization\n• Present findings to senior leadership\n\nWhat They're Looking For:\n• Currently pursuing a degree in Engineering, Business, or related field\n• Strong analytical and problem-solving skills\n• Proficiency in Excel and data visualization tools`,
   },
   {
     company: 'Deloitte',
@@ -27,6 +31,8 @@ const BACKDOOR_LEADS = [
     recruiter: 'Michelle T., Talent Acquisition',
     posted: 'Expected live in 2 weeks',
     logo: '🏢',
+    alumCount: 5,
+    jobDescriptionText: `Deloitte's Technology Consulting practice helps clients transform their businesses through innovative technology solutions. As an Analyst, you'll work on cutting-edge implementations.\n\nWhat You'll Do:\n• Support technology strategy and implementation projects\n• Conduct research and analysis on emerging tech trends\n• Collaborate with clients to understand business requirements\n\nWhat They're Looking For:\n• Bachelor's degree in Computer Science, Information Systems, or related field\n• Strong communication and presentation skills\n• Interest in emerging technologies and business transformation`,
   },
 ];
 
