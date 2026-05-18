@@ -128,7 +128,17 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
 
         <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1 }}>
 
-          {/* ── Section 2: Auto-Apply ── */}
+          {/* ── Section 2: Job Description ── */}
+          {lead.jobDescriptionText && (
+            <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px' }}>
+              <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>About the Role</p>
+              <div style={{ maxHeight: 300, overflowY: 'auto', paddingRight: 8 }}>
+                <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: '0 0 12px', lineHeight: 1.7 }}>{lead.jobDescriptionText}</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Section 3: Auto-Apply ── */}
           <div style={{ background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px' }}>
             <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Step 1 — Smart Auto-Apply</p>
             <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '0 0 14px', lineHeight: 1.6 }}>
@@ -203,7 +213,7 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
             </button>
           </div>
 
-          {/* ── Section 3: Network Outreach ── */}
+          {/* ── Section 4: Network Outreach ── */}
           <div style={{ background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px' }}>
             <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Step 2 — Network Outreach</p>
 
