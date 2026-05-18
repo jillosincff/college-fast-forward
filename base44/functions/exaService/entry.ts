@@ -281,6 +281,66 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── ACTION 3: Live public job listings with age risk ─────────────
+    if (action === 'getLivePublicListings') {
+      const { targetRoles = [], targetIndustries = [], location = '', limit = 6 } = params;
+
+      const roleQuery = targetRoles.slice(0, 2).join(' OR ') || 'entry level analyst';
+      const locationStr = location ? ` ${location}` : '';
+      const query = `${roleQuery}${locationStr} jobs 2025 2026 site:linkedin.com OR site:indeed.com`;
+
+      const searchRes = await exaFetch('search', {
+        query,
+        type: 'auto',
+        numResults: Math.min(limit * 2, 12),
+        includeDomains: ['linkedin.com', 'indeed.com'],
+        contents: { highlights: { maxCharacters: 800 } },
+        startPublishedDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+
+      const results = searchRes.results || [];
+
+      const jobs = results
+        .filter(r => r.url && r.title)
+        .map(r => {
+          // Calculate age in days
+          const publishedDate = r.publishedDate ? new Date(r.publishedDate) : null;
+          const daysLive = publishedDate
+            ? Math.max(0, Math.floor((Date.now() - publishedDate.getTime()) / (1000 * 60 * 60 * 24)))
+            : null;
+
+          let riskLevel = 'LOW';
+          if (daysLive !== null) {
+            if (daysLive > 6) riskLevel = 'HIGH';
+            else if (daysLive > 3) riskLevel = 'MEDIUM';
+          }
+
+          // Extract company name from title or URL
+          const titleParts = (r.title || '').split(/[|\-·@]/).map(s => s.trim()).filter(Boolean);
+          const jobTitle = titleParts[0] || r.title;
+          const companyName = titleParts[1] || titleParts[2] || '';
+
+          // Determine source
+          const source = r.url?.includes('linkedin.com') ? 'LinkedIn' : 'Indeed';
+
+          return {
+            id: r.id || r.url,
+            title: jobTitle,
+            companyName,
+            sourceUrl: r.url,
+            source,
+            daysLive,
+            riskLevel,
+            publishedDate: publishedDate?.toISOString() || null,
+            snippet: (r.highlights || [])[0] || '',
+          };
+        })
+        .filter(j => j.title)
+        .slice(0, limit);
+
+      return Response.json({ success: true, jobs });
+    }
+
     return Response.json({ success: false, error: 'Unknown action' });
   } catch (e) {
     console.error('[exaService] Error:', e.message);

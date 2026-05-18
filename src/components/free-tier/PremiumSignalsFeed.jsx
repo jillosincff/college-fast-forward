@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import PublicJobSignalCard from './PublicJobSignalCard';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const mono = "'Courier New', monospace";
@@ -231,13 +232,33 @@ function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniC
   );
 }
 
-export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, onCoffeeChat, user }) {
+export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, onCoffeeChat, onBackdoorClick, user }) {
   const t = theme || { primary: '#2563eb', secondary: '#1d4ed8', bgTint: '#eff6ff' };
   const [expandedId, setExpandedId] = useState(null);
   const [networkData, setNetworkData] = useState({});
   const [loadingCounts, setLoadingCounts] = useState({});
+  const [publicListings, setPublicListings] = useState([]);
+  const [loadingListings, setLoadingListings] = useState(false);
 
   const toggle = (id) => setExpandedId(prev => prev === id ? null : id);
+
+  // Fetch live public listings with age/risk scores
+  useEffect(() => {
+    const targetRoles = user?.career_goals?.target_roles || [];
+    const targetIndustries = user?.career_goals?.target_industries || [];
+    if (!targetRoles.length && !targetIndustries.length) return;
+    setLoadingListings(true);
+    base44.functions.invoke('exaService', {
+      action: 'getLivePublicListings',
+      targetRoles,
+      targetIndustries,
+      location: user?.career_goals?.preferred_location || '',
+      limit: 6,
+    }).then((res) => {
+      const data = res?.data ?? res ?? {};
+      setPublicListings(data.jobs || []);
+    }).catch(() => {}).finally(() => setLoadingListings(false));
+  }, [user?.career_goals]);
 
   useEffect(() => {
     const universityName = user?.school_name || user?.school || user?.university;
@@ -404,6 +425,39 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
           );
         })}
       </div>
+
+      {/* Ghost Risk Meter — Public listings with age risk */}
+      {(loadingListings || publicListings.length > 0) && (
+        <div style={{ borderTop: '1px solid #e5e7eb', padding: '16px 22px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ fontSize: 16 }}>👻</span>
+            <div>
+              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#111827', margin: 0 }}>Ghost Risk Meter</p>
+              <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, color: '#9ca3af', margin: 0 }}>Live LinkedIn & Indeed listings · Application decay analysis</p>
+            </div>
+          </div>
+
+          {loadingListings ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[0, 1, 2].map(i => (
+                <div key={i} style={{ background: '#f1f5f9', borderRadius: 14, height: 80, animation: 'pulse-glow 1.5s infinite' }} />
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {publicListings.map((job) => (
+                <PublicJobSignalCard
+                  key={job.id}
+                  job={job}
+                  user={user}
+                  schoolAbbr={user?.school_code || college}
+                  onBackdoorClick={onBackdoorClick || onCoffeeChat}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div style={{ borderTop: '1px solid #e5e7eb', padding: '12px 22px', background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>✅ All signals unlocked — Premium Active</p>
