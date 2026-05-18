@@ -1,19 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
 export default function EmailSyncBanner({ user, onSyncClick, onDismiss }) {
   // Check if user previously dismissed
-  const [dismissed, setDismissed] = useState(() => {
-    try {
-      return localStorage.getItem(`cff_email_dismissed_${user?.id}`) === '1';
-    } catch {
-      return false;
-    }
-  });
+  const [dismissed, setDismissed] = useState(false);
 
-  // If they are already synced or previously dismissed, don't show the setup prompt
-  if (user?.is_email_synced || dismissed) return null;
+  useEffect(() => {
+    try {
+      const wasDismissed = localStorage.getItem(`cff_email_dismissed_${user?.id}`) === '1';
+      setDismissed(wasDismissed);
+    } catch {
+      setDismissed(false);
+    }
+  }, [user?.id]);
+
+  // If they are already synced, don't show the setup prompt
+  if (user?.is_email_synced) return null;
+  if (dismissed) return null;
 
   const handleDismiss = () => {
     try {

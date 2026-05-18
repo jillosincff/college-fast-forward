@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
       }, { status: 503 });
     }
 
-    const redirectUri = `${Deno.env.get('APP_BASE_URL') || window.location.origin}/api/auth/callback/email`;
-    const state = btoa(JSON.stringify({ user_id: user.id, email: user.email }));
+    const redirectUri = `${Deno.env.get('APP_BASE_URL') || window.location.origin}/email-callback`;
+    const state = user.id; // Pass user ID directly for callback handler
 
     const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
       `client_id=${clientId}` +

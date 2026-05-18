@@ -120,7 +120,21 @@ export default function FreeTierDashboard() {
       const res = await base44.functions.invoke('getEmailOAuthUrl', {});
       const oauthUrl = res?.data?.url || res?.url;
       if (oauthUrl) {
-        window.open(oauthUrl, '_blank');
+        window.open(oauthUrl, '_blank', 'width=600,height=800');
+        // Poll for completion
+        const checkInterval = setInterval(async () => {
+          try {
+            const updatedUser = await base44.auth.me();
+            if (updatedUser?.is_email_synced) {
+              clearInterval(checkInterval);
+              setUser(updatedUser);
+              // Trigger banner hide
+              window.dispatchEvent(new CustomEvent('cff:email-synced'));
+            }
+          } catch {}
+        }, 1000);
+        // Stop polling after 2 minutes
+        setTimeout(() => clearInterval(checkInterval), 120000);
       }
     } catch (err) {
       console.error('Failed to get OAuth URL:', err);

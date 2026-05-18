@@ -29,6 +29,7 @@ import StudentWelcome from '@/pages/StudentWelcome';
 import SetSearchGoals from '@/pages/SetSearchGoals';
 import ApplicationTracker from '@/pages/ApplicationTracker';
 import EmailConnectionSettings from '@/pages/EmailConnectionSettings';
+import EmailCallbackPage from '@/pages/EmailCallback';
 import MigrationSignIn from '@/pages/MigrationSignIn';
 import ParentWelcome from '@/pages/ParentWelcome';
 import ParentOnboarding from '@/pages/ParentOnboarding';
@@ -117,6 +118,7 @@ const AuthenticatedApp = () => {
           <Route path="/SetSearchGoals" element={<SetSearchGoals />} />
           <Route path="/ApplicationTracker" element={<LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper>} />
           <Route path="/EmailConnectionSettings" element={<LayoutWrapper currentPageName="EmailConnectionSettings"><EmailConnectionSettings /></LayoutWrapper>} />
+          <Route path="/email-callback" element={<EmailCallbackPage />} />
 
           <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
 
