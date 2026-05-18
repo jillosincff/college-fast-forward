@@ -1,0 +1,55 @@
+{
+  "name": "ParentNetworkProfile",
+  "type": "object",
+  "properties": {
+    "first_name": {
+      "type": "string",
+      "description": "Parent's first name"
+    },
+    "last_name": {
+      "type": "string",
+      "description": "Parent's last name"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name, e.g. Salesforce"
+    },
+    "company_domain": {
+      "type": "string",
+      "description": "Lowercase company domain, e.g. salesforce.com \u2014 used for fast lookup matching"
+    },
+    "role_title": {
+      "type": "string",
+      "description": "e.g. VP of Enterprise Sales"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "LinkedIn profile URL (optional)"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "Strict university ecosystem key, e.g. UF, USC, OSU. Ensures a parent only surfaces for their university's students."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this parent is actively opted in to help students"
+    }
+  },
+  "required": [
+    "first_name",
+    "last_name",
+    "company_name",
+    "company_domain",
+    "role_title",
+    "school_code"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

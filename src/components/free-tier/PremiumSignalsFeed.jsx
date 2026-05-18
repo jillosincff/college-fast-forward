@@ -89,7 +89,7 @@ const LIVE_SIGNALS = [
   },
 ];
 
-function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniCount }) {
+function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniCount, parentCount, sampleConnections }) {
   const t = theme || { primary: '#2563eb' };
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [added, setAdded] = useState(false);
@@ -109,7 +109,12 @@ function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniC
       setAdded(true);
     }
     if (signal.expansion.ctaType === 'coffeechat' && onCoffeeChat) {
-      onCoffeeChat({ company: signal.company, alumniCount: alumniCount ?? 0 });
+      onCoffeeChat({
+        company: signal.company,
+        alumniCount: alumniCount ?? 0,
+        parentCount: parentCount ?? 0,
+        sampleConnections: sampleConnections ?? [],
+      });
     }
   };
 
@@ -229,25 +234,38 @@ function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniC
 export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, onCoffeeChat, user }) {
   const t = theme || { primary: '#2563eb', secondary: '#1d4ed8', bgTint: '#eff6ff' };
   const [expandedId, setExpandedId] = useState(null);
-  const [alumniCounts, setAlumniCounts] = useState({});
+  const [networkData, setNetworkData] = useState({});
   const [loadingCounts, setLoadingCounts] = useState({});
 
   const toggle = (id) => setExpandedId(prev => prev === id ? null : id);
 
   useEffect(() => {
     const universityName = user?.school_name || user?.school || user?.university;
+    const schoolCode = user?.school_code || college || 'UF';
     if (!universityName) return;
 
     LIVE_SIGNALS.forEach((sig) => {
       setLoadingCounts(prev => ({ ...prev, [sig.id]: true }));
       base44.functions.invoke('proxycurlService', {
-        action: 'getAlumniCount',
-        params: { companyName: sig.company, universityName },
+        action: 'getNetworkCount',
+        params: {
+          companyName: sig.company,
+          companyDomain: sig.company.toLowerCase().replace(/\s+/g, '') + '.com',
+          universityName,
+          schoolCode,
+        },
       }).then((res) => {
-        const count = res?.data?.alumni_count ?? res?.alumni_count ?? 0;
-        setAlumniCounts(prev => ({ ...prev, [sig.id]: count }));
+        const d = res?.data ?? res ?? {};
+        setNetworkData(prev => ({
+          ...prev,
+          [sig.id]: {
+            alumni_count: d.alumni_count ?? 0,
+            parent_count: d.parent_count ?? 0,
+            sample_connections: d.sample_connections ?? [],
+          },
+        }));
       }).catch(() => {
-        // silently fail — show nothing rather than crash
+        // silently fail
       }).finally(() => {
         setLoadingCounts(prev => ({ ...prev, [sig.id]: false }));
       });
@@ -290,6 +308,9 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
       <div style={{ padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {LIVE_SIGNALS.map((sig, i) => {
           const isOpen = expandedId === sig.id;
+          const net = networkData[sig.id] || {};
+          const alumniCount = net.alumni_count ?? null;
+          const parentCount = net.parent_count ?? 0;
           return (
             <div
               key={sig.id}
@@ -331,9 +352,17 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
                         <span style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: '#f1f5f9', borderRadius: 6, padding: '2px 8px', animation: 'pulse-glow 1.5s infinite' }}>
                           scanning network…
                         </span>
-                      ) : alumniCounts[sig.id] != null ? (
-                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#ea580c', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '2px 8px' }}>
-                          🎓 {alumniCounts[sig.id]} alumni work here
+                      ) : alumniCount != null ? (
+                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#ea580c', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          🎓 {alumniCount} alumni work here
+                          {parentCount > 0 && (
+                            <>
+                              <span style={{ color: '#fbbf24' }}>|</span>
+                              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4f46e5', background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 4, padding: '1px 6px', animation: 'pulse-glow 2s infinite' }}>
+                                💼 {parentCount} Parent Backdoor{parentCount > 1 ? 's' : ''} Open
+                              </span>
+                            </>
+                          )}
                         </span>
                       ) : (
                         <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>{sig.detail}</p>
@@ -366,7 +395,9 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
                   theme={t}
                   onAddToPipeline={onAddToPipeline || (() => {})}
                   onCoffeeChat={onCoffeeChat}
-                  alumniCount={alumniCounts[sig.id]}
+                  alumniCount={alumniCount}
+                  parentCount={parentCount}
+                  sampleConnections={net.sample_connections || []}
                 />
               )}
             </div>

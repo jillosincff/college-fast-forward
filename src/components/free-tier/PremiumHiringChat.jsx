@@ -23,10 +23,24 @@ export default function PremiumHiringChat({ user, selectedSignal }) {
   // Reset greeting whenever a coffee-chat signal is selected
   useEffect(() => {
     if (!selectedSignal) return;
-    const { company, alumniCount } = selectedSignal;
-    const greeting = alumniCount > 0
-      ? `Hi ${firstName}! 📎 I see there are ${alumniCount} ${schoolAbbr} grads at ${company}. Want me to draft a warm coffee chat outreach message to one of them? I'll keep it short, personal, and impossible to ignore.`
-      : `Hi ${firstName}! 📎 I'm looking at ${company} for you. I don't have direct alumni contacts mapped here yet, but I can still write a highly tailored outreach based on your background. Ready to craft your pitch?`;
+    const { company, alumniCount, parentCount, sampleConnections } = selectedSignal;
+
+    const parentContact = (sampleConnections || []).find(c => c.connection_type === 'parent');
+    const alumContact = (sampleConnections || []).find(c => c.connection_type === 'alum');
+
+    let greeting;
+    if (parentCount > 0 && parentContact) {
+      greeting = `Hi ${firstName}! 📎 I found a ${schoolAbbr} parent — ${parentContact.name}, ${parentContact.role_title} at ${company}. Parents who've opted into our network are 10× more likely to pick up the phone. Let me write them a targeted, warm message that leads with your ${schoolAbbr} connection. Just say "write it" and I'll draft it now.`;
+    } else if (parentCount > 0) {
+      greeting = `Hi ${firstName}! 📎 There ${parentCount === 1 ? 'is' : 'are'} ${parentCount} opted-in ${schoolAbbr} parent${parentCount > 1 ? 's' : ''} at ${company} — these are your highest-conversion contacts. Want me to write a targeted outreach that opens with your shared ${schoolAbbr} connection?`;
+    } else if (alumniCount > 0 && alumContact) {
+      greeting = `Hi ${firstName}! 📎 I'm looking at ${company} — ${alumniCount} ${schoolAbbr} grads work there. I found ${alumContact.name} (${alumContact.role_title}) as a warm lead. Want me to draft a concise coffee chat request that's personalized to their background? Just say "write it."`;
+    } else if (alumniCount > 0) {
+      greeting = `Hi ${firstName}! 📎 There are ${alumniCount} ${schoolAbbr} grads at ${company}. Want me to draft a warm coffee chat outreach — short, personal, and impossible to ignore?`;
+    } else {
+      greeting = `Hi ${firstName}! 📎 I'm on ${company} for you. No direct contacts mapped yet, but I can write a cold outreach that still feels warm based on your background. Ready to craft your pitch?`;
+    }
+
     setMessages([{ role: 'agent', text: greeting }]);
     setInput('');
   }, [selectedSignal]);
