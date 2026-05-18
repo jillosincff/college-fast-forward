@@ -88,7 +88,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
             padding: 12px !important;
           }
           .premium-ftd-grid {
-            grid-template-columns: 1fr !important;
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
           }
           .premium-ftd-sidebar {
             display: none !important;

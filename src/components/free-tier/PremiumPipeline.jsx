@@ -164,6 +164,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   }, [signalAdditions]);
   const [selectedLead, setSelectedLead] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [activeCol, setActiveCol] = useState('OPPORTUNITIES');
 
   const handleLeadOpen = (lead) => {
     setSelectedLead(lead);
@@ -259,59 +260,99 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }} className="pipeline-scroll">
-          <style>{`.pipeline-scroll::-webkit-scrollbar { display: none; }`}</style>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(200px, 1fr))', gap: 0, minWidth: 720 }}>
-            {COLUMNS.map((col, ci) => (
-              <div key={col} style={{ borderRight: ci < 3 ? '1px solid #f3f4f6' : 'none', padding: '14px 14px 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                  <div style={{ width: 9, height: 9, borderRadius: '50%', background: ci === 0 ? '#3b82f6' : ci === 1 ? '#f97316' : ci === 2 ? '#8b5cf6' : '#10b981', boxShadow: ci === 0 ? '0 0 6px rgba(59,130,246,0.6)' : ci === 1 ? '0 0 6px rgba(249,115,22,0.6)' : ci === 2 ? '0 0 6px rgba(139,92,246,0.6)' : '0 0 6px rgba(16,185,129,0.6)' }} />
-                  <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{col}</p>
-                  <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', background: '#f3f4f6', borderRadius: 100, padding: '1px 7px', marginLeft: 'auto' }}>{cards[col]?.length || 0}</span>
-                </div>
+        {/* Mobile: Tab row */}
+        <div className="pipeline-tab-bar" style={{ display: 'none', borderBottom: '1px solid #f3f4f6', overflowX: 'auto', scrollbarWidth: 'none' }}>
+          <style>{`
+            .pipeline-tab-bar::-webkit-scrollbar { display: none; }
+            @media (max-width: 768px) {
+              .pipeline-tab-bar { display: flex !important; }
+              .pipeline-desktop-grid { display: none !important; }
+              .pipeline-mobile-col { display: flex !important; }
+            }
+          `}</style>
+          {COLUMNS.map((col, ci) => {
+            const dotColors = ['#3b82f6','#f97316','#8b5cf6','#10b981'];
+            return (
+              <button
+                key={col}
+                onClick={() => setActiveCol(col)}
+                style={{
+                  fontFamily: dm, fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
+                  color: activeCol === col ? '#111827' : '#6b7280',
+                  background: 'none', border: 'none',
+                  borderBottom: `2px solid ${activeCol === col ? dotColors[ci] : 'transparent'}`,
+                  padding: '10px 16px', cursor: 'pointer', minHeight: 'auto',
+                  display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: dotColors[ci], boxShadow: `0 0 5px ${dotColors[ci]}99` }} />
+                {col}
+                <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', background: '#f3f4f6', borderRadius: 100, padding: '1px 7px' }}>{cards[col]?.length || 0}</span>
+              </button>
+            );
+          })}
+        </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
-                  {col === 'OPPORTUNITIES'
-                    ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} />)
-                    : cards[col].map((item, i) => (
-                      <LeadCard 
-                        key={i} 
-                        lead={item} 
-                        columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'}
-                        onOpen={setSelectedCard} 
-                      />
-                    ))
-                  }
-
-                  {/* Add card input */}
-                  {newCard.col === col ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      <input
-                        autoFocus
-                        value={newCard.text}
-                        onChange={e => setNewCard(n => ({ ...n, text: e.target.value }))}
-                        onKeyDown={e => { if (e.key === 'Enter') addCard(col); if (e.key === 'Escape') setNewCard({ col: null, text: '' }); }}
-                        placeholder="Company or role name..."
-                        style={{ fontFamily: dm, fontSize: 12, color: '#374151', background: '#fff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 10px', outline: 'none', minHeight: 'auto' }}
-                      />
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={() => addCard(col)} style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Add</button>
-                        <button onClick={() => setNewCard({ col: null, text: '' })} style={{ flex: 1, fontFamily: dm, fontSize: 11, color: '#6b7280', background: '#f3f4f6', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setNewCard({ col, text: '' })}
-                      style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: 'none', border: '1px dashed #e5e7eb', borderRadius: 10, padding: '8px 0', cursor: 'pointer', minHeight: 'auto', transition: 'border-color 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = '#bfdbfe'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}
-                    >
-                      + Add card
-                    </button>
-                  )}
-                </div>
+        {/* Mobile: single active column */}
+        <div className="pipeline-mobile-col" style={{ display: 'none', flexDirection: 'column', gap: 10, padding: '14px' }}>
+          {cards[activeCol]?.map((item, i) => (
+            <LeadCard
+              key={i} lead={item}
+              columnId={activeCol === 'OPPORTUNITIES' ? 'opportunities' : activeCol === 'APPLIED' ? 'applied' : activeCol === 'INTERVIEWING' ? 'interviewing' : 'offer'}
+              onOpen={activeCol === 'OPPORTUNITIES' ? handleLeadOpen : setSelectedCard}
+            />
+          ))}
+          {newCard.col === activeCol ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <input autoFocus value={newCard.text} onChange={e => setNewCard(n => ({ ...n, text: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCard(activeCol); if (e.key === 'Escape') setNewCard({ col: null, text: '' }); }} placeholder="Company or role name..." style={{ fontFamily: dm, fontSize: 12, color: '#374151', background: '#fff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 10px', outline: 'none', minHeight: 'auto' }} />
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button onClick={() => addCard(activeCol)} style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Add</button>
+                <button onClick={() => setNewCard({ col: null, text: '' })} style={{ flex: 1, fontFamily: dm, fontSize: 11, color: '#6b7280', background: '#f3f4f6', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
               </div>
-            ))}
+            </div>
+          ) : (
+            <button onClick={() => setNewCard({ col: activeCol, text: '' })} style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: 'none', border: '1px dashed #e5e7eb', borderRadius: 10, padding: '8px 0', cursor: 'pointer', minHeight: 'auto' }}>+ Add card</button>
+          )}
+        </div>
+
+        {/* Desktop: 4-column grid */}
+        <div className="pipeline-desktop-grid" style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <style>{`.pipeline-desktop-grid::-webkit-scrollbar { display: none; }`}</style>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(200px, 1fr))', gap: 0, minWidth: 720 }}>
+            {COLUMNS.map((col, ci) => {
+              const dotColors = ['#3b82f6','#f97316','#8b5cf6','#10b981'];
+              const glows = ['rgba(59,130,246,0.6)','rgba(249,115,22,0.6)','rgba(139,92,246,0.6)','rgba(16,185,129,0.6)'];
+              return (
+                <div key={col} style={{ borderRight: ci < 3 ? '1px solid #f3f4f6' : 'none', padding: '14px 14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: dotColors[ci], boxShadow: `0 0 6px ${glows[ci]}` }} />
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{col}</p>
+                    <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', background: '#f3f4f6', borderRadius: 100, padding: '1px 7px', marginLeft: 'auto' }}>{cards[col]?.length || 0}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
+                    {col === 'OPPORTUNITIES'
+                      ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} />)
+                      : cards[col].map((item, i) => (
+                          <LeadCard key={i} lead={item} columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} />
+                        ))
+                    }
+                    {newCard.col === col ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <input autoFocus value={newCard.text} onChange={e => setNewCard(n => ({ ...n, text: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCard(col); if (e.key === 'Escape') setNewCard({ col: null, text: '' }); }} placeholder="Company or role name..." style={{ fontFamily: dm, fontSize: 12, color: '#374151', background: '#fff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 10px', outline: 'none', minHeight: 'auto' }} />
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button onClick={() => addCard(col)} style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Add</button>
+                          <button onClick={() => setNewCard({ col: null, text: '' })} style={{ flex: 1, fontFamily: dm, fontSize: 11, color: '#6b7280', background: '#f3f4f6', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => setNewCard({ col, text: '' })} style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: 'none', border: '1px dashed #e5e7eb', borderRadius: 10, padding: '8px 0', cursor: 'pointer', minHeight: 'auto', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#bfdbfe'} onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}>
+                        + Add card
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

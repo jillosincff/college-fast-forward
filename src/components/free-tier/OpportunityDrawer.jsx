@@ -185,8 +185,13 @@ ${userFirstName}`;
       />
 
       {/* Drawer */}
-      <div style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, width: 460, maxWidth: '95vw',
+      <style>{`
+        @media (max-width: 768px) {
+          .opportunity-drawer { width: 100% !important; left: 0 !important; }
+        }
+      `}</style>
+      <div className="opportunity-drawer" style={{
+        position: 'fixed', top: 0, right: 0, bottom: 0, width: 460, maxWidth: '100vw',
         background: '#fff', zIndex: 40001, boxShadow: '-8px 0 48px rgba(0,0,0,0.18)',
         display: 'flex', flexDirection: 'column', animation: 'drawerSlideIn 0.28s cubic-bezier(0.22,1,0.36,1)',
         overflowY: 'auto',
@@ -219,56 +224,71 @@ ${userFirstName}`;
           </div>
         )}
 
-        {/* ── Section 1: Intelligence Header ── */}
+        {/* ── Section 1: Header — Role + Company + Signals ── */}
         <div style={{ background: `linear-gradient(135deg, #0a0a0a 0%, #0d1a3a 60%, ${t.primary}22 100%)`, padding: '28px 24px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
             <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>
               {lead.logo}
             </div>
-            <div>
-              <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff', margin: '0 0 2px', lineHeight: 1.2 }}>{lead.role}</p>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff', margin: '0 0 2px', lineHeight: 1.2 }}>{lead.role}</p>
               <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.65)', fontWeight: 600, margin: 0 }}>{lead.company}</p>
             </div>
           </div>
 
-          {/* Backdoor badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(234,179,8,0.15)', border: '1px solid rgba(234,179,8,0.35)', borderRadius: 100, padding: '5px 12px', marginBottom: 14 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#eab308', boxShadow: '0 0 6px rgba(234,179,8,0.8)' }} />
-            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#eab308', letterSpacing: '0.06em' }}>💡 UNADVERTISED ROLE · DETECTED 4 HOURS AGO</span>
-          </div>
-
-          {/* Warm link summary */}
-          <div style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '12px 16px' }}>
-            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Edge</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
-                🐊 {lead.alumCount || 3} {shortName} grads work here
-              </p>
-              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
-                🎯 Internal Contact: {lead.recruiter}
-              </p>
+          {/* Signal badges row */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(234,179,8,0.15)', border: '1px solid rgba(234,179,8,0.35)', borderRadius: 100, padding: '4px 12px' }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#eab308', boxShadow: '0 0 6px rgba(234,179,8,0.8)' }} />
+              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#eab308', letterSpacing: '0.06em' }}>UNADVERTISED ROLE</span>
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 100, padding: '4px 12px' }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e' }} />
+              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#22c55e', letterSpacing: '0.06em' }}>AGENT DETECTED</span>
             </div>
           </div>
         </div>
 
         <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1 }}>
 
-          {/* ── Section 2: Job Description ── */}
+          {/* ── Section 1b: Job Description (anchors context first) ── */}
           {lead.jobDescriptionText && (
             <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px' }}>
               <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>About the Role</p>
-              <div style={{ maxHeight: 300, overflowY: 'auto', paddingRight: 8 }}>
-                <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: '0 0 12px', lineHeight: 1.7 }}>{lead.jobDescriptionText}</p>
+              <div style={{ maxHeight: 260, overflowY: 'auto', paddingRight: 6, scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
+                <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.75, whiteSpace: 'pre-line' }}>{lead.jobDescriptionText}</p>
               </div>
             </div>
           )}
 
-          {/* ── Section 3: Auto-Apply ── */}
+          {/* ── Section 2: YOUR EDGE alert box ── */}
+          <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '16px 20px' }}>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.45)', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>⚡ Your Edge</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 15 }}>🐊</span>
+                <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
+                  <strong style={{ color: '#fff' }}>{lead.alumCount || 3} {shortName} grads</strong> work here — warm path exists
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 15 }}>🎯</span>
+                <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
+                  Internal Contact: <strong style={{ color: '#fff' }}>{lead.recruiter}</strong>
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 15 }}>📋</span>
+                <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0 }}>
+                  Listing Status: <strong style={{ color: lead.posted === 'Not yet public' ? '#fbbf24' : '#34d399' }}>{lead.posted}</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Section 3: Execution Buttons ── */}
           <div style={{ background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px' }}>
-            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Step 1 — Smart Auto-Apply</p>
-            <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '0 0 14px', lineHeight: 1.6 }}>
-              Our agent will format your <strong style={{ color: '#111827' }}>98% optimized Master Resume</strong>, bypass the standard HR portal, and route your profile directly into the internal referral tracking system.
-            </p>
+            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 14px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Execute</p>
             
             {/* Tailored Resume Button */}
             {!tailoredResume ? (
@@ -339,7 +359,7 @@ ${userFirstName}`;
             </button>
           </div>
 
-          {/* ── Section 4: Network Outreach ── */}
+          {/* ── Section 4: Network Outreach Tabs ── */}
           <div style={{ background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px' }}>
             <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Step 2 — Network Outreach</p>
 
@@ -397,12 +417,6 @@ ${userFirstName}`;
                   : '📋 Copy & Open LinkedIn Profile'
               }
             </button>
-          </div>
-
-          {/* Listing status footer */}
-          <div style={{ background: '#fefce8', border: '1px solid #fde68a', borderRadius: 12, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 14 }}>📋</span>
-            <p style={{ fontFamily: dm, fontSize: 12, color: '#92400e', margin: 0, fontWeight: 600 }}>Listing Status: {lead.posted}</p>
           </div>
 
           {/* ── Smart Alumni Stack ── */}
