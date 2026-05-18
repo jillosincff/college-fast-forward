@@ -41,13 +41,19 @@ const COLUMNS = ['OPPORTUNITIES', 'APPLIED', 'INTERVIEWING', 'OFFER 🎉'];
 
 function LeadCard({ lead, onOpen, columnId }) {
   const emailSyncActive = lead.emailSyncStatus === 'active';
-  
+  const [viewed, setViewed] = useState(false);
+
+  const handleClick = () => {
+    setViewed(true);
+    onOpen(lead);
+  };
+
   return (
     <div
-      onClick={() => onOpen(lead)}
+      onClick={handleClick}
       style={{ 
         background: '#fff', 
-        border: '1px solid #e5e7eb', 
+        border: viewed ? '1px dashed #cbd5e1' : '1px solid #e5e7eb', 
         borderRadius: 12, 
         padding: '14px 16px', 
         cursor: 'pointer', 
@@ -57,7 +63,8 @@ function LeadCard({ lead, onOpen, columnId }) {
         minHeight: 110,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        opacity: viewed ? 0.8 : 1,
       }}
       onMouseEnter={e => { 
         e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.06), 0 4px 8px rgba(0,0,0,0.04)'; 
@@ -66,7 +73,7 @@ function LeadCard({ lead, onOpen, columnId }) {
       }}
       onMouseLeave={e => { 
         e.currentTarget.style.boxShadow = emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.03)'; 
-        e.currentTarget.style.borderColor = '#e5e7eb';
+        e.currentTarget.style.borderColor = viewed ? '#cbd5e1' : '#e5e7eb';
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
@@ -92,8 +99,8 @@ function LeadCard({ lead, onOpen, columnId }) {
       
       {/* Middle & Bottom Rows: Column-Specific Metadata */}
       {columnId === 'opportunities' && (
-        <div style={{ background: '#E85D20', borderRadius: 6, padding: '6px 10px', boxShadow: '0 2px 8px rgba(232,93,32,0.25)' }}>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#fff', margin: 0, fontWeight: 700 }}>🐊 {lead.alumCount || 3} {lead.schoolShortName || 'UF'} grads work here</p>
+        <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: 6, padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <p style={{ fontFamily: dm, fontSize: 12, color: '#ea580c', margin: 0, fontWeight: 600 }}>🐊 {lead.alumCount || 3} {lead.schoolShortName || 'UF'} grads work here</p>
         </div>
       )}
       
