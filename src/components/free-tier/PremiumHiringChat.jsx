@@ -20,22 +20,34 @@ export default function PremiumHiringChat({ user, selectedSignal }) {
   const [loading, setLoading] = useState(false);
   const [parentMatch, setParentMatch] = useState(null);
   const [matchDismissed, setMatchDismissed] = useState(false);
+  const [interviewData, setInterviewData] = useState(null);
+  const [interviewDismissed, setInterviewDismissed] = useState(false);
   const bottomRef = useRef(null);
 
-  // On mount — look up whether a parent match exists for the student's target industry
+  // On mount — run both checks in parallel; interview prep takes priority over parent match
   useEffect(() => {
     if (!user?.id) return;
-    base44.functions.invoke('getDashboardParentMatch', {}).then((res) => {
-      const d = res?.data ?? res ?? {};
-      if (d.match_found && d.parent) {
-        setParentMatch(d);
-        const { parent, industry, school_code } = d;
+
+    Promise.all([
+      base44.functions.invoke('checkUpcomingInterviews', {}).catch(() => null),
+      base44.functions.invoke('getDashboardParentMatch', {}).catch(() => null),
+    ]).then(([intRes, parentRes]) => {
+      const interview = intRes?.data ?? intRes ?? {};
+      const parentD = parentRes?.data ?? parentRes ?? {};
+
+      if (interview?.has_upcoming && interview?.interview) {
+        const { company, role } = interview.interview;
+        setInterviewData(interview.interview);
+        const roleStr = role ? ` for the ${role} role` : '';
+        const greeting = `Hey ${firstName}! 📎 I noticed you have an interview coming up${roleStr} at ${company}. Let's make sure you're absolutely locked in.\n\nWant to run a quick 10-minute mock interview right now to prep for the questions they're going to throw at you?`;
+        setMessages([{ role: 'agent', text: greeting }]);
+      } else if (parentD?.match_found && parentD?.parent) {
+        setParentMatch(parentD);
+        const { parent, industry, school_code } = parentD;
         const school = school_code || schoolAbbr;
         const greeting = `Hey ${firstName}! 📎 I was just scanning our network and found a ${school} parent — ${parent.first_name}, a ${parent.role_title} at ${parent.company_name}. They've explicitly opted in to backchanneling resumes and mentoring students in ${industry}. Want to connect with them for insider advice or a warm referral?`;
         setMessages([{ role: 'agent', text: greeting }]);
       }
-    }).catch(() => {
-      // silently fail — default greeting stays
     });
   }, [user?.id]);
 
@@ -116,6 +128,34 @@ export default function PremiumHiringChat({ user, selectedSignal }) {
             }}>
               <p style={{ fontFamily: dm, fontSize: 12, margin: 0, lineHeight: 1.6 }}>{m.text}</p>
             </div>
+            {/* Interview prep action buttons — shown only under the first agent message */}
+            {i === 0 && m.role === 'agent' && interviewData && !interviewDismissed && messages.length <= 1 && (
+              <div style={{ marginTop: 8, background: 'rgba(79,70,229,0.05)', border: '1px solid rgba(79,70,229,0.15)', borderRadius: 12, padding: '10px 12px', maxWidth: '82%' }}>
+                <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#4f46e5', margin: '0 0 8px' }}>🎯 Recommended Prep Event Triggered</p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      setInterviewDismissed(true);
+                      window.location.hash = `#MockInterview?company=${encodeURIComponent(interviewData.company)}`;
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                  >
+                    🎙️ Start Practice Session
+                  </button>
+                  <button
+                    onClick={() => setInterviewDismissed(true)}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#6b7280', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '8px 12px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                  >
+                    Maybe later
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Parent match action buttons — shown only under the first agent message */}
             {i === 0 && m.role === 'agent' && parentMatch && !matchDismissed && messages.length <= 1 && (
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
