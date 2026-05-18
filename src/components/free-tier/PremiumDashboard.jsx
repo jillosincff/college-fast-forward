@@ -57,9 +57,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
   const showParentStat = parentCount === null || parentCount >= 20;
   const stats = [
-    { emoji: '🚀', label: '24/7 Active Crawlers', value: 'ON' },
-    { emoji: '📄', label: 'Resume Match Target', value: '98%' },
-    ...(showParentStat ? [{ emoji: '🤝', label: `${shortName} Parents Online`, value: parentCount === null ? '247' : `${parentCount}` }] : []),
+    { emoji: '🤖', label: 'Agent Status', value: 'FULLY DEPLOYED' },
+    { emoji: '🎯', label: 'Resume Match', value: '98% (ATS Proof)' },
+    { emoji: '🐊', label: 'Synced Network', value: `${shortName} Network Active` },
   ];
 
   return (
@@ -101,12 +101,13 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
             <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#60a5fa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>CFF Sprint Active</span>
           </div>
 
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
-            Welcome to your Premium Sprint, {firstName} ⚡
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: isMobile ? 24 : 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
+            Let's get locked in and get you hired, {firstName} 🚀
           </h1>
-          <p style={{ fontFamily: dm, fontSize: 14, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: 680 }}>
-            Your agent is fully deployed. We've cleared your resume red flags, mapped your <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{shortName}</strong> network, and are actively crawling hidden corporate subdomains for unadvertised roles.{' '}
-            <strong style={{ color: '#E85D20' }}>Let's get you hired.</strong>
+          <p style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: 680 }}>
+            Your career agent is officially live and working 24/7. We've already scrubbed your resume flags, bypassed the standard job-board portals, and mapped out your{' '}
+            <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{shortName}</strong> alumni backdoor channels.{' '}
+            <strong style={{ color: '#E85D20' }}>Let's go get this offer.</strong>
           </p>
 
           {/* Stats row */}
