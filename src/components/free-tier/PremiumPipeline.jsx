@@ -52,9 +52,20 @@ function LeadCard({ lead, onOpen, columnId }) {
         flexDirection: 'column',
         justifyContent: 'space-between'
       }}
-      onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = '#bfdbfe'; }}
-      onMouseLeave={e => { e.currentTarget.style.boxShadow = emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
+      onMouseEnter={e => { 
+        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; 
+        e.currentTarget.style.borderColor = '#bfdbfe';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={e => { 
+        e.currentTarget.style.boxShadow = emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.05)'; 
+        e.currentTarget.style.borderColor = '#e5e7eb';
+        e.currentTarget.style.transform = 'translateY(0)';
+      }}
     >
+      {/* Subtle chevron indicator in top-right corner */}
+      <div style={{ position: 'absolute', top: 12, right: 12, color: '#94a3b8', fontSize: 16, lineHeight: 1, pointerEvents: 'none' }}>›</div>
+      
       {emailSyncActive && (
         <div style={{ position: 'absolute', top: 10, right: 10, width: 8, height: 8, borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s infinite' }}>
           <style>{`@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }`}</style>
@@ -74,12 +85,9 @@ function LeadCard({ lead, onOpen, columnId }) {
       
       {/* Middle & Bottom Rows: Column-Specific Metadata */}
       {columnId === 'opportunities' && (
-        <>
-          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '6px 10px', marginBottom: 8 }}>
-            <p style={{ fontFamily: dm, fontSize: 10, color: '#2563eb', margin: 0, fontWeight: 600 }}>💡 {lead.connectionsCount || 3} UF Connections</p>
-          </div>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#3b82f6', margin: 0, fontWeight: 500 }}>Click to open Backdoor Access →</p>
-        </>
+        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '6px 10px' }}>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#2563eb', margin: 0, fontWeight: 600 }}>💡 {lead.connectionsCount || 3} UF Connections</p>
+        </div>
       )}
       
       {columnId === 'applied' && (
@@ -98,21 +106,15 @@ function LeadCard({ lead, onOpen, columnId }) {
       )}
       
       {columnId === 'interviewing' && (
-        <>
-          <div style={{ background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 6, padding: '6px 10px', marginBottom: 8 }}>
-            <p style={{ fontFamily: dm, fontSize: 10, color: '#7c3aed', margin: 0, fontWeight: 600 }}>📅 {lead.interviewRound || 'Round 1'}: {lead.interviewDate ? new Date(lead.interviewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}</p>
-          </div>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#6366f1', margin: 0, fontWeight: 500 }}>🔗 View Sent Resume</p>
-        </>
+        <div style={{ background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 6, padding: '6px 10px' }}>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#7c3aed', margin: 0, fontWeight: 600 }}>📅 {lead.interviewRound || 'Round 1'}: {lead.interviewDate ? new Date(lead.interviewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}</p>
+        </div>
       )}
       
       {columnId === 'offer' && (
-        <>
-          <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '6px 10px', marginBottom: 8 }}>
-            <p style={{ fontFamily: dm, fontSize: 10, color: '#15803d', margin: 0, fontWeight: 700 }}>🎉 Offer Unlocked</p>
-          </div>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#16a34a', margin: 0, fontWeight: 500 }}>💰 View Negotiation Tools →</p>
-        </>
+        <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 6, padding: '6px 10px' }}>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#15803d', margin: 0, fontWeight: 700 }}>🎉 Offer Unlocked</p>
+        </div>
       )}
     </div>
   );
