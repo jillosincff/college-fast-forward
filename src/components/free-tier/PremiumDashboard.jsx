@@ -18,7 +18,7 @@ function PremiumNav({ user }) {
           <div style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
             <span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span>
           </div>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 100, padding: '3px 12px', boxShadow: '0 2px 6px rgba(37,99,235,0.2)' }}>Sprint Active</span>
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 100, padding: '6px 12px', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>Premium Active</span>
         </div>
         <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>
           {user?.full_name || user?.email}
@@ -113,9 +113,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(37,99,235,0.15)', border: '1px solid rgba(37,99,235,0.35)', borderRadius: 100, padding: '4px 14px', marginBottom: 16 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb', boxShadow: '0 0 6px rgba(37,99,235,0.8)' }} />
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#60a5fa', letterSpacing: '0.1em', textTransform: 'uppercase' }}>CFF Sprint Active</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(30,41,59,0.4)', border: '1px solid rgba(51,65,85,1)', borderRadius: 100, padding: '4px 12px', marginBottom: 16 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 8px #34d399' }} />
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Premium Account</span>
           </div>
 
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: isMobile ? 24 : 28, fontWeight: 700, color: '#fff', margin: '0 0 10px', lineHeight: 1.2, letterSpacing: '-0.01em' }}>
