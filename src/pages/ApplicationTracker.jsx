@@ -248,31 +248,31 @@ export default function ApplicationTracker() {
                 key={app.id}
                 onClick={() => setSelectedApp(app)}
                 style={{
-                  background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #E5E5E5',
-                  cursor: 'pointer', transition: 'all 0.2s',
+                  background: '#fff', borderRadius: 12, padding: '16px 14px', border: '1px solid #E5E5E5',
+                  cursor: 'pointer', transition: 'all 0.2s', boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                  <div style={{ fontSize: 28, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ fontSize: 28, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {app.logo}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{ fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px', fontSize: 14 }}>
+                    <h4 style={{ fontWeight: 600, color: '#1A1A1A', margin: '0 0 4px', fontSize: 14, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {app.jobTitle}
                     </h4>
-                    <p style={{ fontSize: 13, color: '#666', margin: 0 }}>
-                      {app.company} • {new Date(app.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    <p style={{ fontSize: 11, color: '#666', margin: 0, letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {app.company} • {new Date(app.dateApplied).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{
                     fontSize: 12, fontWeight: 600, color: '#fff', background: STATUS_COLORS[app.status],
-                    padding: '4px 10px', borderRadius: 100,
+                    padding: '4px 10px', borderRadius: 100, flexShrink: 0,
                   }}>
                     {STATUS_LABELS[app.status]}
                   </span>
-                  <p style={{ fontSize: 12, color: '#888', margin: 0 }}>
+                  <p style={{ fontSize: 11, color: '#888', margin: 0, letterSpacing: '-0.01em' }}>
                     {app.resumeVersion}
                   </p>
                 </div>
