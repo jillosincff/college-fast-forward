@@ -15,8 +15,10 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
   const [copied, setCopied] = useState(false);
   const [tailoring, setTailoring] = useState(false);
   const [tailoredResume, setTailoredResume] = useState(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [sortedAlumni, setSortedAlumni] = useState([]);
+  const [tailoringStep, setTailoringStep] = useState(0);
 
   const recruiterName = lead?.recruiter?.split(',')[0] || '[Name]';
   const userFirstName = user?.full_name?.split(' ')[0] || '[Your Name]';
@@ -125,22 +127,44 @@ ${userFirstName}`;
 
   const handleTailorResume = async () => {
     setTailoring(true);
+    setTailoringStep(0);
+    
+    // Step 1: Loading animation with progress text
+    await new Promise(r => setTimeout(r, 1200));
+    setTailoringStep(1);
+    await new Promise(r => setTimeout(r, 1300));
+    
     // Simulate AI tailoring — in production this calls a backend function
-    await new Promise(r => setTimeout(r, 2500));
     const lastName = user?.full_name?.split(' ')[1] || user?.full_name?.split(' ')[0] || 'Resume';
     const fileName = `Resume_${lastName}_${lead?.company?.replace(/\s+/g, '')}.pdf`;
+    const mockOptimizations = [
+      `Highlighted "Outbound Lead Gen" in your ${shortName} Sales Club exp`,
+      `Matched 4 core ATS keywords from ${lead?.company} description`,
+      `Emphasized ${userMajor || 'relevant'} coursework alignment`,
+    ];
+    
     setTailoredResume({
       fileName,
       tailoredFor: lead?.company,
       tailoredForRole: lead?.role,
       tailoredAt: new Date().toISOString(),
+      optimizations: mockOptimizations,
+      previewUrl: null, // In production: actual PDF URL from backend
     });
     setTailoring(false);
+    setTailoringStep(0);
+    setShowPreviewModal(true);
   };
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') { onClose(); setShowConfirmModal(false); }; };
+    const handler = (e) => { 
+      if (e.key === 'Escape') { 
+        onClose(); 
+        setShowConfirmModal(false); 
+        setShowPreviewModal(false);
+      }; 
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
@@ -171,8 +195,29 @@ ${userFirstName}`;
         {/* Close button */}
         <button
           onClick={onClose}
-          style={{ position: 'absolute', top: 16, right: 16, width: 32, height: 32, borderRadius: '50%', background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: '#6b7280', minHeight: 'auto', minWidth: 'auto', zIndex: 1 }}
+          style={{ position: 'absolute', top: 16, right: 16, width: 32, height: 32, borderRadius: '50%', background: '#f3f4f6', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: '#6b7280', minHeight: 'auto', minWidth: 'auto', zIndex: 10 }}
         >×</button>
+
+        {/* Tailoring Progress Overlay */}
+        {tailoring && (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.95)',
+            zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', animation: 'overlayFadeIn 0.2s ease',
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 24, animation: 'bounce 1s infinite' }}>
+              {tailoringStep === 0 ? '🤖' : '✂️'}
+            </div>
+            <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}`}</style>
+            <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: '0 0 8px', textAlign: 'center' }}>
+              {tailoringStep === 0 
+                ? `🤖 Agent analyzing ${lead?.company} ${lead?.role} requirements...`
+                : `✂️ Injecting optimized skill alignments...`
+              }
+            </p>
+            <div style={{ width: 48, height: 48, border: '4px solid #e5e7eb', borderTop: '4px solid #8b5cf6', borderRadius: '50%', animation: 'spinTailor 0.7s linear infinite', marginTop: 16 }} />
+          </div>
+        )}
 
         {/* ── Section 1: Intelligence Header ── */}
         <div style={{ background: `linear-gradient(135deg, #0a0a0a 0%, #0d1a3a 60%, ${t.primary}22 100%)`, padding: '28px 24px 24px' }}>
@@ -271,6 +316,7 @@ ${userFirstName}`;
             <button
               onClick={handleAutoApply}
               disabled={applying || applied}
+              data-apply-button
               style={{
                 width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 700,
                 color: '#fff', border: 'none', borderRadius: 12, padding: '14px 0',
@@ -394,6 +440,130 @@ ${userFirstName}`;
 
         </div>
       </div>
+
+      {/* ── Resume Preview Modal ── */}
+      {showPreviewModal && tailoredResume && (
+        <>
+          <div
+            onClick={() => setShowPreviewModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 60000, animation: 'overlayFadeIn 0.25s ease', backdropFilter: 'blur(4px)' }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 'calc(100% - 48px)',
+            maxWidth: 720,
+            maxHeight: '85vh',
+            background: '#fff',
+            zIndex: 60001,
+            borderRadius: 20,
+            boxShadow: '0 24px 80px rgba(0,0,0,0.35)',
+            animation: 'modalSlideIn 0.3s cubic-bezier(0.22,1,0.36,1)',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            {/* Header */}
+            <div style={{ background: `linear-gradient(135deg, #1e293b, #334155)`, padding: '20px 28px', borderBottom: '1px solid #e5e7eb' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 24 }}>📄</span>
+                  <div>
+                    <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff', margin: 0 }}>Review Your Tailored Resume</p>
+                    <p style={{ fontFamily: dm, fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: '2px 0 0' }}>{tailoredResume.fileName}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowPreviewModal(false)}
+                  style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#fff', minHeight: 'auto' }}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+              {/* AI Optimizations Summary */}
+              <div style={{ background: '#f0f9ff', border: '1px solid #7dd3fc', borderRadius: 16, padding: '18px 20px', marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <span style={{ fontSize: 18 }}>🤖</span>
+                  <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#0c4a6e', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>AI Optimizations Made</p>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 20 }}>
+                  {tailoredResume.optimizations?.map((opt, idx) => (
+                    <li key={idx} style={{ fontFamily: dm, fontSize: 13, color: '#164e63', marginBottom: 6, lineHeight: 1.6 }}>{opt}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* PDF Preview Container */}
+              <div style={{
+                background: '#f8fafc',
+                border: '2px solid #e2e8f0',
+                borderRadius: 12,
+                padding: 20,
+                minHeight: 400,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <div style={{ fontSize: 64, marginBottom: 16 }}>📎</div>
+                <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#475569', margin: '0 0 4px' }}>PDF Preview</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#94a3b8', margin: 0 }}>In production: Embedded PDF viewer loads here</p>
+                <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', marginTop: 8, fontStyle: 'italic' }}>
+                  Showing: {tailoredResume.fileName}
+                </p>
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div style={{ padding: '20px 28px', borderTop: '1px solid #e5e7eb', background: '#f9fafb', display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  alert('Manual edit feature coming soon!');
+                }}
+                style={{
+                  flex: 1, fontFamily: dm, fontSize: 13, fontWeight: 700,
+                  color: '#475569', background: '#fff', border: '2px solid #e2e8f0',
+                  borderRadius: 12, padding: '14px 0', cursor: 'pointer', minHeight: 'auto',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#94a3b8'; e.currentTarget.style.color = '#1e293b'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = '#475569'; }}
+              >
+                📝 Edit Text Manually
+              </button>
+              <button
+                onClick={() => {
+                  setShowPreviewModal(false);
+                  // Highlight the auto-apply button to prime user for final commit
+                  setTimeout(() => {
+                    const applyBtn = document.querySelector('[data-apply-button]');
+                    if (applyBtn) applyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 100);
+                }}
+                style={{
+                  flex: 1, fontFamily: dm, fontSize: 13, fontWeight: 700,
+                  color: '#fff', background: `linear-gradient(135deg, ${t.primary}, ${t.secondary || t.primary})`,
+                  border: 'none', borderRadius: 12, padding: '14px 0',
+                  cursor: 'pointer', minHeight: 'auto',
+                  boxShadow: `0 4px 16px ${t.primary}44`,
+                  transition: 'transform 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                👍 Looks Perfect, Save
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ── Auto-Apply Confirmation Modal ── */}
       {showConfirmModal && (
