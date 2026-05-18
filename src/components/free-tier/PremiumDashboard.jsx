@@ -46,6 +46,21 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const shortName = t.shortName || college || 'your university';
   const [selectedLead, setSelectedLead] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [signalAdditions, setSignalAdditions] = useState([]);
+
+  const handleAddFromSignals = (company, roles) => {
+    const newCards = roles.map(r => ({
+      company,
+      role: r.title,
+      source: 'Signal Feed · Agent discovered',
+      recruiter: '—',
+      posted: 'Not yet public',
+      logo: '🤖',
+      alumCount: 0,
+      fromSignal: true,
+    }));
+    setSignalAdditions(prev => [...prev, ...newCards]);
+  };
   
   // Detect mobile viewport
   useEffect(() => {
@@ -143,8 +158,8 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} />
-            <PremiumSignalsFeed college={college} theme={t} />
+            <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
+            <PremiumSignalsFeed college={college} theme={t} onAddToPipeline={handleAddFromSignals} />
           </div>
 
           {/* Right Column (Desktop Only) */}

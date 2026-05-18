@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import OpportunityDrawer from './OpportunityDrawer';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -136,7 +137,7 @@ function LeadCard({ lead, onOpen, columnId }) {
 
 
 
-export default function PremiumPipeline({ theme, onLeadSelect, user, college, parentCount }) {
+export default function PremiumPipeline({ theme, onLeadSelect, user, college, parentCount, signalAdditions = [] }) {
   const t = theme || { primary: '#2563eb' };
   const [cards, setCards] = useState({
     'OPPORTUNITIES': BACKDOOR_LEADS,
@@ -144,6 +145,23 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     'INTERVIEWING': [],
     'OFFER 🎉': [],
   });
+
+  // Merge new signal additions into OPPORTUNITIES (deduplicate by company+role)
+  const prevAdditionsRef = React.useRef([]);
+  React.useEffect(() => {
+    const incoming = signalAdditions.filter(
+      a => !prevAdditionsRef.current.some(p => p.company === a.company && p.role === a.role)
+    );
+    if (incoming.length === 0) return;
+    prevAdditionsRef.current = signalAdditions;
+    setCards(prev => ({
+      ...prev,
+      'OPPORTUNITIES': [
+        ...prev['OPPORTUNITIES'],
+        ...incoming.filter(a => !prev['OPPORTUNITIES'].some(c => c.company === a.company && c.role === a.role)),
+      ],
+    }));
+  }, [signalAdditions]);
   const [selectedLead, setSelectedLead] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
 
