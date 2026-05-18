@@ -167,8 +167,8 @@ export default function PremiumCareerAssetsCard({ user }) {
   const masterFilename = `${user?.full_name?.replace(/\s+/g, '_') || 'Master'}_Resume.pdf`;
 
   const TABS = [
-    { id: 'ats', label: '📊 ATS Matcher' },
-    { id: 'ghost', label: '👻 Ghost Check' },
+    { id: 'ats', label: '📊 ATS Matcher', tooltip: null },
+    { id: 'ghost', label: '👻 Ghost Check', tooltip: 'Reveals recruiter activity, login frequency, and hiring freeze risk at a specific company.' },
   ];
 
   return (
@@ -256,9 +256,31 @@ export default function PremiumCareerAssetsCard({ user }) {
                 background: 'none', border: 'none',
                 borderBottom: `2px solid ${activeTab === tab.id ? BLUE : 'transparent'}`,
                 padding: '10px 4px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
               }}
             >
               {tab.label}
+              {tab.tooltip && (
+                <span style={{ position: 'relative', display: 'inline-block', cursor: 'help', color: '#94a3b8', lineHeight: 1 }}
+                  onMouseEnter={e => e.currentTarget.querySelector('.tip').style.opacity = '1'}
+                  onMouseLeave={e => e.currentTarget.querySelector('.tip').style.opacity = '0'}
+                >
+                  ⓘ
+                  <span className="tip" style={{
+                    position: 'absolute', bottom: 'calc(100% + 8px)', left: '50%',
+                    transform: 'translateX(-50%)', width: 200,
+                    background: '#0f172a', color: '#fff', fontFamily: dm,
+                    fontSize: 11, fontWeight: 400, lineHeight: 1.5,
+                    padding: '8px 10px', borderRadius: 8, textAlign: 'center',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                    opacity: 0, transition: 'opacity 0.18s ease',
+                    pointerEvents: 'none', zIndex: 50, whiteSpace: 'normal',
+                  }}>
+                    {tab.tooltip}
+                    <span style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', width: 0, height: 0, borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '5px solid #0f172a' }} />
+                  </span>
+                </span>
+              )}
             </button>
           ))}
         </div>
