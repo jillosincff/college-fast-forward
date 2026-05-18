@@ -63,13 +63,37 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
     setSortedAlumni(sorted);
   }, [lead?.role]);
 
-  // Generate dynamic script based on alum match type
+  // Generate dynamic script based on alum match type (Gen Z Momentum Style)
   const generateAlumniScript = (alum) => {
     const isFireMatch = alum.isTopMatch;
+    const userFirstName = user?.full_name?.split(' ')[0] || '[Your Name]';
+    const alumFirstName = alum.name.split(' ')[0];
+    
     if (isFireMatch) {
-      return `Hi ${alum.name.split(' ')[0]},\n\nI noticed you're working as ${alum.title} at ${lead?.company} — that immediately caught my attention since I'm actively pursuing opportunities in this exact space.\n\nAs a fellow ${shortName} student studying ${userMajor}, I'd be incredibly grateful for 15 minutes to hear about your path and any advice on breaking into ${lead?.industry || 'this field'}.\n\nThank you so much for being part of the ${shortName} network!\n\nWarm regards,\n${user?.full_name || '[Your Name]'}`;
+      // 🔥 Scenario A: Fire Match - Highly targeted team script
+      return `Hi ${alumFirstName},
+
+Go Gators! 🐊 I just saw your profile and noticed you're ${alum.title.startsWith('VP') || alum.title.startsWith('Director') || alum.title.startsWith('Head') ? 'leading' : 'working as'} ${alum.title} at ${lead?.company}. 
+
+I'm a graduating senior at ${shortName}, and I actually just hit auto-apply for the open ${lead?.role} role on your exact team. I know you're incredibly busy, but I'd love to grab 5 minutes sometime this week to ask a quick question about how you ${alum.title.includes('Marketing') ? 'structured the team' : alum.title.includes('Engineering') ? 'approach technical challenges' : alum.title.includes('Sales') ? 'build relationships with clients' : 'structure your work'}. 
+
+Any insight from a fellow Gator would be massive as I navigate the process. Either way, appreciate you!
+
+Best,
+${userFirstName}`;
+    } else {
+      // 💼 Scenario B: General Company Alum - Culture/school connection
+      return `Hi ${alumFirstName},
+
+Go Gators! 🐊 I came across your profile while looking into ${lead?.company}—awesome to see a fellow ${shortName} grad killing it there. 
+
+I'm a senior at ${shortName} and just applied for a ${lead?.role} role on the ${lead?.industry || 'commercial'} team. I know you're in a different department, but I'd love to connect briefly to get your take on the overall company culture and what it's like transitioning from ${shortName === 'UF' ? 'Gainesville' : 'campus'} to the ${lead?.industry || 'tech'} world. 
+
+Hope to cross paths soon!
+
+Best,
+${userFirstName}`;
     }
-    return `Hi ${alum.name.split(' ')[0]},\n\nI came across your profile and noticed we both graduated from ${shortName}. I'm currently a student there studying ${userMajor} and exploring opportunities at ${lead?.company}.\n\nI'd love to hear about your experience and any advice you might have for someone looking to break into your team.\n\nThanks for being part of the ${shortName} network!\n\nBest,\n${user?.full_name || '[Your Name]'}`;
   };
 
   const handleAutoApply = () => {
