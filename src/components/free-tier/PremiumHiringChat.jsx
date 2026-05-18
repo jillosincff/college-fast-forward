@@ -103,6 +103,42 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
     setInput('');
   }, [selectedJob]);
 
+  // Email sync suggestion — shown after user manually adds applications or when no recap/interview/parent match is found
+  useEffect(() => {
+    if (!user?.id || recapLoaded || interviewData || parentMatch || selectedJob || selectedSignal) return;
+    
+    // Only suggest if user hasn't synced email yet
+    if (user?.is_email_synced) return;
+
+    const checkAndSuggest = async () => {
+      try {
+        // Check if user has recent applications
+        const applications = await base44.entities.JobApplication.filter({ user_id: user.id }, '-created_date', 5);
+        const recentApps = applications?.filter(a => {
+          const createdDate = new Date(a.created_date);
+          const now = new Date();
+          const hoursDiff = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+          return hoursDiff < 24; // Added in last 24 hours
+        });
+
+        if (recentApps && recentApps.length > 0) {
+          const greeting = `Hey ${firstName}! 📎 I just logged your new application. To save you some time moving forward, you can sync your inbox directly from the banner at the top of your dashboard. Once connected, I can automatically watch for interview dates and updates from companies, so you never have to drag a card manually again. Want me to open the setup?`;
+          setMessages([{ role: 'agent', text: greeting }]);
+          
+          // Add action button
+          setTimeout(() => {
+            setRecapAction({ type: 'SYNC_EMAIL_PROMPT' });
+          }, 100);
+        }
+      } catch (err) {
+        console.error('Failed to check applications:', err);
+      }
+    };
+
+    const timeoutId = setTimeout(checkAndSuggest, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [user?.id, recapLoaded, interviewData, parentMatch, selectedJob, selectedSignal]);
+
   // Reset greeting whenever a coffee-chat signal is selected
   useEffect(() => {
     if (!selectedSignal) return;
@@ -279,6 +315,25 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
                     onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
                   >
                     🔍 Explore Live Feed
+                  </button>
+                )}
+                {recapAction.type === 'SYNC_EMAIL_PROMPT' && (
+                  <button
+                    onClick={async () => {
+                      setRecapAction(null);
+                      try {
+                        const res = await base44.functions.invoke('getEmailOAuthUrl', {});
+                        const oauthUrl = res?.data?.url || res?.url;
+                        if (oauthUrl) window.open(oauthUrl, '_blank');
+                      } catch (err) {
+                        alert('Email sync is temporarily unavailable.');
+                      }
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                  >
+                    ⚡ Open Email Sync Setup
                   </button>
                 )}
               </div>

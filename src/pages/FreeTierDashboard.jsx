@@ -7,6 +7,7 @@ import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 import CareerAssetsCard from '@/components/free-tier/CareerAssetsCard';
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
+import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 
@@ -45,6 +46,7 @@ export default function FreeTierDashboard() {
   const [upgradeFeature, setUpgradeFeature] = useState('');
   const [parentCount, setParentCount] = useState(null);
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
+  const [showEmailSyncModal, setShowEmailSyncModal] = useState(false);
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -112,6 +114,19 @@ export default function FreeTierDashboard() {
       return stored ? JSON.parse(stored)[0] : null;
     } catch { return null; }
   })();
+
+  const handleEmailSync = async () => {
+    try {
+      const res = await base44.functions.invoke('getEmailOAuthUrl', {});
+      const oauthUrl = res?.data?.url || res?.url;
+      if (oauthUrl) {
+        window.open(oauthUrl, '_blank');
+      }
+    } catch (err) {
+      console.error('Failed to get OAuth URL:', err);
+      alert('Email sync is temporarily unavailable. Please try again later.');
+    }
+  };
 
   const empathyMap = {
     ghosted: {
@@ -198,6 +213,15 @@ export default function FreeTierDashboard() {
             </p>
           </div>
         </div>
+
+        {/* ── Email Sync Banner ── */}
+        {!user?.is_email_synced && (
+          <EmailSyncBanner 
+            user={user} 
+            onSyncClick={handleEmailSync}
+            onDismiss={() => {}}
+          />
+        )}
 
         {/* ── School Pride Network Anchor ── */}
         <div style={{ 
