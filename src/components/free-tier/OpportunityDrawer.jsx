@@ -15,11 +15,15 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
   const [copied, setCopied] = useState(false);
   const [tailoring, setTailoring] = useState(false);
   const [tailoredResume, setTailoredResume] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [sortedAlumni, setSortedAlumni] = useState([]);
 
   const recruiterName = lead?.recruiter?.split(',')[0] || '[Name]';
   const userFirstName = user?.full_name?.split(' ')[0] || '[Your Name]';
   const userMajor = user?.student_major || '[Your Major]';
   const targetIndustry = user?.target_industries?.[0] || lead?.industry || '[Target Industry]';
+  const lastName = user?.full_name?.split(' ')[1] || user?.full_name?.split(' ')[0] || 'Resume';
+  const tailoredResumeName = `Master_Resume_${lead?.company?.replace(/\s+/g, '')}.pdf`;
 
   const alumniScript = `Hi ${recruiterName},\n\nI came across the ${lead?.role} opportunity at ${lead?.company} through the College Fast Forward alumni network. I was thrilled to see that ${lead?.source} — that connection immediately stood out.\n\nI'm a current ${shortName} student actively pursuing this type of role, and I'd love to connect briefly to learn more about the opportunity and share how my background aligns.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
 
@@ -27,7 +31,54 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
 
   const activeScript = activeTab === 'alumni' ? alumniScript : parentScript;
 
-  const handleAutoApply = async () => {
+  // Smart Alumni Relevancy Engine
+  useEffect(() => {
+    if (!lead?.role) return;
+    
+    // Extract keywords from role title
+    const roleKeywords = lead.role.toLowerCase().split(' ').filter(w => w.length > 3);
+    const departmentMap = {
+      marketing: ['marketing', 'brand', 'growth', 'creative', 'content', 'social'],
+      sales: ['sales', 'business development', 'account', 'revenue', 'bd'],
+      engineering: ['engineer', 'developer', 'software', 'technical', 'dev'],
+      finance: ['finance', 'accounting', 'financial', 'analyst', 'controller'],
+      operations: ['operations', 'ops', 'logistics', 'supply chain', 'coordinator'],
+      hr: ['human resources', 'hr', 'talent', 'recruiting', 'people'],
+      product: ['product', 'pm', 'manager', 'strategy', 'roadmap'],
+    };
+    
+    const relevantKeywords = Object.entries(departmentMap)
+      .filter(([dept]) => roleKeywords.some(k => k.includes(dept) || dept.includes(k)))
+      .flatMap(([, keywords]) => keywords);
+    
+    // Mock alumni data with relevancy scoring
+    const mockAlumni = [
+      { name: 'Michael K.', title: 'VP of Product Marketing', isTopMatch: relevantKeywords.some(k => 'marketing product'.includes(k)) },
+      { name: 'Jessica L.', title: 'Account Executive', isTopMatch: relevantKeywords.some(k => 'sales account'.includes(k)) },
+      { name: 'David T.', title: 'Corporate Accountant', isTopMatch: relevantKeywords.some(k => 'finance accounting'.includes(k)) },
+    ];
+    
+    // Sort by relevancy (top matches first)
+    const sorted = mockAlumni.sort((a, b) => (b.isTopMatch ? 1 : 0) - (a.isTopMatch ? 1 : 0));
+    setSortedAlumni(sorted);
+  }, [lead?.role]);
+
+  // Generate dynamic script based on alum match type
+  const generateAlumniScript = (alum) => {
+    const isFireMatch = alum.isTopMatch;
+    if (isFireMatch) {
+      return `Hi ${alum.name.split(' ')[0]},\n\nI noticed you're working as ${alum.title} at ${lead?.company} — that immediately caught my attention since I'm actively pursuing opportunities in this exact space.\n\nAs a fellow ${shortName} student studying ${userMajor}, I'd be incredibly grateful for 15 minutes to hear about your path and any advice on breaking into ${lead?.industry || 'this field'}.\n\nThank you so much for being part of the ${shortName} network!\n\nWarm regards,\n${user?.full_name || '[Your Name]'}`;
+    }
+    return `Hi ${alum.name.split(' ')[0]},\n\nI came across your profile and noticed we both graduated from ${shortName}. I'm currently a student there studying ${userMajor} and exploring opportunities at ${lead?.company}.\n\nI'd love to hear about your experience and any advice you might have for someone looking to break into your team.\n\nThanks for being part of the ${shortName} network!\n\nBest,\n${user?.full_name || '[Your Name]'}`;
+  };
+
+  const handleAutoApply = () => {
+    // Trigger confirmation modal instead of immediate apply
+    setShowConfirmModal(true);
+  };
+
+  const confirmAutoApply = async () => {
+    setShowConfirmModal(false);
     setApplying(true);
     await new Promise(r => setTimeout(r, 2000));
     setApplied(true);
@@ -65,7 +116,7 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e) => { if (e.key === 'Escape') { onClose(); setShowConfirmModal(false); }; };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
@@ -284,8 +335,147 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
             <p style={{ fontFamily: dm, fontSize: 12, color: '#92400e', margin: 0, fontWeight: 600 }}>Listing Status: {lead.posted}</p>
           </div>
 
+          {/* ── Smart Alumni Stack ── */}
+          {sortedAlumni.length > 0 && (
+            <div style={{ background: '#f8f9fc', border: '1px solid #e5e7eb', borderRadius: 16, padding: '18px 20px' }}>
+              <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#374151', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Your Edge</p>
+              <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '0 0 12px', lineHeight: 1.5 }}>
+                🐊 {sortedAlumni.length} {shortName} grads work here:
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {sortedAlumni.map((alum, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 12px' }}>
+                    <span style={{ fontSize: 16 }}>{alum.isTopMatch ? '🔥' : idx === 0 ? '💼' : '👥'}</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
+                        {alum.name} · {alum.title}
+                        {alum.isTopMatch && <span style={{ color: '#dc2626', fontWeight: 600, marginLeft: 6 }}>(Top Match)</span>}
+                      </p>
+                      <button
+                        onClick={() => {
+                          const script = generateAlumniScript(alum);
+                          navigator.clipboard.writeText(script);
+                          alert('Script copied! Ready to paste into LinkedIn.');
+                        }}
+                        style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: t.primary, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', textDecoration: 'underline', minHeight: 'auto' }}
+                      >
+                        📋 Copy Script
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
+
+      {/* ── Auto-Apply Confirmation Modal ── */}
+      {showConfirmModal && (
+        <>
+          <div
+            onClick={() => setShowConfirmModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50000, animation: 'overlayFadeIn 0.2s ease' }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 'calc(100% - 40px)',
+            maxWidth: 480,
+            background: '#fff',
+            zIndex: 50001,
+            borderRadius: 20,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            animation: 'modalSlideIn 0.25s cubic-bezier(0.22,1,0.36,1)',
+          }}>
+            <style>{`@keyframes modalSlideIn { from { opacity: 0; transform: translate(-50%, -48%); } to { opacity: 1; transform: translate(-50%, -50%); } }`}</style>
+            
+            {/* Header */}
+            <div style={{ background: `linear-gradient(135deg, ${t.primary}, ${t.secondary || t.primary})`, padding: '24px 28px', borderRadius: '20px 20px 0 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 28 }}>🚀</span>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff', margin: 0 }}>Confirm Your Application</p>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: 'rgba(255,255,255,0.8)', margin: '4px 0 0' }}>Final check before we lock it in</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '28px 28px 24px' }}>
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '0 0 8px', fontWeight: 600 }}>You are about to auto-apply for:</p>
+                <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: 0 }}>{lead?.role}</p>
+                <p style={{ fontFamily: dm, fontSize: 14, color: t.primary, fontWeight: 700, margin: '2px 0 0' }}>{lead?.company}</p>
+              </div>
+
+              <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
+                  <span style={{ fontSize: 16 }}>📄</span>
+                  <div>
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: '0 0 2px', textTransform: 'uppercase' }}>Tailored Asset</p>
+                    <p style={{ fontFamily: dm, fontSize: 12, color: '#111827', margin: 0, fontWeight: 600 }}>{tailoredResume?.fileName || tailoredResumeName}</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <span style={{ fontSize: 16 }}>🎯</span>
+                  <div>
+                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: '0 0 2px', textTransform: 'uppercase' }}>Routed To</p>
+                    <p style={{ fontFamily: dm, fontSize: 12, color: '#111827', margin: 0, fontWeight: 600 }}>{recruiterName} ({lead?.recruiter?.split(', ')[1] || 'Campus Recruiter'})</p>
+                  </div>
+                </div>
+              </div>
+
+              <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '0 0 24px', lineHeight: 1.6, fontStyle: 'italic' }}>
+                *Our agent will officially submit your data. Make sure everything looks right before we lock it in.
+              </p>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  style={{
+                    flex: 1, fontFamily: dm, fontSize: 13, fontWeight: 700,
+                    color: '#6b7280', background: '#f3f4f6', border: 'none',
+                    borderRadius: 12, padding: '14px 0', cursor: 'pointer', minHeight: 'auto',
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#e5e7eb'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#f3f4f6'}
+                >
+                  ❌ Cancel
+                </button>
+                <button
+                  onClick={confirmAutoApply}
+                  disabled={applying}
+                  style={{
+                    flex: 1, fontFamily: dm, fontSize: 13, fontWeight: 700,
+                    color: '#fff', background: applying ? '#9ca3af' : `linear-gradient(135deg, ${t.primary}, ${t.secondary || t.primary})`,
+                    border: 'none', borderRadius: 12, padding: '14px 0',
+                    cursor: applying ? 'not-allowed' : 'pointer', minHeight: 'auto',
+                    boxShadow: applying ? 'none' : `0 4px 16px ${t.primary}44`,
+                    transition: 'background 0.2s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  {applying ? (
+                    <>
+                      <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+                      Processing...
+                    </>
+                  ) : (
+                    <>⚡ Let's Lock It In</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
