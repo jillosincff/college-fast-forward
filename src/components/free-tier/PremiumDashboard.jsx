@@ -46,8 +46,18 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const shortName = t.shortName || college || 'your university';
   const [selectedLead, setSelectedLead] = useState(null);
   const [selectedSignal, setSelectedSignal] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);  // Ghost Risk Meter bypass
   const [isMobile, setIsMobile] = useState(false);
   const [signalAdditions, setSignalAdditions] = useState([]);
+
+  const handleBackdoorClick = (job) => {
+    setSelectedJob(job);
+    setSelectedSignal(null); // clear any signal selection
+    // Scroll CliFF panel into view
+    setTimeout(() => {
+      document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
 
   const handleAddFromSignals = (company, roles) => {
     const newCards = roles.map(r => ({
@@ -162,7 +172,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
-            <PremiumSignalsFeed college={college} theme={t} onAddToPipeline={handleAddFromSignals} onCoffeeChat={setSelectedSignal} user={user} />
+            <PremiumSignalsFeed college={college} theme={t} onAddToPipeline={handleAddFromSignals} onCoffeeChat={setSelectedSignal} onBackdoorClick={handleBackdoorClick} user={user} />
           </div>
 
           {/* Right Column (Desktop Only) */}
@@ -177,7 +187,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
             )}
 
-            <PremiumHiringChat user={user} selectedSignal={selectedSignal} />
+            <div id="cliff-chat-panel">
+              <PremiumHiringChat user={user} selectedSignal={selectedSignal} selectedJob={selectedJob} />
+            </div>
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ const STARTER_PROMPTS = [
   "How do I negotiate salary for my first job?",
 ];
 
-export default function PremiumHiringChat({ user, selectedSignal }) {
+export default function PremiumHiringChat({ user, selectedSignal, selectedJob }) {
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'your university';
 
@@ -50,6 +50,26 @@ export default function PremiumHiringChat({ user, selectedSignal }) {
       }
     });
   }, [user?.id]);
+
+  // Reset greeting when a Ghost Risk Meter "Bypass" job is selected
+  useEffect(() => {
+    if (!selectedJob) return;
+    const { title, companyName, riskLevel, daysLive, totalAlumni, parentConnections } = selectedJob;
+
+    let greeting;
+    if (riskLevel === 'HIGH') {
+      const alumniLine = totalAlumni ? `there are ${totalAlumni} ${schoolAbbr} grads there` : "let's find alumni contacts";
+      const parentLine = parentConnections ? ` and ${parentConnections} parent backdoor${parentConnections > 1 ? 's' : ''}` : '';
+      greeting = `Hey ${firstName}! 🛑 That listing for ${title}${companyName ? ` at ${companyName}` : ''} has been live for ${daysLive} days — cold applications are hitting a black hole right now.\n\nDon't apply blind. Here's the play: ${alumniLine}${parentLine}. Want me to draft a targeted outreach that bypasses the queue entirely?`;
+    } else if (riskLevel === 'MEDIUM') {
+      greeting = `Hey ${firstName}! ⚠️ The **${title}${companyName ? ` at ${companyName}` : ''}** listing is ${daysLive} days old — it's filling up fast.\n\nBest move: apply AND hit the network simultaneously. ${totalAlumni ? `I see ${totalAlumni} ${schoolAbbr} grads there` : 'Let me find warm contacts'}. Want me to draft a backdoor outreach to run alongside your application?`;
+    } else {
+      greeting = `Hey ${firstName}! ⏱️ Great timing — **${title}${companyName ? ` at ${companyName}` : ''}** just dropped${daysLive !== null ? ` ${daysLive} day${daysLive !== 1 ? 's' : ''} ago` : ''}. Your resume has a high chance of landing at the top.\n\n${totalAlumni ? `There are ${totalAlumni} ${schoolAbbr} grads there too.` : ''} Want me to tailor your pitch for this specific role before you apply?`;
+    }
+
+    setMessages([{ role: 'agent', text: greeting }]);
+    setInput('');
+  }, [selectedJob]);
 
   // Reset greeting whenever a coffee-chat signal is selected
   useEffect(() => {
