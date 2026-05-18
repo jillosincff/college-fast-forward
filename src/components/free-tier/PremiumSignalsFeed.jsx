@@ -89,7 +89,7 @@ const LIVE_SIGNALS = [
   },
 ];
 
-function SignalExpansion({ signal, theme, onAddToPipeline }) {
+function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniCount }) {
   const t = theme || { primary: '#2563eb' };
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [added, setAdded] = useState(false);
@@ -107,6 +107,9 @@ function SignalExpansion({ signal, theme, onAddToPipeline }) {
         : signal.expansion.roles;
       onAddToPipeline(signal.company, toAdd);
       setAdded(true);
+    }
+    if (signal.expansion.ctaType === 'coffeechat' && onCoffeeChat) {
+      onCoffeeChat({ company: signal.company, alumniCount: alumniCount ?? 0 });
     }
   };
 
@@ -223,7 +226,7 @@ function SignalExpansion({ signal, theme, onAddToPipeline }) {
   );
 }
 
-export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, user }) {
+export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, onCoffeeChat, user }) {
   const t = theme || { primary: '#2563eb', secondary: '#1d4ed8', bgTint: '#eff6ff' };
   const [expandedId, setExpandedId] = useState(null);
   const [alumniCounts, setAlumniCounts] = useState({});
@@ -362,6 +365,8 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, us
                   signal={sig}
                   theme={t}
                   onAddToPipeline={onAddToPipeline || (() => {})}
+                  onCoffeeChat={onCoffeeChat}
+                  alumniCount={alumniCounts[sig.id]}
                 />
               )}
             </div>

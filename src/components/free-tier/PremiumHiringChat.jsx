@@ -9,14 +9,27 @@ const STARTER_PROMPTS = [
   "How do I negotiate salary for my first job?",
 ];
 
-export default function PremiumHiringChat({ user }) {
+export default function PremiumHiringChat({ user, selectedSignal }) {
   const firstName = user?.full_name?.split(' ')[0] || 'there';
-  const [messages, setMessages] = useState([
-    { role: 'agent', text: `Hi ${firstName}! 📎 I'm CliFF, your CFF Career Agent. Ask me anything — tricky interview follow-ups, salary negotiations, or how to reach out to that alum at your target company. I'm locked in 24/7.` }
-  ]);
+  const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'alumni';
+
+  const defaultGreeting = `Hi ${firstName}! 📎 I'm CliFF, your CFF Career Agent. Ask me anything — tricky interview follow-ups, salary negotiations, or how to reach out to that alum at your target company. I'm locked in 24/7.`;
+
+  const [messages, setMessages] = useState([{ role: 'agent', text: defaultGreeting }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
+
+  // Reset greeting whenever a coffee-chat signal is selected
+  useEffect(() => {
+    if (!selectedSignal) return;
+    const { company, alumniCount } = selectedSignal;
+    const greeting = alumniCount > 0
+      ? `Hi ${firstName}! 📎 I see there are ${alumniCount} ${schoolAbbr} grads at ${company}. Want me to draft a warm coffee chat outreach message to one of them? I'll keep it short, personal, and impossible to ignore.`
+      : `Hi ${firstName}! 📎 I'm looking at ${company} for you. I don't have direct alumni contacts mapped here yet, but I can still write a highly tailored outreach based on your background. Ready to craft your pitch?`;
+    setMessages([{ role: 'agent', text: greeting }]);
+    setInput('');
+  }, [selectedSignal]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -45,6 +45,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';
   const [selectedLead, setSelectedLead] = useState(null);
+  const [selectedSignal, setSelectedSignal] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [signalAdditions, setSignalAdditions] = useState([]);
 
@@ -161,7 +162,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
-            <PremiumSignalsFeed college={college} theme={t} onAddToPipeline={handleAddFromSignals} />
+            <PremiumSignalsFeed college={college} theme={t} onAddToPipeline={handleAddFromSignals} onCoffeeChat={setSelectedSignal} user={user} />
           </div>
 
           {/* Right Column (Desktop Only) */}
@@ -176,7 +177,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />
             )}
 
-            <PremiumHiringChat user={user} />
+            <PremiumHiringChat user={user} selectedSignal={selectedSignal} />
           </div>
         </div>
       </div>
