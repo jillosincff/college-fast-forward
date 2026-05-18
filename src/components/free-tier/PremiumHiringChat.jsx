@@ -22,11 +22,43 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
   const [matchDismissed, setMatchDismissed] = useState(false);
   const [interviewData, setInterviewData] = useState(null);
   const [interviewDismissed, setInterviewDismissed] = useState(false);
+  const [recapLoaded, setRecapLoaded] = useState(false);
+  const [recapAction, setRecapAction] = useState(null);
   const bottomRef = useRef(null);
 
-  // On mount — run both checks in parallel; interview prep takes priority over parent match
+  // On mount — run recap context check first, then fall back to interview/parent checks
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || recapLoaded) return;
+
+    const loadRecap = async () => {
+      try {
+        const recapRes = await base44.functions.invoke('getAgentRecapContext', {});
+        const recap = recapRes?.data ?? recapRes ?? {};
+
+        if (recap.actionItem) {
+          setRecapAction(recap.actionItem);
+
+          if (recap.actionItem.type === 'SEND_WARM_OUTREACH') {
+            const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: We currently have ${recap.metrics.totalInPipeline} opportunities active in your pipeline${recap.metrics.interviewingCount > 0 ? `, and you're locked in for ${recap.metrics.interviewingCount} interview${recap.metrics.interviewingCount > 1 ? 's' : ''}` : ''}. Right now, your application for ${recap.actionItem.companyName} is sitting in 'Applied.' We found ${recap.actionItem.parentCount} ${recap.schoolAbbreviation} parents who work there—let's write a quick message to them today to make sure your resume doesn't hit a cold black hole. Want to draft it now?`;
+            setMessages([{ role: 'agent', text: greeting }]);
+          } else if (recap.actionItem.type === 'FRESH_FEED_LOOKUP') {
+            const greeting = `Welcome back, ${recap.studentName}! 📎 Your tracker is looking completely clean and up to date. Since we're pushing hard for ${recap.actionItem.industry} roles this week, our live feed just picked up fresh listings at companies with active ${recap.schoolAbbreviation} alumni networks. Should we jump into the feed and load some new warm leads into your pipeline?`;
+            setMessages([{ role: 'agent', text: greeting }]);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load recap:', err);
+      } finally {
+        setRecapLoaded(true);
+      }
+    };
+
+    loadRecap();
+  }, [user?.id, recapLoaded]);
+
+  // Secondary checks — only run if no recap action was found
+  useEffect(() => {
+    if (!user?.id || recapLoaded) return;
 
     Promise.all([
       base44.functions.invoke('checkUpcomingInterviews', {}).catch(() => null),
@@ -36,8 +68,8 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
       const parentD = parentRes?.data ?? parentRes ?? {};
 
       if (interview?.has_upcoming && interview?.interview) {
-        const { company, role } = interview.interview;
         setInterviewData(interview.interview);
+        const { company, role } = interview.interview;
         const roleStr = role ? ` for the ${role} role` : '';
         const greeting = `Hey ${firstName}! 📎 I noticed you have an interview coming up${roleStr} at ${company}. Let's make sure you're absolutely locked in.\n\nWant to run a quick 10-minute mock interview right now to prep for the questions they're going to throw at you?`;
         setMessages([{ role: 'agent', text: greeting }]);
@@ -49,7 +81,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
         setMessages([{ role: 'agent', text: greeting }]);
       }
     });
-  }, [user?.id]);
+  }, [user?.id, recapLoaded]);
 
   // Reset greeting when a Ghost Risk Meter "Bypass" job is selected
   useEffect(() => {
@@ -200,6 +232,55 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
                 >
                   Not right now
                 </button>
+              </div>
+            )}
+
+            {/* Recap action buttons — shown only under the first agent message */}
+            {i === 0 && m.role === 'agent' && recapAction && messages.length <= 1 && (
+              <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {recapAction.type === 'SEND_WARM_OUTREACH' && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setRecapAction(null);
+                        sendMessage(`Draft a warm outreach message for ${recapAction.companyName}`);
+                      }}
+                      style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                    >
+                      ⚡ Draft Message for {recapAction.companyName}
+                    </button>
+                    <button
+                      onClick={() => {
+                        window.location.hash = '#FreeTierDashboard';
+                        setTimeout(() => {
+                          const trackerEl = document.querySelector('[data-tracker]');
+                          trackerEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
+                      style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#6b7280', background: '#f1f5f9', border: '1px solid #e5e7eb', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#f1f5f9'}
+                    >
+                      View Tracker
+                    </button>
+                  </>
+                )}
+                {recapAction.type === 'FRESH_FEED_LOOKUP' && (
+                  <button
+                    onClick={() => {
+                      setRecapAction(null);
+                      const signalsEl = document.querySelector('[data-signals]');
+                      signalsEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                  >
+                    🔍 Explore Live Feed
+                  </button>
+                )}
               </div>
             )}
           </div>
