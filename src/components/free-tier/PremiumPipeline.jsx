@@ -50,8 +50,8 @@ function LeadCard({ lead, onOpen, columnId }) {
         borderRadius: 12, 
         padding: '14px 16px', 
         cursor: 'pointer', 
-        transition: 'all 0.2s', 
-        boxShadow: emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.05)',
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)', 
+        boxShadow: emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.03)',
         position: 'relative',
         minHeight: 110,
         display: 'flex',
@@ -59,12 +59,12 @@ function LeadCard({ lead, onOpen, columnId }) {
         justifyContent: 'space-between'
       }}
       onMouseEnter={e => { 
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; 
-        e.currentTarget.style.borderColor = '#bfdbfe';
-        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.06), 0 4px 8px rgba(0,0,0,0.04)'; 
+        e.currentTarget.style.borderColor = '#E85D20';
+        e.currentTarget.style.transform = 'translateY(-4px)';
       }}
       onMouseLeave={e => { 
-        e.currentTarget.style.boxShadow = emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.05)'; 
+        e.currentTarget.style.boxShadow = emailSyncActive ? '0 0 0 2px rgba(34, 197, 94, 0.3)' : '0 1px 3px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.03)'; 
         e.currentTarget.style.borderColor = '#e5e7eb';
         e.currentTarget.style.transform = 'translateY(0)';
       }}
@@ -84,21 +84,21 @@ function LeadCard({ lead, onOpen, columnId }) {
           {lead.logo}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.role}</p>
-          <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: '2px 0 0' }}>{lead.company}</p>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#0f172a', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.role}</p>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#64748b', margin: '2px 0 0' }}>{lead.company}</p>
         </div>
       </div>
       
       {/* Middle & Bottom Rows: Column-Specific Metadata */}
       {columnId === 'opportunities' && (
-        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '6px 10px' }}>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#2563eb', margin: 0, fontWeight: 600 }}>🐊 {lead.alumCount || 3} {lead.schoolShortName || 'UF'} grads work here</p>
+        <div style={{ background: '#E85D20', borderRadius: 6, padding: '6px 10px', boxShadow: '0 2px 8px rgba(232,93,32,0.25)' }}>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#fff', margin: 0, fontWeight: 700 }}>🐊 {lead.alumCount || 3} {lead.schoolShortName || 'UF'} grads work here</p>
         </div>
       )}
       
       {columnId === 'applied' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📩 Tracked via Inbox • {lead.appliedDate ? new Date(lead.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Auto-detecting...'}</p>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#64748b', margin: 0, letterSpacing: '-0.01em' }}>📩 Tracked via Inbox · {lead.appliedDate ? new Date(lead.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Auto-detecting...'}</p>
           {lead.tailoredResume && (
             <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📄 Version: {lead.tailoredResume.fileName.replace('.pdf', '').split('_').pop() || 'Master'}</p>
           )}
@@ -246,7 +246,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
             {COLUMNS.map((col, ci) => (
               <div key={col} style={{ borderRight: ci < 3 ? '1px solid #f3f4f6' : 'none', padding: '14px 14px 16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: ci === 0 ? '#2563eb' : ci === 1 ? '#f59e0b' : ci === 2 ? '#8b5cf6' : '#16a34a' }} />
+                  <div style={{ width: 9, height: 9, borderRadius: '50%', background: ci === 0 ? '#3b82f6' : ci === 1 ? '#f97316' : ci === 2 ? '#8b5cf6' : '#10b981', boxShadow: ci === 0 ? '0 0 6px rgba(59,130,246,0.6)' : ci === 1 ? '0 0 6px rgba(249,115,22,0.6)' : ci === 2 ? '0 0 6px rgba(139,92,246,0.6)' : '0 0 6px rgba(16,185,129,0.6)' }} />
                   <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{col}</p>
                   <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', background: '#f3f4f6', borderRadius: 100, padding: '1px 7px', marginLeft: 'auto' }}>{cards[col]?.length || 0}</span>
                 </div>
