@@ -119,10 +119,15 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
 
           {/* Warm link summary */}
           <div style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12, padding: '12px 16px' }}>
-            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Edge</p>
-            <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: 0, lineHeight: 1.65 }}>
-              We found <strong style={{ color: '#fff' }}>{lead.source}</strong>. Internal contact: <strong style={{ color: '#fff' }}>{lead.recruiter}</strong>.
-            </p>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Edge</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
+                🐊 {lead.alumCount || 3} {shortName} grads work here
+              </p>
+              <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
+                🎯 Internal Contact: {lead.recruiter}
+              </p>
+            </div>
           </div>
         </div>
 
