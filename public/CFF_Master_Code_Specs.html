@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>College Fast Forward - Technical Product Specifications</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .cover-header-bar {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            margin: -20px -30px 40px -30px;
+        }
+        .cover-title { font-size: 26pt; font-weight: 800; line-height: 1.2; margin: 0 0 10px 0; letter-spacing: -0.5px; }
+        .cover-subtitle { font-size: 14pt; font-weight: 300; color: #93c5fd; margin: 0; }
+        .cover-meta { border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 40px; display: flex; gap: 40px; }
+        .meta-label { font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 4px; margin-top: 12px; }
+        .meta-value { font-size: 11pt; font-weight: 600; color: #0f172a; }
+        h1 { font-size: 18pt; font-weight: 700; color: #0f172a; margin-top: 40px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        h2 { font-size: 13pt; font-weight: 700; color: #1e3a8a; margin-top: 24px; margin-bottom: 12px; border-left: 4px solid #ff6b00; padding-left: 8px; }
+        h3 { font-size: 11pt; font-weight: 600; color: #334155; margin-top: 16px; margin-bottom: 6px; }
+        p { margin-top: 0; margin-bottom: 12px; text-align: justify; }
+        ul, ol { margin-top: 0; margin-bottom: 12px; padding-left: 20px; }
+        li { margin-bottom: 6px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th { background-color: #0f172a; color: #ffffff; font-weight: 600; text-align: left; padding: 8px 12px; font-size: 9pt; border: 1px solid #0f172a; }
+        td { padding: 8px 12px; font-size: 9pt; border: 1px solid #e2e8f0; vertical-align: top; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        .callout-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin: 16px 0; }
+        .callout-box.orange-glow { border-left: 4px solid #ff6b00; background-color: #fffaf7; }
+        pre { background-color: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 8.5pt; white-space: pre-wrap; word-wrap: break-word; margin: 10px 0 15px; }
+        code { font-family: 'Courier New', Courier, monospace; background-color: #f1f5f9; color: #0f172a; padding: 2px 4px; border-radius: 4px; font-size: 9pt; }
+        pre code { background-color: transparent; color: inherit; padding: 0; }
+        .math { font-family: 'Times New Roman', serif; font-style: italic; font-weight: bold; color: #1e3a8a; }
+        .badge { display: inline-block; padding: 2px 6px; font-size: 8pt; font-weight: bold; border-radius: 4px; text-transform: uppercase; }
+        .badge-orange { background-color: #ff6b00; color: #ffffff; }
+        .badge-blue { background-color: #2563eb; color: #ffffff; }
+        .badge-purple { background-color: #7c3aed; color: #ffffff; }
+        .badge-green { background-color: #16a34a; color: #ffffff; }
+        .print-btn { position: fixed; top: 20px; right: 20px; background: #ff6b00; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(255,107,0,0.3); z-index: 999; }
+        .print-btn:hover { background: #e55e00; }
+        @media print { .print-btn { display: none; } }
+        hr { border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0; }
+    </style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+
+<div class="cover-header-bar">
+    <div class="cover-title">COLLEGE FAST FORWARD</div>
+    <p class="cover-subtitle">Master Technical UI/UX &amp; Execution Specifications</p>
+</div>
+
+<div style="font-size: 12pt; max-width: 80%;">
+    <p><strong>Document Intent:</strong> This production-ready specification details the comprehensive functional logic, front-end structural layout rules, onboarding behavioral mechanics, data routing loops, and UI design states tailored for the <strong>College Fast Forward</strong> command center workspace platform.</p>
+    <p>It acts as the single source of truth for the product engineering and design teams to ensure pixel-perfect deployment and premium user value monetization.</p>
+</div>
+
+<div class="cover-meta">
+    <div>
+        <div class="meta-label">Author / Product Developer</div>
+        <div class="meta-value">Jill Osinoff</div>
+        <div class="meta-label">Target Core User Base</div>
+        <div class="meta-value">University Undergraduates / Graduating Seniors</div>
+    </div>
+    <div>
+        <div class="meta-label">Document Version</div>
+        <div class="meta-value">v1.0 (Production Master)</div>
+        <div class="meta-label">Release Target Date</div>
+        <div class="meta-value">May 18, 2026</div>
+    </div>
+</div>
+
+<h1>1. Architectural Funnel Layout &amp; Onboarding Engine</h1>
+
+<h2>1.1 Onboarding Intake &amp; Frustration Scene Split</h2>
+<p>To eliminate initial intake choice friction and maximize user conversions from top-of-funnel entry-points, the user setup interface implements a strategic intake selector segment mapped to the user's explicit professional readiness tier. The user is prompted with the core question:</p>
+<div class="callout-box">
+    <strong>"What is the single most frustrating aspect of your career search right now?"</strong>
+</div>
+<p>The user must select from three mutually exclusive conditional response pathways:</p>
+<ol>
+    <li><code>[ 👻 I keep getting ghosted by recruiters ]</code> → Routes instantly to standard background data-ingestion pipeline setup.</li>
+    <li><code>[ 📁 Standing out on LinkedIn feels impossible ]</code> → Routes instantly to standard background data-ingestion pipeline setup.</li>
+    <li><code>[ 🧩 I'm not exactly sure what I want to do yet ]</code> → Bypasses standard target pipelines and executes the <strong>Career Archetype Funnel</strong>.</li>
+</ol>
+
+<h2>1.2 Career Archetype Funnel &amp; Monetization Playwall</h2>
+<p>If a user initiates path 3 (Uncertain Directionality), they are seamlessly introduced into a localized high-accuracy behavioral-trait assessment wrapper designed to resolve choice paralysis. Upon completion of the multi-variate test sequence, the platform surfaces an explicit high-intent <strong>"Teaser &amp; Unlock"</strong> paywall layout to trigger monetization:</p>
+<ul>
+    <li><strong>Headline Element:</strong> "Your Career Archetype is Ready, <code>${user.firstName}</code>!"</li>
+    <li><strong>Subtext Element:</strong> "Based on your unique combination of operational, creative, and persuasive data indicators, you possess matching traits for an elite sector role."</li>
+    <li><strong>Obfuscation Effect:</strong> The main archetype result badge is container-rendered with <code>filter: blur(8px);</code>.</li>
+    <li><strong>Industrial Locks:</strong> Top 3 lucrative industries matched to their profile displayed with lock indicators (🔒).</li>
+    <li><strong>Conversion Prompt:</strong> "Unlock your complete 15-page Career Archetype Blueprint, plus unconstrained access to the full automated background pipeline agent for just <strong>$4.99 a week</strong>."</li>
+    <li><strong>CTA Button:</strong> <code>[ ⚡ Lock In Your Blueprint &amp; Get Hired ]</code></li>
+</ul>
+
+<h2>1.3 Subscription Hydration Sequence</h2>
+<p>The instant the weekly payment intent callback is verified successful by the database webhook receiver, the application initializes the following structural configuration rules:</p>
+<ul>
+    <li>The internal user database table appends the subscription model parameter and unlocks the profile flag.</li>
+    <li>The system executes an automatic initial seed script inside the pipeline repository layer, matching the user's calculated strengths with three unposted or active backdoor roles, ensuring the user lands on a fully populated pipeline space on their first viewport initialize.</li>
+</ul>
+
+<div class="callout-box orange-glow">
+    <strong>UI Copy Guideline:</strong> All legacy branding indicators naming "FastIQ" or containing standard, low-tier freemium references ("Upgrade", "Free Account Type") must be programmatically scrubbed and replaced with <strong>College Fast Forward</strong> verified elements.
+</div>
+
+<hr />
+
+<h1>2. Unified Desktop Workspace Interface Specification</h1>
+
+<h2>2.1 Premium Motivation Banner Layout</h2>
+<p>The primary command center viewport houses a full-width focus banner styled with a high-energy midnight blue background gradient (<code>linear-gradient(to right, #0f172a, #1e293b)</code>) containing white typography configured as follows:</p>
+<ul>
+    <li><strong>Main Title Hook:</strong> "Let's get locked in and get you hired, <code>${user.firstName}</code> 🚀"</li>
+    <li><strong>Subtext Payload Copy:</strong> "Your career agent is officially live and working 24/7. We've already scrubbed your resume flags, bypassed the standard job-board portals, and mapped out your <code>${user.universityMascot}</code> alumni backdoor channels. Let's go get this offer."</li>
+</ul>
+
+<h2>2.2 Core Dashboard Grid Configuration</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Layout Component</th>
+            <th>Desktop Width</th>
+            <th>Responsive Behavior (&lt; 768px)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>My Application Pipeline</strong></td>
+            <td>62% Viewport Width</td>
+            <td>Collapses into 100% block-width. Converts columns into horizontal tap-tab triggers.</td>
+        </tr>
+        <tr>
+            <td><strong>My Career Assets Pane</strong></td>
+            <td>38% Viewport Width</td>
+            <td>Pushed directly under the pipeline stack block linearly.</td>
+        </tr>
+        <tr>
+            <td><strong>Live Career Signals Feed</strong></td>
+            <td>Spans 100% width below Pipeline</td>
+            <td>Maintains full-width container expansion seamlessly.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>2.3 High-Signal Kanban Pipeline Cards (Interactive Layer)</h2>
+<p>The four primary kanban tracking statuses are: <span class="badge badge-blue">Opportunities</span>, <span class="badge badge-orange">Applied</span>, <span class="badge badge-purple">Interviewing</span>, and <span class="badge badge-green">Offer 🎉</span>. All individual tracking cards must adhere to strict minimalist data surfacing specifications:</p>
+<ul>
+    <li><strong>Scrub Instructions:</strong> Completely remove explicit instructional labels such as "Click to open backdoor access ➔" to avoid layout cluttering.</li>
+    <li><strong>Affordance Signifiers:</strong> Inject a clean right-facing chevron (<code>›</code>) adjacent to the Job Title text block to signal clickability.</li>
+    <li><strong>Interactive Styling Rules:</strong> Enforce <code>cursor: pointer; transition: all 0.25s ease-in-out;</code> across the bounding box. On hover, card shifts <code>transform: translateY(-3px)</code> with elevated drop-shadow.</li>
+</ul>
+
+<h3>Dynamic Card Condition Rendering Matrix</h3>
+<pre>
+switch (card.currentStatusColumn) {
+  case "OPPORTUNITIES":
+    renderNetworkEdgeBadge(`🐊 ${job.alumCount} ${user.schoolShortCode} grads work here`);
+    break;
+
+  case "APPLIED":
+    renderMetadataLogs({
+      icon: "📩",
+      text: `Tracked via Inbox • ${job.dateCaptured}`,
+      subtext: `📄 Version: ${job.tailoredResumeVersionName}`
+    });
+    renderGhostRiskWarning({
+      percentage: job.calculatedGhostRisk,
+      copy: `👻 Ghost Risk: ${job.calculatedGhostRisk}%`
+    });
+    break;
+}</pre>
+
+<hr />
+
+<h1>3. Deep Automation Context-First Opportunity Drawer</h1>
+<p>When a pipeline card triggers an <code>onClick</code> handler, a contextual details drawer slides in from the right (fixed <code>width: 450px</code> desktop, full-bleed 100% below 768px).</p>
+
+<h2>3.1 Sequential Interface Information Hierarchy</h2>
+<ol>
+    <li><strong>Header Panel Zone:</strong> Role Title + Company Metadata + Active Pipeline Phase Badges.</li>
+    <li><strong>Section 1 — Native Context Block:</strong> Scrollable wrapper (<code>max-height: 300px; overflow-y: auto;</code>) rendering the full un-truncated Job Description to anchor understanding before execution.</li>
+    <li><strong>Section 2 — "YOUR EDGE":</strong> Accent alert card featuring bullet listings with network leverage highlights: <code>"3 ${user.schoolShortCode} grads work here"</code>.</li>
+    <li><strong>Section 3 — Primary Action Triggers:</strong>
+        <ul>
+            <li>Button A: <code>[ ✂️ Tailor Resume for this Role ]</code></li>
+            <li>Button B: <code>[ ⚡ Auto-Apply &amp; Route Profile ]</code></li>
+        </ul>
+    </li>
+    <li><strong>Section 4 — Network Outreach Generator Suite:</strong> Tab-controlled module housing dynamically written messaging copy for alumni and parent profile types.</li>
+</ol>
+
+<h2>3.2 Pre-Flight Document Preview Overlay</h2>
+<ul>
+    <li>Loading state exhibits animated text: <code>🤖 Agent analyzing requirements...</code> → <code>✂️ Injecting optimized skill alignments...</code></li>
+    <li>Upon data return, surfaces a full-screen review dialog with optimization summary tags.</li>
+    <li>Inline iframe preview: <code>&lt;iframe src={tailoredResumeUrl} className="w-full h-[450px]" /&gt;</code></li>
+    <li><strong>Commit Trigger:</strong> <code>[ 👍 Looks Perfect, Save ]</code> — links PDF token to the specific card instance.</li>
+</ul>
+
+<h2>3.3 Auto-Apply Safety Interception Modal</h2>
+<div class="callout-box">
+    <strong>Pre-Flight Safety Check Panel:</strong><br />
+    • Warning: "You are about to auto-apply. Would you like to proceed?"<br />
+    • Target: <code>Business Development Representative at Salesforce</code><br />
+    • File: <code>Resume_Jill_Osinoff_Salesforce.pdf (Approved)</code><br />
+    • Destination: <code>Sarah M. (Campus Recruiter — Verified)</code><br />
+    • Actions: <code>[ ❌ Cancel ]</code> | <code>[ ⚡ Let's Lock It In ]</code>
+</div>
+
+<hr />
+
+<h1>4. Gamified Alum Network Relevancy Engine</h1>
+
+<h2>4.1 Context Match Sorting Algorithm Logic</h2>
+<p>Alumni contacts are scored against the active Job Category variable token using a keyword affinity algorithm:</p>
+<div style="text-align:center; margin:1em 0; font-size:1.15em;">
+    <span class="math">R<sub>score</sub> = Σ (W<sub>keyword</sub> × C<sub>occurrence</sub>)</span>
+</div>
+<p>Keyword matches inside a target department string (e.g., <em>Marketing → "Growth", "Brand", "Creative"</em>) receive weight <span class="math">W = 10</span>; unrelated profiles receive <span class="math">W = 1</span>.</p>
+
+<h2>4.2 High-Relevancy Visual Indicators</h2>
+<ul>
+    <li><strong>Top-Tier (Score ≥ 10):</strong> Prepend 🔥, label <em>"Top Match"</em>, promote to index 0.</li>
+    <li><strong>Standard (Score &lt; 10):</strong> Prepend 💼 or 👥.</li>
+</ul>
+
+<h2>4.3 Dynamic Double-Track Script Generation Flow</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Target Context</th>
+            <th>Copy Phrasing Blueprint</th>
+            <th>UX Goal</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Fire Match 🔥</strong><br /><em>(VP / Team Lead)</em></td>
+            <td>"Go Gators! 🐊 ... I actually just hit auto-apply for the open role on your exact team. Would love 5 minutes to ask how you structured the team..."</td>
+            <td>Position candidate as informed insider angling for direct referral from decision maker.</td>
+        </tr>
+        <tr>
+            <td><strong>General Alum 💼</strong><br /><em>(External Dept)</em></td>
+            <td>"Go Gators! 🐊 ... I just applied for a role on the commercial team. I know you're in a different department, but I'd love to get your take on company culture..."</td>
+            <td>Leverage campus bonds safely to secure generalized guidance.</td>
+        </tr>
+    </tbody>
+</table>
+
+<hr />
+
+<h1>5. Background Ingestion Layer &amp; Live Intelligence Feed</h1>
+
+<h2>5.1 Automated Data Separation Concept</h2>
+<ul>
+    <li><strong>Live Career Signals Feed</strong> = exclusive <em>Ingestion Layer Engine</em>. Raw background crawler events, transient signal scrapes, global network motion.</li>
+    <li><strong>Application Pipeline Grid</strong> = exclusive <em>Action Layer Core</em>. Cards here represent persistent opportunities graduated from the sandbox via explicit selection.</li>
+</ul>
+
+<h2>5.2 "Reveal ›" Accordion Interaction Mechanics</h2>
+<p>The "Reveal ›" trigger expands the selected stream item vertically via local state toggle — it does <strong>not</strong> deploy a full drawer panel:</p>
+<pre>
+const [expandedSignalId, setExpandedSignalId] = useState(null);
+
+if (signal.type === "unadvertised_roles") {
+  displayInlineRolesList(signal.metadata.extractedInternalRoles);
+  printSourceContext("Agent detected these roles in a private staging directory.");
+  renderHighContrastMiniButton({
+    label: "📥 Add Selected to My Opportunities Pipeline",
+    action: () => dispatch(graduateSignalToPipelineCard(signal.id))
+  });
+} else if (signal.type === "recruiter_view") {
+  displayInsiderProfileCard(signal.metadata.recruiterProfileLink);
+  printSourceContext(`Spent ${signal.metadata.duration} min reviewing your profile.`);
+  renderHighContrastMiniButton({
+    label: "⚡ Open Drawer & Send Direct LinkedIn Outreach",
+    action: () => uiController.openDrawerWithTab("outreach")
+  });
+}</pre>
+
+<hr style="margin: 40px 0 20px 0;" />
+<div style="text-align: center; font-size: 8.5pt; color: #64748b; font-style: italic;">
+    [ End of Specification Document — Compiled for College Fast Forward Engineering Sprint Core Integration ]
+</div>
+
+</body>
+</html>
