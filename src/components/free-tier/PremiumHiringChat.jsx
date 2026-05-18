@@ -11,14 +11,33 @@ const STARTER_PROMPTS = [
 
 export default function PremiumHiringChat({ user, selectedSignal }) {
   const firstName = user?.full_name?.split(' ')[0] || 'there';
-  const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'alumni';
+  const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'your university';
 
   const defaultGreeting = `Hi ${firstName}! 📎 I'm CliFF, your CFF Career Agent. Ask me anything — tricky interview follow-ups, salary negotiations, or how to reach out to that alum at your target company. I'm locked in 24/7.`;
 
   const [messages, setMessages] = useState([{ role: 'agent', text: defaultGreeting }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [parentMatch, setParentMatch] = useState(null);
+  const [matchDismissed, setMatchDismissed] = useState(false);
   const bottomRef = useRef(null);
+
+  // On mount — look up whether a parent match exists for the student's target industry
+  useEffect(() => {
+    if (!user?.id) return;
+    base44.functions.invoke('getDashboardParentMatch', {}).then((res) => {
+      const d = res?.data ?? res ?? {};
+      if (d.match_found && d.parent) {
+        setParentMatch(d);
+        const { parent, industry, school_code } = d;
+        const school = school_code || schoolAbbr;
+        const greeting = `Hey ${firstName}! 📎 I was just scanning our network and found a ${school} parent — ${parent.first_name}, a ${parent.role_title} at ${parent.company_name}. They've explicitly opted in to backchanneling resumes and mentoring students in ${industry}. Want to connect with them for insider advice or a warm referral?`;
+        setMessages([{ role: 'agent', text: greeting }]);
+      }
+    }).catch(() => {
+      // silently fail — default greeting stays
+    });
+  }, [user?.id]);
 
   // Reset greeting whenever a coffee-chat signal is selected
   useEffect(() => {
@@ -84,9 +103,9 @@ export default function PremiumHiringChat({ user, selectedSignal }) {
       </div>
 
       {/* Messages */}
-      <div style={{ padding: '14px 16px', maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ padding: '14px 16px', maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {messages.map((m, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <div style={{
               maxWidth: '82%',
               background: m.role === 'user' ? '#0A0A0A' : '#f9fafb',
@@ -97,6 +116,30 @@ export default function PremiumHiringChat({ user, selectedSignal }) {
             }}>
               <p style={{ fontFamily: dm, fontSize: 12, margin: 0, lineHeight: 1.6 }}>{m.text}</p>
             </div>
+            {/* Parent match action buttons — shown only under the first agent message */}
+            {i === 0 && m.role === 'agent' && parentMatch && !matchDismissed && messages.length <= 1 && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <button
+                  onClick={() => {
+                    setMatchDismissed(true);
+                    sendMessage(`Yes, draft an opener for ${parentMatch.parent.first_name} at ${parentMatch.parent.company_name}`);
+                  }}
+                  style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                >
+                  ⚡ Yes, draft an opener
+                </button>
+                <button
+                  onClick={() => setMatchDismissed(true)}
+                  style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#6b7280', background: '#f1f5f9', border: '1px solid #e5e7eb', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#f1f5f9'}
+                >
+                  Not right now
+                </button>
+              </div>
+            )}
           </div>
         ))}
         {loading && (
