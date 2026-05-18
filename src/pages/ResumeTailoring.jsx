@@ -228,12 +228,21 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   };
 
   const handleDoTailor = async () => {
-    if (!resumeText || !jobDescription.trim()) return;
+    // Ensure we have resume text — re-fetch from active resume if state is stale
+    let effectiveResumeText = resumeText;
+    if (!effectiveResumeText) {
+      const active = resumes.find(r => r.is_active) || resumes[0];
+      effectiveResumeText = active?.parsed_text || '';
+    }
+    if (!effectiveResumeText) {
+      setError('Your resume text hasn\'t finished processing yet. Please wait a moment and try again.');
+      return;
+    }
     setPhase('tailoring');
     setError(null);
     try {
       const res = await tailorResume({
-        resumeText,
+        resumeText: effectiveResumeText,
         jobTitle: jobTitle.trim(),
         companyName: companyName.trim(),
         jobDescription: jobDescription.trim(),

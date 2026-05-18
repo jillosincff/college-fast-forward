@@ -8,9 +8,12 @@ Deno.serve(async (req) => {
 
     const { resumeText, jobTitle, companyName, jobDescription, sourceResumeId } = await req.json();
 
-    if (!resumeText || !jobDescription) {
-      return Response.json({ error: 'Resume text and job description are required' }, { status: 400 });
+    if (!resumeText) {
+      return Response.json({ error: 'Resume text is required' }, { status: 400 });
     }
+
+    // If no job description provided, optimize against career goals (general improvement mode)
+    const effectiveJD = jobDescription || `Optimize this resume for general career readiness. Improve clarity, impact language, and professional framing. Target role: ${jobTitle || 'professional role'}. Company: ${companyName || 'any company'}.`;
 
     // Server-side trial enforcement — return basic keyword score only if trial expired
     const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
@@ -44,7 +47,7 @@ ${resumeText.substring(0, 6000)}
 JOB TITLE: ${jobTitle || 'Not specified'}
 COMPANY: ${companyName || 'Not specified'}
 JOB DESCRIPTION:
-${jobDescription.substring(0, 4000)}
+${effectiveJD.substring(0, 4000)}
 
 Analyze the resume against the job description and generate:
 

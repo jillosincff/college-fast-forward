@@ -39,12 +39,21 @@ export default function ResumeView({ originalText, tailoredText, changes, active
         borderRadius: 14, padding: '24px 28px',
         maxHeight: 600, overflowY: 'auto',
       }}>
+        {!text && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, gap: 10 }}>
+            <span style={{ fontSize: 32 }}>📄</span>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#aaa', margin: 0, textAlign: 'center' }}>
+              Resume content is still loading.<br />Try refreshing or re-uploading your resume.
+            </p>
+          </div>
+        )}
         <div style={{
           fontFamily: "Georgia, 'Times New Roman', serif",
           fontSize: 13, lineHeight: 1.5, color: '#1a1a1a',
           whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+          display: text ? 'block' : 'none',
         }}>
-          {(text || 'No resume content available.').split('\n').map((line, i) => {
+          {(text || '').split('\n').map((line, i) => {
             const isHeader = /^[A-Z][A-Z\s&]+$/.test(line.trim()) && line.trim().length < 40;
             if (isHeader) {
               return (
