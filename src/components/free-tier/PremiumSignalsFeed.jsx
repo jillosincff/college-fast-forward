@@ -196,8 +196,8 @@ function SignalExpansion({ signal, theme, onAddToPipeline }) {
       )}
 
       {/* Intel box */}
-      <div style={{ background: `${t.primary}08`, border: `1px solid ${t.primary}25`, borderRadius: 8, padding: '10px 12px', marginBottom: 12 }}>
-        <p style={{ fontFamily: mono, fontSize: 11, color: '#475569', margin: 0, lineHeight: 1.6, fontStyle: 'italic' }}>
+      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '14px 16px', marginBottom: 12 }}>
+        <p style={{ fontFamily: mono, fontSize: '0.875rem', color: '#334155', margin: 0, lineHeight: 1.6, fontWeight: 500, letterSpacing: '-0.01em' }}>
           "{ex.intel}"
         </p>
       </div>
