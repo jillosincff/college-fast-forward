@@ -92,7 +92,7 @@ function LeadCard({ lead, onOpen, columnId }) {
       {/* Middle & Bottom Rows: Column-Specific Metadata */}
       {columnId === 'opportunities' && (
         <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '6px 10px' }}>
-          <p style={{ fontFamily: dm, fontSize: 10, color: '#2563eb', margin: 0, fontWeight: 600 }}>💡 {lead.connectionsCount || 3} UF Connections</p>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#2563eb', margin: 0, fontWeight: 600 }}>🐊 {lead.alumCount || 3} {lead.schoolShortName || 'UF'} grads work here</p>
         </div>
       )}
       
