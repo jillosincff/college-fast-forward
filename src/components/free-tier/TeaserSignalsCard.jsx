@@ -8,7 +8,7 @@ const BLUE_BORDER = '#bfdbfe';
 const FAKE_SIGNALS = [
   { count: 3, label: 'Unadvertised roles', company: 'matching your FSU Alumni network', time: 'This morning' },
   { count: 1, label: 'Hiring manager viewed a similar profile', company: 'at a company on your list', time: '2 hours ago' },
-  { count: 5, label: 'New backdoor leads crawled', company: 'from alumni-connected companies', time: 'Today' },
+  { count: 5, label: 'New Inside Track leads crawled', company: 'from alumni-connected companies', time: 'Today' },
 ];
 
 function SignalRow({ sig, i, onUnlock }) {

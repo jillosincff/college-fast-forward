@@ -147,12 +147,12 @@ export default function FreeTierDashboard() {
 
   const empathyMap = {
     ghosted: {
-      text: "We know how deflating it is to get ghosted after applying. While you track applications here, our background agent is hunting for unadvertised roles to get you real replies.",
-      cta: '✨ Unlock the Backdoor Network',
-      feature: 'Backdoor Lead Signals',
+      text: "We know how deflating it is to get ghosted after applying. While you track applications here, CLiFF is hunting for unadvertised Inside Track roles to get you real replies.",
+      cta: '✨ Unlock the Inside Track Network',
+      feature: 'Inside Track Signals',
     },
     outreach: {
-      text: "Cold-messaging strangers on LinkedIn is exhausting. We're mapping out your school's warm alumni connections below so you never have to guess what to write.",
+      text: "Cold-messaging strangers on LinkedIn is exhausting. We're mapping out your school's Campus Ecosystem warm alumni connections so you never have to guess what to write.",
       cta: '✨ Unlock Warm Scripts',
       feature: 'AI Outreach Generator',
     },
@@ -164,7 +164,7 @@ export default function FreeTierDashboard() {
     which_jobs: {
       text: "Not knowing which roles to apply for wastes weeks. Your background agent is scanning for openings that actually match your profile — upgraded members see them first.",
       cta: '✨ Unlock My Job Feed',
-      feature: 'Backdoor Lead Signals',
+      feature: 'Inside Track Signals',
     },
     disorganized: {
       text: "Losing track of where you applied is more common than you think. Use this board to stay organized — and upgrade to let the agent auto-log every application for you.",
@@ -304,7 +304,7 @@ export default function FreeTierDashboard() {
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <ApplicationTracker onUpgrade={triggerUpgrade} />
-            <TeaserSignalsCard onUnlock={() => triggerUpgrade('Backdoor Lead Signals')} college={college} theme={campusTheme} />
+            <TeaserSignalsCard onUnlock={() => triggerUpgrade('Inside Track Signals')} college={college} theme={campusTheme} />
           </div>
 
           {/* ── Right Column (Desktop Only) ── */}
@@ -397,9 +397,25 @@ export default function FreeTierDashboard() {
         <UpgradeModal
           featureName={upgradeFeature}
           onClose={() => setShowUpgrade(false)}
-          onUpgrade={() => {
+          onUpgrade={async () => {
             setShowUpgrade(false);
-            base44.auth.redirectToLogin('/#FreeTierDashboard');
+            if (!user) {
+              base44.auth.redirectToLogin('/#FreeTierDashboard');
+              return;
+            }
+            try {
+              const res = await base44.functions.invoke('createCheckoutSession', {
+                plan: 'weekly',
+                user_id: user.id,
+                user_email: user.email,
+                success_url: window.location.origin + '/#FreeTierDashboard',
+                cancel_url: window.location.origin + '/#FreeTierDashboard',
+              });
+              const url = res?.data?.url || res?.url;
+              if (url) window.location.href = url;
+            } catch {
+              base44.auth.redirectToLogin('/#FreeTierDashboard');
+            }
           }}
         />
       )}
