@@ -108,7 +108,7 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
     <div style={{ textAlign: 'center', maxWidth: 600, width: '100%', animation: 'fadeUp 0.3s ease', position: 'relative' }}>
       <div style={{ position: 'absolute', top: -60, right: -80, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,102,255,0.07) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 20px' }}>Step 2 of 8 · Meet Your Team</p>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 20px' }}>Step 2 of 9 · Meet Your Team</p>
         <h1 style={h1style}>Built by Hiring Experts</h1>
         <p style={{ ...substyle, marginBottom: 28 }}>These are the real people whose playbooks power your plan. Tap one to learn more.</p>
         <style>{`@media (max-width: 600px) { .expert-grid { flex-direction: column !important; } }`}</style>
@@ -209,7 +209,7 @@ const InputField = ({ label, placeholder, value, onChange, type = 'text', icon, 
 
 // Post-auth funnel: full flow including resume wow, LinkedIn, and plan
 // Screens: Welcome → Goals → Roadblocks → University → Resume Input → Resume Wow → LinkedIn → Plan
-const POST_AUTH_STEPS = [1, 4, 6, 7, 8, 9, 10, 11, 12];
+const POST_AUTH_STEPS = [1, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false }) {
   const [screen, setScreen] = useState(1);
