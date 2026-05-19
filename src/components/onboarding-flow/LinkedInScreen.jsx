@@ -348,7 +348,7 @@ Return valid JSON.`,
         <button
           onClick={() => { setStep3Active(true); if (onNext) { onNext(); } else { setShowPaywall(true); } }}
           style={{
-            width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 14px',
+            width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 10px',
             fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff',
             background: `linear-gradient(to bottom, #10B981, #059669)`,
             border: 'none', borderRadius: 10, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto',
@@ -358,11 +358,11 @@ Return valid JSON.`,
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.45)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.35)'; }}
         >
-          Next: Unlock My Insider Opportunities ➔
+          Next: Unlock My Inside Tracks ➔
         </button>
-        <button onClick={saveAndAuth} style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
-          Save progress and continue for free
-        </button>
+        <p style={{ fontFamily: FONT, fontSize: 10, color: '#94a3b8', fontWeight: 500, margin: 0 }}>
+          Securing your data. Pressing next initiates your personalized ecosystem scan.
+        </p>
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
