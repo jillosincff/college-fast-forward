@@ -9,7 +9,8 @@ const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
  * @param {function} onClose      - Closes the modal.
  * @param {function} onUpgrade    - Fires the billing/checkout flow.
  */
-export default function FeatureInterceptModal({ featureName, onClose, onUpgrade }) {
+export default function FeatureInterceptModal({ featureName, onClose, onUpgrade, user }) {
+  const schoolName = user?.school_name || user?.schoolName || user?.school || 'your university';
   return (
     <div
       onClick={onClose}
@@ -91,7 +92,7 @@ export default function FeatureInterceptModal({ featureName, onClose, onUpgrade 
           {[
             { icon: '⚡', text: 'Unmask verified company profiles, roles, and hiring contacts.' },
             { icon: '🤝', text: 'Access 24/7 personalized, AI-generated email & LinkedIn scripts.' },
-            { icon: '🧬', text: <>Map directly into your school's verified <strong style={{ color: '#0f172a' }}>Campus Ecosystem</strong>.</> },
+            { icon: '🧬', text: <>Map directly into the verified <strong style={{ color: '#0f172a' }}>{schoolName} Campus Ecosystem</strong>.</> },
           ].map(({ icon, text }, i) => (
             <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: i < 2 ? 12 : 0 }}>
               <span style={{ fontSize: 15, color: '#4f46e5', flexShrink: 0, marginTop: -1 }}>{icon}</span>
