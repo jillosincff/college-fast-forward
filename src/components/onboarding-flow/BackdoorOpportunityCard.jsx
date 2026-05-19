@@ -183,7 +183,7 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
 
       {/* Compressed feed below hero card */}
       <div style={{ borderTop: `1px solid ${BORDER}`, padding: '16px 18px 20px' }}>
-        <CompressedOpportunityFeed onUnlock={onUnlock} />
+        <CompressedOpportunityFeed onUnlock={onUnlock} isRemote={location === 'Remote'} />
       </div>
 
       {/* CLiFF Script Popup Modal */}

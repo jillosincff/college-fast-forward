@@ -1,13 +1,17 @@
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
-const TEASER_JOBS = [
-  { id: 2, label: 'Top-Tier FinTech Firm', location: 'New York, NY', remote: true, match: 'Parent Network match detected (VP of Engineering)', matchType: 'parent' },
-  { id: 3, label: 'Locked Global Brand', location: 'Austin, TX', remote: false, match: '3 Alums work here (2 in Product Management)', matchType: 'alumni' },
-  { id: 4, label: 'Premium Tech Startup', location: 'San Francisco, CA', remote: false, match: '1 Alum works here (Talent Acquisition Lead)', matchType: 'alumni' },
+const ALL_TEASER_JOBS = [
+  { id: 2, label: 'Top-Tier FinTech Firm', location: 'Remote', remote: true, match: 'Parent Network match detected (VP of Engineering)', matchType: 'parent' },
+  { id: 3, label: 'Locked Global Brand', location: 'Remote', remote: true, match: '3 Alums work here (2 in Product Management)', matchType: 'alumni' },
+  { id: 4, label: 'Premium Tech Startup', location: 'Remote', remote: true, match: '1 Alum works here (Talent Acquisition Lead)', matchType: 'alumni' },
+  { id: 5, label: 'Top Creative Agency', location: 'Austin, TX', remote: false, match: '1 Alum works here (Talent Acquisition Lead)', matchType: 'alumni' },
+  { id: 6, label: 'Stealth-Mode Startup', location: 'San Francisco, CA', remote: false, match: 'Parent Network match detected (Head of Marketing)', matchType: 'parent' },
+  { id: 7, label: 'Leading Consumer Brand', location: 'New York, NY', remote: false, match: '2 Alums work here (Core Marketing Team)', matchType: 'alumni' },
 ];
 
-export default function CompressedOpportunityFeed({ onUnlock }) {
+export default function CompressedOpportunityFeed({ onUnlock, isRemote }) {
+  const TEASER_JOBS = ALL_TEASER_JOBS.filter(j => j.remote === !!isRemote).slice(0, 3);
   return (
     <div style={{ marginTop: 12 }}>
       {/* Section label */}
@@ -51,7 +55,7 @@ export default function CompressedOpportunityFeed({ onUnlock }) {
                   [{job.label}]
                 </span>
                 <span style={{ fontFamily: dm, fontSize: 10, color: '#94A3B8' }}>
-                  · {job.location}{job.remote ? ' (Remote Optional)' : ''}
+                  · {job.remote ? 'Remote' : job.location}
                 </span>
               </div>
               <p style={{ fontFamily: dm, fontSize: 11, color: job.matchType === 'parent' ? '#7c3aed' : '#2563eb', fontWeight: 600, margin: 0 }}>
