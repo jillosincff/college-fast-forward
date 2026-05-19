@@ -1106,9 +1106,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             >
               Next: Optimize My Online Presence →
             </button>
-            <button onClick={saveAndAuth} style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}>
-              Use this version for now and continue
-            </button>
+
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
