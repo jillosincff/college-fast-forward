@@ -78,10 +78,18 @@ export default function LiveEngineLoader({ exiting = false }) {
       {/* Main Card */}
       <div style={{
         background: CARD, borderRadius: R,
-        boxShadow: SHADOW_MD, overflow: 'hidden',
-        border: `1.5px solid ${GREEN_BORDER}`,
+        boxShadow: '0 20px 50px rgba(0,0,0,0.07)', overflow: 'hidden',
+        border: `1.5px solid #E2E8F0`,
         maxWidth: 480, margin: '0 auto',
+        position: 'relative',
       }}>
+        {/* Shimmer top bar */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
+          background: 'linear-gradient(90deg, #6366F1, #3B82F6, #6366F1)',
+          backgroundSize: '200% auto',
+          animation: 'shimmerBar 3s ease infinite',
+        }} />
         {/* Live Status Section */}
         <div style={{ padding: '28px 28px 24px', display: 'flex', alignItems: 'center', gap: 14 }}>
           {/* SVG Spinner with gradient */}
@@ -89,8 +97,8 @@ export default function LiveEngineLoader({ exiting = false }) {
             <svg width={32} height={32} viewBox="0 0 32 32">
               <defs>
                 <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#10B981" />
-                  <stop offset="100%" stopColor="#059669" />
+                  <stop offset="0%" stopColor="#6366F1" />
+                  <stop offset="100%" stopColor="#3B82F6" />
                 </linearGradient>
               </defs>
               <circle cx="16" cy="16" r="12" fill="none" stroke="#E2E8F0" strokeWidth="3" />
@@ -110,12 +118,11 @@ export default function LiveEngineLoader({ exiting = false }) {
             </svg>
           </div>
 
-          {/* Live action text */}
-          <p style={{
+          {/* Live action text — key forces re-trigger of entry animation */}
+          <p key={actionIdx} style={{
             fontFamily: FONT, fontSize: 14, fontWeight: 600,
-            color: GREEN, margin: 0, textAlign: 'left', lineHeight: 1.5,
-            opacity: fade ? 1 : 0,
-            transition: 'opacity 0.2s ease',
+            color: '#374151', margin: 0, textAlign: 'left', lineHeight: 1.5,
+            animation: 'slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}>
             {ACTIONS[actionIdx]}
           </p>
@@ -141,11 +148,19 @@ export default function LiveEngineLoader({ exiting = false }) {
         </div>
       </div>
 
-      {/* CSS keyframe for spinner */}
       <style>{`
         @keyframes liveSpinEngine {
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
+        }
+        @keyframes slideUpFade {
+          0%   { opacity: 0; transform: translateY(6px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmerBar {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
       `}</style>
     </div>
