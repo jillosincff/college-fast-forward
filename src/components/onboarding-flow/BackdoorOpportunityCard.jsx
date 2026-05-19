@@ -97,7 +97,7 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ fontSize: 15 }}>⚡</span>
           <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: BLUE_BRIGHT, margin: 0, letterSpacing: '0.01em' }}>
-            Backdoor Found: We located a <strong>{shortSchool} Alum</strong> working here.
+            Inside Track Found: We located a <strong>{shortSchool} Alum</strong> working here.
           </p>
         </div>
 
@@ -174,7 +174,7 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
                   <rect x="3" y="11" width="18" height="11" rx="2" />
                   <path d="M7 11V7a5 5 0 0110 0v4" />
                 </svg>
-                🔓 Unlock Inside Track
+                🔓 Unlock Personalized Outreach Script
               </button>
             </div>
           </div>
