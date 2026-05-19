@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { getThemeForSchool } from '@/lib/campusThemes';
+import { CliffLogo } from '@/components/brand/CliffLogo';
 import PremiumPipeline from './PremiumPipeline';
 import PremiumSignalsFeed from './PremiumSignalsFeed';
 import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
@@ -15,9 +16,7 @@ function PremiumNav({ user }) {
     <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
-            <span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span>
-          </div>
+          <CliffLogo size="text-xl" />
           <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 100, padding: '6px 12px', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>Premium Active</span>
         </div>
         <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>

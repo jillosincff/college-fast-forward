@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { CliffLogo } from '@/components/brand/CliffLogo';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 const playfair = "'Playfair Display', Georgia, serif";
@@ -27,6 +28,9 @@ export default function StudentWelcomeScreen({ firstName, onComplete }) {
       padding: '40px 24px',
     }}>
       <div style={{ maxWidth: 500, width: '100%', textAlign: 'center' }}>
+        <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'center' }}>
+          <CliffLogo size="text-2xl" />
+        </div>
         <h1 style={{
           fontFamily: dmSans, fontWeight: 700, fontSize: 'clamp(24px, 4.5vw, 34px)',
           color: '#fff', lineHeight: 1.3, marginBottom: 16,
@@ -34,7 +38,7 @@ export default function StudentWelcomeScreen({ firstName, onComplete }) {
           transform: h1Visible ? 'translateY(0)' : 'translateY(12px)',
           transition: 'opacity 0.5s ease, transform 0.5s ease',
         }}>
-          Welcome to College Fast Forward, {firstName || 'there'}.
+          Welcome to the engine, {firstName || 'there'}.
         </h1>
 
         <p style={{

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { CliffLogo } from '@/components/brand/CliffLogo';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -192,8 +193,10 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
           <span style={{ fontSize: 22, animation: 'clipBounce 2s ease-in-out infinite' }}>📎</span>
           <style>{`@keyframes clipBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }`}</style>
           <div>
-            <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff', margin: 0 }}>Chat with CliFF</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#94a3b8', margin: 0 }}>Your CFF Career Agent</p>
+            <div style={{ marginBottom: 2 }}>
+              <CliffLogo size="text-lg" />
+            </div>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#94a3b8', margin: 0 }}>Your CFF Career Agent</p>
           </div>
         </div>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(6,78,59,0.5)', border: '1px solid #065f46', borderRadius: 6, padding: '4px 10px' }}>
