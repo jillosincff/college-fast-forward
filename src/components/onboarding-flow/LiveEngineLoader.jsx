@@ -17,7 +17,6 @@ const ACTIONS = [
   "📂 Finding companies that won't ghost you after a 3-round interview loop.",
   "💼 Bypassing corporate resume filters so humans actually see your name.",
   "🤫 Digging up the Inside Tracks that corporate recruiters try to hide.",
-  "🐊 Calibrating your university network multipliers...",
 ];
 
 const INSIGHTS = [
@@ -41,10 +40,12 @@ function useRandomInsight() {
   return ref.current;
 }
 
-export default function LiveEngineLoader({ exiting = false }) {
+export default function LiveEngineLoader({ exiting = false, user = null }) {
   const [actionIdx, setActionIdx] = useState(0);
   const [fade, setFade] = useState(true);
   const insight = useRandomInsight();
+
+  const schoolName = user?.school_name || user?.schoolName || user?.school || 'your university';
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -68,11 +69,14 @@ export default function LiveEngineLoader({ exiting = false }) {
     }}>
       {/* Header */}
       <h1 style={{
-        fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 32px)',
-        fontWeight: 800, color: '#1F2937', letterSpacing: '-0.03em',
-        margin: '0 0 28px', lineHeight: 1.2,
+        fontFamily: FONT, fontSize: 'clamp(20px, 3.2vw, 28px)',
+        fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em',
+        margin: '0 0 28px', lineHeight: 1.25,
       }}>
-        Agent is deploying...
+        Bro, give it a minute.{' '}
+        <span style={{ color: '#6366F1', fontWeight: 800, fontSize: '0.9em' }}>
+          We're scouring the internet for you...
+        </span>
       </h1>
 
       {/* Main Card */}
@@ -92,9 +96,9 @@ export default function LiveEngineLoader({ exiting = false }) {
         }} />
         {/* Live Status Section */}
         <div style={{ padding: '28px 28px 24px', display: 'flex', alignItems: 'center', gap: 14 }}>
-          {/* SVG Spinner with gradient */}
-          <div style={{ flexShrink: 0 }}>
-            <svg width={32} height={32} viewBox="0 0 32 32">
+          {/* Spinner + paperclip dance */}
+          <div style={{ flexShrink: 0, position: 'relative', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width={32} height={32} viewBox="0 0 32 32" style={{ position: 'absolute' }}>
               <defs>
                 <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#6366F1" />
@@ -110,21 +114,23 @@ export default function LiveEngineLoader({ exiting = false }) {
                 strokeLinecap="round"
                 strokeDasharray="75.4"
                 strokeDashoffset="20"
-                style={{
-                  transformOrigin: '16px 16px',
-                  animation: 'liveSpinEngine 0.75s linear infinite',
-                }}
+                style={{ transformOrigin: '16px 16px', animation: 'liveSpinEngine 0.75s linear infinite' }}
               />
             </svg>
+            <span style={{ fontSize: 16, animation: 'paperclipDance 1.2s ease-in-out infinite', position: 'relative', zIndex: 1 }}>
+              📎
+            </span>
           </div>
 
-          {/* Live action text — key forces re-trigger of entry animation */}
+          {/* Live action text */}
           <p key={actionIdx} style={{
             fontFamily: FONT, fontSize: 14, fontWeight: 600,
             color: '#374151', margin: 0, textAlign: 'left', lineHeight: 1.5,
             animation: 'slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}>
-            {ACTIONS[actionIdx]}
+            {actionIdx === 3
+              ? `🚀 Calibrating your ${schoolName} network multipliers...`
+              : ACTIONS[actionIdx]}
           </p>
         </div>
 
@@ -145,6 +151,12 @@ export default function LiveEngineLoader({ exiting = false }) {
           }}>
             {insight.text}
           </p>
+          <p style={{
+            fontFamily: FONT, fontSize: 11, color: '#94A3B8',
+            margin: '14px 0 0', textAlign: 'center', letterSpacing: '0.04em',
+          }}>
+            Activating your secure Campus Ecosystem pipeline.
+          </p>
         </div>
       </div>
 
@@ -161,6 +173,13 @@ export default function LiveEngineLoader({ exiting = false }) {
           0%   { background-position: 0% 50%; }
           50%  { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
+        }
+        @keyframes paperclipDance {
+          0%   { transform: rotate(-15deg) scale(1); }
+          25%  { transform: rotate(15deg) scale(1.15); }
+          50%  { transform: rotate(-10deg) scale(1); }
+          75%  { transform: rotate(12deg) scale(1.1); }
+          100% { transform: rotate(-15deg) scale(1); }
         }
       `}</style>
     </div>
