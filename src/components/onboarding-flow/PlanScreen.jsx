@@ -137,12 +137,23 @@ function SprintRoadmap({ targetRole, location, schoolName }) {
                 <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: d.color, background: d.bgColor, border: `1px solid ${d.borderColor}`, borderRadius: 100, padding: '2px 10px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{d.day}</span>
                 <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT }}>{d.title}</span>
               </div>
-              {d.tasks.map((t, ti) => (
-                <div key={ti} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 4 }}>
-                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: d.color, flexShrink: 0, marginTop: 6 }} />
-                  <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{t}</p>
+              {/* Blurred task list — gated behind premium */}
+              <div style={{ position: 'relative' }}>
+                <div style={{ filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+                  {d.tasks.map((t, ti) => (
+                    <div key={ti} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 4 }}>
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: d.color, flexShrink: 0, marginTop: 6 }} />
+                      <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.55 }}>{t}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+                {/* Frosted overlay */}
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(2px)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: d.color, background: d.bgColor, border: `1px solid ${d.borderColor}`, borderRadius: 100, padding: '3px 10px', whiteSpace: 'nowrap' }}>
+                    🔒 Premium Action Plan Feature
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         ))}
