@@ -7,8 +7,6 @@ import ATSScoreRing from './ATSScoreRing';
 import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
 import IndustryScreen from './IndustryScreen';
-import ArchetypeAssessment from './ArchetypeAssessment';
-import ArchetypeUnlockScreen from './ArchetypeUnlockScreen';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -260,23 +258,11 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     setScreen(POST_AUTH_STEPS[prevStep]);
   };
 
-  const go = (n) => setScreen(n);
   const next = () => postAuth ? postAuthNext() : setScreen(s => s + 1);
   const back = () => postAuth ? postAuthBack() : setScreen(s => s - 1);
 
-  const [showArchetypeAssessment, setShowArchetypeAssessment] = useState(false);
-  const [archetypeResult, setArchetypeResult] = useState(null);
-
   const toggleBlocker = (key) => {
-    // 'no_direction' is now treated like any other blocker — no early branch
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
-  };
-
-  const handleArchetypeComplete = (result) => {
-    setArchetypeResult(result);
-    setShowArchetypeAssessment(false);
-    // After archetype completes, proceed to auth/dashboard (school+location already captured)
-    saveAndAuth();
   };
 
   const handleCollegeInput = (val) => {
@@ -360,7 +346,6 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       if (loc) localStorage.setItem('cff_location', loc);
       if (planType === 'free') localStorage.setItem('cff_plan_type', 'free');
       if (blockers.includes('no_direction')) localStorage.setItem('cff_career_unsure', 'true');
-      if (archetypeResult) localStorage.setItem('cff_archetype', JSON.stringify(archetypeResult));
     } catch (e) {}
     // In postAuth mode or if user is already authenticated, complete directly
     if (postAuth || onAlreadyAuthed) {
@@ -459,41 +444,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         </>
       )}
 
-      {/* ── Archetype Assessment Modal ── */}
-      {showArchetypeAssessment && (
-        <div style={{ position: 'fixed', inset: 0, background: BG, zIndex: 15000, overflowY: 'auto', padding: '60px 24px' }}>
-          <button
-            onClick={() => setShowArchetypeAssessment(false)}
-            style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW, zIndex: 15001 }}
-          >
-            ✕
-          </button>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', justifyContent: 'center' }}>
-            <ArchetypeAssessment onComplete={handleArchetypeComplete} onBack={() => setShowArchetypeAssessment(false)} />
-          </div>
-        </div>
-      )}
-
-      {/* ── Archetype Unlock Paywall (after assessment) ── */}
-      {archetypeResult && !showArchetypeAssessment && (
-        <div style={{ ...shell, zIndex: 16000 }}>
-          <button
-            onClick={() => { setArchetypeResult(null); setBlockers(prev => prev.filter(k => k !== 'no_direction')); }}
-            style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW, zIndex: 16001 }}
-          >
-            ✕
-          </button>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', justifyContent: 'center' }}>
-            <ArchetypeUnlockScreen
-              archetypeResult={archetypeResult}
-              userFirstName={firstName}
-            />
-          </div>
-        </div>
-      )}
-
       {/* ── Screen Transition Wrapper ── */}
-      {!analyzing && !showArchetypeAssessment && !archetypeResult && <FunnelTransition screenKey={screen}>
+      {!analyzing && <FunnelTransition screenKey={screen}>
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
