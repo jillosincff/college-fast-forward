@@ -19,7 +19,7 @@ const CARD = '#ffffff';
 import { useState } from 'react';
 
 export default function BackdoorOpportunityCard({ schoolName, location, targetRole, onUnlock }) {
-  const shortSchool = schoolName?.split(' ').slice(0, 2).join(' ') || 'Your School';
+  const shortSchool = schoolName?.split(' ').slice(0, 2).join(' ') || 'your school';
   const city = location === 'Remote' ? 'Miami, FL' : location || 'Miami, FL';
   const [showModal, setShowModal] = useState(false);
 
@@ -97,11 +97,11 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ fontSize: 15 }}>⚡</span>
           <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: BLUE_BRIGHT, margin: 0, letterSpacing: '0.01em' }}>
-            Inside Track Found: We located a <strong>{shortSchool} Alum</strong> working here.
+            Inside Track Found: We located an Alum from <strong>{shortSchool}</strong> working here.
           </p>
         </div>
 
-        {/* Alum profile snippet — identity masked until unlock */}
+        {/* Alum profile snippet — unblurred metadata to show high-value data exists */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: CARD, border: `1px solid ${BLUE_BORDER}`, borderRadius: 10, padding: '10px 13px' }}>
           <div style={{
             width: 36, height: 36, borderRadius: '50%',
@@ -112,14 +112,20 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
           }}>🔒</div>
           <div style={{ flex: 1 }}>
             <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>
-              [Locked] {shortSchool} Alum
+              [Locked] Verified {shortSchool} Alum
             </p>
             <p style={{ fontFamily: dm, fontSize: 11, color: TEXT2, margin: '2px 0 0', lineHeight: 1.5 }}>
-              A {shortSchool} alum who graduated 3 years ago is a Digital Marketing Manager here.{' '}
-              <span style={{ color: BLUE, fontWeight: 600 }}>Unlock to reveal her profile and let CLiFF draft the connection play.</span>
+              Digital Marketing Manager • Creative Strategy Division • Graduated 3 Years Ago
             </p>
           </div>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#fff', background: '#374151', border: 'none', borderRadius: 100, padding: '3px 9px', flexShrink: 0 }}>LOCKED 🔒</span>
+          <button
+            onClick={handleScriptClick}
+            style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '4px 10px', flexShrink: 0, cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = BLUE; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = BLUE_LIGHT; e.currentTarget.style.color = BLUE; }}
+          >
+            Unlock
+          </button>
         </div>
       </div>
 
@@ -140,42 +146,39 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
 
           {/* Message body */}
           <div style={{ padding: '12px 14px', position: 'relative' }}>
-            {/* Visible first line */}
-            <p style={{ fontFamily: dm, fontSize: 13, color: TEXT, margin: '0 0 4px', lineHeight: 1.65, fontStyle: 'italic' }}>
-              "Hey Sarah, noticed you also went to {shortSchool}...
+            {/* Visible hook line — clear and unblurred */}
+            <p style={{ fontFamily: dm, fontSize: 13, color: TEXT, margin: '0 0 8px', lineHeight: 1.65, fontStyle: 'italic' }}>
+              "Hey Sarah, noticed you also went to the same school...
             </p>
 
-            {/* Blurred rest */}
+            {/* Blurred rest of script */}
             <div style={{ position: 'relative' }}>
-              <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.65, fontStyle: 'italic', filter: 'blur(5px)', userSelect: 'none', pointerEvents: 'none' }}>
-                I'm targeting {targetRole || 'marketing'} roles in {city} right now and came across the opening at Nexo. Would love to hear what the team culture is like — any chance for a quick 5-min chat? Huge thanks either way — Go Gators!
+              <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.65, fontStyle: 'italic', filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+                I'm targeting {targetRole || 'marketing'} roles in {city} right now and came across the opening here. Would love to hear what the team culture is like — any chance for a quick 5-min chat? Huge thanks either way!
               </p>
               {/* Frosted overlay */}
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(250,250,250,0.4)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)', borderRadius: 6 }} />
-            </div>
-
-            {/* Lock button centered over blur zone */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
-              <button
-                onClick={handleScriptClick}
-                style={{
-                  fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff',
-                  background: `linear-gradient(to bottom, ${BLUE}, #1d4ed8)`,
-                  border: 'none', borderRadius: 100, padding: '11px 22px',
-                  cursor: 'pointer', minHeight: 'auto',
-                  boxShadow: '0 4px 14px rgba(37,99,235,0.30)',
-                  display: 'inline-flex', alignItems: 'center', gap: 7,
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(37,99,235,0.42)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(37,99,235,0.30)'; }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" />
-                  <path d="M7 11V7a5 5 0 0110 0v4" />
-                </svg>
-                🔓 Unlock Personalized Outreach Script
-              </button>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(250,250,250,0.5)', backdropFilter: 'blur(1px)', WebkitBackdropFilter: 'blur(1px)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button
+                  onClick={handleScriptClick}
+                  style={{
+                    fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff',
+                    background: `linear-gradient(to bottom, ${BLUE}, #1d4ed8)`,
+                    border: 'none', borderRadius: 10, padding: '10px 18px',
+                    cursor: 'pointer', minHeight: 'auto',
+                    boxShadow: '0 4px 14px rgba(37,99,235,0.30)',
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(37,99,235,0.42)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(37,99,235,0.30)'; }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0110 0v4" />
+                  </svg>
+                  Unlock Script
+                </button>
+              </div>
             </div>
           </div>
         </div>
