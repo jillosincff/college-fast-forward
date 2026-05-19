@@ -268,19 +268,15 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [archetypeResult, setArchetypeResult] = useState(null);
 
   const toggleBlocker = (key) => {
-    // If selecting 'no_direction', trigger archetype assessment immediately
-    if (key === 'no_direction' && !blockers.includes(key)) {
-      setShowArchetypeAssessment(true);
-      return;
-    }
+    // 'no_direction' is now treated like any other blocker — no early branch
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
   };
 
   const handleArchetypeComplete = (result) => {
     setArchetypeResult(result);
     setShowArchetypeAssessment(false);
-    // Continue onboarding after assessment
-    next();
+    // After archetype completes, proceed to auth/dashboard (school+location already captured)
+    saveAndAuth();
   };
 
   const handleCollegeInput = (val) => {
@@ -363,6 +359,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
       if (planType === 'free') localStorage.setItem('cff_plan_type', 'free');
+      if (blockers.includes('no_direction')) localStorage.setItem('cff_career_unsure', 'true');
+      if (archetypeResult) localStorage.setItem('cff_archetype', JSON.stringify(archetypeResult));
     } catch (e) {}
     // In postAuth mode or if user is already authenticated, complete directly
     if (postAuth || onAlreadyAuthed) {
@@ -869,7 +867,15 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                 )}
               </div>
             )}
-            <Nav onBack={back} onNext={() => { if (postAuth) { next(); } else { saveAndAuth(); } }} nextDisabled={!(isRemote || hasCity)} />
+            <Nav onBack={back} onNext={() => {
+              if (postAuth) { next(); }
+              else if (blockers.includes('no_direction') && !archetypeResult) {
+                // Show archetype AFTER school + location are captured
+                setShowArchetypeAssessment(true);
+              } else {
+                saveAndAuth();
+              }
+            }} nextDisabled={!(isRemote || hasCity)} />
           </div>
         );
       })()}

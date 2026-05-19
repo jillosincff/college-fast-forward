@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 import UpgradeModal from '@/components/free-tier/UpgradeModal';
 import FreeTierNav from '@/components/free-tier/FreeTierNav';
 import ApplicationTracker from '@/components/free-tier/ApplicationPipeline';
@@ -78,6 +79,8 @@ export default function FreeTierDashboard() {
     try { return localStorage.getItem('cff_college') || user?.school || 'your university'; } catch { return 'your university'; }
   })();
   const campusTheme = getThemeForSchool(college);
+  const isCareerUnsure = (() => { try { return localStorage.getItem('cff_career_unsure') === 'true'; } catch { return false; } })();
+  const schoolAbbr = user?.school_code?.toUpperCase() || college?.split(' ').map(w => w[0]).join('') || 'Campus';
 
   // Show loader while user hasn't loaded yet
   if (!user) {
@@ -213,19 +216,55 @@ export default function FreeTierDashboard() {
             <h1 style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
               Welcome back, {firstName} 👋
             </h1>
-            <button
-              onClick={() => triggerUpgrade(empathy.feature)}
-              style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              {empathy.cta}
-            </button>
+            {!isCareerUnsure && (
+              <button
+                onClick={() => triggerUpgrade(empathy.feature)}
+                style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, whiteSpace: 'nowrap', flexShrink: 0 }}
+              >
+                {empathy.cta}
+              </button>
+            )}
           </div>
-          {/* Dynamic Empathy Banner */}
-          <div style={{ borderLeft: `4px solid ${campusTheme.primary}`, background: `${campusTheme.bgTint || 'rgba(15,23,42,0.02)'}`, borderRadius: '0 10px 10px 0', padding: '12px 16px', marginTop: 16 }}>
-            <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.7 }}>
-              {empathy.text}
-            </p>
-          </div>
+
+          {/* CLiFF Rescue Hook — shown when student selected "not sure" during onboarding */}
+          {isCareerUnsure ? (
+            <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(59,130,246,0.04))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 14, padding: '18px 20px', marginTop: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 16 }}>📎</span>
+                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: 0 }}>
+                  Hey {firstName}, <span style={{ color: '#4F46E5' }}>CLiFF</span> here.
+                </p>
+              </div>
+              <p style={{ fontFamily: dm, fontSize: 13, color: '#4B5563', margin: '0 0 14px', lineHeight: 1.7 }}>
+                You mentioned during setup that you're not quite sure what you want to do yet. <strong>No sweat at all.</strong> Most college students are in the exact same boat. We're going to help you figure it out step-by-step.
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => triggerUpgrade('Career Archetype Assessment')}
+                  style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#4F46E5', border: 'none', borderRadius: 8, padding: '9px 16px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#4338CA'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#4F46E5'}
+                >
+                  🎯 Find My Career Archetype
+                </button>
+                <button
+                  onClick={() => navigate('Directory')}
+                  style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#374151', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '9px 16px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F9FAFB'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                >
+                  Browse {schoolAbbr} Inside Tracks
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Dynamic Empathy Banner */
+            <div style={{ borderLeft: `4px solid ${campusTheme.primary}`, background: `${campusTheme.bgTint || 'rgba(15,23,42,0.02)'}`, borderRadius: '0 10px 10px 0', padding: '12px 16px', marginTop: 16 }}>
+              <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.7 }}>
+                {empathy.text}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* ── Email Sync Banner ── */}
