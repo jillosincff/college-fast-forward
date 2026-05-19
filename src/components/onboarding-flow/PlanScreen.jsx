@@ -274,7 +274,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           <span style={{ color: BLUE }}>and start interviewing.</span>
         </h1>
         <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: '0 auto', maxWidth: 580 }}>
-          The Agent scoured internal company networks and bypassed the public job boards.{' '}
+          <span style={{ fontWeight: 700, color: '#2563eb' }}>⚡ Inside Track Found:</span>{' '}
+          We located a <strong style={{ color: TEXT }}>{schoolName !== 'your university' ? schoolName : 'University'} Alum</strong> working at your top match.{' '}
           <strong style={{ color: TEXT }}>{locationPref === 'remote' ? 'Look what we found for you:' : `Look what we found for you near ${location}:`}</strong>
         </p>
       </div>

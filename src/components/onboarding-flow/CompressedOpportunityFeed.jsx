@@ -77,14 +77,14 @@ export default function CompressedOpportunityFeed({ onUnlock, isRemote }) {
               onMouseEnter={e => { e.currentTarget.style.background = '#4F46E5'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#4F46E5'; }}
               onMouseLeave={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = '#4F46E5'; e.currentTarget.style.borderColor = '#C7D2FE'; }}
             >
-              Reveal Role →
+              🔒 Reveal Role
             </button>
           </div>
         ))}
       </div>
 
       {/* Bottom nudge */}
-      <div style={{ textAlign: 'center', marginTop: 14 }}>
+      <div style={{ textAlign: 'center', marginTop: 20 }}>
         <button
           onClick={onUnlock}
           style={{
@@ -96,6 +96,7 @@ export default function CompressedOpportunityFeed({ onUnlock, isRemote }) {
           }}
         >
           🔒 Unlock All 14 Inside Tracks →
+        
         </button>
       </div>
     </div>
