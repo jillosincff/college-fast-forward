@@ -869,12 +869,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             )}
             <Nav onBack={back} onNext={() => {
               if (postAuth) { next(); }
-              else if (blockers.includes('no_direction') && !archetypeResult) {
-                // Show archetype AFTER school + location are captured
-                setShowArchetypeAssessment(true);
-              } else {
-                saveAndAuth();
-              }
+              else { saveAndAuth(); }
             }} nextDisabled={!(isRemote || hasCity)} />
           </div>
         );
