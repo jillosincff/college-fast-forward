@@ -279,7 +279,7 @@ Return valid JSON.`,
           <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>LinkedIn Identity Architect</span>
         </div>
         <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 700, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-          {firstName ? `${firstName}'s LinkedIn Profile,` : 'Your LinkedIn Profile,'} <span style={{ color: BLUE }}>Rebuilt for Recruiters</span>
+          {firstName ? `${firstName}'s LinkedIn Profile,` : 'Your LinkedIn Profile,'} <span style={{ color: BLUE }}>Rebuilt to Get You Noticed</span>
         </h1>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
           See exactly how your profile will appear — then choose your headline track.
