@@ -1,3 +1,5 @@
+import CompressedOpportunityFeed from './CompressedOpportunityFeed';
+
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
@@ -179,23 +181,9 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
         </div>
       </div>
 
-      {/* Bottom CTA */}
-      <div style={{ borderTop: `1px solid ${BORDER}`, padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
-        <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
-          + <strong style={{ color: TEXT }}>11 more verified leads</strong> in your feed
-        </p>
-        <button
-          onClick={onUnlock}
-          style={{
-            fontFamily: dm, fontSize: 12, fontWeight: 700, color: BLUE,
-            background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`,
-            borderRadius: 100, padding: '7px 16px',
-            cursor: 'pointer', minHeight: 'auto',
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-          }}
-        >
-          🔒 Unlock & Apply via Backdoor →
-        </button>
+      {/* Compressed feed below hero card */}
+      <div style={{ borderTop: `1px solid ${BORDER}`, padding: '16px 18px 20px' }}>
+        <CompressedOpportunityFeed onUnlock={onUnlock} />
       </div>
 
       {/* CLiFF Script Popup Modal */}
