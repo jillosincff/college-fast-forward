@@ -184,6 +184,9 @@ export default function FreeTierDashboard() {
     feature: 'Premium Sprint',
   };
 
+  const isNewUser = (() => { try { return !localStorage.getItem('cff_ftd_seen'); } catch { return false; } })();
+  try { localStorage.setItem('cff_ftd_seen', '1'); } catch {}
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} />
@@ -214,7 +217,7 @@ export default function FreeTierDashboard() {
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
             <h1 style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
-              Welcome back, {firstName} 👋
+              {isNewUser ? `Welcome to the inside track, ${firstName} 🤝` : `Welcome back, ${firstName} 👋`}
             </h1>
             {!isCareerUnsure && (
               <button
@@ -261,7 +264,9 @@ export default function FreeTierDashboard() {
             /* Dynamic Empathy Banner */
             <div style={{ borderLeft: `4px solid ${campusTheme.primary}`, background: `${campusTheme.bgTint || 'rgba(15,23,42,0.02)'}`, borderRadius: '0 10px 10px 0', padding: '12px 16px', marginTop: 16 }}>
               <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.7 }}>
-                {empathy.text}
+                {isNewUser
+                  ? "Your background agent is officially live. We're actively scanning job feeds and matching them against verified alumni and parent connections to find your fastest path in."
+                  : empathy.text}
               </p>
             </div>
           )}
