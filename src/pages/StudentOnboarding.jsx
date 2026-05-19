@@ -83,8 +83,8 @@ export default function StudentOnboarding() {
       // Safari clears localStorage during OAuth — sessionStorage survives
       sessionStorage.setItem('cff_onboarding_type', 'student');
     } catch (e) { /* private browsing */ }
-    // Always redirect to GatorAuth — it smart-routes new vs returning users
-    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+    // Redirect back to StudentOnboarding so step 2 renders after OAuth
+    base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
   };
 
   const handleSubmit = async () => {
