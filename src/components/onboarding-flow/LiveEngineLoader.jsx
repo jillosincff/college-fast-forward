@@ -11,10 +11,13 @@ const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)
 const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
 
 const ACTIONS = [
-  'Scanning internal career portals for hidden roles...',
-  'Cross-referencing global alumni databases...',
-  'Optimizing layout to bypass corporate applicant filters...',
-  'Compiling your personalized 14-day action sprint...',
+  "🤖 Waking up CLiFF... he's already on his third espresso.",
+  "✂️ Shredding traditional cover letters. Nobody reads them anyway.",
+  "🕵️ Deep-diving your campus database (and skipping your ex's profile).",
+  "📂 Finding companies that won't ghost you after a 3-round interview loop.",
+  "💼 Bypassing corporate resume filters so humans actually see your name.",
+  "🤫 Digging up the Inside Tracks that corporate recruiters try to hide.",
+  "🐊 Calibrating your university network multipliers...",
 ];
 
 const INSIGHTS = [
@@ -50,7 +53,7 @@ export default function LiveEngineLoader({ exiting = false }) {
         setActionIdx(i => (i + 1) % ACTIONS.length);
         setFade(true);
       }, 200);
-    }, 1500);
+    }, 2500);
     return () => clearInterval(interval);
   }, []);
 
