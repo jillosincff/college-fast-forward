@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getUniversityBrand } from '@/lib/universityBrand';
 import { base44 } from '@/api/base44Client';
+import { generateReferralPayload } from '@/functions/generateReferralPayload';
 
 const track = (event, props = {}) => {
   base44.entities.AnalyticsEvent.create({ event_name: event, user_id: 'anon', properties: props }).catch(() => {});
@@ -31,6 +32,8 @@ export default function PremiumPaywallModal({
   onReferral,
 }) {
   const [referralClicked, setReferralClicked] = useState(false);
+  const [referralLoading, setReferralLoading] = useState(false);
+  const [copiedPayload, setCopiedPayload] = useState('');
 
   useEffect(() => {
     track(isDownsell ? 'downsell_modal_shown' : 'paywall_shown', { school: user?.school_code });
@@ -51,9 +54,30 @@ export default function PremiumPaywallModal({
     onPay?.();
   };
 
-  const handleReferral = () => {
-    setReferralClicked(true);
+  const handleReferral = async () => {
+    setReferralLoading(true);
     track('paywall_referral_share_clicked', { school: user?.school_code });
+
+    const targetTrack = user?.target_industry || user?.industries?.[0] || '';
+    const res = await generateReferralPayload({
+      userFirstName: resolvedFirst,
+      schoolShortName: resolvedSchool,
+      targetTrack,
+    }).catch(() => null);
+
+    const smsText = res?.data?.smsPayload || res?.smsPayload ||
+      `Hey, if you're trying to bypass Handshake or the regular job boards, check this out. CLiFF maps ${resolvedSchool}'s alumni network and writes your outreach scripts for hidden jobs. Use my link to skip the waitlist: https://cff.dev/join?r=friend`;
+
+    // Try native share first, fall back to clipboard
+    if (navigator.share) {
+      navigator.share({ text: smsText }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(smsText).catch(() => {});
+    }
+
+    setCopiedPayload(smsText);
+    setReferralClicked(true);
+    setReferralLoading(false);
     onReferral?.();
   };
 
@@ -190,26 +214,44 @@ export default function PremiumPaywallModal({
             {/* Option B — Referral */}
             <button
               onClick={handleReferral}
+              disabled={referralLoading}
               style={{
                 width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#1e3a8a',
-                background: '#eff6ff',
-                border: '1.5px solid #bfdbfe',
-                borderRadius: 16, padding: '16px 20px',
-                cursor: 'pointer', minHeight: 'auto',
+                background: referralClicked ? '#f0fdf4' : '#eff6ff',
+                border: `1.5px solid ${referralClicked ? '#86efac' : '#bfdbfe'}`,
+                borderRadius: 16, padding: '14px 20px',
+                cursor: referralLoading ? 'wait' : 'pointer', minHeight: 'auto',
                 display: 'flex', flexDirection: 'column',
-                alignItems: 'center', gap: 3,
+                alignItems: 'center', gap: 4,
                 transition: 'all 0.2s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#dbeafe'; e.currentTarget.style.borderColor = '#93c5fd'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#bfdbfe'; }}
+              onMouseEnter={e => { if (!referralClicked) { e.currentTarget.style.background = '#dbeafe'; e.currentTarget.style.borderColor = '#93c5fd'; }}}
+              onMouseLeave={e => { if (!referralClicked) { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#bfdbfe'; }}}
             >
-              <span style={{ fontSize: 15 }}>
-                {referralClicked ? '✅ Referral Link Copied!' : '🔗 Text 3 Classmates to Unlock Free Access'}
+              <span style={{ fontSize: 14 }}>
+                {referralLoading ? '⏳ Generating your link…' : referralClicked ? '✅ Message Copied to Clipboard!' : '🔗 Share with 3 Classmates → Unlock Free Access'}
               </span>
-              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#3b82f6' }}>
-                Share your link · 3 sign-ups = free premium access
-              </span>
+              {!referralClicked && (
+                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#3b82f6', lineHeight: 1.5, textAlign: 'center' }}>
+                  When they sign up, CLiFF unlocks your Inside Track Dashboard instantly for free
+                </span>
+              )}
             </button>
+
+            {/* Clipboard preview */}
+            {referralClicked && copiedPayload && (
+              <div style={{
+                background: '#0f172a', borderRadius: 12, padding: '12px 14px',
+                border: '1px solid #1e293b',
+              }}>
+                <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>
+                  📋 Paste this in your group chat
+                </p>
+                <p style={{ fontFamily: dm, fontSize: 11, color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>
+                  {copiedPayload}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Trust line */}
