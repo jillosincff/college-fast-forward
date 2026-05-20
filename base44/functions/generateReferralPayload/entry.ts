@@ -19,9 +19,9 @@ Deno.serve(async (req) => {
   }
 
   const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me();
-
+  // Parse body BEFORE auth (body stream must be read before SDK consumes req internals)
   const body = await req.json().catch(() => ({}));
+  const user = await base44.auth.me();
   const userId     = user?.id || body.userId || 'anon';
   const firstName  = body.userFirstName || user?.full_name?.split(' ')[0] || 'You';
   const school     = body.schoolShortName || user?.school_code || 'UF';

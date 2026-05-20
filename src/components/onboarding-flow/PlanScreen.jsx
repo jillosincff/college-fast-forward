@@ -219,12 +219,10 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
     window.location.hash = '#FastIQDashboard';
   };
 
+  // PremiumPaywallModal handles the full share/clipboard flow internally.
+  // onReferral is just a post-share callback — no need to re-trigger sharing here.
   const handleReferral = () => {
-    const shareUrl = `${window.location.origin}/#GetStarted?ref=friend`;
-    const msg = `Join me on College Fast Forward — it found me hidden job leads through ${college || 'campus'} alumni! ${shareUrl}`;
-    try { navigator.share({ text: msg, url: shareUrl }); } catch {
-      try { navigator.clipboard.writeText(msg); } catch {}
-    }
+    // Modal has already copied/shared the payload. Nothing extra needed.
   };
 
   // Intercept ← Back on mobile as exit-intent

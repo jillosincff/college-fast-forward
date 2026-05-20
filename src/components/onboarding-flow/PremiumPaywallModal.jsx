@@ -3,8 +3,9 @@ import { getUniversityBrand } from '@/lib/universityBrand';
 import { base44 } from '@/api/base44Client';
 import { generateReferralPayload } from '@/functions/generateReferralPayload';
 
+let _trackUserId = 'anon';
 const track = (event, props = {}) => {
-  base44.entities.AnalyticsEvent.create({ event_name: event, user_id: 'anon', properties: props }).catch(() => {});
+  base44.entities.AnalyticsEvent.create({ event_name: event, user_id: _trackUserId, properties: props }).catch(() => {});
 };
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -36,6 +37,7 @@ export default function PremiumPaywallModal({
   const [copiedPayload, setCopiedPayload] = useState('');
 
   useEffect(() => {
+    if (user?.id) _trackUserId = user.id;
     track(isDownsell ? 'downsell_modal_shown' : 'paywall_shown', { school: user?.school_code });
   }, []);
 

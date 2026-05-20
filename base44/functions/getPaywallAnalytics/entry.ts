@@ -3,7 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   const user = await base44.auth.me();
-  if (user?.role !== 'admin') {
+  if (!user?.roles?.includes('admin')) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
   // ── 3. Bounce Horizon ────────────────────────────────────────────
   const paywallShown     = countAll('paywall_shown');
   const paywallConverted = countAll('paywall_converted');
-  const paywallBounced   = paywallShown - paywallConverted - downsellConverted;
+  const paywallBounced   = Math.max(0, paywallShown - paywallConverted - downsellConverted);
   const conversionRate   = paywallShown > 0
     ? Math.round((paywallConverted / paywallShown) * 100)
     : null;
