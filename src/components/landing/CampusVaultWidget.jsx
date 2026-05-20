@@ -194,26 +194,8 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           )}
         </div>
 
-        {/* Featured quick-pick pills */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 20 }}>
-          {FEATURED.map(f => (
-            <button
-              key={f.label}
-              onClick={() => selectSchool(f.name)}
-              style={{
-                fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT2,
-                background: CARD, border: '1.5px solid #E2E8F0',
-                borderRadius: 100, padding: '7px 16px',
-                cursor: 'pointer', minHeight: 'auto',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.color = BLUE; e.currentTarget.style.background = BLUE_LIGHT; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; e.currentTarget.style.background = CARD; }}
-            >
-              {f.label}
-            </button>
-          ))}
-          {/* Universal catch-all */}
+        {/* Universal catch-all */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <button
             onClick={() => { if (onSchoolSelect) onSchoolSelect(''); }}
             style={{

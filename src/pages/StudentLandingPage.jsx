@@ -318,7 +318,7 @@ export default function StudentLandingPage({ onParentClick }) {
           <div style={{ marginTop: 14, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
             <span style={{ fontFamily: FONT, fontSize: 12, color: '#065F46', fontWeight: 600 }}>
-              3,412 students from FSU, UF, and Wake Forest actively scanning today
+              Join 3,412 students from top campuses nationwide stepping out of the crowd today.
             </span>
           </div>
         </div>
