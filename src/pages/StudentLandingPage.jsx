@@ -404,18 +404,17 @@ export default function StudentLandingPage({ onParentClick }) {
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 36px', textAlign: 'center' }}>
             One scan. Your entire edge, unlocked.
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 28 }}>
             {[
-              { emoji: '⚡', label: 'Auto-extract insider contact lanes' },
-              { emoji: '🎯', label: 'Real-time ATS formatting repair' },
-              { emoji: '🔗', label: 'Campus alumni mapped to open reqs' },
-              { emoji: '📋', label: 'Hiring CRM — zero spreadsheets' },
-              { emoji: '✉️', label: 'Outreach drafted in your voice' },
-              { emoji: '🏆', label: 'Interview prep from real questions' },
+              { emoji: '🗂️', title: 'Zero Application Chaos', desc: 'Your entire search timeline, tailored assets, and response notes beautifully organized in one workspace. No messy spreadsheets, no lost tracking lines.' },
+              { emoji: '🚀', title: 'Bypass the Masses', desc: 'Skip the public portals entirely. Route your custom profile straight into exclusive, unlisted job tracks hidden from the generic campus pile.' },
+              { emoji: '🔑', title: 'The 10x Inside Track', desc: 'Stop cold messaging strangers on LinkedIn. CliFF aligns your assets directly with verified parent and insider channels ready to pull you in.' },
+              { emoji: '⚡', title: 'Prepared to Win Quickly', desc: 'Get role-specific practice tracks, asset customization, and high-velocity outreach lines engineered to land responses fast.' },
             ].map((item, i) => (
-              <div key={i} style={{ background: BG, borderRadius: R, padding: '16px 18px', boxShadow: SHADOW, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 20, flexShrink: 0 }}>{item.emoji}</span>
-                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.4 }}>{item.label}</p>
+              <div key={i} style={{ background: BG, borderRadius: R, padding: '22px 20px', boxShadow: SHADOW, border: '1px solid #E2E8F0' }}>
+                <span style={{ fontSize: 24, display: 'block', marginBottom: 10 }}>{item.emoji}</span>
+                <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 800, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.01em', lineHeight: 1.3 }}>{item.title}</p>
+                <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.65 }}>{item.desc}</p>
               </div>
             ))}
           </div>
