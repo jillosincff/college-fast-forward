@@ -65,7 +65,7 @@ export default function StudentOnboarding() {
     const name = user.full_name?.split(' ')[0] || '';
     setFirstName(name);
     setStep(2);
-  }, [user, step]);
+  }, [user, step, navigate]);
 
   // Handle OAuth error
   useEffect(() => {
