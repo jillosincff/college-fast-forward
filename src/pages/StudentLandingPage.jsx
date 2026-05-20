@@ -187,7 +187,7 @@ export default function StudentLandingPage({ onParentClick }) {
         localStorage.setItem('pending_invite_role', 'student');
         sessionStorage.setItem('cff_onboarding_type', 'student');
       } catch (e) {}
-      base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
+      base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
     }
   };
 

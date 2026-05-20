@@ -158,7 +158,7 @@ export default function GatorAuth() {
       }
       // Do NOT set cff_onboarding_type for plain sign-ins — returning users must not see onboarding
     } catch (e) { /* private browsing */ }
-    base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
+    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
   };
 
   useEffect(() => {
