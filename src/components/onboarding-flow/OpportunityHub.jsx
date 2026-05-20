@@ -4,6 +4,146 @@ const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
 
 const OPPORTUNITIES_DATA = {
+  healthcare: [
+    {
+      id: 'hc-1',
+      title: 'Clinical Research Coordinator',
+      company: '[Top-Ranked Academic Medical Center]',
+      location: 'Boston, MA (Hybrid)',
+      posted: 'Updated 3 hours ago',
+      alumCount: 2,
+      insiderTitle: 'Lead Clinical Trials Associate',
+      insiderTimeline: 'Graduated 2 Years Ago',
+      previewText: "Hey, noticed you also went to the same school and moved into clinical research here. I'm exploring CRC roles in your department and would love to hear how you navigated the hiring process...",
+    },
+    {
+      id: 'hc-2',
+      title: 'Biotech Research Associate',
+      company: '[Emerging Cell Therapy Company]',
+      location: 'San Diego, CA',
+      posted: 'Updated 6 hours ago',
+      alumCount: 1,
+      insiderTitle: 'Senior Lab Research Scientist',
+      insiderTimeline: 'Graduated 3 Years Ago',
+      previewText: "Hi, saw that you graduated from the same campus and joined the R&D team there. I'm targeting biotech research roles and would really value your perspective on the onboarding and lab culture...",
+    },
+    {
+      id: 'hc-3',
+      title: 'Health Policy Analyst',
+      company: '[Federal Health Agency / Think Tank]',
+      location: 'Washington, DC',
+      posted: 'Updated 1 day ago',
+      alumCount: 2,
+      insiderTitle: 'Policy Program Associate',
+      insiderTimeline: 'Graduated 4 Years Ago',
+      previewText: "Hello, noticed you transitioned from our school ecosystem into health policy work in DC. I'm preparing my applications for analyst roles and would appreciate any insight on the hiring cycle there...",
+    },
+  ],
+  tech: [
+    {
+      id: 'tech-1',
+      title: 'Software Engineering Intern',
+      company: '[Top-Tier Cloud Infrastructure Firm]',
+      location: 'Seattle, WA (Hybrid)',
+      posted: 'Updated 2 hours ago',
+      alumCount: 3,
+      insiderTitle: 'Senior Software Engineer',
+      insiderTimeline: 'Graduated 3 Years Ago',
+      previewText: "Hey, saw you went to the same school and are now on the engineering team there. I'm applying for intern and new grad SWE roles and would love any insight on the technical interview process...",
+    },
+    {
+      id: 'tech-2',
+      title: 'Product Manager — New Grad',
+      company: '[High-Growth B2B SaaS Company]',
+      location: 'San Francisco, CA',
+      posted: 'Updated 5 hours ago',
+      alumCount: 1,
+      insiderTitle: 'Associate Product Manager',
+      insiderTimeline: 'Graduated 2 Years Ago',
+      previewText: "Hi, noticed you also went to the same school and landed a PM role there. I'm targeting APM programs for next cycle and would love 10 minutes to hear about your experience getting in...",
+    },
+    {
+      id: 'tech-3',
+      title: 'Data Science Analyst',
+      company: '[Leading Fintech Platform]',
+      location: 'New York, NY',
+      posted: 'Updated 8 hours ago',
+      alumCount: 2,
+      insiderTitle: 'Data Science Lead',
+      insiderTimeline: 'Graduated 4 Years Ago',
+      previewText: "Hello, came across your profile and noticed the shared school connection. I'm targeting data analyst and data science roles and would value any perspective you have on what skills they prioritize...",
+    },
+  ],
+  law_gov: [
+    {
+      id: 'lg-1',
+      title: 'Legislative Affairs Intern',
+      company: '[U.S. Senate / Congressional Office]',
+      location: 'Washington, DC',
+      posted: 'Updated 4 hours ago',
+      alumCount: 2,
+      insiderTitle: 'Policy Research Associate',
+      insiderTimeline: 'Graduated 2 Years Ago',
+      previewText: "Hey, noticed you also came from the same school and moved into legislative work on the Hill. I'm applying for policy and staff intern roles and would really appreciate any guidance you can share...",
+    },
+    {
+      id: 'lg-2',
+      title: 'Public Policy Analyst',
+      company: '[Top Policy Research Institute]',
+      location: 'Washington, DC (Hybrid)',
+      posted: 'Updated 1 day ago',
+      alumCount: 1,
+      insiderTitle: 'Senior Policy Fellow',
+      insiderTimeline: 'Graduated 5 Years Ago',
+      previewText: "Hi, saw you graduated from the same campus and joined the policy research team there. I'm exploring analyst roles in the public policy space and would love your perspective on breaking in...",
+    },
+    {
+      id: 'lg-3',
+      title: 'Pre-Law Paralegal Associate',
+      company: '[Am Law 100 Firm]',
+      location: 'New York, NY',
+      posted: 'Updated 7 hours ago',
+      alumCount: 1,
+      insiderTitle: 'Litigation Paralegal',
+      insiderTimeline: 'Graduated 3 Years Ago',
+      previewText: "Hello, noticed you went to the same school and took the paralegal route before law school. I'm on a similar pre-law path and would value any advice on making the most of the role...",
+    },
+  ],
+  creative: [
+    {
+      id: 'cr-1',
+      title: 'Entertainment Marketing Coordinator',
+      company: '[Major Film & TV Studio]',
+      location: 'Los Angeles, CA',
+      posted: 'Updated 3 hours ago',
+      alumCount: 2,
+      insiderTitle: 'Creative Marketing Manager',
+      insiderTimeline: 'Graduated 3 Years Ago',
+      previewText: "Hey, noticed you also went to the same school and broke into the entertainment marketing space. I'm targeting coordinator roles at studios and would love your perspective on how you got your foot in the door...",
+    },
+    {
+      id: 'cr-2',
+      title: 'Junior Brand Designer',
+      company: '[Global Fashion & Retail Group]',
+      location: 'New York, NY',
+      posted: 'Updated 6 hours ago',
+      alumCount: 1,
+      insiderTitle: 'Brand Creative Lead',
+      insiderTimeline: 'Graduated 4 Years Ago',
+      previewText: "Hi, saw you graduated from the same campus and moved into brand design at a major retail group. I'm building my portfolio and targeting similar roles — would love any insight on what the team looks for...",
+    },
+    {
+      id: 'cr-3',
+      title: 'Sports Business Analyst',
+      company: '[Professional Sports Organization]',
+      location: 'Miami, FL',
+      posted: 'Updated 9 hours ago',
+      alumCount: 1,
+      insiderTitle: 'Strategy & Partnerships Associate',
+      insiderTimeline: 'Graduated 2 Years Ago',
+      previewText: "Hello, noticed you went to the same school and landed a business role in pro sports. I'm deeply interested in the sports business space and would really value any advice on breaking in...",
+    },
+  ],
   finance: [
     {
       id: 'ib-1',
@@ -77,9 +217,25 @@ const OPPORTUNITIES_DATA = {
 };
 
 function resolveTrack(selectedIndustries = [], targetRoles = []) {
-  const financeKeywords = ['investment banking', 'finance', 'private equity', 'banking', 'financial services', 'consulting', 'accounting'];
   const allSelected = [...selectedIndustries, ...targetRoles].map(s => s.toLowerCase());
-  if (allSelected.some(s => financeKeywords.some(k => s.includes(k)))) return 'finance';
+
+  const matches = (keywords) => allSelected.some(s => keywords.some(k => s.includes(k)));
+
+  // Check bucket keys first (most reliable signal)
+  if (selectedIndustries.includes('healthcare')) return 'healthcare';
+  if (selectedIndustries.includes('tech')) return 'tech';
+  if (selectedIndustries.includes('business')) return 'finance';
+  if (selectedIndustries.includes('law_gov')) return 'law_gov';
+  if (selectedIndustries.includes('creative')) return 'creative';
+  if (selectedIndustries.includes('marketing')) return 'marketing';
+
+  // Fallback: match on role keywords
+  if (matches(['pre-med', 'biotech', 'clinical', 'health', 'pharma', 'nursing', 'public health'])) return 'healthcare';
+  if (matches(['software', 'product', 'data science', 'ux', 'cybersecurity', 'ai', 'ml', 'engineering'])) return 'tech';
+  if (matches(['investment banking', 'private equity', 'consulting', 'finance', 'accounting', 'strategy'])) return 'finance';
+  if (matches(['pre-law', 'policy', 'government', 'nonprofit', 'politics', 'international'])) return 'law_gov';
+  if (matches(['film', 'music', 'fashion', 'sports', 'gaming', 'architecture', 'entertainment'])) return 'creative';
+
   return 'marketing';
 }
 
@@ -87,7 +243,8 @@ export default function OpportunityHub({ selectedIndustries = [], targetRoles = 
   const track = resolveTrack(selectedIndustries, targetRoles);
   const jobs = OPPORTUNITIES_DATA[track];
   const [expandedId, setExpandedId] = useState(jobs[0].id);
-  const emoji = track === 'finance' ? '📊' : '🎯';
+  const emojiMap = { finance: '📊', tech: '💻', healthcare: '🏥', law_gov: '⚖️', creative: '🎨', marketing: '🎯' };
+  const emoji = emojiMap[track] || '🎯';
 
   return (
     <div style={{ width: '100%' }}>
