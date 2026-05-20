@@ -139,29 +139,27 @@ export default function StudentLandingPage({ onParentClick }) {
     }
   }, []);
 
-  // Redirect returning users who already completed the funnel straight to their dashboard
+  // Redirect any logged-in user straight to their dashboard
   useEffect(() => {
     if (isLoadingAuth || !user) return;
-    if (user.onboarding_completed) {
+    if (user.persona === 'parent' || user.roles?.includes('parent')) {
+      navigate('ParentHome');
+    } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+      navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
+    } else if (user.persona || user.roles?.length > 0) {
+      navigate('FreeTierDashboard');
+    }
+  }, [user, isLoadingAuth]);
+
+  // Smart "Get Hired" handler — any logged-in user goes straight to their dashboard, new users hit Google auth
+  const go = () => {
+    if (!isLoadingAuth && user) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('ParentHome');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
         navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
       } else {
         navigate('FreeTierDashboard');
-      }
-    }
-  }, [user, isLoadingAuth]);
-
-  // Smart "Get Hired" handler — returning users go straight to their dashboard, new users hit Google auth immediately → funnel runs post-auth in GatorAuth
-  const go = () => {
-    if (!isLoadingAuth && user && user.onboarding_completed) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('/ParentHome');
-      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-        navigate(user.alumni_intent === 'giving_help' ? '/AlumniHome' : '/FreeTierDashboard');
-      } else {
-        navigate('/FreeTierDashboard');
       }
     } else {
       try {
@@ -217,7 +215,7 @@ export default function StudentLandingPage({ onParentClick }) {
           <button onClick={go} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 12px rgba(0,102,255,0.25)', transition: 'all 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-          >{!isLoadingAuth && user && user.onboarding_completed ? 'Go to Dashboard →' : 'Get Started →'}</button>
+          >{!isLoadingAuth && user ? 'Go to Dashboard →' : 'Get Started →'}</button>
         </div>
       </nav>
 
