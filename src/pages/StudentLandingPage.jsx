@@ -127,7 +127,17 @@ function StoriesCarousel() {
 export default function StudentLandingPage({ onParentClick }) {
   const [mounted, setMounted] = useState(false);
   const [showFunnel, setShowFunnel] = useState(false);
+  const [funnelStartScreen, setFunnelStartScreen] = useState(null);
   const { user, isLoadingAuth } = useAuth();
+
+  const launchWithSchool = (schoolName) => {
+    try {
+      localStorage.setItem('cff_college', schoolName);
+      localStorage.setItem('cff_onboarding_screen', '7');
+    } catch {}
+    setFunnelStartScreen(7);
+    setShowFunnel(true);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -208,7 +218,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
   return (
     <div style={{ background: BG, fontFamily: FONT, color: TEXT, overflowX: 'hidden' }}>
-      {showFunnel && <OnboardingFlow onClose={() => setShowFunnel(false)} />}
+      {showFunnel && <OnboardingFlow onClose={() => { setShowFunnel(false); setFunnelStartScreen(null); }} resumeAtScreen={funnelStartScreen} />}
 
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -381,29 +391,33 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── CAMPUS VAULT WIDGET (replaces 6-box feature grid) ── */}
-      <CampusVaultWidget go={go} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
+      <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <SectionLabel text="How it works" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 48px', textAlign: 'center' }}>
-            One Agent. Everything organized.<br />Real progress.
+      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '72px 24px' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <SectionLabel text="What the Agent does for you" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 36px', textAlign: 'center' }}>
+            One scan. Your entire edge, unlocked.
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 32 }}>
-            {HOW_IT_WORKS.map((step, idx) => (
-              <div key={step.number} style={{ background: BG, borderRadius: R, padding: '28px 24px', position: 'relative', overflow: 'hidden', boxShadow: SHADOW }}>
-                <div style={{ position: 'absolute', top: -12, right: 12, fontSize: 64, opacity: 0.06, lineHeight: 1, fontWeight: 800, pointerEvents: 'none', color: BLUE }}>{step.number}</div>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 14 }}>{step.icon}</div>
-                <p style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px' }}>Step {step.number}</p>
-                <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.01em' }}>{step.title}</p>
-                <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.7 }}>{step.desc}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 28 }}>
+            {[
+              { emoji: '⚡', label: 'Auto-extract insider contact lanes' },
+              { emoji: '🎯', label: 'Real-time ATS formatting repair' },
+              { emoji: '🔗', label: 'Campus alumni mapped to open reqs' },
+              { emoji: '📋', label: 'Hiring CRM — zero spreadsheets' },
+              { emoji: '✉️', label: 'Outreach drafted in your voice' },
+              { emoji: '🏆', label: 'Interview prep from real questions' },
+            ].map((item, i) => (
+              <div key={i} style={{ background: BG, borderRadius: R, padding: '16px 18px', boxShadow: SHADOW, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 20, flexShrink: 0 }}>{item.emoji}</span>
+                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.4 }}>{item.label}</p>
               </div>
             ))}
           </div>
-          <div style={{ background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: R, padding: '20px 28px', textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.8vw, 17px)', fontWeight: 600, color: BLUE, margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
-              💡 "The Agent handles the chaos so you can focus on getting hired."
+          <div style={{ background: '#0F172A', borderRadius: R, padding: '20px 28px', textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 1.6vw, 16px)', fontWeight: 600, color: '#fff', margin: 0, lineHeight: 1.5 }}>
+              💬 <span style={{ color: GREEN }}>"I was overwhelmed applying everywhere. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks."</span> — Marcus, Penn State '27
             </p>
           </div>
         </div>

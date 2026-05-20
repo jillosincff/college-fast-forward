@@ -11,10 +11,18 @@ const CAMPUS_DATA = [
   { key: 'uga',    label: 'UGA',        name: 'University of Georgia',         count: 623,  color: '#BA0C2F', accent: '#000000' },
 ];
 
-export default function CampusVaultWidget({ go, FONT, TEXT, TEXT2, TEXT3, CARD, BG, BLUE, BLUE_LIGHT, BLUE_BORDER, GREEN, GREEN_LIGHT, GREEN_BORDER, SHADOW, SHADOW_MD, R }) {
+export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT2, TEXT3, CARD, BG, BLUE, BLUE_LIGHT, BLUE_BORDER, GREEN, GREEN_LIGHT, GREEN_BORDER, SHADOW, SHADOW_MD, R }) {
   const [selected, setSelected] = useState(null);
 
   const active = selected ? CAMPUS_DATA.find(c => c.key === selected) : null;
+
+  const handleSchoolClick = (campus) => {
+    setSelected(campus.key);
+    // Short delay so user sees the selection flash, then launch onboarding
+    setTimeout(() => {
+      if (onSchoolSelect) onSchoolSelect(campus.name);
+    }, 320);
+  };
 
   return (
     <div style={{ padding: '80px 24px', background: BG }}>
@@ -36,7 +44,7 @@ export default function CampusVaultWidget({ go, FONT, TEXT, TEXT2, TEXT3, CARD, 
           {CAMPUS_DATA.map(campus => (
             <button
               key={campus.key}
-              onClick={() => setSelected(selected === campus.key ? null : campus.key)}
+              onClick={() => handleSchoolClick(campus)}
               style={{
                 fontFamily: FONT,
                 fontSize: 13,
