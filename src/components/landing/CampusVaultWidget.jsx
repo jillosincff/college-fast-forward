@@ -117,10 +117,10 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           Live Campus Vault Status
         </p>
         <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.2 }}>
-          See how your campus ecosystem ranks.<br />Select your school to unlock localized ATS tracks.
+          Bypass the public portals.<br />Access the hidden market.
         </h2>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
-          📈 Stop guessing why recruiters ghost you. Paste your resume, run our instant ATS match engine, and bridge the gap to interviews immediately.
+          Three out of four open roles are never posted to public job boards. Select your school to isolate unlisted opportunities matching your profile, paired instantly with verified campus insiders who can help fast-track your application.
         </p>
 
         {/* Autocomplete search */}
