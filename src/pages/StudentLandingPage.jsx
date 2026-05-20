@@ -280,49 +280,38 @@ export default function StudentLandingPage({ onParentClick }) {
           <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>The CFF AI Agent</span>
         </div>
 
-        <h1 style={{
-          fontFamily: FONT, fontSize: 'clamp(32px, 6vw, 72px)',
-          fontWeight: 800, color: TEXT, lineHeight: 1.05, letterSpacing: '-0.03em',
-          margin: '0 0 8px', maxWidth: 820,
-          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.6s ease 0.1s',
-        }}>
-          Spray and pray is <span style={{ color: '#94A3B8', textDecoration: 'line-through', fontStyle: 'italic' }}>the old way.</span>
-        </h1>
-        <h2 style={{
-          fontFamily: FONT, fontSize: 'clamp(28px, 5vw, 60px)',
-          fontWeight: 800, color: BLUE, lineHeight: 1.05, letterSpacing: '-0.03em',
-          margin: '8px 0 0', maxWidth: 820,
-          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'all 0.6s ease 0.15s',
-        }}>
-          Target and action is the new way.
-        </h2>
+        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 780 }}>
+          <div style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3vw, 30px)', fontWeight: 700, color: '#94A3B8', textDecoration: 'line-through', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
+            Spray and pray is the old way.
+          </div>
+          <div style={{ fontFamily: FONT, fontSize: 'clamp(36px, 6.5vw, 76px)', fontWeight: 900, color: BLUE, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 0 }}>
+            Target and action is the new way.
+          </div>
+        </div>
 
         <p style={{
-          fontFamily: FONT, fontSize: 'clamp(15px, 1.8vw, 18px)',
-          fontWeight: 400, color: TEXT2,
-          lineHeight: 1.8, maxWidth: 580, margin: '24px auto 36px',
+          fontFamily: FONT, fontSize: 'clamp(15px, 1.6vw, 17px)',
+          fontWeight: 500, color: TEXT2,
+          lineHeight: 1.75, maxWidth: 520, margin: '28px auto 0',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Job hunting is stressful, frustrating, and a massive time suck. We help ease the pain. Because at the end of the day, <strong style={{ color: TEXT }}>who you know matters more than what you know.</strong> CLiFF delivers an exclusive, smarter job search strategy that bypasses the generic crowd, gets your assets completely organized, and connects you directly with campus insiders who are <strong style={{ color: BLUE }}>10x more likely to help you land the interview.</strong>
+          Job hunting is a stressful, frustrating time suck. CLiFF bypasses the generic crowd, organizes your entire strategy, and connects you directly with campus insiders <strong style={{ color: TEXT }}>10x more likely to pull you inside.</strong>
         </p>
 
-        <div style={{ width: '100%', maxWidth: 460, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
+        <div style={{ width: '100%', maxWidth: 400, marginTop: 40, paddingBottom: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
           <button onClick={go} style={{
-            width: '100%', fontFamily: FONT, fontSize: 16, fontWeight: 800, color: '#fff',
-            background: 'linear-gradient(135deg, #0066FF 0%, #06B6D4 100%)',
-            border: 'none', borderRadius: 14, padding: '18px 32px',
+            width: '100%', fontFamily: FONT, fontSize: 16, fontWeight: 900, color: '#fff',
+            background: BLUE, border: 'none', borderRadius: 16, padding: '18px 32px',
             cursor: 'pointer', minHeight: 'auto',
             boxShadow: '0 12px 32px rgba(0,102,255,0.35)',
-            transition: 'all 0.2s ease', letterSpacing: '-0.01em',
+            transition: 'all 0.2s ease', letterSpacing: '0.01em',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 18px 40px rgba(0,102,255,0.45)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,102,255,0.35)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
           >⚡ Stand Out From The Crowd</button>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '10px 0 0', textAlign: 'center' }}>
-            🔒 Free Access · Lock in your personalized career roadmap in 30 seconds
-          </p>
+          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            🔒 Free Student Workspace · Takes 30 seconds
+          </span>
           <div style={{ marginTop: 14, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
             <span style={{ fontFamily: FONT, fontSize: 12, color: '#065F46', fontWeight: 600 }}>
