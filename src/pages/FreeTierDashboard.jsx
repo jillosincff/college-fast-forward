@@ -292,9 +292,9 @@ export default function FreeTierDashboard() {
           alignItems: 'center',
           gap: 10,
         }}>
-          <span style={{ fontSize: 20 }}>🐊</span>
+          <span style={{ fontSize: 20 }}>🎓</span>
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: campusTheme.primary, margin: 0 }}>
-            Synced: {college || 'UF'} Alumni & Parent Grid
+            Synced: {college || 'Campus'} Alumni & Parent Grid
           </p>
         </div>
 
@@ -311,7 +311,7 @@ export default function FreeTierDashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar desktop-only">
 
             {/* Career Assets (ATS Check + Premium assets) */}
-            <CareerAssetsCard onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
+            <CareerAssetsCard user={user} onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
 
             {/* Alumni Outreach Generator — campus-themed */}
             <div
