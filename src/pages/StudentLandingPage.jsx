@@ -281,26 +281,34 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <h1 style={{
-          fontFamily: FONT, fontSize: 'clamp(36px, 7vw, 80px)',
+          fontFamily: FONT, fontSize: 'clamp(32px, 6vw, 72px)',
           fontWeight: 800, color: TEXT, lineHeight: 1.05, letterSpacing: '-0.03em',
           margin: '0 0 8px', maxWidth: 820,
           opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
           transition: 'all 0.6s ease 0.1s',
         }}>
-          Job Boards Are a<br />
-          <span style={{ color: BLUE }}>Black Hole.</span>
+          Spray and pray is <span style={{ color: '#94A3B8', textDecoration: 'line-through', fontStyle: 'italic' }}>the old way.</span>
         </h1>
+        <h2 style={{
+          fontFamily: FONT, fontSize: 'clamp(28px, 5vw, 60px)',
+          fontWeight: 800, color: BLUE, lineHeight: 1.05, letterSpacing: '-0.03em',
+          margin: '8px 0 0', maxWidth: 820,
+          opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'all 0.6s ease 0.15s',
+        }}>
+          Target and action is the new way.
+        </h2>
 
         <p style={{
-          fontFamily: FONT, fontSize: 'clamp(15px, 1.8vw, 19px)',
+          fontFamily: FONT, fontSize: 'clamp(15px, 1.8vw, 18px)',
           fontWeight: 400, color: TEXT2,
-          lineHeight: 1.7, maxWidth: 560, margin: '20px auto 36px',
+          lineHeight: 1.8, maxWidth: 580, margin: '24px auto 36px',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed, and get hired — without the chaos.
+          Job hunting is stressful, frustrating, and a massive time suck. We help ease the pain. Because at the end of the day, <strong style={{ color: TEXT }}>who you know matters more than what you know.</strong> CLiFF delivers an exclusive, smarter job search strategy that bypasses the generic crowd, gets your assets completely organized, and connects you directly with campus insiders who are <strong style={{ color: BLUE }}>10x more likely to help you land the interview.</strong>
         </p>
 
-        <div style={{ width: '100%', maxWidth: 420, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
+        <div style={{ width: '100%', maxWidth: 460, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
           <button onClick={go} style={{
             width: '100%', fontFamily: FONT, fontSize: 16, fontWeight: 800, color: '#fff',
             background: 'linear-gradient(135deg, #0066FF 0%, #06B6D4 100%)',
@@ -311,9 +319,9 @@ export default function StudentLandingPage({ onParentClick }) {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 18px 40px rgba(0,102,255,0.45)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,102,255,0.35)'; }}
-          >⚡ Check My ATS Match Score</button>
+          >⚡ Stand Out From The Crowd</button>
           <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '10px 0 0', textAlign: 'center' }}>
-            Instant diagnostic tool · Paste any target job description to reveal your ranking
+            🔒 Free Access · Lock in your personalized career roadmap in 30 seconds
           </p>
           <div style={{ marginTop: 14, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
