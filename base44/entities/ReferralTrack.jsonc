@@ -1,0 +1,53 @@
+{
+  "name": "ReferralTrack",
+  "type": "object",
+  "properties": {
+    "referrer_user_id": {
+      "type": "string",
+      "description": "ID of the user who sent the referral invite"
+    },
+    "referee_email": {
+      "type": "string",
+      "description": "Email of the person who was referred (set once they create an account)"
+    },
+    "referee_email_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of referee email \u2014 unique index to block duplicate reward exploits"
+    },
+    "school_short_name": {
+      "type": "string",
+      "description": "School selected by referee at the milestone step"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "QUALIFIED",
+        "EXPIRED"
+      ],
+      "default": "PENDING",
+      "description": "PENDING = link clicked, QUALIFIED = school milestone hit and token credited"
+    },
+    "token_credited": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the bonus token has been credited to the referrer"
+    },
+    "credited_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the token was credited"
+    }
+  },
+  "required": [
+    "referrer_user_id"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {}
+  }
+}

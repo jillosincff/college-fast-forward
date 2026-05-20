@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { processReferralMilestone } from '@/functions/processReferralMilestone';
 import LinkedInScreen from './LinkedInScreen';
 import PlanScreen from './PlanScreen';
 import Screen6School from './Screen6School';
@@ -322,6 +323,24 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     setCollege(val);
     if (val.length < 2) { setCollegeSuggestions([]); return; }
     setCollegeSuggestions(TOP_SCHOOLS.filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 5));
+  };
+
+  // Fire referral milestone when referee hits the school step
+  const fireReferralMilestone = async (schoolName) => {
+    try {
+      const referrerUserId = localStorage.getItem('cff_referrer_id');
+      if (!referrerUserId) return;
+      // Build a deterministic hash from a session-stable token (no PII at this point)
+      const raw = referrerUserId + '_' + (Date.now() - (Date.now() % 86400000)); // day-bucket
+      const msgBuffer = new TextEncoder().encode(raw);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+      processReferralMilestone({
+        referrerUserId,
+        refereeEmailHash: hashHex,
+        schoolShortName: schoolName || '',
+      }).catch(() => {}); // fire-and-forget — never block the UI
+    } catch {}
   };
 
   // Trigger the resonance scan, then proceed after 2500ms
@@ -866,6 +885,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           onCollegeChange={setCollege}
           onBack={back}
           onNext={() => {
+            fireReferralMilestone(college);
             triggerResonanceScan(() => next());
           }}
           nextLabel="Continue →"

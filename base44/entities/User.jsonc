@@ -562,6 +562,16 @@
     "family_id": {
       "type": "string",
       "description": "ID of the Family record this user belongs to"
+    },
+    "weekly_outreach_tokens": {
+      "type": "number",
+      "default": 3,
+      "description": "Weekly outreach tokens available (replenished each week)"
+    },
+    "referral_bonus_tokens": {
+      "type": "number",
+      "default": 0,
+      "description": "Bonus outreach tokens earned via friend referrals \u2014 credited when a referred friend reaches the school-selection milestone"
     }
   },
   "required": []

@@ -130,6 +130,15 @@ export default function StudentLandingPage({ onParentClick }) {
 
   useEffect(() => {
     setMounted(true);
+    // Capture referrer ID from ?r= param so OnboardingFlow can fire the milestone
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+      const referrerId = urlParams.get('r') || hashParams.get('r');
+      if (referrerId) {
+        localStorage.setItem('cff_referrer_id', referrerId);
+      }
+    } catch {}
     if (!document.getElementById('slp-inter')) {
       const link = document.createElement('link');
       link.id = 'slp-inter';
