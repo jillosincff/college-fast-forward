@@ -1,5 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getUniversityBrand } from '@/lib/universityBrand';
+import { base44 } from '@/api/base44Client';
+
+const track = (event, props = {}) => {
+  base44.entities.AnalyticsEvent.create({ event_name: event, user_id: 'anon', properties: props }).catch(() => {});
+};
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -27,6 +32,10 @@ export default function PremiumPaywallModal({
 }) {
   const [referralClicked, setReferralClicked] = useState(false);
 
+  useEffect(() => {
+    track(isDownsell ? 'downsell_modal_shown' : 'paywall_shown', { school: user?.school_code });
+  }, []);
+
   const brand = getUniversityBrand(user?.school_code || user?.school);
   const resolvedSchool = schoolName || brand.shortName || brand.fullName || 'your school';
   const resolvedFirst = firstName || user?.full_name?.split(' ')[0] || 'You';
@@ -37,8 +46,14 @@ export default function PremiumPaywallModal({
     ? `${resolvedFirst}, here's your last chance offer.`
     : `${resolvedFirst}, don't leave your ${resolvedSchool} network behind!`;
 
+  const handlePay = () => {
+    track(isDownsell ? 'downsell_converted' : 'paywall_converted', { price: isDownsell ? 2.49 : 4.99 });
+    onPay?.();
+  };
+
   const handleReferral = () => {
     setReferralClicked(true);
+    track('paywall_referral_share_clicked', { school: user?.school_code });
     onReferral?.();
   };
 
@@ -139,7 +154,7 @@ export default function PremiumPaywallModal({
 
             {/* Option A — Pay */}
             <button
-              onClick={onPay}
+              onClick={handlePay}
               style={{
                 width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff',
                 background: isDownsell

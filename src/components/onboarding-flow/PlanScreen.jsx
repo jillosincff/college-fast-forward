@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
 import BackdoorOpportunityCard from './BackdoorOpportunityCard';
 import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
@@ -200,6 +201,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
     const handleMouseLeave = (e) => {
       if (e.clientY < 20 && !exitIntentFired.current && !showPaywall) {
         exitIntentFired.current = true;
+        try { base44.entities.AnalyticsEvent.create({ event_name: 'exit_intent_triggered', user_id: 'anon', properties: { source: 'mouse_top' } }); } catch {}
         setIsDownsell(true);
         setShowPaywall(true);
       }

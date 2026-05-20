@@ -51,6 +51,7 @@ import Logout from '@/pages/Logout';
 import AdminV2 from '@/pages/AdminV2';
 import EngagementAgentDashboard from '@/pages/EngagementAgentDashboard';
 import HomePage from '@/pages/HomePage';
+import PaywallAnalyticsDashboard from '@/pages/PaywallAnalyticsDashboard';
 import Unsubscribe from '@/pages/Unsubscribe';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -128,6 +129,7 @@ const AuthenticatedApp = () => {
           <Route path="/Logout" element={<Logout />} />
           <Route path="/admin" element={<AdminV2 />} />
           <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
+          <Route path="/paywall-analytics" element={<PaywallAnalyticsDashboard />} />
           <Route path="/Unsubscribe" element={<Unsubscribe />} />
 
           {/* Main routes */}
