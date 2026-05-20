@@ -191,9 +191,15 @@ export default function GatorAuth() {
         return;
       }
 
-      // Check for saved progress — resume at last screen
+      // Only resume saved progress if the screen was saved in the last 24 hours
       const savedScreen = parseInt(localStorage.getItem('cff_onboarding_screen') || '1', 10);
-      setResumeScreen(savedScreen > 1 ? savedScreen : null);
+      const savedAt = parseInt(localStorage.getItem('cff_onboarding_screen_ts') || '0', 10);
+      const isRecent = Date.now() - savedAt < 24 * 60 * 60 * 1000;
+      if (!isRecent) {
+        localStorage.removeItem('cff_onboarding_screen');
+        localStorage.removeItem('cff_onboarding_screen_ts');
+      }
+      setResumeScreen(savedScreen > 1 && isRecent ? savedScreen : null);
       setStep('onboarding');
       return;
     }

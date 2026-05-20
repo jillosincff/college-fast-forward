@@ -216,6 +216,7 @@ const POST_AUTH_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 function saveProgress(screen, data = {}) {
   try {
     localStorage.setItem('cff_onboarding_screen', String(screen));
+    localStorage.setItem('cff_onboarding_screen_ts', String(Date.now()));
     Object.entries(data).forEach(([k, v]) => {
       if (v !== null && v !== undefined && v !== '') {
         localStorage.setItem(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
