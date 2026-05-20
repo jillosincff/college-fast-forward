@@ -120,7 +120,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           Bypass the public portals.<br />Access the hidden market.
         </h2>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Three out of four open roles are never posted to public job boards. Select your school to isolate unlisted opportunities matching your profile, paired instantly with verified campus insiders who can help fast-track your application.
+          Three out of four open roles are never posted to public job boards. Select your school to identify unlisted opportunities matching your profile, paired instantly with verified campus insiders who can help fast-track your application.
         </p>
 
         {/* Autocomplete search */}
