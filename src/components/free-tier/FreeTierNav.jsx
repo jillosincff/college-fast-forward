@@ -1,5 +1,7 @@
 const dm = "'DM Sans', system-ui, sans-serif";
 
+import { base44 } from '@/api/base44Client';
+
 export default function FreeTierNav({ user, onUpgrade }) {
   const isPremium = user?.fastiq_active || user?.membership_tier === 'premium';
   
@@ -30,6 +32,12 @@ export default function FreeTierNav({ user, onUpgrade }) {
               ⚡ Upgrade
             </button>
           )}
+          <button
+            onClick={() => base44.auth.logout()}
+            style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', background: 'transparent', border: '1px solid #e5e7eb', borderRadius: 10, padding: '9px 14px', cursor: 'pointer', minHeight: 'auto' }}
+          >
+            Log out
+          </button>
         </div>
       </div>
     </header>
