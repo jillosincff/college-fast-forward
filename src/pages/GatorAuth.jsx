@@ -169,8 +169,8 @@ export default function GatorAuth() {
       return;
     }
 
-    // Fully onboarded returning user — ALWAYS send straight to dashboard, no onboarding re-entry
-    if (user.persona && user.onboarding_completed) {
+    // Any user with a persona goes straight to their dashboard — no onboarding re-entry
+    if (user.persona || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentHome');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
@@ -179,26 +179,6 @@ export default function GatorAuth() {
         navigate('/FreeTierDashboard');
       }
       return;
-    }
-
-    // Has persona but hasn't finished onboarding — resume the appropriate flow
-    if (user.persona && !user.onboarding_completed) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('/ParentOnboarding');
-        return;
-      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-        navigate('/AlumniOnboarding');
-        return;
-      } else {
-        // Student with incomplete onboarding — only show funnel if they came from it
-        const cameFromFunnel = sessionStorage.getItem('cff_onboarding_type') === 'student';
-        if (cameFromFunnel) {
-          setStep('onboarding');
-        } else {
-          navigate('/StudentWelcome');
-        }
-        return;
-      }
     }
 
     // Logged in but no persona yet — show the onboarding funnel
