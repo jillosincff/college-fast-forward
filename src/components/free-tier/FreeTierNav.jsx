@@ -33,7 +33,7 @@ export default function FreeTierNav({ user, onUpgrade }) {
             </button>
           )}
           <button
-            onClick={() => base44.auth.logout()}
+            onClick={() => base44.auth.logout(window.location.origin + '/#GatorAuth')}
             style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', background: 'transparent', border: '1px solid #e5e7eb', borderRadius: 10, padding: '9px 14px', cursor: 'pointer', minHeight: 'auto' }}
           >
             Log out
