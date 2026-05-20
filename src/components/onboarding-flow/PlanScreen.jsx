@@ -277,7 +277,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, lineHeight: 1.65, margin: '0 auto', maxWidth: 560 }}>
           <span style={{ fontWeight: 700, color: '#2563eb' }}>⚡ Inside Track Found:</span>{' '}
           CLiFF bypassed the public boards and cracked open active internal networks.{' '}
-          Here are your live hidden slots with a verified <strong style={{ color: TEXT }}>Campus Alum</strong> connection:
+          Here are your live hidden slots with a verified <strong style={{ color: TEXT }}>{schoolName} Alum</strong> connection:
         </p>
       </div>
 
@@ -289,6 +289,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           selectedIndustries={selectedIndustries}
           targetRoles={targetRoles}
           firstName={firstName}
+          primaryBlocker={blockers?.[0]}
+          schoolName={college}
           onUpgrade={() => setShowPaywall(true)}
         />
       </div>
@@ -431,7 +433,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
                 {[
                   { icon: '⚡', text: 'Unmask verified company profiles, roles, and hiring contacts.' },
                   { icon: '🤝', text: 'Access 24/7 personalized, AI-generated email & LinkedIn scripts.' },
-                  { icon: '🧬', text: <span>Map directly into the verified <strong style={{ color: '#0f172a' }}>{schoolName} Campus Ecosystem</strong>.</span> },
+                  { icon: '🧬', text: <span>Map directly into the verified <strong style={{ color: '#0f172a' }}>{schoolName} Alumni Ecosystem</strong>.</span> },
                 ].map(({ icon, text }, i) => (
                   <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: i < 2 ? 12 : 0 }}>
                     <span style={{ fontSize: 15, color: '#4f46e5', flexShrink: 0, marginTop: -1 }}>{icon}</span>

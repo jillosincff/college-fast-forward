@@ -239,15 +239,142 @@ function resolveTrack(selectedIndustries = [], targetRoles = []) {
   return 'marketing';
 }
 
-export default function OpportunityHub({ selectedIndustries = [], targetRoles = [], onUpgrade, firstName }) {
+// ── School short-name lookup ──────────────────────────────────────────────────
+const SCHOOL_SHORT_NAMES = {
+  'university of florida': 'UF',
+  'uf': 'UF',
+  'florida': 'UF',
+  'florida state': 'FSU',
+  'florida state university': 'FSU',
+  'fsu': 'FSU',
+  'penn state': 'Penn State',
+  'pennsylvania state': 'Penn State',
+  'ohio state': 'Ohio State',
+  'osu': 'Ohio State',
+  'university of michigan': 'Michigan',
+  'michigan': 'Michigan',
+  'university of southern california': 'USC',
+  'usc': 'USC',
+  'university of texas': 'UT Austin',
+  'ut austin': 'UT Austin',
+  'university of georgia': 'UGA',
+  'uga': 'UGA',
+  'university of central florida': 'UCF',
+  'ucf': 'UCF',
+  'university of north carolina': 'UNC',
+  'unc': 'UNC',
+  'duke university': 'Duke',
+  'duke': 'Duke',
+  'georgetown': 'Georgetown',
+  'nyu': 'NYU',
+  'new york university': 'NYU',
+  'boston university': 'BU',
+  'bu': 'BU',
+  'university of miami': 'UM',
+  'miami': 'UM',
+  'tulane': 'Tulane',
+  'tulane university': 'Tulane',
+  'emory': 'Emory',
+  'emory university': 'Emory',
+  'vanderbilt': 'Vanderbilt',
+  'purdue': 'Purdue',
+  'purdue university': 'Purdue',
+  'indiana university': 'IU',
+  'iu': 'IU',
+  'university of maryland': 'UMD',
+  'umd': 'UMD',
+  'university of delaware': 'UDel',
+  'udel': 'UDel',
+};
+
+function resolveSchoolShortName(college = '') {
+  if (!college) return 'Your School';
+  const key = college.toLowerCase().trim();
+  // Direct match
+  if (SCHOOL_SHORT_NAMES[key]) return SCHOOL_SHORT_NAMES[key];
+  // Partial match
+  for (const [pattern, name] of Object.entries(SCHOOL_SHORT_NAMES)) {
+    if (key.includes(pattern)) return name;
+  }
+  // Fallback: capitalize first word(s) up to 20 chars
+  const words = college.trim().split(' ');
+  // If it's already short (≤12 chars), return as-is
+  if (college.trim().length <= 12) return college.trim();
+  // Otherwise strip "University of" prefix
+  const stripped = college.replace(/^university\s+of\s+/i, '').replace(/\s+university$/i, '').trim();
+  return stripped.length <= 15 ? stripped : words.slice(-1)[0];
+}
+
+// ── Pain-point config ─────────────────────────────────────────────────────────
+const PAIN_POINT_CONFIG = {
+  ghosted: {
+    badge: '⚡ Ghosting Bypass Active',
+    title: (name) => `${name ? name + ', let' : 'Let'}'s permanently end the job application black hole.`,
+    subtitle: "You're exhausted from getting ghosted by automated resume filters. CLiFF completely bypasses public job boards and plugs you directly into people who are ready to hire.",
+  },
+  resume: {
+    badge: '⚡ ATS Bypass Activated',
+    title: (name) => `${name ? name + ', your' : 'Your'} resume is now rebuilt to get past every filter.`,
+    subtitle: "Most resumes never reach a human. CLiFF rewrote yours to pass Fortune 500 ATS gates and puts it directly in front of the people making hiring decisions.",
+  },
+  which_jobs: {
+    badge: '⚡ Role Targeting Locked In',
+    title: (name) => `${name ? name + ', we' : 'We'}'ve mapped the exact roles that match your background.`,
+    subtitle: "Wasting weeks applying to mismatched jobs is the biggest time drain. CLiFF scanned your profile against live hiring signals to surface only the roles where you're a real fit.",
+  },
+  outreach: {
+    badge: '⚡ Network Multiplier Engaged',
+    title: (name) => `${name ? name + ', you' : 'You'} don't need a massive network to break in.`,
+    subtitle: "If reaching the right people feels impossible, CLiFF has mapped your school's entire active alumni ecosystem to open those closed doors and draft every outreach message for you.",
+  },
+  disorganized: {
+    badge: '⚡ Mission Control Online',
+    title: (name) => `${name ? name + ', your' : 'Your'} 14-day sprint is organized and ready to execute.`,
+    subtitle: "Losing track of applications, follow-ups, and contacts is how offers slip away. CLiFF built you a structured daily action plan so nothing falls through the cracks.",
+  },
+  interviews: {
+    badge: '⚡ Interview Shield Activated',
+    title: (name) => `${name ? name + ', we know' : 'We know'} interviewing can be incredibly stressful.`,
+    subtitle: "You don't have to walk into the room unprepared. CLiFF didn't just find hidden slots — our agent is fully calibrated to run custom mock prep sessions for these exact teams before you talk to them.",
+  },
+};
+
+export default function OpportunityHub({ selectedIndustries = [], targetRoles = [], onUpgrade, firstName, primaryBlocker, schoolName: schoolNameProp }) {
   const track = resolveTrack(selectedIndustries, targetRoles);
   const jobs = OPPORTUNITIES_DATA[track];
   const [expandedId, setExpandedId] = useState(jobs[0].id);
   const emojiMap = { finance: '📊', tech: '💻', healthcare: '🏥', law_gov: '⚖️', creative: '🎨', marketing: '🎯' };
   const emoji = emojiMap[track] || '🎯';
 
+  // Resolve the real school short name
+  const schoolLabel = resolveSchoolShortName(schoolNameProp);
+
+  // Resolve pain-point header content
+  const painConfig = PAIN_POINT_CONFIG[primaryBlocker] || PAIN_POINT_CONFIG['ghosted'];
+
   return (
     <div style={{ width: '100%' }}>
+
+      {/* ── Pain-Point Mirror Header ── */}
+      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '20px 20px', marginBottom: 14, boxShadow: '0 8px 28px rgba(0,0,0,0.12)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#a5b4fc', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.35)', borderRadius: 100, padding: '4px 12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            {painConfig.badge}
+          </span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#64748b' }}>🔒 Premium Sprint Active</span>
+        </div>
+        <h3 style={{ fontFamily: sat, fontSize: 'clamp(15px, 3vw, 18px)', fontWeight: 900, color: '#f1f5f9', margin: '0 0 8px', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+          {painConfig.title(firstName)}
+        </h3>
+        <p style={{ fontFamily: dm, fontSize: 12, color: '#94a3b8', lineHeight: 1.65, margin: 0, fontWeight: 500 }}>
+          {painConfig.subtitle}
+        </p>
+      </div>
+
+      {/* ── Opportunity Cards ── */}
+      <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#9ca3af', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 8px 2px' }}>
+        🎯 Verified Hidden Opportunities Found:
+      </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {jobs.map((job) => {
           const isOpen = expandedId === job.id;
@@ -282,7 +409,7 @@ export default function OpportunityHub({ selectedIndustries = [], targetRoles = 
                   </p>
                 </div>
                 <span style={{ flexShrink: 0, fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#15803d', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 100, padding: '5px 12px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  ⚡ {job.alumCount} Campus Alum{job.alumCount > 1 ? 's' : ''} Found
+                  ⚡ {job.alumCount} {schoolLabel} Alum{job.alumCount > 1 ? 's' : ''} Found
                 </span>
               </div>
 
@@ -300,7 +427,7 @@ export default function OpportunityHub({ selectedIndustries = [], targetRoles = 
                         <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 9, background: '#f59e0b', borderRadius: '50%', padding: '1px 3px', border: '1.5px solid #fff', lineHeight: 1, fontWeight: 700 }}>🔒</span>
                       </div>
                       <div>
-                        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#0f172a', margin: '0 0 2px' }}>[Locked] Verified Campus Connection</p>
+                        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#0f172a', margin: '0 0 2px' }}>[Locked] Verified {schoolLabel} Connection</p>
                         <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', fontWeight: 600, margin: 0 }}>{job.insiderTitle}</p>
                       </div>
                     </div>
@@ -312,7 +439,7 @@ export default function OpportunityHub({ selectedIndustries = [], targetRoles = 
                   {/* Blurred outreach script */}
                   <div style={{ position: 'relative' }}>
                     <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#9ca3af', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px' }}>
-                      📋 CLiFF's Campus Ecosystem Outreach Draft
+                      📋 CLiFF's {schoolLabel} Ecosystem Outreach Draft
                     </p>
                     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '13px 15px', fontFamily: dm, fontSize: 12, color: 'rgba(100,116,139,0.7)', lineHeight: 1.65, fontStyle: 'italic', filter: 'blur(4.5px)', userSelect: 'none', pointerEvents: 'none' }}>
                       "{job.previewText}"
