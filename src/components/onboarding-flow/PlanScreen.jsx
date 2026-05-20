@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import BackdoorOpportunityCard from './BackdoorOpportunityCard';
 import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
+import OpportunityHub from './OpportunityHub';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -267,42 +268,39 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           1. HERO HEADER — Personal, urgent, action-focused
       ───────────────────────────────────────────────────── */}
-      <div style={{ textAlign: 'center', marginBottom: 28, padding: '0 8px' }}>
-        <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+      <div style={{ textAlign: 'center', marginBottom: 20, padding: '0 8px' }}>
+        <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
           {firstName ? firstName.toUpperCase() + ',' : ''}{' '}
           let's stop blindly applying{' '}
           <span style={{ color: BLUE }}>and start interviewing.</span>
         </h1>
-        <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.7, margin: '0 auto', maxWidth: 580 }}>
+        <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, lineHeight: 1.65, margin: '0 auto', maxWidth: 560 }}>
           <span style={{ fontWeight: 700, color: '#2563eb' }}>⚡ Inside Track Found:</span>{' '}
-          We located a <strong style={{ color: TEXT }}>{schoolName !== 'your university' ? schoolName : 'University'} Alum</strong> working at your top match.{' '}
-          <strong style={{ color: TEXT }}>{locationPref === 'remote' ? 'Look what we found for you:' : `Look what we found for you near ${location}:`}</strong>
+          CLiFF bypassed the public boards and cracked open active internal networks.{' '}
+          Here are your live hidden slots with a verified <strong style={{ color: TEXT }}>Campus Alum</strong> connection:
         </p>
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          2. THE CROWN JEWEL — Backdoor Opportunity Card
+          2. PRIMARY FEED — Expandable Opportunity Hub
       ───────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 28, animation: 'fadUp 0.5s ease' }}>
-        <BackdoorOpportunityCard
-          schoolName={schoolName}
-          location={location}
-          targetRole={targetRole}
+      <div style={{ marginBottom: 28, animation: 'fadUp 0.4s ease' }}>
+        <OpportunityHub
           selectedIndustries={selectedIndustries}
           targetRoles={targetRoles}
-          onUnlock={() => setShowPaywall(true)}
+          firstName={firstName}
+          onUpgrade={() => setShowPaywall(true)}
         />
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          3. PROOF HUB — Mini LinkedIn + ATS Ring
+          3. PROOF HUB — Mini LinkedIn + ATS Ring (demoted)
       ───────────────────────────────────────────────────── */}
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
           ✅ What We've Already Built For You
         </p>
         <div className="proof-hub" style={{ display: 'flex', gap: 14, alignItems: 'stretch', alignContent: 'stretch' }}>
-          {/* Left: Mini LinkedIn */}
           <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
             <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 14 }}>💼</span>
@@ -315,8 +313,6 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
               <MiniLinkedInCard name={fullName} college={college} />
             </div>
           </div>
-
-          {/* Right: ATS Ring */}
           <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, alignSelf: 'stretch' }}>
             <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: '0 0 6px', textAlign: 'center' }}>Resume Optimized</p>
             <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 14px', textAlign: 'center' }}>Passes Fortune 500 ATS filters instantly</p>
@@ -324,11 +320,6 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           </div>
         </div>
       </div>
-
-      {/* ─────────────────────────────────────────────────────
-          4. 3-DAY SPRINT ROADMAP
-      ───────────────────────────────────────────────────── */}
-      <SprintRoadmap targetRole={targetRole} location={location} schoolName={schoolName} />
 
       {/* ─────────────────────────────────────────────────────
           5. VALUE CONTRAST — Old Way vs Fast Forward
