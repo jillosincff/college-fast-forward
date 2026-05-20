@@ -10,6 +10,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
+import JoinPage from '@/pages/JoinPage';
 import AlumniOnboarding from '@/pages/AlumniOnboarding';
 import AlumniAllSet from '@/pages/AlumniAllSet';
 import AlumniHome from '@/pages/AlumniHome';
@@ -131,6 +132,7 @@ const AuthenticatedApp = () => {
           <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
           <Route path="/paywall-analytics" element={<PaywallAnalyticsDashboard />} />
           <Route path="/Unsubscribe" element={<Unsubscribe />} />
+          <Route path="/join" element={<JoinPage />} />
 
           {/* Main routes */}
           <Route path="/" element={<StudentLandingPage />} />
