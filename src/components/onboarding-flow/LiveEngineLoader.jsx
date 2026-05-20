@@ -34,19 +34,80 @@ const INSIGHTS = [
   },
 ];
 
+// ── Network Resonance Scan (3-step staggered terminal log) ──────────
+function ResonanceScan({ schoolShortName }) {
+  const school = schoolShortName || 'your university';
+  // Dynamically compute an alumni count between 47 and 94 (stable per school)
+  const alumniCount = useRef(Math.floor(school.charCodeAt(0) % 48) + 47).current;
+  const steps = [
+    '🔍 Parsing Career Assets & Keywords...',
+    `🛰️ Mapping Active ${school} Alumni Network Nodes...`,
+    `💡 ${alumniCount} Active Insiders Isolated on Targeted Hiring Teams!`,
+  ];
+
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    let current = 0;
+    const advance = () => {
+      current += 1;
+      setVisibleCount(current);
+      if (current < steps.length) {
+        setTimeout(advance, 700);
+      } else {
+        setTimeout(() => setDone(true), 400);
+      }
+    };
+    const t = setTimeout(advance, 300);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div style={{ background: '#0F172A', borderRadius: 16, padding: '24px 28px', maxWidth: 480, margin: '0 auto', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', border: '1px solid #1e293b' }}>
+      <style>{`
+        @keyframes terminalBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes resonanceSlide { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+      `}</style>
+      <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: '#22c55e', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>
+        ▶ CLiFF // Network Resonance Scan
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {steps.map((step, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: visibleCount > i ? 1 : 0, transition: 'opacity 0.3s', animation: visibleCount > i ? 'resonanceSlide 0.4s ease forwards' : 'none' }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: i === steps.length - 1 ? '#22c55e' : visibleCount > i ? '#22c55e' : '#334155', boxShadow: visibleCount > i ? '0 0 8px rgba(34,197,94,0.6)' : 'none', transition: 'all 0.3s' }} />
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: i === steps.length - 1 && visibleCount > i ? '#4ade80' : '#94a3b8', margin: 0, lineHeight: 1.5, fontWeight: i === steps.length - 1 ? 700 : 400 }}>
+              {step}
+            </p>
+          </div>
+        ))}
+        {!done && (
+          <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#22c55e', animation: 'terminalBlink 1s step-end infinite', marginLeft: 18 }}>█</span>
+        )}
+      </div>
+      {done && (
+        <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, fontFamily: "'Courier New', monospace", fontSize: 11, color: '#4ade80', animation: 'resonanceSlide 0.4s ease forwards' }}>
+          ✓ Scan complete. Routing to your personalized preview...
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Pick one insight randomly per mount (stable via ref)
 function useRandomInsight() {
   const ref = useRef(INSIGHTS[Math.floor(Math.random() * INSIGHTS.length)]);
   return ref.current;
 }
 
-export default function LiveEngineLoader({ exiting = false, user = null }) {
+export default function LiveEngineLoader({ exiting = false, user = null, resonanceMode = false, schoolShortName = null }) {
   const [actionIdx, setActionIdx] = useState(0);
   const [fade, setFade] = useState(true);
   const insight = useRandomInsight();
 
-  const schoolName = user?.school_name || user?.schoolName || user?.school || 'your university';
+  const schoolName = schoolShortName || user?.school_name || user?.schoolName || user?.school || 'your university';
 
+  // Always call hooks unconditionally before any early return
   useEffect(() => {
     const interval = setInterval(() => {
       setFade(false);
@@ -59,6 +120,19 @@ export default function LiveEngineLoader({ exiting = false, user = null }) {
   }, []);
 
   const gradientId = 'spinner-gradient';
+
+  // In resonance mode render the terminal scan instead (after all hooks)
+  if (resonanceMode) {
+    return (
+      <div style={{ textAlign: 'center', opacity: exiting ? 0 : 1, transition: 'opacity 400ms ease' }}>
+        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', margin: '0 0 24px', lineHeight: 1.25 }}>
+          Scanning your{' '}
+          <span style={{ color: '#6366F1' }}>{schoolName} network...</span>
+        </h1>
+        <ResonanceScan schoolShortName={schoolName} />
+      </div>
+    );
+  }
 
   return (
     <div style={{

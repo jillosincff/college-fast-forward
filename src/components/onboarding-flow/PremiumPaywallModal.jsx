@@ -15,19 +15,21 @@ const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
  * PremiumPaywallModal
  *
  * Props:
- *   user          – { full_name, school_code, school } or raw onboarding data
- *   firstName     – string (overrides user.full_name if provided)
- *   schoolName    – string (overrides brand lookup if provided)
- *   isDownsell    – boolean — if true shows $2.49/wk 50%-off session offer
- *   onClose       – () => void
- *   onPay         – () => void
- *   onReferral    – () => void
+ *   user              – { full_name, school_code, school } or raw onboarding data
+ *   firstName         – string (overrides user.full_name if provided)
+ *   schoolName        – string (overrides brand lookup if provided)
+ *   isDownsell        – boolean — if true shows $2.49/wk 50%-off session offer
+ *   isTokenDepleted   – boolean — if true shows weekly token limit reached state
+ *   onClose           – () => void
+ *   onPay             – () => void
+ *   onReferral        – () => void
  */
 export default function PremiumPaywallModal({
   user,
   firstName,
   schoolName,
   isDownsell = false,
+  isTokenDepleted = false,
   onClose,
   onPay,
   onReferral,
@@ -47,7 +49,9 @@ export default function PremiumPaywallModal({
 
   const price = isDownsell ? '$2.49' : '$4.99';
   const priceLabel = isDownsell ? '$2.49/wk — 50% Off (Today Only)' : '$4.99/wk · Cancel anytime in 1-click';
-  const headerLine = isDownsell
+  const headerLine = isTokenDepleted
+    ? 'Weekly Outreach Limit Reached!'
+    : isDownsell
     ? `${resolvedFirst}, here's your last chance offer.`
     : `${resolvedFirst}, don't leave your ${resolvedSchool} network behind!`;
 
@@ -140,17 +144,17 @@ export default function PremiumPaywallModal({
           <div style={{ textAlign: 'center', marginBottom: 14 }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: isDownsell ? '#fff7ed' : '#eef2ff',
-              border: `1px solid ${isDownsell ? '#fed7aa' : '#c7d2fe'}`,
+              background: isTokenDepleted ? '#fef2f2' : isDownsell ? '#fff7ed' : '#eef2ff',
+              border: `1px solid ${isTokenDepleted ? '#fecaca' : isDownsell ? '#fed7aa' : '#c7d2fe'}`,
               borderRadius: 100, padding: '4px 14px', marginBottom: 12,
             }}>
-              <span style={{ fontSize: 12 }}>{isDownsell ? '🔥' : '🤖'}</span>
+              <span style={{ fontSize: 12 }}>{isTokenDepleted ? '⏳' : isDownsell ? '🔥' : '🤖'}</span>
               <span style={{
                 fontFamily: dm, fontSize: 10, fontWeight: 800,
-                color: isDownsell ? '#c2410c' : '#4338ca',
+                color: isTokenDepleted ? '#dc2626' : isDownsell ? '#c2410c' : '#4338ca',
                 letterSpacing: '0.1em', textTransform: 'uppercase',
               }}>
-                {isDownsell ? 'Session-Only Offer — 50% Off' : 'CLiFF Premium Access'}
+                {isTokenDepleted ? 'Weekly Token Limit Reached' : isDownsell ? 'Session-Only Offer — 50% Off' : 'CLiFF Premium Access'}
               </span>
             </div>
 
@@ -166,7 +170,9 @@ export default function PremiumPaywallModal({
               fontFamily: dm, fontSize: 12, color: '#64748b',
               margin: 0, lineHeight: 1.65,
             }}>
-              {isDownsell
+              {isTokenDepleted
+                ? `You've deployed all 3 of your premium campus routes for this cycle. Don't let your momentum stall while these roles are fresh.`
+                : isDownsell
                 ? `We're offering you 50% off right now — this price disappears when you leave this page.`
                 : `Your ${resolvedSchool} alumni network and hidden job signals are ready. One step to unlock them.`}
             </p>
@@ -175,7 +181,82 @@ export default function PremiumPaywallModal({
           {/* Divider */}
           <div style={{ height: 1, background: '#f1f5f9', margin: '16px 0' }} />
 
-          {/* ── Dual Action Grid ── */}
+          {/* ── Token Depletion Action Grid ── */}
+          {isTokenDepleted ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              {/* Option 1 — Buy add-on tokens */}
+              <button
+                onClick={handlePay}
+                style={{
+                  width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
+                  border: 'none', borderRadius: 16, padding: '16px 20px',
+                  cursor: 'pointer', minHeight: 'auto',
+                  boxShadow: '0 8px 24px rgba(245,158,11,0.28)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <span>🔑 Buy 2 More Routing Tokens — $2.99</span>
+                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, opacity: 0.85 }}>Instant unlock · No subscription required</span>
+              </button>
+
+              {/* Option 2 — Upgrade to Pro */}
+              <button
+                onClick={handlePay}
+                style={{
+                  width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff',
+                  background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                  border: 'none', borderRadius: 16, padding: '16px 20px',
+                  cursor: 'pointer', minHeight: 'auto',
+                  boxShadow: '0 8px 24px rgba(99,102,241,0.28)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                <span>🚀 Upgrade to Pro — $9.99/wk (Includes 10 Tokens)</span>
+                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, opacity: 0.85 }}>Unlimited outreach · Cancel anytime</span>
+              </button>
+
+              {/* Option 3 — Referral for free token */}
+              <button
+                onClick={handleReferral}
+                disabled={referralLoading}
+                style={{
+                  width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#1e3a8a',
+                  background: referralClicked ? '#f0fdf4' : '#eff6ff',
+                  border: `1.5px solid ${referralClicked ? '#86efac' : '#bfdbfe'}`,
+                  borderRadius: 16, padding: '14px 20px',
+                  cursor: referralLoading ? 'wait' : 'pointer', minHeight: 'auto',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { if (!referralClicked) { e.currentTarget.style.background = '#dbeafe'; e.currentTarget.style.borderColor = '#93c5fd'; }}}
+                onMouseLeave={e => { if (!referralClicked) { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#bfdbfe'; }}}
+              >
+                <span style={{ fontSize: 14 }}>
+                  {referralLoading ? '⏳ Generating your link…' : referralClicked ? '✅ Message Copied!' : '🔗 Text 2 Classmates → Unlock 1 Free Token Immediately'}
+                </span>
+                {!referralClicked && (
+                  <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#3b82f6', lineHeight: 1.5, textAlign: 'center' }}>
+                    Each friend who signs up adds 1 token to your balance instantly
+                  </span>
+                )}
+              </button>
+
+              {referralClicked && copiedPayload && (
+                <div style={{ background: '#0f172a', borderRadius: 12, padding: '12px 14px', border: '1px solid #1e293b' }}>
+                  <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>📋 Paste this in your group chat</p>
+                  <p style={{ fontFamily: dm, fontSize: 11, color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>{copiedPayload}</p>
+                </div>
+              )}
+            </div>
+          ) : (
+          /* ── Standard Dual Action Grid ── */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
 
             {/* Option A — Pay */}
@@ -255,6 +336,7 @@ export default function PremiumPaywallModal({
               </div>
             )}
           </div>
+          )}
 
           {/* Trust line */}
           <p style={{

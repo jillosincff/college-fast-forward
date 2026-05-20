@@ -250,6 +250,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [screen, setScreen] = useState(startScreen);
   const [postAuthStep, setPostAuthStep] = useState(0); // index into POST_AUTH_STEPS
   const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
+  const [resonanceActive, setResonanceActive] = useState(false); // Network Resonance Scan
   const [frustration, setFrustration] = useState(saved?.frustration ?? 5);
   const [seeking, setSeeking] = useState(saved?.seeking ?? '');
   const [blockers, setBlockers] = useState(saved?.blockers ?? []);
@@ -323,6 +324,15 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     setCollegeSuggestions(TOP_SCHOOLS.filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 5));
   };
 
+  // Trigger the resonance scan, then proceed after 2500ms
+  const triggerResonanceScan = (onComplete) => {
+    setResonanceActive(true);
+    setTimeout(() => {
+      setResonanceActive(false);
+      onComplete();
+    }, 2500);
+  };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -375,9 +385,13 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         });
       }
       setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
-      setScreen(POST_AUTH_STEPS[POST_AUTH_STEPS.indexOf(9) + 1] ?? 10);
+      setUploading(false);
+      triggerResonanceScan(() => setScreen(POST_AUTH_STEPS[POST_AUTH_STEPS.indexOf(9) + 1] ?? 10));
+      return;
       } catch (err) {
-      setScreen(POST_AUTH_STEPS[POST_AUTH_STEPS.indexOf(9) + 1] ?? 10);
+      setUploading(false);
+      triggerResonanceScan(() => setScreen(POST_AUTH_STEPS[POST_AUTH_STEPS.indexOf(9) + 1] ?? 10));
+      return;
       }
     setUploading(false);
   };
@@ -494,6 +508,13 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         </div>
       )}
 
+      {/* ── Network Resonance Scan ── */}
+      {resonanceActive && (
+        <div style={{ textAlign: 'center', maxWidth: 560, width: '100%', animation: 'fadeUp 0.3s ease' }}>
+          <LiveEngineLoader resonanceMode schoolShortName={college?.split(' ').slice(-2).join(' ') || college || 'your school'} />
+        </div>
+      )}
+
       {/* ── Progress Bar (screens 1–8, or postAuth steps) ── */}
       {!analyzing && screen < 10 && (
         <>
@@ -507,7 +528,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       )}
 
       {/* ── Screen Transition Wrapper ── */}
-      {!analyzing && <FunnelTransition screenKey={screen}>
+      {!analyzing && !resonanceActive && <FunnelTransition screenKey={screen}>
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
@@ -845,7 +866,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           onCollegeChange={setCollege}
           onBack={back}
           onNext={() => {
-            next();
+            triggerResonanceScan(() => next());
           }}
           nextLabel="Continue →"
         />

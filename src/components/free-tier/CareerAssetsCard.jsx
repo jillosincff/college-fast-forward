@@ -180,8 +180,45 @@ function LinkedInPreviewContent() {
   );
 }
 
+// ── Locked Feature Gate Overlay ──────────────────────────────────
+function FeatureGate({ children, onUpgrade }) {
+  return (
+    <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden' }}>
+      {/* Blurred content underneath */}
+      <div style={{ filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+        {children}
+      </div>
+      {/* Lock overlay */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'rgba(248,250,252,0.65)',
+        backdropFilter: 'blur(2px)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 8,
+        borderRadius: 14,
+      }}>
+        <span style={{ fontSize: 20 }}>🔒</span>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#1e293b', margin: 0, textAlign: 'center', lineHeight: 1.4 }}>
+          Reserved for Premium Subscribers
+        </p>
+        <button
+          onClick={onUpgrade}
+          style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff',
+            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+            border: 'none', borderRadius: 8, padding: '7px 14px',
+            cursor: 'pointer', minHeight: 'auto',
+          }}
+        >
+          Unlock — $4.99/wk →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────
-export default function CareerAssetsCard({ user, onUpgrade }) {
+export default function CareerAssetsCard({ user, onUpgrade, isPremium = false }) {
   const [activeTab, setActiveTab] = useState('pain');
 
   const painKey = user?.primaryPainPoint || user?.primary_pain_point || DEFAULT_PAIN_KEY;
@@ -257,23 +294,49 @@ export default function CareerAssetsCard({ user, onUpgrade }) {
             Your AI-optimized assets are built and waiting. Upgrade to download or apply them.
           </p>
 
-          <LockedAssetRow
-            icon="📄"
-            title="AI Perfected Resume"
-            subtitle="Locked (98% ATS Score Target)"
-            buttonLabel="Unlock PDF"
-            onUnlock={onUpgrade}
-            previewContent={<ResumePreviewContent />}
-          />
+          {isPremium ? (
+            <LockedAssetRow
+              icon="📄"
+              title="AI Perfected Resume"
+              subtitle="Locked (98% ATS Score Target)"
+              buttonLabel="Unlock PDF"
+              onUnlock={onUpgrade}
+              previewContent={<ResumePreviewContent />}
+            />
+          ) : (
+            <FeatureGate onUpgrade={onUpgrade}>
+              <LockedAssetRow
+                icon="📄"
+                title="AI Perfected Resume"
+                subtitle="⚡ Download My Optimized Resume File"
+                buttonLabel="Download"
+                onUnlock={onUpgrade}
+                previewContent={<ResumePreviewContent />}
+              />
+            </FeatureGate>
+          )}
 
-          <LockedAssetRow
-            icon="🔗"
-            title="LinkedIn Header Blueprint"
-            subtitle="Locked (Recruiter Signal Sync)"
-            buttonLabel="Unlock Copy"
-            onUnlock={onUpgrade}
-            previewContent={<LinkedInPreviewContent />}
-          />
+          {isPremium ? (
+            <LockedAssetRow
+              icon="🔗"
+              title="LinkedIn Header Blueprint"
+              subtitle="Locked (Recruiter Signal Sync)"
+              buttonLabel="Unlock Copy"
+              onUnlock={onUpgrade}
+              previewContent={<LinkedInPreviewContent />}
+            />
+          ) : (
+            <FeatureGate onUpgrade={onUpgrade}>
+              <LockedAssetRow
+                icon="🚀"
+                title="Interview Simulator Loop"
+                subtitle="🚀 Start Interactive Mock Prep Loop"
+                buttonLabel="Start"
+                onUnlock={onUpgrade}
+                previewContent={<LinkedInPreviewContent />}
+              />
+            </FeatureGate>
+          )}
 
           <button
             onClick={onUpgrade}
