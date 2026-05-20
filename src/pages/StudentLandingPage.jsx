@@ -312,7 +312,7 @@ export default function StudentLandingPage({ onParentClick }) {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
-          >⚡ Stand Out From The Crowd</button>
+          >⚡ Get Interviews Faster – Start for Free</button>
           <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             🔒 Free Student Workspace · Takes 30 seconds
           </span>
