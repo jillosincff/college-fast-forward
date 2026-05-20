@@ -43,6 +43,7 @@ function GoogleIcon() {
 export default function GatorAuth() {
   const { user, isLoadingAuth: isLoading, refreshUser } = useAuth();
   const [step, setStep] = useState(null);
+  const [resumeScreen, setResumeScreen] = useState(null);
   const [activeTab, setActiveTab] = useState('signin');
   const [isMigration] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -190,7 +191,9 @@ export default function GatorAuth() {
         return;
       }
 
-      // Show the white-background onboarding funnel (Screen 1: Welcome to CFF)
+      // Check for saved progress — resume at last screen
+      const savedScreen = parseInt(localStorage.getItem('cff_onboarding_screen') || '1', 10);
+      setResumeScreen(savedScreen > 1 ? savedScreen : null);
       setStep('onboarding');
       return;
     }
@@ -209,7 +212,7 @@ export default function GatorAuth() {
   if (step === 'onboarding') {
     const handleOnboardingComplete = async () => {
       // Clear funnel flags so returning visits don't re-trigger funnel
-      try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); } catch (e) {}
+      try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); localStorage.removeItem('cff_onboarding_screen'); } catch (e) {}
       // After funnel, set persona and go to dashboard
       try {
         await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
@@ -217,7 +220,7 @@ export default function GatorAuth() {
       } catch (e) {}
       navigate('/FreeTierDashboard');
     };
-    return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} />;
+    return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} resumeAtScreen={resumeScreen} />;
   }
 
   // While determining what to show, render a visible loading screen (not blank)

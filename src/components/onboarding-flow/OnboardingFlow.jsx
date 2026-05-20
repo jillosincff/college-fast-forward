@@ -211,20 +211,55 @@ const InputField = ({ label, placeholder, value, onChange, type = 'text', icon, 
 // Screens: Welcome → Goals → Roadblocks → University → Resume Input → Resume Wow → LinkedIn → Plan
 const POST_AUTH_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false }) {
-  const [screen, setScreen] = useState(1);
+// Persist onboarding progress to localStorage so returning users can resume
+function saveProgress(screen, data = {}) {
+  try {
+    localStorage.setItem('cff_onboarding_screen', String(screen));
+    Object.entries(data).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== '') {
+        localStorage.setItem(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+      }
+    });
+  } catch (e) {}
+}
+
+function loadSavedProgress() {
+  try {
+    return {
+      screen: parseInt(localStorage.getItem('cff_onboarding_screen') || '1', 10) || 1,
+      seeking: localStorage.getItem('cff_seeking') || '',
+      college: localStorage.getItem('cff_college') || '',
+      frustration: parseInt(localStorage.getItem('cff_frustration') || '5', 10),
+      blockers: JSON.parse(localStorage.getItem('cff_blockers') || '[]'),
+      selectedIndustries: JSON.parse(localStorage.getItem('cff_industries') || '[]'),
+      targetRoles: JSON.parse(localStorage.getItem('cff_target_roles') || '[]'),
+      locationPref: localStorage.getItem('cff_location_pref') || '',
+      locationCity: localStorage.getItem('cff_location_city') || '',
+      resumeUrl: localStorage.getItem('cff_resume_url') || '',
+    };
+  } catch (e) {
+    return { screen: 1, seeking: '', college: '', frustration: 5, blockers: [], selectedIndustries: [], targetRoles: [], locationPref: '', locationCity: '', resumeUrl: '' };
+  }
+}
+
+export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = false, resumeAtScreen = null }) {
+  // Load saved progress for returning users
+  const saved = resumeAtScreen ? loadSavedProgress() : null;
+  const startScreen = resumeAtScreen || 1;
+
+  const [screen, setScreen] = useState(startScreen);
   const [postAuthStep, setPostAuthStep] = useState(0); // index into POST_AUTH_STEPS
   const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
-  const [frustration, setFrustration] = useState(5);
-  const [seeking, setSeeking] = useState('');
-  const [blockers, setBlockers] = useState([]);
-  const [college, setCollege] = useState('');
+  const [frustration, setFrustration] = useState(saved?.frustration ?? 5);
+  const [seeking, setSeeking] = useState(saved?.seeking ?? '');
+  const [blockers, setBlockers] = useState(saved?.blockers ?? []);
+  const [college, setCollege] = useState(saved?.college ?? '');
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
-  const [locationPref, setLocationPref] = useState('');
-  const [locationCity, setLocationCity] = useState('');
+  const [locationPref, setLocationPref] = useState(saved?.locationPref ?? '');
+  const [locationCity, setLocationCity] = useState(saved?.locationCity ?? '');
   const [citySuggestionsClosed, setCitySuggestionsClosed] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [resumeUrl, setResumeUrl] = useState('');
+  const [resumeUrl, setResumeUrl] = useState(saved?.resumeUrl ?? '');
   const [resumeData, setResumeData] = useState(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [linkedinInput, setLinkedinInput] = useState('');
@@ -234,8 +269,9 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [dataInputMode, setDataInputMode] = useState('choose');
   const [hoveredExpert, setHoveredExpert] = useState(null);
   const [selectedExpert, setSelectedExpert] = useState(null);
-  const [selectedIndustries, setSelectedIndustries] = useState([]);
-  const [targetRoles, setTargetRoles] = useState([]);
+  const [selectedIndustries, setSelectedIndustries] = useState(saved?.selectedIndustries ?? []);
+  const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
+  const [showWelcomeBack] = useState(!!resumeAtScreen && resumeAtScreen > 1);
   const fileRef = useRef();
 
   const TOTAL = postAuth ? POST_AUTH_STEPS.length : 12;
@@ -258,7 +294,23 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     setScreen(POST_AUTH_STEPS[prevStep]);
   };
 
-  const next = () => postAuth ? postAuthNext() : setScreen(s => s + 1);
+  const next = () => {
+    const newScreen = screen + 1;
+    // Save progress at each step so returning users can resume
+    saveProgress(newScreen, {
+      cff_seeking: seeking,
+      cff_college: college,
+      cff_frustration: frustration,
+      cff_blockers: blockers,
+      cff_industries: selectedIndustries,
+      cff_target_roles: targetRoles,
+      cff_location_pref: locationPref,
+      cff_location_city: locationCity,
+      cff_resume_url: resumeUrl,
+    });
+    if (postAuth) postAuthNext();
+    else setScreen(newScreen);
+  };
   const back = () => postAuth ? postAuthBack() : setScreen(s => s - 1);
 
   const toggleBlocker = (key) => {
@@ -335,6 +387,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       localStorage.setItem('pending_invite_role', 'student');
       sessionStorage.setItem('cff_onboarding_type', 'student');
       localStorage.setItem('cff_onboarding_questions_pending', 'true');
+      // Clear resume screen tracker — onboarding is now complete
+      localStorage.removeItem('cff_onboarding_screen');
       if (college) localStorage.setItem('cff_college', college);
       if (seeking) localStorage.setItem('cff_seeking', seeking);
       if (blockers.length) localStorage.setItem('cff_blockers', JSON.stringify(blockers));
@@ -424,6 +478,14 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
       {/* ── Close Button ── */}
       <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
+
+      {/* ── Welcome Back Banner ── */}
+      {showWelcomeBack && screen < 10 && (
+        <div style={{ position: 'absolute', top: 52, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', background: '#0F172A', border: '1px solid rgba(16,185,129,0.4)', borderRadius: 100, padding: '8px 18px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', zIndex: 10, animation: 'fadeUp 0.4s ease' }}>
+          <span style={{ fontSize: 14 }}>⚡</span>
+          <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: '#fff' }}>Welcome back — CLiFF found <span style={{ color: '#10B981' }}>12 potential inside tracks</span> for you. Finish to unlock them.</span>
+        </div>
+      )}
 
       {/* ── Analyzing Loader (postAuth only) ── */}
       {analyzing && (
