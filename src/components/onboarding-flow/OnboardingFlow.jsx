@@ -405,11 +405,11 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       }
       setResumeData({ original: parsed, optimized: { ...parsed, experience: result.optimized_experience } });
       setUploading(false);
-      triggerResonanceScan(() => setScreen(POST_AUTH_STEPS[POST_AUTH_STEPS.indexOf(9) + 1] ?? 10));
+      next();
       return;
       } catch (err) {
       setUploading(false);
-      triggerResonanceScan(() => setScreen(POST_AUTH_STEPS[POST_AUTH_STEPS.indexOf(9) + 1] ?? 10));
+      next();
       return;
       }
     setUploading(false);
@@ -604,24 +604,11 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
               ))}
             </div>
             <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.4 }}>
-              Joining <strong style={{ color: TEXT }}>2,400+ students</strong> from UF, Penn State &amp; USC this week.
+              Joining <strong style={{ color: TEXT }}>2,400+ students</strong> from top campuses nationwide this week.
             </p>
           </div>
         </div>
       )}
-
-      {/* ── SCREEN 2: Built by Experts ── */}
-      {screen === 2 && <Screen2Experts
-        FONT={FONT} CARD={CARD} R={R} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD}
-        BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER}
-        GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER}
-        TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3}
-        h1style={h1style} substyle={substyle}
-        hoveredExpert={hoveredExpert} setHoveredExpert={setHoveredExpert}
-        selectedExpert={selectedExpert} setSelectedExpert={setSelectedExpert}
-        onBack={back} onNext={next}
-        Nav={Nav}
-      />}
 
       {/* ── SCREEN 3: Frustration Slider ── */}
       {screen === 3 && (() => {
