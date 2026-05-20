@@ -296,10 +296,10 @@ export default function StudentLandingPage({ onParentClick }) {
         <p style={{
           fontFamily: FONT, fontSize: 'clamp(14px, 1.6vw, 17px)',
           fontWeight: 500, color: TEXT2,
-          lineHeight: 1.8, maxWidth: 520, margin: '24px auto 0',
+          lineHeight: 1.8, maxWidth: 540, margin: '24px auto 0',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Job hunting is stressful, frustrating, and a massive time suck. CLiFF delivers a smarter strategy that organizes your roadmap, and finds campus insiders <strong style={{ color: TEXT }}>10x more likely to help get interviewed fast.</strong>
+          Job hunting sucks when you're blindly applying to hundreds of jobs and getting ghosted. Your AI career agent, <strong style={{ color: BLUE, fontWeight: 700 }}>CliFF</strong>, gives you a smarter, targeted approach — pairing a focused strategy with real campus insiders <strong style={{ color: TEXT }}>10x more likely to help you get interviewed fast.</strong>
         </p>
 
         <div style={{ width: '100%', maxWidth: 400, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
