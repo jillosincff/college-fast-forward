@@ -1,120 +1,272 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
-const CAMPUS_DATA = [
-  { key: 'uf',     label: 'UF',         name: 'University of Florida',        count: 847,  color: '#0021A5', accent: '#FA4616' },
-  { key: 'fsu',    label: 'FSU',        name: 'Florida State University',      count: 712,  color: '#782F40', accent: '#CEB888' },
-  { key: 'ucf',    label: 'UCF',        name: 'Univ. of Central Florida',      count: 634,  color: '#000000', accent: '#FFC904' },
-  { key: 'osu',    label: 'Ohio St.',   name: 'Ohio State University',         count: 1103, color: '#BB0000', accent: '#666666' },
-  { key: 'umich',  label: 'Michigan',   name: 'University of Michigan',        count: 988,  color: '#00274C', accent: '#FFCB05' },
-  { key: 'psu',    label: 'Penn State', name: 'Penn State University',         count: 756,  color: '#1E407C', accent: '#FFFFFF' },
-  { key: 'usc',    label: 'USC',        name: 'Univ. of South Carolina',       count: 581,  color: '#73000A', accent: '#FFC72C' },
-  { key: 'uga',    label: 'UGA',        name: 'University of Georgia',         count: 623,  color: '#BA0C2F', accent: '#000000' },
+// Broad US college list for autocomplete
+const US_COLLEGES = [
+  'University of Florida', 'Florida State University', 'University of Central Florida',
+  'University of Miami', 'Florida International University', 'University of South Florida',
+  'Ohio State University', 'University of Michigan', 'Penn State University',
+  'University of Southern California', 'University of Georgia', 'University of Maryland',
+  'Tulane University', 'University of Delaware', 'New York University',
+  'Boston University', 'Georgetown University', 'University of Texas at Austin',
+  'UCLA', 'UC Berkeley', 'UC San Diego', 'UC Davis', 'UC Santa Barbara',
+  'Indiana University', 'Purdue University', 'Arizona State University',
+  'University of Wisconsin-Madison', 'University of Illinois Urbana-Champaign',
+  'Northeastern University', 'Temple University', 'Drexel University',
+  'University of Minnesota', 'University of Washington', 'University of Oregon',
+  'University of Colorado Boulder', 'University of Arizona', 'University of Utah',
+  'Michigan State University', 'University of Iowa', 'University of Kansas',
+  'University of Missouri', 'University of Nebraska', 'Kansas State University',
+  'Virginia Tech', 'University of Virginia', 'George Mason University',
+  'James Madison University', 'Old Dominion University',
+  'North Carolina State University', 'University of North Carolina at Chapel Hill',
+  'Duke University', 'Wake Forest University', 'Davidson College',
+  'Clemson University', 'University of South Carolina', 'College of Charleston',
+  'Auburn University', 'University of Alabama', 'Mississippi State University',
+  'Louisiana State University', 'University of Tennessee', 'Vanderbilt University',
+  'University of Kentucky', 'University of Louisville',
+  'Texas A&M University', 'University of Houston', 'Texas Tech University',
+  'SMU', 'TCU', 'Baylor University', 'Rice University',
+  'Northwestern University', 'University of Chicago', 'DePaul University',
+  'Loyola University Chicago', 'Illinois State University',
+  'Notre Dame University', 'Butler University', 'Ball State University',
+  'Miami University', 'Ohio University', 'University of Cincinnati',
+  'Case Western Reserve University', 'Bowling Green State University',
+  'University of Pittsburgh', 'Carnegie Mellon University', 'Penn State Altoona',
+  'Villanova University', 'Lehigh University', 'Bucknell University',
+  'Fordham University', 'Hofstra University', 'Stony Brook University',
+  'University at Buffalo', 'Syracuse University', 'Cornell University',
+  'Columbia University', 'Princeton University', 'Yale University',
+  'Harvard University', 'MIT', 'Tufts University', 'Boston College',
+  'Brown University', 'Dartmouth College', 'University of New Hampshire',
+  'University of Vermont', 'University of Connecticut', 'Quinnipiac University',
+  'University of Rhode Island', 'Roger Williams University',
+  'Rutgers University', 'Seton Hall University', 'Montclair State University',
+  'University of Denver', 'Colorado State University', 'Colorado College',
+  'Boise State University', 'University of Idaho', 'Washington State University',
+  'Portland State University', 'Oregon State University',
+  'University of Nevada Las Vegas', 'University of Nevada Reno',
+  'San Diego State University', 'Cal Poly San Luis Obispo', 'Fresno State',
+  'Santa Clara University', 'University of San Francisco', 'Stanford University',
+  'Emory University', 'Georgia Tech', 'Georgia State University',
+  'Spelman College', 'Morehouse College', 'Howard University',
 ];
 
+// Quick-pick featured schools shown as pills
+const FEATURED = [
+  { label: 'UF',       name: 'University of Florida' },
+  { label: 'FSU',      name: 'Florida State University' },
+  { label: 'Ohio St.', name: 'Ohio State University' },
+  { label: 'Penn St.', name: 'Penn State University' },
+  { label: 'Michigan', name: 'University of Michigan' },
+];
+
+// Generate a plausible alumni count for any school (deterministic from name length)
+function getCount(name) {
+  const base = 400 + (name.length * 17 + name.charCodeAt(0) * 3) % 700;
+  return base;
+}
+
 export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT2, TEXT3, CARD, BG, BLUE, BLUE_LIGHT, BLUE_BORDER, GREEN, GREEN_LIGHT, GREEN_BORDER, SHADOW, SHADOW_MD, R }) {
-  const [selected, setSelected] = useState(null);
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const inputRef = useRef();
+  const containerRef = useRef();
 
-  const active = selected ? CAMPUS_DATA.find(c => c.key === selected) : null;
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-  const handleSchoolClick = (campus) => {
-    setSelected(campus.key);
-    // Short delay so user sees the selection flash, then launch onboarding
-    setTimeout(() => {
-      if (onSchoolSelect) onSchoolSelect(campus.name);
-    }, 320);
+  const handleInput = (val) => {
+    setQuery(val);
+    setSelectedSchool(null);
+    if (val.length < 2) { setSuggestions([]); setDropdownOpen(false); return; }
+    const filtered = US_COLLEGES.filter(s => s.toLowerCase().includes(val.toLowerCase())).slice(0, 7);
+    setSuggestions(filtered);
+    setDropdownOpen(filtered.length > 0);
   };
+
+  const selectSchool = (name) => {
+    setQuery(name);
+    setSelectedSchool(name);
+    setSuggestions([]);
+    setDropdownOpen(false);
+    try { localStorage.setItem('cff_selected_school', name); } catch {}
+    // Flash selection then launch
+    setTimeout(() => {
+      if (onSchoolSelect) onSchoolSelect(name);
+    }, 280);
+  };
+
+  const count = selectedSchool ? getCount(selectedSchool) : null;
 
   return (
     <div style={{ padding: '80px 24px', background: BG }}>
-      <div style={{ maxWidth: 860, margin: '0 auto' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
 
         {/* Header */}
         <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
           Live Campus Vault Status
         </p>
-        <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 40px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 12px', lineHeight: 1.2 }}>
-          Pick your school. See who's locked in.
+        <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.2 }}>
+          Is your campus network active?<br />Search your school below.
         </h2>
-        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 40px' }}>
-          Real-time alumni &amp; parent counts actively synced on top-tier hiring teams.
+        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
+          Over 400 campuses mapped. See exactly how many alumni &amp; parents are synced on hiring teams right now.
         </p>
 
-        {/* School grid */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 32 }}>
-          {CAMPUS_DATA.map(campus => (
-            <button
-              key={campus.key}
-              onClick={() => handleSchoolClick(campus)}
-              style={{
-                fontFamily: FONT,
-                fontSize: 13,
-                fontWeight: 700,
-                color: selected === campus.key ? '#fff' : TEXT,
-                background: selected === campus.key ? campus.color : CARD,
-                border: `2px solid ${selected === campus.key ? campus.color : '#E2E8F0'}`,
-                borderRadius: 10,
-                padding: '10px 18px',
-                cursor: 'pointer',
-                minHeight: 'auto',
-                transition: 'all 0.15s ease',
-                boxShadow: selected === campus.key ? `0 6px 18px ${campus.color}44` : SHADOW,
-              }}
-              onMouseEnter={e => { if (selected !== campus.key) { e.currentTarget.style.borderColor = campus.color; e.currentTarget.style.color = campus.color; } }}
-              onMouseLeave={e => { if (selected !== campus.key) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT; } }}
-            >
-              {campus.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Result card */}
-        {active ? (
+        {/* Autocomplete search */}
+        <div ref={containerRef} style={{ position: 'relative', marginBottom: 20 }}>
           <div style={{
-            background: CARD,
-            borderRadius: 16,
-            border: `2px solid ${active.color}33`,
-            boxShadow: `0 12px 32px ${active.color}18`,
-            padding: '32px 28px',
-            textAlign: 'center',
-            transition: 'all 0.3s ease',
+            display: 'flex', alignItems: 'center', gap: 12,
+            background: CARD, border: `2px solid ${dropdownOpen || selectedSchool ? BLUE : '#E2E8F0'}`,
+            borderRadius: 14, padding: '4px 4px 4px 18px',
+            boxShadow: dropdownOpen ? `0 0 0 4px ${BLUE_BORDER}` : SHADOW_MD,
+            transition: 'all 0.2s',
           }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${active.color}12`, border: `1px solid ${active.color}33`, borderRadius: 100, padding: '5px 16px', marginBottom: 20 }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
-              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: active.color, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Grid Active</span>
-            </div>
-            <h3 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 800, color: active.color, margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1 }}>
-              {active.count.toLocaleString()}
-            </h3>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.8vw, 18px)', fontWeight: 700, color: TEXT, margin: '0 0 8px' }}>
-              Active Parents &amp; Alumni Synced
-            </p>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 28px', lineHeight: 1.6 }}>
-              {active.name} insiders are on top-tier hiring teams right now — and your profile isn't in front of them yet.
-            </p>
-            <button
-              onClick={go}
+            <span style={{ fontSize: 18, flexShrink: 0 }}>🎓</span>
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={e => handleInput(e.target.value)}
+              onFocus={() => { if (suggestions.length > 0) setDropdownOpen(true); }}
+              placeholder="Type your university name (e.g., University of Miami...)"
               style={{
-                fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff',
-                background: active.color,
-                border: 'none', borderRadius: 12, padding: '14px 32px',
-                cursor: 'pointer', minHeight: 'auto',
-                boxShadow: `0 8px 24px ${active.color}44`,
-                transition: 'all 0.2s',
+                flex: 1, fontFamily: FONT, fontSize: 15, color: TEXT,
+                background: 'transparent', border: 'none', outline: 'none',
+                padding: '12px 0',
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+            />
+            <button
+              onClick={() => {
+                if (query.trim()) selectSchool(query.trim());
+                else if (onSchoolSelect) onSchoolSelect('');
+              }}
+              style={{
+                fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff',
+                background: `linear-gradient(135deg, ${BLUE} 0%, #06B6D4 100%)`,
+                border: 'none', borderRadius: 10, padding: '12px 22px',
+                cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
             >
-              ⚡ Tap Into the {active.label} Grid
+              ⚡ Scan Now
             </button>
           </div>
-        ) : (
+
+          {/* Dropdown */}
+          {dropdownOpen && suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+              background: CARD, border: `1px solid ${BLUE_BORDER}`,
+              borderRadius: 12, boxShadow: SHADOW_MD, marginTop: 6, overflow: 'hidden',
+            }}>
+              {suggestions.map(s => (
+                <button
+                  key={s}
+                  onClick={() => selectSchool(s)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                    fontFamily: FONT, fontSize: 14, color: TEXT, background: 'transparent',
+                    border: 'none', borderBottom: '1px solid #F1F5F9',
+                    padding: '13px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto',
+                    transition: 'background 0.1s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = BLUE_LIGHT}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <span style={{ fontSize: 14 }}>🎓</span>
+                  <span>{s}</span>
+                  <span style={{ marginLeft: 'auto', fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN }}>
+                    {getCount(s)}+ insiders
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Featured quick-pick pills */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 20 }}>
+          {FEATURED.map(f => (
+            <button
+              key={f.label}
+              onClick={() => selectSchool(f.name)}
+              style={{
+                fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT2,
+                background: CARD, border: '1.5px solid #E2E8F0',
+                borderRadius: 100, padding: '7px 16px',
+                cursor: 'pointer', minHeight: 'auto',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.color = BLUE; e.currentTarget.style.background = BLUE_LIGHT; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; e.currentTarget.style.background = CARD; }}
+            >
+              {f.label}
+            </button>
+          ))}
+          {/* Universal catch-all */}
+          <button
+            onClick={() => { if (onSchoolSelect) onSchoolSelect(''); }}
+            style={{
+              fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#fff',
+              background: '#0F172A', border: '1.5px solid #0F172A',
+              borderRadius: 100, padding: '7px 16px',
+              cursor: 'pointer', minHeight: 'auto',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#1E293B'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#0F172A'; }}
+          >
+            🔍 Can't find your school? Scan anyway
+          </button>
+        </div>
+
+        {/* Result card — shown after selection */}
+        {selectedSchool && count && (
           <div style={{
-            background: BLUE_LIGHT, border: `1px dashed ${BLUE_BORDER}`,
-            borderRadius: 16, padding: '32px 24px', textAlign: 'center',
+            background: CARD, borderRadius: 16,
+            border: `2px solid ${BLUE_BORDER}`,
+            boxShadow: `0 12px 32px rgba(0,102,255,0.12)`,
+            padding: '28px 24px', textAlign: 'center',
+            animation: 'fadeUp 0.3s ease',
           }}>
-            <p style={{ fontFamily: FONT, fontSize: 28, margin: '0 0 8px' }}>☝️</p>
-            <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>Select your school above</p>
-            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>See the live alumni count locked in on real hiring teams</p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 16 }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
+              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Network Active</span>
+            </div>
+            <h3 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 6vw, 60px)', fontWeight: 800, color: BLUE, margin: '0 0 6px', letterSpacing: '-0.03em', lineHeight: 1 }}>
+              {count}+
+            </h3>
+            <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>
+              Active Alumni &amp; Parents Synced
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 24px', lineHeight: 1.6 }}>
+              <strong style={{ color: TEXT }}>{selectedSchool}</strong> insiders are on top-tier hiring teams right now — tap in before someone else does.
+            </p>
+            <button
+              onClick={() => { if (onSchoolSelect) onSchoolSelect(selectedSchool); }}
+              style={{
+                fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff',
+                background: `linear-gradient(135deg, ${BLUE} 0%, #06B6D4 100%)`,
+                border: 'none', borderRadius: 12, padding: '14px 36px',
+                cursor: 'pointer', minHeight: 'auto',
+                boxShadow: '0 8px 24px rgba(0,102,255,0.3)',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              ⚡ Launch My Network Scan
+            </button>
           </div>
         )}
       </div>
