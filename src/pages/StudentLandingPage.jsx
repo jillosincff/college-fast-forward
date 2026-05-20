@@ -3,6 +3,7 @@ import { navigate } from '@/components/utils/navigation';
 import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
+import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -289,14 +290,28 @@ export default function StudentLandingPage({ onParentClick }) {
           Don't get sucked in. College Fast Forward gives you the tools to get seen, get interviewed, and get hired — without the chaos.
         </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center', marginBottom: 20, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
-          <CTAButton label="Get Hired →" />
-          <button onClick={() => {}} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 500, color: TEXT2, background: CARD, border: `1px solid #E2E8F0`, borderRadius: 8, padding: '16px 28px', cursor: 'pointer', minHeight: 'auto', boxShadow: SHADOW }}>Watch 45-sec demo</button>
+        <div style={{ width: '100%', maxWidth: 420, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s' }}>
+          <button onClick={go} style={{
+            width: '100%', fontFamily: FONT, fontSize: 16, fontWeight: 800, color: '#fff',
+            background: 'linear-gradient(135deg, #0066FF 0%, #06B6D4 100%)',
+            border: 'none', borderRadius: 14, padding: '18px 32px',
+            cursor: 'pointer', minHeight: 'auto',
+            boxShadow: '0 12px 32px rgba(0,102,255,0.35)',
+            transition: 'all 0.2s ease', letterSpacing: '-0.01em',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 18px 40px rgba(0,102,255,0.45)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,102,255,0.35)'; }}
+          >⚡ Run My Free Network Scan</button>
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '10px 0 0', textAlign: 'center' }}>
+            🔒 Free Campus Diagnostic · Takes less than 60 seconds
+          </p>
+          <div style={{ marginTop: 14, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
+            <span style={{ fontFamily: FONT, fontSize: 12, color: '#065F46', fontWeight: 600 }}>
+              3,412 students from FSU, UF, and Wake Forest actively scanning today
+            </span>
+          </div>
         </div>
-
-        <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.4s' }}>
-          No credit card required to start · Built for students at UF, UCF, Penn State, USC &amp; more
-        </p>
 
         {/* Hero Card Preview */}
         <div style={{
@@ -326,48 +341,47 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
       </div>
 
-      {/* ── PROBLEM STRIP ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '72px 24px' }}>
-        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
-          <SectionLabel text="You are not alone" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 4vw, 52px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 20px' }}>
-            Applying shouldn't feel<br />this exhausting.
+      {/* ── DATA CONTRAST GRID (moved above fold) ── */}
+      <div style={{ padding: '72px 24px', background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 820, margin: '0 auto' }}>
+          <SectionLabel text="Why the old way isn't working" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 36px', textAlign: 'center' }}>
+            The numbers don't lie.
           </h2>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.6vw, 17px)', color: TEXT2, lineHeight: 1.75, margin: '0 auto', maxWidth: 520 }}>
-            Students are sending hundreds of applications, getting ghosted, and burning out. We built a smarter system so you don't have to do it all manually.
-          </p>
+          <style>{`@media (max-width: 640px) { .metrics-grid { flex-direction: column !important; } }`}</style>
+          <div className="metrics-grid" style={{ display: 'flex', gap: 16, alignItems: 'stretch' }}>
+            <div style={{ flex: 1, background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#991B1B', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>❌ The Old Way — Blind Numbers Game</p>
+              {[
+                { stat: '2%', label: 'Response rate plugging generic resumes into public job boards and praying.' },
+                { stat: '40+', label: 'Hours wasted on application screens, spreadsheets, and cover letters written from scratch.' },
+                { stat: '~75%', label: 'Of resumes auto-rejected by ATS filters before a human ever reads them.' },
+              ].map(({ stat, label }, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#991B1B', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ flex: 1, background: '#F0FDF4', border: '1px solid #6EE7B7', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#065F46', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>🎉 The Fast Forward Sprint — The Inside Track</p>
+              {[
+                { stat: '18%+', label: 'Response rate via unadvertised portals and direct warm alumni introductions.' },
+                { stat: '4 hrs', label: 'Total — the Agent automates tracking, sources internal leads, and drafts outreach for you.' },
+                { stat: '100%', label: 'Verified campus network routing — every connection is a real school-matched insider.' },
+              ].map(({ stat, label }, i) => (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#065F46', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── BENEFIT CARDS ── */}
-      <div style={{ padding: '80px 24px', maxWidth: 980, margin: '0 auto' }}>
-        <SectionLabel text="Why students use College Fast Forward" />
-        <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 40px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 40px', lineHeight: 1.2 }}>
-          Everything you need to get hired.
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-          {BENEFIT_CARDS.map((card, i) => (
-            <div key={i} style={{
-              background: CARD, borderRadius: R, boxShadow: SHADOW,
-              padding: '24px',
-              border: i === 0 ? `1.5px solid ${BLUE_BORDER}` : 'none',
-              transition: 'box-shadow 0.2s, transform 0.2s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = SHADOW_MD; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = SHADOW; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 16 }}>{card.icon}</div>
-              <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.01em' }}>{card.title}</p>
-              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.7 }}>{card.desc}</p>
-              {i === 0 && (
-                <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '10px 12px', marginTop: 14 }}>
-                  <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', margin: 0, fontWeight: 500, fontStyle: 'italic' }}>"This alone saved me hours." — UF '26</p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* ── CAMPUS VAULT WIDGET (replaces 6-box feature grid) ── */}
+      <CampusVaultWidget go={go} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
       {/* ── HOW IT WORKS ── */}
       <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
@@ -409,51 +423,7 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
       </div>
 
-      {/* ── SUCCESS METRICS COMPARISON ── */}
-      <div style={{ padding: '80px 24px', background: BG }}>
-        <div style={{ maxWidth: 820, margin: '0 auto' }}>
-          <SectionLabel text="Why the old way isn't working" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 40px', textAlign: 'center' }}>
-            The numbers don't lie.
-          </h2>
-          <style>{`
-            @media (max-width: 640px) { .metrics-grid { flex-direction: column !important; } }
-          `}</style>
-          <div className="metrics-grid" style={{ display: 'flex', gap: 16, alignItems: 'stretch' }}>
 
-            {/* Left: Old Way */}
-            <div style={{ flex: 1, background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#991B1B', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>❌ The Old Way — Blind Numbers Game</p>
-              {[
-                { stat: '2%', label: 'Response rate plugging generic resumes into public job boards and praying.' },
-                { stat: '40+', label: 'Hours wasted on application screens, spreadsheets, and cover letters written from scratch.' },
-                { stat: '~75%', label: 'Of resumes auto-rejected by corporate ATS filters before a human ever reads them.' },
-              ].map(({ stat, label }, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#991B1B', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
-                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Right: Fast Forward */}
-            <div style={{ flex: 1, background: '#F0FDF4', border: '1px solid #6EE7B7', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#065F46', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>🎉 The Fast Forward Sprint — The Backdoor Route</p>
-              {[
-                { stat: '18%+', label: 'Response rate via unadvertised portals and direct warm alumni introductions.' },
-                { stat: '4 hrs', label: 'Total — the Agent automates tracking, sources internal leads, and drafts outreach for you.' },
-                { stat: '98%', label: 'ATS match score — profiles restructured by AI to completely bypass automated screening filters.' },
-              ].map(({ stat, label }, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#065F46', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
-                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
-                </div>
-              ))}
-            </div>
-
-          </div>
-        </div>
-      </div>
 
       {/* ── PRICING ── */}
       <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
