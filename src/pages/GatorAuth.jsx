@@ -170,8 +170,8 @@ export default function GatorAuth() {
       return;
     }
 
-    // Any user with a persona goes straight to their dashboard — no onboarding re-entry
-    if (user.persona || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
+    // Any user with a persona OR completed onboarding goes straight to their dashboard — no onboarding re-entry
+    if (user.persona || user.onboarding_completed === true || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentHome');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
