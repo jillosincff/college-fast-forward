@@ -18,9 +18,119 @@ const CARD = '#ffffff';
 
 import { useState } from 'react';
 
-export default function BackdoorOpportunityCard({ schoolName, location, targetRole, onUnlock }) {
+// Compliance-safe dynamic track mock data directory
+const TRACK_DATA = {
+  finance: {
+    companyLabel: '[Elite Global Advisory Firm]',
+    companyCity: 'New York, NY',
+    jobTitle: 'Investment Banking Analyst',
+    division: 'Mergers & Acquisitions (M&A)',
+    insideTrackAlert: 'We located an Alum from your school working on the coverage team here.',
+    scriptHook: "Hey Sarah, noticed you also went to the same school and joined the IB analyst class here. I'm tracking the upcoming summer analyst recruitment sequence and wanted to see how you managed the restructuring group process...",
+  },
+  tech: {
+    companyLabel: '[Top-Tier Tech Company]',
+    companyCity: 'San Francisco, CA',
+    jobTitle: 'Software Engineering Intern',
+    division: 'Core Platform & Infrastructure',
+    insideTrackAlert: 'We located an Alum from your school on the engineering team here.',
+    scriptHook: "Hey Sarah, noticed you also went to the same school and made the jump to this engineering team. I'm targeting SWE internship roles this cycle and wanted to hear how you approached the technical interview process...",
+  },
+  consulting: {
+    companyLabel: '[Big 4 Consulting Firm]',
+    companyCity: 'Chicago, IL',
+    jobTitle: 'Business Analyst',
+    division: 'Strategy & Management Consulting',
+    insideTrackAlert: 'We located an Alum from your school in the consulting practice here.',
+    scriptHook: "Hey Sarah, noticed you also went to the same school and landed in the consulting practice here. I'm going through recruitment right now and wanted to understand what the case interview process looked like from your side...",
+  },
+  marketing: {
+    companyLabel: '[Top-Tier Ad Agency]',
+    companyCity: 'Miami, FL',
+    jobTitle: 'Marketing Coordinator',
+    division: 'Creative Strategy Division',
+    insideTrackAlert: 'We located an Alum from your school working here right now.',
+    scriptHook: "Hey Sarah, noticed you also went to the same school and made the jump into agency work. I'm looking into their digital marketing pipeline right now and wanted to see how you navigated the hiring process...",
+  },
+  healthcare: {
+    companyLabel: '[Leading Healthcare Organization]',
+    companyCity: 'Boston, MA',
+    jobTitle: 'Clinical Research Associate',
+    division: 'Research & Innovation Division',
+    insideTrackAlert: 'We located an Alum from your school working in their research division here.',
+    scriptHook: "Hey Sarah, noticed you also went to the same school and transitioned into clinical research here. I'm exploring roles in this space and wanted to learn how you positioned yourself coming out of school...",
+  },
+  law_gov: {
+    companyLabel: '[Top Government Agency / Law Firm]',
+    companyCity: 'Washington, DC',
+    jobTitle: 'Policy Analyst',
+    division: 'Government Affairs & Public Policy',
+    insideTrackAlert: 'We located an Alum from your school working in their policy division here.',
+    scriptHook: "Hey Sarah, noticed you also went to the same school and are now in public policy work. I'm targeting roles in this sector and wanted to hear how you broke in through this pathway...",
+  },
+  creative: {
+    companyLabel: '[Top Creative Studio / Agency]',
+    companyCity: 'Los Angeles, CA',
+    jobTitle: 'Creative Associate',
+    division: 'Brand & Entertainment Division',
+    insideTrackAlert: 'We located an Alum from your school working in their creative team here.',
+    scriptHook: "Hey Sarah, noticed you also went to the same school and joined the creative team here. I'm exploring roles in entertainment and media and wanted to understand how you got your foot in the door...",
+  },
+};
+
+// Map industry bucket key + specific target roles to the best track content
+function resolveTrack(selectedIndustries, targetRoles) {
+  // Check specific sub-roles first for highest precision
+  const roleMap = {
+    'Investment Banking': 'finance',
+    'Private Equity': 'finance',
+    'Corporate Finance': 'finance',
+    'Consulting': 'consulting',
+    'Strategy': 'consulting',
+    'Software Engineering': 'tech',
+    'Product Management': 'tech',
+    'Data Science': 'tech',
+    'Pre-Med / Clinical': 'healthcare',
+    'Biotech Research': 'healthcare',
+    'Pharma': 'healthcare',
+    'Pre-Law': 'law_gov',
+    'Public Policy': 'law_gov',
+    'Government / Civil Service': 'law_gov',
+    'Social Media': 'marketing',
+    'Content Creation': 'marketing',
+    'Brand Strategy': 'marketing',
+    'Product Marketing': 'marketing',
+    'Film & TV': 'creative',
+    'Music Industry': 'creative',
+    'Sports Business': 'creative',
+    'Gaming': 'creative',
+  };
+
+  for (const role of (targetRoles || [])) {
+    if (roleMap[role]) return TRACK_DATA[roleMap[role]];
+  }
+
+  // Fall back to top-level bucket
+  const bucketMap = {
+    business: 'finance',
+    tech: 'tech',
+    marketing: 'marketing',
+    healthcare: 'healthcare',
+    law_gov: 'law_gov',
+    creative: 'creative',
+  };
+  for (const ind of (selectedIndustries || [])) {
+    if (bucketMap[ind]) return TRACK_DATA[bucketMap[ind]];
+  }
+
+  return TRACK_DATA.marketing; // safe default
+}
+
+export default function BackdoorOpportunityCard({ schoolName, location, targetRole, selectedIndustries, targetRoles, onUnlock }) {
   const shortSchool = schoolName?.split(' ').slice(0, 2).join(' ') || 'your school';
-  const city = location === 'Remote' ? 'Miami, FL' : location || 'Miami, FL';
+
+  const track = resolveTrack(selectedIndustries, targetRoles);
+  const city = location === 'Remote' ? track.companyCity : location || track.companyCity;
   const [showModal, setShowModal] = useState(false);
 
   const handleScriptClick = () => setShowModal(true);
@@ -40,27 +150,27 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
       <div style={{ padding: '20px 22px 16px' }}>
         {/* Header row */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 10 }}>
-          {/* Company logo placeholder */}
-          <div style={{
-            width: 44, height: 44, borderRadius: 12,
-            background: 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, flexShrink: 0, boxShadow: '0 2px 8px rgba(29,78,216,0.25)',
-          }}>🏢</div>
+        {/* Company logo placeholder */}
+        <div style={{
+          width: 44, height: 44, borderRadius: 12,
+          background: 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 20, flexShrink: 0, boxShadow: '0 2px 8px rgba(29,78,216,0.25)',
+        }}>🏢</div>
 
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
-              <p style={{ fontFamily: sat, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>
-                Marketing Coordinator at{' '}
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 6, padding: '1px 10px', fontSize: 13 }}>
-                  🔒 [Top-Tier {city.split(',')[1]?.trim() || 'Miami'} Ad Agency]
-                </span>
-              </p>
-            </div>
-            <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
-              🔒 Company Hidden · {city}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
+            <p style={{ fontFamily: sat, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>
+              {track.jobTitle} at{' '}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 6, padding: '1px 10px', fontSize: 13 }}>
+                🔒 {track.companyLabel}
+              </span>
             </p>
           </div>
+          <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
+            🔒 Company Hidden · {city}
+          </p>
+        </div>
 
           {/* Active signal badge */}
           <div style={{
@@ -97,7 +207,7 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ fontSize: 15 }}>⚡</span>
           <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: BLUE_BRIGHT, margin: 0, letterSpacing: '0.01em' }}>
-            Inside Track Found: We located an Alum from <strong>{shortSchool}</strong> working here.
+            Inside Track Found: {track.insideTrackAlert}
           </p>
         </div>
 
@@ -115,7 +225,7 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
               [Locked] Verified {shortSchool} Alum
             </p>
             <p style={{ fontFamily: dm, fontSize: 11, color: TEXT2, margin: '2px 0 0', lineHeight: 1.5 }}>
-              Digital Marketing Manager • Creative Strategy Division • Graduated 3 Years Ago
+              {track.jobTitle} • {track.division} • Graduated 2–3 Years Ago
             </p>
           </div>
           <button
@@ -148,13 +258,13 @@ export default function BackdoorOpportunityCard({ schoolName, location, targetRo
           <div style={{ padding: '12px 14px', position: 'relative' }}>
             {/* Visible hook line — clear and unblurred */}
             <p style={{ fontFamily: dm, fontSize: 13, color: TEXT, margin: '0 0 8px', lineHeight: 1.65, fontStyle: 'italic' }}>
-              "Hey Sarah, noticed you also went to the same school...
+              "{track.scriptHook.substring(0, 80)}...
             </p>
 
             {/* Blurred rest of script */}
             <div style={{ position: 'relative' }}>
               <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.65, fontStyle: 'italic', filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
-                I'm targeting {targetRole || 'marketing'} roles in {city} right now and came across the opening here. Would love to hear what the team culture is like — any chance for a quick 5-min chat? Huge thanks either way!
+                {track.scriptHook.substring(80)} Would love to hear what the team culture is like — any chance for a quick 5-min chat? Huge thanks either way!
               </p>
               {/* Frosted overlay */}
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(250,250,250,0.5)', backdropFilter: 'blur(1px)', WebkitBackdropFilter: 'blur(1px)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

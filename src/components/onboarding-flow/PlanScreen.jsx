@@ -188,7 +188,7 @@ function ComparisonTable() {
   );
 }
 
-export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, onBack, saveAndAuth }) {
+export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, selectedIndustries = [], targetRoles = [], onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
 
   const goToPaidDashboard = () => {
@@ -288,6 +288,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           schoolName={schoolName}
           location={location}
           targetRole={targetRole}
+          selectedIndustries={selectedIndustries}
+          targetRoles={targetRoles}
           onUnlock={() => setShowPaywall(true)}
         />
       </div>

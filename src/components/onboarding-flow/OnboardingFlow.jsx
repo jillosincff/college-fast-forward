@@ -1168,6 +1168,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           locationPref={locationPref}
           locationCity={locationCity}
           quickRole={quickRole || targetRoles[0]}
+          selectedIndustries={selectedIndustries}
+          targetRoles={targetRoles}
           onBack={back}
           saveAndAuth={saveAndAuth}
         />
