@@ -146,13 +146,16 @@ export default function GatorAuth() {
   };
 
   const handleGoogleSignIn = () => {
-    // Preserve any existing pending role (e.g. 'parent' from ParentLandingPage)
-    // Always redirect back to GatorAuth — it smart-routes returning vs new users
+    // Only set onboarding type flag if user is NOT already logged in (i.e., truly a new sign-up flow)
+    // This prevents returning users who click Google from being funnelled back into onboarding
     try {
       const existingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      const role = existingRole || 'student';
-      localStorage.setItem('pending_invite_role', role);
-      sessionStorage.setItem('cff_onboarding_type', role);
+      if (existingRole) {
+        // Only preserve an explicitly set role (e.g. parent from landing page)
+        localStorage.setItem('pending_invite_role', existingRole);
+        sessionStorage.setItem('cff_onboarding_type', existingRole);
+      }
+      // Do NOT set cff_onboarding_type for plain sign-ins — returning users must not see onboarding
     } catch (e) { /* private browsing */ }
     base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
   };
@@ -166,16 +169,7 @@ export default function GatorAuth() {
       return;
     }
 
-    // Check if they came from the new onboarding funnel (landing page "Get Hired" button)
-    const cameFromFunnel = sessionStorage.getItem('cff_onboarding_type') === 'student';
-
-    // If they came from the funnel, always show it — regardless of existing onboarding status
-    if (cameFromFunnel) {
-      setStep('onboarding');
-      return;
-    }
-
-    // Fully onboarded returning user (no funnel flag) — send straight to dashboard
+    // Fully onboarded returning user — ALWAYS send straight to dashboard, no onboarding re-entry
     if (user.persona && user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentHome');
@@ -187,7 +181,7 @@ export default function GatorAuth() {
       return;
     }
 
-    // Has persona but hasn't finished onboarding
+    // Has persona but hasn't finished onboarding — resume the appropriate flow
     if (user.persona && !user.onboarding_completed) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('/ParentOnboarding');
@@ -196,8 +190,13 @@ export default function GatorAuth() {
         navigate('/AlumniOnboarding');
         return;
       } else {
-        // Student with incomplete onboarding → run them through the funnel
-        setStep('onboarding');
+        // Student with incomplete onboarding — only show funnel if they came from it
+        const cameFromFunnel = sessionStorage.getItem('cff_onboarding_type') === 'student';
+        if (cameFromFunnel) {
+          setStep('onboarding');
+        } else {
+          navigate('/StudentWelcome');
+        }
         return;
       }
     }

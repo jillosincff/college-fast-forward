@@ -101,6 +101,8 @@ export default function StudentWelcome() {
   const skip = useCallback(async () => {
     setSaving(true);
     try {
+      sessionStorage.removeItem('cff_onboarding_type');
+      localStorage.removeItem('pending_invite_role');
       await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
       base44.functions.invoke('incrementUserCount', { user_id: user?.id }).catch(() => {});
       await refreshUser();
