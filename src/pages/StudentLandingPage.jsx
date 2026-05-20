@@ -132,10 +132,10 @@ export default function StudentLandingPage({ onParentClick }) {
 
   const launchWithSchool = (schoolName) => {
     try {
-      localStorage.setItem('cff_college', schoolName);
-      localStorage.setItem('cff_onboarding_screen', '7');
+      if (schoolName) localStorage.setItem('cff_college', schoolName);
+      localStorage.removeItem('cff_onboarding_screen');
     } catch {}
-    setFunnelStartScreen(7);
+    setFunnelStartScreen(null);
     setShowFunnel(true);
   };
 
