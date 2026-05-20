@@ -158,7 +158,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
                 flexShrink: 0,
               }}
             >
-              ⚡ Scan Now
+              ⚡ Find My Match
             </button>
           </div>
 
@@ -208,7 +208,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
             onMouseEnter={e => { e.currentTarget.style.background = '#1E293B'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#0F172A'; }}
           >
-            🔍 Can't find your school? Scan anyway
+            🔍 School not listed? Click here to bypass
           </button>
         </div>
 
