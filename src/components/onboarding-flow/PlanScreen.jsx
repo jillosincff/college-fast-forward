@@ -3,6 +3,7 @@ import BackdoorOpportunityCard from './BackdoorOpportunityCard';
 import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
 import OpportunityHub from './OpportunityHub';
+import PremiumPaywallModal from './PremiumPaywallModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -191,27 +192,47 @@ function ComparisonTable() {
 
 export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, selectedIndustries = [], targetRoles = [], onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isDownsell, setIsDownsell] = useState(false);
+  const exitIntentFired = useRef(false);
+
+  // ── Exit-intent: desktop mouse leaves top of viewport ──
+  useEffect(() => {
+    const handleMouseLeave = (e) => {
+      if (e.clientY < 20 && !exitIntentFired.current && !showPaywall) {
+        exitIntentFired.current = true;
+        setIsDownsell(true);
+        setShowPaywall(true);
+      }
+    };
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, [showPaywall]);
+
+  const openPaywall = (downsell = false) => {
+    setIsDownsell(downsell);
+    setShowPaywall(true);
+  };
 
   const goToPaidDashboard = () => {
-    // TEST MODE: skip payment, go straight to paid dashboard
     window.location.hash = '#FastIQDashboard';
   };
 
-  const continueForFree = () => {
-    // Persist onboarding data so it pre-populates on upgrade
-    try {
-      if (college) localStorage.setItem('cff_college', college);
-      if (seeking) localStorage.setItem('cff_seeking', seeking);
-      if (blockers?.length) localStorage.setItem('cff_blockers', JSON.stringify(blockers));
-      if (frustration) localStorage.setItem('cff_frustration', String(frustration));
-      if (locationPref) localStorage.setItem('cff_location_pref', locationPref);
-      if (locationCity) localStorage.setItem('cff_location_city', locationCity);
-      if (quickRole) localStorage.setItem('cff_quick_role', quickRole);
-      if (resumeData?.original?.name) localStorage.setItem('cff_resume_name', resumeData.original.name);
-      localStorage.setItem('cff_plan_type', 'free');
-    } catch (e) {}
-    // saveAndAuth completes the auth flow; it will route to FreeTierDashboard via GatorAuth
-    if (saveAndAuth) saveAndAuth('free');
+  const handleReferral = () => {
+    const shareUrl = `${window.location.origin}/#GetStarted?ref=friend`;
+    const msg = `Join me on College Fast Forward — it found me hidden job leads through ${college || 'campus'} alumni! ${shareUrl}`;
+    try { navigator.share({ text: msg, url: shareUrl }); } catch {
+      try { navigator.clipboard.writeText(msg); } catch {}
+    }
+  };
+
+  // Intercept ← Back on mobile as exit-intent
+  const handleBack = () => {
+    if (!exitIntentFired.current) {
+      exitIntentFired.current = true;
+      openPaywall(true);
+    } else {
+      onBack?.();
+    }
   };
 
   const firstName = resumeData?.original?.name?.split(' ')[0] || null;
@@ -241,16 +262,13 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         flexDirection: 'column', alignItems: 'stretch', gap: 8,
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
       }}>
-        <button onClick={() => setShowPaywall(true)} style={{
+        <button onClick={() => openPaywall(false)} style={{
           width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff',
           background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
           border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
           boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
         }}>
           Unlock My 14-Day Action Plan →
-        </button>
-        <button onClick={continueForFree} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textAlign: 'center', textDecoration: 'underline' }}>
-          Save progress and continue for free
         </button>
       </div>
 
@@ -352,7 +370,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         </div>
 
         <button
-          onClick={() => setShowPaywall(true)}
+          onClick={() => openPaywall(false)}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 12px',
             fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
@@ -366,107 +384,26 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         >
           Unlock My 14-Day Action Plan — $4.99/wk →
         </button>
-        <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '0 0 16px' }}>
-          🎁 Invite a friend and your first week is on us.
+        <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
+          🎁 Or text 3 friends to unlock free access.
         </p>
-        <button
-          onClick={continueForFree}
-          style={{ fontFamily: dm, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline' }}
-        >
-          Save progress and continue for free
-        </button>
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <button onClick={onBack} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
+        <button onClick={handleBack} style={{ fontFamily: dm, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
       </div>
 
       {/* ── Paywall Modal ── */}
-      {showPaywall && (() => {
-        const roadblockTextMap = {
-          ghosted: 'getting completely ghosted after applying to jobs',
-          resume: 'your resume not getting the responses it deserves',
-          which_jobs: 'struggling to find roles that actually fit your background',
-          outreach: 'the dread of not knowing how to reach the right people',
-          disorganized: 'feeling disorganized and losing track of opportunities',
-          interviews: 'interview anxiety holding you back from landing the role',
-        };
-        const primaryBlocker = blockers?.[0];
-        const selectedPain = roadblockTextMap[primaryBlocker] || 'the broken, old-school job hunt';
-
-        const assetGrid = [
-          { icon: '📄', label: 'Resume Wow', sub: 'ATS-optimized, recruiter-ready' },
-          { icon: '💼', label: 'LinkedIn Mirror Map', sub: 'Keyword-matched to your targets' },
-          { icon: '🤝', label: 'Parent Network', sub: 'Warm intros to hiring insiders' },
-          { icon: '📡', label: 'Hidden Signals', sub: 'Verified active hiring feed' },
-        ];
-
-        return (
-          <div
-            onClick={() => setShowPaywall(false)}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.65)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20000, padding: 16 }}
-          >
-            <div onClick={e => e.stopPropagation()} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 28, maxWidth: 420, width: '100%', padding: '32px 28px 28px', boxShadow: '0 32px 72px -12px rgba(0,0,0,0.18)', position: 'relative', overflow: 'hidden', animation: 'fadUp 0.28s cubic-bezier(0.22,1,0.36,1)' }}>
-
-              {/* Top accent bar */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: 'linear-gradient(to right, #6366f1, #3b82f6, #6366f1)' }} />
-
-              {/* Dismiss */}
-              <button onClick={() => setShowPaywall(false)} style={{ position: 'absolute', top: 14, right: 14, fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: '4px 6px', borderRadius: 6, lineHeight: 1 }}>✕</button>
-
-              {/* Header */}
-              <div style={{ textAlign: 'center', marginTop: 4, marginBottom: 20 }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 100, padding: '4px 14px', marginBottom: 12 }}>
-                  <span style={{ fontSize: 12 }}>🤖</span>
-                  <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4338ca', letterSpacing: '0.1em', textTransform: 'uppercase' }}>CLiFF Premium Feature</span>
-                </div>
-                <h3 style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-                  Unlock the Inside Track
-                </h3>
-                <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.65, maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
-                  Traditional job applications are a black hole. Let CLiFF bypass the filters and connect you directly.
-                </p>
-              </div>
-
-              {/* Value checklist */}
-              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 16, padding: '16px 18px', marginBottom: 20 }}>
-                {[
-                  { icon: '⚡', text: 'Unmask verified company profiles, roles, and hiring contacts.' },
-                  { icon: '🤝', text: 'Access 24/7 personalized, AI-generated email & LinkedIn scripts.' },
-                  { icon: '🧬', text: <span>Map directly into the verified <strong style={{ color: '#0f172a' }}>{schoolName} Alumni Ecosystem</strong>.</span> },
-                ].map(({ icon, text }, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: i < 2 ? 12 : 0 }}>
-                    <span style={{ fontSize: 15, color: '#4f46e5', flexShrink: 0, marginTop: -1 }}>{icon}</span>
-                    <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#334155', margin: 0, lineHeight: 1.6 }}>{text}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Price + CTA */}
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 4, marginBottom: 6 }}>
-                  <span style={{ fontFamily: sat, fontSize: 42, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
-                  <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>/ week</span>
-                </div>
-                <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#16a34a', letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 16px' }}>
-                  ✨ Cancel anytime in one click. Skip a week whenever you want.
-                </p>
-                <button
-                  onClick={goToPaidDashboard}
-                  style={{ width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #059669 0%, #15803d 100%)', border: 'none', borderRadius: 14, padding: '16px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(5,150,105,0.30)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all 0.2s', letterSpacing: '-0.01em', marginBottom: 10 }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(5,150,105,0.45)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(5,150,105,0.30)'; }}
-                >
-                  Unlock Everything Instantly — $4.99/wk →
-                </button>
-                <p style={{ fontFamily: dm, fontSize: 10, color: '#94a3b8', fontWeight: 500, margin: 0 }}>
-                  Secured and processed natively by Stripe.
-                </p>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {showPaywall && (
+        <PremiumPaywallModal
+          firstName={firstName}
+          schoolName={schoolName}
+          isDownsell={isDownsell}
+          onClose={() => setShowPaywall(false)}
+          onPay={goToPaidDashboard}
+          onReferral={handleReferral}
+        />
+      )}
     </div>
   );
 }
