@@ -86,6 +86,20 @@ Deno.serve(async (req) => {
     },
   });
 
+  // ── 6. Fire in-app token notification to referrer ──
+  await base44.asServiceRole.entities.Notification.create({
+    user_id: referrerUserId,
+    type: 'token_deposit',
+    title: '🎁 You earned a referral token!',
+    body: `Someone just completed their ${schoolShortName || 'Network'} Scan! 🎁 1 bonus token has been dropped into your account. Head back to your dashboard to unlock your next inside track route.`,
+    is_read: false,
+    metadata: {
+      trigger: 'referral_milestone',
+      referee_school: schoolShortName,
+      new_token_balance: currentTokens + 1,
+    },
+  });
+
   return Response.json({
     success: true,
     message: 'Referral qualified. Bonus token credited to referrer.',
