@@ -299,7 +299,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.8, maxWidth: 520, margin: '24px auto 0',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Job hunting is stressful, frustrating, and a massive time suck. College Fast Forward delivers a smarter strategy that organizes your roadmap and finds campus insiders <strong style={{ color: TEXT }}>10x more likely to help you win quickly.</strong>
+          Job hunting is stressful, frustrating, and a massive time suck. CLiFF delivers a smarter strategy that organizes your roadmap, and finds campus insiders <strong style={{ color: TEXT }}>10x more likely to help get interviewed fast.</strong>
         </p>
 
         <div style={{ width: '100%', maxWidth: 400, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
