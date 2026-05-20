@@ -64,12 +64,8 @@ export default function StudentOnboarding() {
     }
     const name = user.full_name?.split(' ')[0] || '';
     setFirstName(name);
-    // Use functional update to avoid stale state
-    setStep(prev => {
-      if (prev !== 2) return 2;
-      return prev;
-    });
-  }, [user, navigate]);
+    setStep(2);
+  }, [user, step, navigate]);
 
   // Handle OAuth error
   useEffect(() => {
@@ -238,11 +234,10 @@ export default function StudentOnboarding() {
   };
 
   const handleWelcomeComplete = useCallback(() => {
-    // Flow B: Go to PostJoinUpsell (7-day trial offer)
     navigate('PostJoinUpsell');
   }, []);
 
-  // ── SCREEN 3: Welcome Moment ──
+  // SCREEN 3: Welcome Moment
   if (step === 3) {
     return <StudentWelcomeScreen firstName={firstName} onComplete={handleWelcomeComplete} />;
   }
