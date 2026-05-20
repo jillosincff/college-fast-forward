@@ -117,10 +117,10 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           Live Campus Vault Status
         </p>
         <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.2 }}>
-          Is your campus network active?<br />Search your school below.
+          See how your campus ecosystem ranks.<br />Select your school to unlock localized ATS tracks.
         </h2>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Over 400 campuses mapped. See exactly how many alumni &amp; parents are synced on hiring teams right now.
+          📈 Stop guessing why recruiters ghost you. Paste your resume, run our instant ATS match engine, and bridge the gap to interviews immediately.
         </p>
 
         {/* Autocomplete search */}

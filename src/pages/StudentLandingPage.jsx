@@ -311,9 +311,9 @@ export default function StudentLandingPage({ onParentClick }) {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 18px 40px rgba(0,102,255,0.45)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,102,255,0.35)'; }}
-          >⚡ Run My Free Network Scan</button>
+          >⚡ Check My ATS Match Score</button>
           <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '10px 0 0', textAlign: 'center' }}>
-            🔒 Free Campus Diagnostic · Takes less than 60 seconds
+            Instant diagnostic tool · Paste any target job description to reveal your ranking
           </p>
           <div style={{ marginTop: 14, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
@@ -483,7 +483,7 @@ export default function StudentLandingPage({ onParentClick }) {
               ))}
             </div>
 
-            <CTAButton label="Get Hired →" fullWidth />
+            <CTAButton label="⚡ Check My ATS Match Score" fullWidth />
             <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '14px 0 0' }}>
               No credit card required to start.
             </p>
@@ -503,7 +503,7 @@ export default function StudentLandingPage({ onParentClick }) {
             Join 2,400+ students who stopped applying blindly and started getting results.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <CTAButton label="Get Hired →" />
+            <CTAButton label="⚡ Optimize My Resume File" />
           </div>
           <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>No credit card required to start.</p>
         </div>
