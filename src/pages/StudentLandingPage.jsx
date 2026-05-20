@@ -280,25 +280,28 @@ export default function StudentLandingPage({ onParentClick }) {
           <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>The CFF AI Agent</span>
         </div>
 
-        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 780 }}>
-          <div style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3vw, 30px)', fontWeight: 700, color: '#94A3B8', textDecoration: 'line-through', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 12 }}>
-            Spray and pray is the old way.
-          </div>
-          <div style={{ fontFamily: FONT, fontSize: 'clamp(36px, 6.5vw, 76px)', fontWeight: 900, color: BLUE, letterSpacing: '-0.04em', lineHeight: 1, marginBottom: 0 }}>
-            Target and action is the new way.
+        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 760, textAlign: 'center' }}>
+          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 900, color: BLUE, letterSpacing: '0.14em', textTransform: 'uppercase', display: 'block', marginBottom: 20 }}>
+            Exclusively for College Students
+          </span>
+          <div style={{ fontFamily: FONT, fontSize: 'clamp(28px, 5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
+            <div style={{ color: '#94A3B8', marginBottom: 4 }}>Stop spamming apps.</div>
+            <div style={{ background: 'linear-gradient(135deg, #0066FF 0%, #6366F1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              Start landing interviews.
+            </div>
           </div>
         </div>
 
         <p style={{
-          fontFamily: FONT, fontSize: 'clamp(15px, 1.6vw, 17px)',
+          fontFamily: FONT, fontSize: 'clamp(14px, 1.6vw, 17px)',
           fontWeight: 500, color: TEXT2,
-          lineHeight: 1.75, maxWidth: 520, margin: '28px auto 0',
+          lineHeight: 1.8, maxWidth: 520, margin: '24px auto 0',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Job hunting is a stressful, frustrating time suck. CLiFF bypasses the generic crowd, organizes your entire strategy, and connects you directly with campus insiders <strong style={{ color: TEXT }}>10x more likely to pull you inside.</strong>
+          Job hunting is stressful, frustrating, and a massive time suck. College Fast Forward delivers a smarter strategy that organizes your roadmap and finds campus insiders <strong style={{ color: TEXT }}>10x more likely to help you win quickly.</strong>
         </p>
 
-        <div style={{ width: '100%', maxWidth: 400, marginTop: 40, paddingBottom: 0, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: '100%', maxWidth: 400, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
           <button onClick={go} style={{
             width: '100%', fontFamily: FONT, fontSize: 16, fontWeight: 900, color: '#fff',
             background: BLUE, border: 'none', borderRadius: 16, padding: '18px 32px',
