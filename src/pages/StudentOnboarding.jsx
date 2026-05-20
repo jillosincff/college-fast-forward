@@ -64,8 +64,12 @@ export default function StudentOnboarding() {
     }
     const name = user.full_name?.split(' ')[0] || '';
     setFirstName(name);
-    setStep(2);
-  }, [user, step, navigate]);
+    // Use functional update to avoid stale state
+    setStep(prev => {
+      if (prev !== 2) return 2;
+      return prev;
+    });
+  }, [user, navigate]);
 
   // Handle OAuth error
   useEffect(() => {
