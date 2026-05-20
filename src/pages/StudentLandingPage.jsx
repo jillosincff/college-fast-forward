@@ -286,7 +286,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </span>
           <div style={{ fontFamily: FONT, fontSize: 'clamp(28px, 5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
             <div style={{ color: '#94A3B8', marginBottom: 4 }}>Stop spamming apps.</div>
-            <div style={{ background: 'linear-gradient(135deg, #0066FF 0%, #6366F1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <div style={{ background: 'linear-gradient(135deg, #0066FF 0%, #6366F1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', paddingBottom: '0.15em' }}>
               Start landing interviews.
             </div>
           </div>
