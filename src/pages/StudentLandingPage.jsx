@@ -4,6 +4,7 @@ import OnboardingFlow from '@/components/onboarding-flow/OnboardingFlow';
 import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
+import AppShowcase from '@/components/landing/AppShowcase';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -350,6 +351,9 @@ export default function StudentLandingPage({ onParentClick }) {
           ))}
         </div>
       </div>
+
+      {/* ── APP SHOWCASE ── */}
+      <AppShowcase />
 
       {/* ── DATA CONTRAST GRID (moved above fold) ── */}
       <div style={{ padding: '72px 24px', background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
