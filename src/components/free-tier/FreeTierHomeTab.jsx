@@ -6,6 +6,7 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 import TrialUsageRecap from '@/components/free-tier/TrialUsageRecap';
+import { getUniversityBrand } from '@/lib/universityBrand';
 
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
 
@@ -80,6 +81,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
 
 
 
+  const brand = getUniversityBrand(user?.school_code || user?.school);
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const fastiq = !!(user?.fastiq_setup_complete || user?.subscription_status === 'active' || user?.membership_tier === 'fastiq' || user?.trial_status === 'active' || user?.fastiq_trial_active === true);
   const isPaying = user?.subscription_status === 'active';
@@ -325,7 +327,7 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
               <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
                 <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>750+</p>
-                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>UF Gators in the network</p>
+                <p style={{ fontSize: 12, color: '#888', margin: 0, fontFamily: "'DM Sans', sans-serif" }}>{brand.networkLabel} in the network</p>
               </div>
               <div style={{ background: '#F5F5F5', borderRadius: 10, padding: '12px 16px', flex: 1, minWidth: 140 }}>
                 <p style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: '0 0 2px', fontFamily: "'DM Sans', sans-serif" }}>{user?.career_goals?.target_roles?.length || 0}</p>
