@@ -299,7 +299,7 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.8, maxWidth: 540, margin: '24px auto 0',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Job hunting sucks when you're blindly applying to hundreds of jobs and getting ghosted. Your AI career agent, <strong style={{ color: BLUE, fontWeight: 700 }}>CliFF</strong>, gives you a smarter, targeted approach — pairing a focused strategy with real campus insiders <strong style={{ color: TEXT }}>10x more likely to help you get interviewed fast.</strong>
+          Job hunting sucks when you're blindly applying to hundreds of jobs and getting ghosted. <strong style={{ color: BLUE, fontWeight: 700 }}>CLiFF</strong> — your AI career agent — gives you a smarter, targeted approach: a focused strategy paired with real campus insiders <strong style={{ color: TEXT }}>10X more likely to land you interviews fast.</strong>
         </p>
 
         <div style={{ width: '100%', maxWidth: 400, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
