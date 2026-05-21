@@ -341,9 +341,9 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         {/* Teaser cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
           {[
-            { role: 'Senior Product Manager', company: '████████', dept: 'Product & Strategy', badge: '1 UF Alum Found' },
-            { role: 'Investment Banking Analyst', company: '███████ ██████', dept: 'Finance & Banking', badge: '1 UF Alum Found' },
-            { role: 'Marketing Director', company: '████', dept: 'Marketing & Growth', badge: '1 UF Alum Found' },
+            { role: 'Senior Product Manager', company: '████████', dept: 'Product & Strategy', badge: `1 ${schoolName.split(' ').slice(-2).join(' ')} Alum Found` },
+            { role: 'Investment Banking Analyst', company: '███████ ██████', dept: 'Finance & Banking', badge: `1 ${schoolName.split(' ').slice(-2).join(' ')} Alum Found` },
+            { role: 'Marketing Director', company: '████', dept: 'Marketing & Growth', badge: `1 ${schoolName.split(' ').slice(-2).join(' ')} Alum Found` },
           ].map((card, i) => (
             <div key={i} style={{
               background: i === 0 ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
