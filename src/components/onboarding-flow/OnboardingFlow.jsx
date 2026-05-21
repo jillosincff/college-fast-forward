@@ -555,23 +555,36 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             <div style={{ width: '70%', height: 5, background: '#CBD5E1', borderRadius: 3 }} />
           </div>
 
+          <style>{`
+            @keyframes boltPop {
+              0%   { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+              60%  { transform: scale(1.3) rotate(8deg);  opacity: 1; }
+              80%  { transform: scale(0.92) rotate(-4deg); }
+              100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            }
+            @keyframes boltGlow {
+              0%, 100% { text-shadow: 0 0 0px rgba(0,102,255,0); }
+              50%       { text-shadow: 0 0 12px rgba(0,102,255,0.5); }
+            }
+          `}</style>
+
           {/* Badge pill */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px', marginBottom: 24 }}>
-            <span style={{ fontSize: 12 }}>⚡</span>
+            <span style={{ fontSize: 14, display: 'inline-block', animation: 'boltPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both, boltGlow 2s ease-in-out 0.8s infinite' }}>⚡</span>
             <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Career Agent</span>
           </div>
 
           {/* Headline */}
-          <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 20px', fontSize: 'clamp(30px, 5.5vw, 52px)', color: TEXT }}>
+          <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 20px', fontSize: 'clamp(34px, 6vw, 52px)', color: TEXT }}>
             Welcome to<br />
             <span style={{ background: 'linear-gradient(135deg, #0066FF 0%, #0F172A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>College Fast Forward.</span>
           </h1>
 
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 2vw, 18px)', color: '#334155', lineHeight: 1.65, margin: '0 auto 12px', maxWidth: 460, fontWeight: 500 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 2.2vw, 18px)', color: '#334155', lineHeight: 1.65, margin: '0 auto 12px', maxWidth: 460, fontWeight: 500 }}>
             Your AI Career Agent is here to end the endless application black hole.
           </p>
 
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 1.6vw, 15px)', color: TEXT2, lineHeight: 1.7, margin: '0 auto 32px', maxWidth: 460 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.8vw, 15px)', color: TEXT2, lineHeight: 1.7, margin: '0 auto 32px', maxWidth: 460 }}>
             Most students are stuck spamming 100+ apps and hearing nothing back.<br />
             <strong style={{ color: TEXT }}>We're different</strong> — we learn who you are, then use AI + real campus insiders to get you interviews fast.
           </p>
