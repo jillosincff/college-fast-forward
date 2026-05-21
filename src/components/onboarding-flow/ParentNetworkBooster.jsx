@@ -39,13 +39,14 @@ function ConfirmationScreen({ firstName, parentName, parentCompany, schoolName, 
       {/* Result highlights */}
       <div style={{ background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 18px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
         {[
+          { icon: '🎁', text: '1 week of CLiFF Premium unlocked — free!' },
           { icon: '✅', text: '+1 Parent Network Added' },
           { icon: '🎓', text: `The ${schoolName || 'UF'} community just leveled up` },
           { icon: '🔍', text: 'CLiFF will surface more relevant matches for everyone' },
         ].map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 16 }}>{item.icon}</span>
-            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: TEXT, margin: 0 }}>{item.text}</p>
+            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: i === 0 ? GREEN : TEXT, margin: 0 }}>{item.text}</p>
           </div>
         ))}
       </div>
@@ -124,15 +125,22 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span>🔥</span> Strengthen the {schoolName} Community
+          <span>🔥</span> Special Offer: Strengthen the Community, Get a Free Week
         </p>
         <h3 style={{ fontFamily: sat, fontSize: 18, fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
-          Each parent connection strengthens the {schoolName} community.
+          Add Your Parent → Unlock 1 Week Free + Strengthen the {schoolName} Network
         </h3>
-        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
-          When parents add their professional networks, the entire Gator ecosystem gets stronger.
-          You get more relevant warm intros. Other students benefit too. It grows exponentially.
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 10px', lineHeight: 1.6 }}>
+          When parents add their networks, everyone wins — more opportunities for all students.
         </p>
+        {/* Incentive callout */}
+        <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <span style={{ fontSize: 18, flexShrink: 0 }}>🎁</span>
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#15803d', margin: 0, lineHeight: 1.55 }}>
+            <strong>Limited-time offer:</strong> Add one parent now and we'll give you{' '}
+            <strong>1 week of CLiFF Premium for free</strong> ($4.99 value).
+          </p>
+        </div>
       </div>
 
       {/* Form */}
@@ -236,13 +244,13 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
         disabled={!canSubmit}
         style={{
           width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff',
-          background: canSubmit ? `linear-gradient(135deg, ${BLUE} 0%, #1d4ed8 100%)` : '#d1d5db',
+          background: canSubmit ? `linear-gradient(135deg, ${GREEN} 0%, #15803d 100%)` : '#d1d5db',
           border: 'none', borderRadius: 12, padding: '16px 20px', cursor: canSubmit ? 'pointer' : 'not-allowed',
           minHeight: 52, marginBottom: 8, transition: 'all 0.15s',
-          boxShadow: canSubmit ? '0 4px 14px rgba(37,99,235,0.3)' : 'none',
+          boxShadow: canSubmit ? '0 4px 14px rgba(22,163,74,0.35)' : 'none',
         }}
       >
-        Add My Parent &amp; Strengthen the Community →
+        Add Parent &amp; Claim My Free Week →
       </button>
       <button
         onClick={onSkip}
@@ -256,7 +264,7 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
       </button>
 
       <p style={{ fontFamily: dm, fontSize: 12, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
-        Takes 20 seconds • No pressure
+        Takes 20 seconds • No credit card required • Offer ends soon
       </p>
     </div>
   );
