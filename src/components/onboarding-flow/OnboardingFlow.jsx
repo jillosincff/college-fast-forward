@@ -214,10 +214,6 @@ const InputField = ({ label, placeholder, value, onChange, type = 'text', icon, 
   </div>
 );
 
-// Post-auth funnel: full flow including resume wow, LinkedIn, and plan
-// Screens: Welcome → Goals → Roadblocks → University → Resume Input → Resume Wow → LinkedIn → Plan
-const POST_AUTH_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
 // Persist onboarding progress to localStorage so returning users can resume
 function saveProgress(screen, data = {}) {
   try {
@@ -255,7 +251,6 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const startScreen = resumeAtScreen || 1;
 
   const [screen, setScreen] = useState(startScreen);
-  const [postAuthStep, setPostAuthStep] = useState(0); // index into POST_AUTH_STEPS
   const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
   const [resonanceActive, setResonanceActive] = useState(false); // Network Resonance Scan
   const [frustration, setFrustration] = useState(saved?.frustration ?? 5);
@@ -282,29 +277,10 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [showWelcomeBack] = useState(!!resumeAtScreen && resumeAtScreen > 1);
   const fileRef = useRef();
 
-  const TOTAL = postAuth ? POST_AUTH_STEPS.length : 12;
-
-  // postAuth navigation helpers
-  const postAuthNext = () => {
-    const nextStep = postAuthStep + 1;
-    if (nextStep >= POST_AUTH_STEPS.length) {
-      // Reached end of funnel — complete onboarding
-      if (onClose) onClose();
-    } else {
-      setPostAuthStep(nextStep);
-      setScreen(POST_AUTH_STEPS[nextStep]);
-    }
-  };
-  const postAuthBack = () => {
-    const prevStep = postAuthStep - 1;
-    if (prevStep < 0) return;
-    setPostAuthStep(prevStep);
-    setScreen(POST_AUTH_STEPS[prevStep]);
-  };
+  const TOTAL = 12;
 
   const next = () => {
     const newScreen = screen + 1;
-    // Save progress at each step so returning users can resume
     saveProgress(newScreen, {
       cff_seeking: seeking,
       cff_college: college,
@@ -316,10 +292,13 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       cff_location_city: locationCity,
       cff_resume_url: resumeUrl,
     });
-    if (postAuth) postAuthNext();
-    else setScreen(newScreen);
+    if (newScreen > 12) {
+      if (onClose) onClose();
+    } else {
+      setScreen(newScreen);
+    }
   };
-  const back = () => postAuth ? postAuthBack() : setScreen(s => s - 1);
+  const back = () => setScreen(s => Math.max(1, s - 1));
 
   const toggleBlocker = (key) => {
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
@@ -544,10 +523,10 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       {!analyzing && screen < 10 && (
         <>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#E2E8F0' }}>
-            <div style={{ height: '100%', width: postAuth ? `${((postAuthStep + 1) / POST_AUTH_STEPS.length) * 100}%` : `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
+            <div style={{ height: '100%', width: `${(screen / TOTAL) * 100}%`, background: GREEN, borderRadius: '0 2px 2px 0', transition: 'width 0.4s ease' }} />
           </div>
           <div style={{ position: 'absolute', top: 18, left: 24, fontFamily: FONT, fontSize: 12, color: TEXT3, fontWeight: 600 }}>
-            {postAuth ? `${postAuthStep + 1} / ${POST_AUTH_STEPS.length}` : `${screen} / ${TOTAL}`}
+            {screen} / {TOTAL}
           </div>
         </>
       )}
@@ -929,10 +908,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                 )}
               </div>
             )}
-            <Nav onBack={back} onNext={() => {
-              if (postAuth) { next(); }
-              else { saveAndAuth(); }
-            }} nextDisabled={!(isRemote || hasCity)} />
+            <Nav onBack={back} onNext={next} nextDisabled={!(isRemote || hasCity)} />
           </div>
         );
       })()}
