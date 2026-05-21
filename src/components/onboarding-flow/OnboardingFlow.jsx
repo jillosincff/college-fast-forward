@@ -666,7 +666,6 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, marginBottom: 4 }}>
             This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '0 0 8px' }}>No credit card required to start.</p>
           <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 700, margin: '0 0 28px' }}>✨ Your first warm intro or interview is closer than you think.</p>
 
           {/* Social proof trust bar */}
