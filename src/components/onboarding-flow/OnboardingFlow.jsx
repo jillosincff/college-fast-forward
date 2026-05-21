@@ -104,7 +104,13 @@ const SCREEN2_EXPERTS = [
 ];
 const SCREEN2_LOGOS = ['Goldman Sachs', 'Google', 'Meta', 'McKinsey', 'Amazon'];
 
-function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BLUE_BORDER, GREEN, GREEN_LIGHT, GREEN_BORDER, TEXT, TEXT2, TEXT3, h1style, substyle, hoveredExpert, setHoveredExpert, selectedExpert, setSelectedExpert, onBack, onNext, Nav }) {
+function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BLUE_BORDER, GREEN, GREEN_LIGHT, GREEN_BORDER, TEXT, TEXT2, TEXT3, h1style, substyle, hoveredExpert, setHoveredExpert, selectedExpert, setSelectedExpert, onBack, onNext }) {
+  const NavInline = ({ onBack: b, onNext: n, nextLabel = 'Continue →', nextDisabled = false }) => (
+    <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32 }}>
+      {b && <button onClick={b} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT2, background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>← Back</button>}
+      <button onClick={n} disabled={nextDisabled} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: nextDisabled ? '#CBD5E1' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 8, padding: '15px 36px', cursor: nextDisabled ? 'not-allowed' : 'pointer', minHeight: 'auto', boxShadow: nextDisabled ? 'none' : '0 4px 14px rgba(0,102,255,0.25)' }}>{nextLabel}</button>
+    </div>
+  );
   return (
     <div style={{ textAlign: 'center', maxWidth: 600, width: '100%', animation: 'fadeUp 0.3s ease', position: 'relative' }}>
       <div style={{ position: 'absolute', top: -60, right: -80, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,102,255,0.07) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
@@ -137,7 +143,7 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
             {SCREEN2_LOGOS.map(l => <span key={l} style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#CBD5E1', letterSpacing: '-0.01em' }}>{l}</span>)}
           </div>
         </div>
-        <Nav onBack={onBack} onNext={onNext} />
+        <NavInline onBack={onBack} onNext={onNext} />
       </div>
     </div>
   );
@@ -620,7 +626,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           h1style={h1style} substyle={substyle}
           hoveredExpert={hoveredExpert} setHoveredExpert={setHoveredExpert}
           selectedExpert={selectedExpert} setSelectedExpert={setSelectedExpert}
-          onBack={back} onNext={next} Nav={Nav}
+          onBack={back} onNext={next}
         />
       )}
 
