@@ -112,7 +112,7 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
     </div>
   );
   return (
-    <div style={{ textAlign: 'center', maxWidth: 600, width: '100%', animation: 'fadeUp 0.3s ease', position: 'relative' }}>
+    <div style={{ textAlign: 'center', maxWidth: 600, width: '100%', position: 'relative' }}>
       <div style={{ position: 'absolute', top: -60, right: -80, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,102,255,0.07) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
         <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 20px' }}>Step 2 of 12 · Meet Your Team</p>
@@ -451,7 +451,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
   };
 
   // Card wrapper for screens 1–8
-  const card = { textAlign: 'center', maxWidth: 560, width: '100%', animation: 'fadeUp 0.3s ease' };
+  const card = { textAlign: 'center', maxWidth: 560, width: '100%' };
 
   // Heading styles for screens 1–8
   const h1style = {
@@ -531,7 +531,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
-        <div style={{ ...card, position: 'relative', overflow: 'visible' }}>
+        <div style={{ ...card, position: 'relative', overflow: 'visible', minHeight: 400 }}>
           {/* Teaser background ghost cards */}
           <div style={{ position: 'absolute', left: '-18%', top: '8%', width: 160, height: 100, borderRadius: 12, background: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 4px 16px rgba(0,0,0,0.06)', opacity: 0.07, transform: 'rotate(-6deg)', pointerEvents: 'none', padding: '10px 14px', overflow: 'hidden' }}>
             <div style={{ width: '60%', height: 8, background: '#0066FF', borderRadius: 4, marginBottom: 6 }} />
@@ -1057,7 +1057,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
 
       {/* ── SCREEN 10: Wow Moment (Resume Before/After) ── */}
       {screen === 10 && (
-        <div style={{ maxWidth: 900, width: '100%', animation: 'fadeUp 0.35s ease', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
+        <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
             <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 8px' }}>
