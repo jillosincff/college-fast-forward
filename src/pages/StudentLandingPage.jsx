@@ -290,13 +290,13 @@ export default function StudentLandingPage({ onParentClick }) {
           maxWidth: '100%',
         }}>
           <span style={{ fontSize: 'clamp(12px, 3vw, 13px)' }}>⚡</span>
-          <span style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: BLUE, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Your Career Agent</span>
+          <span style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: BLUE, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Meet CLiFF — Your Career Agent</span>
         </div>
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 720, textAlign: 'center' }}>
           <h1 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 7vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: TEXT, margin: '0 0 16px' }}>
-            Welcome to{' '}
-            <span style={{ color: BLUE }}>College Fast Forward.</span>
+            Stop spamming applications.<br />
+            <span style={{ color: BLUE }}>Start landing interviews.</span>
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.4, margin: '0 0 14px' }}>
             <span style={{ fontWeight: 800 }}>
