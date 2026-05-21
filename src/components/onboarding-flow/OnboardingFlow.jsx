@@ -1561,6 +1561,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           college={college}
           seeking={seeking}
           targetRole={resumeData?.targetRole || quickRole || targetRoles[0]}
+          selectedIndustries={selectedIndustries}
           onBack={back}
           saveAndAuth={saveAndAuth}
           onNext={next}

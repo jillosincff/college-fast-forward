@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import FunnelProgress from './FunnelProgress';
+import LinkedInLoader from './LinkedInLoader';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -150,7 +151,7 @@ function LinkedInProfileCard({ name, headline, college, expanded, onExpand, abou
   );
 }
 
-export default function LinkedInScreen({ resumeData, college, seeking, targetRole, onBack, saveAndAuth, onNext }) {
+export default function LinkedInScreen({ resumeData, college, seeking, targetRole, selectedIndustries = [], onBack, saveAndAuth, onNext }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [typingDone, setTypingDone] = useState(false);
@@ -232,26 +233,7 @@ Return valid JSON.`,
 
   /* ── Loading State ── */
   if (loading) {
-    return (
-      <div style={{ maxWidth: 640, width: '100%', paddingTop: 120, paddingBottom: 80, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 24px', boxShadow: SHADOW_MD }}>💼</div>
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: 700, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-            {firstName ? `Building ${firstName}'s LinkedIn Identity...` : 'Building Your LinkedIn Identity...'}
-          </h2>
-          <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 36px', lineHeight: 1.6 }}>Crafting headlines, bio, and ATS keywords.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 340, margin: '0 auto' }}>
-            {['Analyzing your experience & skills...', 'Writing recruiter-magnet headlines...', 'Crafting your story-driven bio...', 'Building your ATS keyword list...'].map((step, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, background: CARD, borderRadius: 10, padding: '12px 16px', boxShadow: SHADOW }}>
-                <div style={{ width: 16, height: 16, border: `2px solid ${BLUE_BORDER}`, borderTop: `2px solid ${BLUE}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
-                <span style={{ fontFamily: FONT, fontSize: 13, color: TEXT2 }}>{step}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <LinkedInLoader firstName={firstName} college={college} selectedIndustries={selectedIndustries} onSkip={() => setLoading(false)} />;
   }
 
   if (!result) return null;
