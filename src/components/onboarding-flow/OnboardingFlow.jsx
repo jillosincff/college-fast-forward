@@ -38,10 +38,10 @@ const TOP_SCHOOLS = [
 ];
 
 const SEEKING_OPTIONS = [
-  { key: 'internship', emoji: '🎓', label: 'Internship', sub: 'This semester or summer' },
-  { key: 'fulltime', emoji: '💼', label: 'Full-time job after graduation', sub: 'Ready to enter the workforce' },
-  { key: 'both', emoji: '🎯', label: 'Both internships and full-time', sub: 'Keeping all options open' },
-  { key: 'exploring', emoji: '🔭', label: 'Just exploring options', sub: "Not sure yet — that's okay" },
+  { key: 'internship', emoji: '🎓', label: 'Internship', sub: 'This semester or summer', hint: 'Agent will prioritize short-term roles + strong return-offer paths' },
+  { key: 'fulltime', emoji: '💼', label: 'Full-time job after graduation', sub: 'Ready to enter the workforce', hint: 'Agent will focus on full-time pipelines + long-term networking' },
+  { key: 'both', emoji: '🎯', label: 'Both internships and full-time', sub: 'Keeping all options open', hint: 'Agent will build a flexible dual-track strategy' },
+  { key: 'exploring', emoji: '🔭', label: 'Just exploring options', sub: "Not sure yet — that's okay", hint: 'Agent will help you discover what fits best first' },
 ];
 
 const BLOCKERS = [
@@ -802,10 +802,10 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Setting your career coordinates</span>
           </div>
 
-          <h1 style={h1style}>What are you mainly looking for right now?</h1>
-          <p style={{ ...substyle, marginBottom: 28 }}>This is the first coordinate your Agent needs to lock in your target.</p>
+          <h1 style={h1style}>What's your main focus right now?</h1>
+          <p style={{ ...substyle, marginBottom: 28 }}>This is the first key coordinate your Career Agent needs to lock in so it can prioritize the right opportunities, insiders, and tailored materials for you.</p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 4, textAlign: 'left' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 4, textAlign: 'left' }}>
             {SEEKING_OPTIONS.map(opt => {
               const isActive = seeking === opt.key;
               return (
@@ -816,21 +816,26 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                     display: 'flex', alignItems: 'center', gap: 16, width: '100%',
                     background: isActive ? BLUE_LIGHT : CARD,
                     border: `2px solid ${isActive ? BLUE : '#E8EFF6'}`,
-                    borderRadius: 14, padding: '18px 20px', cursor: 'pointer',
+                    borderRadius: 14, padding: '16px 18px', cursor: 'pointer',
                     textAlign: 'left', minHeight: 'auto',
                     boxShadow: isActive
                       ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)`
-                      : '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)',
+                      : '0 4px 12px rgba(0,0,0,0.05)',
                     transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
                     transition: 'all 0.18s ease',
                   }}
-                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 14px 24px rgba(0,0,0,0.10)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = BLUE_BORDER; } }}
-                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#E8EFF6'; } }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = BLUE_BORDER; } }}
+                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#E8EFF6'; } }}
                 >
-                  <span style={{ fontSize: 24, flexShrink: 0, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isActive ? '#fff' : BG, borderRadius: 10, border: `1px solid ${isActive ? BLUE_BORDER : '#E2E8F0'}` }}>{opt.emoji}</span>
+                  <span style={{ fontSize: 22, flexShrink: 0, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isActive ? '#fff' : BG, borderRadius: 10, border: `1px solid ${isActive ? BLUE_BORDER : '#E2E8F0'}` }}>{opt.emoji}</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: isActive ? BLUE : TEXT, margin: '0 0 3px' }}>{opt.label}</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: isActive ? '#3B82F6' : TEXT2, margin: 0 }}>{opt.sub}</p>
+                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: isActive ? BLUE : TEXT, margin: '0 0 2px' }}>{opt.label}</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: isActive ? '#3B82F6' : TEXT2, margin: '0 0 2px' }}>{opt.sub}</p>
+                    {isActive && (
+                      <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic', animation: 'fadeUp 0.2s ease' }}>
+                        → {opt.hint}
+                      </p>
+                    )}
                   </div>
                   <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${isActive ? BLUE : '#CBD5E1'}`, background: isActive ? BLUE : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, transition: 'all 0.18s ease' }}>
                     {isActive && '✓'}
@@ -839,6 +844,27 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
               );
             })}
           </div>
+
+          {/* Instant mirroring after selection */}
+          {seeking && (() => {
+            const selected = SEEKING_OPTIONS.find(o => o.key === seeking);
+            const mirrorMap = {
+              internship: 'short-term roles and return-offer internships',
+              fulltime: 'full-time pipelines and long-term networking',
+              both: 'a flexible dual-track of internships and full-time roles',
+              exploring: 'options that help you discover the best fit first',
+            };
+            return (
+              <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 12, padding: '14px 18px', marginTop: 16, display: 'flex', gap: 10, alignItems: 'flex-start', animation: 'fadeUp 0.25s ease' }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
+                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.6 }}>
+                  <strong>Got it — you're mainly targeting {selected?.label}.</strong><br />
+                  Your Agent is now prioritizing <em>{mirrorMap[seeking]}</em> and will surface matching alumni insiders + resume tweaks tailored to that goal.
+                </p>
+              </div>
+            );
+          })()}
+
           <Nav onBack={back} onNext={next} nextDisabled={!seeking} />
         </div>
       )}
