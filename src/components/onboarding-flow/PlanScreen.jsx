@@ -269,7 +269,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
           boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
         }}>
-          Unlock My 14-Day Action Plan →
+          Unlock My 14-Day Action Plan — $4.99/week →
         </button>
       </div>
 
@@ -430,7 +430,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(22,163,74,0.5), 0 2px 8px rgba(0,0,0,0.1)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(22,163,74,0.35), 0 2px 8px rgba(0,0,0,0.1)'; }}
         >
-          Unlock Everything Now →
+          Unlock My 14-Day Action Plan — $4.99/week →
         </button>
 
         {/* Trust builders */}

@@ -912,7 +912,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             </div>
 
             <h1 style={h1style}>What's the biggest thing holding you back right now?</h1>
-            <p style={{ ...substyle, marginBottom: 20 }}>Select up to 2. Be honest — your Agent will instantly unlock the exact tools and strategies that crush these roadblocks.</p>
+            <p style={{ ...substyle, marginBottom: 20 }}>Select up to 2. Be honest — <strong style={{ color: TEXT }}>CLiFF</strong> will instantly unlock the exact tools to crush these roadblocks.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
               {BLOCKERS.map(opt => {
@@ -974,15 +974,16 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             {/* Instant mirroring unlock panel */}
             {blockers.length > 0 && (
               <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 20, animation: 'fadeUp 0.25s ease' }}>
-                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 4px' }}>
-                  Got it. You selected{' '}
+                <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#065F46', margin: '0 0 6px' }}>Got it.</p>
+                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: '0 0 12px', lineHeight: 1.6 }}>
+                  You're dealing with{' '}
                   {blockers.map((key, idx) => {
                     const b = BLOCKERS.find(x => x.key === key);
                     return <span key={key}>{idx > 0 ? ' and ' : ''}<strong>"{b?.label}"</strong></span>;
                   })}.
                 </p>
-                <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', margin: '0 0 12px', lineHeight: 1.5 }}>
-                  Your Agent is already building solutions for these exact problems. You're ahead of most students.
+                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
+                  CLiFF is already unlocking:
                 </p>
                 {blockers.map(key => {
                   const b = BLOCKERS.find(x => x.key === key);
@@ -991,12 +992,15 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                     <div key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
                       <span style={{ fontSize: 13, flexShrink: 0 }}>{b.icon}</span>
                       <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.5 }}>
-                        → <em>Unlocking <strong>{b.tool}</strong> for you right now</em>
+                        <strong>{b.tool}</strong>
                         <span style={{ display: 'inline-block', marginLeft: 8, fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>✓ Unlocked</span>
                       </p>
                     </div>
                   );
                 })}
+                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: '10px 0 0', lineHeight: 1.6, fontWeight: 600 }}>
+                  You're now ahead of most students who never diagnose their biggest leaks. Let's fix this.
+                </p>
               </div>
             )}
 
@@ -1490,12 +1494,12 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
 
           {/* Emotional Payoff Section */}
           <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)', border: `1px solid ${BLUE_BORDER}`, borderRadius: R, padding: '22px 28px', marginBottom: 28 }}>
-            <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>🎯 What this means for you</p>
+            <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>🎯 What this actually means for you</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
-                { icon: '🧑‍💼', text: 'Your application will actually reach human recruiters — not the trash folder' },
-                { icon: '🏆', text: `You're now positioned in the top 2% of candidates for ${selectedIndustries.length > 0 ? selectedIndustries.slice(0,2).join(' & ') : 'your target'} roles` },
-                { icon: '🤝', text: 'Alumni insiders will see a version of you that stands out immediately' },
+                { icon: '🧑‍💼', text: 'Your applications will finally reach human recruiters instead of getting auto-filtered' },
+                { icon: '🏆', text: "You're now in the top 2% of candidates for your target roles" },
+                { icon: '🤝', text: 'Alumni & parents will see a polished, confident version of you' },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                   <span style={{ fontSize: 16, flexShrink: 0 }}>{item.icon}</span>
@@ -1513,7 +1517,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(0,102,255,0.4)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,102,255,0.3)'; }}
             >
-              Next: Optimize My Online Presence →
+              Next: Optimize My LinkedIn Profile →
             </button>
             <button
               onClick={() => saveAndAuth('free')}
