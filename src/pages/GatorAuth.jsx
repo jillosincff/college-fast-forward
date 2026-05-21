@@ -158,7 +158,7 @@ export default function GatorAuth() {
       }
       // Do NOT set cff_onboarding_type for plain sign-ins — returning users must not see onboarding
     } catch (e) { /* private browsing */ }
-    base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
+    base44.auth.loginWithProvider('google', window.location.origin + '/#GatorAuth');
   };
 
   useEffect(() => {
@@ -182,7 +182,7 @@ export default function GatorAuth() {
       return;
     }
 
-    // Logged in but no persona yet — send to StudentOnboarding
+    // Logged in but no persona yet — show the onboarding funnel
     if (user && !user.persona) {
       const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
 
@@ -191,8 +191,10 @@ export default function GatorAuth() {
         return;
       }
 
-      // All new students go to StudentOnboarding
-      navigate('/StudentOnboarding');
+      // Check for saved progress — resume at last screen
+      const savedScreen = parseInt(localStorage.getItem('cff_onboarding_screen') || '1', 10);
+      setResumeScreen(savedScreen > 1 ? savedScreen : null);
+      setStep('onboarding');
       return;
     }
   }, [user, isLoading]);
