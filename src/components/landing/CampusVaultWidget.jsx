@@ -120,7 +120,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           Bypass the public portals.<br />Access the hidden market.
         </h2>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Three out of four open roles are never posted to public job boards. Select your school to identify unlisted opportunities matching your profile, paired instantly with verified campus insiders who can help fast-track your application.
+          Three out of four open roles are never posted to public job boards. CLiFF bypasses the automated corporate filters by scanning your specific university's alumni network—instantly matching you with unlisted roles and verified campus insiders ready to fast-track your profile.
         </p>
 
         {/* Autocomplete search */}
