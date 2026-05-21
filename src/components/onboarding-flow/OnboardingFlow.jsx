@@ -1041,16 +1041,98 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         const TOP_CITIES = ['New York, NY', 'San Francisco, CA', 'Los Angeles, CA', 'Chicago, IL', 'Austin, TX', 'Boston, MA', 'Seattle, WA', 'Washington, DC', 'Miami, FL', 'Atlanta, GA', 'Dallas, TX', 'Denver, CO', 'Philadelphia, PA', 'Houston, TX', 'Charlotte, NC', 'Nashville, TN', 'Minneapolis, MN', 'Portland, OR', 'San Diego, CA', 'Phoenix, AZ'];
         const citySuggestions = !citySuggestionsClosed && locationCity.length >= 2 ? TOP_CITIES.filter(c => c.toLowerCase().includes(locationCity.toLowerCase())).slice(0, 6) : [];
         const isRemote = locationPref === 'remote';
+        const isHybrid = locationPref === 'hybrid';
         const hasCity = locationPref === 'city' && locationCity.trim().length > 0;
+        const isValid = isRemote || isHybrid || hasCity;
+
+        // Mirroring copy per selection
+        const mirrorLabel = isRemote ? 'Remote' : isHybrid ? 'Hybrid / Flexible' : locationCity || 'your target city';
+        const mirrorDetails = isRemote
+          ? ['Remote-first companies + distributed alumni networks', 'Async-friendly roles and distributed teams', 'Resume adjustments for remote-friendly positioning']
+          : isHybrid
+          ? ['Mix of remote and in-office opportunities', 'Alumni in flexible companies and hybrid-friendly roles', 'Roadmap tuned for flexible work arrangements']
+          : [`Local alumni & parents near ${locationCity || 'your city'}`, `Companies actively hiring in that market`, `Events and networking opportunities in that area`];
+
         return (
           <div style={{ ...card, maxWidth: 500 }}>
             <div style={{ width: 60, height: 60, borderRadius: 14, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, margin: '0 auto 24px', boxShadow: SHADOW }}>📍</div>
-            <h1 style={h1style}>Where are you looking to work?</h1>
-            <p style={substyle}>Helps the Agent find the right opportunities and connections for you.</p>
+            <h1 style={h1style}>Where are you aiming to work?</h1>
+            <p style={{ ...substyle, marginBottom: 28 }}>
+              This helps your Agent prioritize opportunities and connections in the exact places you want to be — whether that's fully remote, a dream city, or hybrid.
+            </p>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'left', marginBottom: 4 }}>
-              <OptionBtn active={isRemote} onClick={() => setLocationPref('remote')} emoji="🌐" label="Remote" sub="Open to fully remote positions anywhere" />
-              <OptionBtn active={locationPref === 'city'} onClick={() => setLocationPref('city')} emoji="🏙️" label="A specific city" sub="I have a target location in mind" />
+              {/* Remote */}
+              <button
+                onClick={() => setLocationPref('remote')}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 14, width: '100%',
+                  background: isRemote ? BLUE_LIGHT : CARD,
+                  border: `2px solid ${isRemote ? BLUE : '#E8EFF6'}`,
+                  borderRadius: 14, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto',
+                  boxShadow: isRemote ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
+                  transform: isRemote ? 'translateY(-2px)' : 'translateY(0)', transition: 'all 0.18s ease',
+                }}
+                onMouseEnter={e => { if (!isRemote) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+                onMouseLeave={e => { if (!isRemote) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E8EFF6'; e.currentTarget.style.transform = 'translateY(0)'; }}}
+              >
+                <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isRemote ? '#fff' : BG, borderRadius: 10, border: `1px solid ${isRemote ? BLUE_BORDER : '#E2E8F0'}` }}>🌐</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: isRemote ? BLUE : TEXT, margin: '0 0 2px' }}>Remote 🌐</p>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 2px' }}>Open to fully remote positions anywhere</p>
+                  {isRemote && <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic', animation: 'fadeUp 0.2s ease' }}>→ Agent will surface remote-first companies + distributed alumni networks</p>}
+                </div>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${isRemote ? BLUE : '#CBD5E1'}`, background: isRemote ? BLUE : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700 }}>{isRemote && '✓'}</div>
+              </button>
+
+              {/* Specific city */}
+              <button
+                onClick={() => setLocationPref('city')}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 14, width: '100%',
+                  background: locationPref === 'city' ? BLUE_LIGHT : CARD,
+                  border: `2px solid ${locationPref === 'city' ? BLUE : '#E8EFF6'}`,
+                  borderRadius: 14, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto',
+                  boxShadow: locationPref === 'city' ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
+                  transform: locationPref === 'city' ? 'translateY(-2px)' : 'translateY(0)', transition: 'all 0.18s ease',
+                }}
+                onMouseEnter={e => { if (locationPref !== 'city') { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+                onMouseLeave={e => { if (locationPref !== 'city') { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E8EFF6'; e.currentTarget.style.transform = 'translateY(0)'; }}}
+              >
+                <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: locationPref === 'city' ? '#fff' : BG, borderRadius: 10, border: `1px solid ${locationPref === 'city' ? BLUE_BORDER : '#E2E8F0'}` }}>🏙️</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: locationPref === 'city' ? BLUE : TEXT, margin: '0 0 2px' }}>A specific city 🏙️</p>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 2px' }}>I have a target location in mind</p>
+                  {locationPref === 'city' && <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic', animation: 'fadeUp 0.2s ease' }}>→ Agent will focus on local alumni, companies, and events in that city</p>}
+                </div>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${locationPref === 'city' ? BLUE : '#CBD5E1'}`, background: locationPref === 'city' ? BLUE : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700 }}>{locationPref === 'city' && '✓'}</div>
+              </button>
+
+              {/* Hybrid */}
+              <button
+                onClick={() => setLocationPref('hybrid')}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 14, width: '100%',
+                  background: isHybrid ? BLUE_LIGHT : CARD,
+                  border: `2px solid ${isHybrid ? BLUE : '#E8EFF6'}`,
+                  borderRadius: 14, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto',
+                  boxShadow: isHybrid ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
+                  transform: isHybrid ? 'translateY(-2px)' : 'translateY(0)', transition: 'all 0.18s ease',
+                }}
+                onMouseEnter={e => { if (!isHybrid) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+                onMouseLeave={e => { if (!isHybrid) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E8EFF6'; e.currentTarget.style.transform = 'translateY(0)'; }}}
+              >
+                <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isHybrid ? '#fff' : BG, borderRadius: 10, border: `1px solid ${isHybrid ? BLUE_BORDER : '#E2E8F0'}` }}>🔀</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: isHybrid ? BLUE : TEXT, margin: '0 0 2px' }}>Hybrid / Flexible</p>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 2px' }}>Open to a mix — I want options</p>
+                  {isHybrid && <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic', animation: 'fadeUp 0.2s ease' }}>→ Agent will build a flexible pipeline across remote and in-person opportunities</p>}
+                </div>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${isHybrid ? BLUE : '#CBD5E1'}`, background: isHybrid ? BLUE : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700 }}>{isHybrid && '✓'}</div>
+              </button>
             </div>
+
+            {/* City input */}
             {locationPref === 'city' && (
               <div style={{ position: 'relative', marginTop: 10 }}>
                 <InputField placeholder="e.g. New York, NY or Austin, TX..." value={locationCity} onChange={e => { setLocationCity(e.target.value); setCitySuggestionsClosed(false); }} icon="🔍" autoFocus />
@@ -1066,7 +1148,27 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                 )}
               </div>
             )}
-            <Nav onBack={back} onNext={next} nextDisabled={!(isRemote || hasCity)} />
+
+            {/* Instant mirroring panel */}
+            {isValid && (
+              <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 16, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
+                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 10px' }}>
+                  Got it — you're targeting <strong>{mirrorLabel}</strong>.
+                </p>
+                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>Your Agent is now:</p>
+                {mirrorDetails.map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, color: GREEN, flexShrink: 0 }}>•</span>
+                    <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0 }}>{item}</p>
+                  </div>
+                ))}
+                <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', margin: '10px 0 0', fontStyle: 'italic', fontWeight: 600 }}>
+                  You're one step closer to opportunities that actually fit your life. 🎯
+                </p>
+              </div>
+            )}
+
+            <Nav onBack={back} onNext={next} nextDisabled={!isValid} />
           </div>
         );
       })()}
