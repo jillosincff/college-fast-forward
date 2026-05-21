@@ -98,9 +98,9 @@ const BLOCKERS = [
 
 // ── Screen 2: Built by Experts (extracted to avoid conditional hooks) ───────
 const SCREEN2_EXPERTS = [
-  { key: 'coach', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/fe0568933_image.png', name: 'Anna V.', role: 'ex-SAP, Global Early Talent', teaser: 'Structures your story to land more first-round calls.', color: '#7C3AED', colorLight: '#F5F3FF', colorBorder: '#DDD6FE' },
-  { key: 'recruiter', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/4dc2560b9_image.png', name: 'Jill O.', role: 'Ex-IPSY Recruiter', teaser: 'Optimized to beat the ATS and catch a human eye.', color: '#0066FF', colorLight: '#EFF6FF', colorBorder: '#BFDBFE' },
-  { key: 'hm', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face', name: 'Sarah K.', role: 'Certified Career Coach', teaser: 'Focuses on the skills that prove you can do the job.', color: '#10B981', colorLight: '#F0FDF4', colorBorder: '#BBF7D0' },
+  { key: 'coach', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/fe0568933_image.png', name: 'Anna V.', role: 'ex-SAP, Global Early Talent', teaser: 'Built hiring pipelines at SAP. She knows exactly what recruiters look for in interns & new grads.', color: '#7C3AED', colorLight: '#F5F3FF', colorBorder: '#DDD6FE' },
+  { key: 'recruiter', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/4dc2560b9_image.png', name: 'Jill O.', role: 'Ex-IPSY Recruiter + Certified Career Coach', teaser: "Spent years on the other side of the desk. She'll help you avoid the mistakes that get applications ghosted.", color: '#0066FF', colorLight: '#EFF6FF', colorBorder: '#BFDBFE' },
+  { key: 'hm', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face', name: 'Sarah K.', role: 'Certified Career Coach', teaser: 'Specializes in helping students clarify their path and build unstoppable confidence in interviews.', color: '#10B981', colorLight: '#F0FDF4', colorBorder: '#BBF7D0' },
 ];
 const SCREEN2_LOGOS = ['Goldman Sachs', 'Google', 'Meta', 'McKinsey', 'Amazon'];
 
@@ -116,8 +116,9 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
       <div style={{ position: 'absolute', top: -60, right: -80, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,102,255,0.07) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
         <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 20px' }}>Step 2 of 12 · Meet Your Team</p>
-        <h1 style={h1style}>Built by Hiring Experts</h1>
-        <p style={{ ...substyle, marginBottom: 28 }}>These are the real people whose playbooks power your plan. Tap one to learn more.</p>
+        <h1 style={{ ...h1style, fontSize: 'clamp(26px, 4.5vw, 42px)' }}>Your Career Agent is powered by real hiring experts.</h1>
+        <p style={{ ...substyle, marginBottom: 8 }}>These are the people whose exact playbooks helped thousands of students break into competitive roles. Their strategies are now built into your personal Agent.</p>
+        <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 600, margin: '0 0 24px' }}>Tap any expert below to see how they'll help you stand out.</p>
         <style>{`@media (max-width: 600px) { .expert-grid { flex-direction: column !important; } }`}</style>
         <div className="expert-grid" style={{ display: 'flex', gap: 12, marginBottom: 28, justifyContent: 'center' }}>
           {SCREEN2_EXPERTS.map(ex => {
@@ -132,7 +133,12 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
                   <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: isActive ? ex.color : TEXT, margin: '0 0 2px' }}>{ex.name}</p>
                   <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, margin: 0 }}>{ex.role}</p>
                 </div>
-                {isActive && <p style={{ fontFamily: FONT, fontSize: 12, color: ex.color, margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>"{ex.teaser}"</p>}
+                {isActive && (
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: ex.color, margin: 0, lineHeight: 1.5 }}>
+                    <span style={{ fontWeight: 700 }}>→ How she helps you: </span>
+                    {ex.teaser}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -143,6 +149,15 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
             {SCREEN2_LOGOS.map(l => <span key={l} style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#CBD5E1', letterSpacing: '-0.01em' }}>{l}</span>)}
           </div>
         </div>
+
+        {/* Bottom anticipation teaser */}
+        <div style={{ margin: '16px 0 4px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 16, flexShrink: 0 }}>🤖</span>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5, fontStyle: 'italic' }}>
+            Your Agent is already combining their best tactics into a custom plan for you…
+          </p>
+        </div>
+
         <NavInline onBack={onBack} onNext={onNext} />
       </div>
     </div>
