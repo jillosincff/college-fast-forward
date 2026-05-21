@@ -446,8 +446,9 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
   const firstName = (typeof rawName === 'string' ? rawName : null)?.split(' ')[0] || null;
 
   const shell = {
-    position: 'fixed', inset: 0, zIndex: 10000,
+    position: 'fixed', inset: 0, zIndex: 99999,
     background: BG,
+    opacity: 1,
     display: 'flex', flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
@@ -455,6 +456,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
     fontFamily: FONT,
     overflowY: 'auto',
     overflowX: 'hidden',
+    isolation: 'isolate',
   };
 
   // Card wrapper for screens 1–8
