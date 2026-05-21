@@ -1186,7 +1186,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         <div style={{ ...card, maxWidth: 520 }}>
           <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} style={{ display: 'none' }} />
 
-          {uploading && <LiveEngineLoader college={college} selectedIndustries={selectedIndustries} onSkip={() => { setUploading(false); next(); }} />}
+          {uploading && <LiveEngineLoader college={college} selectedIndustries={selectedIndustries} seeking={seeking} onSkip={() => { setUploading(false); next(); }} />}
 
           {!uploading && dataInputMode === 'choose' && (
             <>

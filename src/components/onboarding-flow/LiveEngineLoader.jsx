@@ -71,18 +71,19 @@ function ResonanceScan({ schoolShortName }) {
   );
 }
 
-export default function LiveEngineLoader({ exiting = false, user = null, resonanceMode = false, schoolShortName = null, onSkip = null, college = null, selectedIndustries = [] }) {
+export default function LiveEngineLoader({ exiting = false, user = null, resonanceMode = false, schoolShortName = null, onSkip = null, college = null, selectedIndustries = [], seeking = null }) {
   const schoolName = college || schoolShortName || user?.school_name || user?.school || 'your university';
   const industryLabel = selectedIndustries?.length > 0 ? selectedIndustries.slice(0, 2).join(' & ') : 'your selected fields';
+  const roleLabel = seeking === 'internship' ? 'internships' : seeking === 'fulltime' ? 'full-time roles' : 'opportunities';
 
-  // Sequential checklist steps
+  // Sequential checklist steps — personalized with school, industry, and goal
   const STEPS = [
-    { icon: '✅', text: 'Analyzing your resume for ATS gaps & recruiter appeal' },
-    { icon: '✅', text: 'Extracting key skills, achievements & story' },
-    { icon: '✅', text: `Matching against ${industryLabel} roles` },
-    { icon: '✅', text: `Pulling alumni & parent insiders from ${schoolName} who can help` },
-    { icon: '🔄', text: 'Optimizing bullet points with proven keywords (this is where the magic happens)' },
-    { icon: '🔄', text: 'Building your personalized 10x roadmap' },
+    { icon: '✅', text: `Scanning your resume for ATS gaps that block ${roleLabel}` },
+    { icon: '✅', text: `Extracting skills & story aligned to ${industryLabel}` },
+    { icon: '✅', text: `Mapping ${schoolName} alumni on active hiring teams` },
+    { icon: '✅', text: `Pulling insider ${schoolName} parent & alumni connections` },
+    { icon: '🔄', text: `Rewriting your bullet points to land ${industryLabel} ${roleLabel}` },
+    { icon: '🔄', text: `Building your personalized ${schoolName} edge plan` },
   ];
 
   const [visibleSteps, setVisibleSteps] = useState(0);
@@ -133,8 +134,8 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
 
       {/* Headline */}
       <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.2vw, 28px)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', margin: '0 0 28px', lineHeight: 1.25 }}>
-        Bro, give it a minute.{' '}
-        <span style={{ color: INDIGO, fontWeight: 800 }}>We're scouring the internet + your campus network for you...</span>
+        Hang tight.{' '}
+        <span style={{ color: INDIGO, fontWeight: 800 }}>CLiFF is scanning your {schoolName} network + building your {industryLabel} edge...</span>
       </h1>
 
       {/* Main Card */}

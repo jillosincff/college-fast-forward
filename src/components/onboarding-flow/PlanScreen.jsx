@@ -195,6 +195,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
   const [showPaywall, setShowPaywall] = useState(false);
   const [isDownsell, setIsDownsell] = useState(false);
   const [commitment, setCommitment] = useState(null);
+  const [showCommitmentRequired, setShowCommitmentRequired] = useState(false);
   const exitIntentFired = useRef(false);
 
   // ── Exit-intent: desktop mouse leaves top of viewport ──
@@ -368,14 +369,19 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           5b. COMMITMENT QUESTION — Self-persuasion before paywall
       ───────────────────────────────────────────────────── */}
-      <div style={{ background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+      <div id="commitment-anchor" style={{ background: CARD, border: `1.5px solid ${showCommitmentRequired && !commitment ? '#ef4444' : BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 20, boxShadow: showCommitmentRequired && !commitment ? '0 0 0 3px rgba(239,68,68,0.15)' : '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
         <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 6px', lineHeight: 1.6 }}>
           {firstName ? `${firstName}, you're` : "You're"} now set up for a real 14-day sprint.{' '}
           <span style={{ color: GREEN, fontWeight: 700 }}>Most students who reach this point land their first interview or warm intro within 2 weeks.</span>
         </p>
-        <h3 style={{ fontFamily: sat, fontSize: 'clamp(16px, 2.5vw, 20px)', fontWeight: 800, color: TEXT, margin: '16px 0 14px', letterSpacing: '-0.02em' }}>
+        <h3 style={{ fontFamily: sat, fontSize: 'clamp(16px, 2.5vw, 20px)', fontWeight: 800, color: TEXT, margin: '16px 0 6px', letterSpacing: '-0.02em' }}>
           How committed are you to getting hired this semester?
         </h3>
+        {showCommitmentRequired && !commitment && (
+          <p style={{ fontFamily: dm, fontSize: 12, color: '#ef4444', fontWeight: 700, margin: '0 0 12px' }}>
+            ↑ Please answer this before unlocking your plan.
+          </p>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
             { label: '🔥 Extremely — Let\'s go', value: 'extreme' },
@@ -418,7 +424,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
         {/* Big green CTA */}
         <button
-          onClick={() => openPaywall(false)}
+          onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } openPaywall(false); }}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 14px',
             fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',

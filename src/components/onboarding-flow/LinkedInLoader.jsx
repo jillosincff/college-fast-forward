@@ -28,12 +28,12 @@ export default function LinkedInLoader({ firstName, college, selectedIndustries 
     : 'your target fields';
 
   const STEPS = [
-    { label: 'Analyzing your experience, skills & target roles', done: true },
-    { label: 'Writing a recruiter-magnet headline that stands out in searches', done: true },
+    { label: `Analyzing your experience & skills for ${industryLabel} positioning`, done: true },
+    { label: `Writing a recruiter-magnet headline for ${industryLabel} roles`, done: true },
     { label: 'Crafting your story-driven bio (the one that gets profile views)', done: true },
-    { label: 'Building your ATS keyword list for your target fields', done: true },
-    { label: 'Optimizing your About section for warm intros & alumni outreach', done: false },
-    { label: 'Generating connection request templates tailored to insiders', done: false },
+    { label: `Building your ATS keyword list for ${industryLabel}`, done: true },
+    { label: `Optimizing your About section for ${college || 'campus'} alumni warm intros`, done: false },
+    { label: `Generating connection request templates for ${college || 'your school'} insiders`, done: false },
   ];
 
   const [visibleSteps, setVisibleSteps] = useState(0);
@@ -81,7 +81,7 @@ export default function LinkedInLoader({ firstName, college, selectedIndustries 
 
       {/* Sub-headline */}
       <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 32px', lineHeight: 1.65, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
-        Crafting a recruiter-magnet headline, story-driven bio, and ATS-optimized keywords based on your resume + goals.
+        Crafting a recruiter-magnet headline, story-driven bio, and ATS-optimized keywords for <strong style={{ color: TEXT }}>{industryLabel}</strong>{college ? ` — tuned for ${college} alumni networks` : ''}.
       </p>
 
       {/* Checklist card */}

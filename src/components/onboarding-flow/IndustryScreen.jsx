@@ -211,8 +211,30 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
         })}
       </div>
 
+      {/* Mirroring panel — appears after any selection */}
+      {canContinue && (
+        <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 8px' }}>
+            Got it — targeting <strong>{[...selectedIndustries.map(k => BUCKETS.find(b => b.key === k)?.label), ...targetRoles].filter(Boolean).join(', ')}</strong>.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>CLiFF is now:</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {[
+              `Scanning internal pipelines for active ${selectedIndustries.map(k => BUCKETS.find(b => b.key === k)?.label || k).slice(0,2).join(' & ')} openings`,
+              `Mapping alumni & parents on hiring teams in these spaces`,
+              `Tailoring your resume keywords for these exact roles`,
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <span style={{ fontSize: 11, color: GREEN, flexShrink: 0, marginTop: 2 }}>✓</span>
+                <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.5 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Nav */}
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 28 }}>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 20 }}>
         <button onClick={onBack} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT2, background: CARD, border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: SHADOW }}>← Back</button>
         <button
           onClick={onNext}
@@ -225,7 +247,7 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
             boxShadow: canContinue ? '0 4px 14px rgba(0,102,255,0.25)' : 'none',
             transition: 'all 0.2s',
           }}
-        >Continue →</button>
+        >{canContinue ? <>Continue → <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.8 }}>Pipeline Mapped ✓</span></> : 'Select at least 1 →'}</button>
       </div>
     </div>
   );
