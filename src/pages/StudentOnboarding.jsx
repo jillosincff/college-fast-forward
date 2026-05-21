@@ -310,43 +310,26 @@ export default function StudentOnboarding() {
 
             {/* Parent Company - Optional */}
             <div style={{ marginBottom: 32 }}>
-              <label style={{
-                display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-                textTransform: 'uppercase', letterSpacing: '0.1em',
-                color: '#888', marginBottom: 8,
-              }}>
-                Where do your parents or guardians work? <span style={{ color: '#555', fontWeight: 400 }}>(Optional)</span>
-              </label>
-              <input
-                value={parentCompany}
-                onChange={e => setParentCompany(e.target.value)}
-                placeholder="e.g., Google, Deloitte, Mayo Clinic"
-                style={{
-                  width: '100%', background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid #2A2A2A', borderRadius: 12, padding: '14px 16px',
-                  fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', boxSizing: 'border-box',
-                  transition: 'border-color 0.2s',
-                }}
-                onFocus={e => { e.target.style.borderColor = ORANGE; }}
-                onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
-              />
-              <div style={{ background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)', borderRadius: 8, padding: 12, marginTop: 12 }}>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 500, color: '#E85D20', marginBottom: 6 }}>
-                  💡 Why do we ask this?
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888', lineHeight: 1.5, marginBottom: 6 }}>
-                  The corporate game is rigged—80% of jobs are filled through personal connections, not cold job boards.
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888', lineHeight: 1.5, marginBottom: 6 }}>
-                  College Fast Forward activates your Campus Ecosystem. By securely mapping where your family works, you help open up an Inside Track for a fellow student at your school.
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888', lineHeight: 1.5 }}>
-                  In return, you get instant access to the Inside Tracks their families and alumni have opened up for you. It's how we all bypass the resume black hole together.
-                </p>
-                <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 4, fontWeight: 400, color: '#555', fontStyle: 'italic', marginTop: 8 }}>
-                  🔒 Zero Spam Guarantee: We will never email, call, or solicit your parents. This purely maps company availability to give your university ecosystem an unfair advantage.
-                </p>
-              </div>
+            <label style={{
+              display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.1em',
+              color: '#888', marginBottom: 8,
+            }}>
+              Parents' Employer <span style={{ color: '#555', fontWeight: 400 }}>(Optional)</span>
+            </label>
+            <input
+              value={parentCompany}
+              onChange={e => setParentCompany(e.target.value)}
+              placeholder="e.g., Google, Deloitte"
+              style={{
+                width: '100%', background: 'rgba(255,255,255,0.06)',
+                border: '1px solid #2A2A2A', borderRadius: 12, padding: '14px 16px',
+                fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={e => { e.target.style.borderColor = ORANGE; }}
+              onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
+            />
             </div>
 
             {/* CTA */}
@@ -361,7 +344,7 @@ export default function StudentOnboarding() {
                 minHeight: 'auto', transition: 'background 0.2s',
               }}
             >
-              {loading ? 'Setting up...' : 'Take Me In →'}
+              {loading ? 'Setting up...' : 'Continue →'}
             </button>
 
             {/* Instant Feedback Animation */}
