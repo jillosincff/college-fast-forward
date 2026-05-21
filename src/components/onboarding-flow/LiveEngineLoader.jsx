@@ -5,46 +5,28 @@ const GREEN = '#10B981';
 const GREEN_BORDER = '#BBF7D0';
 const GREEN_LIGHT = '#F0FDF4';
 const BLUE = '#0066FF';
+const INDIGO = '#6366F1';
 const CARD = '#FFFFFF';
 const R = 12;
-const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
 const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
 
-const ACTIONS = [
-  "🤖 Waking up CLiFF... he's already on his third espresso.",
-  "✂️ Shredding traditional cover letters. Nobody reads them anyway.",
-  "🕵️ Deep-diving your campus database (and skipping your ex's profile).",
-  "📂 Finding companies that won't ghost you after a 3-round interview loop.",
-  "💼 Bypassing corporate resume filters so humans actually see your name.",
-  "🤫 Digging up the Inside Tracks that corporate recruiters try to hide.",
+const DID_YOU_KNOW = [
+  "The average corporate resume screener filters out up to 75% of applicants before a human ever sees them. Your new version is built to beat that.",
+  "Students who use warm alumni intros get responses 10x faster than cold applications.",
+  "Your Agent is already drafting your first outreach message based on your target roles…",
+  "Over 70% of jobs are filled through internal networks — never publicly posted. We hunt those down for you.",
+  "A single internal referral scales your interview probability by over 4x. We've already mapped yours.",
 ];
 
-const INSIGHTS = [
-  {
-    label: 'The Backdoor Fact',
-    text: 'Over 70% of open positions are filled through internal company networks and are never genuinely public on traditional job boards. We hunt down those internal portals directly.',
-  },
-  {
-    label: 'The ATS Filter Fact',
-    text: 'The average corporate resume screener filters out up to 75% of applicants before a human recruiter ever sees them. Your new profile is explicitly formatted to skip this filter.',
-  },
-  {
-    label: 'The Warm Hook Fact',
-    text: 'An application accompanied by a single internal referral or a warm message to an alumnus scales your interview probability by over 4x. We\'ve already mapped yours out.',
-  },
-];
-
-// ── Network Resonance Scan (3-step staggered terminal log) ──────────
+// ── Network Resonance Scan (terminal mode) ──────────────────────
 function ResonanceScan({ schoolShortName }) {
   const school = schoolShortName || 'your university';
-  // Dynamically compute an alumni count between 47 and 94 (stable per school)
   const alumniCount = useRef(Math.floor(school.charCodeAt(0) % 48) + 47).current;
   const steps = [
     '🔍 Parsing Career Assets & Keywords...',
     `🛰️ Mapping Active ${school} Alumni Network Nodes...`,
     `💡 ${alumniCount} Active Insiders Isolated on Targeted Hiring Teams!`,
   ];
-
   const [visibleCount, setVisibleCount] = useState(0);
   const [done, setDone] = useState(false);
 
@@ -53,18 +35,15 @@ function ResonanceScan({ schoolShortName }) {
     const advance = () => {
       current += 1;
       setVisibleCount(current);
-      if (current < steps.length) {
-        setTimeout(advance, 700);
-      } else {
-        setTimeout(() => setDone(true), 400);
-      }
+      if (current < steps.length) setTimeout(advance, 700);
+      else setTimeout(() => setDone(true), 400);
     };
     const t = setTimeout(advance, 300);
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <div style={{ background: '#FFFFFF', borderRadius: 16, padding: '24px 28px', maxWidth: 480, margin: '0 auto', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0' }}>
+    <div style={{ background: CARD, borderRadius: 16, padding: '24px 28px', maxWidth: 480, margin: '0 auto', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0' }}>
       <style>{`
         @keyframes terminalBlink { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes resonanceSlide { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
@@ -75,18 +54,16 @@ function ResonanceScan({ schoolShortName }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {steps.map((step, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: visibleCount > i ? 1 : 0, transition: 'opacity 0.3s', animation: visibleCount > i ? 'resonanceSlide 0.4s ease forwards' : 'none' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: i === steps.length - 1 ? '#10B981' : visibleCount > i ? '#10B981' : '#CBD5E1', boxShadow: visibleCount > i ? '0 0 8px rgba(16,185,129,0.4)' : 'none', transition: 'all 0.3s' }} />
+            <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: visibleCount > i ? GREEN : '#CBD5E1', boxShadow: visibleCount > i ? '0 0 8px rgba(16,185,129,0.4)' : 'none', transition: 'all 0.3s' }} />
             <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: i === steps.length - 1 && visibleCount > i ? '#059669' : '#64748B', margin: 0, lineHeight: 1.5, fontWeight: i === steps.length - 1 ? 700 : 400 }}>
               {step}
             </p>
           </div>
         ))}
-        {!done && (
-          <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#059669', animation: 'terminalBlink 1s step-end infinite', marginLeft: 18 }}>█</span>
-        )}
+        {!done && <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#059669', animation: 'terminalBlink 1s step-end infinite', marginLeft: 18 }}>█</span>}
       </div>
       {done && (
-        <div style={{ marginTop: 16, padding: '10px 14px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, fontFamily: "'Courier New', monospace", fontSize: 11, color: '#059669', animation: 'resonanceSlide 0.4s ease forwards' }}>
+        <div style={{ marginTop: 16, padding: '10px 14px', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, fontFamily: "'Courier New', monospace", fontSize: 11, color: '#059669', animation: 'resonanceSlide 0.4s ease forwards' }}>
           ✓ Scan complete. Routing to your personalized preview...
         </div>
       )}
@@ -94,40 +71,50 @@ function ResonanceScan({ schoolShortName }) {
   );
 }
 
-// Pick one insight randomly per mount (stable via ref)
-function useRandomInsight() {
-  const ref = useRef(INSIGHTS[Math.floor(Math.random() * INSIGHTS.length)]);
-  return ref.current;
-}
+export default function LiveEngineLoader({ exiting = false, user = null, resonanceMode = false, schoolShortName = null, onSkip = null, college = null, selectedIndustries = [] }) {
+  const schoolName = college || schoolShortName || user?.school_name || user?.school || 'your university';
+  const industryLabel = selectedIndustries?.length > 0 ? selectedIndustries.slice(0, 2).join(' & ') : 'your selected fields';
 
-export default function LiveEngineLoader({ exiting = false, user = null, resonanceMode = false, schoolShortName = null }) {
-  const [actionIdx, setActionIdx] = useState(0);
-  const [fade, setFade] = useState(true);
-  const insight = useRandomInsight();
+  // Sequential checklist steps
+  const STEPS = [
+    { icon: '✅', text: 'Analyzing your resume for ATS gaps & recruiter appeal' },
+    { icon: '✅', text: 'Extracting key skills, achievements & story' },
+    { icon: '✅', text: `Matching against ${industryLabel} roles` },
+    { icon: '✅', text: `Pulling alumni & parent insiders from ${schoolName} who can help` },
+    { icon: '🔄', text: 'Optimizing bullet points with proven keywords (this is where the magic happens)' },
+    { icon: '🔄', text: 'Building your personalized 10x roadmap' },
+  ];
 
-  const schoolName = schoolShortName || user?.school_name || user?.schoolName || user?.school || 'your university';
+  const [visibleSteps, setVisibleSteps] = useState(0);
+  const [didYouKnowIdx, setDidYouKnowIdx] = useState(0);
+  const [factFade, setFactFade] = useState(true);
 
-  // Always call hooks unconditionally before any early return
+  // Reveal checklist items one by one
+  useEffect(() => {
+    if (visibleSteps >= STEPS.length) return;
+    const delay = visibleSteps === 0 ? 400 : 800;
+    const t = setTimeout(() => setVisibleSteps(s => s + 1), delay);
+    return () => clearTimeout(t);
+  }, [visibleSteps]);
+
+  // Rotate Did You Know every 4s
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false);
+      setFactFade(false);
       setTimeout(() => {
-        setActionIdx(i => (i + 1) % ACTIONS.length);
-        setFade(true);
-      }, 200);
-    }, 2500);
+        setDidYouKnowIdx(i => (i + 1) % DID_YOU_KNOW.length);
+        setFactFade(true);
+      }, 250);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
-  const gradientId = 'spinner-gradient';
-
-  // In resonance mode render the terminal scan instead (after all hooks)
+  // Hooks must be above conditional returns
   if (resonanceMode) {
     return (
       <div style={{ textAlign: 'center', opacity: exiting ? 0 : 1, transition: 'opacity 400ms ease' }}>
         <h1 style={{ fontFamily: FONT, fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', margin: '0 0 24px', lineHeight: 1.25 }}>
-          Scanning your{' '}
-          <span style={{ color: '#059669' }}>{schoolName} network...</span>
+          Scanning your <span style={{ color: '#059669' }}>{schoolName} network...</span>
         </h1>
         <ResonanceScan schoolShortName={schoolName} />
       </div>
@@ -135,127 +122,76 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
   }
 
   return (
-    <div style={{
-      textAlign: 'center',
-      opacity: exiting ? 0 : 1,
-      transform: exiting ? 'scale(1.03)' : 'scale(1)',
-      transition: 'opacity 400ms ease, transform 400ms ease',
-    }}>
-      {/* Header */}
-      <h1 style={{
-        fontFamily: FONT, fontSize: 'clamp(20px, 3.2vw, 28px)',
-        fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em',
-        margin: '0 0 28px', lineHeight: 1.25,
-      }}>
+    <div style={{ textAlign: 'center', opacity: exiting ? 0 : 1, transform: exiting ? 'scale(1.03)' : 'scale(1)', transition: 'opacity 400ms ease, transform 400ms ease', maxWidth: 520, width: '100%', margin: '0 auto' }}>
+      <style>{`
+        @keyframes liveSpinEngine { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes shimmerBar { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+        @keyframes checkIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes factFadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+      `}</style>
+
+      {/* Headline */}
+      <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.2vw, 28px)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', margin: '0 0 28px', lineHeight: 1.25 }}>
         Bro, give it a minute.{' '}
-        <span style={{ color: '#6366F1', fontWeight: 800, fontSize: '0.9em' }}>
-          We're scouring the internet for you...
-        </span>
+        <span style={{ color: INDIGO, fontWeight: 800 }}>We're scouring the internet + your campus network for you...</span>
       </h1>
 
       {/* Main Card */}
-      <div style={{
-        background: CARD, borderRadius: R,
-        boxShadow: '0 20px 50px rgba(0,0,0,0.07)', overflow: 'hidden',
-        border: `1.5px solid #E2E8F0`,
-        maxWidth: 480, margin: '0 auto',
-        position: 'relative',
-      }}>
+      <div style={{ background: CARD, borderRadius: 16, boxShadow: '0 20px 50px rgba(0,0,0,0.07)', border: '1.5px solid #E2E8F0', overflow: 'hidden', position: 'relative' }}>
         {/* Shimmer top bar */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-          background: 'linear-gradient(90deg, #6366F1, #3B82F6, #6366F1)',
-          backgroundSize: '200% auto',
-          animation: 'shimmerBar 3s ease infinite',
-        }} />
-        {/* Live Status Section */}
-        <div style={{ padding: '28px 28px 24px', display: 'flex', alignItems: 'center', gap: 14 }}>
-          {/* Spinner + paperclip dance */}
-          <div style={{ flexShrink: 0, position: 'relative', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width={32} height={32} viewBox="0 0 32 32" style={{ position: 'absolute' }}>
-              <defs>
-                <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6366F1" />
-                  <stop offset="100%" stopColor="#3B82F6" />
-                </linearGradient>
-              </defs>
-              <circle cx="16" cy="16" r="12" fill="none" stroke="#E2E8F0" strokeWidth="3" />
-              <circle
-                cx="16" cy="16" r="12"
-                fill="none"
-                stroke={`url(#${gradientId})`}
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray="75.4"
-                strokeDashoffset="20"
-                style={{ transformOrigin: '16px 16px', animation: 'liveSpinEngine 0.75s linear infinite' }}
-              />
-            </svg>
-            <span style={{ fontSize: 16, animation: 'paperclipDance 1.2s ease-in-out infinite', position: 'relative', zIndex: 1 }}>
-              📎
-            </span>
-          </div>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #6366F1, #3B82F6, #10B981, #6366F1)', backgroundSize: '300% auto', animation: 'shimmerBar 2.5s ease infinite' }} />
 
-          {/* Live action text */}
-          <p key={actionIdx} style={{
-            fontFamily: FONT, fontSize: 14, fontWeight: 600,
-            color: '#374151', margin: 0, textAlign: 'left', lineHeight: 1.5,
-            animation: 'slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-          }}>
-            {actionIdx === 3
-              ? `🚀 Calibrating your ${schoolName} network multipliers...`
-              : ACTIONS[actionIdx]}
-          </p>
+        {/* Checklist */}
+        <div style={{ padding: '28px 28px 20px', textAlign: 'left' }}>
+          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 16px' }}>Processing your profile…</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {STEPS.map((step, i) => {
+              const visible = i < visibleSteps;
+              const isSpinning = step.icon === '🔄';
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: visible ? 1 : 0.15, animation: visible ? 'checkIn 0.4s ease forwards' : 'none', transition: 'opacity 0.3s' }}>
+                  {/* Icon / spinner */}
+                  {visible && isSpinning ? (
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #E2E8F0', borderTop: `2px solid ${INDIGO}`, animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+                  ) : (
+                    <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>{visible ? step.icon : '⬜'}</span>
+                  )}
+                  <p style={{ fontFamily: FONT, fontSize: 13, color: visible ? (isSpinning ? INDIGO : '#065F46') : '#94A3B8', margin: 0, fontWeight: visible ? 600 : 400, lineHeight: 1.5, transition: 'color 0.3s' }}>
+                    {step.text}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: '#E2E8F0', margin: '0 28px' }} />
+        <div style={{ height: 1, background: '#F1F5F9', margin: '0 24px' }} />
 
-        {/* Did You Know Section */}
-        <div style={{ padding: '20px 28px 24px' }}>
-          <p style={{
-            fontFamily: FONT, fontSize: 12, fontWeight: 700,
-            color: BLUE, margin: '0 0 10px', letterSpacing: '0.02em',
-          }}>
-            💡 Did you know?
+        {/* Did You Know — rotating */}
+        <div style={{ padding: '18px 28px 24px' }}>
+          <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: BLUE, margin: '0 0 8px', letterSpacing: '0.02em' }}>💡 Did you know?</p>
+          <p style={{ fontFamily: FONT, fontSize: 14, color: '#4B5563', margin: 0, lineHeight: 1.65, opacity: factFade ? 1 : 0, transition: 'opacity 0.25s ease', animation: factFade ? 'factFadeIn 0.3s ease' : 'none', minHeight: 64 }}>
+            {DID_YOU_KNOW[didYouKnowIdx]}
           </p>
-          <p style={{
-            fontFamily: FONT, fontSize: 14, color: '#4B5563',
-            margin: 0, lineHeight: 1.65,
-          }}>
-            {insight.text}
-          </p>
-          <p style={{
-            fontFamily: FONT, fontSize: 11, color: '#94A3B8',
-            margin: '14px 0 0', textAlign: 'center', letterSpacing: '0.04em',
-          }}>
-            Activating your secure Campus Ecosystem pipeline.
+          <p style={{ fontFamily: FONT, fontSize: 11, color: '#94A3B8', margin: '14px 0 0', textAlign: 'center', letterSpacing: '0.04em' }}>
+            ⚡ Activating your secure Campus Ecosystem pipeline…
           </p>
         </div>
       </div>
 
-      <style>{`
-        @keyframes liveSpinEngine {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes slideUpFade {
-          0%   { opacity: 0; transform: translateY(6px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmerBar {
-          0%   { background-position: 0% 50%; }
-          50%  { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes paperclipDance {
-          0%   { transform: rotate(-15deg) scale(1); }
-          25%  { transform: rotate(15deg) scale(1.15); }
-          50%  { transform: rotate(-10deg) scale(1); }
-          75%  { transform: rotate(12deg) scale(1.1); }
-          100% { transform: rotate(-15deg) scale(1); }
-        }
-      `}</style>
+      {/* Timing estimate */}
+      <p style={{ fontFamily: FONT, fontSize: 12, color: '#94A3B8', margin: '16px 0 0', lineHeight: 1.6 }}>
+        Usually done in <strong style={{ color: '#64748B' }}>30–60 seconds</strong>. Hang tight — your Before/After is almost ready.
+      </p>
+
+      {/* Skip button */}
+      {onSkip && (
+        <button onClick={onSkip} style={{ fontFamily: FONT, fontSize: 12, color: INDIGO, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '8px 0', marginTop: 8, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+          Skip wait &amp; see preview →
+        </button>
+      )}
     </div>
   );
 }
