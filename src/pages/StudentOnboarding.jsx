@@ -242,8 +242,15 @@ export default function StudentOnboarding() {
     return <StudentWelcomeScreen firstName={firstName} onComplete={handleWelcomeComplete} />;
   }
 
-  // ── SCREEN 2: Two Questions ──
-  if (step === 2 && user) {
+  // SCREEN 2: Two Questions
+  if (step === 2) {
+    if (!user) {
+      return (
+        <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ color: '#fff', fontFamily: dmSans, fontSize: 14 }}>Loading...</div>
+        </div>
+      );
+    }
     const isValid = firstName.trim().length > 0 && school.trim().length > 0;
     return (
       <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
