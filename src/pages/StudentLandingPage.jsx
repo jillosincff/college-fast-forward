@@ -285,51 +285,54 @@ export default function StudentLandingPage({ onParentClick }) {
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
         }}>
           <span style={{ fontSize: 13 }}>⚡</span>
-          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>The CFF AI Agent</span>
+          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Career Agent</span>
         </div>
 
-        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 760, textAlign: 'center' }}>
-          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 900, color: BLUE, letterSpacing: '0.14em', textTransform: 'uppercase', display: 'block', marginBottom: 20 }}>
-            Exclusively for College Students
-          </span>
-          <div style={{ fontFamily: FONT, fontSize: 'clamp(28px, 5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
-            <div style={{ color: '#94A3B8', marginBottom: 4 }}>Stop spamming apps.</div>
-            <div style={{ background: 'linear-gradient(135deg, #0066FF 0%, #6366F1 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', paddingBottom: '0.15em' }}>
-              Start landing interviews.
-            </div>
-          </div>
+        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 720, textAlign: 'center' }}>
+          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(32px, 5.5vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: TEXT, margin: '0 0 20px' }}>
+            Welcome to{' '}
+            <span style={{ color: BLUE }}>College Fast Forward.</span>
+          </h1>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 2vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.5, margin: '0 0 16px' }}>
+            <span style={{ fontWeight: 800 }}>
+              <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span>
+            </span>
+            , your AI Career Agent, is here to end the endless application black hole.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.6vw, 16px)', color: TEXT2, lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
+            Most students are stuck spamming 100+ apps with almost no responses.{' '}
+            <strong style={{ color: TEXT }}>We're different</strong> —{' '}
+            <span style={{ fontWeight: 600 }}>
+              <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span>
+            </span>{' '}
+            learns who you are, then uses AI + real campus insiders (alumni &amp; parents) to get you interviews fast.
+          </p>
         </div>
 
-        <p style={{
-          fontFamily: FONT, fontSize: 'clamp(14px, 1.6vw, 17px)',
-          fontWeight: 500, color: TEXT2,
-          lineHeight: 1.8, maxWidth: 520, margin: '24px auto 0',
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
-        }}>
-          Job hunting sucks when you're blindly applying to hundreds of jobs and getting ghosted.{' '}
-          <span style={{ fontWeight: 700 }}>
-            <span style={{ color: BLUE }}>C</span>
-            <span style={{ color: TEXT3 }}>li</span>
-            <span style={{ color: BLUE }}>FF</span>
-          </span>{' '}
-          — your AI career agent — gives you a smarter, targeted approach: a focused strategy paired with real campus insiders <strong style={{ color: TEXT }}>10X more likely to land you interviews fast.</strong>
-        </p>
-
-        <div style={{ width: '100%', maxWidth: 400, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: '100%', maxWidth: 420, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
           <button onClick={go} style={{
             width: '100%', fontFamily: FONT, fontSize: 16, fontWeight: 900, color: '#fff',
-            background: BLUE, border: 'none', borderRadius: 16, padding: '18px 32px',
+            background: BLUE, border: 'none', borderRadius: 16, padding: '20px 32px',
             cursor: 'pointer', minHeight: 'auto',
             boxShadow: '0 12px 32px rgba(0,102,255,0.35)',
             transition: 'all 0.2s ease', letterSpacing: '0.01em',
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
-          >Get Interviews Faster – Start for Free</button>
-          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            🔒 Free Student Workspace · Takes 30 seconds
-          </span>
-          <div style={{ marginTop: 14, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          >
+            Let's Build Your Interview Edge with{' '}
+            <span style={{ fontWeight: 900 }}>
+              <span style={{ color: '#93C5FD' }}>C</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>li</span><span style={{ color: '#93C5FD' }}>FF</span>
+            </span>{' '}→
+          </button>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 2px' }}>
+              This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '0 0 10px' }}>No credit card required.</p>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 700, margin: 0 }}>✨ Your first warm intro or interview is closer than you think.</p>
+          </div>
+          <div style={{ marginTop: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
             <span style={{ fontFamily: FONT, fontSize: 12, color: '#065F46', fontWeight: 600 }}>
               Join 3,412 students from top campuses nationwide stepping out of the crowd today.
