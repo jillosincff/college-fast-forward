@@ -284,43 +284,91 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ── Progress Header ── */}
-      <div style={{ textAlign: 'center', marginBottom: 36 }}>
-        <div style={{ marginBottom: 24 }}>
+      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <div style={{ marginBottom: 16 }}>
           <FunnelProgress activeStep={2} />
         </div>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 18 }}>
-          <span style={{ fontSize: 13 }}>🗺️</span>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Step 3 — Your 14-Day Action Plan</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '6px 18px' }}>
+          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.08em', textTransform: 'uppercase' }}>✅ Step 3 — Your 14-Day Action Plan</span>
         </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────
           1. HERO HEADER
       ───────────────────────────────────────────────────── */}
-      <div style={{ textAlign: 'center', marginBottom: 24, padding: '0 8px' }}>
-        <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.15 }}>
-          {firstName ? firstName + ', ' : ''}<span style={{ color: TEXT }}>let's stop blindly applying</span>{' '}
+      <div style={{ textAlign: 'center', marginBottom: 28, padding: '0 4px' }}>
+        <h1 style={{ fontFamily: sat, fontSize: 'clamp(26px, 4.5vw, 42px)', fontWeight: 900, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+          {firstName ? `${firstName}, ` : ''}<span style={{ color: TEXT }}>let's stop blindly applying</span>{' '}
           <span style={{ color: BLUE }}>and start interviewing.</span>
         </h1>
-
-        {/* Short value summary */}
-        <p style={{ fontFamily: dm, fontSize: 15, color: TEXT2, lineHeight: 1.65, margin: '0 auto 20px', maxWidth: 540 }}>
+        <p style={{ fontFamily: dm, fontSize: 16, color: TEXT2, lineHeight: 1.65, margin: '0 auto', maxWidth: 560 }}>
           CLiFF has already <strong style={{ color: TEXT }}>rebuilt your resume + LinkedIn</strong>, found{' '}
           <strong style={{ color: BLUE }}>3 verified {schoolName} alumni connections</strong>, and unlocked hidden internal tracks.{' '}
           <strong style={{ color: GREEN }}>You're no longer playing the numbers game.</strong>
         </p>
+      </div>
 
-        {/* Inside Track banner — shorter */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: 100, padding: '7px 18px' }}>
-          <span style={{ fontSize: 14 }}>🔥</span>
-          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#c2410c' }}>
-            3 Verified {schoolName} Alumni Connections Found
-          </span>
+      {/* ─────────────────────────────────────────────────────
+          2. INSIDE TRACK — Dark highlight section
+      ───────────────────────────────────────────────────── */}
+      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: 20, padding: '24px 24px 20px', marginBottom: 28, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <span style={{ fontSize: 20 }}>🔥</span>
+          <div>
+            <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: '#f8fafc', margin: 0, letterSpacing: '-0.01em' }}>Inside Track Found</p>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#94a3b8', margin: 0 }}>CLiFF bypassed public job boards and opened active internal pipelines.</p>
+          </div>
+          <div style={{ marginLeft: 'auto', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#fca5a5', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Live</span>
+          </div>
+        </div>
+        <p style={{ fontFamily: dm, fontSize: 13, color: '#cbd5e1', margin: '0 0 18px', lineHeight: 1.6 }}>
+          Here are your hidden opportunities with verified <strong style={{ color: '#93c5fd' }}>{schoolName} alumni</strong>:
+        </p>
+
+        {/* Teaser cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
+          {[
+            { role: 'Senior Product Manager', company: '████████', dept: 'Product & Strategy', badge: '1 UF Alum Found' },
+            { role: 'Investment Banking Analyst', company: '███████ ██████', dept: 'Finance & Banking', badge: '1 UF Alum Found' },
+            { role: 'Marketing Director', company: '████', dept: 'Marketing & Growth', badge: '1 UF Alum Found' },
+          ].map((card, i) => (
+            <div key={i} style={{
+              background: i === 0 ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
+              border: i === 0 ? '1px solid rgba(255,255,255,0.18)' : '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 12, padding: '14px 16px',
+              display: 'flex', alignItems: 'center', gap: 12,
+              filter: i > 0 ? 'blur(2.5px)' : 'none',
+              opacity: i === 0 ? 1 : i === 1 ? 0.7 : 0.45,
+              userSelect: i > 0 ? 'none' : 'auto',
+            }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>
+                {['👩‍💼', '👨‍💼', '👩‍💻'][i]}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#f1f5f9', margin: '0 0 2px' }}>{card.role}</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#94a3b8', margin: '0 0 5px', letterSpacing: '0.03em' }}>{card.company} · {card.dept}</p>
+                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#86efac', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>✓ {card.badge}</span>
+              </div>
+              {i === 0 && (
+                <div style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: 8, padding: '6px 12px', flexShrink: 0 }}>
+                  <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#86efac', margin: 0, whiteSpace: 'nowrap' }}>Ready to Intro →</p>
+                </div>
+              )}
+            </div>
+          ))}
+          {/* Fade overlay on locked cards */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to bottom, transparent, rgba(15,23,42,0.95))', borderRadius: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 14, pointerEvents: 'none' }}>
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#93c5fd', background: 'rgba(37,99,235,0.2)', border: '1px solid rgba(37,99,235,0.4)', borderRadius: 100, padding: '6px 18px' }}>
+              🔒 2 more alumni connections unlock with your plan
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          2. COMMITMENT QUESTION — moved up, right after summary
+          3. COMMITMENT QUESTION
       ───────────────────────────────────────────────────── */}
       <div id="commitment-anchor" className="plan-commitment-card" style={{ background: CARD, border: `1.5px solid ${showCommitmentRequired && !commitment ? '#ef4444' : BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 28, boxShadow: showCommitmentRequired && !commitment ? '0 0 0 3px rgba(239,68,68,0.15)' : '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
         <h3 style={{ fontFamily: sat, fontSize: 'clamp(17px, 2.5vw, 22px)', fontWeight: 800, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.02em', textAlign: 'center' }}>
@@ -369,52 +417,6 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          3. ALUMNI TEASER — Blurred connection cards
-      ───────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase' }}>🔥 3 Verified {schoolName} Alumni Connections Found</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, position: 'relative' }}>
-          {[
-            { role: 'Senior Product Manager', company: 'Google', mutual: 'UF Business \'19', type: 'Alumni' },
-            { role: 'Investment Banking Analyst', company: 'Goldman Sachs', mutual: 'UF Finance \'21', type: 'Alumni' },
-            { role: 'Marketing Director', company: 'Meta', mutual: 'UF Marketing \'18', type: 'Alumni' },
-          ].map((card, i) => (
-            <div key={i} style={{
-              background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14,
-              padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14,
-              filter: i > 0 ? 'blur(3px)' : 'none',
-              opacity: i === 0 ? 1 : i === 1 ? 0.75 : 0.5,
-              userSelect: i > 0 ? 'none' : 'auto',
-              pointerEvents: i > 0 ? 'none' : 'auto',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-            }}>
-              <div style={{ width: 42, height: 42, borderRadius: 10, background: `linear-gradient(135deg, ${BLUE}, #0052CC)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-                {['👩‍💼', '👨‍💼', '👩‍💻'][i]}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card.role}</p>
-                <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '0 0 4px' }}>{card.company}</p>
-                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>{card.mutual}</span>
-              </div>
-              {i === 0 && (
-                <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '6px 12px', flexShrink: 0 }}>
-                  <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, margin: 0, whiteSpace: 'nowrap' }}>✓ Ready to Intro</p>
-                </div>
-              )}
-            </div>
-          ))}
-          {/* Unlock overlay on last 2 cards */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '65%', background: 'linear-gradient(to bottom, transparent, rgba(248,249,252,0.97))', borderRadius: 14, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 16, pointerEvents: 'none' }}>
-            <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px' }}>
-              🔒 2 more connections unlocked with your plan
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ─────────────────────────────────────────────────────
           4. PRIMARY FEED — Expandable Opportunity Hub
       ───────────────────────────────────────────────────── */}
       <div style={{ marginBottom: 28, animation: 'fadUp 0.4s ease' }}>
@@ -431,27 +433,27 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           5. PROOF HUB — Mini LinkedIn + ATS Ring
       ───────────────────────────────────────────────────── */}
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 28 }}>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 14px', textAlign: 'center' }}>
           ✅ What We've Already Built For You
         </p>
-        <div className="proof-hub" style={{ display: 'flex', gap: 14, alignItems: 'stretch', alignContent: 'stretch' }}>
+        <div className="proof-hub" style={{ display: 'flex', gap: 14, alignItems: 'stretch' }}>
           <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
             <div style={{ padding: '14px 16px 10px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 14 }}>💼</span>
               <div>
-                <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: 0 }}>LinkedIn Rebuilt</p>
-                <p style={{ fontFamily: dm, fontSize: 10, color: GREEN, fontWeight: 700, margin: 0 }}>→ Ready for recruiters &amp; warm intros</p>
+                <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, margin: 0 }}>LinkedIn Rebuilt</p>
+                <p style={{ fontFamily: dm, fontSize: 11, color: GREEN, fontWeight: 700, margin: 0 }}>→ Ready for recruiters &amp; warm intros</p>
               </div>
             </div>
             <div style={{ padding: '14px 16px' }}>
               <MiniLinkedInCard name={fullName} college={college} />
             </div>
           </div>
-          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, alignSelf: 'stretch' }}>
-            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: '0 0 2px', textAlign: 'center' }}>Resume Optimized</p>
-            <p style={{ fontFamily: dm, fontSize: 10, color: GREEN, fontWeight: 700, margin: '0 0 4px', textAlign: 'center' }}>→ 98% ATS Match (Top 2%)</p>
-            <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 14px', textAlign: 'center' }}>Passes Fortune 500 ATS filters instantly</p>
+          <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, alignSelf: 'stretch' }}>
+            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT, margin: 0, textAlign: 'center' }}>Resume Optimized</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: GREEN, fontWeight: 700, margin: 0, textAlign: 'center' }}>98% ATS Match (Top 2%)</p>
+            <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 10px', textAlign: 'center' }}>Top 2% of Global Applicants</p>
             <ATSScoreRing />
           </div>
         </div>
