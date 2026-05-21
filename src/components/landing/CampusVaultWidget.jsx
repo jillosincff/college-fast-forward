@@ -117,10 +117,10 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           Live Campus Vault Status
         </p>
         <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', textAlign: 'center', margin: '0 0 10px', lineHeight: 1.2 }}>
-          Bypass the public portals.<br />Access the hidden market.
+          Stop competing in public.<br />Access the hidden job market.
         </h2>
         <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 32px', lineHeight: 1.6 }}>
-          Three out of four open roles are never posted to public job boards. CLiFF bypasses the automated corporate filters by scanning your specific university's alumni network—instantly matching you with unlisted roles and verified campus insiders ready to fast-track your profile.
+          Most roles are never posted. CLiFF taps your school's alumni network to connect you directly with unlisted opportunities and insiders who can get you interviews.
         </p>
 
         {/* Autocomplete search */}
@@ -158,7 +158,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
                 flexShrink: 0,
               }}
             >
-              ⚡ Find My Match
+              ⚡ Show Me Hidden Roles
             </button>
           </div>
 
