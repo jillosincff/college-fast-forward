@@ -561,24 +561,34 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Career Agent</span>
           </div>
 
-          {/* Headline — gradient on brand name */}
-          <h1 style={{ fontFamily: FONT, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px', fontSize: 'clamp(26px, 5vw, 44px)', color: TEXT }}>
+          {/* Headline */}
+          <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 20px', fontSize: 'clamp(30px, 5.5vw, 52px)', color: TEXT }}>
             Welcome to<br />
             <span style={{ background: 'linear-gradient(135deg, #0066FF 0%, #0F172A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>College Fast Forward.</span>
           </h1>
 
-          <p style={{ ...substyle, color: '#334155', marginBottom: 32 }}>Your job search co-pilot — built to learn who you are and get you interviews quickly.</p>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 2vw, 18px)', color: '#334155', lineHeight: 1.65, margin: '0 auto 12px', maxWidth: 460, fontWeight: 500 }}>
+            Your AI Career Agent is here to end the endless application black hole.
+          </p>
+
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 1.6vw, 15px)', color: TEXT2, lineHeight: 1.7, margin: '0 auto 32px', maxWidth: 460 }}>
+            Most students are stuck spamming 100+ apps and hearing nothing back.<br />
+            <strong style={{ color: TEXT }}>We're different</strong> — we learn who you are, then use AI + real campus insiders to get you interviews fast.
+          </p>
 
           {/* CTA button with glow */}
           <button
             onClick={next}
-            style={{ display: 'block', margin: '0 auto 6px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '17px 52px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(0,102,255,0.2)', transition: 'all 0.2s ease' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(0,102,255,0.32)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,102,255,0.2)'; }}
-          >Let's Get Started →</button>
+            style={{ display: 'block', margin: '0 auto 10px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 12, padding: '19px 52px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 24px rgba(0,102,255,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(0,102,255,0.38)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(0,102,255,0.28)'; }}
+          >Let's Build Your Interview Edge →</button>
 
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, marginBottom: 4 }}>Takes about 2 minutes. No credit card required.</p>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, fontWeight: 600, margin: '0 0 28px' }}>Your first interview is closer than you think.</p>
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, marginBottom: 4 }}>
+            This guided setup takes ~8–12 minutes (worth it — most students see their first tailored plan in under 10).
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '0 0 8px' }}>No credit card required. Cancel anytime.</p>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 700, margin: '0 0 28px' }}>✨ Your first warm intro or interview is closer than you think.</p>
 
           {/* Social proof trust bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -593,8 +603,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                 <img key={i} src={src} alt="" style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid #fff', objectFit: 'cover', marginLeft: i === 0 ? 0 : -8, boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }} onError={e => { e.target.style.display = 'none'; }} />
               ))}
             </div>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.4 }}>
-              Joining <strong style={{ color: TEXT }}>2,400+ students</strong> from top campuses nationwide this week.
+            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0, lineHeight: 1.5 }}>
+              Join <strong style={{ color: TEXT }}>2,400+ students</strong> from top campuses who stopped guessing and started landing opportunities.
             </p>
           </div>
         </div>
