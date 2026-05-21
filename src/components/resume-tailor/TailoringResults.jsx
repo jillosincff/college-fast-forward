@@ -81,6 +81,7 @@ export default function TailoringResults({ result, companyName, jobTitle, origin
             changes={changes}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            tailoredScore={result.tailoredScore || tr.ats_score || 0}
           />
 
           {/* Right — Changes Panel */}
