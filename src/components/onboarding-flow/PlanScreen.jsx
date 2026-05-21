@@ -167,26 +167,35 @@ function SprintRoadmap({ targetRole, location, schoolName }) {
 
 /* ── Old Way vs Fast Forward ── */
 function ComparisonTable() {
+  const rows = [
+    ['2% response rate on cold apps', '18% avg response on our leads'],
+    ['40 hrs searching per week', '4 hrs of focused work per week'],
+    ['~60% of postings are ghost jobs', '100% verified active hiring signals'],
+  ];
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
-      <div style={{ background: '#fff5f5', border: '1px solid #fecaca', borderRadius: 16, padding: '18px 16px' }}>
-        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#ef4444', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>❌ The Old Way</p>
-        {[['2%', 'response rate on cold apps'], ['40 hrs', 'of searching per week'], ['~60%', 'of postings are ghost jobs']].map(([n, l], i) => (
-          <div key={i} style={{ marginBottom: 10 }}>
-            <p style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: '#ef4444', margin: '0 0 1px' }}>{n}</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>{l}</p>
-          </div>
-        ))}
+    <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 16, overflow: 'hidden', marginBottom: 28 }}>
+      {/* Header row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: `1.5px solid ${BORDER}` }}>
+        <div style={{ padding: '12px 18px', borderRight: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#374151' }}>The Old Way</span>
+          <span style={{ fontSize: 14 }}>❌</span>
+        </div>
+        <div style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#374151' }}>The Fast Forward Way</span>
+          <span style={{ fontSize: 14 }}>✅</span>
+        </div>
       </div>
-      <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 16, padding: '18px 16px' }}>
-        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 12px' }}>✅ Fast Forward Way</p>
-        {[['18%', 'avg response on our leads'], ['4 hrs', 'of focused work per week'], ['100%', 'verified active hiring signals']].map(([n, l], i) => (
-          <div key={i} style={{ marginBottom: 10 }}>
-            <p style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: GREEN, margin: '0 0 1px' }}>{n}</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>{l}</p>
+      {/* Data rows */}
+      {rows.map(([old, ff], i) => (
+        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: i < rows.length - 1 ? `1px solid ${BORDER}` : 'none' }}>
+          <div style={{ padding: '14px 18px', borderRight: `1px solid ${BORDER}`, background: '#fafafa' }}>
+            <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0, lineHeight: 1.5 }}>{old}</p>
           </div>
-        ))}
-      </div>
+          <div style={{ padding: '14px 18px' }}>
+            <p style={{ fontFamily: dm, fontSize: 13, color: GREEN, fontWeight: 600, margin: 0, lineHeight: 1.5 }}>{ff}</p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -279,7 +288,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
           }}
         >
-          Unlock Everything Now & Start Interviewing →
+          Unlock Everything Now →
         </button>
       </div>
 
@@ -472,47 +481,47 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           7. THE CLOSE — Pricing & CTA
       ───────────────────────────────────────────────────── */}
-      <div className="plan-close-card plan-main-cta" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
-        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: TEXT2, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+      <div className="plan-close-card plan-main-cta" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 24px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
+        <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+          {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."}
+        </h2>
+        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: TEXT2, margin: '0 0 18px' }}>
           Unlock Your Full 14-Day Sprint Plan
         </p>
-        <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 32px)', fontWeight: 900, color: TEXT, margin: '0 0 14px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-          {firstName ? `${firstName}, let's get you hired. 🎯` : "Let's get you hired. 🎯"}
-        </h2>
 
         {/* Pricing pill */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '8px 22px', marginBottom: 24 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '8px 22px', marginBottom: 22 }}>
           <span style={{ fontFamily: sat, fontSize: 24, fontWeight: 900, color: GREEN }}>$4.99</span>
-          <span style={{ fontFamily: dm, fontSize: 14, color: TEXT2, fontWeight: 500 }}>/week · Cancel anytime in 1 click</span>
+          <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2, fontWeight: 500 }}>/week · Cancel anytime in 1 click</span>
         </div>
 
         {/* Big green CTA */}
         <button
           onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } openPaywall(false); }}
           style={{
-            width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 18px',
-            fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
+            width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 20px',
+            fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff',
             background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-            border: 'none', borderRadius: 18, padding: '22px 32px', cursor: 'pointer', minHeight: 60,
+            border: 'none', borderRadius: 16, padding: '22px 32px', cursor: 'pointer', minHeight: 62,
             boxShadow: '0 8px 32px rgba(22,163,74,0.35), 0 2px 8px rgba(0,0,0,0.1)',
             letterSpacing: '-0.01em', transition: 'all 0.2s',
           }}
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(22,163,74,0.5), 0 2px 8px rgba(0,0,0,0.1)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(22,163,74,0.35), 0 2px 8px rgba(0,0,0,0.1)'; }}
         >
-          Unlock Everything Now &amp; Start Interviewing →
+          Unlock Everything Now →
         </button>
 
-        {/* Trust builders */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+        {/* Trust signals */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7, alignItems: 'center' }}>
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, fontWeight: 500 }}>
+            🏆 Join 2,400+ students landing interviews this month
+          </p>
           <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>
-            🏆 Join 2,400+ students who landed interviews this month
+            No credit card needed to start
           </p>
-          <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
-            No credit card needed to start · Cancel anytime · 🔒 Secure checkout
-          </p>
-          <p style={{ fontFamily: dm, fontSize: 12, color: BLUE, margin: 0, fontWeight: 600 }}>
-            🎁 Or text 3 friends for free access
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>
+            Cancel anytime · <span style={{ color: BLUE, fontWeight: 600 }}>🎁 Text 3 friends for free access</span>
           </p>
         </div>
       </div>
