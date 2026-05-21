@@ -208,23 +208,8 @@ export default function GatorAuth() {
     boxSizing: 'border-box',
   };
 
-  // New user — show the white-background onboarding funnel (postAuth=true since user is already signed in)
-  if (step === 'onboarding') {
-    const handleOnboardingComplete = async () => {
-      // Clear funnel flags so returning visits don't re-trigger funnel
-      try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); localStorage.removeItem('cff_onboarding_screen'); } catch (e) {}
-      // After funnel, set persona and go to dashboard
-      try {
-        await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
-        if (refreshUser) await refreshUser();
-      } catch (e) {}
-      navigate('/FreeTierDashboard');
-    };
-    return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} resumeAtScreen={resumeScreen} />;
-  }
-
   // While determining what to show, render a visible loading screen (not blank)
-  if (step !== 'auth') {
+  if (step === null) {
     return (
       <AuthPageShell>
         <div style={{ textAlign: 'center' }}>
@@ -233,6 +218,20 @@ export default function GatorAuth() {
         </div>
       </AuthPageShell>
     );
+  }
+
+  // New user — show the white-background onboarding funnel (postAuth=true since user is already signed in)
+  if (step === 'onboarding') {
+    const handleOnboardingComplete = async () => {
+      // Clear funnel flags so returning visits don't re-trigger funnel
+      try { sessionStorage.removeItem('cff_onboarding_type'); localStorage.removeItem('pending_invite_role'); localStorage.removeItem('cff_onboarding_screen'); } catch (e) {}
+      // After funnel, set persona and go to dashboard
+      try {
+        await base44.auth.updateMe({ persona: 'student', roles: ['student'], onboarding_completed: true, is_new_signup: true });
+      } catch (e) {}
+      window.location.hash = '#FreeTierDashboard';
+    };
+    return <OnboardingFlow postAuth={true} onClose={handleOnboardingComplete} onAlreadyAuthed={handleOnboardingComplete} resumeAtScreen={null} />;
   }
 
   if (step === 'auth') {
