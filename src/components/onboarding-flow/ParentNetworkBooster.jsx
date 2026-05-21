@@ -14,52 +14,138 @@ const TEXT2 = '#6b7280';
 
 const RELATIONSHIPS = ['Mom', 'Dad', 'Guardian', 'Other'];
 
-export default function ParentNetworkBooster({ onSkip, onAdd }) {
+function ConfirmationScreen({ firstName, parentName, parentCompany, schoolName, onContinue, onAddAnother }) {
+  return (
+    <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 20, padding: '28px 22px', marginBottom: 28 }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <div style={{ fontSize: 40, marginBottom: 10 }}>🎉</div>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px' }}>
+          Community Just Got Stronger
+        </p>
+        <h3 style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.02em' }}>
+          Thank you{firstName ? `, ${firstName}` : ''}!
+        </h3>
+        <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, lineHeight: 1.65, margin: 0, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
+          Your parent's connection has been added.{' '}
+          Each new parent network strengthens the <strong style={{ color: TEXT }}>{schoolName}</strong> community — giving every student better access to opportunities, warm intros, and hidden roles.
+        </p>
+      </div>
+
+      <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, textAlign: 'center', margin: '0 0 16px', fontStyle: 'italic' }}>
+        You're now part of building something bigger than just your own job search.
+      </p>
+
+      {/* Result highlights */}
+      <div style={{ background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 18px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[
+          { icon: '✅', text: '+1 Parent Network Added' },
+          { icon: '🎓', text: `The ${schoolName || 'UF'} community just leveled up` },
+          { icon: '🔍', text: 'CLiFF will surface more relevant matches for everyone' },
+        ].map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 16 }}>{item.icon}</span>
+            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: TEXT, margin: 0 }}>{item.text}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* CTAs */}
+      <button
+        onClick={onContinue}
+        style={{
+          width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 700, color: '#fff',
+          background: `linear-gradient(135deg, ${GREEN} 0%, #15803d 100%)`,
+          border: 'none', borderRadius: 12, padding: '16px 20px', cursor: 'pointer',
+          minHeight: 52, marginBottom: 8,
+          boxShadow: '0 4px 14px rgba(22,163,74,0.3)',
+        }}
+      >
+        Continue to My Dashboard →
+      </button>
+      <button
+        onClick={onAddAnother}
+        style={{
+          width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 500, color: BLUE,
+          background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`,
+          borderRadius: 12, padding: '12px 20px', cursor: 'pointer', minHeight: 44,
+        }}
+      >
+        Add Another Parent
+      </button>
+    </div>
+  );
+}
+
+export default function ParentNetworkBooster({ schoolName = 'University of Florida', firstName, onSkip, onAdd, onContinue }) {
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [email, setEmail] = useState('');
   const [relationship, setRelationship] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submittedData, setSubmittedData] = useState(null);
 
   const canSubmit = name.trim() && company.trim() && relationship;
 
   const handleAdd = () => {
     if (!canSubmit) return;
-    onAdd?.({ name, company, email, relationship });
+    const data = { name, company, email, relationship };
+    onAdd?.(data);
+    setSubmittedData(data);
     setSubmitted(true);
+  };
+
+  const handleAddAnother = () => {
+    setName('');
+    setCompany('');
+    setEmail('');
+    setRelationship('');
+    setSubmitted(false);
+    setSubmittedData(null);
   };
 
   if (submitted) {
     return (
-      <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 28, textAlign: 'center' }}>
-        <div style={{ fontSize: 36, marginBottom: 10 }}>🎉</div>
-        <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 800, color: GREEN, margin: '0 0 6px' }}>Network Booster Added!</p>
-        <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, margin: 0 }}>
-          We'll scan {name.split(' ')[0]}'s network at <strong style={{ color: TEXT }}>{company}</strong> for warm intros and hidden roles.
-        </p>
-      </div>
+      <ConfirmationScreen
+        firstName={firstName}
+        parentName={submittedData?.name}
+        parentCompany={submittedData?.company}
+        schoolName={schoolName}
+        onContinue={onContinue || onSkip}
+        onAddAnother={handleAddAnother}
+      />
     );
   }
 
   return (
     <div style={{ background: '#fff', border: `1.5px solid ${BORDER}`, borderRadius: 20, padding: '24px 22px', marginBottom: 28, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14 }}>
-        <span style={{ fontSize: 22, lineHeight: 1 }}>⚡</span>
-        <div>
-          <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: TEXT, margin: '0 0 4px', letterSpacing: '-0.01em' }}>
-            Want to 10x your network overnight?
-          </p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.55 }}>
-            Add your parent(s). Each one unlocks their full professional circle — creating an exponential jump in warm intros and hidden roles.{' '}
-            <span style={{ color: TEXT2 }}>Takes 20 seconds. Zero pressure.</span>
-          </p>
+      <div style={{ marginBottom: 16 }}>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>🔥</span> Strengthen the {schoolName} Community
+        </p>
+        <h3 style={{ fontFamily: sat, fontSize: 18, fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
+          Each parent connection strengthens the {schoolName} community.
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 4 }}>
+          {[
+            'You get more warm intros and hidden opportunities.',
+            'Other students get stronger connections.',
+            'The whole community levels up.',
+          ].map((line, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <span style={{ color: GREEN, fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
+              <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>{line}</p>
+            </div>
+          ))}
         </div>
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '8px 0 0', lineHeight: 1.5, fontStyle: 'italic' }}>
+          It's a true win-win that grows exponentially with every addition.
+        </p>
       </div>
 
       {/* Form */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
-        {/* Name */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         <input
           type="text"
           placeholder="Parent's Name *"
@@ -72,7 +158,8 @@ export default function ParentNetworkBooster({ onSkip, onAdd }) {
             transition: 'border-color 0.15s',
           }}
         />
-        {/* Company — highlighted as most important */}
+
+        {/* Company — highlighted */}
         <div style={{ position: 'relative' }}>
           <input
             type="text"
@@ -88,10 +175,12 @@ export default function ParentNetworkBooster({ onSkip, onAdd }) {
             }}
           />
           {!company && (
-            <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontFamily: dm, fontSize: 10, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '2px 7px', pointerEvents: 'none' }}>Key field</span>
+            <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#f97316', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '2px 7px', pointerEvents: 'none' }}>
+              High value
+            </span>
           )}
         </div>
-        {/* Email */}
+
         <input
           type="email"
           placeholder="Work Email (optional)"
@@ -104,6 +193,7 @@ export default function ParentNetworkBooster({ onSkip, onAdd }) {
             transition: 'border-color 0.15s',
           }}
         />
+
         {/* Relationship chips */}
         <div>
           <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: TEXT2, margin: '0 0 8px' }}>Relationship *</p>
@@ -128,7 +218,7 @@ export default function ParentNetworkBooster({ onSkip, onAdd }) {
         </div>
       </div>
 
-      {/* CTAs */}
+      {/* CTA */}
       <button
         onClick={handleAdd}
         disabled={!canSubmit}
@@ -140,7 +230,7 @@ export default function ParentNetworkBooster({ onSkip, onAdd }) {
           boxShadow: canSubmit ? '0 4px 14px rgba(37,99,235,0.3)' : 'none',
         }}
       >
-        Add Parent &amp; Expand My Network →
+        Add My Parent &amp; Strengthen the Community →
       </button>
       <button
         onClick={onSkip}
@@ -153,9 +243,8 @@ export default function ParentNetworkBooster({ onSkip, onAdd }) {
         Skip for now
       </button>
 
-      {/* Benefit line */}
-      <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, textAlign: 'center', margin: '10px 0 0', lineHeight: 1.5 }}>
-        💡 Students who add even one parent typically see <strong style={{ color: GREEN }}>2–4x more opportunities</strong>.
+      <p style={{ fontFamily: dm, fontSize: 12, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
+        Takes 20 seconds • No pressure
       </p>
     </div>
   );

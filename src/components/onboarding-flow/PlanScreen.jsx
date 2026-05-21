@@ -485,8 +485,11 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       ───────────────────────────────────────────────────── */}
       {!parentBoosterDone && (
         <ParentNetworkBooster
+          schoolName={college || 'University of Florida'}
+          firstName={firstName}
           onSkip={() => setParentBoosterDone(true)}
-          onAdd={() => setParentBoosterDone(true)}
+          onAdd={() => {}}
+          onContinue={() => setParentBoosterDone(true)}
         />
       )}
 
