@@ -83,38 +83,38 @@ function StoriesCarousel() {
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
         style={{
-          background: CARD, borderRadius: R, boxShadow: SHADOW_MD,
+          background: CARD, borderRadius: 12, boxShadow: SHADOW_MD,
           borderLeft: `4px solid ${BLUE}`,
-          padding: '32px 32px 28px', cursor: dragging ? 'grabbing' : 'grab',
+          padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)', cursor: dragging ? 'grabbing' : 'grab',
           transform: `translateX(${offset * 0.06}px)`, transition: dragging ? 'none' : 'transform 0.3s ease',
-          minHeight: 160, position: 'relative',
+          minHeight: 140, position: 'relative',
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '4px 12px', marginBottom: 16 }}>
-          <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{s.tag}</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: 'clamp(3px, 1vw, 4px) clamp(8px, 2vw, 12px)', marginBottom: 14, maxWidth: '100%' }}>
+          <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: BLUE, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{s.tag}</span>
         </div>
-        <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 1.8vw, 18px)', fontWeight: 500, color: TEXT, lineHeight: 1.7, margin: '0 0 20px', fontStyle: 'italic' }}>
+        <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 18px)', fontWeight: 500, color: TEXT, lineHeight: 1.6, margin: '0 0 clamp(16px, 4vw, 20px)', fontStyle: 'italic' }}>
           "{s.quote}"
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: `2px solid ${BLUE_BORDER}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 'clamp(36px, 10vw, 44px)', height: 'clamp(36px, 10vw, 44px)', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: `2px solid ${BLUE_BORDER}` }}>
             <img src={s.photo} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
-            <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0, letterSpacing: '-0.01em' }}>{s.name}</p>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0 }}>{s.school}</p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: TEXT, margin: 0, letterSpacing: '-0.01em', lineHeight: 1.3 }}>{s.name}</p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT2, margin: '2px 0 0', lineHeight: 1.3 }}>{s.school}</p>
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
         <div style={{ display: 'flex', gap: 6 }}>
           {STORIES.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 20 : 6, height: 6, borderRadius: 3, background: i === active ? BLUE : '#CBD5E1', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', transition: 'all 0.3s ease' }} />
+            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 18 : 6, height: 6, borderRadius: 3, background: i === active ? BLUE : '#CBD5E1', border: 'none', cursor: 'pointer', padding: 0, minHeight: '44px', transition: 'all 0.3s ease' }} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {['←', '→'].map((arrow, i) => (
-            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 32, height: 32, borderRadius: '50%', background: '#F1F5F9', border: `1px solid #E2E8F0`, fontSize: 13, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
+            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 32, height: 32, borderRadius: '50%', background: '#F1F5F9', border: `1px solid #E2E8F0`, fontSize: 13, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: '44px', transition: 'all 0.15s', touchAction: 'manipulation' }}
               onMouseEnter={e => { e.currentTarget.style.background = BLUE_LIGHT; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.color = BLUE; }}
               onMouseLeave={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; }}
             >{arrow}</button>
@@ -211,13 +211,15 @@ export default function StudentLandingPage({ onParentClick }) {
 
   const CTAButton = ({ label = 'Get Hired →', onClick = go, fullWidth = false }) => (
     <button onClick={onClick} style={{
-      fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
+      fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 16px)', fontWeight: 700, color: '#fff',
       background: `linear-gradient(to bottom, ${GREEN}, #059669)`,
-      border: 'none', borderRadius: 8, padding: '16px 36px',
-      cursor: 'pointer', minHeight: 'auto',
+      border: 'none', borderRadius: 12, padding: 'clamp(16px, 4vw, 20px) clamp(24px, 6vw, 36px)',
+      cursor: 'pointer', minHeight: '48px',
       transition: 'all 0.2s ease',
       boxShadow: '0 8px 24px rgba(16,185,129,0.3)',
       width: fullWidth ? '100%' : 'auto',
+      touchAction: 'manipulation',
+      WebkitTapHighlightColor: 'transparent',
     }}
       onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.4)'; e.currentTarget.style.background = `linear-gradient(to bottom, #059669, #047857)`; }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.3)'; e.currentTarget.style.background = `linear-gradient(to bottom, ${GREEN}, #059669)`; }}
@@ -234,16 +236,16 @@ export default function StudentLandingPage({ onParentClick }) {
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(248,250,252,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E2E8F0', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontFamily: FONT, fontSize: 17, fontWeight: 800, color: TEXT, letterSpacing: '-0.02em' }}>
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(248,250,252,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E2E8F0', padding: '0 16px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em' }}>
           College <span style={{ color: BLUE }}>Fast Forward</span>
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={parent} style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '8px 12px' }}>For Parents</button>
-          <button onClick={go} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 12px rgba(0,102,255,0.25)', transition: 'all 0.15s' }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={parent} style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: '44px', padding: '8px 10px', WebkitTapHighlightColor: 'transparent' }}>For Parents</button>
+          <button onClick={go} style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 10, padding: '10px clamp(14px, 4vw, 20px)', cursor: 'pointer', minHeight: '44px', boxShadow: '0 4px 12px rgba(0,102,255,0.25)', transition: 'all 0.15s', touchAction: 'manipulation' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-          >{!isLoadingAuth && user ? 'Go to Dashboard →' : 'Get Started →'}</button>
+          >{!isLoadingAuth && user ? 'Dashboard →' : 'Get Started →'}</button>
         </div>
       </nav>
 
@@ -251,13 +253,15 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        padding: '120px 24px 80px', textAlign: 'center',
+        padding: 'clamp(80px, 15vw, 120px) 16px clamp(60px, 10vw, 80px)',
+        textAlign: 'center',
         background: 'linear-gradient(180deg, #EFF6FF 0%, #F8FAFC 60%)',
       }}>
         {/* Avatar row */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center',
-          marginBottom: 36, opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
+          display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center',
+          marginBottom: 24, opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
+          flexWrap: 'wrap',
         }}>
           <div style={{ display: 'flex' }}>
             {[
@@ -267,39 +271,40 @@ export default function StudentLandingPage({ onParentClick }) {
               'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=face',
               'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=face',
             ].map((src, i) => (
-              <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${BG}`, overflow: 'hidden', marginLeft: i === 0 ? 0 : -10, position: 'relative', zIndex: 5 - i, boxShadow: SHADOW }}>
+              <div key={i} style={{ width: 28, height: 28, borderRadius: '50%', border: `2px solid ${BG}`, overflow: 'hidden', marginLeft: i === 0 ? 0 : -8, position: 'relative', zIndex: 5 - i, boxShadow: SHADOW }}>
                 <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             ))}
           </div>
-          <span style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, fontWeight: 500 }}>
+          <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT2, fontWeight: 500 }}>
             Joined by <strong style={{ color: TEXT, fontWeight: 700 }}>2,400+</strong> students
           </span>
         </div>
 
         {/* Badge */}
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
+          display: 'inline-flex', alignItems: 'center', gap: 6,
           background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`,
-          borderRadius: 100, padding: '7px 18px', marginBottom: 32,
+          borderRadius: 100, padding: '6px 14px', marginBottom: 24,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
+          maxWidth: '100%',
         }}>
-          <span style={{ fontSize: 13 }}>⚡</span>
-          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Career Agent</span>
+          <span style={{ fontSize: 'clamp(12px, 3vw, 13px)' }}>⚡</span>
+          <span style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: BLUE, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Your Career Agent</span>
         </div>
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 720, textAlign: 'center' }}>
-          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(32px, 5.5vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: TEXT, margin: '0 0 20px' }}>
+          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 7vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: TEXT, margin: '0 0 16px' }}>
             Welcome to{' '}
             <span style={{ color: BLUE }}>College Fast Forward.</span>
           </h1>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 2vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.5, margin: '0 0 16px' }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.4, margin: '0 0 14px' }}>
             <span style={{ fontWeight: 800 }}>
               <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span>
             </span>
             , your AI Career Agent, is here to end the endless application black hole.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.6vw, 16px)', color: TEXT2, lineHeight: 1.8, maxWidth: 520, margin: '0 auto' }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 16px)', color: TEXT2, lineHeight: 1.6, maxWidth: '100%', margin: '0 auto' }}>
             Most students are stuck spamming 100+ apps with almost no responses.{' '}
             <strong style={{ color: TEXT }}>We're different</strong> —{' '}
             <span style={{ fontWeight: 600 }}>
@@ -309,13 +314,14 @@ export default function StudentLandingPage({ onParentClick }) {
           </p>
         </div>
 
-        <div style={{ width: '100%', maxWidth: 420, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: '100%', maxWidth: 420, marginTop: 'clamp(24px, 8vw, 40px)', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
           <button onClick={go} style={{
-            width: '100%', fontFamily: FONT, fontSize: 16, fontWeight: 900, color: '#fff',
-            background: BLUE, border: 'none', borderRadius: 16, padding: '20px 32px',
-            cursor: 'pointer', minHeight: 'auto',
+            width: '100%', fontFamily: FONT, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 900, color: '#fff',
+            background: BLUE, border: 'none', borderRadius: 14, padding: 'clamp(16px, 5vw, 20px) clamp(20px, 6vw, 32px)',
+            cursor: 'pointer', minHeight: '52px',
             boxShadow: '0 12px 32px rgba(0,102,255,0.35)',
             transition: 'all 0.2s ease', letterSpacing: '0.01em',
+            touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
@@ -326,15 +332,15 @@ export default function StudentLandingPage({ onParentClick }) {
             </span>{' '}→
           </button>
           <div style={{ textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 2px' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: '0 0 2px', lineHeight: 1.4 }}>
               This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
             </p>
-            <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '0 0 10px' }}>No credit card required.</p>
-            <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 700, margin: 0 }}>✨ Your first warm intro or interview is closer than you think.</p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT3, margin: '0 0 8px', lineHeight: 1.3 }}>No credit card required.</p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: BLUE, fontWeight: 700, margin: 0, lineHeight: 1.4 }}>✨ Your first warm intro or interview is closer than you think.</p>
           </div>
-          <div style={{ marginTop: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
-            <span style={{ fontFamily: FONT, fontSize: 12, color: '#065F46', fontWeight: 600 }}>
+          <div style={{ marginTop: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: 'clamp(6px, 2vw, 8px) clamp(10px, 3vw, 14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, maxWidth: '100%' }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
+            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: '#065F46', fontWeight: 600, lineHeight: 1.4 }}>
               Join 3,412 students from top campuses nationwide stepping out of the crowd today.
             </span>
           </div>
@@ -342,27 +348,27 @@ export default function StudentLandingPage({ onParentClick }) {
 
         {/* Hero Card Preview */}
         <div style={{
-          marginTop: 56, maxWidth: 560, width: '100%',
-          background: CARD, borderRadius: 16, boxShadow: SHADOW_LG, padding: '24px',
+          marginTop: 'clamp(32px, 10vw, 56px)', maxWidth: 560, width: '100%',
+          background: CARD, borderRadius: 14, boxShadow: SHADOW_LG, padding: 'clamp(16px, 4vw, 24px)',
           textAlign: 'left', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.5s',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 }}>⚡</div>
-            <div>
-              <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0 }}>The Agent is working for you</p>
-              <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, margin: 0 }}>Updated just now</p>
+            <div style={{ width: 'clamp(28px, 8vw, 32px)', height: 'clamp(28px, 8vw, 32px)', borderRadius: 8, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'clamp(13px, 4vw, 15px)' }}>⚡</div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.3 }}>The Agent is working for you</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT2, margin: '2px 0 0', lineHeight: 1.3 }}>Updated just now</p>
             </div>
-            <div style={{ marginLeft: 'auto', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
-              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN }}>Live</span>
+            <div style={{ marginLeft: 'auto', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(2px, 1vw, 3px) clamp(6px, 2vw, 10px)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+              <div style={{ width: 'clamp(5px, 1.5vw, 6px)', height: 'clamp(5px, 1.5vw, 6px)', borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
+              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: GREEN, whiteSpace: 'nowrap' }}>Live</span>
             </div>
           </div>
           {PROOF_CALLOUTS.map((text, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #F1F5F9` : 'none' }}>
-              <div style={{ width: 18, height: 18, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 9, color: GREEN }}>✓</span>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)', padding: 'clamp(8px, 2vw, 10px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #F1F5F9` : 'none' }}>
+              <div style={{ width: 'clamp(16px, 4vw, 18px)', height: 'clamp(16px, 4vw, 18px)', borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 'clamp(7px, 2vw, 9px)', color: GREEN }}>✓</span>
               </div>
-              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT, margin: 0, fontWeight: 500 }}>{text}</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT, margin: 0, fontWeight: 500, lineHeight: 1.4 }}>{text}</p>
             </div>
           ))}
         </div>
@@ -372,37 +378,36 @@ export default function StudentLandingPage({ onParentClick }) {
       <AppShowcase />
 
       {/* ── DATA CONTRAST GRID (moved above fold) ── */}
-      <div style={{ padding: '72px 24px', background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 72px) 16px', background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
         <div style={{ maxWidth: 820, margin: '0 auto' }}>
           <SectionLabel text="Why the old way isn't working" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 36px', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: `0 0 clamp(24px, 6vw, 36px)`, textAlign: 'center' }}>
             The numbers don't lie.
           </h2>
-          <style>{`@media (max-width: 640px) { .metrics-grid { flex-direction: column !important; } }`}</style>
-          <div className="metrics-grid" style={{ display: 'flex', gap: 16, alignItems: 'stretch' }}>
-            <div style={{ flex: 1, background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#991B1B', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>❌ The Old Way — Blind Numbers Game</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }}>
+            <div style={{ width: '100%', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 14, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 4vw, 24px)' }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#991B1B', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>❌ The Old Way — Blind Numbers Game</p>
               {[
                 { stat: '2%', label: 'Response rate plugging generic resumes into public job boards and praying.' },
                 { stat: '40+', label: 'Hours wasted on application screens, spreadsheets, and cover letters written from scratch.' },
                 { stat: '~75%', label: 'Of resumes auto-rejected by ATS filters before a human ever reads them.' },
               ].map(({ stat, label }, i) => (
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#991B1B', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
-                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 'clamp(24px, 8vw, 32px)', fontWeight: 800, color: '#991B1B', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: '#4B5563', lineHeight: 1.5 }}>{label}</span>
                 </div>
               ))}
             </div>
-            <div style={{ flex: 1, background: '#F0FDF4', border: '1px solid #6EE7B7', borderRadius: 16, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
-              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#065F46', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>🎉 The Fast Forward Sprint — The Inside Track</p>
+            <div style={{ width: '100%', background: '#F0FDF4', border: '1px solid #6EE7B7', borderRadius: 14, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 4vw, 24px)' }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#065F46', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>🎉 The Fast Forward Sprint — The Inside Track</p>
               {[
                 { stat: '18%+', label: 'Response rate via unadvertised portals and direct warm alumni introductions.' },
                 { stat: '4 hrs', label: 'Total — the Agent automates tracking, sources internal leads, and drafts outreach for you.' },
                 { stat: '100%', label: 'Verified campus network routing — every connection is a real school-matched insider.' },
               ].map(({ stat, label }, i) => (
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: '#065F46', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
-                  <span style={{ fontFamily: FONT, fontSize: 13, color: '#4B5563', lineHeight: 1.6 }}>{label}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 'clamp(24px, 8vw, 32px)', fontWeight: 800, color: '#065F46', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
+                  <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: '#4B5563', lineHeight: 1.5 }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -414,13 +419,13 @@ export default function StudentLandingPage({ onParentClick }) {
       <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '72px 24px' }}>
+      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: 'clamp(48px, 10vw, 72px) 16px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <SectionLabel text="What the Agent does for you" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 38px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 36px', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 38px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
             One scan. Your entire edge, unlocked.
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 28 }}>
             {[
               { emoji: '⚡', label: 'Auto-extract insider contact lanes' },
               { emoji: '🎯', label: 'Real-time ATS formatting repair' },
@@ -429,14 +434,14 @@ export default function StudentLandingPage({ onParentClick }) {
               { emoji: '✉️', label: 'Outreach drafted in your voice' },
               { emoji: '🏆', label: 'Interview prep from real questions' },
             ].map((item, i) => (
-              <div key={i} style={{ background: BG, borderRadius: R, padding: '16px 18px', boxShadow: SHADOW, display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 20, flexShrink: 0 }}>{item.emoji}</span>
-                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.4 }}>{item.label}</p>
+              <div key={i} style={{ background: BG, borderRadius: 10, padding: 'clamp(12px, 3vw, 16px)', boxShadow: SHADOW, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0 }}>{item.emoji}</span>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 13px)', fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.3 }}>{item.label}</p>
               </div>
             ))}
           </div>
-          <div style={{ background: '#0F172A', borderRadius: R, padding: '20px 28px', textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 1.6vw, 16px)', fontWeight: 600, color: '#fff', margin: 0, lineHeight: 1.5 }}>
+          <div style={{ background: '#0F172A', borderRadius: 12, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 15px)', fontWeight: 600, color: '#fff', margin: 0, lineHeight: 1.5 }}>
               💬 <span style={{ color: GREEN }}>"I was overwhelmed applying everywhere. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks."</span> — Marcus, Penn State '27
             </p>
           </div>
@@ -444,14 +449,14 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── SOCIAL PROOF ── */}
-      <div style={{ padding: '80px 24px' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 16px' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <SectionLabel text="Students like you" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 36px', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
             Real results. Real students.
           </h2>
           <StoriesCarousel />
-          <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, textAlign: 'center', margin: '24px 0 0', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT3, textAlign: 'center', margin: 'clamp(16px, 4vw, 24px) 0 0', lineHeight: 1.6 }}>
             Students use CFF to stay organized, reduce stress, and move through the search with more traction.
           </p>
         </div>
@@ -460,51 +465,51 @@ export default function StudentLandingPage({ onParentClick }) {
 
 
       {/* ── PRICING ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '80px 24px' }}>
+      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: 'clamp(48px, 10vw, 80px) 16px' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <SectionLabel text="Pricing" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 40px', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
             One focused sprint.<br />Real results.
           </h2>
 
           {/* Sprint Card */}
-          <div style={{ background: CARD, borderRadius: 16, padding: '36px 32px', boxShadow: '0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)', border: `1px solid ${BLUE_BORDER}`, position: 'relative' }}>
+          <div style={{ background: CARD, borderRadius: 14, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', boxShadow: '0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)', border: `1px solid ${BLUE_BORDER}`, position: 'relative' }}>
 
             {/* Badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 14px', marginBottom: 24 }}>
-              <span style={{ fontSize: 12 }}>🎓</span>
-              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Graduation Sprint Plan</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(16px, 4vw, 24px)', maxWidth: '100%' }}>
+              <span style={{ fontSize: 'clamp(11px, 3vw, 12px)' }}>🎓</span>
+              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: '#059669', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Graduation Sprint Plan</span>
             </div>
 
             {/* Comparison badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 100, padding: '5px 14px', marginBottom: 20, marginLeft: 8 }}>
-              <span style={{ fontSize: 12 }}>⚡</span>
-              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: '#92400E' }}>Less than a single delivery meal for 14 days</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(14px, 4vw, 20px)', marginLeft: 0 }}>
+              <span style={{ fontSize: 'clamp(11px, 3vw, 12px)' }}>⚡</span>
+              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 600, color: '#92400E', whiteSpace: 'nowrap' }}>Less than a delivery meal for 14 days</span>
             </div>
 
             {/* Price */}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
-              <span style={{ fontFamily: FONT, fontSize: 52, fontWeight: 800, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
-              <span style={{ fontFamily: FONT, fontSize: 16, color: TEXT3, fontWeight: 400 }}>/week</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: FONT, fontSize: 'clamp(36px, 10vw, 52px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
+              <span style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 16px)', color: TEXT3, fontWeight: 400 }}>/week</span>
             </div>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: '0 0 28px' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: '0 0 clamp(20px, 5vw, 28px)', lineHeight: 1.4 }}>
               Billed monthly ($19.96) · Cancel in 1-tap anytime
             </p>
 
             {/* Features */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 'clamp(20px, 5vw, 28px)' }}>
               {PRO_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                    <span style={{ fontSize: 9, color: GREEN, fontWeight: 700 }}>✓</span>
+                  <div style={{ width: 'clamp(16px, 4vw, 18px)', height: 'clamp(16px, 4vw, 18px)', borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                    <span style={{ fontSize: 'clamp(7px, 2vw, 9px)', color: GREEN, fontWeight: 700 }}>✓</span>
                   </div>
-                  <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT, margin: 0, lineHeight: 1.6 }}>{f}</p>
+                  <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT, margin: 0, lineHeight: 1.5 }}>{f}</p>
                 </div>
               ))}
             </div>
 
             <CTAButton label="⚡ Check My ATS Match Score" fullWidth />
-            <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '14px 0 0' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, textAlign: 'center', margin: 'clamp(12px, 3vw, 14px) 0 0', lineHeight: 1.4 }}>
               No credit card required to start.
             </p>
           </div>
@@ -512,34 +517,34 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── FINAL CTA ── */}
-      <div style={{ padding: '88px 24px 72px', textAlign: 'center', background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%)' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 88px) 16px clamp(48px, 10vw, 72px)', textAlign: 'center', background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%)' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <SectionLabel text="Ready to escape the black hole?" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px' }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
             Search Smarter,<br />
             <span style={{ color: BLUE }}>Not Harder.</span>
           </h2>
-          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 0 32px', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 15px)', color: TEXT2, margin: '0 0 clamp(24px, 6vw, 32px)', lineHeight: 1.6 }}>
             Join 2,400+ students who stopped applying blindly and started getting results.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
             <CTAButton label="⚡ Optimize My Resume File" />
           </div>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>No credit card required to start.</p>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: 0, lineHeight: 1.4 }}>No credit card required to start.</p>
         </div>
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={{ borderTop: '1px solid #E2E8F0', padding: '28px 24px', textAlign: 'center', background: CARD }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div style={{ borderTop: '1px solid #E2E8F0', padding: 'clamp(20px, 5vw, 28px) 16px', textAlign: 'center', background: CARD }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
           {[['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
-            <a key={label} href={href} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, textDecoration: 'none', transition: 'color 0.15s' }}
+            <a key={label} href={href} style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT3, textDecoration: 'none', transition: 'color 0.15s', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
               onMouseEnter={e => e.currentTarget.style.color = TEXT2}
               onMouseLeave={e => e.currentTarget.style.color = TEXT3}
             >{label}</a>
           ))}
         </div>
-        <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>
+        <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: 0, lineHeight: 1.5 }}>
           © {new Date().getFullYear()} College Fast Forward · Helping students land faster with less stress.
         </p>
       </div>

@@ -337,7 +337,7 @@ export default function StudentOnboarding() {
                 <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 400, color: '#888', lineHeight: 1.5 }}>
                   In return, you get instant access to the Inside Tracks their families and alumni have opened up for you. It's how we all bypass the resume black hole together.
                 </p>
-                <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 4, fontWeight: 400, color: '#555', fontStyle: 'italic', marginTop: 8 }}>
+                <p style={{ fontFamily: dmSans, fontSize: 10, fontWeight: 400, color: '#555', fontStyle: 'italic', marginTop: 8 }}>
                   🔒 Zero Spam Guarantee: We will never email, call, or solicit your parents. This purely maps company availability to give your university ecosystem an unfair advantage.
                 </p>
               </div>
