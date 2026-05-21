@@ -142,16 +142,9 @@ export default function StudentLandingPage({ onParentClick }) {
       } catch {}
       setFunnelStartScreen(null);
       setShowFunnel(true);
-    } else {
-      // Authenticated users go straight to dashboard
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('ParentHome');
-      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-        navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
-      } else {
-        navigate('FreeTierDashboard');
-      }
     }
+    // For authenticated users, do nothing here - they stay on the landing page to view results
+    // Navigation happens separately via the "Go to Dashboard" button or action buttons in results
   };
 
   useEffect(() => {
