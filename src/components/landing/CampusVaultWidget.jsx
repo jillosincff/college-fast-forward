@@ -71,6 +71,10 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
   const [suggestions, setSuggestions] = useState([]);
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalStep, setModalStep] = useState('form'); // 'form' or 'success'
+  const [formData, setFormData] = useState({ university: '', email: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef();
   const containerRef = useRef();
 
@@ -84,6 +88,22 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const handleModalSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.email || !formData.university) return;
+    setIsSubmitting(true);
+    // Simulate API call - in production, send to backend
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setModalStep('success');
+    setIsSubmitting(false);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalStep('form');
+    setFormData({ university: '', email: '' });
+  };
 
   const handleInput = (val) => {
     setQuery(val);
@@ -197,7 +217,7 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
         {/* Universal catch-all */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <button
-            onClick={() => { if (onSchoolSelect) onSchoolSelect(''); }}
+            onClick={() => setShowModal(true)}
             style={{
               fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#fff',
               background: '#0F172A', border: '1.5px solid #0F172A',
@@ -208,9 +228,140 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
             onMouseEnter={e => { e.currentTarget.style.background = '#1E293B'; }}
             onMouseLeave={e => { e.currentTarget.style.background = '#0F172A'; }}
           >
-            🔍 School not listed? Click here to bypass
+            My school isn't listed? Click here
           </button>
         </div>
+
+        {/* Modal */}
+        {showModal && (
+          <div style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+            zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 24,
+          }} onClick={closeModal}>
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: '#fff', borderRadius: 16, maxWidth: 480, width: '100%',
+                padding: 32, position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                animation: 'fadeUp 0.2s ease',
+              }}
+            >
+              {/* Close button */}
+              <button
+                onClick={closeModal}
+                style={{
+                  position: 'absolute', top: 16, right: 16, background: 'transparent',
+                  border: 'none', fontSize: 24, cursor: 'pointer', color: '#64748B',
+                  padding: 4, minHeight: 'auto', lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+
+              {modalStep === 'form' ? (
+                <>
+                  <h3 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: '#0F172A', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
+                    Can't find your school?
+                  </h3>
+                  <p style={{ fontFamily: FONT, fontSize: 14, color: '#64748B', margin: '0 0 24px', lineHeight: 1.6 }}>
+                    We're adding new universities every week.<br />
+                    Drop your school + email below and we'll notify you the moment it's live in the Campus Vault.
+                  </p>
+
+                  <form onSubmit={handleModalSubmit}>
+                    <div style={{ marginBottom: 16 }}>
+                      <label style={{ display: 'block', fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        University Name
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.university}
+                        onChange={e => setFormData({ ...formData, university: e.target.value })}
+                        placeholder="e.g., University of California, Los Angeles"
+                        required
+                        style={{
+                          width: '100%', fontFamily: FONT, fontSize: 14, color: '#0F172A',
+                          background: '#F8FAFC', border: '2px solid #E2E8F0', borderRadius: 10,
+                          padding: '12px 14px', boxSizing: 'border-box', outline: 'none',
+                          transition: 'border-color 0.15s',
+                        }}
+                        onFocus={e => e.currentTarget.style.borderColor = BLUE}
+                        onBlur={e => e.currentTarget.style.borderColor = '#E2E8F0'}
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: 24 }}>
+                      <label style={{ display: 'block', fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Email Address <span style={{ color: '#EF4444' }}>*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="you@university.edu"
+                        required
+                        style={{
+                          width: '100%', fontFamily: FONT, fontSize: 14, color: '#0F172A',
+                          background: '#F8FAFC', border: '2px solid #E2E8F0', borderRadius: 10,
+                          padding: '12px 14px', boxSizing: 'border-box', outline: 'none',
+                          transition: 'border-color 0.15s',
+                        }}
+                        onFocus={e => e.currentTarget.style.borderColor = BLUE}
+                        onBlur={e => e.currentTarget.style.borderColor = '#E2E8F0'}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      style={{
+                        width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 800,
+                        color: '#fff', background: isSubmitting ? '#94A3B8' : BLUE,
+                        border: 'none', borderRadius: 12, padding: '14px 24px',
+                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.2s', opacity: isSubmitting ? 0.7 : 1,
+                      }}
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Notify Me When My School Is Added'}
+                    </button>
+
+                    <p style={{ fontFamily: FONT, fontSize: 11, color: '#94A3B8', textAlign: 'center', margin: '12px 0 0' }}>
+                      We respect your inbox. You can unsubscribe anytime.
+                    </p>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
+                    <h3 style={{ fontFamily: FONT, fontSize: 24, fontWeight: 800, color: '#0F172A', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
+                      You're on the list!
+                    </h3>
+                    <p style={{ fontFamily: FONT, fontSize: 14, color: '#64748B', margin: '0 0 8px', lineHeight: 1.6 }}>
+                      Thanks! We'll email you as soon as <strong style={{ color: BLUE }}>{formData.university}</strong> is added to CLiFF.
+                    </p>
+                    <p style={{ fontFamily: FONT, fontSize: 14, color: '#64748B', margin: '0 0 24px', lineHeight: 1.6 }}>
+                      In the meantime, feel free to explore our free resources or join the general waitlist for early access.
+                    </p>
+                    <button
+                      onClick={closeModal}
+                      style={{
+                        fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff',
+                        background: BLUE, border: 'none', borderRadius: 10, padding: '12px 28px',
+                        cursor: 'pointer', minHeight: 'auto', transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = BLUE_LIGHT}
+                      onMouseLeave={e => e.currentTarget.style.background = BLUE}
+                    >
+                      Back to Search
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Result card — shown after selection */}
         {selectedSchool && count && (
