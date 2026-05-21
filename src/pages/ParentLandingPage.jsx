@@ -84,16 +84,17 @@ export default function ParentLandingPage({ onStudentClick }) {
     e.preventDefault();
     if (!form.fullName || !form.jobTitle || !form.industry || !form.email) return;
     setSubmitting(true);
-    // Store parent role hint and navigate to signup
+    // Store parent role hint for future navigation
     localStorage.setItem('pending_invite_role', 'parent');
     sessionStorage.setItem('pending_invite_role', 'parent');
     // Store form data for pre-population
     try {
       sessionStorage.setItem('parent_prefill', JSON.stringify(form));
     } catch {}
+    // Show success screen directly - no auth needed
     setTimeout(() => {
       setSubmitting(false);
-      navigate('GatorAuth');
+      setSubmitted(true);
     }, 600);
   };
 
