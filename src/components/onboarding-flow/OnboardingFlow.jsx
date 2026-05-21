@@ -104,7 +104,24 @@ const SCREEN2_EXPERTS = [
 ];
 const SCREEN2_LOGOS = ['Goldman Sachs', 'Google', 'Meta', 'McKinsey', 'Amazon'];
 
-function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BLUE_BORDER, GREEN, GREEN_LIGHT, GREEN_BORDER, TEXT, TEXT2, TEXT3, h1style, substyle, hoveredExpert, setHoveredExpert, selectedExpert, setSelectedExpert, onBack, onNext }) {
+// Maps blocker key → expert key that should be highlighted
+const BLOCKER_TO_EXPERT = {
+  resume: 'recruiter',   // Jill: ghosted applications / resume
+  ghosted: 'recruiter',  // Jill: ghosted
+  no_direction: 'hm',   // Sarah: career direction / confidence
+  which_jobs: 'coach',  // Anna: what recruiters want
+  outreach: 'coach',    // Anna: insider knowledge
+  disorganized: 'hm',   // Sarah: clarity & confidence
+  interviews: 'hm',     // Sarah: interview confidence
+};
+
+function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BLUE_BORDER, GREEN, GREEN_LIGHT, GREEN_BORDER, TEXT, TEXT2, TEXT3, h1style, substyle, hoveredExpert, setHoveredExpert, selectedExpert, setSelectedExpert, onBack, onNext, blockers }) {
+  const [pressedExpert, setPressedExpert] = useState(null);
+
+  // Determine featured expert from blockers
+  const featuredKey = blockers?.length > 0
+    ? (BLOCKER_TO_EXPERT[blockers[0]] || null)
+    : null;
   const NavInline = ({ onBack: b, onNext: n, nextLabel = 'Continue →', nextDisabled = false }) => (
     <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32 }}>
       {b && <button onClick={b} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT2, background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>← Back</button>}
@@ -124,19 +141,52 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
           {SCREEN2_EXPERTS.map(ex => {
             const isActive = selectedExpert === ex.key;
             const isHov = hoveredExpert === ex.key;
+            const isPressed = pressedExpert === ex.key;
+            const isFeatured = featuredKey === ex.key && !selectedExpert;
             return (
-              <div key={ex.key} onClick={() => setSelectedExpert(isActive ? null : ex.key)} onMouseEnter={() => setHoveredExpert(ex.key)} onMouseLeave={() => setHoveredExpert(null)}
-                style={{ flex: 1, minWidth: 140, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, background: isActive ? ex.colorLight : CARD, border: `2px solid ${isActive ? ex.color : isHov ? ex.colorBorder : '#E2E8F0'}`, borderRadius: 16, padding: '20px 14px 16px', cursor: 'pointer', boxShadow: isActive ? `0 8px 24px ${ex.color}22` : isHov ? SHADOW_MD : SHADOW, transform: isActive || isHov ? 'translateY(-4px)' : 'translateY(0)', transition: 'all 0.2s ease', textAlign: 'center' }}
+              <div
+                key={ex.key}
+                onClick={() => setSelectedExpert(isActive ? null : ex.key)}
+                onMouseEnter={() => setHoveredExpert(ex.key)}
+                onMouseLeave={() => setHoveredExpert(null)}
+                onMouseDown={() => setPressedExpert(ex.key)}
+                onMouseUp={() => setPressedExpert(null)}
+                onTouchStart={() => setPressedExpert(ex.key)}
+                onTouchEnd={() => { setPressedExpert(null); setSelectedExpert(isActive ? null : ex.key); }}
+                style={{
+                  flex: 1, minWidth: 140,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                  background: isActive ? ex.colorLight : isFeatured ? ex.colorLight : CARD,
+                  border: `2px solid ${isActive ? ex.color : isFeatured ? ex.colorBorder : isHov ? ex.colorBorder : '#E2E8F0'}`,
+                  borderRadius: 16, padding: '20px 14px 16px', cursor: 'pointer',
+                  boxShadow: isActive ? `0 8px 24px ${ex.color}22` : isFeatured ? `0 8px 20px ${ex.color}18` : isHov ? SHADOW_MD : SHADOW,
+                  transform: isPressed ? 'scale(0.95)' : isActive || isHov ? 'translateY(-4px)' : 'translateY(0)',
+                  transition: isPressed ? 'transform 0.08s ease' : 'all 0.2s ease',
+                  textAlign: 'center', position: 'relative',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
               >
-                <img src={ex.avatar} alt={ex.name} style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isActive ? ex.color : '#E2E8F0'}`, transition: 'border-color 0.2s' }} onError={e => { e.target.style.display = 'none'; }} />
+                {/* Featured badge */}
+                {isFeatured && (
+                  <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: ex.color, color: '#fff', fontFamily: FONT, fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 100, whiteSpace: 'nowrap' }}>
+                    ✦ Recommended for you
+                  </div>
+                )}
+
+                <img src={ex.avatar} alt={ex.name} style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `3px solid ${isActive || isFeatured ? ex.color : '#E2E8F0'}`, transition: 'border-color 0.2s' }} onError={e => { e.target.style.display = 'none'; }} />
                 <div>
-                  <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: isActive ? ex.color : TEXT, margin: '0 0 2px' }}>{ex.name}</p>
+                  <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: isActive || isFeatured ? ex.color : TEXT, margin: '0 0 2px' }}>{ex.name}</p>
                   <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, margin: 0 }}>{ex.role}</p>
                 </div>
-                {isActive && (
+
+                {isActive ? (
                   <p style={{ fontFamily: FONT, fontSize: 12, color: ex.color, margin: 0, lineHeight: 1.5 }}>
                     <span style={{ fontWeight: 700 }}>→ How she helps you: </span>
                     {ex.teaser}
+                  </p>
+                ) : (
+                  <p style={{ fontFamily: FONT, fontSize: 11, color: isFeatured ? ex.color : TEXT2, margin: 0, fontWeight: isFeatured ? 600 : 400, opacity: isFeatured ? 1 : 0.75 }}>
+                    Learn how she helps →
                   </p>
                 )}
               </div>
@@ -648,6 +698,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           h1style={h1style} substyle={substyle}
           hoveredExpert={hoveredExpert} setHoveredExpert={setHoveredExpert}
           selectedExpert={selectedExpert} setSelectedExpert={setSelectedExpert}
+          blockers={blockers}
           onBack={back} onNext={next}
         />
       )}
