@@ -302,7 +302,13 @@ export default function StudentLandingPage({ onParentClick }) {
           lineHeight: 1.8, maxWidth: 520, margin: '24px auto 0',
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.2s',
         }}>
-          Job hunting is stressful, frustrating, and a massive time suck. CLiFF delivers a smarter strategy that organizes your roadmap, and finds campus insiders <strong style={{ color: TEXT }}>10x more likely to help get interviewed fast.</strong>
+          Job hunting sucks when you're blindly applying to hundreds of jobs and getting ghosted.{' '}
+          <span style={{ fontWeight: 700 }}>
+            <span style={{ color: BLUE }}>C</span>
+            <span style={{ color: TEXT3 }}>li</span>
+            <span style={{ color: BLUE }}>FF</span>
+          </span>{' '}
+          — your AI career agent — gives you a smarter, targeted approach: a focused strategy paired with real campus insiders <strong style={{ color: TEXT }}>10X more likely to land you interviews fast.</strong>
         </p>
 
         <div style={{ width: '100%', maxWidth: 400, marginTop: 40, opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
@@ -315,7 +321,7 @@ export default function StudentLandingPage({ onParentClick }) {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
-          >⚡ Stand Out From The Crowd</button>
+          >Get Interviews Faster – Start for Free</button>
           <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             🔒 Free Student Workspace · Takes 30 seconds
           </span>
