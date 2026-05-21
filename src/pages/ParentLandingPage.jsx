@@ -170,12 +170,73 @@ export default function ParentLandingPage({ onStudentClick }) {
           textAlign: 'left',
         }}>
           {submitted ? (
-            <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
-              <h3 style={{ fontFamily: FONT, fontSize: 22, fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.02em' }}>You're in!</h3>
-              <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, lineHeight: 1.65, margin: 0 }}>
-                Thanks for joining. Finish setting up your profile so students can find you.
+            <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+              <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
+              <h3 style={{ fontFamily: FONT, fontSize: 26, fontWeight: 800, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.02em' }}>Thank you!</h3>
+              <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT, lineHeight: 1.5, margin: '0 0 16px' }}>
+                Your information has been added to the College Fast Forward network.
               </p>
+              <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 0 24px' }}>
+                Each parent connection strengthens the student community. Your profile will now be surfaced to relevant students from your school who are looking in your industry — creating real opportunities for the next generation.
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: GREEN, margin: '0 0 24px' }}>
+                You just helped make the network better for everyone.
+              </p>
+
+              {/* Next Steps */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                <button
+                  onClick={() => {
+                    // Open email client with pre-filled message
+                    const subject = encodeURIComponent('Join me on College Fast Forward');
+                    const body = encodeURIComponent('Hey! I just joined the College Fast Forward network to help students in my industry. You should sign up too - it\'s free and only takes 30 seconds.\n\nJoin here: https://collegefastforward.com\n\nLet me know if you have any questions!');
+                    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+                  }}
+                  style={{
+                    fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
+                    background: BLUE, border: 'none', borderRadius: R, padding: '15px 24px',
+                    cursor: 'pointer', minHeight: 'auto',
+                    boxShadow: '0 6px 20px rgba(0,102,255,0.25)',
+                    transition: 'all 0.2s ease', width: '100%',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
+                >
+                  Invite My Student →
+                </button>
+                <button
+                  onClick={student}
+                  style={{
+                    fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT2,
+                    background: '#F8FAFC', border: '1.5px solid #E2E8F0', borderRadius: R, padding: '15px 24px',
+                    cursor: 'pointer', minHeight: 'auto',
+                    transition: 'all 0.2s ease', width: '100%',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.color = BLUE; e.currentTarget.style.background = BLUE_LIGHT; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; e.currentTarget.style.background = '#F8FAFC'; }}
+                >
+                  Done — Return Home
+                </button>
+              </div>
+
+              {/* What happens next */}
+              <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: 18, textAlign: 'left' }}>
+                <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEXT3, margin: '0 0 10px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>What happens next?</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {[
+                    'Students matching your school + industry will see you as a potential warm connection',
+                    'You\'ll only be contacted if a student reaches out',
+                    'You can edit or remove your profile anytime',
+                  ].map((line, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <div style={{ width: 14, height: 14, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                        <span style={{ fontSize: 8, color: GREEN }}>✓</span>
+                      </div>
+                      <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.5 }}>{line}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
