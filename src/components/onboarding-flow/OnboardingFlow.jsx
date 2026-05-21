@@ -252,7 +252,6 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
 
   const [screen, setScreen] = useState(startScreen);
   const [analyzing, setAnalyzing] = useState(false); // analyzing loader after university
-  const [resonanceActive, setResonanceActive] = useState(false); // Network Resonance Scan
   const [frustration, setFrustration] = useState(saved?.frustration ?? 5);
   const [seeking, setSeeking] = useState(saved?.seeking ?? '');
   const [blockers, setBlockers] = useState(saved?.blockers ?? []);
@@ -334,14 +333,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
     } catch {}
   };
 
-  // Trigger the resonance scan, then proceed after 2500ms
-  const triggerResonanceScan = (onComplete) => {
-    setResonanceActive(true);
-    setTimeout(() => {
-      setResonanceActive(false);
-      onComplete();
-    }, 2500);
-  };
+
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -514,12 +506,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         </div>
       )}
 
-      {/* ── Network Resonance Scan ── */}
-      {resonanceActive && (
-        <div style={{ textAlign: 'center', maxWidth: 560, width: '100%', animation: 'fadeUp 0.3s ease' }}>
-          <LiveEngineLoader resonanceMode schoolShortName={college?.split(' ').slice(-2).join(' ') || college || 'your school'} />
-        </div>
-      )}
+
 
       {/* ── Progress Bar (screens 1–8, or postAuth steps) ── */}
       {!analyzing && screen < 10 && (
@@ -534,7 +521,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       )}
 
       {/* ── Screen Transition Wrapper ── */}
-      {!analyzing && !resonanceActive && <FunnelTransition screenKey={screen}>
+      {!analyzing && <FunnelTransition screenKey={screen}>
 
       {/* ── SCREEN 1: Welcome ── */}
       {screen === 1 && (
@@ -874,7 +861,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           onBack={back}
           onNext={() => {
             fireReferralMilestone(college);
-            triggerResonanceScan(() => next());
+            next();
           }}
           nextLabel="Continue →"
         />
