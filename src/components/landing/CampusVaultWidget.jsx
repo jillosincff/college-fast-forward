@@ -72,11 +72,22 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
   const [selectedSchool, setSelectedSchool] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalStep, setModalStep] = useState('form'); // 'form' or 'success'
+  const [modalStep, setModalStep] = useState('form');
   const [formData, setFormData] = useState({ university: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const inputRef = useRef();
   const containerRef = useRef();
+
+  // Mock job matches data
+  const mockJobs = [
+    { title: 'Software Engineering Intern', company: 'Google', daysAgo: 6, matchStrength: 'High', insiders: 2 },
+    { title: 'Finance Analyst', company: 'Goldman Sachs', daysAgo: 3, matchStrength: 'High', insiders: 1 },
+    { title: 'Marketing Coordinator', company: 'Meta', daysAgo: 12, matchStrength: 'Medium', insiders: 3 },
+    { title: 'Data Science Intern', company: 'Microsoft', daysAgo: 8, matchStrength: 'High', insiders: 1 },
+    { title: 'Product Management Rotational', company: 'Amazon', daysAgo: 5, matchStrength: 'Medium', insiders: 2 },
+  ];
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -93,7 +104,6 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
     e.preventDefault();
     if (!formData.email || !formData.university) return;
     setIsSubmitting(true);
-    // Simulate API call - in production, send to backend
     await new Promise(resolve => setTimeout(resolve, 800));
     setModalStep('success');
     setIsSubmitting(false);
@@ -105,6 +115,24 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
     setFormData({ university: '', email: '' });
   };
 
+  const selectSchool = (name) => {
+    setQuery(name);
+    setSelectedSchool(name);
+    setSuggestions([]);
+    setDropdownOpen(false);
+    try { localStorage.setItem('cff_selected_school', name); } catch {}
+    
+    // Show loading state first
+    setIsLoading(true);
+    setShowResults(false);
+    
+    setTimeout(() => {
+      setIsLoading(false);
+      setShowResults(true);
+      if (onSchoolSelect) onSchoolSelect(name);
+    }, 1800);
+  };
+
   const handleInput = (val) => {
     setQuery(val);
     setSelectedSchool(null);
@@ -114,18 +142,6 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
     setDropdownOpen(filtered.length > 0);
   };
 
-  const selectSchool = (name) => {
-    setQuery(name);
-    setSelectedSchool(name);
-    setSuggestions([]);
-    setDropdownOpen(false);
-    try { localStorage.setItem('cff_selected_school', name); } catch {}
-    // Flash selection then launch
-    setTimeout(() => {
-      if (onSchoolSelect) onSchoolSelect(name);
-    }, 280);
-  };
-
   const count = selectedSchool ? getCount(selectedSchool) : null;
 
   return (
@@ -133,6 +149,12 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
 
         {/* Header */}
+        <style>{`
+          @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,102,255,0.15)} 50%{box-shadow:0 0 0 8px rgba(0,102,255,0)} }
+          @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        `}</style>
+
         <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>
           Live Campus Vault Status
         </p>
@@ -363,43 +385,193 @@ export default function CampusVaultWidget({ go, onSchoolSelect, FONT, TEXT, TEXT
           </div>
         )}
 
-        {/* Result card — shown after selection */}
-        {selectedSchool && count && (
+        {/* Loading State */}
+        {isLoading && (
           <div style={{
             background: CARD, borderRadius: 16,
             border: `2px solid ${BLUE_BORDER}`,
             boxShadow: `0 12px 32px rgba(0,102,255,0.12)`,
-            padding: '28px 24px', textAlign: 'center',
+            padding: '48px 24px', textAlign: 'center',
             animation: 'fadeUp 0.3s ease',
           }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 16 }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
-              <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Network Active</span>
+            <div style={{ width: 48, height: 48, border: `4px solid ${BLUE_LIGHT}`, borderTop: `4px solid ${BLUE}`, borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 24px' }} />
+            <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 600, color: TEXT, margin: 0 }}>
+              Scanning <strong style={{ color: BLUE }}>{query || selectedSchool}</strong> alumni network…
+            </p>
+          </div>
+        )}
+
+        {/* Results Screen */}
+        {showResults && selectedSchool && (
+          <div style={{
+            background: CARD, borderRadius: 16,
+            border: `2px solid ${BLUE_BORDER}`,
+            boxShadow: `0 12px 32px rgba(0,102,255,0.12)`,
+            padding: '32px 28px', textAlign: 'left',
+            animation: 'fadeUp 0.3s ease',
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', background: GREEN_LIGHT, border: `2px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 14, color: GREEN }}>✓</span>
+              </div>
+              <h3 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>
+                {selectedSchool} Campus Vault Unlocked
+              </h3>
             </div>
-            <h3 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 6vw, 60px)', fontWeight: 800, color: BLUE, margin: '0 0 6px', letterSpacing: '-0.03em', lineHeight: 1 }}>
-              {count}+
-            </h3>
-            <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 700, color: TEXT, margin: '0 0 6px' }}>
-              Active Alumni &amp; Parents Synced
-            </p>
-            <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 24px', lineHeight: 1.6 }}>
-              <strong style={{ color: TEXT }}>{selectedSchool}</strong> insiders are on top-tier hiring teams right now — tap in before someone else does.
-            </p>
-            <button
-              onClick={() => { if (onSchoolSelect) onSchoolSelect(selectedSchool); }}
-              style={{
-                fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff',
-                background: `linear-gradient(135deg, ${BLUE} 0%, #06B6D4 100%)`,
-                border: 'none', borderRadius: 12, padding: '14px 36px',
-                cursor: 'pointer', minHeight: 'auto',
-                boxShadow: '0 8px 24px rgba(0,102,255,0.3)',
-                transition: 'all 0.2s',
+
+            {/* Big Result Number */}
+            <div style={{ marginBottom: 32 }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(42px, 8vw, 64px)', fontWeight: 800, color: BLUE, margin: '0 0 8px', letterSpacing: '-0.04em', lineHeight: 1 }}>
+                47
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT, margin: '0 0 6px' }}>
+                hidden opportunities matched for you right now
+              </p>
+              <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
+                These roles are never posted on public job boards. CLiFF found them through your school's alumni network.
+              </p>
+            </div>
+
+            {/* Job Matches */}
+            <div style={{ marginBottom: 32 }}>
+              <h4 style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.01em' }}>
+                🔥 Top Matches This Week
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {mockJobs.slice(0, 4).map((job, i) => (
+                  <div key={i} style={{
+                    background: BG, borderRadius: 12, padding: '16px 18px',
+                    border: '1px solid #E2E8F0', transition: 'all 0.15s',
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.transform = 'translateX(4px)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'translateX(0)'; }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div>
+                        <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 4px' }}>
+                          {job.title}
+                        </p>
+                        <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>
+                          {job.company} • Posted {job.daysAgo} days ago via alumni
+                        </p>
+                      </div>
+                      <span style={{
+                        fontFamily: FONT, fontSize: 11, fontWeight: 700,
+                        color: job.matchStrength === 'High' ? '#059669' : '#D97706',
+                        background: job.matchStrength === 'High' ? GREEN_LIGHT : '#FEF3C7',
+                        border: `1px solid ${job.matchStrength === 'High' ? GREEN_BORDER : '#FCD34D'}`,
+                        borderRadius: 100, padding: '4px 10px',
+                      }}>
+                        {job.matchStrength} Match
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontFamily: FONT, fontSize: 11, color: TEXT2 }}>
+                        {job.insiders} insider{job.insiders > 1 ? 's' : ''} can connect you
+                      </span>
+                      <button style={{
+                        fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE,
+                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        padding: '4px 8px', minHeight: 'auto', marginLeft: 'auto',
+                      }}>
+                        View Role →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Insider Summary */}
+            <div style={{
+              background: BLUE_LIGHT, borderRadius: 12, padding: '20px 22px',
+              border: `1px solid ${BLUE_BORDER}`, marginBottom: 28,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{ fontSize: 20 }}>🎓</span>
+                <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: BLUE, margin: 0 }}>
+                  Campus Insider Summary
+                </p>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 16 }}>
+                <div>
+                  <p style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: BLUE, margin: '0 0 2px' }}>
+                    12
+                  </p>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0 }}>
+                    Verified insiders at target companies
+                  </p>
+                </div>
+                <div>
+                  <p style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: BLUE, margin: '0 0 2px' }}>
+                    3
+                  </p>
+                  <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0 }}>
+                    At Google, Goldman, Meta
+                  </p>
+                </div>
+              </div>
+              <button style={{
+                fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff',
+                background: BLUE, border: 'none', borderRadius: 10, padding: '10px 20px',
+                cursor: 'pointer', minHeight: 'auto', width: '100%',
+                transition: 'all 0.15s',
               }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              ⚡ Launch My Network Scan
-            </button>
+                onMouseEnter={e => e.currentTarget.style.background = BLUE_LIGHT}
+                onMouseLeave={e => e.currentTarget.style.background = BLUE}
+              >
+                Connect with Insiders →
+              </button>
+            </div>
+
+            {/* Next Steps Bar */}
+            <div style={{
+              background: '#0F172A', borderRadius: 12, padding: '20px 22px',
+              display: 'flex', flexDirection: 'column', gap: 12,
+            }}>
+              <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#94A3B8', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Next Steps
+              </p>
+              <button
+                onClick={() => { if (onSchoolSelect) onSchoolSelect(selectedSchool); }}
+                style={{
+                  fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff',
+                  background: `linear-gradient(135deg, ${BLUE} 0%, #06B6D4 100%)`,
+                  border: 'none', borderRadius: 10, padding: '14px 24px',
+                  cursor: 'pointer', minHeight: 'auto', width: '100%',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                📦 Build My Targeted Application Pack
+              </button>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
+                <button style={{
+                  fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff',
+                  background: 'transparent', border: '2px solid #334155', borderRadius: 10,
+                  padding: '12px 18px', cursor: 'pointer', minHeight: 'auto',
+                  transition: 'all 0.15s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.color = BLUE; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.color = '#fff'; }}
+                >
+                  See All 47 Roles
+                </button>
+                <button style={{
+                  fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff',
+                  background: 'transparent', border: '2px solid #334155', borderRadius: 10,
+                  padding: '12px 18px', cursor: 'pointer', minHeight: 'auto',
+                  transition: 'all 0.15s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = GREEN; e.currentTarget.style.color = GREEN; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#334155'; e.currentTarget.style.color = '#fff'; }}
+                >
+                  🎤 Get Interview Coaching
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
