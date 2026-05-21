@@ -274,7 +274,6 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [selectedExpert, setSelectedExpert] = useState(null);
   const [selectedIndustries, setSelectedIndustries] = useState(saved?.selectedIndustries ?? []);
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
-  const [showWelcomeBack] = useState(!!resumeAtScreen && resumeAtScreen > 1);
   const fileRef = useRef();
 
   const TOTAL = 12;
@@ -506,8 +505,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       {/* ── Close Button ── */}
       <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
 
-      {/* ── Welcome Back Banner ── */}
-      {false && null /* welcome back banner removed */}
+      {/* Welcome back banner intentionally removed */}
 
       {/* ── Analyzing Loader (postAuth only) ── */}
       {analyzing && (

@@ -134,7 +134,10 @@ export default function StudentLandingPage({ onParentClick }) {
   const launchWithSchool = (schoolName) => {
     try {
       if (schoolName) localStorage.setItem('cff_college', schoolName);
+      // Always clear any saved screen so funnel starts fresh at screen 1
       localStorage.removeItem('cff_onboarding_screen');
+      localStorage.removeItem('cff_seeking');
+      localStorage.removeItem('cff_blockers');
     } catch {}
     setFunnelStartScreen(null);
     setShowFunnel(true);
