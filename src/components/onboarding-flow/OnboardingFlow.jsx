@@ -336,6 +336,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [dataInputMode, setDataInputMode] = useState('choose');
   const [hoveredExpert, setHoveredExpert] = useState(null);
   const [selectedExpert, setSelectedExpert] = useState(null);
+  const [analyzingFrustration, setAnalyzingFrustration] = useState(false);
   const [selectedIndustries, setSelectedIndustries] = useState(saved?.selectedIndustries ?? []);
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
   const fileRef = useRef();
@@ -705,19 +706,28 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
       {/* ── SCREEN 3: Frustration Slider ── */}
       {screen === 3 && (() => {
-        const frustEmoji = frustration <= 3 ? '😌' : frustration <= 5 ? '😐' : frustration <= 7 ? '😟' : frustration <= 9 ? '😰' : '🆘';
+        const frustEmoji = frustration <= 2 ? '😌' : frustration <= 4 ? '😐' : frustration <= 6 ? '😟' : frustration <= 8 ? '😰' : '🆘';
         const frustColor = frustration <= 3 ? GREEN : frustration <= 6 ? '#F59E0B' : '#EF4444';
         const glowColor = frustration <= 3 ? 'rgba(16,185,129,0.08)' : frustration <= 6 ? 'rgba(245,158,11,0.09)' : 'rgba(239,68,68,0.11)';
         const microCopy = frustration <= 3
-          ? "You've got a head start. Let's sharpen your edge."
+          ? `You're at a ${frustration}/10 — staying calm. Smart move. We'll keep that momentum going and get you ahead of the curve before things heat up.`
+          : frustration <= 5
+          ? `You're at a ${frustration}/10 — feeling the pressure but still in control. Most students hit their breakthrough right at this stage. Your Agent is ready to tip the scales.`
           : frustration <= 7
-          ? "You're feeling the heat. Most students are right here with you—we'll take the weight off."
-          : "Deep breaths. The 'Black Hole' is real, but we have the ladder to get you out.";
+          ? `You're at a ${frustration}/10 — right in the danger zone. Most students feel exactly like you do before they start seeing real traction. The good news? This is where your Career Agent starts turning things around.`
+          : frustration <= 9
+          ? `You're at a ${frustration}/10 — we hear you. The black hole is real, and it's exhausting. But students at this exact level see the biggest gains fastest once the Agent kicks in. Let's go.`
+          : `You're at 10/10 — at breaking point. Let's fix this fast. Your Agent is built exactly for this moment.`;
+        const handleContinue = () => {
+          setAnalyzingFrustration(true);
+          setTimeout(() => { setAnalyzingFrustration(false); next(); }, 700);
+        };
+        const analyzing = analyzingFrustration;
         const pct = ((frustration - 1) / 9) * 100;
         return (
           <div style={{ ...card, maxWidth: 520, paddingTop: 40 }}>
             <h1 style={{ ...h1style, marginBottom: 10 }}>How frustrated are you with your job search right now?</h1>
-            <p style={{ ...substyle, marginBottom: 32 }}>Be honest — we're building your strategy around your specific roadblocks.</p>
+            <p style={{ ...substyle, marginBottom: 32 }}>Be honest — the more accurately you answer, the better your Agent can build a strategy around your exact roadblocks.</p>
 
             <div style={{ background: CARD, border: `1.5px solid ${frustColor}33`, borderRadius: R, padding: '32px 28px 28px', marginBottom: 12, boxShadow: `0 0 40px ${glowColor}, ${SHADOW}`, transition: 'box-shadow 0.4s ease, border-color 0.4s ease' }}>
               {/* Emoji indicator */}
@@ -756,14 +766,27 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
               </div>
             </div>
 
-            {/* Custom nav — subtle back, bold continue */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, marginTop: 8 }}>
+            {/* Emotional closer */}
+            <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: '16px 0 0', lineHeight: 1.65, fontStyle: 'italic', textAlign: 'center' }}>
+              Every day you stay stuck in this loop is another day without interviews. Let's change that starting now.
+            </p>
+
+            {/* Continue CTA */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, marginTop: 20 }}>
               <button
-                onClick={next}
-                style={{ width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '16px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(0,102,255,0.2)', transition: 'all 0.25s ease' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(0,102,255,0.32)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,102,255,0.2)'; }}
-              >Continue →</button>
+                onClick={handleContinue}
+                disabled={analyzing}
+                style={{ width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: analyzing ? '#4A7FE8' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '16px 32px', cursor: analyzing ? 'default' : 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(0,102,255,0.2)', transition: 'all 0.25s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                onMouseEnter={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(0,102,255,0.32)'; }}}
+                onMouseLeave={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,102,255,0.2)'; }}}
+              >
+                {analyzing ? (
+                  <>
+                    <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                    Agent analyzing your frustration level…
+                  </>
+                ) : 'Continue →'}
+              </button>
               <button onClick={back} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 8px', textDecoration: 'underline', textUnderlineOffset: 3 }}>← Back</button>
             </div>
           </div>
