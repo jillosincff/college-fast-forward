@@ -49,14 +49,14 @@ const BLOCKERS = [
     key: 'resume',
     icon: '📄',
     label: "My resume isn't getting responses",
-    solution: "We'll optimize for ATS and recruiter-readability.",
+    solution: "We'll optimize it for ATS + make it recruiter-magnet level.",
     tool: 'Resume Optimizer',
   },
   {
     key: 'ghosted',
     icon: '👻',
     label: "I'm getting ghosted after applying",
-    solution: "Switch to our verified 'Fast Track' job feed.",
+    solution: "Switch to our verified Fast Track job feed with warm intros.",
     tool: 'Fast Track Feed',
   },
   {
@@ -70,7 +70,7 @@ const BLOCKERS = [
     key: 'which_jobs',
     icon: '🔍',
     label: "I don't know which jobs to apply for",
-    solution: "Your Agent scouts roles that match your profile daily.",
+    solution: "Your Agent scouts matching roles daily and ranks them for you.",
     tool: 'Job Scout Agent',
   },
   {
@@ -82,9 +82,9 @@ const BLOCKERS = [
   },
   {
     key: 'disorganized',
-    icon: '🗂️',
+    icon: '📁',
     label: "I'm disorganized and losing track",
-    solution: "We'll prioritize your Personal Hiring CRM to keep you on track.",
+    solution: "Your Personal Hiring CRM keeps everything organized + on track.",
     tool: 'Hiring CRM',
   },
   {
@@ -911,19 +911,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
               <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: '#EA580C', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Career Diagnostic</span>
             </div>
 
-            <h1 style={h1style}>What's the biggest thing holding you back?</h1>
-
-            {/* Dynamic consultation hint */}
-            <div style={{ minHeight: 36, marginBottom: 16 }}>
-              {dynamicHint ? (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '8px 14px', animation: 'fadeUp 0.2s ease' }}>
-                  <span style={{ fontSize: 14 }}>🤖</span>
-                  <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', fontWeight: 600, margin: 0 }}>{dynamicHint}</p>
-                </div>
-              ) : (
-                <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, margin: 0 }}>Select up to 2 — your Agent unlocks a tool for each.</p>
-              )}
-            </div>
+            <h1 style={h1style}>What's the biggest thing holding you back right now?</h1>
+            <p style={{ ...substyle, marginBottom: 20 }}>Select up to 2. Be honest — your Agent will instantly unlock the exact tools and strategies that crush these roadblocks.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
               {BLOCKERS.map(opt => {
@@ -982,8 +971,33 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
               })}
             </div>
 
-            {/* Continue button — disabled until at least 1 selection */}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32 }}>
+            {/* Instant mirroring unlock panel */}
+            {blockers.length > 0 && (
+              <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 20, animation: 'fadeUp 0.25s ease' }}>
+                <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>🤖</span> Got it. Unlocking tools for you now…
+                </p>
+                {blockers.map(key => {
+                  const b = BLOCKERS.find(x => x.key === key);
+                  if (!b) return null;
+                  return (
+                    <div key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
+                      <span style={{ fontSize: 13, flexShrink: 0 }}>{b.icon}</span>
+                      <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.5 }}>
+                        <strong>{b.label}</strong> → <em>Unlocking {b.tool} for you right now</em>
+                        <span style={{ display: 'inline-block', marginLeft: 6, fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '1px 7px' }}>✓ Unlocked</span>
+                      </p>
+                    </div>
+                  );
+                })}
+                <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', margin: '10px 0 0', fontStyle: 'italic', lineHeight: 1.5 }}>
+                  Your Agent is already building solutions for these exact problems. Most students only pick one or two — you're now ahead of 90% of applicants.
+                </p>
+              </div>
+            )}
+
+            {/* Continue button */}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 24 }}>
               <Btn primary={false} onClick={back} small>← Back</Btn>
               <button
                 onClick={next}
@@ -996,11 +1010,12 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                   minHeight: 'auto',
                   boxShadow: blockers.length === 0 ? 'none' : '0 4px 14px rgba(0,102,255,0.30)',
                   transition: 'all 0.25s ease',
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
                 }}
                 onMouseEnter={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.40)'; }}}
                 onMouseLeave={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.30)'; }}}
               >
-                {blockers.length === 0 ? 'Select at least 1 →' : 'Continue →'}
+                {blockers.length === 0 ? 'Select at least 1 →' : <>Continue → <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.85 }}>Tools unlocked ✓</span></>}
               </button>
             </div>
           </div>
