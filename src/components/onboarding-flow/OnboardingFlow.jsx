@@ -1357,13 +1357,15 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 8px' }}>
+            <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 10px' }}>
               {firstName
-                ? `${firstName}'s Resume Just Leveled Up`
-                : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : 'Your Resume Just Leveled Up'}
+                ? <>{firstName}, your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>
+                : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : <>Your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>}
             </h1>
-            <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto', maxWidth: 520, lineHeight: 1.65 }}>
-              {dataInputMode === 'quickstart' ? 'The Agent built your starter profile and showed what stronger positioning looks like.' : 'The Agent rewrote your bullets, improved the layout, and made it ATS-ready — without losing your story.'}
+            <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto', maxWidth: 560, lineHeight: 1.7 }}>
+              {dataInputMode === 'quickstart'
+                ? 'The Agent built your starter profile and showed what stronger positioning looks like.'
+                : <>Based on everything you shared — your{selectedIndustries.length > 0 ? <strong style={{ color: TEXT }}> {selectedIndustries.slice(0,2).join(' & ')} </strong> : ' '}goals and biggest roadblocks — the Agent rewrote your bullets, modernized the layout, and made it ATS-ready while keeping your authentic story.</>}
             </p>
           </div>
 
@@ -1448,7 +1450,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           })()}
 
           {/* Agent Feedback Card — 2-col layout */}
-          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px 28px', marginBottom: 32, border: `1px solid ${GREEN_BORDER}` }}>
+          <div style={{ background: CARD, borderRadius: R, boxShadow: SHADOW, padding: '24px 28px', marginBottom: 24, border: `1px solid ${GREEN_BORDER}` }}>
             <h3 style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
               ✓ Agent Feedback
             </h3>
@@ -1456,10 +1458,11 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
               {/* Left: checklist (65%) */}
               <div style={{ flex: '0 0 calc(65% - 14px)', minWidth: 200, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
-                  'Strengthened bullet points to focus on results, not tasks',
-                  'Improved formatting and visual hierarchy for a modern look',
+                  'Strengthened bullet points to focus on results and impact (recruiters love this)',
+                  'Improved formatting and visual hierarchy for a modern, professional look',
                   'Made it ATS-friendly while keeping it visually standout',
-                  <span key="score">Score improved from <span style={{ textDecoration: 'line-through', color: '#EF4444', margin: '0 4px' }}>51/100</span> → <span style={{ fontWeight: 700, color: GREEN, marginLeft: 4 }}>98/100</span></span>,
+                  <span key="score">Score improved from <span style={{ textDecoration: 'line-through', color: '#EF4444', margin: '0 4px' }}>59/100</span> → <span style={{ fontWeight: 700, color: GREEN, marginLeft: 4 }}>98/100</span></span>,
+                  'Now optimized to beat the 75% auto-rejection rate most students face',
                 ].map((line, i) => (
                   <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontFamily: FONT, fontSize: 13, color: TEXT, lineHeight: 1.6 }}>
                     <span style={{ color: GREEN, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
@@ -1474,18 +1477,47 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
             </div>
           </div>
 
-          {/* CTA */}
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          {/* Emotional Payoff Section */}
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)', border: `1px solid ${BLUE_BORDER}`, borderRadius: R, padding: '22px 28px', marginBottom: 28 }}>
+            <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>🎯 What this means for you</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { icon: '🧑‍💼', text: 'Your application will actually reach human recruiters — not the trash folder' },
+                { icon: '🏆', text: `You're now positioned in the top 2% of candidates for ${selectedIndustries.length > 0 ? selectedIndustries.slice(0,2).join(' & ') : 'your target'} roles` },
+                { icon: '🤝', text: 'Alumni insiders will see a version of you that stands out immediately' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <span style={{ fontSize: 16, flexShrink: 0 }}>{item.icon}</span>
+                  <p style={{ fontFamily: FONT, fontSize: 14, color: '#1E3A5F', margin: 0, lineHeight: 1.6, fontWeight: 500 }}>{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA Buttons */}
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <button
               onClick={next}
-              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 14px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 8, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(0,102,255,0.3)', transition: 'all 0.2s' }}
+              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 12px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(0,102,255,0.3)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(0,102,255,0.4)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,102,255,0.3)'; }}
             >
               Next: Optimize My Online Presence →
             </button>
-
+            <button
+              onClick={() => saveAndAuth('free')}
+              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto', fontFamily: FONT, fontSize: 14, fontWeight: 600, color: TEXT2, background: CARD, border: `1.5px solid #E2E8F0`, borderRadius: 10, padding: '14px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: SHADOW, transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = SHADOW_MD; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = SHADOW; }}
+            >
+              Save This Version &amp; Continue Onboarding
+            </button>
           </div>
+
+          {/* Micro-copy */}
+          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '0 0 16px', lineHeight: 1.7, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto', fontStyle: 'italic' }}>
+            You've now completed the hardest part most students never do. Your Agent is building the rest of your sprint plan with this stronger foundation.
+          </p>
 
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
