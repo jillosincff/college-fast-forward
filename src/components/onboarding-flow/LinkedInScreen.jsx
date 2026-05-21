@@ -260,14 +260,31 @@ Return valid JSON.`,
           <span style={{ fontSize: 13 }}>💼</span>
           <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>LinkedIn Identity Architect</span>
         </div>
-        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-          {firstName ? `${firstName}, your LinkedIn Profile is` : 'Your LinkedIn Profile is'} <span style={{ color: BLUE }}>rebuilt to get you noticed.</span>
+        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.5vw, 32px)', fontWeight: 800, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+          {firstName ? `${firstName}, your LinkedIn profile is` : 'Your LinkedIn profile is'}{' '}
+          <span style={{ color: BLUE }}>rebuilt to get you noticed.</span>
         </h1>
-        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.7, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
+        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: '0 0 18px', lineHeight: 1.7, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
           Based on your <strong style={{ color: TEXT }}>{selectedIndustries?.length > 0 ? selectedIndustries.slice(0, 2).join(' & ') : 'target fields'}</strong>
           {college ? <>, <strong style={{ color: TEXT }}>{college}</strong> background,</> : null}
           {' '}and goals, we've crafted a profile that attracts recruiters and alumni insiders.
         </p>
+        {/* Immediate payoff summary — mirrors back their investment */}
+        <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 14, padding: '14px 20px', maxWidth: 540, margin: '0 auto', textAlign: 'left' }}>
+          <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>⚡ What changes right now</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              'Recruiters will stop scrolling — your headline is now keyword-optimized',
+              `Alumni & parents in ${selectedIndustries?.length > 0 ? selectedIndustries[0] : 'your target spaces'} will see a compelling, credible story`,
+              "You're positioned stronger than 95%+ of applicants before you send a single message",
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                <span style={{ color: GREEN, fontSize: 13, flexShrink: 0, marginTop: 1 }}>✓</span>
+                <p style={{ fontFamily: FONT, fontSize: 13, color: '#1E3A5F', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* ── LinkedIn Profile Simulator ── */}

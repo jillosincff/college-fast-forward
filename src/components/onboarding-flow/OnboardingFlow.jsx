@@ -641,32 +641,32 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           </div>
 
           {/* Headline */}
-          <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 20px', fontSize: 'clamp(34px, 6vw, 52px)', color: TEXT }}>
-            Welcome to<br />
+          <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 16px', fontSize: 'clamp(30px, 5.5vw, 48px)', color: TEXT }}>
+            Welcome to{' '}
             <span style={{ background: 'linear-gradient(135deg, #0066FF 0%, #0F172A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>College Fast Forward.</span>
           </h1>
 
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 2.2vw, 18px)', color: '#334155', lineHeight: 1.65, margin: '0 auto 12px', maxWidth: 460, fontWeight: 500 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 2.2vw, 19px)', color: '#334155', lineHeight: 1.6, margin: '0 auto 14px', maxWidth: 480, fontWeight: 600 }}>
             Your AI Career Agent is here to end the endless application black hole.
           </p>
 
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.8vw, 15px)', color: TEXT2, lineHeight: 1.7, margin: '0 auto 32px', maxWidth: 460 }}>
-            Most students are stuck spamming 100+ apps and hearing nothing back.<br />
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 1.8vw, 15px)', color: TEXT2, lineHeight: 1.75, margin: '0 auto 28px', maxWidth: 460 }}>
+            Most students are stuck spamming 100+ apps with almost no responses.{' '}
             <strong style={{ color: TEXT }}>We're different</strong> — we learn who you are, then use AI + real campus insiders to get you interviews fast.
           </p>
 
           {/* CTA button with glow */}
           <button
             onClick={next}
-            style={{ display: 'block', margin: '0 auto 10px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 12, padding: '19px 52px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 24px rgba(0,102,255,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
+            style={{ display: 'block', margin: '0 auto 12px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 12, padding: '19px 52px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 24px rgba(0,102,255,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(0,102,255,0.38)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(0,102,255,0.28)'; }}
           >Let's Build Your Interview Edge →</button>
 
           <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, marginBottom: 4 }}>
-            This guided setup takes ~8–12 minutes (worth it — most students see their first tailored plan in under 10).
+            This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '0 0 8px' }}>No credit card required. Cancel anytime.</p>
+          <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT3, margin: '0 0 8px' }}>No credit card required.</p>
           <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 700, margin: '0 0 28px' }}>✨ Your first warm intro or interview is closer than you think.</p>
 
           {/* Social proof trust bar */}
@@ -973,9 +973,16 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
             {/* Instant mirroring unlock panel */}
             {blockers.length > 0 && (
-              <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 20, animation: 'fadeUp 0.25s ease' }}>
-                <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>🤖</span> Got it. Unlocking tools for you now…
+              <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 20, animation: 'fadeUp 0.25s ease' }}>
+                <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 4px' }}>
+                  Got it. You selected{' '}
+                  {blockers.map((key, idx) => {
+                    const b = BLOCKERS.find(x => x.key === key);
+                    return <span key={key}>{idx > 0 ? ' and ' : ''}<strong>"{b?.label}"</strong></span>;
+                  })}.
+                </p>
+                <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', margin: '0 0 12px', lineHeight: 1.5 }}>
+                  Your Agent is already building solutions for these exact problems. You're ahead of most students.
                 </p>
                 {blockers.map(key => {
                   const b = BLOCKERS.find(x => x.key === key);
@@ -984,15 +991,12 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                     <div key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
                       <span style={{ fontSize: 13, flexShrink: 0 }}>{b.icon}</span>
                       <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.5 }}>
-                        <strong>{b.label}</strong> → <em>Unlocking {b.tool} for you right now</em>
-                        <span style={{ display: 'inline-block', marginLeft: 6, fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '1px 7px' }}>✓ Unlocked</span>
+                        → <em>Unlocking <strong>{b.tool}</strong> for you right now</em>
+                        <span style={{ display: 'inline-block', marginLeft: 8, fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>✓ Unlocked</span>
                       </p>
                     </div>
                   );
                 })}
-                <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', margin: '10px 0 0', fontStyle: 'italic', lineHeight: 1.5 }}>
-                  Your Agent is already building solutions for these exact problems. Most students only pick one or two — you're now ahead of 90% of applicants.
-                </p>
               </div>
             )}
 
@@ -1354,20 +1358,27 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
 
       {/* ── SCREEN 10: Wow Moment (Resume Before/After) ── */}
       {screen === 10 && (
-        <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 10px' }}>
-              {firstName
-                ? <>{firstName}, your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>
-                : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : <>Your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>}
-            </h1>
-            <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto', maxWidth: 560, lineHeight: 1.7 }}>
-              {dataInputMode === 'quickstart'
-                ? 'The Agent built your starter profile and showed what stronger positioning looks like.'
-                : <>Based on everything you shared — your{selectedIndustries.length > 0 ? <strong style={{ color: TEXT }}> {selectedIndustries.slice(0,2).join(' & ')} </strong> : ' '}goals and biggest roadblocks — the Agent rewrote your bullets, modernized the layout, and made it ATS-ready while keeping your authentic story.</>}
-            </p>
-          </div>
+      <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 3.5vw, 36px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', margin: '0 0 12px' }}>
+          {firstName
+            ? <>{firstName}, your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>
+            : dataInputMode === 'quickstart' ? 'Your Starter Profile Is Ready' : <>Your resume just <span style={{ color: '#10B981' }}>leveled up.</span></>}
+        </h1>
+        {/* Personal note — mirrors back their inputs */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
+          <span style={{ fontSize: 12 }}>🤖</span>
+          <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: '#059669' }}>
+            Customized for your{selectedIndustries.length > 0 ? ` ${selectedIndustries.slice(0,2).join(' & ')}` : ''}{blockers.includes('resume') || blockers.includes('ghosted') ? ' · optimized to beat ATS rejection' : ' target roles'}
+          </span>
+        </div>
+        <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 auto', maxWidth: 560, lineHeight: 1.7 }}>
+          {dataInputMode === 'quickstart'
+            ? 'The Agent built your starter profile and showed what stronger positioning looks like.'
+            : <>Based on your {selectedIndustries.length > 0 ? <strong style={{ color: TEXT }}>{selectedIndustries.slice(0,2).join(' & ')}</strong> : 'target'} goals{blockers.length > 0 ? <> and the <strong style={{ color: TEXT }}>{blockers.length === 2 ? '2 roadblocks' : 'roadblock'}</strong> you flagged</> : ''}, the Agent rewrote your bullets, modernized the layout, and made it ATS-ready while keeping your authentic story.</>}
+        </p>
+      </div>
 
           {/* Before / After */}
           {(() => {
