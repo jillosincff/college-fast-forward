@@ -525,7 +525,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
     display: 'flex', flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    padding: isFullPageScreen ? '60px 24px 60px' : '100px 24px 60px',
+    padding: isFullPageScreen ? '60px 20px 60px' : '100px 20px 80px',
     fontFamily: FONT,
     overflowY: 'auto',
     overflowX: 'hidden',
@@ -574,6 +574,15 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         input::placeholder { color: #94A3B8; }
+        /* Mobile: ensure single column, generous side padding */
+        @media (max-width: 640px) {
+          .onb-card { padding: 0 4px !important; }
+          .onb-h1 { font-size: clamp(22px, 6vw, 32px) !important; }
+          .onb-body { font-size: 16px !important; line-height: 1.6 !important; }
+          .onb-btn-primary { padding: 18px 28px !important; font-size: 16px !important; min-height: 56px !important; }
+          .onb-option-btn { padding: 16px !important; min-height: 56px !important; }
+          .blocker-card-list { gap: 14px !important; }
+        }
       `}</style>
 
       {/* ── Close Button ── */}
@@ -658,12 +667,13 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           {/* CTA button with glow */}
           <button
             onClick={next}
-            style={{ display: 'block', margin: '0 auto 12px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 12, padding: '19px 52px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 10px 24px rgba(0,102,255,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
+            className="onb-btn-primary"
+            style={{ display: 'block', width: '100%', maxWidth: 420, margin: '0 auto 12px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 12, padding: '20px 52px', cursor: 'pointer', minHeight: 56, boxShadow: '0 10px 24px rgba(0,102,255,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(0,102,255,0.38)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(0,102,255,0.28)'; }}
           >Let's Build Your Interview Edge →</button>
 
-          <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, marginBottom: 4 }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, marginBottom: 4, lineHeight: 1.6 }}>
             This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
           </p>
           <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 700, margin: '0 0 28px' }}>✨ Your first warm intro or interview is closer than you think.</p>
@@ -804,7 +814,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           <h1 style={h1style}>What's your main focus right now?</h1>
           <p style={{ ...substyle, marginBottom: 28 }}>This is the first key coordinate your Career Agent needs to lock in so it can prioritize the right opportunities, insiders, and tailored materials for you.</p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 4, textAlign: 'left' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 4, textAlign: 'left' }} className="blocker-card-list">
             {SEEKING_OPTIONS.map(opt => {
               const isActive = seeking === opt.key;
               return (
@@ -913,8 +923,8 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
             <h1 style={h1style}>What's the biggest thing holding you back right now?</h1>
             <p style={{ ...substyle, marginBottom: 20 }}>Select up to 2. Be honest — <strong style={{ color: TEXT }}>CLiFF</strong> will instantly unlock the exact tools to crush these roadblocks.</p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
-              {BLOCKERS.map(opt => {
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }} className="blocker-card-list">
+               {BLOCKERS.map(opt => {
                 const active = blockers.includes(opt.key);
                 const maxed = blockers.length >= 2 && !active;
                 return (

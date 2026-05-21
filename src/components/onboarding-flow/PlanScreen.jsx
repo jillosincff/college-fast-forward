@@ -244,12 +244,18 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
   const schoolName = college || 'your university';
 
   return (
-    <div style={{ maxWidth: 780, width: '100%', paddingTop: 100, paddingBottom: 120, boxSizing: 'border-box' }}>
+    <div style={{ maxWidth: 780, width: '100%', paddingTop: 100, paddingBottom: 120, boxSizing: 'border-box', paddingLeft: 0, paddingRight: 0 }}>
       <style>{`
         @keyframes fadUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulseBlue { 0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0.35)} 50%{box-shadow:0 0 0 8px rgba(37,99,235,0.0)} }
         .plan-sticky-cta { display: none; }
-        @media (max-width: 767px) { .plan-sticky-cta { display: flex; } }
+        @media (max-width: 767px) {
+          .plan-sticky-cta { display: flex; }
+          .plan-main-cta { margin-bottom: 80px !important; }
+          .plan-body-text { font-size: 16px !important; line-height: 1.6 !important; }
+          .plan-commitment-card { padding: 20px 16px !important; }
+          .plan-close-card { padding: 28px 16px !important; }
+        }
         @media (max-width: 640px) {
           .proof-hub { flex-direction: column !important; }
           .proof-hub-col { width: 100% !important; }
@@ -264,12 +270,15 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         flexDirection: 'column', alignItems: 'stretch', gap: 8,
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
       }}>
-        <button onClick={() => openPaywall(false)} style={{
-          width: '100%', fontFamily: dm, fontSize: 15, fontWeight: 800, color: '#fff',
-          background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-          border: 'none', borderRadius: 12, padding: '16px', cursor: 'pointer', minHeight: 'auto',
-          boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
-        }}>
+        <button
+          onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } openPaywall(false); }}
+          style={{
+            width: '100%', fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff',
+            background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
+            border: 'none', borderRadius: 14, padding: '18px 16px', cursor: 'pointer', minHeight: 56,
+            boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
+          }}
+        >
           Unlock My 14-Day Action Plan — $4.99/week →
         </button>
       </div>
@@ -369,7 +378,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           5b. COMMITMENT QUESTION — Self-persuasion before paywall
       ───────────────────────────────────────────────────── */}
-      <div id="commitment-anchor" style={{ background: CARD, border: `1.5px solid ${showCommitmentRequired && !commitment ? '#ef4444' : BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 20, boxShadow: showCommitmentRequired && !commitment ? '0 0 0 3px rgba(239,68,68,0.15)' : '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
+      <div id="commitment-anchor" className="plan-commitment-card" style={{ background: CARD, border: `1.5px solid ${showCommitmentRequired && !commitment ? '#ef4444' : BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 20, boxShadow: showCommitmentRequired && !commitment ? '0 0 0 3px rgba(239,68,68,0.15)' : '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
         <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 6px', lineHeight: 1.6 }}>
           {firstName ? `${firstName}, you're` : "You're"} now set up for a real 14-day sprint.{' '}
           <span style={{ color: GREEN, fontWeight: 700 }}>Most students who reach this point land their first interview or warm intro within 2 weeks.</span>
@@ -382,7 +391,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             ↑ Please answer this before unlocking your plan.
           </p>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[
             { label: '🔥 Extremely — Let\'s go', value: 'extreme', response: "Hell yes — CLiFF is ready when you are." },
             { label: '✅ Very committed', value: 'very', response: "Solid — that's all it takes. Let's build your edge." },
@@ -393,7 +402,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
                 display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
                 background: commitment === opt.value ? (opt.value === 'extreme' ? GREEN_LIGHT : BLUE_LIGHT) : '#F8FAFC',
                 border: `1.5px solid ${commitment === opt.value ? (opt.value === 'extreme' ? GREEN_BORDER : BLUE_BORDER) : '#E2E8F0'}`,
-                borderRadius: 10, padding: '14px 16px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
+                borderRadius: 12, padding: '16px 18px', cursor: 'pointer', minHeight: 56, transition: 'all 0.15s',
               }}
             >
               <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${commitment === opt.value ? (opt.value === 'extreme' ? GREEN : BLUE) : '#CBD5E1'}`, background: commitment === opt.value ? (opt.value === 'extreme' ? GREEN : BLUE) : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 800 }}>
@@ -423,7 +432,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           6. THE CLOSE — Final Checkout Card
       ───────────────────────────────────────────────────── */}
-      <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
+      <div className="plan-close-card plan-main-cta" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
         <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 6px' }}>
           Unlock My Elite Profile + 14-Day Execution Plan 🎯
         </p>

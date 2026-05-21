@@ -174,7 +174,7 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
           <p style={{ fontFamily: FONT, fontSize: 14, color: '#4B5563', margin: 0, lineHeight: 1.65, opacity: factFade ? 1 : 0, transition: 'opacity 0.25s ease', animation: factFade ? 'factFadeIn 0.3s ease' : 'none', minHeight: 64 }}>
             {DID_YOU_KNOW[didYouKnowIdx]}
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 11, color: '#94A3B8', margin: '14px 0 0', textAlign: 'center', letterSpacing: '0.04em' }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: '#94A3B8', margin: '14px 0 0', textAlign: 'center', letterSpacing: '0.02em', lineHeight: 1.6 }}>
             Most students get auto-rejected by 75% of applications. CLiFF is making sure yours doesn't.
           </p>
         </div>

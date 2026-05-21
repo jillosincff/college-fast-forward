@@ -94,8 +94,8 @@ export default function LinkedInLoader({ firstName, college, selectedIndustries 
           </div>
 
           {/* Rotating status line */}
-          <div style={{ marginTop: 18, padding: '10px 14px', background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8 }}>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, margin: 0, lineHeight: 1.6, minHeight: 36 }}>
+          <div style={{ marginTop: 18, padding: '12px 16px', background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8 }}>
+            <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, margin: 0, lineHeight: 1.6, minHeight: 36 }}>
               💡 Students with optimized LinkedIn profiles get 3–5x more views and messages.
             </p>
           </div>
