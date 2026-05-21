@@ -145,44 +145,61 @@ export default function FreeTierDashboard() {
     }
   };
 
-  const empathyMap = {
+  // Psychological Blueprint: "They Heard Me" - Dynamic emotional matching
+  const PAIN_POINT_CONFIG = {
+    interviews: {
+      title: "Hey {name}, we know interviewing can be incredibly stressful.",
+      subtitle: "But you don't have to walk into the room nervous. CLiFF didn't just find hidden slots—our agent is fully locked and loaded to run custom mock prep sessions specifically for these exact teams before you talk to them.",
+      badge: "⚡ Interview Shield Activated",
+      cta: '✨ Unlock AI Interview Coach',
+      feature: 'Mock Interview Coach',
+    },
     ghosted: {
-      text: "We know how deflating it is to get ghosted after applying. While you track applications here, CLiFF is hunting for unadvertised Inside Track roles to get you real replies.",
+      title: "Hey {name}, let's permanently end the job application black hole.",
+      subtitle: "We know you are completely exhausted from getting ghosted by automated resume filters. That's why CLiFF completely bypasses the public job boards and plugs you directly into people ready to hire.",
+      badge: "⚡ Ghosting Bypass Active",
       cta: '✨ Unlock the Inside Track Network',
       feature: 'Inside Track Signals',
     },
     outreach: {
-      text: "Cold-messaging strangers on LinkedIn is exhausting. We're mapping out your school's Campus Ecosystem warm alumni connections so you never have to guess what to write.",
+      title: "Hey {name}, you don't need a massive personal network to break in.",
+      subtitle: "If you feel like you don't have the right inside connections, don't worry. CLiFF has mapped out your entire school's active alumni ecosystem to open those closed doors for you.",
+      badge: "⚡ Network Multiplier Engaged",
       cta: '✨ Unlock Warm Scripts',
       feature: 'AI Outreach Generator',
     },
     resume: {
-      text: "Beating corporate ATS resume bots is a broken game. Drop a job description on the right to run your free match check — and see exactly what to fix.",
+      title: "Hey {name}, beating corporate ATS resume bots is a broken game.",
+      subtitle: "Drop a job description on the right to run your free match check — and see exactly what to fix. CLiFF will optimize your resume to beat the bots and catch human eyes.",
+      badge: "⚡ ATS Crusher Mode",
       cta: '✨ Fix My Resume Instantly',
       feature: 'Resume Wow Rewrite',
     },
     which_jobs: {
-      text: "Not knowing which roles to apply for wastes weeks. Your background agent is scanning for openings that actually match your profile — upgraded members see them first.",
+      title: "Hey {name}, not knowing which roles to apply for wastes weeks.",
+      subtitle: "Your background agent is scanning for openings that actually match your profile. Upgrade to see the unadvertised roles first and skip the application black hole.",
+      badge: "⚡ Job Scout Active",
       cta: '✨ Unlock My Job Feed',
       feature: 'Inside Track Signals',
     },
     disorganized: {
-      text: "Losing track of where you applied is more common than you think. Use this board to stay organized — and upgrade to let the agent auto-log every application for you.",
+      title: "Hey {name}, losing track of where you applied is more common than you think.",
+      subtitle: "Use this board to stay organized — and upgrade to let the agent auto-log every application, track follow-ups, and remind you when to reach back out.",
+      badge: "⚡ Auto-Tracking Ready",
       cta: '✨ Unlock Auto-Tracking',
       feature: 'Hiring CRM',
     },
-    interviews: {
-      text: "Interview anxiety is real, but preparation kills it. Your free dashboard has a mock interview tool in the sidebar — upgrade to get instant AI feedback after every answer.",
-      cta: '✨ Unlock AI Interview Coach',
-      feature: 'Mock Interview Coach',
-    },
   };
 
-  const empathy = empathyMap[primaryBlocker] || {
-    text: "Track your applications here while our agent works in the background on unadvertised roles and warm alumni connections.",
+  const painConfig = PAIN_POINT_CONFIG[primaryBlocker] || {
+    title: "Hey {name}, your inside track is officially live.",
+    subtitle: "Track your applications here while our agent works in the background on unadvertised roles and warm alumni connections.",
+    badge: "⚡ Premium Sprint Active",
     cta: '⚡ Upgrade to Premium — $4.99/wk',
     feature: 'Premium Sprint',
   };
+
+  const formattedTitle = painConfig.title.replace("{name}", firstName);
 
   const isNewUser = (() => { try { return !localStorage.getItem('cff_ftd_seen'); } catch { return false; } })();
   try { localStorage.setItem('cff_ftd_seen', '1'); } catch {}
@@ -213,64 +230,71 @@ export default function FreeTierDashboard() {
           }
         `}</style>
 
-        {/* ── Welcome Banner ── */}
-        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-            <h1 style={{ fontFamily: dm, fontSize: 22, fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
-              {isNewUser ? `Welcome to the inside track, ${firstName} 🤝` : `Welcome back, ${firstName} 👋`}
-            </h1>
-            {!isCareerUnsure && (
-              <button
-                onClick={() => triggerUpgrade(empathy.feature)}
-                style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, whiteSpace: 'nowrap', flexShrink: 0 }}
-              >
-                {empathy.cta}
-              </button>
-            )}
+        {/* ── Psychological Blueprint Header: "They Heard Me" ── */}
+        <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b)', border: '1px solid #1e293b', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 4px 24px rgba(15,23,42,0.15)' }}>
+          {/* Badge Row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 100, padding: '4px 12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {painConfig.badge}
+            </span>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#94a3b8', background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(148,163,184,0.2)', borderRadius: 100, padding: '4px 12px' }}>
+              🔒 Premium Sprint Active
+            </span>
           </div>
 
-          {/* CLiFF Rescue Hook — shown when student selected "not sure" during onboarding */}
-          {isCareerUnsure ? (
-            <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(59,130,246,0.04))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 14, padding: '18px 20px', marginTop: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 16 }}>📎</span>
-                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: 0 }}>
-                  Hey {firstName}, <span style={{ color: '#4F46E5' }}>CLiFF</span> here.
-                </p>
-              </div>
-              <p style={{ fontFamily: dm, fontSize: 13, color: '#4B5563', margin: '0 0 14px', lineHeight: 1.7 }}>
-                You mentioned during setup that you're not quite sure what you want to do yet. <strong>No sweat at all.</strong> Most college students are in the exact same boat. We're going to help you figure it out step-by-step.
-              </p>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => triggerUpgrade('Career Archetype Assessment')}
-                  style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#4F46E5', border: 'none', borderRadius: 8, padding: '9px 16px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#4338CA'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#4F46E5'}
-                >
-                  🎯 Find My Career Archetype
-                </button>
-                <button
-                  onClick={() => navigate('Directory')}
-                  style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#374151', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '9px 16px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F9FAFB'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#fff'}
-                >
-                  Browse {schoolAbbr} Inside Tracks
-                </button>
-              </div>
-            </div>
-          ) : (
-            /* Dynamic Empathy Banner */
-            <div style={{ borderLeft: `4px solid ${campusTheme.primary}`, background: `${campusTheme.bgTint || 'rgba(15,23,42,0.02)'}`, borderRadius: '0 10px 10px 0', padding: '12px 16px', marginTop: 16 }}>
-              <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.7 }}>
-                {isNewUser
-                  ? "Your background agent is officially live. We're actively scanning job feeds and matching them against verified alumni and parent connections to find your fastest path in."
-                  : empathy.text}
-              </p>
-            </div>
+          {/* Dynamic Mirror Header */}
+          <h2 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 12px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
+            {formattedTitle}
+          </h2>
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: '0 0 20px', lineHeight: 1.7, fontWeight: 500 }}>
+            {painConfig.subtitle}
+          </p>
+
+          {/* CTA Button */}
+          {!isCareerUnsure && (
+            <button
+              onClick={() => triggerUpgrade(painConfig.feature)}
+              style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 8px 20px ${campusTheme.primary}55`; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 14px ${campusTheme.primary}44`; }}
+            >
+              {painConfig.cta}
+            </button>
           )}
         </div>
+
+        {/* CLiFF Rescue Hook — shown when student selected "not sure" during onboarding */}
+        {isCareerUnsure && (
+          <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 18 }}>📎</span>
+              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#111827', margin: 0 }}>
+                Hey {firstName}, <span style={{ color: '#4F46E5' }}>CLiFF</span> here.
+              </p>
+            </div>
+            <p style={{ fontFamily: dm, fontSize: 13, color: '#4B5563', margin: '0 0 16px', lineHeight: 1.7 }}>
+              You mentioned during setup that you're not quite sure what you want to do yet. <strong>No sweat at all.</strong> Most college students are in the exact same boat. We're going to help you figure it out step-by-step.
+            </p>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => triggerUpgrade('Career Archetype Assessment')}
+                style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#4F46E5', border: 'none', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s', boxShadow: '0 2px 8px rgba(79,70,229,0.25)' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#4338CA'}
+                onMouseLeave={e => e.currentTarget.style.background = '#4F46E5'}
+              >
+                🎯 Find My Career Archetype
+              </button>
+              <button
+                onClick={() => navigate('Directory')}
+                style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#374151', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.background = '#F9FAFB'}
+                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+              >
+                Browse {schoolAbbr} Inside Tracks
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ── Email Sync Banner ── */}
         {!user?.is_email_synced && (
