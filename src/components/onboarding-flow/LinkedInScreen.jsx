@@ -260,11 +260,13 @@ Return valid JSON.`,
           <span style={{ fontSize: 13 }}>💼</span>
           <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>LinkedIn Identity Architect</span>
         </div>
-        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 700, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-          {firstName ? `${firstName}'s LinkedIn Profile,` : 'Your LinkedIn Profile,'} <span style={{ color: BLUE }}>Rebuilt to Get You Noticed</span>
+        <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+          {firstName ? `${firstName}, your LinkedIn Profile is` : 'Your LinkedIn Profile is'} <span style={{ color: BLUE }}>rebuilt to get you noticed.</span>
         </h1>
-        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
-          See exactly how your profile will appear — then choose your headline track.
+        <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.7, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
+          Based on your <strong style={{ color: TEXT }}>{selectedIndustries?.length > 0 ? selectedIndustries.slice(0, 2).join(' & ') : 'target fields'}</strong>
+          {college ? <>, <strong style={{ color: TEXT }}>{college}</strong> background,</> : null}
+          {' '}and goals, we've crafted a profile that attracts recruiters and alumni insiders.
         </p>
       </div>
 
@@ -283,27 +285,44 @@ Return valid JSON.`,
 
       {/* ── Headline Switcher (outside the card) ── */}
       <div style={{ background: CARD, border: LI_BORDER, borderRadius: BORDER_R, padding: '20px 24px', marginBottom: 12 }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 14px' }}>
-          Select Your Headline Track:
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>
+          Choose your headline track
+        </p>
+        <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 14px', lineHeight: 1.5 }}>
+          This becomes your #1 search result line — choose the one that fits your positioning.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {(result.headlines || []).map((h, i) => (
-            <button
-              key={i}
-              onClick={() => { setActiveHeadline(i); }}
-              style={{
-                display: 'flex', alignItems: 'flex-start', gap: 12, textAlign: 'left', width: '100%',
-                background: activeHeadline === i ? BLUE_LIGHT : BG,
-                border: `1.5px solid ${activeHeadline === i ? BLUE_BORDER : '#E2E8F0'}`,
-                borderRadius: 10, padding: '12px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
-              }}
-            >
-              <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${activeHeadline === i ? BLUE : '#CBD5E1'}`, background: activeHeadline === i ? BLUE : 'transparent', flexShrink: 0, marginTop: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: '#fff', fontWeight: 700 }}>
-                {activeHeadline === i && '✓'}
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 13, color: activeHeadline === i ? TEXT : TEXT2, margin: 0, lineHeight: 1.55 }}>{h}</p>
-            </button>
-          ))}
+          {(result.headlines || []).map((h, i) => {
+            const whyLabels = [
+              'Leads with your target role — optimized for recruiter keyword searches.',
+              'Highlights your technical depth — great for specialist roles.',
+              'Emphasizes impact and vision — stands out in alumni + hiring manager feeds.',
+            ];
+            return (
+              <button
+                key={i}
+                onClick={() => { setActiveHeadline(i); }}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 12, textAlign: 'left', width: '100%',
+                  background: activeHeadline === i ? BLUE_LIGHT : BG,
+                  border: `1.5px solid ${activeHeadline === i ? BLUE_BORDER : '#E2E8F0'}`,
+                  borderRadius: 10, padding: '12px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${activeHeadline === i ? BLUE : '#CBD5E1'}`, background: activeHeadline === i ? BLUE : 'transparent', flexShrink: 0, marginTop: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: '#fff', fontWeight: 700 }}>
+                  {activeHeadline === i && '✓'}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: FONT, fontSize: 13, color: activeHeadline === i ? TEXT : TEXT2, margin: 0, lineHeight: 1.55, fontWeight: activeHeadline === i ? 600 : 400 }}>{h}</p>
+                  {activeHeadline === i && (
+                    <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: '5px 0 0', lineHeight: 1.5, fontWeight: 500, fontStyle: 'italic' }}>
+                      ✦ Why this works: {whyLabels[i] || 'Optimized for your target role and audience.'}
+                    </p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -319,14 +338,35 @@ Return valid JSON.`,
           ))}
         </div>
         <div style={{ background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8, padding: '12px 14px', marginTop: 14 }}>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
-            💡 Agent Tip: Add these to your LinkedIn Skills section to pass the recruiter algorithm for {seekingLabel} roles.
+          <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, margin: 0, lineHeight: 1.55, fontWeight: 500 }}>
+            💡 <strong>Agent Tip:</strong> Add these to your <strong>Skills section</strong> → you'll rank higher for the exact {seekingLabel} roles you told us you want.
           </p>
         </div>
       </div>
 
+      {/* ── Emotional Payoff Box ── */}
+      <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 12, padding: '20px 24px', marginBottom: 20 }}>
+        <p style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#065F46', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 12px' }}>
+          ✦ What changes now
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[
+            'Recruiters will actually stop scrolling on your profile',
+            'Alumni & parents in your target spaces will see a clear, compelling story',
+            "You're positioned as a stronger candidate than 95%+ of applicants",
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ width: 18, height: 18, borderRadius: '50%', background: GREEN, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                <span style={{ fontSize: 9, color: '#fff', fontWeight: 800 }}>✓</span>
+              </div>
+              <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.55, fontWeight: 600 }}>{item}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Master CTA ── */}
-      <div style={{ textAlign: 'center', marginTop: 36, marginBottom: 20 }}>
+      <div style={{ textAlign: 'center', marginTop: 8, marginBottom: 20 }}>
         <button
           onClick={() => { setStep3Active(true); if (onNext) { onNext(); } else { setShowPaywall(true); } }}
           style={{
@@ -340,15 +380,17 @@ Return valid JSON.`,
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.45)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.35)'; }}
         >
-          Next: Unlock My Inside Tracks ➔
+          Next: Unlock My Inside Tracks →
         </button>
-        <p style={{ fontFamily: FONT, fontSize: 10, color: '#94a3b8', fontWeight: 500, margin: 0 }}>
-          Securing your data. Pressing next initiates your personalized ecosystem scan.
+        <p style={{ fontFamily: FONT, fontSize: 11, color: TEXT2, fontWeight: 500, margin: '8px 0 0' }}>
+          This opens your personalized alumni + parent network matches.
         </p>
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <button onClick={onBack} style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
+        <button onClick={onBack} style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '8px 0', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+          ← Save &amp; Continue Later
+        </button>
       </div>
 
       {/* ── Paywall Modal ── */}
