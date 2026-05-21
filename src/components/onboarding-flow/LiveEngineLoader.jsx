@@ -64,29 +64,29 @@ function ResonanceScan({ schoolShortName }) {
   }, []);
 
   return (
-    <div style={{ background: '#0F172A', borderRadius: 16, padding: '24px 28px', maxWidth: 480, margin: '0 auto', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', border: '1px solid #1e293b' }}>
+    <div style={{ background: '#FFFFFF', borderRadius: 16, padding: '24px 28px', maxWidth: 480, margin: '0 auto', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0' }}>
       <style>{`
         @keyframes terminalBlink { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes resonanceSlide { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
       `}</style>
-      <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: '#22c55e', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>
+      <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>
         ▶ CLiFF // Network Resonance Scan
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {steps.map((step, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: visibleCount > i ? 1 : 0, transition: 'opacity 0.3s', animation: visibleCount > i ? 'resonanceSlide 0.4s ease forwards' : 'none' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: i === steps.length - 1 ? '#22c55e' : visibleCount > i ? '#22c55e' : '#334155', boxShadow: visibleCount > i ? '0 0 8px rgba(34,197,94,0.6)' : 'none', transition: 'all 0.3s' }} />
-            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: i === steps.length - 1 && visibleCount > i ? '#4ade80' : '#94a3b8', margin: 0, lineHeight: 1.5, fontWeight: i === steps.length - 1 ? 700 : 400 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: i === steps.length - 1 ? '#10B981' : visibleCount > i ? '#10B981' : '#CBD5E1', boxShadow: visibleCount > i ? '0 0 8px rgba(16,185,129,0.4)' : 'none', transition: 'all 0.3s' }} />
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: i === steps.length - 1 && visibleCount > i ? '#059669' : '#64748B', margin: 0, lineHeight: 1.5, fontWeight: i === steps.length - 1 ? 700 : 400 }}>
               {step}
             </p>
           </div>
         ))}
         {!done && (
-          <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#22c55e', animation: 'terminalBlink 1s step-end infinite', marginLeft: 18 }}>█</span>
+          <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#059669', animation: 'terminalBlink 1s step-end infinite', marginLeft: 18 }}>█</span>
         )}
       </div>
       {done && (
-        <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 8, fontFamily: "'Courier New', monospace", fontSize: 11, color: '#4ade80', animation: 'resonanceSlide 0.4s ease forwards' }}>
+        <div style={{ marginTop: 16, padding: '10px 14px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, fontFamily: "'Courier New', monospace", fontSize: 11, color: '#059669', animation: 'resonanceSlide 0.4s ease forwards' }}>
           ✓ Scan complete. Routing to your personalized preview...
         </div>
       )}
@@ -127,7 +127,7 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
       <div style={{ textAlign: 'center', opacity: exiting ? 0 : 1, transition: 'opacity 400ms ease' }}>
         <h1 style={{ fontFamily: FONT, fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', margin: '0 0 24px', lineHeight: 1.25 }}>
           Scanning your{' '}
-          <span style={{ color: '#6366F1' }}>{schoolName} network...</span>
+          <span style={{ color: '#059669' }}>{schoolName} network...</span>
         </h1>
         <ResonanceScan schoolShortName={schoolName} />
       </div>
