@@ -378,7 +378,7 @@ Return valid JSON.`,
             <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 24px', lineHeight: 1.6 }}>Full bio, all 3 headlines, alumni DM, unlimited resume versions, and the full Agent.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button onClick={saveAndAuth} style={{ width: '100%', background: '#F8FAFC', border: `1px solid #E2E8F0`, borderRadius: 10, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
+              <button onClick={() => saveAndAuth('paid')} style={{ width: '100%', background: '#F8FAFC', border: `1px solid #E2E8F0`, borderRadius: 10, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
                 onMouseLeave={e => e.currentTarget.style.background = '#F8FAFC'}
               >
@@ -389,7 +389,7 @@ Return valid JSON.`,
                 <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '3px 10px' }}>Flexible</span>
               </button>
 
-              <button onClick={saveAndAuth} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: 10, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s', position: 'relative' }}
+              <button onClick={() => saveAndAuth('paid')} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: 10, padding: '18px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.15s', position: 'relative' }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.92'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >

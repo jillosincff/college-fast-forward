@@ -117,7 +117,7 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
   const canContinue = totalSelected > 0;
 
   return (
-    <div style={{ textAlign: 'center', maxWidth: 580, width: '100%', animation: 'fadeUp 0.3s ease' }}>
+    <div style={{ textAlign: 'center', maxWidth: 580, width: '100%' }}>
       {/* Badge */}
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 100, padding: '5px 14px', marginBottom: 20 }}>
         <span style={{ fontSize: 11 }}>🗺️</span>

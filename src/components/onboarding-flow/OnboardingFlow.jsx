@@ -298,7 +298,14 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       setScreen(newScreen);
     }
   };
-  const back = () => setScreen(s => Math.max(1, s - 1));
+  const back = () => {
+    setScreen(s => {
+      const prev = Math.max(1, s - 1);
+      // Reset screen 9 sub-mode when leaving screen 9 via back
+      if (s === 9) setDataInputMode('choose');
+      return prev;
+    });
+  };
 
   const toggleBlocker = (key) => {
     setBlockers(prev => prev.includes(key) ? prev.filter(k => k !== key) : prev.length < 2 ? [...prev, key] : prev);
@@ -744,7 +751,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           if (!active && blockers.length >= 2) {
             // show toast by setting a temp DOM message
             const el = document.getElementById('blocker-limit-toast');
-            if (el) { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(-6px)'; }, 2200); }
+            if (el) { el.style.opacity = '1'; setTimeout(() => { el.style.opacity = '0'; }, 2200); }
             return;
           }
           toggleBlocker(key);
@@ -753,7 +760,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         return (
           <div style={{ ...card, maxWidth: 540 }}>
             {/* Limit toast */}
-            <div id="blocker-limit-toast" style={{ position: 'fixed', top: 56, left: '50%', transform: 'translateX(-50%) translateY(-6px)', background: '#1E293B', color: '#fff', fontFamily: FONT, fontSize: 13, fontWeight: 600, padding: '10px 20px', borderRadius: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.18)', zIndex: 20000, opacity: 0, transition: 'opacity 0.25s ease, transform 0.25s ease', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+            <div id="blocker-limit-toast" style={{ position: 'fixed', top: 56, left: '50%', transform: 'translateX(-50%)', background: '#1E293B', color: '#fff', fontFamily: FONT, fontSize: 13, fontWeight: 600, padding: '10px 20px', borderRadius: 100, boxShadow: '0 8px 24px rgba(0,0,0,0.18)', zIndex: 20000, opacity: 0, transition: 'opacity 0.25s ease, transform 0.25s ease', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
               Focusing on your top 2 priorities ensures the fastest results.
             </div>
 
