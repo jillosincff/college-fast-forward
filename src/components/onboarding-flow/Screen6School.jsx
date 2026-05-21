@@ -137,12 +137,14 @@ export default function Screen6School({ college, onCollegeChange, onBack, onNext
         <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Alumni Advantage</span>
       </div>
 
-      <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 34px)', fontWeight: 700, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.03em', margin: '0 0 10px' }}>
-        Alumni from your school are<br /><span style={{ color: BLUE }}>10x more likely</span> to help you.
+      <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 34px)', fontWeight: 800, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
+        Alumni & parents from your school are<br /><span style={{ color: BLUE }}>10x more likely</span> to help you.
       </h1>
-      <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.65, margin: '0 auto 28px', maxWidth: 400 }}>
-        We'll use this to surface warm connections when it matters most.
-      </p>
+      <div style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 auto 28px', maxWidth: 420, textAlign: 'center' }}>
+        <p style={{ margin: '0 0 4px' }}>Cold applications get <strong style={{ color: '#EF4444' }}>~1% response rates.</strong></p>
+        <p style={{ margin: '0 0 4px' }}>Warm intros from your campus network get <strong style={{ color: GREEN }}>~10%.</strong></p>
+        <p style={{ margin: 0 }}>We'll use this to surface real people who can actually open doors for you.</p>
+      </div>
 
       {/* Animated bar chart */}
       <AlumniBarChart pulse={pulse} />
@@ -196,11 +198,26 @@ export default function Screen6School({ college, onCollegeChange, onBack, onNext
         )}
       </div>
 
-      {/* Selected confirmation */}
+      {/* Post-selection mirroring panel */}
       {isValid && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '8px 14px', marginTop: 12, animation: 'fadeUp 0.2s ease' }}>
-          <span style={{ fontSize: 14 }}>✅</span>
-          <p style={{ fontFamily: FONT, fontSize: 12, color: '#059669', fontWeight: 600, margin: 0 }}>Alumni network unlocked for <strong>{college}</strong></p>
+        <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 16, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 12px' }}>
+            🎉 Awesome — <strong>{college}</strong> network has your back.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: GREEN, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>Your Agent just activated:</p>
+          {[
+            '200+ alumni & parents in your target fields',
+            'Ready-to-use warm intro templates',
+            'Hidden opportunities most students never see',
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 12, color: GREEN, flexShrink: 0 }}>✓</span>
+              <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0 }}>{item}</p>
+            </div>
+          ))}
+          <p style={{ fontFamily: FONT, fontSize: 13, color: '#059669', margin: '12px 0 0', fontStyle: 'italic', fontWeight: 600 }}>
+            You're no longer applying cold. 🚀
+          </p>
         </div>
       )}
 
@@ -228,7 +245,12 @@ export default function Screen6School({ college, onCollegeChange, onBack, onNext
           onMouseEnter={e => { if (isValid) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.40)'; }}}
           onMouseLeave={e => { if (isValid) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.30)'; }}}
         >
-          {nextLabel}
+          {isValid ? (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              Continue →
+              <span style={{ fontSize: 11, fontWeight: 600, background: 'rgba(255,255,255,0.2)', borderRadius: 6, padding: '2px 8px' }}>Network Activated ✓</span>
+            </span>
+          ) : nextLabel}
         </button>
       </div>
     </div>
