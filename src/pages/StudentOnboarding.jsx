@@ -4,97 +4,89 @@ import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import GoogleSignInButton from '@/components/onboarding/student/GoogleSignInButton';
 import SchoolSearchInput from '@/components/onboarding/student/SchoolSearchInput';
-import StudentWelcomeScreen from '@/components/onboarding/student/StudentWelcomeScreen';
 import { deriveSchoolCode } from '@/lib/schoolNames';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
-const playfair = "'Playfair Display', Georgia, serif";
 const ORANGE = '#E85D20';
 
-/**
- * FLOW B — Student joins on their own (from role selection "I'm a Job Seeker").
- * 3 screens: Sign Up → Two Questions → Welcome Moment
- */
 export default function StudentOnboarding() {
-  const { user, refreshUser, isLoading } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Form state
   const [firstName, setFirstName] = useState('');
   const [school, setSchool] = useState('');
   const [parentCompany, setParentCompany] = useState('');
   const [showCompanyFeedback, setShowCompanyFeedback] = useState(false);
+  const [careerGoal, setCareerGoal] = useState('');
+  const [locationPreference, setLocationPreference] = useState('');
+  const [resumeUploaded, setResumeUploaded] = useState(false);
+  const [linkedInOptimized, setLinkedInOptimized] = useState(false);
 
-  // Load fonts
   useEffect(() => {
     if (!document.getElementById('student-onb-fonts')) {
       const link = document.createElement('link');
       link.id = 'student-onb-fonts';
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap';
+      link.href = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap';
       document.head.appendChild(link);
     }
   }, []);
 
-  // Capture referral code silently from URL
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
     const ref = hashParams.get('ref') || hashParams.get('referral');
     if (ref) {
-      try { sessionStorage.setItem('pending_referral_code', ref); } catch (e) { /* ok */ }
-      try { localStorage.setItem('parent_referral_code', ref); } catch (e) { /* ok */ }
+      try { sessionStorage.setItem('pending_referral_code', ref); } catch (e) {}
     }
   }, []);
 
-  // After OAuth completes — if already onboarded, redirect; otherwise pre-fill and advance
   useEffect(() => {
-    if (!user || step !== 1) return;
-    // Already onboarded — route them directly to the right dashboard
-    if (user.persona && user.onboarding_completed) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('ParentHome');
-      } else if (user.persona === 'alumni' && user.alumni_intent === 'giving_help') {
-        navigate('AlumniHome');
-      } else {
-        navigate('FreeTierDashboard');
+    if (user && step === 1) {
+      // Already onboarded — route them to the right dashboard
+      if (user.persona && user.onboarding_completed) {
+        if (user.persona === 'parent' || user.roles?.includes('parent')) {
+          navigate('ParentHome');
+        } else if (user.persona === 'alumni' && user.alumni_intent === 'giving_help') {
+          navigate('AlumniHome');
+        } else {
+          navigate('FreeTierDashboard');
+        }
+        return;
       }
-      return;
+      const name = user.full_name?.split(' ')[0] || '';
+      setFirstName(name);
+      setStep(2);
     }
-    const name = user.full_name?.split(' ')[0] || '';
-    setFirstName(name);
-    setStep(2);
-  }, [user, step, navigate]);
-
-  // Handle OAuth error
-  useEffect(() => {
-    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
-    if (hashParams.get('error')) {
-      setError('Something went wrong. Please try again.');
-    }
-  }, []);
+  }, [user, step]);
 
   const handleGoogleSignIn = () => {
     setLoading(true);
     setError(null);
     try {
       localStorage.setItem('pending_invite_role', 'student');
-      // Safari clears localStorage during OAuth — sessionStorage survives
       sessionStorage.setItem('cff_onboarding_type', 'student');
-    } catch (e) { /* private browsing */ }
-    // Redirect back to StudentOnboarding so step 2 renders after OAuth
+    } catch (e) {}
     base44.auth.redirectToLogin(window.location.origin + '/#StudentOnboarding');
   };
 
-  const handleSubmit = async () => {
-    if (!firstName.trim() || !school.trim()) return;
+  const completeLifecycle = async (referralCode) => {
+    base44.functions.invoke('linkStudentToParent', { action: 'auto_link', studentUserId: user.id, studentEmailAddress: user.email }).catch(() => {});
+    base44.functions.invoke('awardStudentKarma', { userId: user.id, userEmail: user.email, actionType: 'complete_profile' }).catch(() => {});
+    base44.functions.invoke('sendWelcomeEmail', { userId: user.id, userEmail: user.email, userName: firstName.trim(), persona: 'student' }).catch(() => {});
+    if (referralCode) {
+      base44.functions.invoke('trackReferralClick', { referral_code: referralCode, action: 'signup_completed', user_email: user.email }).catch(() => {});
+    }
+    if (refreshUser) await refreshUser();
+    setLoading(false);
+    navigate('FreeTierDashboard');
+  };
+
+  const handleFinalSubmit = async () => {
     setLoading(true);
-
-    // Capture silent referral code
     let referralCode = null;
-    try { referralCode = sessionStorage.getItem('pending_referral_code'); } catch (e) { /* ok */ }
-
+    try { referralCode = sessionStorage.getItem('pending_referral_code'); } catch (e) {}
     const schoolCode = deriveSchoolCode(school);
 
     const updateData = {
@@ -103,23 +95,18 @@ export default function StudentOnboarding() {
       onboarding_completed: true,
       onboarding_completed_at: new Date().toISOString(),
       is_new_signup: true,
-      invite_code_used: 'direct',
       school: school.trim(),
       school_name: school.trim(),
       university: school.trim(),
-      ...(schoolCode ? { school_code: schoolCode } : {}),
       first_name: firstName.trim(),
     };
 
+    if (schoolCode) updateData.school_code = schoolCode;
     if (referralCode) updateData.referral_code = referralCode;
-    if (user.full_name !== firstName.trim()) {
-      updateData.full_name = firstName.trim();
-    }
 
     try {
       await base44.auth.updateMe(updateData);
 
-      // Save parent company if provided (non-blocking)
       if (parentCompany.trim()) {
         base44.entities.ParentNetworkProfile.create({
           first_name: firstName.trim(),
@@ -130,119 +117,65 @@ export default function StudentOnboarding() {
           school_code: schoolCode || '',
           is_active: true,
         }).catch(() => {});
-        
-        // Show instant feedback
+
         setShowCompanyFeedback(true);
         setTimeout(async () => {
           setShowCompanyFeedback(false);
-          // Auto-link to parent if any (non-blocking)
-          base44.functions.invoke('linkStudentToParent', {
-            action: 'auto_link',
-            studentUserId: user.id,
-            studentEmailAddress: user.email,
-          }).catch(() => {});
-          // Award karma (non-blocking)
-          base44.functions.invoke('awardStudentKarma', {
-            userId: user.id, userEmail: user.email,
-            actionType: 'complete_profile', description: 'Completed student profile',
-          }).catch(() => {});
-          // Welcome email (non-blocking)
-          base44.functions.invoke('sendWelcomeEmail', {
-            userId: user.id, userEmail: user.email,
-            userName: firstName.trim(), persona: 'student',
-          }).catch(() => {});
-          // Credit ambassador referral (non-blocking)
-          if (referralCode) {
-            base44.functions.invoke('trackReferralClick', {
-              referral_code: referralCode,
-              action: 'signup_completed',
-              user_email: user.email,
-            }).catch(() => {});
-            try { sessionStorage.removeItem('pending_referral_code'); } catch (e) { /* ok */ }
-          }
-          // Claim parent referral if present (non-blocking)
-          const parentRefCode = (() => { try { return localStorage.getItem('parent_referral_code'); } catch (e) { return null; } })();
-          if (parentRefCode) {
-            fetch('https://growth-hacker-marketing-agent-101dbdc8.base44.app/functions/claimParentReferral', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ referral_code: parentRefCode }),
-              credentials: 'include',
-            }).catch(() => {});
-            try { localStorage.removeItem('parent_referral_code'); } catch (e) { /* ok */ }
-          }
-          localStorage.removeItem('pending_invite_role');
-          try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
-          if (refreshUser) await refreshUser();
-          setStep(3);
+          await completeLifecycle(referralCode);
         }, 2000);
-        return; // Exit early to show feedback animation
+        return;
       }
 
-      // No parent company - proceed normally
-      // Auto-link to parent if any (non-blocking)
-      base44.functions.invoke('linkStudentToParent', {
-        action: 'auto_link',
-        studentUserId: user.id,
-        studentEmailAddress: user.email,
-      }).catch(() => {});
-
-      // Award karma (non-blocking)
-      base44.functions.invoke('awardStudentKarma', {
-        userId: user.id, userEmail: user.email,
-        actionType: 'complete_profile', description: 'Completed student profile',
-      }).catch(() => {});
-
-      // Welcome email (non-blocking)
-      base44.functions.invoke('sendWelcomeEmail', {
-        userId: user.id, userEmail: user.email,
-        userName: firstName.trim(), persona: 'student',
-      }).catch(() => {});
-
-      // Credit ambassador referral (non-blocking)
-      if (referralCode) {
-        base44.functions.invoke('trackReferralClick', {
-          referral_code: referralCode,
-          action: 'signup_completed',
-          user_email: user.email,
-        }).catch(() => {});
-        try { sessionStorage.removeItem('pending_referral_code'); } catch (e) { /* ok */ }
-      }
-
-      // Claim parent referral if present (non-blocking)
-      const parentRefCode = (() => { try { return localStorage.getItem('parent_referral_code'); } catch (e) { return null; } })();
-      if (parentRefCode) {
-        fetch('https://growth-hacker-marketing-agent-101dbdc8.base44.app/functions/claimParentReferral', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ referral_code: parentRefCode }),
-          credentials: 'include',
-        }).catch(() => {});
-        try { localStorage.removeItem('parent_referral_code'); } catch (e) { /* ok */ }
-      }
-
-      localStorage.removeItem('pending_invite_role');
-      try { sessionStorage.removeItem('cff_onboarding_type'); } catch (e) {}
-      if (refreshUser) await refreshUser();
-      setStep(3);
+      await completeLifecycle(referralCode);
     } catch (e) {
-      console.error('Onboarding update failed:', e.message);
-      setError('Something went wrong. Please try again.');
-    } finally {
+      setError('System update failed. Please try again.');
       setLoading(false);
     }
   };
 
-  const handleWelcomeComplete = useCallback(() => {
-    navigate('PostJoinUpsell');
-  }, []);
+  const OnboardingLayout = ({ currentStep, totalSteps, children }) => (
+    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+      <div style={{ maxWidth: 480, width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 32 }}>
+          {Array.from({ length: totalSteps }).map((_, idx) => (
+            <div
+              key={idx}
+              style={{
+                width: 24,
+                height: 4,
+                borderRadius: 2,
+                background: (idx + 1) === currentStep ? ORANGE : 'rgba(255,255,255,0.1)'
+              }}
+            />
+          ))}
+        </div>
+        <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 16, padding: '40px 32px' }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 
-  // SCREEN 3: Welcome Moment
-  if (step === 3) {
-    return <StudentWelcomeScreen firstName={firstName} onComplete={handleWelcomeComplete} />;
+  // SCREEN 1: Authentication Gateway
+  if (step === 1) {
+    return (
+      <OnboardingLayout currentStep={1} totalSteps={9}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: ORANGE, marginBottom: 16 }}>College Fast Forward</p>
+          <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 28, color: '#fff', marginBottom: 8 }}>Let's get you set up.</h1>
+          <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 32 }}>Takes less than 60 seconds.</p>
+          {error && (
+            <div style={{ background: 'rgba(229,57,53,0.1)', border: '1px solid rgba(229,57,53,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
+              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#e53935', margin: 0 }}>{error}</p>
+            </div>
+          )}
+          <GoogleSignInButton onClick={handleGoogleSignIn} loading={loading} />
+        </div>
+      </OnboardingLayout>
+    );
   }
 
-  // SCREEN 2: Two Questions
+  // SCREEN 2: Welcome & Co-Pilot
   if (step === 2) {
     if (!user) {
       return (
@@ -251,201 +184,190 @@ export default function StudentOnboarding() {
         </div>
       );
     }
-    const isValid = firstName.trim().length > 0 && school.trim().length > 0;
     return (
-      <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
-        <div style={{ maxWidth: 480, width: '100%' }}>
-          {/* Progress dots */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE }} />
-          </div>
-
-          <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px' }}>
-            <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 24, color: '#fff', lineHeight: 1.3, marginBottom: 8 }}>
-              Almost there.
-            </h1>
-            <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#888', lineHeight: 1.6, marginBottom: 32 }}>
-              Just two quick things.
-            </p>
-
-            {/* First name */}
-            <div style={{ marginBottom: 24 }}>
-              <label style={{
-                display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-                textTransform: 'uppercase', letterSpacing: '0.1em',
-                color: ORANGE, marginBottom: 8,
-              }}>
-                First name
-              </label>
-              <input
-                value={firstName}
-                onChange={e => setFirstName(e.target.value)}
-                placeholder="Your first name"
-                style={{
-                  width: '100%', background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid #2A2A2A', borderRadius: 12, padding: '14px 16px',
-                  fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', boxSizing: 'border-box',
-                  transition: 'border-color 0.2s',
-                }}
-                onFocus={e => { e.target.style.borderColor = ORANGE; }}
-                onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
-              />
-            </div>
-
-            {/* School */}
-            <div style={{ marginBottom: 24 }}>
-              <label style={{
-                display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-                textTransform: 'uppercase', letterSpacing: '0.1em',
-                color: ORANGE, marginBottom: 8,
-              }}>
-                Your school
-              </label>
-              <SchoolSearchInput value={school} onChange={setSchool} />
-              <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: '#888', marginTop: 8 }}>
-                This helps us find alumni and opportunities specific to your campus.
-              </p>
-            </div>
-
-            {/* Parent Company - Optional */}
-            <div style={{ marginBottom: 32 }}>
-            <label style={{
-              display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.1em',
-              color: '#888', marginBottom: 8,
-            }}>
-              Parents' Employer <span style={{ color: '#555', fontWeight: 400 }}>(Optional)</span>
-            </label>
-            <input
-              value={parentCompany}
-              onChange={e => setParentCompany(e.target.value)}
-              placeholder="e.g., Google, Deloitte"
-              style={{
-                width: '100%', background: 'rgba(255,255,255,0.06)',
-                border: '1px solid #2A2A2A', borderRadius: 12, padding: '14px 16px',
-                fontFamily: dmSans, fontSize: 15, fontWeight: 400, color: '#fff', boxSizing: 'border-box',
-                transition: 'border-color 0.2s',
-              }}
-              onFocus={e => { e.target.style.borderColor = ORANGE; }}
-              onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
-            />
-            </div>
-
-            {/* CTA */}
-            <button
-              onClick={handleSubmit}
-              disabled={!isValid || loading}
-              style={{
-                width: '100%', padding: '16px 24px', borderRadius: 100, border: 'none',
-                background: isValid && !loading ? ORANGE : 'rgba(232,93,32,0.3)',
-                color: '#fff', fontFamily: dmSans, fontSize: 16, fontWeight: 600,
-                cursor: isValid && !loading ? 'pointer' : 'not-allowed',
-                minHeight: 'auto', transition: 'background 0.2s',
-              }}
-            >
-              {loading ? 'Setting up...' : 'Continue →'}
-            </button>
-
-            {/* Instant Feedback Animation */}
-            {showCompanyFeedback && parentCompany && (
-              <div style={{
-                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                background: 'rgba(10,10,10,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 24, zIndex: 9999,
-              }}>
-                <div style={{
-                  background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 16,
-                  padding: '40px 32px', maxWidth: 400, width: '100%', textAlign: 'center',
-                  animation: 'fadeInUp 0.3s ease-out',
-                }}>
-                  <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-                  <h3 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 20, color: '#fff', marginBottom: 8 }}>
-                    Boom! You just unlocked {parentCompany} network access
-                  </h3>
-                  <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888', lineHeight: 1.5 }}>
-                    The entire {school} pool now has a warm entry point at {parentCompany}. In return, I've mapped out other parents and alums to help you jump the line this week.
-                  </p>
-                  <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 600, color: ORANGE, marginTop: 16 }}>
-                    Welcome to the engine. 🐊
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <OnboardingLayout currentStep={2} totalSteps={9}>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 26, color: '#fff', marginBottom: 12 }}>Welcome, {firstName}!</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 15, color: '#AAA', lineHeight: '1.6', marginBottom: 32 }}>
+          Think of College Fast Forward as your personal career co-pilot. We aren't here to make you fill out endless applications—we're here to build your competitive engine.
+        </p>
+        <button onClick={() => setStep(3)} style={{ width: '100%', padding: '16px', borderRadius: 12, border: 'none', background: ORANGE, color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: 'pointer', minHeight: 'auto' }}>
+          Meet the Team →
+        </button>
+      </OnboardingLayout>
     );
   }
 
-  // ── SCREEN 1: Sign Up ──
-  return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
-      <div style={{ maxWidth: 480, width: '100%' }}>
-        {/* Progress dots */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 32 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: ORANGE }} />
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
-        </div>
+  // SCREEN 3: Built by Experts
+  if (step === 3) {
+    return (
+      <OnboardingLayout currentStep={3} totalSteps={9}>
+        <span style={{ background: 'rgba(232,93,32,0.1)', color: ORANGE, fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 6, textTransform: 'uppercase' }}>Built by Experts</span>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 16, marginBottom: 12 }}>No generic templates here.</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', lineHeight: '1.6', marginBottom: 32 }}>
+          This system was custom engineered by senior career technology professionals who got exhausted watching excellent students get automatically vaporized by corporate parsing scripts.
+        </p>
+        <button onClick={() => setStep(4)} style={{ width: '100%', padding: '16px', borderRadius: 12, border: 'none', background: ORANGE, color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: 'pointer', minHeight: 'auto' }}>
+          See the Strategy →
+        </button>
+      </OnboardingLayout>
+    );
+  }
 
-        <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 12, padding: '40px 32px', textAlign: 'center' }}>
-          {/* Label */}
-          <p style={{
-            fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            textTransform: 'uppercase', letterSpacing: '0.14em',
-            color: ORANGE, marginBottom: 24,
-          }}>
-            College Fast Forward
-          </p>
+  // SCREEN 4: The Frustration Screen
+  if (step === 4) {
+    return (
+      <OnboardingLayout currentStep={4} totalSteps={9}>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 24, color: '#fff', marginBottom: 12 }}>The cold application market is completely broken.</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#EC5B5B', fontWeight: 500, marginBottom: 16 }}>❌ Spatially spamming 500 portals = getting ghosted.</p>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', lineHeight: '1.6', marginBottom: 32 }}>
+          Mass-applying drops your profile straight into algorithmic black holes. CLiFF fixes this by completely reversing the framework: we map target actions to isolated lanes.
+        </p>
+        <button onClick={() => setStep(5)} style={{ width: '100%', padding: '16px', borderRadius: 12, border: 'none', background: ORANGE, color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: 'pointer', minHeight: 'auto' }}>
+          Lock in Your Intent →
+        </button>
+      </OnboardingLayout>
+    );
+  }
 
-          {/* Header */}
-          <h1 style={{
-            fontFamily: dmSans, fontWeight: 700, fontSize: 'clamp(24px, 4vw, 30px)',
-            color: '#fff', lineHeight: 1.3, marginBottom: 8,
-          }}>
-            {"Let's get you set up."}
-          </h1>
-
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 400, color: '#888', marginBottom: 32 }}>
-            Takes less than 60 seconds.
-          </p>
-
-          {/* Error */}
-          {error && (
-            <div style={{ background: 'rgba(229,57,53,0.1)', border: '1px solid rgba(229,57,53,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 16, textAlign: 'left' }}>
-              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#e53935', margin: 0 }}>{error}</p>
-            </div>
-          )}
-
-          {/* CTA */}
-          <GoogleSignInButton onClick={handleGoogleSignIn} loading={loading} />
-
-          {/* Fine print */}
-          <p style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: '#555', marginTop: 16, lineHeight: 1.6 }}>
-            By continuing you agree to our{' '}
-            <a href="#Terms" style={{ color: '#888', textDecoration: 'underline' }}>Terms of Service</a> and{' '}
-            <a href="#Privacy" style={{ color: '#888', textDecoration: 'underline' }}>Privacy Policy</a>.
-          </p>
-
-          {/* Sign in link */}
-          <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#888', marginTop: 24 }}>
-            Already have an account?{' '}
-            <button
-              onClick={() => {
-                try { localStorage.removeItem('pending_invite_role'); } catch (e) { /* ok */ }
-                base44.auth.redirectToLogin(window.location.origin + '/#GatorAuth');
-              }}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: dmSans, fontSize: 13, fontWeight: 600, color: ORANGE,
-                minHeight: 'auto', width: 'auto', padding: 0,
-              }}
+  // SCREEN 5: What Are You Looking For?
+  if (step === 5) {
+    const options = [
+      { id: 'internship', title: 'Summer 2027 Internship' },
+      { id: 'fulltime', title: 'Graduation Full-Time Career' },
+      { id: 'explore', title: 'Isolating High-Yield Paths' }
+    ];
+    return (
+      <OnboardingLayout currentStep={5} totalSteps={9}>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 22, color: '#fff', marginBottom: 8 }}>What are you tracking?</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 24 }}>We optimize your engine parameters based on this anchor target.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+          {options.map(opt => (
+            <div
+              key={opt.id}
+              onClick={() => setCareerGoal(opt.id)}
+              style={{ padding: '16px', borderRadius: 12, border: careerGoal === opt.id ? `2px solid ${ORANGE}` : '1px solid #2A2A2A', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: '#fff', fontFamily: dmSans, fontSize: 15, fontWeight: 500 }}
             >
-              Sign in →
-            </button>
-          </p>
+              {opt.title}
+            </div>
+          ))}
         </div>
-      </div>
-    </div>
-  );
+        <button disabled={!careerGoal} onClick={() => setStep(6)} style={{ width: '100%', padding: '16px', borderRadius: 12, border: 'none', background: careerGoal ? ORANGE : '#2A2A2A', color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: careerGoal ? 'pointer' : 'not-allowed', minHeight: 'auto' }}>
+          Continue →
+        </button>
+      </OnboardingLayout>
+    );
+  }
+
+  // SCREEN 6: Location Preference
+  if (step === 6) {
+    return (
+      <OnboardingLayout currentStep={6} totalSteps={9}>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 22, color: '#fff', marginBottom: 8 }}>Target Footprint</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 24 }}>Where are we looking to establish inside tracks?</p>
+        <input
+          value={locationPreference}
+          onChange={e => setLocationPreference(e.target.value)}
+          placeholder="e.g., New York, Charlotte, Remote"
+          style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid #2A2A2A', borderRadius: 12, padding: '14px 16px', fontFamily: dmSans, fontSize: 15, color: '#fff', boxSizing: 'border-box', marginBottom: 24 }}
+        />
+        <button disabled={!locationPreference.trim()} onClick={() => setStep(7)} style={{ width: '100%', padding: '16px', borderRadius: 12, border: 'none', background: locationPreference.trim() ? ORANGE : '#2A2A2A', color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: locationPreference.trim() ? 'pointer' : 'not-allowed', minHeight: 'auto' }}>
+          Continue →
+        </button>
+      </OnboardingLayout>
+    );
+  }
+
+  // SCREEN 7: Resume
+  if (step === 7) {
+    return (
+      <OnboardingLayout currentStep={7} totalSteps={9}>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 22, color: '#fff', marginBottom: 8 }}>Resume Formatting Repair</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 24 }}>Prepare your file structure to slide right past AI filtration gates.</p>
+        <div
+          onClick={() => setResumeUploaded(true)}
+          style={{ border: '2px dashed #333', padding: '32px 16px', borderRadius: 12, textAlign: 'center', cursor: 'pointer', background: resumeUploaded ? 'rgba(46,125,50,0.1)' : 'transparent', borderColor: resumeUploaded ? '#2E7D32' : '#333', marginBottom: 24 }}
+        >
+          <span style={{ fontSize: 24, display: 'block', marginBottom: 8 }}>📄</span>
+          <span style={{ color: '#fff', fontFamily: dmSans, fontSize: 14, fontWeight: 500 }}>
+            {resumeUploaded ? 'Resume Parsing Configured!' : 'Tap to sync baseline resume file'}
+          </span>
+        </div>
+        <button onClick={() => setStep(8)} style={{ width: '100%', padding: '16px', borderRadius: 12, border: 'none', background: ORANGE, color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: 'pointer', minHeight: 'auto' }}>
+          {resumeUploaded ? 'Next Step' : 'Skip for Now'} →
+        </button>
+      </OnboardingLayout>
+    );
+  }
+
+  // SCREEN 8: LinkedIn Optimization
+  if (step === 8) {
+    return (
+      <OnboardingLayout currentStep={8} totalSteps={9}>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 22, color: '#fff', marginBottom: 8 }}>Profile Optimization</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 24 }}>Ensure your digital footprint completely matches your target assets before network execution.</p>
+        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid #2A2A2A', padding: '16px', borderRadius: 12, color: '#AAA', fontSize: 14, fontFamily: dmSans, lineHeight: '1.5', marginBottom: 24 }}>
+          💡 <strong style={{ color: '#fff' }}>Agent Tip:</strong> Inside tracks check your social links immediately. We'll deploy optimized headlines directly to your profile workspace.
+        </div>
+        <button onClick={() => { setLinkedInOptimized(true); setStep(9); }} style={{ width: '100%', padding: '16px', borderRadius: 12, border: 'none', background: ORANGE, color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: 'pointer', minHeight: 'auto' }}>
+          Connect Engine Asset Base →
+        </button>
+      </OnboardingLayout>
+    );
+  }
+
+  // SCREEN 9: Finalize
+  if (step === 9) {
+    const isFormValid = school.trim().length > 0;
+    return (
+      <OnboardingLayout currentStep={9} totalSteps={9}>
+        <h1 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 22, color: '#fff', marginBottom: 8 }}>Finalizing Inside Tracks</h1>
+        <p style={{ fontFamily: dmSans, fontSize: 14, color: '#888', marginBottom: 24 }}>Map your local ecosystem coordinates.</p>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: ORANGE, marginBottom: 8 }}>Your School</label>
+          <SchoolSearchInput value={school} onChange={setSchool} />
+        </div>
+
+        <div style={{ marginBottom: 32 }}>
+          <label style={{ display: 'block', fontFamily: dmSans, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#888', marginBottom: 8 }}>
+            Parents' Employer <span style={{ color: '#555', fontWeight: 400 }}>(Optional)</span>
+          </label>
+          <input
+            value={parentCompany}
+            onChange={e => setParentCompany(e.target.value)}
+            placeholder="e.g., Apple, McKinsey"
+            style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid #2A2A2A', borderRadius: 12, padding: '14px 16px', fontFamily: dmSans, fontSize: 15, color: '#fff', boxSizing: 'border-box' }}
+          />
+        </div>
+
+        {error && (
+          <div style={{ background: 'rgba(229,57,53,0.1)', border: '1px solid rgba(229,57,53,0.3)', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
+            <p style={{ fontFamily: dmSans, fontSize: 13, color: '#e53935', margin: 0 }}>{error}</p>
+          </div>
+        )}
+
+        <button
+          onClick={handleFinalSubmit}
+          disabled={!isFormValid || loading}
+          style={{ width: '100%', padding: '16px', borderRadius: 100, border: 'none', background: isFormValid && !loading ? ORANGE : 'rgba(232,93,32,0.2)', color: '#fff', fontWeight: 600, fontFamily: dmSans, cursor: isFormValid && !loading ? 'pointer' : 'not-allowed', minHeight: 'auto' }}
+        >
+          {loading ? 'Activating Agent...' : 'Deploy My Agent ⚡'}
+        </button>
+
+        {showCompanyFeedback && parentCompany && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(10,10,10,0.96)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+            <div style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 16, padding: '40px 32px', maxWidth: 400, width: '100%', textAlign: 'center' }}>
+              <div style={{ fontSize: 44, marginBottom: 12 }}>🎉</div>
+              <h3 style={{ fontFamily: dmSans, fontWeight: 700, fontSize: 20, color: '#fff', marginBottom: 8 }}>Unlocked {parentCompany}</h3>
+              <p style={{ fontFamily: dmSans, fontSize: 13, color: '#888', margin: 0 }}>Your school now has a direct insider channel locked into the registry.</p>
+            </div>
+          </div>
+        )}
+      </OnboardingLayout>
+    );
+  }
+
+  return null;
 }
+
+StudentOnboarding.isPublic = true;
