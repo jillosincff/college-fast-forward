@@ -191,9 +191,9 @@ export default function GatorAuth() {
         return;
       }
 
-      // Check for saved progress — resume at last screen
-      const savedScreen = parseInt(localStorage.getItem('cff_onboarding_screen') || '1', 10);
-      setResumeScreen(savedScreen > 1 ? savedScreen : null);
+      // Always start fresh at screen 1 — stale saved screens cause blank renders
+      localStorage.removeItem('cff_onboarding_screen');
+      setResumeScreen(null);
       setStep('onboarding');
       return;
     }
