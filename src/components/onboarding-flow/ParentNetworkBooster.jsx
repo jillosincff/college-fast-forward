@@ -80,6 +80,7 @@ function ConfirmationScreen({ firstName, parentName, parentCompany, schoolName, 
 export default function ParentNetworkBooster({ schoolName = 'University of Florida', firstName, onSkip, onAdd, onContinue }) {
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
   const [email, setEmail] = useState('');
   const [relationship, setRelationship] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -89,7 +90,7 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
 
   const handleAdd = () => {
     if (!canSubmit) return;
-    const data = { name, company, email, relationship };
+    const data = { name, company, jobTitle, email, relationship };
     onAdd?.(data);
     setSubmittedData(data);
     setSubmitted(true);
@@ -98,6 +99,7 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
   const handleAddAnother = () => {
     setName('');
     setCompany('');
+    setJobTitle('');
     setEmail('');
     setRelationship('');
     setSubmitted(false);
@@ -127,20 +129,9 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
         <h3 style={{ fontFamily: sat, fontSize: 18, fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
           Each parent connection strengthens the {schoolName} community.
         </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 4 }}>
-          {[
-            'You get more warm intros and hidden opportunities.',
-            'Other students get stronger connections.',
-            'The whole community levels up.',
-          ].map((line, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-              <span style={{ color: GREEN, fontWeight: 700, flexShrink: 0, marginTop: 1 }}>✓</span>
-              <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.5 }}>{line}</p>
-            </div>
-          ))}
-        </div>
-        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '8px 0 0', lineHeight: 1.5, fontStyle: 'italic' }}>
-          It's a true win-win that grows exponentially with every addition.
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
+          When parents add their professional networks, the entire Gator ecosystem gets stronger.
+          You get more relevant warm intros. Other students benefit too. It grows exponentially.
         </p>
       </div>
 
@@ -177,6 +168,27 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
           {!company && (
             <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#f97316', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '2px 7px', pointerEvents: 'none' }}>
               High value
+            </span>
+          )}
+        </div>
+
+        {/* Job Title */}
+        <div style={{ position: 'relative' }}>
+          <input
+            type="text"
+            placeholder="Job Title (optional) — e.g. Software Engineer, CFO"
+            value={jobTitle}
+            onChange={e => setJobTitle(e.target.value)}
+            style={{
+              fontFamily: dm, fontSize: 14, color: TEXT,
+              background: '#f9fafb', border: `1.5px solid ${jobTitle ? BLUE_BORDER : BORDER}`,
+              borderRadius: 10, padding: '12px 14px', outline: 'none', width: '100%', boxSizing: 'border-box',
+              transition: 'border-color 0.15s',
+            }}
+          />
+          {!jobTitle && (
+            <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontFamily: dm, fontSize: 10, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '2px 7px', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+              Helps CLiFF find better matches
             </span>
           )}
         </div>
