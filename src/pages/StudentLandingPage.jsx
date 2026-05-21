@@ -132,15 +132,26 @@ export default function StudentLandingPage({ onParentClick }) {
   const { user, isLoadingAuth } = useAuth();
 
   const launchWithSchool = (schoolName) => {
-    try {
-      if (schoolName) localStorage.setItem('cff_college', schoolName);
-      // Always clear any saved screen so funnel starts fresh at screen 1
-      localStorage.removeItem('cff_onboarding_screen');
-      localStorage.removeItem('cff_seeking');
-      localStorage.removeItem('cff_blockers');
-    } catch {}
-    setFunnelStartScreen(null);
-    setShowFunnel(true);
+    // Only show funnel for unauthenticated users
+    if (!user) {
+      try {
+        if (schoolName) localStorage.setItem('cff_college', schoolName);
+        localStorage.removeItem('cff_onboarding_screen');
+        localStorage.removeItem('cff_seeking');
+        localStorage.removeItem('cff_blockers');
+      } catch {}
+      setFunnelStartScreen(null);
+      setShowFunnel(true);
+    } else {
+      // Authenticated users go straight to dashboard
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        navigate('ParentHome');
+      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+        navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
+      } else {
+        navigate('FreeTierDashboard');
+      }
+    }
   };
 
   useEffect(() => {
