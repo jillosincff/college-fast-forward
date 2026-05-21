@@ -9,17 +9,15 @@ export default function FunnelTransition({ screenKey, children }) {
 
   useEffect(() => {
     setVisible(false);
-    const t = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setVisible(true));
-    });
-    return () => cancelAnimationFrame(t);
+    const t = setTimeout(() => setVisible(true), 30);
+    return () => clearTimeout(t);
   }, [screenKey]);
 
   return (
     <div style={{
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0)' : 'translateY(10px)',
-      transition: 'opacity 300ms ease, transform 300ms ease',
+      transition: 'opacity 250ms ease, transform 250ms ease',
       width: '100%',
       display: 'flex',
       flexDirection: 'column',

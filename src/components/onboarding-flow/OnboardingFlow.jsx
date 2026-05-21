@@ -498,12 +498,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       <button onClick={onClose} style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, minHeight: 'auto', borderRadius: '50%', background: CARD, border: '1px solid #E2E8F0', color: TEXT2, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: SHADOW }}>✕</button>
 
       {/* ── Welcome Back Banner ── */}
-      {showWelcomeBack && screen < 10 && (
-        <div style={{ position: 'absolute', top: 52, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', background: '#0F172A', border: '1px solid rgba(16,185,129,0.4)', borderRadius: 100, padding: '8px 18px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', zIndex: 10, animation: 'fadeUp 0.4s ease' }}>
-          <span style={{ fontSize: 14 }}>⚡</span>
-          <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: '#fff' }}>Welcome back — CLiFF found <span style={{ color: '#10B981' }}>12 potential inside tracks</span> for you. Finish to unlock them.</span>
-        </div>
-      )}
+      {false && null /* welcome back banner removed */}
 
       {/* ── Analyzing Loader (postAuth only) ── */}
       {analyzing && (
