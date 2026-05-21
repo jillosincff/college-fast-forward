@@ -194,6 +194,7 @@ function ComparisonTable() {
 export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, selectedIndustries = [], targetRoles = [], onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
   const [isDownsell, setIsDownsell] = useState(false);
+  const [commitment, setCommitment] = useState(null);
   const exitIntentFired = useRef(false);
 
   // ── Exit-intent: desktop mouse leaves top of viewport ──
@@ -287,14 +288,26 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           1. HERO HEADER — Personal, urgent, action-focused
       ───────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', marginBottom: 20, padding: '0 8px' }}>
-        <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-          {firstName ? firstName.toUpperCase() + ',' : ''}{' '}
-          let's stop blindly applying{' '}
+        <h1 style={{ fontFamily: sat, fontSize: 'clamp(24px, 4.5vw, 40px)', fontWeight: 900, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+          {firstName ? firstName + ', ' : ''}<span style={{ color: TEXT }}>let's stop blindly applying</span>{' '}
           <span style={{ color: BLUE }}>and start interviewing.</span>
         </h1>
-        <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, lineHeight: 1.65, margin: '0 auto', maxWidth: 560 }}>
-          <span style={{ fontWeight: 700, color: '#2563eb' }}>⚡ Inside Track Found:</span>{' '}
-          CLiFF bypassed the public boards and cracked open active internal networks.{' '}
+        {/* Sub-headline: personal win summary */}
+        <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1px solid ${BLUE_BORDER}`, borderRadius: 14, padding: '16px 20px', maxWidth: 580, margin: '0 auto 16px', textAlign: 'left' }}>
+          <p style={{ fontFamily: dm, fontSize: 14, color: TEXT, lineHeight: 1.7, margin: 0 }}>
+            Your Agent has already <strong>rebuilt your resume + LinkedIn</strong>, found{' '}
+            <strong style={{ color: BLUE }}>3 verified {schoolName} alumni connections</strong>, and unlocked hidden internal tracks.{' '}
+            <span style={{ color: GREEN, fontWeight: 700 }}>You're no longer playing the numbers game.</span>
+          </p>
+        </div>
+        {/* Inside Track Found banner */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: 100, padding: '7px 18px', marginBottom: 4 }}>
+          <span style={{ fontSize: 14 }}>🔥</span>
+          <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#c2410c', letterSpacing: '0.02em' }}>
+            Inside Track Found: CLiFF bypassed public boards → active internal pipelines unlocked
+          </span>
+        </div>
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '8px auto 0', maxWidth: 500, lineHeight: 1.6 }}>
           Here are your live hidden slots with a verified <strong style={{ color: TEXT }}>{schoolName} Alum</strong> connection:
         </p>
       </div>
@@ -326,7 +339,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
               <span style={{ fontSize: 14 }}>💼</span>
               <div>
                 <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: 0 }}>LinkedIn Rebuilt</p>
-                <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: 0 }}>Keyword-optimized for recruiters</p>
+                <p style={{ fontFamily: dm, fontSize: 10, color: GREEN, fontWeight: 700, margin: 0 }}>→ Ready for recruiters &amp; warm intros</p>
               </div>
             </div>
             <div style={{ padding: '14px 16px' }}>
@@ -334,7 +347,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             </div>
           </div>
           <div className="proof-hub-col" style={{ flex: 1, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: '20px 16px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, alignSelf: 'stretch' }}>
-            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: '0 0 6px', textAlign: 'center' }}>Resume Optimized</p>
+            <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT, margin: '0 0 2px', textAlign: 'center' }}>Resume Optimized</p>
+            <p style={{ fontFamily: dm, fontSize: 10, color: GREEN, fontWeight: 700, margin: '0 0 4px', textAlign: 'center' }}>→ 98% ATS Match (Top 2%)</p>
             <p style={{ fontFamily: dm, fontSize: 10, color: TEXT2, margin: '0 0 14px', textAlign: 'center' }}>Passes Fortune 500 ATS filters instantly</p>
             <ATSScoreRing />
           </div>
@@ -352,27 +366,61 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ─────────────────────────────────────────────────────
+          5b. COMMITMENT QUESTION — Self-persuasion before paywall
+      ───────────────────────────────────────────────────── */}
+      <div style={{ background: CARD, border: `1.5px solid ${BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 6px', lineHeight: 1.6 }}>
+          {firstName ? `${firstName}, you're` : "You're"} now set up for a real 14-day sprint.{' '}
+          <span style={{ color: GREEN, fontWeight: 700 }}>Most students who reach this point land their first interview or warm intro within 2 weeks.</span>
+        </p>
+        <h3 style={{ fontFamily: sat, fontSize: 'clamp(16px, 2.5vw, 20px)', fontWeight: 800, color: TEXT, margin: '16px 0 14px', letterSpacing: '-0.02em' }}>
+          How committed are you to getting hired this semester?
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[
+            { label: '🔥 Extremely — Let\'s go', value: 'extreme' },
+            { label: '✅ Very committed', value: 'very' },
+            { label: '🤔 Somewhat — still figuring it out', value: 'somewhat' },
+          ].map(opt => (
+            <button key={opt.value} onClick={() => { setCommitment(opt.value); setTimeout(() => openPaywall(false), 320); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
+                background: commitment === opt.value ? (opt.value === 'extreme' ? GREEN_LIGHT : BLUE_LIGHT) : '#F8FAFC',
+                border: `1.5px solid ${commitment === opt.value ? (opt.value === 'extreme' ? GREEN_BORDER : BLUE_BORDER) : '#E2E8F0'}`,
+                borderRadius: 10, padding: '14px 16px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s',
+              }}
+            >
+              <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${commitment === opt.value ? (opt.value === 'extreme' ? GREEN : BLUE) : '#CBD5E1'}`, background: commitment === opt.value ? (opt.value === 'extreme' ? GREEN : BLUE) : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 800 }}>
+                {commitment === opt.value && '✓'}
+              </div>
+              <span style={{ fontFamily: dm, fontSize: 14, fontWeight: commitment === opt.value ? 700 : 500, color: commitment === opt.value ? TEXT : TEXT2 }}>{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────
           6. THE CLOSE — Final Checkout Card
       ───────────────────────────────────────────────────── */}
       <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
-        <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, margin: '0 0 6px' }}>
-          Real Job ➔ Elite Profile ➔ 3-Day Execution Plan.
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 6px' }}>
+          Unlock My Elite Profile + 14-Day Execution Plan 🎯
         </p>
-        <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+        <h2 style={{ fontFamily: sat, fontSize: 'clamp(20px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
           {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."} 🎯
         </h2>
-        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 8px', lineHeight: 1.6 }}>
-          The Verified Feed · The Insider DM · Your Daily 14-Day Sprint
-        </p>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '5px 16px', marginBottom: 24 }}>
-          <span style={{ fontFamily: sat, fontSize: 20, fontWeight: 900, color: GREEN }}>$4.99</span>
-          <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2, fontWeight: 500 }}>/week · ✨ Cancel in 1-click anytime</span>
+
+        {/* Pricing pill */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '7px 20px', marginBottom: 22 }}>
+          <span style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: GREEN }}>$4.99</span>
+          <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2, fontWeight: 500 }}>/week · Cancel anytime in 1 click</span>
         </div>
 
+        {/* Big green CTA */}
         <button
           onClick={() => openPaywall(false)}
           style={{
-            width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 12px',
+            width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 14px',
             fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
             background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
             border: 'none', borderRadius: 18, padding: '22px 32px', cursor: 'pointer', minHeight: 'auto',
@@ -382,11 +430,21 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(22,163,74,0.5), 0 2px 8px rgba(0,0,0,0.1)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(22,163,74,0.35), 0 2px 8px rgba(0,0,0,0.1)'; }}
         >
-          Unlock My 14-Day Action Plan — $4.99/wk →
+          Unlock Everything Now →
         </button>
-        <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
-          🎁 Or text 3 friends to unlock free access.
-        </p>
+
+        {/* Trust builders */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+          <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
+            🏆 Join 2,400+ students landing opportunities
+          </p>
+          <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
+            🔒 No credit card needed to start — charged only after your free trial
+          </p>
+          <p style={{ fontFamily: dm, fontSize: 12, color: BLUE, margin: 0, fontWeight: 600 }}>
+            🎁 Or text 3 friends for free access
+          </p>
+        </div>
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
