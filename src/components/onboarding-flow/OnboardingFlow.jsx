@@ -610,6 +610,20 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
         </div>
       )}
 
+      {/* ── SCREEN 2: Built by Experts ── */}
+      {screen === 2 && (
+        <Screen2Experts
+          FONT={FONT} CARD={CARD} R={R} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD}
+          BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER}
+          GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER}
+          TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3}
+          h1style={h1style} substyle={substyle}
+          hoveredExpert={hoveredExpert} setHoveredExpert={setHoveredExpert}
+          selectedExpert={selectedExpert} setSelectedExpert={setSelectedExpert}
+          onBack={back} onNext={next} Nav={Nav}
+        />
+      )}
+
       {/* ── SCREEN 3: Frustration Slider ── */}
       {screen === 3 && (() => {
         const frustEmoji = frustration <= 3 ? '😌' : frustration <= 5 ? '😐' : frustration <= 7 ? '😟' : frustration <= 9 ? '😰' : '🆘';
