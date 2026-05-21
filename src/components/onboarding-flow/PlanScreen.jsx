@@ -5,6 +5,7 @@ import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
 import OpportunityHub from './OpportunityHub';
 import PremiumPaywallModal from './PremiumPaywallModal';
+import ParentNetworkBooster from './ParentNetworkBooster';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -205,6 +206,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
   const [isDownsell, setIsDownsell] = useState(false);
   const [commitment, setCommitment] = useState(null);
   const [showCommitmentRequired, setShowCommitmentRequired] = useState(false);
+  const [parentBoosterDone, setParentBoosterDone] = useState(false);
   const exitIntentFired = useRef(false);
 
   // ── Exit-intent: desktop mouse leaves top of viewport ──
@@ -479,7 +481,17 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          7. THE CLOSE — Pricing & CTA
+          7. PARENT NETWORK BOOSTER
+      ───────────────────────────────────────────────────── */}
+      {!parentBoosterDone && (
+        <ParentNetworkBooster
+          onSkip={() => setParentBoosterDone(true)}
+          onAdd={() => setParentBoosterDone(true)}
+        />
+      )}
+
+      {/* ─────────────────────────────────────────────────────
+          8. THE CLOSE — Pricing & CTA
       ───────────────────────────────────────────────────── */}
       <div className="plan-close-card plan-main-cta" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 24px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
         <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
