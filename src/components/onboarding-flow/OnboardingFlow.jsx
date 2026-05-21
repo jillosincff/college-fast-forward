@@ -398,7 +398,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
     setUploading(false);
   };
 
-  const saveAndAuth = (planType) => {
+  const saveAndAuth = async (planType) => {
     try {
       localStorage.setItem('pending_invite_role', 'student');
       sessionStorage.setItem('cff_onboarding_type', 'student');
@@ -416,6 +416,22 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
       if (loc) localStorage.setItem('cff_location', loc);
       if (planType === 'free') localStorage.setItem('cff_plan_type', 'free');
       if (blockers.includes('no_direction')) localStorage.setItem('cff_career_unsure', 'true');
+      
+      // CRITICAL: Update user profile with persona if already authenticated
+      try {
+        const currentUser = await base44.auth.me();
+        if (currentUser) {
+          await base44.auth.updateMe({
+            persona: 'student',
+            roles: ['student'],
+            onboarding_completed: true,
+            school: college || '',
+            school_code: college ? college.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 10) : '',
+          });
+        }
+      } catch (updateErr) {
+        console.warn('Failed to update user persona during onboarding:', updateErr);
+      }
     } catch (e) {}
     // In postAuth mode or if user is already authenticated, complete directly
     if (postAuth || onAlreadyAuthed) {
