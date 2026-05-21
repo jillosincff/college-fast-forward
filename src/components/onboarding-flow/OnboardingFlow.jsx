@@ -1182,45 +1182,77 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
           {!uploading && dataInputMode === 'choose' && (
             <>
-              <h1 style={h1style}>Let's build your profile</h1>
-              <p style={substyle}>The Agent needs to know who you are to find your insiders and build your plan.</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'left' }}>
-                <button onClick={() => fileRef.current?.click()} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: R, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: SHADOW }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = GREEN}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = GREEN_BORDER}
+              <h1 style={h1style}>Let's build your standout profile</h1>
+              <p style={{ ...substyle, marginBottom: 28 }}>The more your Agent knows about you, the better it can match you with alumni insiders, tailor your materials, and uncover opportunities that actually fit.</p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }}>
+                {/* Upload Resume */}
+                <button onClick={() => fileRef.current?.click()}
+                  style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 14, background: GREEN_LIGHT, border: `2px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: `0 4px 12px rgba(16,185,129,0.10)` }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = GREEN; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px rgba(16,185,129,0.18)`; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = GREEN_BORDER; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(16,185,129,0.10)`; }}
                 >
-                  <span style={{ fontSize: 22, flexShrink: 0 }}>📄</span>
+                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${GREEN_BORDER}` }}>📄</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>Upload Resume</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0 }}>PDF or Word — get a full Before/After transformation</p>
+                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>Upload Resume</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>PDF or Word — get a full Before/After transformation in seconds</p>
+                    <p style={{ fontFamily: FONT, fontSize: 11, color: '#059669', margin: 0, fontStyle: 'italic' }}>Agent rewrites bullet points, adds ATS keywords + aligns with your target roles</p>
                   </div>
-                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: GREEN, background: CARD, border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '2px 8px', flexShrink: 0 }}>BEST</span>
+                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: GREEN, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>BEST</span>
                 </button>
 
-                <button onClick={() => setDataInputMode('linkedin')} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, background: BLUE_LIGHT, border: `1.5px solid ${BLUE_BORDER}`, borderRadius: R, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: SHADOW }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = BLUE}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = BLUE_BORDER}
+                {/* LinkedIn */}
+                <button onClick={() => setDataInputMode('linkedin')}
+                  style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 14, background: BLUE_LIGHT, border: `2px solid ${BLUE_BORDER}`, borderRadius: 14, padding: '18px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: `0 4px 12px rgba(0,102,255,0.08)` }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px rgba(0,102,255,0.14)`; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 12px rgba(0,102,255,0.08)`; }}
                 >
-                  <span style={{ fontSize: 22, flexShrink: 0 }}>💼</span>
+                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', borderRadius: 10, border: `1px solid ${BLUE_BORDER}` }}>💼</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>Paste LinkedIn URL</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0 }}>No PDF? The Agent extracts your experience from LinkedIn</p>
+                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>Paste LinkedIn URL</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>No PDF? The Agent instantly extracts your experience, skills, and story.</p>
+                    <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic' }}>Fast, clean, and no uploading needed</p>
                   </div>
-                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: BLUE, background: CARD, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '2px 8px', flexShrink: 0 }}>FAST</span>
+                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: BLUE, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>FAST</span>
                 </button>
 
-                <button onClick={() => setDataInputMode('quickstart')} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, background: CARD, border: `1px solid #E2E8F0`, borderRadius: R, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: SHADOW }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = '#CBD5E1'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = '#E2E8F0'}
+                {/* Quick Start */}
+                <button onClick={() => setDataInputMode('quickstart')}
+                  style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 14, background: CARD, border: `2px solid #E2E8F0`, borderRadius: 14, padding: '18px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: SHADOW }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW_MD; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = SHADOW; }}
                 >
-                  <span style={{ fontSize: 22, flexShrink: 0 }}>⚡</span>
-                  <div>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>Quick Start (3 questions)</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: 0 }}>No resume or LinkedIn? Answer 3 questions to build your starter profile</p>
+                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFBEB', borderRadius: 10, border: '1px solid #FDE68A' }}>⚡</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>Quick Start (3 questions)</p>
+                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>No resume or LinkedIn? Answer 3 quick questions and we'll build a strong starter profile for you.</p>
+                    <p style={{ fontFamily: FONT, fontSize: 11, color: '#D97706', margin: 0, fontStyle: 'italic' }}>Takes under 2 minutes</p>
                   </div>
                 </button>
               </div>
-              <div style={{ textAlign: 'center', marginTop: 20 }}>
+
+              {/* Teaser: what you'll get */}
+              <div style={{ background: BG, border: '1px solid #E2E8F0', borderRadius: 12, padding: '16px 18px', marginTop: 20 }}>
+                <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 10px' }}>What you'll get right after:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  {[
+                    { icon: '✨', text: 'AI-optimized resume version' },
+                    { icon: '💬', text: 'Personalized outreach templates' },
+                    { icon: '🔍', text: "Insider match preview based on everything you've shared so far" },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
+                      <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, margin: 0 }}>{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '16px 0 0', lineHeight: 1.6, fontStyle: 'italic' }}>
+                Choose the fastest way for you — most students see their first "wow" moment within 60 seconds.
+              </p>
+
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
                 <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
               </div>
             </>
