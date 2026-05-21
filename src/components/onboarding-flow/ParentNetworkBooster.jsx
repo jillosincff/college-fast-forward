@@ -21,34 +21,16 @@ function ConfirmationScreen({ firstName, parentName, parentCompany, schoolName, 
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <div style={{ fontSize: 40, marginBottom: 10 }}>🎉</div>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px' }}>
-          Community Just Got Stronger
+          Thank You — The Community Just Got Stronger
         </p>
         <h3 style={{ fontFamily: sat, fontSize: 22, fontWeight: 900, color: TEXT, margin: '0 0 12px', letterSpacing: '-0.02em' }}>
-          Thank you{firstName ? `, ${firstName}` : ''}!
+          Your parent's connection has been added.
         </h3>
         <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, lineHeight: 1.65, margin: 0, maxWidth: 420, marginLeft: 'auto', marginRight: 'auto' }}>
-          Your parent's connection has been added.{' '}
-          Each new parent network strengthens the <strong style={{ color: TEXT }}>{schoolName}</strong> community — giving every student better access to opportunities, warm intros, and hidden roles.
+          CLiFF will now surface your parent as a potential warm connection when other students from the same school are looking in matching industries or roles.
+          <br /><br />
+          This is how we build a stronger, more supportive network for students across all schools — one connection at a time.
         </p>
-      </div>
-
-      <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, textAlign: 'center', margin: '0 0 16px', fontStyle: 'italic' }}>
-        You're now part of building something bigger than just your own job search.
-      </p>
-
-      {/* Result highlights */}
-      <div style={{ background: '#fff', border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 18px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {[
-          { icon: '🎁', text: '1 week of CLiFF Premium unlocked — free!' },
-          { icon: '✅', text: '+1 Parent Network Added' },
-          { icon: '🎓', text: `The ${schoolName || 'UF'} community just leveled up` },
-          { icon: '🔍', text: 'CLiFF will surface more relevant matches for everyone' },
-        ].map((item, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 16 }}>{item.icon}</span>
-            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: i === 0 ? GREEN : TEXT, margin: 0 }}>{item.text}</p>
-          </div>
-        ))}
       </div>
 
       {/* CTAs */}
@@ -125,22 +107,16 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span>🔥</span> Special Offer: Strengthen the Community, Get a Free Week
+          <span>🔥</span> Strengthen the Student Community
         </p>
         <h3 style={{ fontFamily: sat, fontSize: 18, fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.02em', lineHeight: 1.3 }}>
-          Add Your Parent → Unlock 1 Week Free + Strengthen the {schoolName} Network
+          Each parent connection strengthens the student community.
         </h3>
-        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: '0 0 10px', lineHeight: 1.6 }}>
-          When parents add their networks, everyone wins — more opportunities for all students.
+        <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, lineHeight: 1.6 }}>
+          When a parent adds their information, CLiFF simply surfaces them as a potential connection when another student from the same school is looking in a matching industry or role.
+          <br /><br />
+          It's a simple, powerful way for students to help other students — creating more warm, relevant opportunities across all schools.
         </p>
-        {/* Incentive callout */}
-        <div style={{ background: GREEN_LIGHT, border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <span style={{ fontSize: 18, flexShrink: 0 }}>🎁</span>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#15803d', margin: 0, lineHeight: 1.55 }}>
-            <strong>Limited-time offer:</strong> Add one parent now and we'll give you{' '}
-            <strong>1 week of CLiFF Premium for free</strong> ($4.99 value).
-          </p>
-        </div>
       </div>
 
       {/* Form */}
@@ -250,7 +226,7 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
           boxShadow: canSubmit ? '0 4px 14px rgba(22,163,74,0.35)' : 'none',
         }}
       >
-        Add Parent &amp; Claim My Free Week →
+        Add My Parent &amp; Strengthen the Network →
       </button>
       <button
         onClick={onSkip}
@@ -264,7 +240,7 @@ export default function ParentNetworkBooster({ schoolName = 'University of Flori
       </button>
 
       <p style={{ fontFamily: dm, fontSize: 12, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
-        Takes 20 seconds • No credit card required • Offer ends soon
+        Takes 20 seconds • Completely optional • Your parent will only be shown to relevant students from the same school
       </p>
     </div>
   );
