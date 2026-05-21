@@ -182,9 +182,16 @@ export default function GatorAuth() {
       return;
     }
 
-    // Logged in but no persona yet — show the onboarding funnel
+    // Logged in but no persona yet — check if existing user or new
     if (user && !user.persona) {
       const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+      
+      // Existing users without persona go straight to dashboard (they can complete onboarding later)
+      const isExistingUser = user.created_date && new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
+      if (isExistingUser || user.onboarding_completed === true) {
+        navigate('/FreeTierDashboard');
+        return;
+      }
 
       if (pendingRole === 'parent') {
         navigate('/ParentOnboarding');
