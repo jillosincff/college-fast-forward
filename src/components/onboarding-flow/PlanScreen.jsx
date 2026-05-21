@@ -384,11 +384,11 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
-            { label: '🔥 Extremely — Let\'s go', value: 'extreme' },
-            { label: '✅ Very committed', value: 'very' },
-            { label: '🤔 Somewhat — still figuring it out', value: 'somewhat' },
+            { label: '🔥 Extremely — Let\'s go', value: 'extreme', response: "Hell yes — CLiFF is ready when you are." },
+            { label: '✅ Very committed', value: 'very', response: "Solid — that's all it takes. Let's build your edge." },
+            { label: '🤔 Somewhat committed', value: 'somewhat', response: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." },
           ].map(opt => (
-            <button key={opt.value} onClick={() => { setCommitment(opt.value); setTimeout(() => openPaywall(false), 320); }}
+            <button key={opt.value} onClick={() => setCommitment(opt.value)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
                 background: commitment === opt.value ? (opt.value === 'extreme' ? GREEN_LIGHT : BLUE_LIGHT) : '#F8FAFC',
@@ -403,6 +403,21 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             </button>
           ))}
         </div>
+        {/* Tailored response line */}
+        {commitment && (() => {
+          const selected = [
+            { value: 'extreme', response: "Hell yes — CLiFF is ready when you are." },
+            { value: 'very', response: "Solid — that's all it takes. Let's build your edge." },
+            { value: 'somewhat', response: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." },
+          ].find(o => o.value === commitment);
+          return (
+            <div style={{ background: commitment === 'extreme' ? GREEN_LIGHT : BLUE_LIGHT, border: `1px solid ${commitment === 'extreme' ? GREEN_BORDER : BLUE_BORDER}`, borderRadius: 10, padding: '12px 16px', marginTop: 10, animation: 'fadUp 0.2s ease' }}>
+              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: commitment === 'extreme' ? '#065F46' : '#1e40af', margin: 0 }}>
+                {selected?.response}
+              </p>
+            </div>
+          );
+        })()}
       </div>
 
       {/* ─────────────────────────────────────────────────────
@@ -445,7 +460,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             🏆 Join 2,400+ students landing opportunities
           </p>
           <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>
-            🔒 No credit card needed to start — charged only after your free trial
+            Cancel anytime · No long-term commitment · 🔒 Secure checkout
           </p>
           <p style={{ fontFamily: dm, fontSize: 12, color: BLUE, margin: 0, fontWeight: 600 }}>
             🎁 Or text 3 friends for free access

@@ -78,12 +78,11 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
 
   // Sequential checklist steps — personalized with school, industry, and goal
   const STEPS = [
-    { icon: '✅', text: `Scanning your resume for ATS gaps that block ${roleLabel}` },
-    { icon: '✅', text: `Extracting skills & story aligned to ${industryLabel}` },
-    { icon: '✅', text: `Mapping ${schoolName} alumni on active hiring teams` },
-    { icon: '✅', text: `Pulling insider ${schoolName} parent & alumni connections` },
-    { icon: '🔄', text: `Rewriting your bullet points to land ${industryLabel} ${roleLabel}` },
-    { icon: '🔄', text: `Building your personalized ${schoolName} edge plan` },
+    { icon: '✅', text: 'Analyzing your experience & target roles' },
+    { icon: '✅', text: 'Rewriting bullets for maximum impact' },
+    { icon: '✅', text: 'Optimizing for ATS + recruiter appeal' },
+    { icon: '✅', text: `Matching against your selected spaces (${industryLabel})` },
+    { icon: '🔄', text: `Pulling ${schoolName} alumni insights` },
   ];
 
   const [visibleSteps, setVisibleSteps] = useState(0);
@@ -134,8 +133,7 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
 
       {/* Headline */}
       <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.2vw, 28px)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', margin: '0 0 28px', lineHeight: 1.25 }}>
-        Hang tight.{' '}
-        <span style={{ color: INDIGO, fontWeight: 800 }}>CLiFF is scanning your {schoolName} network + building your {industryLabel} edge...</span>
+        <span style={{ color: INDIGO, fontWeight: 800 }}>CLiFF is working on your resume...</span>
       </h1>
 
       {/* Main Card */}
@@ -177,14 +175,14 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
             {DID_YOU_KNOW[didYouKnowIdx]}
           </p>
           <p style={{ fontFamily: FONT, fontSize: 11, color: '#94A3B8', margin: '14px 0 0', textAlign: 'center', letterSpacing: '0.04em' }}>
-            ⚡ Activating your secure Campus Ecosystem pipeline…
+            Most students get auto-rejected by 75% of applications. CLiFF is making sure yours doesn't.
           </p>
         </div>
       </div>
 
       {/* Timing estimate */}
       <p style={{ fontFamily: FONT, fontSize: 12, color: '#94A3B8', margin: '16px 0 0', lineHeight: 1.6 }}>
-        Usually done in <strong style={{ color: '#64748B' }}>30–60 seconds</strong>. Hang tight — your Before/After is almost ready.
+        This usually takes <strong style={{ color: '#64748B' }}>30–60 seconds</strong>. Your Before/After will be ready shortly.
       </p>
 
       {/* Skip button */}

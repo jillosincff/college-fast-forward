@@ -15,32 +15,20 @@ const INDIGO = '#6366F1';
 const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
 const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
 
-const STATUS_LINES = (college, industryLabel) => [
-  `Pulling insights from your ${industryLabel} focus and ${college || 'university'} network…`,
-  'Most students get 3–5x more profile views with this kind of optimization.',
-  'Your headline is being crafted to appear in recruiter searches right now…',
-  `Mapping ${college || 'your university'} alumni who can make warm intros…`,
-];
-
 export default function LinkedInLoader({ firstName, college, selectedIndustries = [], onSkip }) {
   const industryLabel = selectedIndustries?.length > 0
     ? selectedIndustries.slice(0, 2).join(' & ')
     : 'your target fields';
 
   const STEPS = [
-    { label: `Analyzing your experience & skills for ${industryLabel} positioning`, done: true },
-    { label: `Writing a recruiter-magnet headline for ${industryLabel} roles`, done: true },
-    { label: 'Crafting your story-driven bio (the one that gets profile views)', done: true },
-    { label: `Building your ATS keyword list for ${industryLabel}`, done: true },
-    { label: `Optimizing your About section for ${college || 'campus'} alumni warm intros`, done: false },
-    { label: `Generating connection request templates for ${college || 'your school'} insiders`, done: false },
+    { label: 'Analyzing your experience & skills', done: true },
+    { label: 'Writing a recruiter-magnet headline', done: true },
+    { label: 'Crafting your story-driven About section', done: true },
+    { label: 'Building your ATS keyword list', done: true },
+    { label: 'Optimizing for warm intros & alumni outreach', done: false },
   ];
 
   const [visibleSteps, setVisibleSteps] = useState(0);
-  const [statusIdx, setStatusIdx] = useState(0);
-  const [statusFade, setStatusFade] = useState(true);
-
-  const lines = STATUS_LINES(college, industryLabel);
 
   // Reveal steps one by one
   useEffect(() => {
@@ -50,17 +38,7 @@ export default function LinkedInLoader({ firstName, college, selectedIndustries 
     return () => clearTimeout(t);
   }, [visibleSteps]);
 
-  // Rotate status line every 3.5s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStatusFade(false);
-      setTimeout(() => {
-        setStatusIdx(i => (i + 1) % lines.length);
-        setStatusFade(true);
-      }, 250);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
+
 
   return (
     <div style={{ maxWidth: 520, width: '100%', paddingTop: 100, paddingBottom: 80, boxSizing: 'border-box', margin: '0 auto', textAlign: 'center' }}>
@@ -76,7 +54,7 @@ export default function LinkedInLoader({ firstName, college, selectedIndustries 
 
       {/* Headline */}
       <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 30px)', fontWeight: 800, color: TEXT, margin: '0 0 10px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-        {firstName ? `Building ${firstName}'s LinkedIn Identity...` : 'Building Your LinkedIn Identity...'}
+        CLiFF is building your LinkedIn Identity...
       </h2>
 
       {/* Sub-headline */}
@@ -117,8 +95,8 @@ export default function LinkedInLoader({ firstName, college, selectedIndustries 
 
           {/* Rotating status line */}
           <div style={{ marginTop: 18, padding: '10px 14px', background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 8 }}>
-            <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, margin: 0, lineHeight: 1.6, opacity: statusFade ? 1 : 0, transition: 'opacity 0.25s ease', animation: statusFade ? 'factFade 0.3s ease' : 'none', minHeight: 36 }}>
-              💡 {lines[statusIdx]}
+            <p style={{ fontFamily: FONT, fontSize: 12, color: BLUE, margin: 0, lineHeight: 1.6, minHeight: 36 }}>
+              💡 Students with optimized LinkedIn profiles get 3–5x more views and messages.
             </p>
           </div>
         </div>

@@ -125,10 +125,10 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
       </div>
 
       <h1 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 4vw, 34px)', fontWeight: 800, color: TEXT, lineHeight: 1.15, letterSpacing: '-0.03em', margin: '0 0 12px' }}>
-        What spaces are you looking to break into?
+        What spaces are you trying to break into?
       </h1>
-      <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 440 }}>
-        Select up to 3 fields so the Agent can map out the right internal pipelines.
+      <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 460 }}>
+        Select up to 3 fields. CLiFF will use this to map out the right internal pipelines, alumni connections, and tailored strategies for those exact spaces.
       </p>
       <p style={{ fontFamily: FONT, fontSize: 12, color: totalSelected >= MAX_TOTAL ? '#EA580C' : TEXT3, margin: '0 0 24px', fontWeight: totalSelected >= MAX_TOTAL ? 700 : 400, transition: 'color 0.2s' }}>
         {totalSelected >= MAX_TOTAL ? '✓ Max 3 selected' : `${MAX_TOTAL - totalSelected} selection${MAX_TOTAL - totalSelected !== 1 ? 's' : ''} remaining`}
@@ -213,23 +213,29 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
 
       {/* Mirroring panel — appears after any selection */}
       {canContinue && (
-        <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '16px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
-          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 8px' }}>
-            Got it — targeting <strong>{[...selectedIndustries.map(k => BUCKETS.find(b => b.key === k)?.label), ...targetRoles].filter(Boolean).join(', ')}</strong>.
+        <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 14, padding: '18px 20px', marginTop: 20, textAlign: 'left', animation: 'fadeUp 0.25s ease' }}>
+          <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#065F46', margin: '0 0 12px' }}>
+            Got it — you're targeting{' '}
+            <strong>
+              {[...selectedIndustries.map(k => BUCKETS.find(b => b.key === k)?.label), ...targetRoles].filter(Boolean).join(', ')}
+            </strong>.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 8px' }}>CLiFF is now:</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>CLiFF is now prioritizing:</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
             {[
-              `Scanning internal pipelines for active ${selectedIndustries.map(k => BUCKETS.find(b => b.key === k)?.label || k).slice(0,2).join(' & ')} openings`,
-              `Mapping alumni & parents on hiring teams in these spaces`,
-              `Tailoring your resume keywords for these exact roles`,
+              'Alumni & parent insiders in those spaces',
+              'Role-specific resume versions and outreach templates',
+              'Hidden opportunities most students never see',
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                <span style={{ fontSize: 11, color: GREEN, flexShrink: 0, marginTop: 2 }}>✓</span>
+                <span style={{ fontSize: 12, color: GREEN, flexShrink: 0, marginTop: 1 }}>•</span>
                 <p style={{ fontFamily: FONT, fontSize: 13, color: '#065F46', margin: 0, lineHeight: 1.5 }}>{item}</p>
               </div>
             ))}
           </div>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: '#059669', margin: '12px 0 0', fontWeight: 700 }}>
+            You just gave CLiFF the coordinates it needs to work effectively for you. 🎯
+          </p>
         </div>
       )}
 
