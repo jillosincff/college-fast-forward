@@ -293,21 +293,21 @@ export default function StudentLandingPage({ onParentClick }) {
         background: '#f8f7f4', position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#34d399 0.6px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.05, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#60a5fa 0.6px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.10, pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, textAlign: 'center' }}>
 
           {/* Eyebrow badge */}
           {mounted && (
-            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #d1fae5', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(16,185,129,0.08)' }}>
-              <span style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#059669' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #bae6fd', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(59,130,246,0.08)' }}>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#0369a1' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
             </div>
           )}
 
           {/* Main headline */}
           {mounted && (
             <div className="hero-animate-2">
-              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#1f2937', margin: '0 0 24px' }}>
+              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#1e2937', margin: '0 0 24px' }}>
                 The job search is a black hole.
               </h1>
             </div>
@@ -316,7 +316,7 @@ export default function StudentLandingPage({ onParentClick }) {
           {/* Sub-headline */}
           {mounted && (
             <div className="hero-animate-3">
-              <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 600, color: '#10b981', margin: '0 0 28px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
+              <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 600, color: '#3b82f6', margin: '0 0 28px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
                 CFF finds the path around it.
               </h2>
               <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 4vw, 19px)', color: '#4b5563', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 720 }}>
@@ -330,15 +330,15 @@ export default function StudentLandingPage({ onParentClick }) {
             <div className="hero-animate-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
               <button onClick={go} style={{
                 fontFamily: SF, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
-                background: '#059669', border: 'none', borderRadius: 999,
+                background: '#3b82f6', border: 'none', borderRadius: 999,
                 padding: 'clamp(16px, 4vw, 22px) clamp(44px, 8vw, 64px)',
                 cursor: 'pointer', minHeight: 60,
-                boxShadow: '0 10px 40px rgba(16,185,129,0.30)',
+                boxShadow: '0 10px 40px rgba(59,130,246,0.30)',
                 transition: 'all 0.3s ease',
                 touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
               }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#10b981'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(16,185,129,0.40)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#059669'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(16,185,129,0.30)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(59,130,246,0.40)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(59,130,246,0.30)'; }}
               >
                 Start for Free →
               </button>
@@ -355,7 +355,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   ))}
                 </div>
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: '#9ca3af', margin: 0 }}>
-                  <span style={{ color: '#1f2937', fontWeight: 700 }}>2,400+</span> students hired faster
+                  <span style={{ color: '#1e2937', fontWeight: 700 }}>2,400+</span> students hired faster
                 </p>
               </div>
             </div>
