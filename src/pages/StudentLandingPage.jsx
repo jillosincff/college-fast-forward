@@ -260,67 +260,42 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── HERO ── */}
       <div style={{
-        minHeight: '100vh', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(80px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
-        textAlign: 'center',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #312e81 100%)',
+        minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(96px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
+        textAlign: 'center', background: '#0f172a',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Dot grid overlay */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(96,165,250,0.8) 0.8px, transparent 1px)', backgroundSize: '30px 30px', opacity: 0.18, pointerEvents: 'none' }} />
+        {/* Dot grid */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(96,165,250,0.6) 0.6px, transparent 1px)', backgroundSize: '35px 35px', opacity: 0.20, pointerEvents: 'none' }} />
 
-        {/* Avatar row + social proof */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 28, opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease', position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex' }}>
-            {[
-              'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=64&h=64&fit=crop&crop=face',
-              'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=64&h=64&fit=crop&crop=face',
-              'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=64&h=64&fit=crop&crop=face',
-            ].map((src, i) => (
-              <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid white', overflow: 'hidden', marginLeft: i === 0 ? 0 : -10, zIndex: 3 - i }}>
-                <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-            ))}
+        <div style={{ maxWidth: 800, position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' }}>
+          {/* Badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(12px)', borderRadius: 999, padding: '10px 24px', marginBottom: 28 }}>
+            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 600, color: '#fff', letterSpacing: '0.05em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
           </div>
-          <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
-            Joined by <strong style={{ color: '#fff' }}>2,400+</strong> students
-          </span>
-        </div>
 
-        {/* Badge */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-          backdropFilter: 'blur(12px)', borderRadius: 999,
-          padding: '10px 24px', marginBottom: 28,
-          opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
-          position: 'relative', zIndex: 1,
-        }}>
-          <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 600, color: '#fff', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
-        </div>
-
-        {/* Headline */}
-        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.15s', maxWidth: 860, position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: '#fff', margin: '0 0 16px' }}>
+          {/* Headline */}
+          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: '#fff', margin: '0 0 20px' }}>
             The job search is a black hole.
           </h1>
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15, color: '#60a5fa', margin: '0 0 28px' }}>
+
+          {/* Sub-headline */}
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 600, color: '#60a5fa', margin: '0 0 32px', lineHeight: 1.15 }}>
             CFF finds the path around it.
-          </h2>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: 400, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 680 }}>
+          </p>
+
+          {/* Body */}
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, margin: '0 auto 44px', maxWidth: 600 }}>
             We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
-        </div>
 
-        {/* CTA */}
-        <div style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, position: 'relative', zIndex: 1 }}>
+          {/* CTA */}
           <button onClick={go} style={{
-            fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 20px)', fontWeight: 700, color: '#fff',
+            fontFamily: FONT, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
             background: '#2563EB', border: 'none', borderRadius: 999,
-            padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
+            padding: 'clamp(16px, 4vw, 20px) clamp(44px, 8vw, 60px)',
             cursor: 'pointer', minHeight: '56px',
-            boxShadow: '0 8px 32px rgba(37,99,235,0.45)',
+            boxShadow: '0 20px 60px rgba(59,130,246,0.35)',
             transition: 'all 0.2s ease',
             touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
@@ -329,7 +304,9 @@ export default function StudentLandingPage({ onParentClick }) {
           >
             Start for Free →
           </button>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.5 }}>
+
+          {/* Trust line */}
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: 'rgba(255,255,255,0.45)', margin: '24px 0 0', lineHeight: 1.5 }}>
             This guided setup takes 8–12 minutes — you'll have a personalized plan.
           </p>
         </div>
