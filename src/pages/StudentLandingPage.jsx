@@ -295,12 +295,14 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 720, textAlign: 'center' }}>
-          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 7vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: TEXT, margin: '0 0 16px' }}>
-            Stop mass-applying to random jobs.<br />
-            <span style={{ color: BLUE }}>Start landing interviews.</span>
+          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 7vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: TEXT, margin: '0 0 10px' }}>
+            The job search is a black hole.
           </h1>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: 500, color: TEXT2, lineHeight: 1.5, margin: '0 0 14px' }}>
-            Track applications, uncover hidden jobs, surface warm alumni & parent connections — and finally land interviews.
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 32px)', fontWeight: 800, color: BLUE, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 20px' }}>
+            CLiFF finds the path around it.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 19px)', fontWeight: 400, color: TEXT2, lineHeight: 1.6, margin: '0 0 14px' }}>
+            We help you bypass the void: hidden opportunities, warm connections from alumni & parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
 
         </div>
