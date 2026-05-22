@@ -1386,7 +1386,16 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
 
       {/* ── SCREEN 10: Meet CLiFF ── */}
       {screen === 10 && (
-        <CliffRevealScreen onNext={next} firstName={firstName} />
+        <CliffRevealScreen
+          onNext={next}
+          firstName={firstName}
+          skipped={!resumeData}
+          targetRoles={targetRoles}
+          locationCity={locationCity}
+          locationPref={locationPref}
+          seeking={seeking}
+          selectedIndustries={selectedIndustries}
+        />
       )}
 
       {/* ── SCREEN 11: Wow Moment (Resume Before/After) ── */}
