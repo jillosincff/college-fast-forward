@@ -285,12 +285,12 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } openPaywall(false); }}
           style={{
             width: '100%', fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff',
-            background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
             border: 'none', borderRadius: 14, padding: '18px 16px', cursor: 'pointer', minHeight: 56,
-            boxShadow: '0 4px 16px rgba(22,163,74,0.35)',
+            boxShadow: '0 4px 16px rgba(109,40,217,0.40)',
           }}
         >
-          Unlock Everything Now →
+          Deploy CLiFF Agent — $4.98 →
         </button>
       </div>
 
@@ -379,49 +379,64 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          3. COMMITMENT QUESTION
+          3. COMMITMENT QUESTION — Pill toggle
       ───────────────────────────────────────────────────── */}
       <div id="commitment-anchor" className="plan-commitment-card" style={{ background: CARD, border: `1.5px solid ${showCommitmentRequired && !commitment ? '#ef4444' : BORDER}`, borderRadius: 20, padding: '28px 24px', marginBottom: 28, boxShadow: showCommitmentRequired && !commitment ? '0 0 0 3px rgba(239,68,68,0.15)' : '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.2s' }}>
-        <h3 style={{ fontFamily: sat, fontSize: 'clamp(17px, 2.5vw, 22px)', fontWeight: 800, color: TEXT, margin: '0 0 16px', letterSpacing: '-0.02em', textAlign: 'center' }}>
-          How committed are you to getting hired this semester?
+        {/* Network badge */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0f4ff', border: '1px solid #c7d7ff', borderRadius: 100, padding: '5px 16px' }}>
+            <span style={{ fontSize: 12 }}>⚡</span>
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.06em' }}>
+              Target Set: {college ? college.split(' ').slice(-2).join(' ') : 'Your University'} Network
+            </span>
+          </div>
+        </div>
+        <h3 style={{ fontFamily: sat, fontSize: 'clamp(16px, 2.5vw, 20px)', fontWeight: 800, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.02em', textAlign: 'center' }}>
+          How aggressive is your search this semester?
         </h3>
         {showCommitmentRequired && !commitment && (
-          <p style={{ fontFamily: dm, fontSize: 12, color: '#ef4444', fontWeight: 700, margin: '0 0 12px', textAlign: 'center' }}>
-            ↑ Please answer this before unlocking your plan.
+          <p style={{ fontFamily: dm, fontSize: 12, color: '#ef4444', fontWeight: 700, margin: '0 0 10px', textAlign: 'center' }}>
+            ↑ Pick a mode to continue.
           </p>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Pill row */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: commitment ? 14 : 0 }}>
           {[
-            { label: '🔥 Extremely — Let\'s go', value: 'extreme', response: "Hell yes — CLiFF is ready when you are." },
-            { label: '✅ Very committed', value: 'very', response: "Solid — that's all it takes. Let's build your edge." },
-            { label: '🤔 Somewhat — still figuring it out', value: 'somewhat', response: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." },
-          ].map(opt => (
-            <button key={opt.value} onClick={() => setCommitment(opt.value)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
-                background: commitment === opt.value ? (opt.value === 'extreme' ? GREEN_LIGHT : BLUE_LIGHT) : '#F8FAFC',
-                border: `1.5px solid ${commitment === opt.value ? (opt.value === 'extreme' ? GREEN_BORDER : BLUE_BORDER) : '#E2E8F0'}`,
-                borderRadius: 12, padding: '16px 18px', cursor: 'pointer', minHeight: 56, transition: 'all 0.15s',
-              }}
-            >
-              <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${commitment === opt.value ? (opt.value === 'extreme' ? GREEN : BLUE) : '#CBD5E1'}`, background: commitment === opt.value ? (opt.value === 'extreme' ? GREEN : BLUE) : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 800 }}>
-                {commitment === opt.value && '✓'}
-              </div>
-              <span style={{ fontFamily: dm, fontSize: 15, fontWeight: commitment === opt.value ? 700 : 500, color: commitment === opt.value ? TEXT : TEXT2 }}>{opt.label}</span>
-            </button>
-          ))}
+            { label: 'Just Browsing', value: 'somewhat', emoji: '🤔', response: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." },
+            { label: 'Actively Hunting', value: 'very', emoji: '✅', response: "Solid — that's all it takes. Let's build your edge." },
+            { label: 'Absolute Blitzkrieg', value: 'extreme', emoji: '⚡', response: "Hell yes — CLiFF is ready when you are." },
+          ].map(opt => {
+            const isActive = commitment === opt.value;
+            const activeBg = opt.value === 'extreme' ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : opt.value === 'very' ? BLUE : '#4b5563';
+            return (
+              <button key={opt.value} onClick={() => setCommitment(opt.value)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  fontFamily: dm, fontSize: 14, fontWeight: isActive ? 700 : 500,
+                  color: isActive ? '#fff' : TEXT2,
+                  background: isActive ? activeBg : '#F8FAFC',
+                  border: `1.5px solid ${isActive ? 'transparent' : '#E2E8F0'}`,
+                  borderRadius: 100, padding: '10px 22px',
+                  cursor: 'pointer', minHeight: 'auto',
+                  boxShadow: isActive ? '0 4px 16px rgba(109,40,217,0.28)' : 'none',
+                  transition: 'all 0.15s',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span style={{ fontSize: 14 }}>{opt.emoji}</span>
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
         {commitment && (() => {
-          const selected = [
-            { value: 'extreme', response: "Hell yes — CLiFF is ready when you are." },
-            { value: 'very', response: "Solid — that's all it takes. Let's build your edge." },
-            { value: 'somewhat', response: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." },
-          ].find(o => o.value === commitment);
+          const resp = { extreme: "Hell yes — CLiFF is ready when you are.", very: "Solid — that's all it takes. Let's build your edge.", somewhat: "That's okay. Even 30 min/week with CLiFF beats 100 cold apps." };
+          const col = commitment === 'extreme' ? '#6d28d9' : commitment === 'very' ? BLUE : '#374151';
+          const bg = commitment === 'extreme' ? '#f5f3ff' : commitment === 'very' ? BLUE_LIGHT : '#f9fafb';
+          const bd = commitment === 'extreme' ? '#ddd6fe' : commitment === 'very' ? BLUE_BORDER : '#e5e7eb';
           return (
-            <div style={{ background: commitment === 'extreme' ? GREEN_LIGHT : BLUE_LIGHT, border: `1px solid ${commitment === 'extreme' ? GREEN_BORDER : BLUE_BORDER}`, borderRadius: 10, padding: '12px 16px', marginTop: 10, animation: 'fadUp 0.2s ease' }}>
-              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: commitment === 'extreme' ? '#065F46' : '#1e40af', margin: 0 }}>
-                {selected?.response}
-              </p>
+            <div style={{ background: bg, border: `1px solid ${bd}`, borderRadius: 10, padding: '12px 16px', animation: 'fadUp 0.2s ease' }}>
+              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 700, color: col, margin: 0 }}>{resp[commitment]}</p>
             </div>
           );
         })()}
@@ -481,62 +496,67 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       </div>
 
       {/* ─────────────────────────────────────────────────────
-          7. PARENT NETWORK BOOSTER
+          7. THE CLOSE — Dark deployment CTA
       ───────────────────────────────────────────────────── */}
-      {!parentBoosterDone && (
-        <ParentNetworkBooster
-          schoolName={college || schoolName}
-          firstName={firstName}
-          onSkip={() => setParentBoosterDone(true)}
-          onAdd={() => {}}
-          onContinue={() => setParentBoosterDone(true)}
-        />
-      )}
-
-      {/* ─────────────────────────────────────────────────────
-          8. THE CLOSE — Pricing & CTA
-      ───────────────────────────────────────────────────── */}
-      <div className="plan-close-card plan-main-cta" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: `1.5px solid ${BLUE_BORDER}`, borderRadius: 24, padding: '36px 24px', marginBottom: 20, boxShadow: '0 4px 24px rgba(37,99,235,0.08)' }}>
-        <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 6px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
-          {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."}
-        </h2>
-        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: TEXT2, margin: '0 0 18px' }}>
-          Unlock Your Full 14-Day Sprint Plan
-        </p>
-
-        {/* Pricing pill */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: `1.5px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '8px 22px', marginBottom: 22 }}>
-          <span style={{ fontFamily: sat, fontSize: 24, fontWeight: 900, color: GREEN }}>$4.99</span>
-          <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2, fontWeight: 500 }}>/week · Cancel anytime in 1 click</span>
+      <div className="plan-close-card plan-main-cta" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)', borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 16px 48px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.06)' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 22 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
+            <span style={{ fontSize: 12 }}>⚡</span>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#a78bfa', letterSpacing: '0.12em', textTransform: 'uppercase' }}>CLiFF Agent · Ready to Deploy</span>
+          </div>
+          <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, color: '#f8fafc', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+            {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."}
+          </h2>
+          <p style={{ fontFamily: dm, fontSize: 14, color: '#94a3b8', margin: 0 }}>
+            Unlock Your Full 14-Day Sprint Plan
+          </p>
         </div>
 
-        {/* Big green CTA */}
+        {/* Live metrics strip */}
+        <div style={{ display: 'flex', gap: 10, marginBottom: 22, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Resume Optimization', value: '98% ATS Approved', color: '#4ade80' },
+            { label: 'Alumni Matrix', value: '3 Warm Tracks Isolated', color: '#a78bfa' },
+          ].map((m, i) => (
+            <div key={i} style={{ flex: 1, minWidth: 140, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '12px 14px' }}>
+              <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{m.label}</p>
+              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: m.color, margin: 0 }}>{m.value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Pricing */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 100, padding: '8px 24px' }}>
+            <span style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: '#f8fafc' }}>$4.98</span>
+            <span style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8' }}>/week · Cancel anytime</span>
+          </div>
+        </div>
+
+        {/* Deploy button — purple */}
         <button
           onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } openPaywall(false); }}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 20px',
-            fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#fff',
-            background: 'linear-gradient(135deg, #22c55e 0%, #15803d 100%)',
-            border: 'none', borderRadius: 16, padding: '22px 32px', cursor: 'pointer', minHeight: 62,
-            boxShadow: '0 8px 32px rgba(22,163,74,0.35), 0 2px 8px rgba(0,0,0,0.1)',
+            fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            border: 'none', borderRadius: 14, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto',
+            boxShadow: '0 8px 32px rgba(109,40,217,0.45), 0 2px 8px rgba(0,0,0,0.2)',
             letterSpacing: '-0.01em', transition: 'all 0.2s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(22,163,74,0.5), 0 2px 8px rgba(0,0,0,0.1)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(22,163,74,0.35), 0 2px 8px rgba(0,0,0,0.1)'; }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(109,40,217,0.60)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(109,40,217,0.45), 0 2px 8px rgba(0,0,0,0.2)'; }}
         >
-          Unlock Everything Now →
+          Deploy CLiFF Agent — $4.98 →
         </button>
 
         {/* Trust signals */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7, alignItems: 'center' }}>
-          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0, fontWeight: 500 }}>
-            🏆 Join 2,400+ students landing interviews this month
-          </p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>
-            No credit card needed to start
-          </p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>
-            Cancel anytime · <span onClick={() => openPaywall(false)} style={{ color: BLUE, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>🎁 Text 3 friends for free access</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0 }}>🏆 Join 2,400+ students landing interviews this month</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0 }}>No credit card needed to start · Cancel anytime</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0 }}>
+            <span onClick={() => openPaywall(false)} style={{ color: '#a78bfa', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>🎁 Text 3 friends for free access</span>
           </p>
         </div>
       </div>
