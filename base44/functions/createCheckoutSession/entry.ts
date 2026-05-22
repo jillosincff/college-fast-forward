@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const PRICES = {
+  pro_monthly:             'price_1TZyJm873TV7WMcTr7YyXrat',  // $21.67/month (~$4.99/week)
   fastiq_monthly:          'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
   fastiq_annual:           'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
   fastiq_founding_monthly: 'price_1TFPPy873TV7WMcTSw0rKVfj',  // $14.50/month
@@ -36,9 +37,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Auto-apply founding rate if within deadline and plan is not already founding
+    // Auto-apply founding rate if within deadline and plan is not already founding (fastiq plans only)
     const now = new Date();
-    if (now <= FOUNDING_OFFER_DEADLINE && !plan?.includes('founding') && plan?.includes('fastiq')) {
+    if (now <= FOUNDING_OFFER_DEADLINE && !plan?.includes('founding') && plan?.startsWith('fastiq')) {
       plan = plan.replace('fastiq_', 'fastiq_founding_');
     }
 

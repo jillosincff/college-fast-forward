@@ -325,7 +325,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             boxShadow: '0 4px 16px rgba(109,40,217,0.40)',
           }}
         >
-          {checkoutLoading ? 'Launching…' : 'Deploy CLiFF Agent — $4.98 →'}
+          {checkoutLoading ? 'Launching…' : 'Deploy CLiFF Agent — $4.99 →'}
         </button>
       </div>
 
@@ -564,7 +564,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         {/* Pricing */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, background: '#fff', border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '8px 24px' }}>
-            <span style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: BLUE }}>$4.98</span>
+            <span style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: BLUE }}>$4.99</span>
             <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2 }}>/week · Cancel anytime</span>
           </div>
         </div>
@@ -598,7 +598,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
               <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
               Launching Stripe…
             </>
-          ) : 'Deploy CLiFF Agent — $4.98 →'}
+          ) : 'Deploy CLiFF Agent — $4.99 →'}
         </button>
         {checkoutError && (
           <p style={{ fontFamily: dm, fontSize: 13, color: '#ef4444', textAlign: 'center', margin: '-12px 0 16px', fontWeight: 600 }}>
