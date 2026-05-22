@@ -356,6 +356,10 @@ export default function StudentLandingPage({ onParentClick }) {
 
               </div>
 
+              <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3vw, 15px)', color: TEXT3, margin: '4px 0 0', lineHeight: 1.5 }}>
+                This guided setup takes 8–12 minutes — you'll have a personalized plan.
+              </p>
+
               {/* Social proof avatars */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ display: 'flex' }}>
