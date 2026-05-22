@@ -6,68 +6,87 @@ import { base44 } from '@/api/base44Client';
 import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
 import AppShowcase from '@/components/landing/AppShowcase';
 
-// ── Design Tokens — Carbon Mint (Dark Mode) ────────────────────
-const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
-const BG = '#1e2326';
-const BG2 = '#252b2e';
-const CARD = '#2d3436';
-const CARD2 = '#323b3e';
-const TEXT = '#f0faf8';
-const TEXT2 = '#a8c5bf';
-const TEXT3 = '#6b8f88';
-const MINT = '#00FFC2';
-const MINT_DIM = '#00d4a3';
-const MINT_DARK = '#00a882';
-const MINT_LIGHT = 'rgba(0,255,194,0.10)';
-const MINT_BORDER = 'rgba(0,255,194,0.25)';
-const CORAL = '#ff6b81';
-const CORAL_LIGHT = 'rgba(255,107,129,0.12)';
-const CORAL_BORDER = 'rgba(255,107,129,0.30)';
-const GREEN = '#00FFC2';
-const GREEN_LIGHT = 'rgba(0,255,194,0.10)';
-const GREEN_BORDER = 'rgba(0,255,194,0.25)';
-const BLUE = '#00FFC2';
-const BLUE_LIGHT = 'rgba(0,255,194,0.10)';
-const BLUE_BORDER = 'rgba(0,255,194,0.25)';
-// Aliases for backward compat
-const TEAL = MINT;
-const TEAL_DARK = MINT_DARK;
-const TEAL_LIGHT = MINT_LIGHT;
-const TEAL_BORDER = MINT_BORDER;
-const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -1px rgba(0,0,0,0.2)';
-const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -2px rgba(0,0,0,0.25)';
-const SHADOW_LG = '0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.3)';
+// ── Design Tokens — Light Mode / Gen Z ─────────────────────────
+const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
+const FONT = SF;
+
+// Page backgrounds
+const BG   = '#f8f9ff';
+const BG2  = '#ffffff';
+
+// Cards
+const CARD  = '#ffffff';
+const CARD2 = '#f1f5ff';
+
+// Text
+const TEXT  = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
+
+// Indigo — primary accent
+const INDIGO       = '#4f46e5';
+const INDIGO_DIM   = '#4338ca';
+const INDIGO_LIGHT = 'rgba(79,70,229,0.08)';
+const INDIGO_BORDER= 'rgba(79,70,229,0.20)';
+
+// Violet — secondary accent
+const VIOLET       = '#7c3aed';
+const VIOLET_LIGHT = 'rgba(124,58,237,0.08)';
+const VIOLET_BORDER= 'rgba(124,58,237,0.20)';
+
+// Pink — accent 3
+const PINK        = '#ec4899';
+const PINK_LIGHT  = 'rgba(236,72,153,0.08)';
+const PINK_BORDER = 'rgba(236,72,153,0.22)';
+
+// Teal — accent 4
+const TEAL        = '#06b6d4';
+const TEAL_LIGHT  = 'rgba(6,182,212,0.08)';
+const TEAL_BORDER = 'rgba(6,182,212,0.22)';
+const TEAL_DARK   = '#0891b2';
+
+// Coral for "bad" contrast
+const CORAL       = '#f43f5e';
+const CORAL_LIGHT = 'rgba(244,63,94,0.07)';
+const CORAL_BORDER= 'rgba(244,63,94,0.22)';
+
+// Gradient helpers
+const GRAD_HERO   = 'linear-gradient(145deg, #f0f4ff 0%, #fdf2ff 50%, #f0fbff 100%)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+const GRAD_WARM   = 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)';
+
+// Shadows
+const SHADOW    = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+const SHADOW_MD = '0 4px 16px rgba(79,70,229,0.10), 0 1px 4px rgba(0,0,0,0.06)';
+const SHADOW_LG = '0 20px 40px rgba(79,70,229,0.14), 0 4px 12px rgba(0,0,0,0.08)';
+
+// Aliases for backward compat (CampusVaultWidget passes these as props)
+const MINT        = INDIGO;
+const MINT_DIM    = INDIGO_DIM;
+const MINT_DARK   = INDIGO_DIM;
+const MINT_LIGHT  = INDIGO_LIGHT;
+const MINT_BORDER = INDIGO_BORDER;
+const GREEN       = TEAL;
+const GREEN_LIGHT = TEAL_LIGHT;
+const GREEN_BORDER= TEAL_BORDER;
+const BLUE        = INDIGO;
+const BLUE_LIGHT  = INDIGO_LIGHT;
+const BLUE_BORDER = INDIGO_BORDER;
 const R = 16;
 
-const BENEFIT_CARDS = [
-  { icon: '📄', title: 'Tailored Resumes', desc: 'Automatically adapt your resume for each role so you apply faster and with more confidence.' },
-  { icon: '🎯', title: 'Relevant Opportunities', desc: 'Surface jobs that better match your background, goals, and interests.' },
-  { icon: '📊', title: 'Application Tracking', desc: 'Keep every application organized in one place with clear status updates.' },
-  { icon: '🔔', title: 'Follow-Up Reminders', desc: 'Never miss the right moment to check in again.' },
-  { icon: '💼', title: 'LinkedIn Optimization', desc: 'Improve your profile so recruiters and connections can find you more easily.' },
-  { icon: '🤝', title: 'Warm Intros', desc: 'Find alumni and parent connections who can open warmer paths into companies.' },
-];
-
-const HOW_IT_WORKS = [
-  { number: '01', icon: '🎯', title: 'Know What to Apply For', desc: 'Smart matching + daily opportunities tailored to your goals.' },
-  { number: '02', icon: '✨', title: 'Stand Out', desc: 'Modern resumes and LinkedIn optimization that actually get noticed by recruiters.' },
-  { number: '03', icon: '📋', title: 'Stay on Track', desc: 'Track every application, get smart reminders, and reach the right connections.' },
+const PRO_FEATURES = ['Unlimited AI Agent', 'Advanced tailoring + modern templates', 'Smart reminders + interview prep', 'Most students upgrade once they see results'];
+const PROOF_CALLOUTS = [
+  { text: 'Upload once — get perfectly tailored resume versions for every job you target' },
+  { text: 'Discovers hidden jobs most students never see, including unlisted internal roles' },
+  { text: 'Surfaces warm alumni & parent connections far more likely to actually respond' },
+  { text: 'Tracks every application automatically — smart reminders so nothing falls through' },
+  { text: 'Crafts personalized outreach messages that get real replies instead of silence' },
 ];
 
 const STORIES = [
-  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=96&h=96&fit=crop&crop=face", tag: "Landed an internship" },
-  { quote: "I finally felt like I had a system instead of a mess. Before this I had 40 tabs open and no idea where anything stood.", name: "Maya R.", school: "UF '26, Business", photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=96&h=96&fit=crop&crop=face", tag: "Less stress" },
-  { quote: "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours.", name: "Alex P.", school: "USC '25, Marketing", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=96&h=96&fit=crop&crop=face", tag: "Better outreach" },
-];
-
-const FREE_FEATURES = ['Basic resume tools', 'Limited Agent usage', 'Application tracker', 'Perfect for getting started'];
-const PRO_FEATURES = ['Unlimited AI Agent', 'Advanced tailoring + modern templates', 'Smart reminders + interview prep', 'Most students upgrade once they see results'];
-const PROOF_CALLOUTS = [
-  { icon: '✓', text: 'Upload once — get perfectly tailored resume versions for every job you target' },
-  { icon: '✓', text: 'Discovers hidden jobs most students never see, including unlisted internal roles' },
-  { icon: '✓', text: 'Surfaces warm alumni & parent connections far more likely to actually respond' },
-  { icon: '✓', text: 'Tracks every application automatically — smart reminders so nothing falls through' },
-  { icon: '✓', text: 'Crafts personalized outreach messages that get real replies instead of silence' },
+  { quote: "I was overwhelmed applying everywhere and getting ghosted. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks.", name: "Marcus", school: "Penn State '27, Finance", photo: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=96&h=96&fit=crop&crop=face", tag: "🎉 Landed an internship", color: INDIGO },
+  { quote: "I finally felt like I had a system instead of a mess. Before this I had 40 tabs open and no idea where anything stood.", name: "Maya R.", school: "UF '26, Business", photo: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=96&h=96&fit=crop&crop=face", tag: "😮‍💨 Less stress", color: VIOLET },
+  { quote: "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours.", name: "Alex P.", school: "USC '25, Marketing", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=96&h=96&fit=crop&crop=face", tag: "🤝 Better outreach", color: PINK },
 ];
 
 function StoriesCarousel() {
@@ -98,40 +117,38 @@ function StoriesCarousel() {
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
         style={{
-          background: CARD, borderRadius: 16, boxShadow: SHADOW_MD,
-          borderLeft: `4px solid ${TEAL}`,
+          background: CARD, borderRadius: 20, boxShadow: SHADOW_LG,
+          borderLeft: `4px solid ${s.color}`,
           padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)', cursor: dragging ? 'grabbing' : 'grab',
           transform: `translateX(${offset * 0.06}px)`, transition: dragging ? 'none' : 'transform 0.3s ease',
-          minHeight: 140, position: 'relative',
+          minHeight: 140,
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 100, padding: 'clamp(3px, 1vw, 4px) clamp(8px, 2vw, 12px)', marginBottom: 14, maxWidth: '100%' }}>
-          <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: TEAL_DARK, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{s.tag}</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${s.color}14`, border: `1px solid ${s.color}33`, borderRadius: 100, padding: '4px 14px', marginBottom: 14 }}>
+          <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: s.color }}>{s.tag}</span>
         </div>
-        <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 18px)', fontWeight: 500, color: TEXT, lineHeight: 1.6, margin: '0 0 clamp(16px, 4vw, 20px)', fontStyle: 'italic' }}>
+        <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 500, color: TEXT, lineHeight: 1.65, margin: '0 0 20px', fontStyle: 'italic' }}>
           "{s.quote}"
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 'clamp(36px, 10vw, 44px)', height: 'clamp(36px, 10vw, 44px)', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: `2px solid ${TEAL_BORDER}` }}>
-            <img src={s.photo} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <img src={s.photo} alt={s.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${s.color}40`, flexShrink: 0 }} />
           <div>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: TEXT, margin: 0, letterSpacing: '-0.01em', lineHeight: 1.3 }}>{s.name}</p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT2, margin: '2px 0 0', lineHeight: 1.3 }}>{s.school}</p>
+            <p style={{ fontFamily: SF, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>{s.name}</p>
+            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '2px 0 0' }}>{s.school}</p>
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
         <div style={{ display: 'flex', gap: 6 }}>
-          {STORIES.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 18 : 6, height: 6, borderRadius: 3, background: i === active ? TEAL : 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', padding: 0, minHeight: '44px', transition: 'all 0.3s ease' }} />
+          {STORIES.map((st, i) => (
+            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 20 : 6, height: 6, borderRadius: 3, background: i === active ? st.color : '#e2e8f0', border: 'none', cursor: 'pointer', padding: 0, minHeight: 44, transition: 'all 0.3s ease' }} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {['←', '→'].map((arrow, i) => (
-            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 32, height: 32, borderRadius: '50%', background: CARD2, border: `1px solid rgba(255,255,255,0.1)`, fontSize: 13, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: '44px', transition: 'all 0.15s', touchAction: 'manipulation' }}
-              onMouseEnter={e => { e.currentTarget.style.background = MINT_LIGHT; e.currentTarget.style.borderColor = MINT_BORDER; e.currentTarget.style.color = MINT; }}
-              onMouseLeave={e => { e.currentTarget.style.background = CARD2; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = TEXT2; }}
+            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 36, height: 36, borderRadius: '50%', background: CARD2, border: '1px solid #e2e8f0', fontSize: 14, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: 44, transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = INDIGO_LIGHT; e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.color = INDIGO; }}
+              onMouseLeave={e => { e.currentTarget.style.background = CARD2; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.color = TEXT2; }}
             >{arrow}</button>
           ))}
         </div>
@@ -147,7 +164,6 @@ export default function StudentLandingPage({ onParentClick }) {
   const { user, isLoadingAuth } = useAuth();
 
   const launchWithSchool = (schoolName) => {
-    // Only show funnel for unauthenticated users
     if (!user) {
       try {
         if (schoolName) localStorage.setItem('cff_college', schoolName);
@@ -158,59 +174,38 @@ export default function StudentLandingPage({ onParentClick }) {
       setFunnelStartScreen(null);
       setShowFunnel(true);
     }
-    // For authenticated users, do nothing here - they stay on the landing page to view results
-    // Navigation happens separately via the "Go to Dashboard" button or action buttons in results
   };
 
   useEffect(() => {
     setMounted(true);
-    // Capture referrer ID from ?r= param so OnboardingFlow can fire the milestone
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const hashParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
       const referrerId = urlParams.get('r') || hashParams.get('r');
-      if (referrerId) {
-        localStorage.setItem('cff_referrer_id', referrerId);
-      }
+      if (referrerId) localStorage.setItem('cff_referrer_id', referrerId);
     } catch {}
-    if (!document.getElementById('slp-inter')) {
-      const link = document.createElement('link');
-      link.id = 'slp-inter';
-      link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
-      document.head.appendChild(link);
-    }
     if (!document.getElementById('slp-satoshi')) {
-      const link2 = document.createElement('link');
-      link2.id = 'slp-satoshi';
-      link2.rel = 'stylesheet';
-      link2.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap';
-      document.head.appendChild(link2);
+      const l = document.createElement('link');
+      l.id = 'slp-satoshi'; l.rel = 'stylesheet';
+      l.href = 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap';
+      document.head.appendChild(l);
     }
   }, []);
 
-  // Redirect any logged-in user straight to their dashboard
   useEffect(() => {
     if (isLoadingAuth || !user) return;
-    if (user.persona === 'parent' || user.roles?.includes('parent')) {
-      navigate('ParentHome');
-    } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+    if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentHome');
+    else if (user.persona === 'alumni' || user.roles?.includes('alumni'))
       navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
-    } else if (user.persona || user.roles?.length > 0) {
-      navigate('FreeTierDashboard');
-    }
+    else if (user.persona || user.roles?.length > 0) navigate('FreeTierDashboard');
   }, [user, isLoadingAuth]);
 
-  // Smart "Get Hired" handler — any logged-in user goes straight to their dashboard, new users hit Google auth
   const go = () => {
     if (!isLoadingAuth && user) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('ParentHome');
-      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+      if (user.persona === 'parent' || user.roles?.includes('parent')) navigate('ParentHome');
+      else if (user.persona === 'alumni' || user.roles?.includes('alumni'))
         navigate(user.alumni_intent === 'giving_help' ? 'AlumniHome' : 'FreeTierDashboard');
-      } else {
-        navigate('FreeTierDashboard');
-      }
+      else navigate('FreeTierDashboard');
     } else {
       try {
         localStorage.setItem('pending_invite_role', 'student');
@@ -227,162 +222,221 @@ export default function StudentLandingPage({ onParentClick }) {
     navigate('ParentLandingPage');
   };
 
-  const SectionLabel = ({ text }) => (
-    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: MINT, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
+  const SectionLabel = ({ text, color = INDIGO }) => (
+    <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
 
-  const CTAButton = ({ label = 'Get Hired →', onClick = go, fullWidth = false }) => (
+  const CTAButton = ({ label = 'Get Hired →', onClick = go, fullWidth = false, style: extra = {} }) => (
     <button onClick={onClick} style={{
-      fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 16px)', fontWeight: 700, color: '#0d1a17',
-      background: MINT,
-      border: 'none', borderRadius: 999, padding: 'clamp(16px, 4vw, 18px) clamp(28px, 6vw, 40px)',
-      cursor: 'pointer', minHeight: '48px',
+      fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 700, color: '#fff',
+      background: GRAD_INDIGO, border: 'none', borderRadius: 14,
+      padding: 'clamp(14px, 4vw, 17px) clamp(28px, 6vw, 40px)',
+      cursor: 'pointer', minHeight: 52,
+      boxShadow: `0 8px 28px rgba(79,70,229,0.28)`,
       transition: 'all 0.2s ease',
-      boxShadow: `0 8px 24px rgba(0,255,194,0.35)`,
       width: fullWidth ? '100%' : 'auto',
-      touchAction: 'manipulation',
-      WebkitTapHighlightColor: 'transparent',
+      touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+      ...extra,
     }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = MINT_DIM; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,255,194,0.5)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = MINT; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,255,194,0.35)'; }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(79,70,229,0.40)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(79,70,229,0.28)'; }}
     >{label}</button>
   );
 
   return (
-    <div style={{ background: BG, fontFamily: FONT, color: TEXT, overflowX: 'hidden' }}>
+    <div style={{ background: BG, fontFamily: SF, color: TEXT, overflowX: 'hidden' }}>
       {showFunnel && <OnboardingFlow onClose={() => { setShowFunnel(false); setFunnelStartScreen(null); }} resumeAtScreen={funnelStartScreen} />}
 
       <style>{`
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,194,0.2)} 50%{box-shadow:0 0 0 8px rgba(0,255,194,0)} }
         @keyframes pulseGreen { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        @keyframes badgeGlow { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,194,0.4)} 50%{box-shadow:0 0 24px 6px rgba(0,255,194,0.15)} }
-        @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-6px)} }
-        @keyframes drift { 0%{transform:translate(0,0)} 25%{transform:translate(6px,-4px)} 50%{transform:translate(-4px,6px)} 75%{transform:translate(4px,2px)} 100%{transform:translate(0,0)} }
-        @keyframes checkIn { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
-        @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-        @keyframes mintGlow { 0%,100%{text-shadow:0 0 20px rgba(0,255,194,0.4)} 50%{text-shadow:0 0 40px rgba(0,255,194,0.7)} }
+        @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-8px)} }
+        @keyframes gradShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        .hero-animate { animation: fadeUp 0.7s ease both; }
+        .hero-animate-2 { animation: fadeUp 0.7s 0.12s ease both; }
+        .hero-animate-3 { animation: fadeUp 0.7s 0.24s ease both; }
+        .hero-animate-4 { animation: fadeUp 0.7s 0.36s ease both; }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(30,35,38,0.95)', backdropFilter: 'blur(16px)', borderBottom: `1px solid ${MINT_BORDER}`, padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em' }}>
-          College <span style={{ color: MINT, animation: 'mintGlow 3s ease-in-out infinite' }}>Fast Forward</span>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        background: 'rgba(248,249,255,0.90)', backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(79,70,229,0.10)',
+        padding: '0 clamp(16px,5vw,32px)', height: 64,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <span style={{ fontFamily: SF, fontSize: 17, fontWeight: 800, color: TEXT, letterSpacing: '-0.03em' }}>
+          College{' '}
+          <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Fast Forward
+          </span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={parent} style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: '44px', padding: '8px 10px', WebkitTapHighlightColor: 'transparent' }}>For Parents</button>
-          <button onClick={go} style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: '#0d1a17', background: MINT, border: 'none', borderRadius: 999, padding: '10px clamp(16px, 4vw, 22px)', cursor: 'pointer', minHeight: '44px', boxShadow: `0 4px 16px rgba(0,255,194,0.35)`, transition: 'all 0.15s', touchAction: 'manipulation' }}
-            onMouseEnter={e => { e.currentTarget.style.background = MINT_DIM; e.currentTarget.style.transform = 'scale(1.03)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = MINT; e.currentTarget.style.transform = 'scale(1)'; }}
+          <button onClick={parent} style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 12px' }}>For Parents</button>
+          <button onClick={go} style={{
+            fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
+            background: GRAD_INDIGO, border: 'none', borderRadius: 10,
+            padding: '10px 20px', cursor: 'pointer', minHeight: 44,
+            boxShadow: '0 4px 14px rgba(79,70,229,0.30)', transition: 'all 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
           >{!isLoadingAuth && user ? 'Dashboard →' : 'Get Started →'}</button>
         </div>
       </nav>
 
       {/* ── HERO ── */}
       <div style={{
-        minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(96px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
-        textAlign: 'center',
-        background: 'linear-gradient(160deg, #f0f4ff 0%, #f8f9ff 60%, #eef2ff 100%)',
-        position: 'relative', overflow: 'hidden',
+        minHeight: '92vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(100px, 15vw, 130px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
+        background: GRAD_HERO, position: 'relative', overflow: 'hidden',
       }}>
-        {/* Soft blue dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#a5b4fc 0.8px, transparent 1px)', backgroundSize: '48px 48px', opacity: 0.15, pointerEvents: 'none' }} />
-        {/* Soft blue blob */}
-        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' }}>
-          {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0e7ff', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(99,102,241,0.10)' }}>
-            <span style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#4338ca' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
-          </div>
+        {/* Floating blobs */}
+        <div style={{ position: 'absolute', top: '8%', left: '-8%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '5%', right: '-6%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '40%', right: '15%', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(236,72,153,0.08) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        {/* Dot grid */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(79,70,229,0.12) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', opacity: 0.6 }} />
 
-          {/* Headline */}
-          <h1 style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#0f172a', margin: '0 0 20px' }}>
-            The job search is a black hole.
-          </h1>
+        <div style={{ maxWidth: 780, position: 'relative', zIndex: 1, textAlign: 'center' }}>
+
+          {/* Eyebrow badge */}
+          {mounted && (
+            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0e7ff', borderRadius: 999, padding: '8px 20px', marginBottom: 32, boxShadow: '0 2px 16px rgba(79,70,229,0.10)' }}>
+              <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: PINK, animation: 'pulseGreen 1.8s ease-in-out infinite' }} />
+              <span style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: INDIGO, letterSpacing: '0.04em' }}>2,400+ students already getting hired faster</span>
+            </div>
+          )}
+
+          {/* Main headline — split layout */}
+          {mounted && (
+            <div className="hero-animate-2">
+              <h1 style={{ fontFamily: SF, fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 0.95, margin: '0 0 16px', textAlign: 'center' }}>
+                <span style={{ display: 'block', fontSize: 'clamp(42px, 10vw, 84px)', color: TEXT }}>
+                  Stop getting
+                </span>
+                <span style={{ display: 'block', fontSize: 'clamp(42px, 10vw, 84px)', background: 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 40%, #ec4899 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  ghosted.
+                </span>
+              </h1>
+            </div>
+          )}
 
           {/* Sub-headline */}
-          <h2 style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(26px, 6vw, 56px)', fontWeight: 600, color: '#3730a3', margin: '0 0 40px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
-            CFF finds the path around it.
-          </h2>
+          {mounted && (
+            <div className="hero-animate-3">
+              <p style={{ fontFamily: SF, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 500, color: TEXT2, lineHeight: 1.6, margin: '0 auto 40px', maxWidth: 600 }}>
+                CFF gives you hidden jobs, <span style={{ color: INDIGO, fontWeight: 700 }}>warm alumni intros</span>, and AI-powered tools — so a real human sees your resume.
+              </p>
+            </div>
+          )}
 
-          {/* Body */}
-          <p style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(16px, 4vw, 19px)', color: '#64748b', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 680 }}>
-            We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
-          </p>
+          {/* CTA row */}
+          {mounted && (
+            <div className="hero-animate-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button onClick={go} style={{
+                  fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 700, color: '#fff',
+                  background: GRAD_INDIGO, border: 'none', borderRadius: 14,
+                  padding: 'clamp(16px, 4vw, 18px) clamp(36px, 7vw, 52px)',
+                  cursor: 'pointer', minHeight: 56,
+                  boxShadow: '0 10px 36px rgba(79,70,229,0.32)',
+                  transition: 'all 0.2s ease',
+                  touchAction: 'manipulation',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.03)'; e.currentTarget.style.boxShadow = '0 18px 48px rgba(79,70,229,0.42)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 10px 36px rgba(79,70,229,0.32)'; }}
+                >
+                  Start for Free →
+                </button>
+                <button onClick={go} style={{
+                  fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 600, color: INDIGO,
+                  background: '#fff', border: `2px solid ${INDIGO_BORDER}`, borderRadius: 14,
+                  padding: 'clamp(16px, 4vw, 18px) clamp(28px, 6vw, 40px)',
+                  cursor: 'pointer', minHeight: 56,
+                  boxShadow: SHADOW, transition: 'all 0.2s ease', touchAction: 'manipulation',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = INDIGO; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW_MD; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = SHADOW; }}
+                >
+                  See how it works
+                </button>
+              </div>
 
-          {/* CTA */}
-          <button onClick={go} style={{
-            fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
-            background: '#4338ca', border: 'none', borderRadius: 14,
-            padding: 'clamp(16px, 4vw, 18px) clamp(44px, 8vw, 56px)',
-            cursor: 'pointer', minHeight: '56px',
-            boxShadow: '0 8px 32px rgba(67,56,202,0.30)',
-            transition: 'all 0.2s ease',
-            touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#3730a3'; e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(67,56,202,0.45)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#4338ca'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(67,56,202,0.30)'; }}
-          >
-            Start for Free →
-          </button>
+              {/* Social proof avatars */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex' }}>
+                  {STORIES.map((s, i) => (
+                    <img key={i} src={s.photo} alt={s.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', marginLeft: i > 0 ? -10 : 0 }} />
+                  ))}
+                </div>
+                <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: 0 }}>
+                  <span style={{ color: TEXT, fontWeight: 700 }}>2,400+</span> students hired faster
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
-          {/* Trust line */}
-          <p style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(13px, 3vw, 15px)', color: '#94a3b8', margin: '24px 0 0', lineHeight: 1.5 }}>
-            This guided setup takes 8–12 minutes — you'll have a personalized plan.
-          </p>
+      {/* ── TRUST BAR ── */}
+      <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
+          {[
+            { emoji: '🎓', stat: '2,400+', label: 'Students' },
+            { emoji: '🏢', stat: '500+', label: 'Companies Accessed' },
+            { emoji: '🤝', stat: '3 weeks', label: 'Avg. Time to Offer' },
+            { emoji: '⭐', stat: '4.9/5', label: 'Student Rating' },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px' }}>
+              <span style={{ fontSize: 20 }}>{item.emoji}</span>
+              <div>
+                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>{item.stat}</p>
+                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: 0, fontWeight: 500 }}>{item.label}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* ── HONEST SECTION ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG2, borderTop: `1px solid ${MINT_BORDER}` }}>
+      <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: BG }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
-            Let's be honest: the modern job hunt is a literal nightmare. 😮‍💨
-          </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 0 24px' }}>
-            Spending hours tailoring a resume just to get screened out by a bot is exhausting and demoralizing.
-          </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, color: TEAL, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
-            CFF eliminates the headache.
-          </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 0 32px' }}>
-            We bring organization, hidden job listings, and warm networking (via alumni and parents) into one place — so you stop shouting into the void.
+          <SectionLabel text="The real talk" color={PINK} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 44px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 20px', textAlign: 'center' }}>
+            The modern job hunt is a<br />
+            <span style={{ background: GRAD_WARM, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>literal nightmare 😮‍💨</span>
+          </h2>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', color: TEXT2, lineHeight: 1.75, margin: '0 0 24px', textAlign: 'center' }}>
+            Spending hours tailoring a resume just to get screened out by a bot is exhausting. CFF brings hidden jobs, warm networking, and smart tools into one place.
           </p>
 
-          <div style={{ borderLeft: `4px solid ${TEAL}`, paddingLeft: 'clamp(16px, 4vw, 24px)', marginBottom: 32 }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 600, color: TEXT, lineHeight: 1.6, margin: '0 0 10px' }}>
-              CFF isn't just another digital filing cabinet.
-            </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 800, color: TEXT, lineHeight: 1.4, margin: '0 0 10px' }}>
-              It's a career accelerator.
-            </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 17px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: 0 }}>
-              It takes a cold, soul-crushing process and makes it human again.
-            </p>
-          </div>
-
-          <div style={{ background: `linear-gradient(135deg, ${MINT_LIGHT} 0%, rgba(0,255,194,0.05) 100%)`, border: `1px solid ${MINT_BORDER}`, borderRadius: 20, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', marginBottom: 28 }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', fontWeight: 700, color: TEAL, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: CORAL, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 8px' }}>
-              More applications won't save you.
-            </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: TEAL, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 16px' }}>
-              More interviews will. 🎯
-            </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 16px)', color: TEXT2, lineHeight: 1.6, margin: 0 }}>
+          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #f1f5f9', boxShadow: SHADOW_MD, padding: 'clamp(24px, 6vw, 36px)', marginBottom: 28 }}>
+            <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>❌</span>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 20px)', fontWeight: 800, color: CORAL, letterSpacing: '-0.02em', lineHeight: 1.2, margin: 0 }}>More applications won't save you.</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>🎯</span>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(16px, 4.5vw, 20px)', fontWeight: 800, color: INDIGO, letterSpacing: '-0.02em', lineHeight: 1.2, margin: 0 }}>More interviews will.</p>
+              </div>
+            </div>
+            <p style={{ fontFamily: SF, fontSize: 'clamp(14px, 3.5vw, 16px)', color: TEXT3, lineHeight: 1.6, margin: '16px 0 0' }}>
               We're here to help you skip the line and get real results.
             </p>
           </div>
 
           <button onClick={go} style={{
-            width: '100%', fontFamily: FONT, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 700, color: '#0d1a17',
-            background: MINT, border: 'none', borderRadius: 999, padding: 'clamp(16px, 5vw, 20px)',
-            cursor: 'pointer', minHeight: '52px', boxShadow: `0 12px 32px rgba(0,255,194,0.35)`,
-            transition: 'all 0.2s ease', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+            width: '100%', fontFamily: SF, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 700, color: '#fff',
+            background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: 'clamp(16px, 5vw, 20px)',
+            cursor: 'pointer', minHeight: 52, boxShadow: '0 8px 28px rgba(79,70,229,0.28)',
+            transition: 'all 0.2s ease', touchAction: 'manipulation',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = MINT_DIM; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = MINT; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(79,70,229,0.38)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(79,70,229,0.28)'; }}
           >
             Start for Free →
           </button>
@@ -390,48 +444,41 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── OLD WAY VS SMART WAY ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG, borderTop: `1px solid rgba(255,255,255,0.06)` }}>
+      <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <SectionLabel text="Stop playing a losing game" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            The Old Way vs The Smart Way
+          <SectionLabel text="Stop playing a losing game" color={VIOLET} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 44px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
+            The Old Way vs <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The Smart Way</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-
             {/* Old Way */}
-            <div style={{ background: CORAL_LIGHT, border: `1.5px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 18 }}>🕳️</span>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The Old Way</p>
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Brutal Cycle</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
+            <div style={{ background: '#fff5f7', border: `1.5px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)' }}>
+              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>🕳️ The Old Way</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Brutal Cycle</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
                   { emoji: '😃', text: 'Start full of hope and optimism' },
-                  { emoji: '⏰', text: 'Spend dozens of hours mass-applying to 200+ random jobs' },
+                  { emoji: '⏰', text: 'Spend dozens of hours mass-applying to 200+ jobs' },
                   { emoji: '😶', text: 'Get automated rejections or total silence' },
                   { emoji: '😟', text: 'Slowly lose confidence and question your worth' },
                   { emoji: '💔', text: 'Feel discouraged, anxious, stuck in the void' },
                 ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0, lineHeight: 1.3 }}>{item.emoji}</span>
-                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#ffb3bf', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <span style={{ fontSize: 18, flexShrink: 0, lineHeight: 1.4 }}>{item.emoji}</span>
+                    <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#9f1239', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20, background: 'rgba(255,107,129,0.2)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: CORAL }}>❌ 98% of cold apps get ghosted</span>
+              <div style={{ marginTop: 20, background: CORAL_LIGHT, borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${CORAL_BORDER}` }}>
+                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: CORAL }}>❌ 98% of cold apps get ghosted</span>
               </div>
             </div>
 
             {/* Smart Way */}
-            <div style={{ background: TEAL_LIGHT, border: `1.5px solid ${TEAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 18 }}>⚡</span>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: TEAL_DARK, letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The CFF Way</p>
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: TEAL_DARK, margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Smart Path</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
+            <div style={{ background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)' }}>
+              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>⚡ The CFF Way</p>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Smart Path</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
                   { emoji: '🔥', text: 'Start strategic and confident with CFF' },
                   { emoji: '🔍', text: 'Uncover hidden jobs most students never see' },
@@ -439,57 +486,39 @@ export default function StudentLandingPage({ onParentClick }) {
                   { emoji: '🚀', text: 'Move quickly from application to real interviews' },
                   { emoji: '🎉', text: 'Get hired through human connections, not algorithms' },
                 ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0, lineHeight: 1.3 }}>{item.emoji}</span>
-                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: TEAL_DARK, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <span style={{ fontSize: 18, flexShrink: 0, lineHeight: 1.4 }}>{item.emoji}</span>
+                    <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: INDIGO_DIM, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20, background: '#99f6e4', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEAL_DARK }}>✅ 1 warm intro = 10x more interviews</span>
+              <div style={{ marginTop: 20, background: '#fff', borderRadius: 10, padding: '10px 14px', textAlign: 'center', border: `1px solid ${INDIGO_BORDER}` }}>
+                <span style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO }}>✅ 1 warm intro = 10x more interviews</span>
               </div>
             </div>
-
           </div>
 
-          {/* Bottom callout */}
-          <div style={{ marginTop: 'clamp(20px, 5vw, 28px)', background: `linear-gradient(135deg, ${MINT_LIGHT}, rgba(0,255,194,0.04))`, border: `1px solid ${MINT_BORDER}`, borderRadius: 20, padding: 'clamp(18px, 4vw, 26px) clamp(20px, 5vw, 32px)', textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 8px', color: TEXT }}>
-              One warm introduction beats 100 cold applications.
-            </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: TEXT2, margin: 0, lineHeight: 1.5 }}>
-              This is how the real world actually works.
-            </p>
-          </div>
-
-          {/* ── CFF IS ALREADY WORKING FOR YOU ── */}
-          <div style={{ marginTop: 'clamp(24px, 6vw, 36px)', background: CARD, border: `1.5px solid ${MINT_BORDER}`, borderRadius: 20, boxShadow: SHADOW_MD, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
+          {/* CFF proof list */}
+          <div style={{ marginTop: 28, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 20, boxShadow: SHADOW_MD, padding: 'clamp(20px, 5vw, 32px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚡</div>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚡</div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.3 }}>
-                  CFF is already working for you
-                </p>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT3, margin: '2px 0 0', lineHeight: 1.3 }}>Scanning your opportunities right now</p>
+                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>CFF is already working for you</p>
+                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>Scanning opportunities right now</p>
               </div>
-              <div style={{ background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 100, padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: TEAL, animation: 'pulseGreen 1.5s ease-in-out infinite' }} />
-                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: TEAL_DARK, whiteSpace: 'nowrap', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Live</span>
+              <div style={{ background: '#dcfce7', border: '1px solid #86efac', borderRadius: 100, padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', animation: 'pulseGreen 1.5s ease-in-out infinite' }} />
+                <span style={{ fontFamily: SF, fontSize: 10, fontWeight: 800, color: '#15803d', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Live</span>
               </div>
             </div>
             {PROOF_CALLOUTS.map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 12px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid rgba(255,255,255,0.06)` : 'none' }}>
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                  <span style={{ fontSize: 11, color: TEAL, fontWeight: 800 }}>✓</span>
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 12px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <span style={{ fontSize: 10, color: '#fff', fontWeight: 800 }}>✓</span>
                 </div>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT2, margin: 0, fontWeight: 500, lineHeight: 1.5 }}>{item.text}</p>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT2, margin: 0, fontWeight: 500, lineHeight: 1.5 }}>{item.text}</p>
               </div>
             ))}
-            <div style={{ marginTop: 18, background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 12, padding: '12px 16px' }}>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEAL_DARK, fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
-                🚀 Your personalized plan is being built right now — you're already ahead of 95% of applicants.
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -497,33 +526,34 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── APP SHOWCASE ── */}
       <AppShowcase />
 
-      {/* ── CAMPUS VAULT WIDGET (replaces 6-box feature grid) ── */}
-      <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
+      {/* ── CAMPUS VAULT WIDGET ── */}
+      <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG2} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: BG2, borderTop: `1px solid ${MINT_BORDER}`, borderBottom: `1px solid ${MINT_BORDER}`, padding: 'clamp(48px, 10vw, 72px) 20px' }}>
+      <div style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <SectionLabel text="What the Agent does for you" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 38px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
-            One scan. Your entire edge, unlocked.
+          <SectionLabel text="What the Agent does for you" color={TEAL_DARK} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 40px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(24px, 6vw, 40px)', textAlign: 'center' }}>
+            One scan. Your entire edge,{' '}
+            <span style={{ background: 'linear-gradient(90deg, #06b6d4, #4f46e5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>unlocked.</span>
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: 28 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 28 }}>
             {[
-              { emoji: '⚡', label: 'Auto-extract insider contact lanes' },
-              { emoji: '🎯', label: 'Real-time ATS formatting repair' },
-              { emoji: '🔗', label: 'Campus alumni mapped to open reqs' },
-              { emoji: '📋', label: 'Hiring CRM — zero spreadsheets' },
-              { emoji: '✉️', label: 'Outreach drafted in your voice' },
-              { emoji: '🏆', label: 'Interview prep from real questions' },
+              { emoji: '⚡', label: 'Auto-extract insider contact lanes', color: VIOLET },
+              { emoji: '🎯', label: 'Real-time ATS formatting repair', color: INDIGO },
+              { emoji: '🔗', label: 'Campus alumni mapped to open reqs', color: TEAL_DARK },
+              { emoji: '📋', label: 'Hiring CRM — zero spreadsheets', color: PINK },
+              { emoji: '✉️', label: 'Outreach drafted in your voice', color: VIOLET },
+              { emoji: '🏆', label: 'Interview prep from real questions', color: INDIGO },
             ].map((item, i) => (
-              <div key={i} style={{ background: CARD, borderRadius: 14, padding: 'clamp(12px, 3vw, 16px)', boxShadow: SHADOW, border: `1px solid rgba(255,255,255,0.07)`, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0 }}>{item.emoji}</span>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 13px)', fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.3 }}>{item.label}</p>
+              <div key={i} style={{ background: '#fff', borderRadius: 16, padding: 'clamp(12px, 3vw, 18px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>{item.emoji}</span>
+                <p style={{ fontFamily: SF, fontSize: 'clamp(11px, 3vw, 13px)', fontWeight: 700, color: item.color, margin: 0, lineHeight: 1.3 }}>{item.label}</p>
               </div>
             ))}
           </div>
-          <div style={{ background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 16, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 15px)', fontWeight: 600, color: TEAL_DARK, margin: 0, lineHeight: 1.5 }}>
+          <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center' }}>
+            <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 600, color: INDIGO_DIM, margin: 0, lineHeight: 1.5 }}>
               💬 "I was overwhelmed applying everywhere. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks." — Marcus, Penn State '27
             </p>
           </div>
@@ -531,67 +561,65 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── SOCIAL PROOF ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG2 }}>
+      <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <SectionLabel text="Students like you" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
-            Real results. Real students.
+          <SectionLabel text="Students like you" color={VIOLET} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
+            Real results.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Real students.</span>
           </h2>
           <StoriesCarousel />
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT3, textAlign: 'center', margin: 'clamp(16px, 4vw, 24px) 0 0', lineHeight: 1.6 }}>
+          <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textAlign: 'center', margin: 'clamp(16px, 4vw, 24px) 0 0', lineHeight: 1.6 }}>
             Students use CFF to stay organized, reduce stress, and move through the search with more traction.
           </p>
         </div>
       </div>
 
-
-
       {/* ── PRICING ── */}
-      <div style={{ background: BG, borderTop: `1px solid ${MINT_BORDER}`, borderBottom: `1px solid ${MINT_BORDER}`, padding: 'clamp(48px, 10vw, 80px) 16px' }}>
+      <div style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
-          <SectionLabel text="Pricing" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            One focused sprint.<br />Real results.
+          <SectionLabel text="Pricing" color={INDIGO} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
+            One focused sprint.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Real results.</span>
           </h2>
 
-          {/* Sprint Card */}
-          <div style={{ background: CARD2, borderRadius: 14, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', boxShadow: `0 20px 60px rgba(0,0,0,0.4), 0 4px 16px rgba(0,255,194,0.08)`, border: `1px solid ${MINT_BORDER}`, position: 'relative' }}>
+          <div style={{ background: '#fff', borderRadius: 24, padding: 'clamp(24px, 6vw, 40px)', boxShadow: SHADOW_LG, border: `2px solid ${INDIGO_BORDER}`, position: 'relative', overflow: 'hidden' }}>
+            {/* Top gradient accent */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: GRAD_INDIGO }} />
 
-            {/* Badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(16px, 4vw, 24px)', maxWidth: '100%' }}>
-              <span style={{ fontSize: 'clamp(11px, 3vw, 12px)' }}>🎓</span>
-              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: MINT, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Graduation Sprint Plan</span>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 'clamp(16px, 4vw, 24px)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100, padding: '5px 14px' }}>
+                <span style={{ fontSize: 12 }}>🎓</span>
+                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Graduation Sprint Plan</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 100, padding: '5px 14px' }}>
+                <span style={{ fontSize: 12 }}>⚡</span>
+                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#92400e' }}>Less than a delivery meal for 14 days</span>
+              </div>
             </div>
 
-            {/* Comparison badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(253,224,71,0.10)', border: '1px solid rgba(253,224,71,0.28)', borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(14px, 4vw, 20px)', marginLeft: 0 }}>
-              <span style={{ fontSize: 'clamp(11px, 3vw, 12px)' }}>⚡</span>
-              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 600, color: '#fde047', whiteSpace: 'nowrap' }}>Less than a delivery meal for 14 days</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 56px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1, background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>$4.99</span>
+              <span style={{ fontFamily: SF, fontSize: 16, color: TEXT3, fontWeight: 500 }}>/week</span>
             </div>
-
-            {/* Price */}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: FONT, fontSize: 'clamp(36px, 10vw, 52px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
-              <span style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 16px)', color: TEXT3, fontWeight: 400 }}>/week</span>
-            </div>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: '0 0 clamp(20px, 5vw, 28px)', lineHeight: 1.4 }}>
+            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '0 0 clamp(20px, 5vw, 28px)', lineHeight: 1.4 }}>
               Billed monthly ($19.96) · Cancel in 1-tap anytime
             </p>
 
-            {/* Features */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 'clamp(20px, 5vw, 28px)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 'clamp(20px, 5vw, 28px)' }}>
               {PRO_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{ width: 'clamp(16px, 4vw, 18px)', height: 'clamp(16px, 4vw, 18px)', borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                    <span style={{ fontSize: 'clamp(7px, 2vw, 9px)', color: GREEN, fontWeight: 700 }}>✓</span>
+                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                    <span style={{ fontSize: 9, color: '#fff', fontWeight: 800 }}>✓</span>
                   </div>
-                  <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT, margin: 0, lineHeight: 1.5 }}>{f}</p>
+                  <p style={{ fontFamily: SF, fontSize: 'clamp(12px, 3.5vw, 14px)', color: TEXT, margin: 0, lineHeight: 1.5 }}>{f}</p>
                 </div>
               ))}
             </div>
 
             <CTAButton label="⚡ Check My ATS Match Score" fullWidth />
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, textAlign: 'center', margin: 'clamp(12px, 3vw, 14px) 0 0', lineHeight: 1.4 }}>
+            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.4 }}>
               No credit card required to start.
             </p>
           </div>
@@ -599,34 +627,44 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── FINAL CTA ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 88px) 20px clamp(48px, 10vw, 72px)', textAlign: 'center', background: `radial-gradient(ellipse at 50% 100%, rgba(0,255,194,0.10) 0%, ${BG} 70%)` }}>
-        <div style={{ maxWidth: 520, margin: '0 auto' }}>
-          <SectionLabel text="Ready to escape the black hole?" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
-            Search Smarter,<br />
-            <span style={{ color: TEAL }}>Not Harder.</span>
+      <div style={{ padding: 'clamp(56px, 12vw, 100px) clamp(20px, 5vw, 40px)', textAlign: 'center', background: 'linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>Ready to escape the black hole?</p>
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(28px, 7vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 16px' }}>
+            Search Smarter,<br />Not Harder.
           </h2>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 15px)', color: TEXT2, margin: '0 0 clamp(24px, 6vw, 32px)', lineHeight: 1.6 }}>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: 'rgba(255,255,255,0.75)', margin: '0 0 clamp(28px, 6vw, 36px)', lineHeight: 1.65 }}>
             Join 2,400+ students who stopped applying blindly and started getting results.
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <CTAButton label="⚡ Optimize My Resume File" />
-          </div>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: 0, lineHeight: 1.4 }}>No credit card required to start.</p>
+          <button onClick={go} style={{
+            fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 700, color: INDIGO,
+            background: '#fff', border: 'none', borderRadius: 14,
+            padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
+            cursor: 'pointer', minHeight: 56,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            transition: 'all 0.2s ease', touchAction: 'manipulation',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'; }}
+          >
+            ⚡ Optimize My Resume File
+          </button>
+          <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '16px 0 0', lineHeight: 1.4 }}>No credit card required to start.</p>
         </div>
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={{ borderTop: `1px solid ${MINT_BORDER}`, padding: 'clamp(20px, 5vw, 28px) 16px', textAlign: 'center', background: '#161b1e' }}>
+      <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', textAlign: 'center', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
           {[['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
-            <a key={label} href={href} style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT3, textDecoration: 'none', transition: 'color 0.15s', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
-              onMouseEnter={e => e.currentTarget.style.color = TEXT2}
+            <a key={label} href={href} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.color = TEXT}
               onMouseLeave={e => e.currentTarget.style.color = TEXT3}
             >{label}</a>
           ))}
         </div>
-        <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.5 }}>
           © {new Date().getFullYear()} College Fast Forward · Helping students land faster with less stress.
         </p>
       </div>
