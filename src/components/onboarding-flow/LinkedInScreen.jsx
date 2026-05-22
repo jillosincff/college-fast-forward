@@ -3,22 +3,37 @@ import { base44 } from '@/api/base44Client';
 import FunnelProgress from './FunnelProgress';
 import LinkedInLoader from './LinkedInLoader';
 
-// ── Design Tokens ──────────────────────────────────────────────
+// ── Design Tokens — Purple/Indigo (match landing pages) ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
-const BG = '#F8FAFC';
-const CARD = '#FFFFFF';
-const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
-const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
-const TEXT = '#0F172A';
-const TEXT2 = '#64748B';
-const BLUE = '#0066FF';
-const BLUE_LIGHT = '#EFF6FF';
-const BLUE_BORDER = '#BFDBFE';
-const GREEN = '#10B981';
-const GREEN_LIGHT = '#F0FDF4';
-const GREEN_BORDER = '#BBF7D0';
-const BORDER_R = 8;
-const LI_BORDER = '1px solid #E0E0E0';
+const BG = '#f8f9ff';
+const CARD = '#ffffff';
+const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
+const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const INDIGO = '#6d28d9';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
+const VIOLET = '#7c3aed';
+const VIOLET_LIGHT = 'rgba(124,58,237,0.08)';
+const VIOLET_BORDER = 'rgba(124,58,237,0.20)';
+const TEAL = '#06b6d4';
+const TEAL_LIGHT = 'rgba(6,182,212,0.08)';
+const TEAL_BORDER = 'rgba(6,182,212,0.22)';
+const CORAL = '#f43f5e';
+const CORAL_LIGHT = 'rgba(244,63,94,0.07)';
+const CORAL_BORDER = 'rgba(244,63,94,0.22)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
+const BORDER_R = 12;
+const LI_BORDER = '1px solid #E2E8F0';
+// Aliases for backward compat
+const BLUE = INDIGO;
+const BLUE_LIGHT = INDIGO_LIGHT;
+const BLUE_BORDER = INDIGO_BORDER;
+const GREEN = TEAL;
+const GREEN_LIGHT = TEAL_LIGHT;
+const GREEN_BORDER = TEAL_BORDER;
 
 function TypewriterText({ text, delay = 22, onDone }) {
   const [displayed, setDisplayed] = useState('');
@@ -58,7 +73,7 @@ function LinkedInProfileCard({ name, headline, college, expanded, onExpand, abou
         {/* Banner */}
         <div style={{
           height: 96,
-          background: 'linear-gradient(135deg, #0052CC 0%, #0066FF 45%, #0891B2 100%)',
+          background: GRAD_INDIGO,
           position: 'relative',
         }} />
 
@@ -67,7 +82,7 @@ function LinkedInProfileCard({ name, headline, college, expanded, onExpand, abou
           <div style={{
             width: 88, height: 88, borderRadius: '50%',
             border: '4px solid #FFFFFF',
-            background: 'linear-gradient(135deg, #1D4ED8 0%, #0066FF 100%)',
+            background: GRAD_INDIGO,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             marginTop: -44, marginBottom: 10,
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',

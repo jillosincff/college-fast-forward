@@ -9,22 +9,43 @@ import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
 import IndustryScreen from './IndustryScreen';
 
-// ── Design Tokens ──────────────────────────────────────────────
+// ── Design Tokens — Purple/Indigo (match landing pages) ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
-const BG = '#F8FAFC';
-const CARD = '#FFFFFF';
-const TEXT = '#0F172A';
-const TEXT2 = '#64748B';
-const TEXT3 = '#94A3B8';
-const BLUE = '#0066FF';
-const BLUE_LIGHT = '#EFF6FF';
-const BLUE_BORDER = '#BFDBFE';
-const GREEN = '#10B981';
-const GREEN_LIGHT = '#F0FDF4';
-const GREEN_BORDER = '#BBF7D0';
-const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
-const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
-const R = 12;
+const BG = '#f8f9ff';
+const CARD = '#ffffff';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
+const INDIGO = '#6d28d9';
+const INDIGO_DIM = '#5b21b6';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
+const VIOLET = '#7c3aed';
+const VIOLET_LIGHT = 'rgba(124,58,237,0.08)';
+const VIOLET_BORDER = 'rgba(124,58,237,0.20)';
+const PINK = '#ec4899';
+const PINK_LIGHT = 'rgba(236,72,153,0.08)';
+const PINK_BORDER = 'rgba(236,72,153,0.22)';
+const TEAL = '#06b6d4';
+const TEAL_LIGHT = 'rgba(6,182,212,0.08)';
+const TEAL_BORDER = 'rgba(6,182,212,0.22)';
+const TEAL_DARK = '#0891b2';
+const CORAL = '#f43f5e';
+const CORAL_LIGHT = 'rgba(244,63,94,0.07)';
+const CORAL_BORDER = 'rgba(244,63,94,0.22)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
+const GRAD_WARM = 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)';
+const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
+const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
+const R = 16;
+// Aliases for backward compat
+const BLUE = INDIGO;
+const BLUE_LIGHT = INDIGO_LIGHT;
+const BLUE_BORDER = INDIGO_BORDER;
+const GREEN = TEAL;
+const GREEN_LIGHT = TEAL_LIGHT;
+const GREEN_BORDER = TEAL_BORDER;
 
 const TOP_SCHOOLS = [
   'University of Florida', 'Florida State University', 'University of Central Florida',

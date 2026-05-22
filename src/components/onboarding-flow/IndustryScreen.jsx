@@ -1,53 +1,70 @@
 import { useState } from 'react';
 
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
-const BLUE = '#0066FF';
-const BLUE_LIGHT = '#EFF6FF';
-const BLUE_BORDER = '#BFDBFE';
-const GREEN = '#10B981';
-const GREEN_LIGHT = '#F0FDF4';
-const GREEN_BORDER = '#BBF7D0';
-const TEXT = '#0F172A';
-const TEXT2 = '#64748B';
-const TEXT3 = '#94A3B8';
-const CARD = '#FFFFFF';
-const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
+const INDIGO = '#6d28d9';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
+const VIOLET = '#7c3aed';
+const VIOLET_LIGHT = 'rgba(124,58,237,0.08)';
+const VIOLET_BORDER = 'rgba(124,58,237,0.20)';
+const PINK = '#ec4899';
+const PINK_LIGHT = 'rgba(236,72,153,0.08)';
+const PINK_BORDER = 'rgba(236,72,153,0.22)';
+const TEAL = '#06b6d4';
+const TEAL_LIGHT = 'rgba(6,182,212,0.08)';
+const TEAL_BORDER = 'rgba(6,182,212,0.22)';
+const TEAL_DARK = '#0891b2';
+const CORAL = '#f43f5e';
+const CORAL_LIGHT = 'rgba(244,63,94,0.07)';
+const CORAL_BORDER = 'rgba(244,63,94,0.22)';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
+const CARD = '#ffffff';
+const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+// Aliases for backward compat
+const BLUE = INDIGO;
+const BLUE_LIGHT = INDIGO_LIGHT;
+const BLUE_BORDER = INDIGO_BORDER;
+const GREEN = TEAL;
+const GREEN_LIGHT = TEAL_LIGHT;
+const GREEN_BORDER = TEAL_BORDER;
 
 const BUCKETS = [
   {
     key: 'tech',
     emoji: '💻',
     label: 'Tech & Engineering',
-    color: '#0066FF',
-    colorLight: '#EFF6FF',
-    colorBorder: '#BFDBFE',
+    color: INDIGO,
+    colorLight: INDIGO_LIGHT,
+    colorBorder: INDIGO_BORDER,
     subs: ['Software Engineering', 'Product Management', 'Data Science', 'UX/UI Design', 'Cybersecurity', 'AI/ML'],
   },
   {
     key: 'business',
     emoji: '📊',
     label: 'Business & Finance',
-    color: '#7C3AED',
-    colorLight: '#F5F3FF',
-    colorBorder: '#DDD6FE',
+    color: VIOLET,
+    colorLight: VIOLET_LIGHT,
+    colorBorder: VIOLET_BORDER,
     subs: ['Investment Banking', 'Consulting', 'Private Equity', 'Corporate Finance', 'Accounting', 'Strategy'],
   },
   {
     key: 'marketing',
     emoji: '📣',
     label: 'Marketing & Media',
-    color: '#EA580C',
-    colorLight: '#FFF7ED',
-    colorBorder: '#FED7AA',
+    color: PINK,
+    colorLight: PINK_LIGHT,
+    colorBorder: PINK_BORDER,
     subs: ['Social Media', 'Content Creation', 'Product Marketing', 'Brand Strategy', 'PR & Communications', 'Growth Marketing'],
   },
   {
     key: 'healthcare',
     emoji: '🏥',
     label: 'Healthcare & Bio',
-    color: '#059669',
-    colorLight: '#F0FDF4',
-    colorBorder: '#BBF7D0',
+    color: TEAL,
+    colorLight: TEAL_LIGHT,
+    colorBorder: TEAL_BORDER,
     subs: ['Pre-Med / Clinical', 'Biotech Research', 'Health Policy', 'Pharma', 'Nursing', 'Public Health'],
   },
   {
@@ -63,9 +80,9 @@ const BUCKETS = [
     key: 'creative',
     emoji: '🎨',
     label: 'Creative & Entertainment',
-    color: '#DB2777',
-    colorLight: '#FDF2F8',
-    colorBorder: '#FBCFE8',
+    color: PINK,
+    colorLight: PINK_LIGHT,
+    colorBorder: PINK_BORDER,
     subs: ['Film & TV', 'Music Industry', 'Fashion & Retail', 'Sports Business', 'Gaming', 'Architecture & Design'],
   },
 ];
