@@ -672,7 +672,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
           {/* Headline */}
           <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 16px', fontSize: 'clamp(30px, 5.5vw, 48px)', color: TEXT }}>
-            Welcome to{' '}
+            Welcome to<br />
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>College Fast Forward.</span>
           </h1>
 
