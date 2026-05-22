@@ -1,4 +1,6 @@
 const dm = "'DM Sans', system-ui, sans-serif";
+import { base44 } from '@/api/base44Client';
+import { navigate } from '@/components/utils/navigation';
 
 export default function FreeTierNav({ user, onUpgrade }) {
   const isPremium = user?.fastiq_active || user?.membership_tier === 'premium';
@@ -22,6 +24,17 @@ export default function FreeTierNav({ user, onUpgrade }) {
               {user.full_name || user.email}
             </span>
           )}
+          <button
+            onClick={async () => {
+              await base44.auth.logout();
+              navigate('LandingPage');
+            }}
+            style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', background: 'none', border: '1px solid #e5e7eb', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.borderColor = '#d1d5db'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
+          >
+            Logout
+          </button>
           {!isPremium && (
             <button
               onClick={onUpgrade}
