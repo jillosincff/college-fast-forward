@@ -8,11 +8,17 @@ import AppShowcase from '@/components/landing/AppShowcase';
 
 // ── Design Tokens ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
-const BG = '#F8FAFC';
+const BG = '#f8fafc';
 const CARD = '#FFFFFF';
-const TEXT = '#0F172A';
-const TEXT2 = '#64748B';
-const TEXT3 = '#94A3B8';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
+const TEAL = '#0d9488';
+const TEAL_DARK = '#0f766e';
+const TEAL_LIGHT = '#ccfbf1';
+const TEAL_BORDER = '#99f6e4';
+const CORAL = '#fb7185';
+const CORAL_LIGHT = '#fff1f2';
 const BLUE = '#0066FF';
 const BLUE_LIGHT = '#EFF6FF';
 const BLUE_BORDER = '#BFDBFE';
@@ -21,11 +27,10 @@ const GREEN = '#10B981';
 const GREEN_LIGHT = '#F0FDF4';
 const GREEN_BORDER = '#BBF7D0';
 const ORANGE = '#F97316';
-const CORAL = '#FF6B6B';
 const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
 const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
 const SHADOW_LG = '0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04)';
-const R = 12;
+const R = 16;
 
 const BENEFIT_CARDS = [
   { icon: '📄', title: 'Tailored Resumes', desc: 'Automatically adapt your resume for each role so you apply faster and with more confidence.' },
@@ -86,21 +91,21 @@ function StoriesCarousel() {
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
         style={{
-          background: CARD, borderRadius: 12, boxShadow: SHADOW_MD,
-          borderLeft: `4px solid ${BLUE}`,
+          background: CARD, borderRadius: 16, boxShadow: SHADOW_MD,
+          borderLeft: `4px solid ${TEAL}`,
           padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)', cursor: dragging ? 'grabbing' : 'grab',
           transform: `translateX(${offset * 0.06}px)`, transition: dragging ? 'none' : 'transform 0.3s ease',
           minHeight: 140, position: 'relative',
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: 'clamp(3px, 1vw, 4px) clamp(8px, 2vw, 12px)', marginBottom: 14, maxWidth: '100%' }}>
-          <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: BLUE, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{s.tag}</span>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 100, padding: 'clamp(3px, 1vw, 4px) clamp(8px, 2vw, 12px)', marginBottom: 14, maxWidth: '100%' }}>
+          <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: TEAL_DARK, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{s.tag}</span>
         </div>
         <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 18px)', fontWeight: 500, color: TEXT, lineHeight: 1.6, margin: '0 0 clamp(16px, 4vw, 20px)', fontStyle: 'italic' }}>
           "{s.quote}"
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 'clamp(36px, 10vw, 44px)', height: 'clamp(36px, 10vw, 44px)', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: `2px solid ${BLUE_BORDER}` }}>
+          <div style={{ width: 'clamp(36px, 10vw, 44px)', height: 'clamp(36px, 10vw, 44px)', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: `2px solid ${TEAL_BORDER}` }}>
             <img src={s.photo} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
@@ -112,13 +117,13 @@ function StoriesCarousel() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
         <div style={{ display: 'flex', gap: 6 }}>
           {STORIES.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 18 : 6, height: 6, borderRadius: 3, background: i === active ? BLUE : '#CBD5E1', border: 'none', cursor: 'pointer', padding: 0, minHeight: '44px', transition: 'all 0.3s ease' }} />
+            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 18 : 6, height: 6, borderRadius: 3, background: i === active ? TEAL : '#CBD5E1', border: 'none', cursor: 'pointer', padding: 0, minHeight: '44px', transition: 'all 0.3s ease' }} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {['←', '→'].map((arrow, i) => (
             <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 32, height: 32, borderRadius: '50%', background: '#F1F5F9', border: `1px solid #E2E8F0`, fontSize: 13, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: '44px', transition: 'all 0.15s', touchAction: 'manipulation' }}
-              onMouseEnter={e => { e.currentTarget.style.background = BLUE_LIGHT; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.color = BLUE; }}
+              onMouseEnter={e => { e.currentTarget.style.background = TEAL_LIGHT; e.currentTarget.style.borderColor = TEAL_BORDER; e.currentTarget.style.color = TEAL; }}
               onMouseLeave={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; }}
             >{arrow}</button>
           ))}
@@ -209,23 +214,23 @@ export default function StudentLandingPage({ onParentClick }) {
   };
 
   const SectionLabel = ({ text }) => (
-    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
+    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEAL, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
 
   const CTAButton = ({ label = 'Get Hired →', onClick = go, fullWidth = false }) => (
     <button onClick={onClick} style={{
       fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 16px)', fontWeight: 700, color: '#fff',
-      background: `linear-gradient(to bottom, ${GREEN}, #059669)`,
-      border: 'none', borderRadius: 12, padding: 'clamp(16px, 4vw, 20px) clamp(24px, 6vw, 36px)',
+      background: TEAL,
+      border: 'none', borderRadius: 999, padding: 'clamp(16px, 4vw, 18px) clamp(28px, 6vw, 40px)',
       cursor: 'pointer', minHeight: '48px',
       transition: 'all 0.2s ease',
-      boxShadow: '0 8px 24px rgba(16,185,129,0.3)',
+      boxShadow: `0 8px 24px rgba(13,148,136,0.3)`,
       width: fullWidth ? '100%' : 'auto',
       touchAction: 'manipulation',
       WebkitTapHighlightColor: 'transparent',
     }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(16,185,129,0.4)'; e.currentTarget.style.background = `linear-gradient(to bottom, #059669, #047857)`; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16,185,129,0.3)'; e.currentTarget.style.background = `linear-gradient(to bottom, ${GREEN}, #059669)`; }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = TEAL_DARK; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = TEAL; }}
     >{label}</button>
   );
 
@@ -245,15 +250,15 @@ export default function StudentLandingPage({ onParentClick }) {
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(248,250,252,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E2E8F0', padding: '0 16px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em' }}>
-          College <span style={{ color: BLUE }}>Fast Forward</span>
+          College <span style={{ color: TEAL }}>Fast Forward</span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={parent} style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: '44px', padding: '8px 10px', WebkitTapHighlightColor: 'transparent' }}>For Parents</button>
-          <button onClick={go} style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 10, padding: '10px clamp(14px, 4vw, 20px)', cursor: 'pointer', minHeight: '44px', boxShadow: '0 4px 12px rgba(0,102,255,0.25)', transition: 'all 0.15s', touchAction: 'manipulation' }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          <button onClick={go} style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: '#fff', background: TEAL, border: 'none', borderRadius: 999, padding: '10px clamp(16px, 4vw, 22px)', cursor: 'pointer', minHeight: '44px', boxShadow: `0 4px 12px rgba(13,148,136,0.3)`, transition: 'all 0.15s', touchAction: 'manipulation' }}
+            onMouseEnter={e => { e.currentTarget.style.background = TEAL_DARK; e.currentTarget.style.transform = 'scale(1.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = TEAL; e.currentTarget.style.transform = 'scale(1)'; }}
           >{!isLoadingAuth && user ? 'Dashboard →' : 'Get Started →'}</button>
         </div>
       </nav>
@@ -311,22 +316,22 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── HONEST SECTION ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 16px', background: CARD, borderTop: '1px solid #E2E8F0' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: '#fff', borderTop: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
-            Let's be honest: the modern job hunt is a literal nightmare.
+            Let's be honest: the modern job hunt is a literal nightmare. 😮‍💨
           </p>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 0 24px' }}>
             Spending hours tailoring a resume just to get screened out by a bot is exhausting and demoralizing.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, color: BLUE, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, color: TEAL, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
             CFF eliminates the headache.
           </p>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 0 32px' }}>
             We bring organization, hidden job listings, and warm networking (via alumni and parents) into one place — so you stop shouting into the void.
           </p>
 
-          <div style={{ borderLeft: `4px solid ${BLUE}`, paddingLeft: 'clamp(16px, 4vw, 24px)', marginBottom: 32 }}>
+          <div style={{ borderLeft: `4px solid ${TEAL}`, paddingLeft: 'clamp(16px, 4vw, 24px)', marginBottom: 32 }}>
             <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 600, color: TEXT, lineHeight: 1.6, margin: '0 0 10px' }}>
               CFF isn't just another digital filing cabinet.
             </p>
@@ -338,27 +343,27 @@ export default function StudentLandingPage({ onParentClick }) {
             </p>
           </div>
 
-          <div style={{ background: '#0F172A', borderRadius: 16, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', marginBottom: 28 }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', fontWeight: 700, color: '#64748B', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: '#F87171', letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 8px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%)', border: `1px solid ${TEAL_BORDER}`, borderRadius: 20, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', marginBottom: 28 }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', fontWeight: 700, color: TEAL, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: CORAL, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 8px' }}>
               More applications won't save you.
             </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: GREEN, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 16px' }}>
-              More interviews will.
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: TEAL, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 16px' }}>
+              More interviews will. 🎯
             </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#94A3B8', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 16px)', color: TEXT2, lineHeight: 1.6, margin: 0 }}>
               We're here to help you skip the line and get real results.
             </p>
           </div>
 
           <button onClick={go} style={{
-            width: '100%', fontFamily: FONT, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 900, color: '#fff',
-            background: BLUE, border: 'none', borderRadius: 14, padding: 'clamp(16px, 5vw, 20px)',
-            cursor: 'pointer', minHeight: '52px', boxShadow: '0 12px 32px rgba(0,102,255,0.3)',
+            width: '100%', fontFamily: FONT, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 700, color: '#fff',
+            background: TEAL, border: 'none', borderRadius: 999, padding: 'clamp(16px, 5vw, 20px)',
+            cursor: 'pointer', minHeight: '52px', boxShadow: `0 12px 32px rgba(13,148,136,0.3)`,
             transition: 'all 0.2s ease', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = TEAL_DARK; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = TEAL; }}
           >
             Start for Free →
           </button>
@@ -366,7 +371,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── OLD WAY VS SMART WAY ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 16px', background: CARD, borderTop: '1px solid #E2E8F0' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG, borderTop: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
           <SectionLabel text="Stop playing a losing game" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
@@ -375,13 +380,12 @@ export default function StudentLandingPage({ onParentClick }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
 
             {/* Old Way */}
-            <div style={{ background: 'linear-gradient(160deg, #1C0A0A 0%, #2D0F0F 100%)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(239,68,68,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ background: CORAL_LIGHT, border: '1.5px solid #fecdd3', borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <span style={{ fontSize: 18 }}>🕳️</span>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#FCA5A5', letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The Old Way</p>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#e11d48', letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The Old Way</p>
               </div>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: '#FCA5A5', margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Brutal Cycle</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: '#be123c', margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Brutal Cycle</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
                 {[
                   { emoji: '😃', text: 'Start full of hope and optimism' },
@@ -391,24 +395,23 @@ export default function StudentLandingPage({ onParentClick }) {
                   { emoji: '💔', text: 'Feel discouraged, anxious, stuck in the void' },
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0, lineHeight: 1.3, filter: 'saturate(0.5)' }}>{item.emoji}</span>
-                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: 'rgba(252,165,165,0.8)', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                    <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0, lineHeight: 1.3 }}>{item.emoji}</span>
+                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#9f1239', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20, background: 'rgba(239,68,68,0.1)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#FCA5A5' }}>❌ 98% of cold apps get ghosted</span>
+              <div style={{ marginTop: 20, background: '#fecdd3', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#be123c' }}>❌ 98% of cold apps get ghosted</span>
               </div>
             </div>
 
             {/* Smart Way */}
-            <div style={{ background: 'linear-gradient(160deg, #031A0E 0%, #062918 100%)', border: '1px solid rgba(16,185,129,0.35)', borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ background: TEAL_LIGHT, border: `1.5px solid ${TEAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <span style={{ fontSize: 18 }}>⚡</span>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#6EE7B7', letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The CFF Way</p>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: TEAL_DARK, letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The CFF Way</p>
               </div>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: '#6EE7B7', margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Smart Path</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: TEAL_DARK, margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Smart Path</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
                 {[
                   { emoji: '🔥', text: 'Start strategic and confident with CFF' },
@@ -419,55 +422,52 @@ export default function StudentLandingPage({ onParentClick }) {
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                     <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0, lineHeight: 1.3 }}>{item.emoji}</span>
-                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: 'rgba(110,231,183,0.9)', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: TEAL_DARK, margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20, background: 'rgba(16,185,129,0.12)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#6EE7B7' }}>✅ 1 warm intro = 10x more interviews</span>
+              <div style={{ marginTop: 20, background: '#99f6e4', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: TEAL_DARK }}>✅ 1 warm intro = 10x more interviews</span>
               </div>
             </div>
 
           </div>
 
           {/* Bottom callout */}
-          <div style={{ marginTop: 'clamp(20px, 5vw, 28px)', background: 'linear-gradient(135deg, #0A1628, #0D1F3C)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 16, padding: 'clamp(18px, 4vw, 26px) clamp(20px, 5vw, 32px)', textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 8px', background: `linear-gradient(90deg, #FFFFFF, ${CYAN})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <div style={{ marginTop: 'clamp(20px, 5vw, 28px)', background: 'linear-gradient(135deg, #f0fdfa, #ecfeff)', border: `1px solid ${TEAL_BORDER}`, borderRadius: 20, padding: 'clamp(18px, 4vw, 26px) clamp(20px, 5vw, 32px)', textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 8px', color: TEXT }}>
               One warm introduction beats 100 cold applications.
             </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.5 }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: TEXT2, margin: 0, lineHeight: 1.5 }}>
               This is how the real world actually works.
             </p>
           </div>
 
-          {/* ── CLiFF IS ALREADY WORKING FOR YOU ── */}
-          <div style={{ marginTop: 'clamp(24px, 6vw, 36px)', background: 'linear-gradient(135deg, #0A1628 0%, #0D1F3C 100%)', borderRadius: 20, boxShadow: `0 24px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(6,182,212,0.2)`, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
-            {/* Header */}
+          {/* ── CFF IS ALREADY WORKING FOR YOU ── */}
+          <div style={{ marginTop: 'clamp(24px, 6vw, 36px)', background: '#fff', border: `1.5px solid ${TEAL_BORDER}`, borderRadius: 20, boxShadow: SHADOW_MD, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, rgba(0,102,255,0.3), rgba(6,182,212,0.3))', border: '1px solid rgba(6,182,212,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚡</div>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚡</div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 800, color: '#FFFFFF', margin: 0, lineHeight: 1.3 }}>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.3 }}>
                   CFF is already working for you
                 </p>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0', lineHeight: 1.3 }}>Scanning your opportunities right now</p>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT3, margin: '2px 0 0', lineHeight: 1.3 }}>Scanning your opportunities right now</p>
               </div>
-              <div style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.4)', borderRadius: 100, padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulseGreen 1.5s ease-in-out infinite' }} />
-                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: '#6EE7B7', whiteSpace: 'nowrap', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Live</span>
+              <div style={{ background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 100, padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: TEAL, animation: 'pulseGreen 1.5s ease-in-out infinite' }} />
+                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 800, color: TEAL_DARK, whiteSpace: 'nowrap', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Live</span>
               </div>
             </div>
-            {/* Items */}
             {PROOF_CALLOUTS.map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 12px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid rgba(255,255,255,0.06)` : 'none', animation: `checkIn 0.4s ease ${i * 0.1}s both` }}>
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(16,185,129,0.2)', border: `1px solid rgba(16,185,129,0.5)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                  <span style={{ fontSize: 11, color: '#6EE7B7', fontWeight: 800 }}>✓</span>
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 12px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #f1f5f9` : 'none' }}>
+                <div style={{ width: 22, height: 22, borderRadius: '50%', background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <span style={{ fontSize: 11, color: TEAL, fontWeight: 800 }}>✓</span>
                 </div>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: 'rgba(255,255,255,0.8)', margin: 0, fontWeight: 500, lineHeight: 1.5 }}>{item.text}</p>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT2, margin: 0, fontWeight: 500, lineHeight: 1.5 }}>{item.text}</p>
               </div>
             ))}
-            {/* Bottom teaser */}
-            <div style={{ marginTop: 18, background: `linear-gradient(90deg, rgba(0,102,255,0.15), rgba(6,182,212,0.15))`, border: `1px solid rgba(6,182,212,0.25)`, borderRadius: 12, padding: '12px 16px' }}>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: CYAN, fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
+            <div style={{ marginTop: 18, background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 12, padding: '12px 16px' }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEAL_DARK, fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
                 🚀 Your personalized plan is being built right now — you're already ahead of 95% of applicants.
               </p>
             </div>
@@ -482,7 +482,7 @@ export default function StudentLandingPage({ onParentClick }) {
       <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: 'clamp(48px, 10vw, 72px) 16px' }}>
+      <div style={{ background: '#fff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: 'clamp(48px, 10vw, 72px) 20px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <SectionLabel text="What the Agent does for you" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 38px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
@@ -497,22 +497,22 @@ export default function StudentLandingPage({ onParentClick }) {
               { emoji: '✉️', label: 'Outreach drafted in your voice' },
               { emoji: '🏆', label: 'Interview prep from real questions' },
             ].map((item, i) => (
-              <div key={i} style={{ background: BG, borderRadius: 10, padding: 'clamp(12px, 3vw, 16px)', boxShadow: SHADOW, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div key={i} style={{ background: BG, borderRadius: 14, padding: 'clamp(12px, 3vw, 16px)', boxShadow: SHADOW, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0 }}>{item.emoji}</span>
                 <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 13px)', fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.3 }}>{item.label}</p>
               </div>
             ))}
           </div>
-          <div style={{ background: '#0F172A', borderRadius: 12, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center' }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 15px)', fontWeight: 600, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-              💬 <span style={{ color: GREEN }}>"I was overwhelmed applying everywhere. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks."</span> — Marcus, Penn State '27
+          <div style={{ background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, borderRadius: 16, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 15px)', fontWeight: 600, color: TEAL_DARK, margin: 0, lineHeight: 1.5 }}>
+              💬 "I was overwhelmed applying everywhere. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks." — Marcus, Penn State '27
             </p>
           </div>
         </div>
       </div>
 
       {/* ── SOCIAL PROOF ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 16px' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <SectionLabel text="Students like you" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
@@ -580,12 +580,12 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── FINAL CTA ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 88px) 16px clamp(48px, 10vw, 72px)', textAlign: 'center', background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%)' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 88px) 20px clamp(48px, 10vw, 72px)', textAlign: 'center', background: 'linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%)' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <SectionLabel text="Ready to escape the black hole?" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
             Search Smarter,<br />
-            <span style={{ color: BLUE }}>Not Harder.</span>
+            <span style={{ color: TEAL }}>Not Harder.</span>
           </h2>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 15px)', color: TEXT2, margin: '0 0 clamp(24px, 6vw, 32px)', lineHeight: 1.6 }}>
             Join 2,400+ students who stopped applying blindly and started getting results.
