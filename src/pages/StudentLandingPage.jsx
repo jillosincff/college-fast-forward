@@ -283,15 +283,17 @@ export default function StudentLandingPage({ onParentClick }) {
         minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(96px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, #fdfaf5 0%, #f8f4eb 100%)',
+        background: 'linear-gradient(160deg, #f0f4ff 0%, #f8f9ff 60%, #eef2ff 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Subtle violet dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#c4b5fd 0.8px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.12, pointerEvents: 'none' }} />
+        {/* Soft blue dot grid */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#a5b4fc 0.8px, transparent 1px)', backgroundSize: '48px 48px', opacity: 0.15, pointerEvents: 'none' }} />
+        {/* Soft blue blob */}
+        <div style={{ position: 'absolute', top: '-10%', right: '-5%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', border: '1px solid #ede9fe', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 1px 8px rgba(0,0,0,0.06)' }}>
-            <span style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 500, color: '#6d28d9' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0e7ff', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(99,102,241,0.10)' }}>
+            <span style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#4338ca' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
           </div>
 
           {/* Headline */}
@@ -300,27 +302,27 @@ export default function StudentLandingPage({ onParentClick }) {
           </h1>
 
           {/* Sub-headline */}
-          <h2 style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(26px, 6vw, 58px)', fontWeight: 600, color: '#7c3aed', margin: '0 0 40px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
+          <h2 style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(26px, 6vw, 56px)', fontWeight: 600, color: '#3730a3', margin: '0 0 40px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
             CFF finds the path around it.
           </h2>
 
           {/* Body */}
-          <p style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(16px, 4vw, 19px)', color: '#475569', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 680 }}>
+          <p style={{ fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(16px, 4vw, 19px)', color: '#64748b', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 680 }}>
             We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
 
           {/* CTA */}
           <button onClick={go} style={{
             fontFamily: "'Satoshi', 'Inter', sans-serif", fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
-            background: '#7c3aed', border: 'none', borderRadius: 999,
-            padding: 'clamp(16px, 4vw, 20px) clamp(44px, 8vw, 60px)',
+            background: '#4338ca', border: 'none', borderRadius: 14,
+            padding: 'clamp(16px, 4vw, 18px) clamp(44px, 8vw, 56px)',
             cursor: 'pointer', minHeight: '56px',
-            boxShadow: '0 12px 40px rgba(124,58,237,0.35)',
+            boxShadow: '0 8px 32px rgba(67,56,202,0.30)',
             transition: 'all 0.2s ease',
             touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#6d28d9'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 50px rgba(124,58,237,0.5)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#7c3aed'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,58,237,0.35)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#3730a3'; e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(67,56,202,0.45)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#4338ca'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(67,56,202,0.30)'; }}
           >
             Start for Free →
           </button>
