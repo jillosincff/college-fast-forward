@@ -372,6 +372,69 @@ export default function StudentLandingPage({ onParentClick }) {
         </div>
       </div>
 
+      {/* ── OLD WAY VS SMART WAY ── */}
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 16px', background: CARD, borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto' }}>
+          <SectionLabel text="Stop playing a losing game" />
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
+            The Old Way vs The Smart Way
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+
+            {/* Old Way */}
+            <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 16, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)' }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#991B1B', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px' }}>The Old Way ❌</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 800, color: '#7F1D1D', margin: '0 0 clamp(16px, 4vw, 22px)', letterSpacing: '-0.01em' }}>The Brutal Cycle</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
+                {[
+                  { emoji: '😃', text: 'Start full of hope and optimism' },
+                  { emoji: '⏰', text: 'Spend dozens of hours mass-applying to 200+ random jobs' },
+                  { emoji: '😶', text: 'Get automated rejections or total silence' },
+                  { emoji: '😟', text: 'Slowly lose confidence and question your worth' },
+                  { emoji: '💔', text: 'Feel discouraged, anxious, and stuck in the void' },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <span style={{ fontSize: 'clamp(18px, 5vw, 22px)', flexShrink: 0, lineHeight: 1.3 }}>{item.emoji}</span>
+                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#7F1D1D', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Smart Way */}
+            <div style={{ background: '#F0FDF4', border: '1px solid #6EE7B7', borderRadius: 16, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)' }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#065F46', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px' }}>The College Fast Forward Way ✅</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 800, color: '#064E3B', margin: '0 0 clamp(16px, 4vw, 22px)', letterSpacing: '-0.01em' }}>The Smart Path</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
+                {[
+                  { emoji: '🔥', text: 'Start strategic and confident with CLiFF' },
+                  { emoji: '🔍', text: 'Uncover hidden jobs most students never see' },
+                  { emoji: '🤝', text: 'Get warm introductions from alumni & parents who actually want to help' },
+                  { emoji: '🚀', text: 'Move quickly from application to real interviews' },
+                  { emoji: '🎉', text: 'Get hired through real human connections instead of endless ghosting' },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <span style={{ fontSize: 'clamp(18px, 5vw, 22px)', flexShrink: 0, lineHeight: 1.3 }}>{item.emoji}</span>
+                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#064E3B', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom callout */}
+          <div style={{ marginTop: 'clamp(20px, 5vw, 28px)', background: '#0F172A', borderRadius: 14, padding: 'clamp(16px, 4vw, 22px) clamp(20px, 5vw, 28px)', textAlign: 'center' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 4vw, 18px)', fontWeight: 700, color: '#fff', margin: '0 0 6px', lineHeight: 1.4 }}>
+              One warm introduction beats 100 cold applications.
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: '#94A3B8', margin: 0, lineHeight: 1.4 }}>
+              This is how the real world actually works.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ── APP SHOWCASE ── */}
       <AppShowcase />
 
