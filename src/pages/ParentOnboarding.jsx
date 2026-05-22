@@ -3,6 +3,7 @@ import { navigate } from '@/components/utils/navigation';
 import { sendStudentInviteEmail } from '@/functions/sendStudentInviteEmail';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/components/auth/AuthContext';
+import { deriveSchoolCode } from '@/lib/schoolNames';
 import ParentStep1AboutYou from '../components/onboarding/parent-v3/ParentStep1AboutYou';
 import ParentStep2InviteStudent from '../components/onboarding/parent-v3/ParentStep2InviteStudent';
 
@@ -38,13 +39,16 @@ export default function ParentOnboarding() {
 
   const saveProfileAndContinue = async () => {
     setStep(2); // advance immediately so auth refresh doesn't reset step
+    const schoolName = formData.school?.trim() || '';
+    const schoolCode = deriveSchoolCode(schoolName);
     const updateData = {
       // Always assert persona so user exists in DB immediately
       persona: 'parent',
       roles: ['parent'],
       full_name: formData.fullName.trim(),
-      school: formData.school.trim(),
-      school_name: formData.school.trim(),
+      school: schoolName,
+      school_name: schoolName,
+      ...(schoolCode ? { school_code: schoolCode } : {}),
       current_company: formData.company.trim(),
       company: formData.company.trim(),
       career_background: formData.careerBackground?.trim() || '',
@@ -119,13 +123,15 @@ export default function ParentOnboarding() {
   const completeOnboarding = async (didInvite) => {
     try {
       // Derive the parent's school from whatever university was entered (even if they skipped the invite)
-      const parentSchool = formData.studentUniversity?.trim() || invitedStudents[0]?.university?.trim() || formData.school?.trim() || '';
+      const parentSchool = formData.school?.trim() || formData.studentUniversity?.trim() || invitedStudents[0]?.university?.trim() || '';
+      const finalSchoolCode = deriveSchoolCode(parentSchool);
       await base44.auth.updateMe({
         // Always re-assert persona so user is always in DB with correct role
         persona: 'parent',
         roles: ['parent'],
         onboarding_completed: true,
         ...(parentSchool ? { school: parentSchool, school_name: parentSchool } : {}),
+        ...(finalSchoolCode ? { school_code: finalSchoolCode } : {}),
         onboarding_completed_at: new Date().toISOString(),
         onboarding_flow_type: 'parent_v3',
         pledge_taken: true,

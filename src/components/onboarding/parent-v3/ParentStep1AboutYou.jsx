@@ -1,8 +1,28 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   OnboardingShell, ProgressDots, FieldLabel, FieldInput, FieldSelect,
   HelperText, PrimaryButton, BackLink, dmSans, playfair, ORANGE,
 } from './ParentOnboardingShell';
+
+const COMMON_UNIVERSITIES = [
+  'University of Florida', 'Florida State University', 'University of Central Florida',
+  'Florida Atlantic University', 'University of Miami', 'University of South Florida',
+  'Ohio State University', 'University of Michigan', 'Penn State University',
+  'University of Georgia', 'University of Maryland', 'University of Delaware',
+  'Tulane University', 'James Madison University', 'University of South Carolina',
+  'University of Kentucky', 'University of Texas at Austin', 'UC Berkeley',
+  'University of Virginia', 'Duke University', 'University of North Carolina',
+  'Northwestern University', 'University of Notre Dame', 'Georgetown University',
+  'Boston University', 'Northeastern University', 'NYU', 'Cornell University',
+  'University of Pennsylvania', 'Yale University', 'Harvard University', 'Stanford University',
+  'UCLA', 'USC', 'University of Washington', 'Arizona State University',
+  'University of Illinois', 'Indiana University', 'Purdue University',
+  'Michigan State University', 'University of Wisconsin', 'University of Minnesota',
+  'Virginia Tech', 'Georgia Tech', 'Texas A&M University', 'Rice University',
+  'Vanderbilt University', 'Emory University', 'Carnegie Mellon University',
+  'University of Pittsburgh', 'Rutgers University', 'University of Connecticut',
+  'University of Colorado Boulder', 'Babson College', 'Other',
+];
 
 const INDUSTRIES = [
   'Accounting & Finance', 'Advertising & Marketing', 'Architecture & Design',
@@ -20,7 +40,38 @@ const INTRO_OPTIONS = [
 ];
 
 export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack, loading }) {
+  const [schoolSearch, setSchoolSearch] = useState(formData.school || '');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [filteredSchools, setFilteredSchools] = useState([]);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (schoolSearch.length >= 2) {
+      const q = schoolSearch.toLowerCase();
+      const matches = COMMON_UNIVERSITIES.filter(u => u.toLowerCase().includes(q)).slice(0, 8);
+      setFilteredSchools(matches);
+      setShowDropdown(matches.length > 0);
+    } else {
+      setShowDropdown(false);
+    }
+  }, [schoolSearch]);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const selectSchool = (name) => {
+    setSchoolSearch(name);
+    onUpdate({ school: name });
+    setShowDropdown(false);
+  };
+
   const handleContinue = () => {
+    if (schoolSearch.trim()) onUpdate({ school: schoolSearch.trim() });
     onNext();
   };
 
@@ -48,6 +99,53 @@ export default function ParentStep1AboutYou({ formData, onUpdate, onNext, onBack
         <p style={{ fontFamily: dmSans, fontSize: 14, color: ORANGE, margin: 0, lineHeight: 1.7, fontStyle: 'italic' }}>
           You decide how much you engage — but showing up here could change someone’s life.
         </p>
+      </div>
+
+      {/* School */}
+      <div style={{ marginBottom: 20, position: 'relative' }} ref={dropdownRef}>
+        <FieldLabel required>Which school is your student at?</FieldLabel>
+        <input
+          value={schoolSearch}
+          onChange={e => {
+            setSchoolSearch(e.target.value);
+            onUpdate({ school: e.target.value });
+          }}
+          placeholder="Start typing their university..."
+          style={{
+            width: '100%', background: 'rgba(255,255,255,0.06)',
+            border: '0.5px solid rgba(255,255,255,0.1)',
+            borderRadius: 12, padding: '12px 16px',
+            fontFamily: dmSans, fontSize: 14, fontWeight: 300,
+            color: '#f4f0e8', boxSizing: 'border-box',
+          }}
+        />
+        <HelperText>This connects you to the right school network.</HelperText>
+        {showDropdown && (
+          <div style={{
+            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+            background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 12, marginTop: 4, maxHeight: 200, overflowY: 'auto',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          }}>
+            {filteredSchools.map(school => (
+              <button
+                key={school}
+                type="button"
+                onClick={() => selectSchool(school)}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '10px 16px', background: 'none', border: 'none',
+                  fontFamily: dmSans, fontSize: 13, color: '#f4f0e8',
+                  cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+              >
+                {school}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Full Name */}
