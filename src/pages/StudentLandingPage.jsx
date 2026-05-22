@@ -295,11 +295,11 @@ export default function StudentLandingPage({ onParentClick }) {
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 720, textAlign: 'center' }}>
           <h1 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 7vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: TEXT, margin: '0 0 16px' }}>
-            Stop mass-applying to random jobs.<br />
+            Stop mass-applying.<br />
             <span style={{ color: BLUE }}>Start landing interviews.</span>
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.4, margin: '0 0 14px' }}>
-            <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span> organizes the chaos, targets hidden jobs, surfaces warm alumni &amp; parent connections, and crafts your messages — so you spend less time applying and get better results.
+            <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span> organizes the chaos, uncovers hidden jobs, surfaces warm connections, and crafts your messages — so you spend less time applying and get better results.
           </p>
 
         </div>
@@ -316,19 +316,17 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
           >
-            Build My Interview Edge with CLiFF →
+            Start for Free →
           </button>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: '0 0 2px', lineHeight: 1.4 }}>
-              This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
+              This guided setup takes 8–12 minutes — you'll have a personalized plan.
             </p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT3, margin: '0 0 8px', lineHeight: 1.3 }}>No credit card required.</p>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: BLUE, fontWeight: 700, margin: 0, lineHeight: 1.4 }}>✨ Your first warm intro or interview is closer than you think.</p>
           </div>
           <div style={{ marginTop: 6, background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: 'clamp(6px, 2vw, 8px) clamp(10px, 3vw, 14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, maxWidth: '100%' }}>
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite', flexShrink: 0 }} />
             <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: '#065F46', fontWeight: 600, lineHeight: 1.4 }}>
-              Join 3,412 students from top campuses nationwide stepping out of the crowd today.
+              Join 3,412 students from top campuses who are finally getting interviews.
             </span>
           </div>
         </div>
