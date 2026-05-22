@@ -290,25 +290,25 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{
         minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(100px, 15vw, 130px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
-        background: '#fdfaf5', position: 'relative', overflow: 'hidden',
+        background: '#f8f7f4', position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#a5b4fc 0.8px, transparent 1px)', backgroundSize: '45px 45px', opacity: 0.10, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#34d399 0.6px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.05, pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, textAlign: 'center' }}>
 
           {/* Eyebrow badge */}
           {mounted && (
-            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0e7ff', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(99,102,241,0.10)' }}>
-              <span style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#6366f1' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #d1fae5', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(16,185,129,0.08)' }}>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#059669' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
             </div>
           )}
 
           {/* Main headline */}
           {mounted && (
             <div className="hero-animate-2">
-              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#1e2937', margin: '0 0 24px' }}>
-                Tired of the black hole?
+              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#1f2937', margin: '0 0 24px' }}>
+                The job search is a black hole.
               </h1>
             </div>
           )}
@@ -316,10 +316,10 @@ export default function StudentLandingPage({ onParentClick }) {
           {/* Sub-headline */}
           {mounted && (
             <div className="hero-animate-3">
-              <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 600, color: '#6366f1', margin: '0 0 28px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
+              <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 600, color: '#10b981', margin: '0 0 28px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
                 CFF finds the path around it.
               </h2>
-              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 4vw, 20px)', color: '#475569', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 720 }}>
+              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 4vw, 19px)', color: '#4b5563', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 720 }}>
                 We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
               </p>
             </div>
@@ -330,20 +330,20 @@ export default function StudentLandingPage({ onParentClick }) {
             <div className="hero-animate-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
               <button onClick={go} style={{
                 fontFamily: SF, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
-                background: '#6366f1', border: 'none', borderRadius: 999,
+                background: '#059669', border: 'none', borderRadius: 999,
                 padding: 'clamp(16px, 4vw, 22px) clamp(44px, 8vw, 64px)',
                 cursor: 'pointer', minHeight: 60,
-                boxShadow: '0 10px 40px rgba(99,102,241,0.30)',
+                boxShadow: '0 10px 40px rgba(16,185,129,0.30)',
                 transition: 'all 0.3s ease',
                 touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
               }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#4f46e5'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(99,102,241,0.40)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#6366f1'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(99,102,241,0.30)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#10b981'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(16,185,129,0.40)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#059669'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(16,185,129,0.30)'; }}
               >
                 Start for Free →
               </button>
 
-              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 15px)', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
+              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 15px)', color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
                 This guided setup takes 8–12 minutes — you'll have a personalized plan.
               </p>
 
@@ -354,8 +354,8 @@ export default function StudentLandingPage({ onParentClick }) {
                     <img key={i} src={s.photo} alt={s.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', marginLeft: i > 0 ? -10 : 0 }} />
                   ))}
                 </div>
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: '#94a3b8', margin: 0 }}>
-                  <span style={{ color: '#1e2937', fontWeight: 700 }}>2,400+</span> students hired faster
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: '#9ca3af', margin: 0 }}>
+                  <span style={{ color: '#1f2937', fontWeight: 700 }}>2,400+</span> students hired faster
                 </p>
               </div>
             </div>
