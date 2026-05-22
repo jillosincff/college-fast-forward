@@ -299,7 +299,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <span style={{ color: BLUE }}>Start landing interviews.</span>
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.4, margin: '0 0 14px' }}>
-            CLiFF organizes the chaos, targets hidden jobs, surfaces warm alumni &amp; parent connections, and crafts your messages — so you spend less time applying and get better results.
+            <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span> organizes the chaos, targets hidden jobs, surfaces warm alumni &amp; parent connections, and crafts your messages — so you spend less time applying and get better results.
           </p>
 
         </div>
