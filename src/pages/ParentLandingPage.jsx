@@ -35,6 +35,13 @@ const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
 const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
 const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
 const R = 16;
+// Aliases for backward compat
+const BLUE = INDIGO;
+const BLUE_LIGHT = INDIGO_LIGHT;
+const BLUE_BORDER = INDIGO_BORDER;
+const GREEN = TEAL;
+const GREEN_LIGHT = TEAL_LIGHT;
+const GREEN_BORDER = TEAL_BORDER;
 
 const SCHOOLS = ['University of Florida', 'Florida State', 'Ohio State', 'UCF', 'USC', 'Penn State', 'University of Michigan', 'Tulane', 'University of Maryland', 'And growing…'];
 
