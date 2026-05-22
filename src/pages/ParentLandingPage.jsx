@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
+import { deriveSchoolCode } from '@/lib/schoolNames';
 
 // ── Design Tokens — match StudentLandingPage ──────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -109,9 +110,12 @@ export default function ParentLandingPage({ onStudentClick }) {
     // Store parent role hint for future navigation
     localStorage.setItem('pending_invite_role', 'parent');
     sessionStorage.setItem('pending_invite_role', 'parent');
+    // Derive and store school_code along with form data
+    const schoolCode = deriveSchoolCode(form.school);
+    const prefillData = { ...form, school_code: schoolCode };
     // Store form data for pre-population
     try {
-      sessionStorage.setItem('parent_prefill', JSON.stringify(form));
+      sessionStorage.setItem('parent_prefill', JSON.stringify(prefillData));
     } catch {}
     // Show success screen directly - no auth needed
     setTimeout(() => {
