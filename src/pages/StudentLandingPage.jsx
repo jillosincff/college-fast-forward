@@ -49,10 +49,11 @@ const STORIES = [
 const FREE_FEATURES = ['Basic resume tools', 'Limited Agent usage', 'Application tracker', 'Perfect for getting started'];
 const PRO_FEATURES = ['Unlimited AI Agent', 'Advanced tailoring + modern templates', 'Smart reminders + interview prep', 'Most students upgrade once they see results'];
 const PROOF_CALLOUTS = [
-  'Upload your resume once.',
-  'Get modern, tailored versions for every job.',
-  'Track all applications automatically with smart reminders.',
-  'Get outreach support when it makes sense.',
+  { icon: '✓', text: 'Upload once — get perfectly tailored resume versions for every job you target' },
+  { icon: '✓', text: 'Discovers hidden jobs most students never see, including unlisted internal roles' },
+  { icon: '✓', text: 'Surfaces warm alumni & parent connections far more likely to actually respond' },
+  { icon: '✓', text: 'Tracks every application automatically — smart reminders so nothing falls through' },
+  { icon: '✓', text: 'Crafts personalized outreach messages that get real replies instead of silence' },
 ];
 
 function StoriesCarousel() {
@@ -337,25 +338,37 @@ export default function StudentLandingPage({ onParentClick }) {
           background: CARD, borderRadius: 14, boxShadow: SHADOW_LG, padding: 'clamp(16px, 4vw, 24px)',
           textAlign: 'left', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.5s',
         }}>
+          {/* Card Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <div style={{ width: 'clamp(28px, 8vw, 32px)', height: 'clamp(28px, 8vw, 32px)', borderRadius: 8, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'clamp(13px, 4vw, 15px)' }}>⚡</div>
+            <div style={{ width: 'clamp(28px, 8vw, 36px)', height: 'clamp(28px, 8vw, 36px)', borderRadius: 8, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'clamp(14px, 4vw, 16px)', flexShrink: 0 }}>⚡</div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.3 }}>The Agent is working for you</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.3 }}>
+                <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span> is already working for you
+              </p>
               <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT2, margin: '2px 0 0', lineHeight: 1.3 }}>Updated just now</p>
             </div>
-            <div style={{ marginLeft: 'auto', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(2px, 1vw, 3px) clamp(6px, 2vw, 10px)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+            <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(2px, 1vw, 3px) clamp(6px, 2vw, 10px)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
               <div style={{ width: 'clamp(5px, 1.5vw, 6px)', height: 'clamp(5px, 1.5vw, 6px)', borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
               <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: GREEN, whiteSpace: 'nowrap' }}>Live</span>
             </div>
           </div>
-          {PROOF_CALLOUTS.map((text, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 2vw, 12px)', padding: 'clamp(8px, 2vw, 10px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #F1F5F9` : 'none' }}>
-              <div style={{ width: 'clamp(16px, 4vw, 18px)', height: 'clamp(16px, 4vw, 18px)', borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 'clamp(7px, 2vw, 9px)', color: GREEN }}>✓</span>
+
+          {/* Callout items */}
+          {PROOF_CALLOUTS.map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(8px, 2vw, 12px)', padding: 'clamp(9px, 2.5vw, 11px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #F1F5F9` : 'none' }}>
+              <div style={{ width: 'clamp(17px, 4.5vw, 20px)', height: 'clamp(17px, 4.5vw, 20px)', borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                <span style={{ fontSize: 'clamp(8px, 2vw, 10px)', color: GREEN, fontWeight: 700 }}>✓</span>
               </div>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT, margin: 0, fontWeight: 500, lineHeight: 1.4 }}>{text}</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT, margin: 0, fontWeight: 500, lineHeight: 1.45 }}>{item.text}</p>
             </div>
           ))}
+
+          {/* Bottom teaser */}
+          <div style={{ marginTop: 14, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 10, padding: 'clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)' }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: BLUE, fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
+              🚀 Your personalized plan is being built right now — you're already ahead of 95% of applicants.
+            </p>
+          </div>
         </div>
       </div>
 
