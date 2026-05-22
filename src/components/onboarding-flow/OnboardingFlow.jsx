@@ -121,7 +121,7 @@ const BLOCKERS = [
 const SCREEN2_EXPERTS = [
   { key: 'coach', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/fe0568933_image.png', name: 'Anna V.', role: 'ex-SAP, Global Early Talent', teaser: 'Built hiring pipelines at SAP. She knows exactly what recruiters look for in interns & new grads.', color: '#7C3AED', colorLight: '#F5F3FF', colorBorder: '#DDD6FE' },
   { key: 'recruiter', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/4dc2560b9_image.png', name: 'Jill O.', role: 'Ex-IPSY Recruiter + Certified Career Coach', teaser: "Spent years on the other side of the desk. She'll help you avoid the mistakes that get applications ghosted.", color: '#0066FF', colorLight: '#EFF6FF', colorBorder: '#BFDBFE' },
-  { key: 'hm', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face', name: 'Sarah K.', role: 'Certified Career Coach', teaser: 'Specializes in helping students clarify their path and build unstoppable confidence in interviews.', color: '#10B981', colorLight: '#F0FDF4', colorBorder: '#BBF7D0' },
+  { key: 'hm', avatar: 'https://media.base44.com/images/public/684474c5723dc90efce23588/ac28e9514_image.png', name: 'Suzanne R.', role: 'Career Development Coach', teaser: 'Specializes in helping students clarify their path and build unstoppable confidence in interviews.', color: '#10B981', colorLight: '#F0FDF4', colorBorder: '#BBF7D0' },
 ];
 const SCREEN2_LOGOS = ['Goldman Sachs', 'Google', 'Meta', 'McKinsey', 'Amazon'];
 
