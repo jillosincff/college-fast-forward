@@ -6,30 +6,37 @@ import { base44 } from '@/api/base44Client';
 import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
 import AppShowcase from '@/components/landing/AppShowcase';
 
-// ── Design Tokens ──────────────────────────────────────────────
+// ── Design Tokens — Carbon Mint (Dark Mode) ────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
-const BG = '#f8fafc';
-const CARD = '#FFFFFF';
-const TEXT = '#0f172a';
-const TEXT2 = '#475569';
-const TEXT3 = '#94a3b8';
-const TEAL = '#0d9488';
-const TEAL_DARK = '#0f766e';
-const TEAL_LIGHT = '#ccfbf1';
-const TEAL_BORDER = '#99f6e4';
-const CORAL = '#fb7185';
-const CORAL_LIGHT = '#fff1f2';
-const BLUE = '#0066FF';
-const BLUE_LIGHT = '#EFF6FF';
-const BLUE_BORDER = '#BFDBFE';
-const CYAN = '#06B6D4';
-const GREEN = '#10B981';
-const GREEN_LIGHT = '#F0FDF4';
-const GREEN_BORDER = '#BBF7D0';
-const ORANGE = '#F97316';
-const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
-const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
-const SHADOW_LG = '0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04)';
+const BG = '#1e2326';
+const BG2 = '#252b2e';
+const CARD = '#2d3436';
+const CARD2 = '#323b3e';
+const TEXT = '#f0faf8';
+const TEXT2 = '#a8c5bf';
+const TEXT3 = '#6b8f88';
+const MINT = '#00FFC2';
+const MINT_DIM = '#00d4a3';
+const MINT_DARK = '#00a882';
+const MINT_LIGHT = 'rgba(0,255,194,0.10)';
+const MINT_BORDER = 'rgba(0,255,194,0.25)';
+const CORAL = '#ff6b81';
+const CORAL_LIGHT = 'rgba(255,107,129,0.12)';
+const CORAL_BORDER = 'rgba(255,107,129,0.30)';
+const GREEN = '#00FFC2';
+const GREEN_LIGHT = 'rgba(0,255,194,0.10)';
+const GREEN_BORDER = 'rgba(0,255,194,0.25)';
+const BLUE = '#00FFC2';
+const BLUE_LIGHT = 'rgba(0,255,194,0.10)';
+const BLUE_BORDER = 'rgba(0,255,194,0.25)';
+// Aliases for backward compat
+const TEAL = MINT;
+const TEAL_DARK = MINT_DARK;
+const TEAL_LIGHT = MINT_LIGHT;
+const TEAL_BORDER = MINT_BORDER;
+const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -1px rgba(0,0,0,0.2)';
+const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.4), 0 4px 6px -2px rgba(0,0,0,0.25)';
+const SHADOW_LG = '0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.3)';
 const R = 16;
 
 const BENEFIT_CARDS = [
@@ -122,9 +129,9 @@ function StoriesCarousel() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {['←', '→'].map((arrow, i) => (
-            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 32, height: 32, borderRadius: '50%', background: '#F1F5F9', border: `1px solid #E2E8F0`, fontSize: 13, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: '44px', transition: 'all 0.15s', touchAction: 'manipulation' }}
-              onMouseEnter={e => { e.currentTarget.style.background = TEAL_LIGHT; e.currentTarget.style.borderColor = TEAL_BORDER; e.currentTarget.style.color = TEAL; }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; }}
+            <button key={i} onClick={() => goTo(active + (i === 0 ? -1 : 1))} style={{ width: 32, height: 32, borderRadius: '50%', background: CARD2, border: `1px solid rgba(255,255,255,0.1)`, fontSize: 13, color: TEXT2, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: '44px', transition: 'all 0.15s', touchAction: 'manipulation' }}
+              onMouseEnter={e => { e.currentTarget.style.background = MINT_LIGHT; e.currentTarget.style.borderColor = MINT_BORDER; e.currentTarget.style.color = MINT; }}
+              onMouseLeave={e => { e.currentTarget.style.background = CARD2; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = TEXT2; }}
             >{arrow}</button>
           ))}
         </div>
@@ -214,23 +221,23 @@ export default function StudentLandingPage({ onParentClick }) {
   };
 
   const SectionLabel = ({ text }) => (
-    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEAL, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
+    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: MINT, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
 
   const CTAButton = ({ label = 'Get Hired →', onClick = go, fullWidth = false }) => (
     <button onClick={onClick} style={{
-      fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 16px)', fontWeight: 700, color: '#fff',
-      background: TEAL,
+      fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 16px)', fontWeight: 700, color: '#0d1a17',
+      background: MINT,
       border: 'none', borderRadius: 999, padding: 'clamp(16px, 4vw, 18px) clamp(28px, 6vw, 40px)',
       cursor: 'pointer', minHeight: '48px',
       transition: 'all 0.2s ease',
-      boxShadow: `0 8px 24px rgba(13,148,136,0.3)`,
+      boxShadow: `0 8px 24px rgba(0,255,194,0.35)`,
       width: fullWidth ? '100%' : 'auto',
       touchAction: 'manipulation',
       WebkitTapHighlightColor: 'transparent',
     }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = TEAL_DARK; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = TEAL; }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = MINT_DIM; e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,255,194,0.5)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = MINT; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,255,194,0.35)'; }}
     >{label}</button>
   );
 
@@ -240,25 +247,26 @@ export default function StudentLandingPage({ onParentClick }) {
 
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,102,255,0.15)} 50%{box-shadow:0 0 0 8px rgba(0,102,255,0)} }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,194,0.2)} 50%{box-shadow:0 0 0 8px rgba(0,255,194,0)} }
         @keyframes pulseGreen { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        @keyframes badgeGlow { 0%,100%{box-shadow:0 0 0 0 rgba(0,102,255,0.4)} 50%{box-shadow:0 0 16px 4px rgba(0,102,255,0.15)} }
+        @keyframes badgeGlow { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,194,0.4)} 50%{box-shadow:0 0 24px 6px rgba(0,255,194,0.15)} }
         @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-6px)} }
         @keyframes drift { 0%{transform:translate(0,0)} 25%{transform:translate(6px,-4px)} 50%{transform:translate(-4px,6px)} 75%{transform:translate(4px,2px)} 100%{transform:translate(0,0)} }
         @keyframes checkIn { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
         @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+        @keyframes mintGlow { 0%,100%{text-shadow:0 0 20px rgba(0,255,194,0.4)} 50%{text-shadow:0 0 40px rgba(0,255,194,0.7)} }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(30,35,38,0.95)', backdropFilter: 'blur(16px)', borderBottom: `1px solid ${MINT_BORDER}`, padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em' }}>
-          College <span style={{ color: TEAL }}>Fast Forward</span>
+          College <span style={{ color: MINT, animation: 'mintGlow 3s ease-in-out infinite' }}>Fast Forward</span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button onClick={parent} style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: '44px', padding: '8px 10px', WebkitTapHighlightColor: 'transparent' }}>For Parents</button>
-          <button onClick={go} style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: '#fff', background: TEAL, border: 'none', borderRadius: 999, padding: '10px clamp(16px, 4vw, 22px)', cursor: 'pointer', minHeight: '44px', boxShadow: `0 4px 12px rgba(13,148,136,0.3)`, transition: 'all 0.15s', touchAction: 'manipulation' }}
-            onMouseEnter={e => { e.currentTarget.style.background = TEAL_DARK; e.currentTarget.style.transform = 'scale(1.03)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = TEAL; e.currentTarget.style.transform = 'scale(1)'; }}
+          <button onClick={go} style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 700, color: '#0d1a17', background: MINT, border: 'none', borderRadius: 999, padding: '10px clamp(16px, 4vw, 22px)', cursor: 'pointer', minHeight: '44px', boxShadow: `0 4px 16px rgba(0,255,194,0.35)`, transition: 'all 0.15s', touchAction: 'manipulation' }}
+            onMouseEnter={e => { e.currentTarget.style.background = MINT_DIM; e.currentTarget.style.transform = 'scale(1.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = MINT; e.currentTarget.style.transform = 'scale(1)'; }}
           >{!isLoadingAuth && user ? 'Dashboard →' : 'Get Started →'}</button>
         </div>
       </nav>
@@ -268,55 +276,57 @@ export default function StudentLandingPage({ onParentClick }) {
         minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(96px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #ecfeff 60%, #ffffff 100%)',
+        background: `radial-gradient(ellipse at 50% 0%, rgba(0,255,194,0.08) 0%, ${BG} 70%)`,
         position: 'relative', overflow: 'hidden',
       }}>
+        {/* Subtle grid overlay */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(0,255,194,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,194,0.03) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', background: '#ccfbf1', borderRadius: 999, padding: '10px 24px', marginBottom: 28 }}>
-            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 600, color: '#0f766e', letterSpacing: '0.05em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: MINT_LIGHT, border: `1px solid ${MINT_BORDER}`, borderRadius: 999, padding: '10px 24px', marginBottom: 28 }}>
+            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: MINT, letterSpacing: '0.08em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
           </div>
 
           {/* Headline */}
-          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: '#0f172a', margin: '0 0 20px' }}>
+          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: TEXT, margin: '0 0 20px' }}>
             The job search is a black hole.
           </h1>
 
           {/* Sub-headline */}
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 700, color: '#0d9488', margin: '0 0 32px', lineHeight: 1.15 }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 700, color: MINT, margin: '0 0 32px', lineHeight: 1.15, animation: 'mintGlow 3s ease-in-out infinite' }}>
             CFF finds the path around it.
           </h2>
 
           {/* Body */}
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 19px)', color: '#475569', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 640 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 19px)', color: TEXT2, lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 640 }}>
             We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
 
           {/* CTA */}
           <button onClick={go} style={{
-            fontFamily: FONT, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
-            background: '#0d9488', border: 'none', borderRadius: 999,
+            fontFamily: FONT, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 700, color: '#0d1a17',
+            background: MINT, border: 'none', borderRadius: 999,
             padding: 'clamp(16px, 4vw, 20px) clamp(44px, 8vw, 60px)',
             cursor: 'pointer', minHeight: '56px',
-            boxShadow: '0 12px 40px rgba(13,148,136,0.35)',
+            boxShadow: '0 12px 40px rgba(0,255,194,0.4)',
             transition: 'all 0.2s ease',
             touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#0f766e'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#0d9488'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = MINT_DIM; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 50px rgba(0,255,194,0.55)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = MINT; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,255,194,0.4)'; }}
           >
             Start for Free →
           </button>
 
           {/* Trust line */}
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: '#94a3b8', margin: '24px 0 0', lineHeight: 1.5 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: TEXT3, margin: '24px 0 0', lineHeight: 1.5 }}>
             This guided setup takes 8–12 minutes — you'll have a personalized plan.
           </p>
         </div>
       </div>
 
       {/* ── HONEST SECTION ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: '#fff', borderTop: '1px solid #e2e8f0' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG2, borderTop: `1px solid ${MINT_BORDER}` }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
             Let's be honest: the modern job hunt is a literal nightmare. 😮‍💨
@@ -343,7 +353,7 @@ export default function StudentLandingPage({ onParentClick }) {
             </p>
           </div>
 
-          <div style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%)', border: `1px solid ${TEAL_BORDER}`, borderRadius: 20, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', marginBottom: 28 }}>
+          <div style={{ background: `linear-gradient(135deg, ${MINT_LIGHT} 0%, rgba(0,255,194,0.05) 100%)`, border: `1px solid ${MINT_BORDER}`, borderRadius: 20, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', marginBottom: 28 }}>
             <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', fontWeight: 700, color: TEAL, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
             <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: CORAL, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 8px' }}>
               More applications won't save you.
@@ -357,13 +367,13 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
 
           <button onClick={go} style={{
-            width: '100%', fontFamily: FONT, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 700, color: '#fff',
-            background: TEAL, border: 'none', borderRadius: 999, padding: 'clamp(16px, 5vw, 20px)',
-            cursor: 'pointer', minHeight: '52px', boxShadow: `0 12px 32px rgba(13,148,136,0.3)`,
+            width: '100%', fontFamily: FONT, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 700, color: '#0d1a17',
+            background: MINT, border: 'none', borderRadius: 999, padding: 'clamp(16px, 5vw, 20px)',
+            cursor: 'pointer', minHeight: '52px', boxShadow: `0 12px 32px rgba(0,255,194,0.35)`,
             transition: 'all 0.2s ease', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = TEAL_DARK; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = TEAL; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = MINT_DIM; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = MINT; }}
           >
             Start for Free →
           </button>
@@ -371,7 +381,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── OLD WAY VS SMART WAY ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG, borderTop: '1px solid #e2e8f0' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG, borderTop: `1px solid rgba(255,255,255,0.06)` }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
           <SectionLabel text="Stop playing a losing game" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
@@ -380,12 +390,12 @@ export default function StudentLandingPage({ onParentClick }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
 
             {/* Old Way */}
-            <div style={{ background: CORAL_LIGHT, border: '1.5px solid #fecdd3', borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
+            <div style={{ background: CORAL_LIGHT, border: `1.5px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <span style={{ fontSize: 18 }}>🕳️</span>
-                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#e11d48', letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The Old Way</p>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: 0 }}>The Old Way</p>
               </div>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: '#be123c', margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Brutal Cycle</p>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 clamp(18px, 4vw, 24px)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>The Brutal Cycle</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(12px, 3vw, 16px)' }}>
                 {[
                   { emoji: '😃', text: 'Start full of hope and optimism' },
@@ -396,12 +406,12 @@ export default function StudentLandingPage({ onParentClick }) {
                 ].map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                     <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0, lineHeight: 1.3 }}>{item.emoji}</span>
-                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#9f1239', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
+                    <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', color: '#ffb3bf', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>{item.text}</p>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20, background: '#fecdd3', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
-                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: '#be123c' }}>❌ 98% of cold apps get ghosted</span>
+              <div style={{ marginTop: 20, background: 'rgba(255,107,129,0.2)', borderRadius: 10, padding: '10px 14px', textAlign: 'center' }}>
+                <span style={{ fontFamily: FONT, fontSize: 12, fontWeight: 700, color: CORAL }}>❌ 98% of cold apps get ghosted</span>
               </div>
             </div>
 
@@ -434,7 +444,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
 
           {/* Bottom callout */}
-          <div style={{ marginTop: 'clamp(20px, 5vw, 28px)', background: 'linear-gradient(135deg, #f0fdfa, #ecfeff)', border: `1px solid ${TEAL_BORDER}`, borderRadius: 20, padding: 'clamp(18px, 4vw, 26px) clamp(20px, 5vw, 32px)', textAlign: 'center' }}>
+          <div style={{ marginTop: 'clamp(20px, 5vw, 28px)', background: `linear-gradient(135deg, ${MINT_LIGHT}, rgba(0,255,194,0.04))`, border: `1px solid ${MINT_BORDER}`, borderRadius: 20, padding: 'clamp(18px, 4vw, 26px) clamp(20px, 5vw, 32px)', textAlign: 'center' }}>
             <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 8px', color: TEXT }}>
               One warm introduction beats 100 cold applications.
             </p>
@@ -444,7 +454,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
 
           {/* ── CFF IS ALREADY WORKING FOR YOU ── */}
-          <div style={{ marginTop: 'clamp(24px, 6vw, 36px)', background: '#fff', border: `1.5px solid ${TEAL_BORDER}`, borderRadius: 20, boxShadow: SHADOW_MD, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
+          <div style={{ marginTop: 'clamp(24px, 6vw, 36px)', background: CARD, border: `1.5px solid ${MINT_BORDER}`, borderRadius: 20, boxShadow: SHADOW_MD, padding: 'clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚡</div>
               <div style={{ flex: 1 }}>
@@ -459,7 +469,7 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
             </div>
             {PROOF_CALLOUTS.map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 12px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #f1f5f9` : 'none' }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 12px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid rgba(255,255,255,0.06)` : 'none' }}>
                 <div style={{ width: 22, height: 22, borderRadius: '50%', background: TEAL_LIGHT, border: `1px solid ${TEAL_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                   <span style={{ fontSize: 11, color: TEAL, fontWeight: 800 }}>✓</span>
                 </div>
@@ -482,7 +492,7 @@ export default function StudentLandingPage({ onParentClick }) {
       <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: '#fff', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: 'clamp(48px, 10vw, 72px) 20px' }}>
+      <div style={{ background: BG2, borderTop: `1px solid ${MINT_BORDER}`, borderBottom: `1px solid ${MINT_BORDER}`, padding: 'clamp(48px, 10vw, 72px) 20px' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <SectionLabel text="What the Agent does for you" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 38px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
@@ -497,7 +507,7 @@ export default function StudentLandingPage({ onParentClick }) {
               { emoji: '✉️', label: 'Outreach drafted in your voice' },
               { emoji: '🏆', label: 'Interview prep from real questions' },
             ].map((item, i) => (
-              <div key={i} style={{ background: BG, borderRadius: 14, padding: 'clamp(12px, 3vw, 16px)', boxShadow: SHADOW, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div key={i} style={{ background: CARD, borderRadius: 14, padding: 'clamp(12px, 3vw, 16px)', boxShadow: SHADOW, border: `1px solid rgba(255,255,255,0.07)`, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 'clamp(18px, 5vw, 20px)', flexShrink: 0 }}>{item.emoji}</span>
                 <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 13px)', fontWeight: 700, color: TEXT, margin: 0, lineHeight: 1.3 }}>{item.label}</p>
               </div>
@@ -512,7 +522,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── SOCIAL PROOF ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 20px', background: BG2 }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
           <SectionLabel text="Students like you" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
@@ -528,7 +538,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
 
       {/* ── PRICING ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: 'clamp(48px, 10vw, 80px) 16px' }}>
+      <div style={{ background: BG, borderTop: `1px solid ${MINT_BORDER}`, borderBottom: `1px solid ${MINT_BORDER}`, padding: 'clamp(48px, 10vw, 80px) 16px' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <SectionLabel text="Pricing" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
@@ -536,7 +546,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </h2>
 
           {/* Sprint Card */}
-          <div style={{ background: CARD, borderRadius: 14, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', boxShadow: '0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)', border: `1px solid ${BLUE_BORDER}`, position: 'relative' }}>
+          <div style={{ background: CARD2, borderRadius: 14, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', boxShadow: `0 20px 60px rgba(0,0,0,0.4), 0 4px 16px rgba(0,255,194,0.08)`, border: `1px solid ${MINT_BORDER}`, position: 'relative' }}>
 
             {/* Badge */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(16px, 4vw, 24px)', maxWidth: '100%' }}>
@@ -580,7 +590,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── FINAL CTA ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 88px) 20px clamp(48px, 10vw, 72px)', textAlign: 'center', background: 'linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%)' }}>
+      <div style={{ padding: 'clamp(48px, 10vw, 88px) 20px clamp(48px, 10vw, 72px)', textAlign: 'center', background: `radial-gradient(ellipse at 50% 100%, rgba(0,255,194,0.10) 0%, ${BG} 70%)` }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <SectionLabel text="Ready to escape the black hole?" />
           <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 14px' }}>
@@ -598,7 +608,7 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={{ borderTop: '1px solid #E2E8F0', padding: 'clamp(20px, 5vw, 28px) 16px', textAlign: 'center', background: CARD }}>
+      <div style={{ borderTop: `1px solid ${MINT_BORDER}`, padding: 'clamp(20px, 5vw, 28px) 16px', textAlign: 'center', background: '#161b1e' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
           {[['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
             <a key={label} href={href} style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: TEXT3, textDecoration: 'none', transition: 'color 0.15s', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
