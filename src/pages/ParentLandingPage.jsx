@@ -508,7 +508,7 @@ export default function ParentLandingPage({ onStudentClick }) {
             >
               Join the Network →
             </button>
-            <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '16px 0 0', lineHeight: 1.4 }}>No credit card required to start.</p>
+            <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '16px 0 0', lineHeight: 1.4 }}>Free to Join</p>
           </div>
         </div>
       )}
