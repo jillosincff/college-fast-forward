@@ -146,17 +146,17 @@ function Screen2Experts({ FONT, CARD, R, SHADOW, SHADOW_MD, BLUE, BLUE_LIGHT, BL
   const NavInline = ({ onBack: b, onNext: n, nextLabel = 'Continue →', nextDisabled = false }) => (
     <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 32 }}>
       {b && <button onClick={b} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: TEXT2, background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>← Back</button>}
-      <button onClick={n} disabled={nextDisabled} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: nextDisabled ? '#CBD5E1' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 8, padding: '15px 36px', cursor: nextDisabled ? 'not-allowed' : 'pointer', minHeight: 'auto', boxShadow: nextDisabled ? 'none' : '0 4px 14px rgba(0,102,255,0.25)' }}>{nextLabel}</button>
+      <button onClick={n} disabled={nextDisabled} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: nextDisabled ? '#CBD5E1' : GRAD_INDIGO, border: 'none', borderRadius: 8, padding: '15px 36px', cursor: nextDisabled ? 'not-allowed' : 'pointer', minHeight: 'auto', boxShadow: nextDisabled ? 'none' : '0 4px 14px rgba(109,40,217,0.25)' }}>{nextLabel}</button>
     </div>
   );
   return (
     <div style={{ textAlign: 'center', maxWidth: 600, width: '100%', position: 'relative' }}>
       <div style={{ position: 'absolute', top: -60, right: -80, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,102,255,0.07) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 20px' }}>Step 2 of 12 · Meet Your Team</p>
+        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 20px' }}>Step 2 of 12 · Meet Your Team</p>
         <h1 style={{ ...h1style, fontSize: 'clamp(26px, 4.5vw, 42px)' }}>Your Career Agent is powered by real hiring experts.</h1>
         <p style={{ ...substyle, marginBottom: 8 }}>These are the people whose exact playbooks helped thousands of students break into competitive roles. Their strategies are now built into your personal Agent.</p>
-        <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 600, margin: '0 0 24px' }}>Tap any expert below to see how they'll help you stand out.</p>
+        <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO, fontWeight: 600, margin: '0 0 24px' }}>Tap any expert below to see how they'll help you stand out.</p>
         <style>{`@media (max-width: 600px) { .expert-grid { flex-direction: column !important; } }`}</style>
         <div className="expert-grid" style={{ display: 'flex', gap: 12, marginBottom: 28, justifyContent: 'center' }}>
           {SCREEN2_EXPERTS.map(ex => {
@@ -246,20 +246,20 @@ const Btn = ({ children, onClick, disabled, primary = true, small = false, loadi
       fontWeight: 700,
       color: primary ? '#fff' : TEXT2,
       background: primary
-        ? (disabled || loading) ? '#CBD5E1' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`
+        ? (disabled || loading) ? '#CBD5E1' : GRAD_INDIGO
         : CARD,
       border: primary ? 'none' : `1px solid #E2E8F0`,
       borderRadius: 8,
       padding: small ? '10px 20px' : '15px 36px',
       cursor: (disabled || loading) ? 'not-allowed' : 'pointer',
       minHeight: 'auto',
-      boxShadow: primary && !disabled && !loading ? '0 4px 14px rgba(0,102,255,0.25)' : SHADOW,
+      boxShadow: primary && !disabled && !loading ? '0 4px 14px rgba(109,40,217,0.25)' : SHADOW,
       transition: 'all 0.2s ease',
       display: 'inline-flex', alignItems: 'center', gap: 8,
       ...extra,
     }}
-    onMouseEnter={e => { if (!disabled && !loading && primary) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.35)'; } }}
-    onMouseLeave={e => { if (!disabled && !loading && primary) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.25)'; } }}
+    onMouseEnter={e => { if (!disabled && !loading && primary) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(109,40,217,0.35)'; } }}
+    onMouseLeave={e => { if (!disabled && !loading && primary) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(109,40,217,0.25)'; } }}
   >
     {loading && (
       <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
@@ -667,13 +667,13 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           {/* Badge pill */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px', marginBottom: 24 }}>
             <span style={{ fontSize: 14, display: 'inline-block', animation: 'boltPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both, boltGlow 2s ease-in-out 0.8s infinite' }}>⚡</span>
-            <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Career Agent</span>
+            <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Your Career Agent</span>
           </div>
 
           {/* Headline */}
           <h1 style={{ fontFamily: FONT, fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.03em', margin: '0 0 16px', fontSize: 'clamp(30px, 5.5vw, 48px)', color: TEXT }}>
             Welcome to{' '}
-            <span style={{ background: 'linear-gradient(135deg, #0066FF 0%, #0F172A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>College Fast Forward.</span>
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>College Fast Forward.</span>
           </h1>
 
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 2.2vw, 19px)', color: '#334155', lineHeight: 1.6, margin: '0 auto 14px', maxWidth: 480, fontWeight: 600 }}>
@@ -689,15 +689,15 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
           <button
             onClick={next}
             className="onb-btn-primary"
-            style={{ display: 'block', width: '100%', maxWidth: 420, margin: '0 auto 12px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 12, padding: '20px 52px', cursor: 'pointer', minHeight: 56, boxShadow: '0 10px 24px rgba(0,102,255,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(0,102,255,0.38)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(0,102,255,0.28)'; }}
+            style={{ display: 'block', width: '100%', maxWidth: 420, margin: '0 auto 12px', fontFamily: FONT, fontSize: 17, fontWeight: 800, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 12, padding: '20px 52px', cursor: 'pointer', minHeight: 56, boxShadow: '0 10px 24px rgba(109,40,217,0.28)', transition: 'all 0.2s ease', letterSpacing: '-0.01em' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 32px rgba(109,40,217,0.38)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 24px rgba(109,40,217,0.28)'; }}
           >Let's Build Your Interview Edge →</button>
 
           <p style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, marginBottom: 4, lineHeight: 1.6 }}>
             This guided setup takes 8–12 minutes and is worth it — you'll have your first personalized plan by the end.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 13, color: BLUE, fontWeight: 700, margin: '0 0 28px' }}>✨ Your first warm intro or interview is closer than you think.</p>
+          <p style={{ fontFamily: FONT, fontSize: 13, color: INDIGO, fontWeight: 700, margin: '0 0 28px' }}>✨ Your first warm intro or interview is closer than you think.</p>
 
           {/* Social proof trust bar */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -806,9 +806,9 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
               <button
                 onClick={handleContinue}
                 disabled={analyzing}
-                style={{ width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: analyzing ? '#4A7FE8' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '16px 32px', cursor: analyzing ? 'default' : 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(0,102,255,0.2)', transition: 'all 0.25s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-                onMouseEnter={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(0,102,255,0.32)'; }}}
-                onMouseLeave={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,102,255,0.2)'; }}}
+                style={{ width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: analyzing ? '#7c3aed' : GRAD_INDIGO, border: 'none', borderRadius: 10, padding: '16px 32px', cursor: analyzing ? 'default' : 'pointer', minHeight: 'auto', boxShadow: '0 10px 20px rgba(109,40,217,0.2)', transition: 'all 0.25s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                         onMouseEnter={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 28px rgba(109,40,217,0.32)'; }}}
+                         onMouseLeave={e => { if (!analyzing) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(109,40,217,0.2)'; }}}
               >
                 {analyzing ? (
                   <>
@@ -849,12 +849,12 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                     borderRadius: 14, padding: '16px 18px', cursor: 'pointer',
                     textAlign: 'left', minHeight: 'auto',
                     boxShadow: isActive
-                      ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)`
+                      ? `0 0 0 3px ${INDIGO_BORDER}, 0 10px 24px rgba(109,40,217,0.10)`
                       : '0 4px 12px rgba(0,0,0,0.05)',
                     transform: isActive ? 'translateY(-2px)' : 'translateY(0)',
                     transition: 'all 0.18s ease',
                   }}
-                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = BLUE_BORDER; } }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = INDIGO_BORDER; } }}
                   onMouseLeave={e => { if (!isActive) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#E8EFF6'; } }}
                 >
                   <span style={{ fontSize: 22, flexShrink: 0, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isActive ? '#fff' : BG, borderRadius: 10, border: `1px solid ${isActive ? BLUE_BORDER : '#E2E8F0'}` }}>{opt.emoji}</span>
@@ -1042,16 +1042,16 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                 disabled={blockers.length === 0}
                 style={{
                   fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
-                  background: blockers.length === 0 ? '#CBD5E1' : `linear-gradient(to bottom, ${BLUE}, #0052CC)`,
+                  background: blockers.length === 0 ? '#CBD5E1' : GRAD_INDIGO,
                   border: 'none', borderRadius: 8, padding: '15px 36px',
                   cursor: blockers.length === 0 ? 'not-allowed' : 'pointer',
                   minHeight: 'auto',
-                  boxShadow: blockers.length === 0 ? 'none' : '0 4px 14px rgba(0,102,255,0.30)',
+                  boxShadow: blockers.length === 0 ? 'none' : '0 4px 14px rgba(109,40,217,0.30)',
                   transition: 'all 0.25s ease',
                   display: 'inline-flex', alignItems: 'center', gap: 8,
                 }}
-                onMouseEnter={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,255,0.40)'; }}}
-                onMouseLeave={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,102,255,0.30)'; }}}
+                onMouseEnter={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(109,40,217,0.40)'; }}}
+                onMouseLeave={e => { if (blockers.length > 0) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(109,40,217,0.30)'; }}}
               >
                 {blockers.length === 0 ? 'Select at least 1 →' : <>Continue → <span style={{ fontSize: 11, fontWeight: 600, opacity: 0.85 }}>Tools unlocked ✓</span></>}
               </button>
@@ -1108,10 +1108,10 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                   background: isRemote ? BLUE_LIGHT : CARD,
                   border: `2px solid ${isRemote ? BLUE : '#E8EFF6'}`,
                   borderRadius: 14, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto',
-                  boxShadow: isRemote ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
+                  boxShadow: isRemote ? `0 0 0 3px ${INDIGO_BORDER}, 0 10px 24px rgba(109,40,217,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
                   transform: isRemote ? 'translateY(-2px)' : 'translateY(0)', transition: 'all 0.18s ease',
                 }}
-                onMouseEnter={e => { if (!isRemote) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+                onMouseEnter={e => { if (!isRemote) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
                 onMouseLeave={e => { if (!isRemote) { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; e.currentTarget.style.borderColor = '#E8EFF6'; e.currentTarget.style.transform = 'translateY(0)'; }}}
               >
                 <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isRemote ? '#fff' : BG, borderRadius: 10, border: `1px solid ${isRemote ? BLUE_BORDER : '#E2E8F0'}` }}>🌐</span>
@@ -1131,7 +1131,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                   background: locationPref === 'city' ? BLUE_LIGHT : CARD,
                   border: `2px solid ${locationPref === 'city' ? BLUE : '#E8EFF6'}`,
                   borderRadius: 14, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto',
-                  boxShadow: locationPref === 'city' ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
+                  boxShadow: locationPref === 'city' ? `0 0 0 3px ${INDIGO_BORDER}, 0 10px 24px rgba(109,40,217,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
                   transform: locationPref === 'city' ? 'translateY(-2px)' : 'translateY(0)', transition: 'all 0.18s ease',
                 }}
                 onMouseEnter={e => { if (locationPref !== 'city') { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
@@ -1154,7 +1154,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                   background: isHybrid ? BLUE_LIGHT : CARD,
                   border: `2px solid ${isHybrid ? BLUE : '#E8EFF6'}`,
                   borderRadius: 14, padding: '16px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto',
-                  boxShadow: isHybrid ? `0 0 0 3px ${BLUE_BORDER}, 0 10px 24px rgba(0,102,255,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
+                  boxShadow: isHybrid ? `0 0 0 3px ${INDIGO_BORDER}, 0 10px 24px rgba(109,40,217,0.10)` : '0 4px 12px rgba(0,0,0,0.05)',
                   transform: isHybrid ? 'translateY(-2px)' : 'translateY(0)', transition: 'all 0.18s ease',
                 }}
                 onMouseEnter={e => { if (!isHybrid) { e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.09)'; e.currentTarget.style.borderColor = BLUE_BORDER; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
@@ -1251,7 +1251,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                     <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>No PDF? The Agent instantly extracts your experience, skills, and story.</p>
                     <p style={{ fontFamily: FONT, fontSize: 11, color: BLUE, margin: 0, fontStyle: 'italic' }}>Fast, clean, and no uploading needed</p>
                   </div>
-                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: BLUE, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>FAST</span>
+                  <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: INDIGO, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>FAST</span>
                 </button>
 
                 {/* Quick Start */}
@@ -1524,7 +1524,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
 
           {/* Emotional Payoff Section */}
           <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%)', border: `1px solid ${BLUE_BORDER}`, borderRadius: R, padding: '22px 28px', marginBottom: 28 }}>
-            <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>🎯 What this actually means for you</p>
+            <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: INDIGO, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>🎯 What this actually means for you</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { icon: '🧑‍💼', text: 'Your applications will finally reach human recruiters instead of getting auto-filtered' },
@@ -1543,9 +1543,9 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
           <div style={{ textAlign: 'center', marginBottom: 16 }}>
             <button
               onClick={next}
-              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 12px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: `linear-gradient(to bottom, ${BLUE}, #0052CC)`, border: 'none', borderRadius: 10, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(0,102,255,0.3)', transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(0,102,255,0.4)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,102,255,0.3)'; }}
+              style={{ width: '100%', maxWidth: 480, display: 'block', margin: '0 auto 12px', fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: GRAD_INDIGO, border: 'none', borderRadius: 10, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(109,40,217,0.3)', transition: 'all 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 32px rgba(109,40,217,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(109,40,217,0.3)'; }}
             >
               Next: Optimize My LinkedIn Profile →
             </button>
