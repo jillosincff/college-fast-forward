@@ -301,14 +301,7 @@ export default function StudentLandingPage({ onParentClick }) {
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.4, margin: '0 0 14px' }}>
             CLiFF organizes the chaos, targets hidden jobs, surfaces warm alumni &amp; parent connections, and crafts your messages — so you spend less time applying and get better results.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 16px)', color: TEXT2, lineHeight: 1.6, maxWidth: '100%', margin: '0 auto' }}>
-            Most students are stuck spamming 100+ apps with almost no responses.{' '}
-            <strong style={{ color: TEXT }}>We're different</strong> —{' '}
-            <span style={{ fontWeight: 600 }}>
-              <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span>
-            </span>{' '}
-            learns who you are, then uses AI + real campus insiders (alumni &amp; parents) to get you interviews fast.
-          </p>
+
         </div>
 
         <div style={{ width: '100%', maxWidth: 420, marginTop: 'clamp(24px, 8vw, 40px)', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
