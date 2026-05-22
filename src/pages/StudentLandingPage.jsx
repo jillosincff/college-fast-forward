@@ -23,11 +23,11 @@ const TEXT  = '#0f172a';
 const TEXT2 = '#475569';
 const TEXT3 = '#94a3b8';
 
-// Indigo — primary accent
-const INDIGO       = '#4f46e5';
-const INDIGO_DIM   = '#4338ca';
-const INDIGO_LIGHT = 'rgba(79,70,229,0.08)';
-const INDIGO_BORDER= 'rgba(79,70,229,0.20)';
+// Signature Purple — primary brand color (unified across all CTAs)
+const INDIGO       = '#6d28d9';
+const INDIGO_DIM   = '#5b21b6';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_BORDER= 'rgba(109,40,217,0.20)';
 
 // Violet — secondary accent
 const VIOLET       = '#7c3aed';
@@ -52,13 +52,13 @@ const CORAL_BORDER= 'rgba(244,63,94,0.22)';
 
 // Gradient helpers
 const GRAD_HERO   = 'linear-gradient(145deg, #f0f4ff 0%, #fdf2ff 50%, #f0fbff 100%)';
-const GRAD_INDIGO = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
 const GRAD_WARM   = 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)';
 
-// Shadows
+// Shadows (unified across all floating elements)
 const SHADOW    = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
-const SHADOW_MD = '0 4px 16px rgba(79,70,229,0.10), 0 1px 4px rgba(0,0,0,0.06)';
-const SHADOW_LG = '0 20px 40px rgba(79,70,229,0.14), 0 4px 12px rgba(0,0,0,0.08)';
+const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
+const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
 
 // Aliases for backward compat (CampusVaultWidget passes these as props)
 const MINT        = INDIGO;
@@ -232,14 +232,14 @@ export default function StudentLandingPage({ onParentClick }) {
       background: GRAD_INDIGO, border: 'none', borderRadius: 14,
       padding: 'clamp(14px, 4vw, 17px) clamp(28px, 6vw, 40px)',
       cursor: 'pointer', minHeight: 52,
-      boxShadow: `0 8px 28px rgba(79,70,229,0.28)`,
+      boxShadow: `0 8px 28px rgba(109,40,217,0.30)`,
       transition: 'all 0.2s ease',
       width: fullWidth ? '100%' : 'auto',
       touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
       ...extra,
     }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(79,70,229,0.40)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(79,70,229,0.28)'; }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
     >{label}</button>
   );
 
@@ -278,7 +278,7 @@ export default function StudentLandingPage({ onParentClick }) {
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
             background: GRAD_INDIGO, border: 'none', borderRadius: 10,
             padding: '10px 20px', cursor: 'pointer', minHeight: 44,
-            boxShadow: '0 4px 14px rgba(79,70,229,0.35)', transition: 'all 0.15s',
+            boxShadow: '0 4px 14px rgba(109,40,217,0.35)', transition: 'all 0.15s',
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
@@ -293,7 +293,7 @@ export default function StudentLandingPage({ onParentClick }) {
         background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle radial glow */}
-        <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.10) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           
@@ -342,13 +342,13 @@ export default function StudentLandingPage({ onParentClick }) {
                   background: GRAD_INDIGO, border: 'none', borderRadius: 999,
                   padding: 'clamp(16px, 4vw, 20px) clamp(48px, 8vw, 64px)',
                   cursor: 'pointer', minHeight: 56,
-                  boxShadow: '0 20px 48px rgba(79,70,229,0.35)',
+                  boxShadow: '0 20px 48px rgba(109,40,217,0.35)',
                   transition: 'all 0.3s ease',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
                   alignSelf: 'flex-start',
                 }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #4338ca 0%, #6d28d9 100%)'; e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 24px 56px rgba(79,70,229,0.45)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(79,70,229,0.35)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%)'; e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 24px 56px rgba(109,40,217,0.45)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
                   Start for Free →
@@ -365,13 +365,13 @@ export default function StudentLandingPage({ onParentClick }) {
           {mounted && (
             <div className="hero-animate-6" style={{ position: 'relative', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Base Layer - Soft radial gradient */}
-              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(59,130,246,0.12) 0%, transparent 70%)', borderRadius: 24 }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24 }} />
               
               {/* Dark "Black Hole" Element */}
               <div style={{ position: 'absolute', width: 280, height: 280, background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%', boxShadow: '0 24px 48px rgba(15,23,42,0.15)', animation: 'float 6s ease-in-out infinite' }} />
               
               {/* Floating Card 1 */}
-              <div style={{ position: 'absolute', top: '15%', right: '10%', width: 180, background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 24px 48px rgba(0,0,0,0.04)', animation: 'float 5s ease-in-out infinite 0.5s', zIndex: 2 }}>
+              <div style={{ position: 'absolute', top: '15%', right: '10%', width: 180, background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 5s ease-in-out infinite 0.5s', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: INDIGO_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎯</div>
                   <div>
@@ -385,7 +385,7 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
 
               {/* Floating Card 2 */}
-              <div style={{ position: 'absolute', bottom: '20%', left: '5%', width: 160, background: '#fff', borderRadius: 16, padding: 14, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 24px 48px rgba(0,0,0,0.04)', animation: 'float 5.5s ease-in-out infinite 1s', zIndex: 2 }}>
+              <div style={{ position: 'absolute', bottom: '20%', left: '5%', width: 160, background: '#fff', borderRadius: 16, padding: 14, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 5.5s ease-in-out infinite 1s', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <div style={{ width: 28, height: 28, borderRadius: 6, background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>✓</div>
                   <p style={{ fontFamily: SF, fontSize: 10, fontWeight: 700, color: '#166534', margin: 0 }}>Resume Match: 94%</p>
@@ -394,7 +394,7 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
 
               {/* Floating Card 3 */}
-              <div style={{ position: 'absolute', top: '50%', left: '0%', width: 140, background: '#fff', borderRadius: 14, padding: 12, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 24px 48px rgba(0,0,0,0.04)', animation: 'float 6.5s ease-in-out infinite 1.5s', zIndex: 3 }}>
+              <div style={{ position: 'absolute', top: '50%', left: '0%', width: 140, background: '#fff', borderRadius: 14, padding: 12, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 6.5s ease-in-out infinite 1.5s', zIndex: 3 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ display: 'flex' }}>
                     {[1,2,3].map(i => (
@@ -441,7 +441,7 @@ export default function StudentLandingPage({ onParentClick }) {
             Spending hours tailoring a resume just to get screened out by a bot is exhausting. CFF brings hidden jobs, warm networking, and smart tools into one place.
           </p>
 
-          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #f1f5f9', boxShadow: SHADOW_MD, padding: 'clamp(24px, 6vw, 36px)', marginBottom: 28 }}>
+          <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #f1f5f9', boxShadow: SHADOW, padding: 'clamp(24px, 6vw, 36px)', marginBottom: 28 }}>
             <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -461,11 +461,11 @@ export default function StudentLandingPage({ onParentClick }) {
           <button onClick={go} style={{
             width: '100%', fontFamily: SF, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 700, color: '#fff',
             background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: 'clamp(16px, 5vw, 20px)',
-            cursor: 'pointer', minHeight: 52, boxShadow: '0 8px 28px rgba(79,70,229,0.28)',
+            cursor: 'pointer', minHeight: 52, boxShadow: '0 8px 28px rgba(109,40,217,0.30)',
             transition: 'all 0.2s ease', touchAction: 'manipulation',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(79,70,229,0.38)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(79,70,229,0.28)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
           >
             Start for Free →
           </button>
@@ -480,8 +480,8 @@ export default function StudentLandingPage({ onParentClick }) {
             The Old Way vs <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The Smart Way</span>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {/* Old Way */}
-            <div style={{ background: '#fff5f7', border: `1.5px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)' }}>
+            {/* Old Way - "Black Hole" box with warning state */}
+            <div style={{ background: 'rgba(254,242,242,0.6)', border: `1px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: '0 1px 3px rgba(244,63,94,0.08)' }}>
               <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>🕳️ The Old Way</p>
               <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: CORAL, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Brutal Cycle</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -503,8 +503,8 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
             </div>
 
-            {/* Smart Way */}
-            <div style={{ background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)' }}>
+            {/* Smart Way - elevated with soft glow */}
+            <div style={{ background: 'rgba(245,243,255,0.8)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: SHADOW_MD }}>
               <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>⚡ The CFF Way</p>
               <p style={{ fontFamily: SF, fontSize: 'clamp(18px, 4.5vw, 22px)', fontWeight: 900, color: INDIGO, margin: '0 0 20px', letterSpacing: '-0.02em' }}>The Smart Path</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -527,10 +527,10 @@ export default function StudentLandingPage({ onParentClick }) {
             </div>
           </div>
 
-          {/* CFF proof list */}
-          <div style={{ marginTop: 28, background: '#fff', border: `1.5px solid ${INDIGO_BORDER}`, borderRadius: 20, boxShadow: SHADOW_MD, padding: 'clamp(20px, 5vw, 32px)' }}>
+          {/* CFF proof list - connected dashboard element */}
+          <div style={{ marginTop: 28, background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, boxShadow: SHADOW, padding: 'clamp(20px, 5vw, 32px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚡</div>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}>⚡</div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0 }}>CFF is already working for you</p>
                 <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: '2px 0 0' }}>Scanning opportunities right now</p>
@@ -581,7 +581,7 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
             ))}
           </div>
-          <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center' }}>
+          <div style={{ background: 'rgba(245,243,255,0.6)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center', boxShadow: SHADOW }}>
             <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 600, color: INDIGO_DIM, margin: 0, lineHeight: 1.5 }}>
               💬 "I was overwhelmed applying everywhere. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks." — Marcus, Penn State '27
             </p>
@@ -618,18 +618,18 @@ export default function StudentLandingPage({ onParentClick }) {
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: GRAD_INDIGO }} />
 
             <div style={{ display: 'flex', gap: 8, marginBottom: 'clamp(16px, 4vw, 24px)', flexWrap: 'wrap' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100, padding: '5px 14px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,243,255,0.8)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100, padding: '5px 14px' }}>
                 <span style={{ fontSize: 12 }}>🎓</span>
                 <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Graduation Sprint Plan</span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 100, padding: '5px 14px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(254,252,232,0.7)', border: '1px solid rgba(253,224,138,0.5)', borderRadius: 100, padding: '5px 14px' }}>
                 <span style={{ fontSize: 12 }}>⚡</span>
-                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#92400e' }}>Less than a delivery meal for 14 days</span>
+                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#854d0e' }}>Less than a delivery meal for 14 days</span>
               </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
-              <span style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 56px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1, background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>$4.99</span>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 56px)', fontWeight: 900, color: INDIGO, letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
               <span style={{ fontFamily: SF, fontSize: 16, color: TEXT3, fontWeight: 500 }}>/week</span>
             </div>
             <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '0 0 clamp(20px, 5vw, 28px)', lineHeight: 1.4 }}>
