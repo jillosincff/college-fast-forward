@@ -231,10 +231,6 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
 
-  const goToPaidDashboard = () => {
-    window.location.hash = '#FastIQDashboard';
-  };
-
   // Launch real Stripe checkout — saves onboarding data first, then redirects
   const launchCheckout = async () => {
     setCheckoutLoading(true);
@@ -244,18 +240,18 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       const user = await base44.auth.me().catch(() => null);
       if (!user) {
         // Not logged in yet — save intent and route through auth
-        localStorage.setItem('cff_post_auth_intent', 'checkout_fastiq_monthly');
+        localStorage.setItem('cff_post_auth_intent', 'checkout_pro_monthly');
         if (saveAndAuth) {
           await saveAndAuth('paid');
         } else {
-          base44.auth.loginWithProvider('google', window.location.origin + '/#FreeTierDashboard?checkout=fastiq_monthly');
+          base44.auth.loginWithProvider('google', window.location.origin + '/#FreeTierDashboard?checkout=pro_monthly');
         }
         setCheckoutLoading(false);
         return;
       }
       // Already authenticated — call checkout directly
       const res = await createCheckoutSession({
-        plan: 'fastiq_monthly',
+        plan: 'pro_monthly',
         user: { id: user.id, email: user.email, family_id: user.family_id },
         successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
         cancelUrl: window.location.href,

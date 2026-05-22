@@ -524,7 +524,6 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
     // In postAuth mode or if user is already authenticated, complete directly
     if (postAuth || onAlreadyAuthed) {
       if (planType === 'free') {
-        // Route to free tier dashboard
         window.location.hash = '#FreeTierDashboard';
       } else {
         if (onAlreadyAuthed) onAlreadyAuthed();
