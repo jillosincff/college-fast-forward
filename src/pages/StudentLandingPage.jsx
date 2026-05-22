@@ -276,50 +276,50 @@ export default function StudentLandingPage({ onParentClick }) {
         minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(96px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
         textAlign: 'center',
-        background: `radial-gradient(ellipse at 50% 0%, rgba(0,255,194,0.08) 0%, ${BG} 70%)`,
+        background: 'linear-gradient(135deg, #fdfaf5 0%, #f1e8e0 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Subtle grid overlay */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(0,255,194,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,194,0.03) 1px, transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
+        {/* Subtle dot grid */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#c4b5fd 0.8px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.10, pointerEvents: 'none' }} />
         <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', background: MINT_LIGHT, border: `1px solid ${MINT_BORDER}`, borderRadius: 999, padding: '10px 24px', marginBottom: 28 }}>
-            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: MINT, letterSpacing: '0.08em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #ddd6fe', borderRadius: 999, padding: '10px 24px', marginBottom: 32, boxShadow: '0 1px 6px rgba(0,0,0,0.07)' }}>
+            <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#6d28d9' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
           </div>
 
           {/* Headline */}
-          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: TEXT, margin: '0 0 20px' }}>
+          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.05, color: '#0f172a', margin: '0 0 20px' }}>
             The job search is a black hole.
           </h1>
 
           {/* Sub-headline */}
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 700, color: MINT, margin: '0 0 32px', lineHeight: 1.15, animation: 'mintGlow 3s ease-in-out infinite' }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 52px)', fontWeight: 600, color: '#4f46e5', margin: '0 0 40px', lineHeight: 1.15 }}>
             CFF finds the path around it.
           </h2>
 
           {/* Body */}
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 19px)', color: TEXT2, lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 640 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', color: '#475569', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 680 }}>
             We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
 
           {/* CTA */}
           <button onClick={go} style={{
-            fontFamily: FONT, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 700, color: '#0d1a17',
-            background: MINT, border: 'none', borderRadius: 999,
+            fontFamily: FONT, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 700, color: '#fff',
+            background: '#4f46e5', border: 'none', borderRadius: 999,
             padding: 'clamp(16px, 4vw, 20px) clamp(44px, 8vw, 60px)',
             cursor: 'pointer', minHeight: '56px',
-            boxShadow: '0 12px 40px rgba(0,255,194,0.4)',
+            boxShadow: '0 12px 40px rgba(79,70,229,0.35)',
             transition: 'all 0.2s ease',
             touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = MINT_DIM; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 50px rgba(0,255,194,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = MINT; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,255,194,0.4)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#4338ca'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 50px rgba(79,70,229,0.5)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#4f46e5'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(79,70,229,0.35)'; }}
           >
             Start for Free →
           </button>
 
           {/* Trust line */}
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: TEXT3, margin: '24px 0 0', lineHeight: 1.5 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: '#94a3b8', margin: '28px 0 0', lineHeight: 1.5 }}>
             This guided setup takes 8–12 minutes — you'll have a personalized plan.
           </p>
         </div>
