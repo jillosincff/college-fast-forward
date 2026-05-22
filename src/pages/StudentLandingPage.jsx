@@ -263,16 +263,13 @@ export default function StudentLandingPage({ onParentClick }) {
         minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(96px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%)',
+        background: 'linear-gradient(135deg, #f8fafc 0%, #ecfeff 60%, #ffffff 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(34,211,238,0.8) 0.8px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.10, pointerEvents: 'none' }} />
-
-        <div style={{ maxWidth: 800, position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' }}>
+        <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.6s ease' }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', border: '1px solid #bae6fd', borderRadius: 999, padding: '10px 24px', marginBottom: 28, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 600, color: '#0f172a', letterSpacing: '0.05em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: '#ccfbf1', borderRadius: 999, padding: '10px 24px', marginBottom: 28 }}>
+            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 600, color: '#0f766e', letterSpacing: '0.05em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
           </div>
 
           {/* Headline */}
@@ -281,27 +278,27 @@ export default function StudentLandingPage({ onParentClick }) {
           </h1>
 
           {/* Sub-headline */}
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 600, color: '#0284c7', margin: '0 0 32px', lineHeight: 1.15 }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 48px)', fontWeight: 700, color: '#0d9488', margin: '0 0 32px', lineHeight: 1.15 }}>
             CFF finds the path around it.
-          </p>
+          </h2>
 
           {/* Body */}
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', color: '#475569', lineHeight: 1.7, margin: '0 auto 44px', maxWidth: 620 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 19px)', color: '#475569', lineHeight: 1.75, margin: '0 auto 44px', maxWidth: 640 }}>
             We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
 
           {/* CTA */}
           <button onClick={go} style={{
             fontFamily: FONT, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
-            background: '#0284c7', border: 'none', borderRadius: 999,
+            background: '#0d9488', border: 'none', borderRadius: 999,
             padding: 'clamp(16px, 4vw, 20px) clamp(44px, 8vw, 60px)',
             cursor: 'pointer', minHeight: '56px',
-            boxShadow: '0 12px 40px rgba(2,132,199,0.35)',
+            boxShadow: '0 12px 40px rgba(13,148,136,0.35)',
             transition: 'all 0.2s ease',
             touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#0369a1'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#0f766e'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#0d9488'; e.currentTarget.style.transform = 'scale(1)'; }}
           >
             Start for Free →
           </button>
