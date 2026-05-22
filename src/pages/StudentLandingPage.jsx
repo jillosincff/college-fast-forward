@@ -290,7 +290,7 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{
         minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(100px, 15vw, 130px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
-        background: 'linear-gradient(135deg, #f8f7f4 0%, #ffffff 50%, #f8f7f4 100%)', position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle dot grid */}
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#dbeafe 1px, transparent 1px)', backgroundSize: '60px 60px', opacity: 0.40, pointerEvents: 'none' }} />
