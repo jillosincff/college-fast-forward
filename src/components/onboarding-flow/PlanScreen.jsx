@@ -536,7 +536,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             No credit card needed to start
           </p>
           <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>
-            Cancel anytime · <span style={{ color: BLUE, fontWeight: 600 }}>🎁 Text 3 friends for free access</span>
+            Cancel anytime · <span onClick={() => openPaywall(false)} style={{ color: BLUE, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>🎁 Text 3 friends for free access</span>
           </p>
         </div>
       </div>
