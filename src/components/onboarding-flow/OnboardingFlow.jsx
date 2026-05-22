@@ -8,6 +8,7 @@ import ATSScoreRing from './ATSScoreRing';
 import LiveEngineLoader from './LiveEngineLoader';
 import FunnelTransition from './FunnelTransition';
 import IndustryScreen from './IndustryScreen';
+import CliffRevealScreen from './CliffRevealScreen';
 
 // ── Design Tokens — Purple/Indigo (match landing pages) ──────────────────────────────────────────────
 const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
@@ -362,7 +363,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
   const [targetRoles, setTargetRoles] = useState(saved?.targetRoles ?? []);
   const fileRef = useRef();
 
-  const TOTAL = 12;
+  const TOTAL = 13;
 
   const next = () => {
     const newScreen = screen + 1;
@@ -377,7 +378,7 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       cff_location_city: locationCity,
       cff_resume_url: resumeUrl,
     });
-    if (newScreen > 12) {
+    if (newScreen > 13) {
       if (onClose) onClose();
     } else {
       setScreen(newScreen);
@@ -535,7 +536,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
     }
   };
 
-  const isFullPageScreen = screen >= 10;
+  const isFullPageScreen = screen >= 11;
   const rawName = resumeData?.original?.name;
   const firstName = (typeof rawName === 'string' ? rawName : null)?.split(' ')[0] || null;
 
@@ -1383,8 +1384,13 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         </div>
       )}
 
-      {/* ── SCREEN 10: Wow Moment (Resume Before/After) ── */}
+      {/* ── SCREEN 10: Meet CLiFF ── */}
       {screen === 10 && (
+        <CliffRevealScreen onNext={next} firstName={firstName} />
+      )}
+
+      {/* ── SCREEN 11: Wow Moment (Resume Before/After) ── */}
+      {screen === 11 && (
       <div style={{ maxWidth: 900, width: '100%', paddingTop: 80, minHeight: '100vh', boxSizing: 'border-box' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
@@ -1592,8 +1598,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         </div>
       )}
 
-      {/* ── SCREEN 11: LinkedIn Identity Architect ── */}
-      {screen === 11 && (
+      {/* ── SCREEN 12: LinkedIn Identity Architect ── */}
+      {screen === 12 && (
         <LinkedInScreen
           resumeData={resumeData}
           college={college}
@@ -1606,8 +1612,8 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
         />
       )}
 
-      {/* ── SCREEN 12: Your 14-Day Plan ── */}
-      {screen === 12 && (
+      {/* ── SCREEN 13: Your 14-Day Plan ── */}
+      {screen === 13 && (
         <PlanScreen
           resumeData={resumeData}
           college={college}
