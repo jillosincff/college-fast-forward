@@ -69,7 +69,7 @@ function FAQItem({ q, a }) {
 export default function ParentLandingPage({ onStudentClick }) {
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
-  const [form, setForm] = useState({ fullName: '', jobTitle: '', industry: '', linkedin: '', email: '' });
+  const [form, setForm] = useState({ fullName: '', jobTitle: '', industry: '', linkedin: '', email: '', school: '' });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -97,7 +97,7 @@ export default function ParentLandingPage({ onStudentClick }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.fullName || !form.jobTitle || !form.industry || !form.email) return;
+    if (!form.fullName || !form.jobTitle || !form.industry || !form.email || !form.school) return;
     setSubmitting(true);
     // Store parent role hint for future navigation
     localStorage.setItem('pending_invite_role', 'parent');
@@ -306,6 +306,17 @@ export default function ParentLandingPage({ onStudentClick }) {
                   placeholder="e.g. Software Engineering at Google"
                   value={form.industry}
                   onChange={e => setForm(f => ({ ...f, industry: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Which school would you like to support? *</label>
+                <input
+                  className="parent-input"
+                  style={inputStyle}
+                  placeholder="e.g. University of Florida"
+                  value={form.school}
+                  onChange={e => setForm(f => ({ ...f, school: e.target.value }))}
                   required
                 />
               </div>
