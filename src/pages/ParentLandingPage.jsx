@@ -56,12 +56,12 @@ const FAQS = [
 function FAQItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ borderBottom: `1px solid #E2E8F0` }}>
+    <div style={{ borderBottom: `1px solid #f1f5f9` }}>
       <button onClick={() => setOpen(!open)} style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '20px 0', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto' }}>
-        <span style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT, lineHeight: 1.4 }}>{q}</span>
-        <span style={{ fontSize: 20, color: BLUE, flexShrink: 0, transform: open ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1 }}>+</span>
+        <span style={{ fontFamily: SF, fontSize: 15, fontWeight: 600, color: TEXT, lineHeight: 1.4 }}>{q}</span>
+        <span style={{ fontSize: 20, color: INDIGO, flexShrink: 0, transform: open ? 'rotate(45deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1 }}>+</span>
       </button>
-      {open && <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.75, margin: '0 0 20px' }}>{a}</p>}
+      {open && <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, lineHeight: 1.75, margin: '0 0 20px' }}>{a}</p>}
     </div>
   );
 }
