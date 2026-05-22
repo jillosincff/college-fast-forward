@@ -299,10 +299,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <span style={{ color: BLUE }}>Start landing interviews.</span>
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.4, margin: '0 0 14px' }}>
-            <span style={{ fontWeight: 800 }}>
-              <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span>
-            </span>
-            , your AI Career Agent, is here to end the endless application black hole.
+            CLiFF organizes the chaos, targets hidden jobs, surfaces warm alumni &amp; parent connections, and crafts your messages — so you spend less time applying and get better results.
           </p>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 16px)', color: TEXT2, lineHeight: 1.6, maxWidth: '100%', margin: '0 auto' }}>
             Most students are stuck spamming 100+ apps with almost no responses.{' '}
@@ -326,10 +323,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
           >
-            Let's Build Your Interview Edge with{' '}
-            <span style={{ fontWeight: 900 }}>
-              <span style={{ color: '#93C5FD' }}>C</span><span style={{ color: 'rgba(255,255,255,0.6)' }}>li</span><span style={{ color: '#93C5FD' }}>FF</span>
-            </span>{' '}→
+            Build My Interview Edge with CLiFF →
           </button>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: TEXT3, margin: '0 0 2px', lineHeight: 1.4 }}>
