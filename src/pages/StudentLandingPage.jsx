@@ -606,50 +606,47 @@ export default function StudentLandingPage({ onParentClick }) {
       </div>
 
       {/* ── PRICING ── */}
-      <div style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
-        <div style={{ maxWidth: 520, margin: '0 auto' }}>
+      <div style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
+        <div style={{ maxWidth: 540, margin: '0 auto' }}>
           <SectionLabel text="Pricing" color={INDIGO} />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
             One focused sprint.<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block' }}>Real results.</span>
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block' }}>Real results.</span>
           </h2>
 
-          <div style={{ background: '#fff', borderRadius: 24, padding: 'clamp(24px, 6vw, 40px)', boxShadow: SHADOW_LG, border: `2px solid ${INDIGO_BORDER}`, position: 'relative', overflow: 'hidden' }}>
-            {/* Top gradient accent */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: GRAD_INDIGO }} />
-
-            <div style={{ display: 'flex', gap: 8, marginBottom: 'clamp(16px, 4vw, 24px)', flexWrap: 'wrap' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,243,255,0.8)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 100, padding: '5px 14px' }}>
+          <div style={{ background: '#fff', borderRadius: 20, padding: 'clamp(28px, 6vw, 40px)', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1px solid #e2e8f0', position: 'relative' }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: 'clamp(20px, 5vw, 28px)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '6px 14px' }}>
                 <span style={{ fontSize: 12 }}>🎓</span>
                 <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Graduation Sprint Plan</span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(254,252,232,0.7)', border: '1px solid rgba(253,224,138,0.5)', borderRadius: 100, padding: '5px 14px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 100, padding: '6px 14px' }}>
                 <span style={{ fontSize: 12 }}>⚡</span>
                 <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#854d0e' }}>Less than a delivery meal for 14 days</span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
               <span style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 56px)', fontWeight: 900, color: INDIGO, letterSpacing: '-0.04em', lineHeight: 1 }}>$4.99</span>
               <span style={{ fontFamily: SF, fontSize: 16, color: TEXT3, fontWeight: 500 }}>/week</span>
             </div>
-            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: '0 0 clamp(20px, 5vw, 28px)', lineHeight: 1.4 }}>
+            <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: '0 0 clamp(24px, 5vw, 32px)', lineHeight: 1.5 }}>
               Billed monthly ($19.96) · Cancel in 1-tap anytime
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 'clamp(20px, 5vw, 28px)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 'clamp(24px, 5vw, 32px)' }}>
               {PRO_FEATURES.map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{ width: 20, height: 20, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                    <span style={{ fontSize: 9, color: '#fff', fontWeight: 800 }}>✓</span>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                    <span style={{ fontSize: 10, color: '#fff', fontWeight: 800 }}>✓</span>
                   </div>
-                  <p style={{ fontFamily: SF, fontSize: 'clamp(12px, 3.5vw, 14px)', color: TEXT, margin: 0, lineHeight: 1.5 }}>{f}</p>
+                  <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 14px)', color: TEXT, margin: 0, lineHeight: 1.5, flex: 1 }}>{f}</p>
                 </div>
               ))}
             </div>
 
             <CTAButton label="⚡ Check My ATS Match Score" fullWidth />
-            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '14px 0 0', lineHeight: 1.4 }}>
+            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '16px 0 0', lineHeight: 1.4 }}>
               No credit card required to start.
             </p>
           </div>
