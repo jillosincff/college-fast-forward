@@ -288,76 +288,121 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── HERO ── */}
       <div style={{
-        minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(100px, 15vw, 130px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
+        minHeight: '90vh', display: 'flex', alignItems: 'center',
+        padding: 'clamp(80px, 12vw, 120px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
         background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden',
       }}>
-        {/* Subtle dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#dbeafe 1px, transparent 1px)', backgroundSize: '60px 60px', opacity: 0.40, pointerEvents: 'none' }} />
+        {/* Subtle radial glow */}
+        <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          
+          {/* Left Column - Text (60%) */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
 
-          {/* Eyebrow badge */}
-          {mounted && (
-            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0f2fe', borderRadius: 999, padding: '14px 32px', marginBottom: 48, boxShadow: '0 8px 32px rgba(59,130,246,0.12)' }}>
-              <span style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#0369a1' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
-            </div>
-          )}
+            {/* Eyebrow badge */}
+            {mounted && (
+              <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: 999, padding: '12px 28px', marginBottom: 32 }}>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: '#1e40af', letterSpacing: '0.06em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+              </div>
+            )}
 
-          {/* Main headline */}
-          {mounted && (
-            <div className="hero-animate-2">
-              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#0f172a', margin: '0 0 24px', textShadow: '0 2px 4px rgba(0,0,0,0.04)' }}>
-                The job search is a black hole.
-              </h1>
-            </div>
-          )}
+            {/* Main headline */}
+            {mounted && (
+              <div className="hero-animate-2">
+                <h1 style={{ fontFamily: SF, fontSize: 'clamp(42px, 9vw, 72px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#0f172a', margin: '0 0 20px' }}>
+                  The job search is a black hole.
+                </h1>
+              </div>
+            )}
 
-          {/* Sub-headline */}
-          {mounted && (
-            <div className="hero-animate-3">
-              <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 600, color: '#3b82f6', margin: '0 0 28px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
-                CFF finds the path around it.
-              </h2>
-              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 4vw, 19px)', color: '#4b5563', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 720 }}>
-                We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
-              </p>
-            </div>
-          )}
+            {/* Sub-headline */}
+            {mounted && (
+              <div className="hero-animate-3">
+                <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 48px)', fontWeight: 600, color: '#3b82f6', margin: '0 0 24px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+                  CFF finds the path around it.
+                </h2>
+              </div>
+            )}
 
-          {/* CTA */}
-          {mounted && (
-            <div className="hero-animate-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-              <button onClick={go} style={{
-                fontFamily: SF, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
-                background: '#3b82f6', border: 'none', borderRadius: 999,
-                padding: 'clamp(20px, 5vw, 24px) clamp(56px, 9vw, 72px)',
-                cursor: 'pointer', minHeight: 64,
-                boxShadow: '0 20px 48px rgba(59,130,246,0.40)',
-                transition: 'all 0.3s ease',
-                touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 24px 56px rgba(59,130,246,0.50)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(59,130,246,0.40)'; }}
-                onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.95)'; }}
-              >
-                Start for Free →
-              </button>
-
-              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 15px)', color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
-                This guided setup takes 8–12 minutes — you'll have a personalized plan.
-              </p>
-
-              {/* Social proof avatars */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ display: 'flex' }}>
-                  {STORIES.map((s, i) => (
-                    <img key={i} src={s.photo} alt={s.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', marginLeft: i > 0 ? -10 : 0 }} />
-                  ))}
-                </div>
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: '#9ca3af', margin: 0 }}>
-                  <span style={{ color: '#0f172a', fontWeight: 700 }}>2,400+</span> students hired faster
+            {/* Body */}
+            {mounted && (
+              <div className="hero-animate-4">
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#475569', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
+                  We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
                 </p>
+              </div>
+            )}
+
+            {/* CTA */}
+            {mounted && (
+              <div className="hero-animate-5" style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
+                <button onClick={go} style={{
+                  fontFamily: SF, fontSize: 'clamp(16px, 3.5vw, 18px)', fontWeight: 600, color: '#fff',
+                  background: '#3b82f6', border: 'none', borderRadius: 999,
+                  padding: 'clamp(16px, 4vw, 20px) clamp(48px, 8vw, 64px)',
+                  cursor: 'pointer', minHeight: 56,
+                  boxShadow: '0 20px 48px rgba(59,130,246,0.35)',
+                  transition: 'all 0.3s ease',
+                  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+                  alignSelf: 'flex-start',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 24px 56px rgba(59,130,246,0.45)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(59,130,246,0.35)'; }}
+                  onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
+                >
+                  Start for Free →
+                </button>
+
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#94a3b8', margin: '8px 0 0', lineHeight: 1.5 }}>
+                  This guided setup takes 8–12 minutes — you'll have a personalized plan.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Visual Anchor (40%) */}
+          {mounted && (
+            <div className="hero-animate-6" style={{ position: 'relative', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Base Layer - Soft radial gradient */}
+              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(59,130,246,0.12) 0%, transparent 70%)', borderRadius: 24 }} />
+              
+              {/* Dark "Black Hole" Element */}
+              <div style={{ position: 'absolute', width: 280, height: 280, background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)', borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%', boxShadow: '0 24px 48px rgba(15,23,42,0.15)', animation: 'float 6s ease-in-out infinite' }} />
+              
+              {/* Floating Card 1 */}
+              <div style={{ position: 'absolute', top: '15%', right: '10%', width: 180, background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 24px 48px rgba(0,0,0,0.04)', animation: 'float 5s ease-in-out infinite 0.5s', zIndex: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎯</div>
+                  <div>
+                    <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: '#1e293b', margin: 0 }}>Hidden Roles</p>
+                    <p style={{ fontFamily: SF, fontSize: 9, color: '#64748b', margin: 0 }}>Unlocked</p>
+                  </div>
+                </div>
+                <div style={{ height: 4, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ width: '78%', height: '100%', background: '#3b82f6' }} />
+                </div>
+              </div>
+
+              {/* Floating Card 2 */}
+              <div style={{ position: 'absolute', bottom: '20%', left: '5%', width: 160, background: '#fff', borderRadius: 16, padding: 14, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 24px 48px rgba(0,0,0,0.04)', animation: 'float 5.5s ease-in-out infinite 1s', zIndex: 2 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 6, background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>✓</div>
+                  <p style={{ fontFamily: SF, fontSize: 10, fontWeight: 700, color: '#166534', margin: 0 }}>Resume Match: 94%</p>
+                </div>
+                <p style={{ fontFamily: SF, fontSize: 9, color: '#64748b', margin: 0 }}>ATS-optimized & ready</p>
+              </div>
+
+              {/* Floating Card 3 */}
+              <div style={{ position: 'absolute', top: '50%', left: '0%', width: 140, background: '#fff', borderRadius: 14, padding: 12, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 24px 48px rgba(0,0,0,0.04)', animation: 'float 6.5s ease-in-out infinite 1.5s', zIndex: 3 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ display: 'flex' }}>
+                    {[1,2,3].map(i => (
+                      <div key={i} style={{ width: 24, height: 24, borderRadius: '50%', background: `hsl(${200 + i * 20}, 70%, 70%)`, border: '2px solid #fff', marginLeft: i > 0 ? -6 : 0 }} />
+                    ))}
+                  </div>
+                  <p style={{ fontFamily: SF, fontSize: 9, fontWeight: 700, color: '#1e293b', margin: 0 }}>+12 intros</p>
+                </div>
               </div>
             </div>
           )}
