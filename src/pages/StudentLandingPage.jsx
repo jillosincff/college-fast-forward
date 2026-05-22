@@ -336,6 +336,61 @@ export default function StudentLandingPage({ onParentClick }) {
 
       </div>
 
+      {/* ── HONEST SECTION ── */}
+      <div style={{ padding: 'clamp(48px, 10vw, 80px) 16px', background: CARD, borderTop: '1px solid #E2E8F0' }}>
+        <div style={{ maxWidth: 680, margin: '0 auto' }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
+            Let's be honest: the modern job hunt is a literal nightmare.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 0 24px' }}>
+            Spending hours tailoring a resume just to get screened out by a bot is exhausting and demoralizing.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 22px)', fontWeight: 800, color: BLUE, letterSpacing: '-0.02em', lineHeight: 1.3, margin: '0 0 16px' }}>
+            CFF eliminates the headache.
+          </p>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 0 32px' }}>
+            We bring organization, hidden job listings, and warm networking (via alumni and parents) into one place — so you stop shouting into the void.
+          </p>
+
+          <div style={{ borderLeft: `4px solid ${BLUE}`, paddingLeft: 'clamp(16px, 4vw, 24px)', marginBottom: 32 }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 600, color: TEXT, lineHeight: 1.6, margin: '0 0 10px' }}>
+              CFF isn't just another digital filing cabinet.
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 800, color: TEXT, lineHeight: 1.4, margin: '0 0 10px' }}>
+              It's a career accelerator.
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 17px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: 0 }}>
+              It takes a cold, soul-crushing process and makes it human again.
+            </p>
+          </div>
+
+          <div style={{ background: '#0F172A', borderRadius: 16, padding: 'clamp(24px, 6vw, 36px) clamp(20px, 5vw, 32px)', marginBottom: 28 }}>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', fontWeight: 700, color: '#64748B', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 16px' }}>The Bottom Line</p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: '#F87171', letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 8px' }}>
+              More applications won't save you.
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(18px, 5vw, 26px)', fontWeight: 800, color: GREEN, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 16px' }}>
+              More interviews will.
+            </p>
+            <p style={{ fontFamily: FONT, fontSize: 'clamp(14px, 3.5vw, 16px)', color: '#94A3B8', lineHeight: 1.6, margin: 0 }}>
+              We're here to help you skip the line and get real results.
+            </p>
+          </div>
+
+          <button onClick={go} style={{
+            width: '100%', fontFamily: FONT, fontSize: 'clamp(15px, 4.5vw, 17px)', fontWeight: 900, color: '#fff',
+            background: BLUE, border: 'none', borderRadius: 14, padding: 'clamp(16px, 5vw, 20px)',
+            cursor: 'pointer', minHeight: '52px', boxShadow: '0 12px 32px rgba(0,102,255,0.3)',
+            transition: 'all 0.2s ease', touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
+          >
+            Start for Free →
+          </button>
+        </div>
+      </div>
+
       {/* ── OLD WAY VS SMART WAY ── */}
       <div style={{ padding: 'clamp(48px, 10vw, 80px) 16px', background: CARD, borderTop: '1px solid #E2E8F0' }}>
         <div style={{ maxWidth: 860, margin: '0 auto' }}>
