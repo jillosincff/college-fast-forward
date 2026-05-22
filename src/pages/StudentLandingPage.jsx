@@ -278,7 +278,7 @@ export default function StudentLandingPage({ onParentClick }) {
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
             background: GRAD_INDIGO, border: 'none', borderRadius: 10,
             padding: '10px 20px', cursor: 'pointer', minHeight: 44,
-            boxShadow: '0 4px 14px rgba(79,70,229,0.30)', transition: 'all 0.15s',
+            boxShadow: '0 4px 14px rgba(79,70,229,0.35)', transition: 'all 0.15s',
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
@@ -293,7 +293,7 @@ export default function StudentLandingPage({ onParentClick }) {
         background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle radial glow */}
-        <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,70,229,0.10) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           
@@ -302,8 +302,8 @@ export default function StudentLandingPage({ onParentClick }) {
 
             {/* Eyebrow badge */}
             {mounted && (
-              <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.15)', borderRadius: 999, padding: '12px 28px', marginBottom: 32 }}>
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: '#1e40af', letterSpacing: '0.06em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+              <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: '12px 28px', marginBottom: 32 }}>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
               </div>
             )}
 
@@ -339,16 +339,16 @@ export default function StudentLandingPage({ onParentClick }) {
               <div className="hero-animate-5" style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
                 <button onClick={go} style={{
                   fontFamily: SF, fontSize: 'clamp(16px, 3.5vw, 18px)', fontWeight: 600, color: '#fff',
-                  background: '#3b82f6', border: 'none', borderRadius: 999,
+                  background: GRAD_INDIGO, border: 'none', borderRadius: 999,
                   padding: 'clamp(16px, 4vw, 20px) clamp(48px, 8vw, 64px)',
                   cursor: 'pointer', minHeight: 56,
-                  boxShadow: '0 20px 48px rgba(59,130,246,0.35)',
+                  boxShadow: '0 20px 48px rgba(79,70,229,0.35)',
                   transition: 'all 0.3s ease',
                   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
                   alignSelf: 'flex-start',
                 }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 24px 56px rgba(59,130,246,0.45)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(59,130,246,0.35)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #4338ca 0%, #6d28d9 100%)'; e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 24px 56px rgba(79,70,229,0.45)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(79,70,229,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
                   Start for Free →
@@ -373,14 +373,14 @@ export default function StudentLandingPage({ onParentClick }) {
               {/* Floating Card 1 */}
               <div style={{ position: 'absolute', top: '15%', right: '10%', width: 180, background: '#fff', borderRadius: 16, padding: 16, border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 24px 48px rgba(0,0,0,0.04)', animation: 'float 5s ease-in-out infinite 0.5s', zIndex: 2 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎯</div>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: INDIGO_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎯</div>
                   <div>
                     <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: '#1e293b', margin: 0 }}>Hidden Roles</p>
                     <p style={{ fontFamily: SF, fontSize: 9, color: '#64748b', margin: 0 }}>Unlocked</p>
                   </div>
                 </div>
                 <div style={{ height: 4, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ width: '78%', height: '100%', background: '#3b82f6' }} />
+                  <div style={{ width: '78%', height: '100%', background: INDIGO }} />
                 </div>
               </div>
 
@@ -398,7 +398,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ display: 'flex' }}>
                     {[1,2,3].map(i => (
-                      <div key={i} style={{ width: 24, height: 24, borderRadius: '50%', background: `hsl(${200 + i * 20}, 70%, 70%)`, border: '2px solid #fff', marginLeft: i > 0 ? -6 : 0 }} />
+                      <div key={i} style={{ width: 24, height: 24, borderRadius: '50%', background: `hsl(${230 + i * 15}, 75%, 75%)`, border: '2px solid #fff', marginLeft: i > 0 ? -6 : 0 }} />
                     ))}
                   </div>
                   <p style={{ fontFamily: SF, fontSize: 9, fontWeight: 700, color: '#1e293b', margin: 0 }}>+12 intros</p>
