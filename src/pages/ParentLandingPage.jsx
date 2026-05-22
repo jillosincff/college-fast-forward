@@ -494,17 +494,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
       </div>
 
-      {/* ── FAQ ── */}
-      <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
-        <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <SectionLabel text="FAQ" color={TEAL_DARK} />
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 44px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
-            Got questions?<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Fair.</span>
-          </h2>
-          {FAQS.map((faq, i) => <FAQItem key={i} q={faq.q} a={faq.a} />)}
-        </div>
-      </div>
+
 
       {/* ── FINAL CTA ── */}
       {!submitted && (
