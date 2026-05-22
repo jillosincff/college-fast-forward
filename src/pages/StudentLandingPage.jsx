@@ -353,18 +353,7 @@ export default function StudentLandingPage({ onParentClick }) {
                 >
                   Start for Free →
                 </button>
-                <button onClick={go} style={{
-                  fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 600, color: INDIGO,
-                  background: '#fff', border: `2px solid ${INDIGO_BORDER}`, borderRadius: 14,
-                  padding: 'clamp(16px, 4vw, 18px) clamp(28px, 6vw, 40px)',
-                  cursor: 'pointer', minHeight: 56,
-                  boxShadow: SHADOW, transition: 'all 0.2s ease', touchAction: 'manipulation',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = INDIGO; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW_MD; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = INDIGO_BORDER; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = SHADOW; }}
-                >
-                  See how it works
-                </button>
+
               </div>
 
               {/* Social proof avatars */}
