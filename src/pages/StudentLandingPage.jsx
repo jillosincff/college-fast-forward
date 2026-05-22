@@ -300,7 +300,7 @@ export default function StudentLandingPage({ onParentClick }) {
             <span style={{ color: BLUE }}>Start landing interviews.</span>
           </h1>
           <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: 500, color: TEXT2, lineHeight: 1.5, margin: '0 0 14px' }}>
-            <span style={{ color: BLUE, fontWeight: 700 }}>C</span><span style={{ color: TEXT3, fontWeight: 700 }}>li</span><span style={{ color: BLUE, fontWeight: 700 }}>FF</span> unlocks the hidden job market and warm alumni & parent connections — so you can stop refreshing LinkedIn and finally start landing interviews.
+            Track applications, uncover hidden jobs, surface warm alumni & parent connections — and finally land interviews.
           </p>
 
         </div>
