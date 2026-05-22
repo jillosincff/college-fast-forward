@@ -290,16 +290,16 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{
         minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(100px, 15vw, 130px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
-        background: '#f8f7f4', position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(135deg, #f8f7f4 0%, #ffffff 50%, #f8f7f4 100%)', position: 'relative', overflow: 'hidden',
       }}>
         {/* Subtle dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#60a5fa 0.6px, transparent 1px)', backgroundSize: '50px 50px', opacity: 0.10, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#dbeafe 1px, transparent 1px)', backgroundSize: '60px 60px', opacity: 0.40, pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, textAlign: 'center' }}>
 
           {/* Eyebrow badge */}
           {mounted && (
-            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #bae6fd', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(59,130,246,0.08)' }}>
+            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0f2fe', borderRadius: 999, padding: '14px 32px', marginBottom: 48, boxShadow: '0 8px 32px rgba(59,130,246,0.12)' }}>
               <span style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#0369a1' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
             </div>
           )}
@@ -307,7 +307,7 @@ export default function StudentLandingPage({ onParentClick }) {
           {/* Main headline */}
           {mounted && (
             <div className="hero-animate-2">
-              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#1e2937', margin: '0 0 24px' }}>
+              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#0f172a', margin: '0 0 24px', textShadow: '0 2px 4px rgba(0,0,0,0.04)' }}>
                 The job search is a black hole.
               </h1>
             </div>
@@ -331,14 +331,15 @@ export default function StudentLandingPage({ onParentClick }) {
               <button onClick={go} style={{
                 fontFamily: SF, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
                 background: '#3b82f6', border: 'none', borderRadius: 999,
-                padding: 'clamp(16px, 4vw, 22px) clamp(44px, 8vw, 64px)',
-                cursor: 'pointer', minHeight: 60,
-                boxShadow: '0 10px 40px rgba(59,130,246,0.30)',
+                padding: 'clamp(20px, 5vw, 24px) clamp(56px, 9vw, 72px)',
+                cursor: 'pointer', minHeight: 64,
+                boxShadow: '0 20px 48px rgba(59,130,246,0.40)',
                 transition: 'all 0.3s ease',
                 touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
               }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(59,130,246,0.40)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(59,130,246,0.30)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#2563eb'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 24px 56px rgba(59,130,246,0.50)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(59,130,246,0.40)'; }}
+                onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.95)'; }}
               >
                 Start for Free →
               </button>
@@ -355,7 +356,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   ))}
                 </div>
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: '#9ca3af', margin: 0 }}>
-                  <span style={{ color: '#1e2937', fontWeight: 700 }}>2,400+</span> students hired faster
+                  <span style={{ color: '#0f172a', fontWeight: 700 }}>2,400+</span> students hired faster
                 </p>
               </div>
             </div>
