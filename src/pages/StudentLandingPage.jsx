@@ -433,44 +433,6 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── APP SHOWCASE ── */}
       <AppShowcase />
 
-      {/* ── DATA CONTRAST GRID (moved above fold) ── */}
-      <div style={{ padding: 'clamp(48px, 10vw, 72px) 16px', background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
-        <div style={{ maxWidth: 820, margin: '0 auto' }}>
-          <SectionLabel text="Why the old way isn't working" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(22px, 6vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: `0 0 clamp(24px, 6vw, 36px)`, textAlign: 'center' }}>
-            The numbers don't lie.
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }}>
-            <div style={{ width: '100%', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 14, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 4vw, 24px)' }}>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#991B1B', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>❌ The Old Way — Blind Numbers Game</p>
-              {[
-                { stat: '2%', label: 'Response rate plugging generic resumes into public job boards and praying.' },
-                { stat: '40+', label: 'Hours wasted on application screens, spreadsheets, and cover letters written from scratch.' },
-                { stat: '~75%', label: 'Of resumes auto-rejected by ATS filters before a human ever reads them.' },
-              ].map(({ stat, label }, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 'clamp(24px, 8vw, 32px)', fontWeight: 800, color: '#991B1B', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
-                  <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: '#4B5563', lineHeight: 1.5 }}>{label}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ width: '100%', background: '#F0FDF4', border: '1px solid #6EE7B7', borderRadius: 14, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)', display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 4vw, 24px)' }}>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', fontWeight: 700, color: '#065F46', letterSpacing: '0.05em', textTransform: 'uppercase', margin: 0 }}>🎉 The Fast Forward Sprint — The Inside Track</p>
-              {[
-                { stat: '18%+', label: 'Response rate via unadvertised portals and direct warm alumni introductions.' },
-                { stat: '4 hrs', label: 'Total — the Agent automates tracking, sources internal leads, and drafts outreach for you.' },
-                { stat: '100%', label: 'Verified campus network routing — every connection is a real school-matched insider.' },
-              ].map(({ stat, label }, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span style={{ fontFamily: FONT, fontSize: 'clamp(24px, 8vw, 32px)', fontWeight: 800, color: '#065F46', letterSpacing: '-0.02em', lineHeight: 1 }}>{stat}</span>
-                  <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: '#4B5563', lineHeight: 1.5 }}>{label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* ── CAMPUS VAULT WIDGET (replaces 6-box feature grid) ── */}
       <CampusVaultWidget go={go} onSchoolSelect={launchWithSchool} FONT={FONT} TEXT={TEXT} TEXT2={TEXT2} TEXT3={TEXT3} CARD={CARD} BG={BG} BLUE={BLUE} BLUE_LIGHT={BLUE_LIGHT} BLUE_BORDER={BLUE_BORDER} GREEN={GREEN} GREEN_LIGHT={GREEN_LIGHT} GREEN_BORDER={GREEN_BORDER} SHADOW={SHADOW} SHADOW_MD={SHADOW_MD} R={R} />
 
