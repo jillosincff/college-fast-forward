@@ -124,7 +124,7 @@ function StoriesCarousel() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
         <div style={{ display: 'flex', gap: 6 }}>
           {STORIES.map((_, i) => (
-            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 18 : 6, height: 6, borderRadius: 3, background: i === active ? TEAL : '#CBD5E1', border: 'none', cursor: 'pointer', padding: 0, minHeight: '44px', transition: 'all 0.3s ease' }} />
+            <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? 18 : 6, height: 6, borderRadius: 3, background: i === active ? TEAL : 'rgba(255,255,255,0.18)', border: 'none', cursor: 'pointer', padding: 0, minHeight: '44px', transition: 'all 0.3s ease' }} />
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -551,13 +551,13 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Badge */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(16px, 4vw, 24px)', maxWidth: '100%' }}>
               <span style={{ fontSize: 'clamp(11px, 3vw, 12px)' }}>🎓</span>
-              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: '#059669', letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Graduation Sprint Plan</span>
+              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: MINT, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Graduation Sprint Plan</span>
             </div>
 
             {/* Comparison badge */}
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(14px, 4vw, 20px)', marginLeft: 0 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(253,224,71,0.10)', border: '1px solid rgba(253,224,71,0.28)', borderRadius: 100, padding: 'clamp(4px, 1vw, 5px) clamp(10px, 3vw, 14px)', marginBottom: 'clamp(14px, 4vw, 20px)', marginLeft: 0 }}>
               <span style={{ fontSize: 'clamp(11px, 3vw, 12px)' }}>⚡</span>
-              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 600, color: '#92400E', whiteSpace: 'nowrap' }}>Less than a delivery meal for 14 days</span>
+              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 600, color: '#fde047', whiteSpace: 'nowrap' }}>Less than a delivery meal for 14 days</span>
             </div>
 
             {/* Price */}
