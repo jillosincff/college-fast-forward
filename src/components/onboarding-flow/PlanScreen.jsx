@@ -5,7 +5,7 @@ import ATSScoreRing from './ATSScoreRing';
 import FunnelProgress from './FunnelProgress';
 import OpportunityHub from './OpportunityHub';
 import PremiumPaywallModal from './PremiumPaywallModal';
-import ParentNetworkBooster from './ParentNetworkBooster';
+import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
@@ -228,15 +228,53 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
     setShowPaywall(true);
   };
 
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+
   const goToPaidDashboard = () => {
     window.location.hash = '#FastIQDashboard';
   };
 
-  // PremiumPaywallModal handles the full share/clipboard flow internally.
-  // onReferral is just a post-share callback — no need to re-trigger sharing here.
-  const handleReferral = () => {
-    // Modal has already copied/shared the payload. Nothing extra needed.
+  // Launch real Stripe checkout — saves onboarding data first, then redirects
+  const launchCheckout = async () => {
+    setCheckoutLoading(true);
+    setCheckoutError('');
+    try {
+      // Ensure user is authenticated first; if not, trigger auth + store intent
+      const user = await base44.auth.me().catch(() => null);
+      if (!user) {
+        // Not logged in yet — save intent and route through auth
+        localStorage.setItem('cff_post_auth_intent', 'checkout_fastiq_monthly');
+        if (saveAndAuth) {
+          await saveAndAuth('paid');
+        } else {
+          base44.auth.loginWithProvider('google', window.location.origin + '/#FreeTierDashboard?checkout=fastiq_monthly');
+        }
+        setCheckoutLoading(false);
+        return;
+      }
+      // Already authenticated — call checkout directly
+      const res = await createCheckoutSession({
+        plan: 'fastiq_monthly',
+        user: { id: user.id, email: user.email, family_id: user.family_id },
+        successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
+        cancelUrl: window.location.href,
+      });
+      if (res?.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        setCheckoutError(res?.data?.error || 'Something went wrong. Please try again.');
+        setCheckoutLoading(false);
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      setCheckoutError('Could not start checkout. Please try again.');
+      setCheckoutLoading(false);
+    }
   };
+
+  // PremiumPaywallModal handles the full share/clipboard flow internally.
+  const handleReferral = () => {};
 
   // Intercept ← Back on mobile as exit-intent
   const handleBack = () => {
@@ -282,15 +320,16 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
       }}>
         <button
-          onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } openPaywall(false); }}
+          onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } launchCheckout(); }}
+          disabled={checkoutLoading}
           style={{
             width: '100%', fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#fff',
             background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-            border: 'none', borderRadius: 14, padding: '18px 16px', cursor: 'pointer', minHeight: 56,
+            border: 'none', borderRadius: 14, padding: '18px 16px', cursor: checkoutLoading ? 'default' : 'pointer', minHeight: 56,
             boxShadow: '0 4px 16px rgba(109,40,217,0.40)',
           }}
         >
-          Deploy CLiFF Agent — $4.98 →
+          {checkoutLoading ? 'Launching…' : 'Deploy CLiFF Agent — $4.98 →'}
         </button>
       </div>
 
@@ -536,20 +575,40 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
         {/* Deploy button — purple */}
         <button
-          onClick={() => { if (!commitment) { setShowCommitmentRequired(true); const el = document.getElementById('commitment-anchor'); el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; } openPaywall(false); }}
+          onClick={() => {
+            if (!commitment) {
+              setShowCommitmentRequired(true);
+              const el = document.getElementById('commitment-anchor');
+              el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              return;
+            }
+            launchCheckout();
+          }}
+          disabled={checkoutLoading}
           style={{
             width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 20px',
             fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
-            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-            border: 'none', borderRadius: 14, padding: '20px 32px', cursor: 'pointer', minHeight: 'auto',
+            background: checkoutLoading ? '#4c1d95' : 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            border: 'none', borderRadius: 14, padding: '20px 32px', cursor: checkoutLoading ? 'default' : 'pointer', minHeight: 'auto',
             boxShadow: '0 8px 32px rgba(109,40,217,0.45), 0 2px 8px rgba(0,0,0,0.2)',
             letterSpacing: '-0.01em', transition: 'all 0.2s',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(109,40,217,0.60)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(109,40,217,0.45), 0 2px 8px rgba(0,0,0,0.2)'; }}
+          onMouseEnter={e => { if (!checkoutLoading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(109,40,217,0.60)'; }}}
+          onMouseLeave={e => { if (!checkoutLoading) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(109,40,217,0.45), 0 2px 8px rgba(0,0,0,0.2)'; }}}
         >
-          Deploy CLiFF Agent — $4.98 →
+          {checkoutLoading ? (
+            <>
+              <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
+              Launching Stripe…
+            </>
+          ) : 'Deploy CLiFF Agent — $4.98 →'}
         </button>
+        {checkoutError && (
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#ef4444', textAlign: 'center', margin: '-12px 0 16px', fontWeight: 600 }}>
+            ⚠️ {checkoutError}
+          </p>
+        )}
 
         {/* Trust signals */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
@@ -572,7 +631,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           schoolName={schoolName}
           isDownsell={isDownsell}
           onClose={() => setShowPaywall(false)}
-          onPay={goToPaidDashboard}
+          onPay={launchCheckout}
           onReferral={handleReferral}
         />
       )}
