@@ -296,11 +296,11 @@ export default function StudentLandingPage({ onParentClick }) {
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 720, textAlign: 'center' }}>
           <h1 style={{ fontFamily: FONT, fontSize: 'clamp(28px, 7vw, 60px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: TEXT, margin: '0 0 16px' }}>
-            Stop mass-applying.<br />
+            Stop mass-applying to random jobs.<br />
             <span style={{ color: BLUE }}>Start landing interviews.</span>
           </h1>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 21px)', fontWeight: 700, color: TEXT, lineHeight: 1.4, margin: '0 0 14px' }}>
-            <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span> organizes the chaos, uncovers hidden jobs, surfaces warm connections, and crafts your messages — so you spend less time applying and get better results.
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: 500, color: TEXT2, lineHeight: 1.5, margin: '0 0 14px' }}>
+            <span style={{ color: BLUE, fontWeight: 700 }}>C</span><span style={{ color: TEXT3, fontWeight: 700 }}>li</span><span style={{ color: BLUE, fontWeight: 700 }}>FF</span> unlocks the hidden job market and warm alumni & parent connections — so you can stop refreshing LinkedIn and finally start landing interviews.
           </p>
 
         </div>
