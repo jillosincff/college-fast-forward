@@ -182,16 +182,20 @@ export default function ParentLandingPage({ onStudentClick }) {
           </span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={student} style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 12px' }}>For Students</button>
-          <button onClick={go} style={{
-            fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
-            background: GRAD_INDIGO, border: 'none', borderRadius: 10,
-            padding: '10px 20px', cursor: 'pointer', minHeight: 44,
-            boxShadow: '0 4px 14px rgba(109,40,217,0.35)', transition: 'all 0.15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-          >Join the Network →</button>
+          {!submitted && (
+            <>
+              <button onClick={student} style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 12px' }}>For Students</button>
+              <button onClick={go} style={{
+                fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
+                background: GRAD_INDIGO, border: 'none', borderRadius: 10,
+                padding: '10px 20px', cursor: 'pointer', minHeight: 44,
+                boxShadow: '0 4px 14px rgba(109,40,217,0.35)', transition: 'all 0.15s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+              >Join the Network →</button>
+            </>
+          )}
         </div>
       </nav>
 
@@ -473,18 +477,20 @@ export default function ParentLandingPage({ onStudentClick }) {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <button onClick={go} style={{
-              fontFamily: SF, fontSize: 15, fontWeight: 700, color: '#fff',
-              background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: '16px 36px',
-              cursor: 'pointer', minHeight: 52,
-              boxShadow: '0 8px 28px rgba(109,40,217,0.30)',
-              transition: 'all 0.2s ease',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
-            >Join the Network →</button>
-          </div>
+          {!submitted && (
+            <div style={{ textAlign: 'center' }}>
+              <button onClick={go} style={{
+                fontFamily: SF, fontSize: 15, fontWeight: 700, color: '#fff',
+                background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: '16px 36px',
+                cursor: 'pointer', minHeight: 52,
+                boxShadow: '0 8px 28px rgba(109,40,217,0.30)',
+                transition: 'all 0.2s ease',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
+              >Join the Network →</button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -501,32 +507,34 @@ export default function ParentLandingPage({ onStudentClick }) {
       </div>
 
       {/* ── FINAL CTA ── */}
-      <div style={{ padding: 'clamp(56px, 12vw, 100px) clamp(20px, 5vw, 40px)', textAlign: 'center', background: 'linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>One connection changes everything</p>
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(28px, 7vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 16px' }}>
-            One introduction from you can<br />lead to an interview.
-          </h2>
-          <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: 'rgba(255,255,255,0.75)', margin: '0 0 clamp(28px, 6vw, 36px)', lineHeight: 1.65 }}>
-            Free. 30 seconds. No obligation.<br />Students at your school genuinely need you.
-          </p>
-          <button onClick={go} style={{
-            fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 700, color: INDIGO,
-            background: '#fff', border: 'none', borderRadius: 14,
-            padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
-            cursor: 'pointer', minHeight: 56,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-            transition: 'all 0.2s ease', touchAction: 'manipulation',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'; }}
-          >
-            Join the Network →
-          </button>
-          <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '16px 0 0', lineHeight: 1.4 }}>No credit card required to start.</p>
+      {!submitted && (
+        <div style={{ padding: 'clamp(56px, 12vw, 100px) clamp(20px, 5vw, 40px)', textAlign: 'center', background: 'linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
+          <div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>One connection changes everything</p>
+            <h2 style={{ fontFamily: SF, fontSize: 'clamp(28px, 7vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 16px' }}>
+              One introduction from you can<br />lead to an interview.
+            </h2>
+            <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: 'rgba(255,255,255,0.75)', margin: '0 0 clamp(28px, 6vw, 36px)', lineHeight: 1.65 }}>
+              Free. 30 seconds. No obligation.<br />Students at your school genuinely need you.
+            </p>
+            <button onClick={go} style={{
+              fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 700, color: INDIGO,
+              background: '#fff', border: 'none', borderRadius: 14,
+              padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
+              cursor: 'pointer', minHeight: 56,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+              transition: 'all 0.2s ease', touchAction: 'manipulation',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'; }}
+            >
+              Join the Network →
+            </button>
+            <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '16px 0 0', lineHeight: 1.4 }}>No credit card required to start.</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── FOOTER ── */}
       <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', textAlign: 'center', background: '#fff' }}>
