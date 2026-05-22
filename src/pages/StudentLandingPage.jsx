@@ -288,37 +288,27 @@ export default function StudentLandingPage({ onParentClick }) {
 
       {/* ── HERO ── */}
       <div style={{
-        minHeight: '92vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(100px, 15vw, 130px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)',
-        background: GRAD_HERO, position: 'relative', overflow: 'hidden',
+        background: '#fdfaf5', position: 'relative', overflow: 'hidden',
       }}>
-        {/* Floating blobs */}
-        <div style={{ position: 'absolute', top: '8%', left: '-8%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '5%', right: '-6%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '40%', right: '15%', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(236,72,153,0.08) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        {/* Dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(79,70,229,0.12) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', opacity: 0.6 }} />
+        {/* Subtle dot grid */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#a5b4fc 0.8px, transparent 1px)', backgroundSize: '45px 45px', opacity: 0.10, pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: 780, position: 'relative', zIndex: 1, textAlign: 'center' }}>
+        <div style={{ maxWidth: 860, position: 'relative', zIndex: 1, textAlign: 'center' }}>
 
           {/* Eyebrow badge */}
           {mounted && (
-            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0e7ff', borderRadius: 999, padding: '8px 20px', marginBottom: 32, boxShadow: '0 2px 16px rgba(79,70,229,0.10)' }}>
-              <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: PINK, animation: 'pulseGreen 1.8s ease-in-out infinite' }} />
-              <span style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: INDIGO, letterSpacing: '0.04em' }}>2,400+ students already getting hired faster</span>
+            <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #e0e7ff', borderRadius: 999, padding: '10px 24px', marginBottom: 40, boxShadow: '0 2px 12px rgba(99,102,241,0.10)' }}>
+              <span style={{ fontFamily: SF, fontSize: 'clamp(12px, 3vw, 14px)', fontWeight: 600, color: '#6366f1' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
             </div>
           )}
 
           {/* Main headline */}
           {mounted && (
             <div className="hero-animate-2">
-              <h1 style={{ fontFamily: SF, fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 0.95, margin: '0 0 20px', textAlign: 'center' }}>
-                <span style={{ display: 'block', fontSize: 'clamp(42px, 10vw, 84px)', color: TEXT }}>
-                  Tired of the
-                </span>
-                <span style={{ display: 'block', fontSize: 'clamp(42px, 10vw, 84px)', background: 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 40%, #ec4899 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  black hole?
-                </span>
+              <h1 style={{ fontFamily: SF, fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1.0, color: '#1e2937', margin: '0 0 24px' }}>
+                Tired of the black hole?
               </h1>
             </div>
           )}
@@ -326,37 +316,34 @@ export default function StudentLandingPage({ onParentClick }) {
           {/* Sub-headline */}
           {mounted && (
             <div className="hero-animate-3">
-              <h2 style={{ fontFamily: SF, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 700, color: TEXT, lineHeight: 1.25, margin: '0 auto 16px', maxWidth: 620, letterSpacing: '-0.02em' }}>
+              <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 600, color: '#6366f1', margin: '0 0 28px', lineHeight: 1.1, letterSpacing: '-0.03em' }}>
                 CFF finds the path around it.
               </h2>
-              <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 620 }}>
+              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 4vw, 20px)', color: '#475569', lineHeight: 1.75, margin: '0 auto 48px', maxWidth: 720 }}>
                 We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
               </p>
             </div>
           )}
 
-          {/* CTA row */}
+          {/* CTA */}
           {mounted && (
-            <div className="hero-animate-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-                <button onClick={go} style={{
-                  fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 700, color: '#fff',
-                  background: GRAD_INDIGO, border: 'none', borderRadius: 14,
-                  padding: 'clamp(16px, 4vw, 18px) clamp(36px, 7vw, 52px)',
-                  cursor: 'pointer', minHeight: 56,
-                  boxShadow: '0 10px 36px rgba(79,70,229,0.32)',
-                  transition: 'all 0.2s ease',
-                  touchAction: 'manipulation',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.03)'; e.currentTarget.style.boxShadow = '0 18px 48px rgba(79,70,229,0.42)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 10px 36px rgba(79,70,229,0.32)'; }}
-                >
-                  Start for Free →
-                </button>
+            <div className="hero-animate-4" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+              <button onClick={go} style={{
+                fontFamily: SF, fontSize: 'clamp(17px, 4vw, 20px)', fontWeight: 600, color: '#fff',
+                background: '#6366f1', border: 'none', borderRadius: 999,
+                padding: 'clamp(16px, 4vw, 22px) clamp(44px, 8vw, 64px)',
+                cursor: 'pointer', minHeight: 60,
+                boxShadow: '0 10px 40px rgba(99,102,241,0.30)',
+                transition: 'all 0.3s ease',
+                touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#4f46e5'; e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(99,102,241,0.40)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#6366f1'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 10px 40px rgba(99,102,241,0.30)'; }}
+              >
+                Start for Free →
+              </button>
 
-              </div>
-
-              <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3vw, 15px)', color: TEXT3, margin: '4px 0 0', lineHeight: 1.5 }}>
+              <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 15px)', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
                 This guided setup takes 8–12 minutes — you'll have a personalized plan.
               </p>
 
@@ -367,8 +354,8 @@ export default function StudentLandingPage({ onParentClick }) {
                     <img key={i} src={s.photo} alt={s.name} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', marginLeft: i > 0 ? -10 : 0 }} />
                   ))}
                 </div>
-                <p style={{ fontFamily: SF, fontSize: 13, color: TEXT3, margin: 0 }}>
-                  <span style={{ color: TEXT, fontWeight: 700 }}>2,400+</span> students hired faster
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: '#94a3b8', margin: 0 }}>
+                  <span style={{ color: '#1e2937', fontWeight: 700 }}>2,400+</span> students hired faster
                 </p>
               </div>
             </div>
