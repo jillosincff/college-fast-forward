@@ -256,6 +256,16 @@ export default function StudentLandingPage({ onParentClick }) {
         .hero-animate-2 { animation: fadeUp 0.7s 0.12s ease both; }
         .hero-animate-3 { animation: fadeUp 0.7s 0.24s ease both; }
         .hero-animate-4 { animation: fadeUp 0.7s 0.36s ease both; }
+        /* Nav: hide "For Parents" on mobile, show on desktop */
+        @media (max-width: 640px) {
+          .nav-for-parents { display: none !important; }
+        }
+        /* Hero: stack layout on mobile */
+        @media (max-width: 768px) {
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .hero-visual { order: 3; min-height: 280px !important; margin-top: 8px; }
+          .hero-text { order: 1; }
+        }
       `}</style>
 
       {/* ── NAV ── */}
@@ -273,7 +283,8 @@ export default function StudentLandingPage({ onParentClick }) {
           </span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={parent} style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 12px' }}>For Parents</button>
+          {/* "For Parents" hidden on mobile — shown in footer instead */}
+          <button onClick={parent} className="nav-for-parents" style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 12px' }}>For Parents</button>
           <button onClick={go} style={{
             fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
             background: GRAD_INDIGO, border: 'none', borderRadius: 10,
@@ -295,10 +306,10 @@ export default function StudentLandingPage({ onParentClick }) {
         {/* Subtle radial glow */}
         <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        <div className="hero-grid" style={{ maxWidth: 1200, width: '100%', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 'clamp(40px, 8vw, 80px)', alignItems: 'center', position: 'relative', zIndex: 1 }}>
           
           {/* Left Column - Text (60%) */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <div className="hero-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
 
             {/* Eyebrow badge */}
             {mounted && (
@@ -328,8 +339,8 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Body */}
             {mounted && (
               <div className="hero-animate-4">
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#475569', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
-                  We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#334155', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
+                 We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
                 </p>
               </div>
             )}
@@ -354,7 +365,7 @@ export default function StudentLandingPage({ onParentClick }) {
                   Start for Free →
                 </button>
 
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#94a3b8', margin: '8px 0 0', lineHeight: 1.5 }}>
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: '8px 0 0', lineHeight: 1.5 }}>
                   This guided setup takes 8–12 minutes — you'll have a personalized plan.
                 </p>
               </div>
@@ -363,7 +374,7 @@ export default function StudentLandingPage({ onParentClick }) {
 
           {/* Right Column - Visual Anchor (40%) */}
           {mounted && (
-            <div className="hero-animate-6" style={{ position: 'relative', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="hero-animate-6 hero-visual" style={{ position: 'relative', minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {/* Base Layer - Soft radial gradient */}
               <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(109,40,217,0.10) 0%, transparent 70%)', borderRadius: 24 }} />
               
@@ -688,8 +699,8 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── FOOTER ── */}
       <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', textAlign: 'center', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
-          {[['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
-            <a key={label} href={href} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s' }}
+          {[['For Parents', null], ['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
+            <a key={label} href={href || undefined} onClick={!href ? (e) => { e.preventDefault(); parent(); } : undefined} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s', cursor: 'pointer' }}
               onMouseEnter={e => e.currentTarget.style.color = TEXT}
               onMouseLeave={e => e.currentTarget.style.color = TEXT3}
             >{label}</a>
