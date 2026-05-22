@@ -251,7 +251,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       }
       // Already authenticated — call checkout directly
       const res = await createCheckoutSession({
-        plan: 'pro_monthly',
+        plan: isDownsell ? 'pro_monthly_founding' : 'pro_monthly',
         user: { id: user.id, email: user.email, family_id: user.family_id },
         successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
         cancelUrl: window.location.href,

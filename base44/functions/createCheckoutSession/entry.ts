@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const PRICES = {
   pro_monthly:             'price_1TZyJ8873TV7WMcTiMisnPsg',  // $19.96/month ($4.99/week × 4)
+  pro_monthly_founding:    'price_1TZyqK873TV7WMcTuQVvrYcG',  // $9.96/month (50% off — founding/downsell)
   fastiq_monthly:          'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
   fastiq_annual:           'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
   fastiq_founding_monthly: 'price_1TFPPy873TV7WMcTSw0rKVfj',  // $14.50/month
@@ -50,7 +51,8 @@ Deno.serve(async (req) => {
     const isSubscription = plan !== 'career_archetype';
     const isFoundingPlan = plan.includes('founding');
 
-    if (isFoundingPlan && new Date() > FOUNDING_OFFER_DEADLINE) {
+    // Only fastiq founding plans are deadline-gated; pro_monthly_founding is a permanent downsell price
+    if (isFoundingPlan && plan !== 'pro_monthly_founding' && new Date() > FOUNDING_OFFER_DEADLINE) {
       return Response.json({
         success: false,
         error: 'The founding member offer has expired.',
