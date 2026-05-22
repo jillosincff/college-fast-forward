@@ -1,10 +1,12 @@
 export const dmSans = "'DM Sans', system-ui, sans-serif";
 export const playfair = "'Playfair Display', Georgia, serif";
-export const BG = '#0A0A0A';
-export const CARD_BG = '#1A1A1A';
+export const BG = '#0d1117';
+export const CARD_BG = '#161b27';
 export const MUTED = '#888888';
-export const ORANGE = '#E85D20';
-export const BORDER = '#2A2A2A';
+export const ORANGE = '#7c3aed';
+export const INDIGO = '#6d28d9';
+export const VIOLET = '#7c3aed';
+export const BORDER = '#1e2a3a';
 
 export const ACTIVE_TABS = [
   { id: 'company-intel', label: 'Company Intel', icon: '🏢' },

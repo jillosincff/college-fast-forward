@@ -120,8 +120,8 @@ export default function AlumniHome() {
       <div style={{
         position: 'fixed', inset: 0,
         backgroundImage: `
-          radial-gradient(ellipse 60% 40% at 50% 0%, rgba(232,93,32,0.07) 0%, transparent 55%),
-          radial-gradient(ellipse 40% 30% at 90% 80%, rgba(8,33,165,0.05) 0%, transparent 50%)
+          radial-gradient(ellipse 60% 40% at 50% 0%, rgba(109,40,217,0.10) 0%, transparent 55%),
+          radial-gradient(ellipse 40% 30% at 90% 80%, rgba(124,58,237,0.06) 0%, transparent 50%)
         `,
         pointerEvents: 'none', zIndex: 0,
       }} />
@@ -167,7 +167,7 @@ export default function AlumniHome() {
               margin: '0 0 6px',
             }}>
               Welcome back,{' '}
-              <span style={{ color: '#E85D20', fontStyle: 'italic' }}>{firstName}.</span>
+              <span style={{ color: '#a78bfa', fontStyle: 'italic' }}>{firstName}.</span>
             </h1>
             <p style={{
               fontFamily: dmSans, fontSize: 14,
@@ -183,8 +183,8 @@ export default function AlumniHome() {
               onClick={() => navigate('Messages')}
               style={{
                 width: '100%',
-                background: 'rgba(232,93,32,0.1)',
-                border: '1px solid rgba(232,93,32,0.35)',
+                background: 'rgba(109,40,217,0.1)',
+                border: '1px solid rgba(109,40,217,0.35)',
                 borderRadius: 14,
                 padding: '16px 20px',
                 display: 'flex',
@@ -195,12 +195,12 @@ export default function AlumniHome() {
                 textAlign: 'left',
                 transition: 'all 0.2s ease',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.15)'; e.currentTarget.style.borderColor = '#E85D20'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.1)'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.35)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(109,40,217,0.15)'; e.currentTarget.style.borderColor = '#7c3aed'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(109,40,217,0.1)'; e.currentTarget.style.borderColor = 'rgba(109,40,217,0.35)'; }}
             >
               <div style={{
                 width: 36, height: 36, borderRadius: '50%',
-                background: '#E85D20',
+                background: '#7c3aed',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 18, flexShrink: 0,
               }}>
@@ -247,7 +247,7 @@ export default function AlumniHome() {
               </p>
               <p style={{
                 fontFamily: dmSans, fontSize: 14, fontWeight: 700,
-                color: profile.score >= 80 ? '#4ade80' : profile.score >= 50 ? '#E85D20' : 'rgba(255,255,255,0.5)',
+                color: profile.score >= 80 ? '#4ade80' : profile.score >= 50 ? '#a78bfa' : 'rgba(255,255,255,0.5)',
                 margin: 0,
               }}>
                 {profile.score}%
@@ -263,7 +263,7 @@ export default function AlumniHome() {
                 width: `${profile.score}%`,
                 background: profile.score >= 80
                   ? 'linear-gradient(90deg, #4ade80, #22c55e)'
-                  : 'linear-gradient(90deg, #E85D20, #c9471a)',
+                  : 'linear-gradient(90deg, #6d28d9, #7c3aed)',
                 borderRadius: 3,
                 transition: 'width 1s ease',
               }} />
@@ -283,14 +283,14 @@ export default function AlumniHome() {
               onClick={() => navigate('ProfileEdit')}
               style={{
                 fontFamily: dmSans, fontSize: 13, fontWeight: 600,
-                color: '#E85D20', background: 'none',
-                border: '1px solid rgba(232,93,32,0.3)',
+                color: '#a78bfa', background: 'none',
+                border: '1px solid rgba(109,40,217,0.3)',
                 borderRadius: 8, padding: '9px 20px',
                 cursor: 'pointer', minHeight: 'auto',
                 transition: 'all 0.15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(232,93,32,0.08)'; e.currentTarget.style.borderColor = '#E85D20'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(232,93,32,0.3)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(109,40,217,0.08)'; e.currentTarget.style.borderColor = '#7c3aed'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'rgba(109,40,217,0.3)'; }}
             >
               {profile.complete ? 'View My Profile →' : 'Complete My Profile →'}
             </button>
@@ -314,8 +314,8 @@ export default function AlumniHome() {
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
               <div style={{
                 width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(232,93,32,0.12)',
-                border: '1px solid rgba(232,93,32,0.25)',
+                background: 'rgba(109,40,217,0.12)',
+                border: '1px solid rgba(109,40,217,0.25)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 18, flexShrink: 0,
               }}>
@@ -341,10 +341,10 @@ export default function AlumniHome() {
               onClick={() => navigate('Directory')}
               style={{
                 fontFamily: dmSans, fontSize: 13, fontWeight: 600,
-                color: '#fff', background: '#E85D20', border: 'none',
-                borderRadius: 8, padding: '10px 20px',
-                cursor: 'pointer', minHeight: 'auto',
-                boxShadow: '0 4px 12px rgba(232,93,32,0.25)',
+                color: '#fff', background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', border: 'none',
+                  borderRadius: 8, padding: '10px 20px',
+                  cursor: 'pointer', minHeight: 'auto',
+                  boxShadow: '0 4px 12px rgba(109,40,217,0.25)',
                 transition: 'opacity 0.15s',
               }}
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
@@ -407,7 +407,7 @@ export default function AlumniHome() {
                   textDecorationColor: 'rgba(255,255,255,0.2)',
                   transition: 'color 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#E85D20'; e.currentTarget.style.textDecorationColor = '#E85D20'; }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#a78bfa'; e.currentTarget.style.textDecorationColor = '#a78bfa'; }}
                 onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; e.currentTarget.style.textDecorationColor = 'rgba(255,255,255,0.2)'; }}
               >
                 FastIQ can help — $14.50/mo founding rate until April 30 →

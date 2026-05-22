@@ -16,7 +16,7 @@ export default function DashboardHero({ user, isPaid, onUnlock }) {
         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 'clamp(28px, 4vw, 38px)', color: '#fff', lineHeight: 1.2, marginBottom: 4 }}>
           Welcome, {firstName}.
         </h1>
-        <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 'clamp(20px, 3vw, 26px)', color: ORANGE, lineHeight: 1.3, marginBottom: 16 }}>
+        <p style={{ fontFamily: playfair, fontWeight: 400, fontStyle: 'italic', fontSize: 'clamp(20px, 3vw, 26px)', color: '#a78bfa', lineHeight: 1.3, marginBottom: 16 }}>
           Your career starts here.
         </p>
 
@@ -30,8 +30,8 @@ export default function DashboardHero({ user, isPaid, onUnlock }) {
         {/* Upgrade banner — free users only */}
         {!isPaid && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(232,93,32,0.12) 0%, rgba(232,93,32,0.06) 100%)',
-            border: '1px solid rgba(232,93,32,0.25)',
+            background: 'linear-gradient(135deg, rgba(109,40,217,0.12) 0%, rgba(124,58,237,0.06) 100%)',
+            border: '1px solid rgba(109,40,217,0.25)',
             borderRadius: 12, padding: '20px 24px',
           }}>
             <p style={{ fontFamily: dmSans, fontSize: 15, fontWeight: 500, color: '#fff', lineHeight: 1.5, marginBottom: 4 }}>
@@ -45,7 +45,7 @@ export default function DashboardHero({ user, isPaid, onUnlock }) {
                 onClick={onUnlock}
                 style={{
                   fontFamily: dmSans, fontSize: 14, fontWeight: 600, color: '#fff',
-                  background: ORANGE, border: 'none', borderRadius: 100,
+                  background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)', border: 'none', borderRadius: 100,
                   padding: '10px 24px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto',
                 }}
               >

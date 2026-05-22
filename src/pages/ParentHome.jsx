@@ -6,12 +6,12 @@ const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
 const C = {
-  bg: '#0d0d14',
-  card: '#13131f',
+  bg: '#0d1117',
+  card: '#161b27',
   cardBorder: 'rgba(255,255,255,0.07)',
-  orange: '#E85D20',
-  orangeLight: 'rgba(232,93,32,0.12)',
-  orangeBorder: 'rgba(232,93,32,0.25)',
+  orange: '#7c3aed',
+  orangeLight: 'rgba(109,40,217,0.12)',
+  orangeBorder: 'rgba(109,40,217,0.25)',
   white: '#ffffff',
   muted: 'rgba(255,255,255,0.5)',
   hint: 'rgba(255,255,255,0.25)',
@@ -170,12 +170,12 @@ export default function ParentHome() {
 
       {/* ── HEADER ── */}
       <div style={{
-        background: 'linear-gradient(180deg, #1a0a05 0%, #0d0d14 100%)',
+        background: 'linear-gradient(180deg, #120d2a 0%, #0d1117 100%)',
         borderBottom: `1px solid ${C.cardBorder}`,
         padding: '48px 32px 40px',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: -60, right: -40, width: 400, height: 400, background: 'radial-gradient(ellipse, rgba(232,93,32,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: -60, right: -40, width: 400, height: 400, background: 'radial-gradient(ellipse, rgba(109,40,217,0.10) 0%, transparent 60%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 900, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <p style={{ fontFamily: dmSans, fontSize: 13, color: C.hint, margin: '0 0 8px', letterSpacing: '0.02em' }}>
             {currentDate} · {currentTime}
@@ -342,10 +342,10 @@ export default function ParentHome() {
             </div>
             <button onClick={() => navigate('FastIQDashboard')} style={{
               fontFamily: dmSans, fontSize: 13, fontWeight: 700,
-              color: '#fff', background: 'linear-gradient(135deg, #E85D20, #c9471a)',
+              color: '#fff', background: 'linear-gradient(135deg, #6d28d9, #7c3aed)',
               border: 'none', borderRadius: 10, padding: '13px 0',
               cursor: 'pointer', minHeight: 'auto', width: '100%',
-              boxShadow: '0 4px 16px rgba(232,93,32,0.25)', transition: 'all 0.2s ease',
+              boxShadow: '0 4px 16px rgba(109,40,217,0.25)', transition: 'all 0.2s ease',
             }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
@@ -407,7 +407,7 @@ export default function ParentHome() {
 
         {/* ── NETWORK NUDGE ── */}
         <div style={{
-          background: 'linear-gradient(135deg, rgba(232,93,32,0.08) 0%, rgba(232,93,32,0.03) 100%)',
+          background: 'linear-gradient(135deg, rgba(109,40,217,0.08) 0%, rgba(124,58,237,0.03) 100%)',
           border: `1px solid ${C.orangeBorder}`,
           borderRadius: 16, padding: '20px 24px',
           display: 'flex', alignItems: 'center',

@@ -22,8 +22,8 @@ export default function TabBar({ activeTab, onTabChange, isPaid, onLockedClick }
                 style={{
                   fontFamily: dmSans, fontSize: 13, fontWeight: isActive ? 600 : 400,
                   color: isLocked ? 'rgba(255,255,255,0.4)' : isActive ? '#fff' : '#888',
-                  background: isActive ? 'rgba(232,93,32,0.15)' : 'transparent',
-                  border: `1px solid ${isActive ? 'rgba(232,93,32,0.3)' : BORDER}`,
+                  background: isActive ? 'rgba(109,40,217,0.15)' : 'transparent',
+                  border: `1px solid ${isActive ? 'rgba(109,40,217,0.3)' : BORDER}`,
                   borderRadius: 100, padding: '8px 16px', cursor: 'pointer',
                   whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6,
                   minHeight: 'auto', minWidth: 'auto', opacity: isLocked ? 0.5 : 1,
@@ -76,7 +76,7 @@ export default function TabBar({ activeTab, onTabChange, isPaid, onLockedClick }
                   style={{
                     fontFamily: dmSans, fontSize: 14, fontWeight: isActive ? 600 : 400,
                     color: isActive ? '#fff' : '#888',
-                    background: isActive ? 'rgba(232,93,32,0.12)' : 'transparent',
+                    background: isActive ? 'rgba(109,40,217,0.12)' : 'transparent',
                     border: 'none', borderRadius: 10,
                     padding: '10px 14px', cursor: 'pointer', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: 10,
@@ -128,7 +128,7 @@ export default function TabBar({ activeTab, onTabChange, isPaid, onLockedClick }
                   style={{
                     fontFamily: dmSans, fontSize: 14, fontWeight: isActive ? 600 : 400,
                     color: isActive ? '#fff' : '#888',
-                    background: isActive ? 'rgba(232,93,32,0.12)' : 'transparent',
+                    background: isActive ? 'rgba(109,40,217,0.12)' : 'transparent',
                     border: 'none', borderRadius: 10,
                     padding: '10px 14px', cursor: 'pointer', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: 10,
