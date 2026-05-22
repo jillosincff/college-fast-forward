@@ -39,11 +39,11 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, step: 'create_product', error: product.error.message }, { status: 500 });
     }
 
-    // 2. Create the price — $21.67/month (= $4.99/week × 4.33)
-    // Stripe amounts are in cents. $21.67 = 2167 cents.
+    // 2. Create the price — $19.96/month (= $4.99/week × 4)
+    // Stripe amounts are in cents. $19.96 = 1996 cents.
     const priceBody = new URLSearchParams({
       product: product.id,
-      unit_amount: '2167',
+      unit_amount: '1996',
       currency: 'usd',
       'recurring[interval]': 'month',
       nickname: 'Pro Monthly ($4.99/week)',
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       message: 'Product and price created! Copy the price_id below into PRICES.pro_monthly in createCheckoutSession.js',
       product_id: product.id,
       price_id: price.id,
-      amount: '$21.67/month (~$4.99/week)',
+      amount: '$19.96/month ($4.99/week × 4)',
     });
 
   } catch (e) {
