@@ -327,7 +327,7 @@ export default function StudentLandingPage({ onParentClick }) {
           <p style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 36px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 20px', background: `linear-gradient(90deg, ${CYAN}, ${BLUE})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             CFF finds the path around it.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, margin: '0 0 14px', maxWidth: 600 }}>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, margin: '0 auto 14px', maxWidth: 600 }}>
             We help you bypass the void: hidden opportunities, warm connections from alumni & parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
         </div>
