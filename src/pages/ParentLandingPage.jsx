@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 import { deriveSchoolCode } from '@/lib/schoolNames';
+import { base44 } from '@/api/base44Client';
 
 // ── Design Tokens — match StudentLandingPage ──────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -103,25 +104,46 @@ export default function ParentLandingPage({ onStudentClick }) {
     else navigate('StudentLandingPage');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.fullName || !form.jobTitle || !form.industry || !form.email || !form.school) return;
     setSubmitting(true);
-    // Store parent role hint for future navigation
-    localStorage.setItem('pending_invite_role', 'parent');
-    sessionStorage.setItem('pending_invite_role', 'parent');
-    // Derive and store school_code along with form data
-    const schoolCode = deriveSchoolCode(form.school);
-    const prefillData = { ...form, school_code: schoolCode };
-    // Store form data for pre-population
+    
     try {
-      sessionStorage.setItem('parent_prefill', JSON.stringify(prefillData));
-    } catch {}
-    // Show success screen directly - no auth needed
-    setTimeout(() => {
-      setSubmitting(false);
+      // Derive school_code from school name
+      const schoolCode = deriveSchoolCode(form.school);
+      
+      // Create parent user directly in database
+      await base44.functions.invoke('createParentUser', {
+        email: form.email.toLowerCase().trim(),
+        full_name: form.fullName.trim(),
+        school: form.school.trim(),
+        school_name: form.school.trim(),
+        school_code: schoolCode,
+        company: form.industry.trim(),
+        career_background: form.jobTitle.trim(),
+        industry: form.industry.trim(),
+        industries: [form.industry.trim()],
+        intro_willingness: 'yes',
+        ways_to_help: ['networking_intros', 'career_advice'],
+        help_types: ['networking_intros', 'career_advice'],
+        visible_in_directory: true,
+        directory_consent_given: true,
+        linkedin_url: form.linkedin?.trim() || '',
+      });
+      
+      // Store parent role hint for future login
+      localStorage.setItem('pending_invite_role', 'parent');
+      sessionStorage.setItem('pending_invite_role', 'parent');
+      
+      // Show success screen
       setSubmitted(true);
-    }, 600);
+    } catch (error) {
+      console.error('Failed to create parent:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const SectionLabel = ({ text, color = INDIGO }) => (
