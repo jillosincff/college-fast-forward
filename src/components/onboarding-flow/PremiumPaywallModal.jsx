@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { getUniversityBrand } from '@/lib/universityBrand';
 import { base44 } from '@/api/base44Client';
-import { generateReferralPayload } from '@/functions/generateReferralPayload';
-import { generateUserReferralCode } from '@/functions/generateUserReferralCode';
-import { activateFastIQTrial } from '@/functions/activateFastIQTrial';
 
 let _trackUserId = 'anon';
 const track = (event, props = {}) => {
@@ -24,7 +21,6 @@ const sat = "'Satoshi', 'DM Sans', system-ui, sans-serif";
  *   isTokenDepleted   – boolean — if true shows weekly token limit reached state
  *   onClose           – () => void
  *   onPay             – () => void
- *   onReferral        – () => void
  */
 export default function PremiumPaywallModal({
   user,
@@ -34,15 +30,7 @@ export default function PremiumPaywallModal({
   isTokenDepleted = false,
   onClose,
   onPay,
-  onReferral,
 }) {
-  const [referralClicked, setReferralClicked] = useState(false);
-  const [referralLoading, setReferralLoading] = useState(false);
-  const [copiedPayload, setCopiedPayload] = useState('');
-  const [referralCode, setReferralCode] = useState('');
-  const [referralCount, setReferralCount] = useState(0);
-  const [freeWeekGranted, setFreeWeekGranted] = useState(false);
-
   useEffect(() => {
     if (user?.id) _trackUserId = user.id;
     track(isDownsell ? 'downsell_modal_shown' : 'paywall_shown', { school: user?.school_code });
@@ -63,60 +51,6 @@ export default function PremiumPaywallModal({
   const handlePay = () => {
     track(isDownsell ? 'downsell_converted' : 'paywall_converted', { price: isDownsell ? 2.49 : 4.99 });
     onPay?.();
-  };
-
-  const handleReferral = async () => {
-    setReferralLoading(true);
-    track('paywall_referral_share_clicked', { school: user?.school_code });
-
-    // Generate a unique referral code for this user session
-    let code = referralCode;
-    if (!code) {
-      const codeRes = await generateUserReferralCode({
-        firstName: resolvedFirst,
-        school: resolvedSchool,
-      }).catch(() => null);
-      code = codeRes?.data?.code || codeRes?.code || `REF-${Math.random().toString(36).slice(2,8).toUpperCase()}`;
-      setReferralCode(code);
-      // Persist so we can track sign-ups
-      try { localStorage.setItem('cff_referral_code', code); } catch {}
-    }
-
-    const referralUrl = `https://collegefastforward.com/join?r=${code}`;
-    const smsText = `Hey! 👋 I'm using College Fast Forward to land interviews way faster — their AI career agent rewrites your resume + finds alumni insiders at your target companies. You can skip the waitlist with my link: ${referralUrl}`;
-
-    // Try native SMS share first (best for mobile), fall back to clipboard
-    if (navigator.share) {
-      navigator.share({ text: smsText }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(smsText).catch(() => {});
-    }
-
-    setCopiedPayload(smsText);
-    setReferralClicked(true);
-    setReferralLoading(false);
-
-    // Poll localStorage for referral sign-up count (set by join page on sign-up)
-    // Check every 5s for up to 10 minutes
-    let checks = 0;
-    const interval = setInterval(async () => {
-      checks++;
-      const count = parseInt(localStorage.getItem(`cff_referral_signups_${code}`) || '0', 10);
-      setReferralCount(count);
-      if (count >= 3 && !freeWeekGranted) {
-        clearInterval(interval);
-        setFreeWeekGranted(true);
-        // Grant a free week trial
-        try {
-          await activateFastIQTrial({ source: 'referral_3_friends', code });
-        } catch {}
-        track('referral_free_week_granted', { code, count });
-        onReferral?.();
-      }
-      if (checks > 120) clearInterval(interval); // Stop after 10 min
-    }, 5000);
-
-    onReferral?.();
   };
 
   return (
@@ -253,45 +187,10 @@ export default function PremiumPaywallModal({
                 <span>🚀 Upgrade to Pro — $9.99/wk (Includes 10 Tokens)</span>
                 <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, opacity: 0.85 }}>Unlimited outreach · Cancel anytime</span>
               </button>
-
-              {/* Option 3 — Referral for free token */}
-              <button
-                onClick={handleReferral}
-                disabled={referralLoading}
-                style={{
-                  width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#1e3a8a',
-                  background: referralClicked ? '#f0fdf4' : '#eff6ff',
-                  border: `1.5px solid ${referralClicked ? '#86efac' : '#bfdbfe'}`,
-                  borderRadius: 16, padding: '14px 20px',
-                  cursor: referralLoading ? 'wait' : 'pointer', minHeight: 'auto',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { if (!referralClicked) { e.currentTarget.style.background = '#dbeafe'; e.currentTarget.style.borderColor = '#93c5fd'; }}}
-                onMouseLeave={e => { if (!referralClicked) { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#bfdbfe'; }}}
-              >
-                <span style={{ fontSize: 14 }}>
-                  {referralLoading ? '⏳ Generating your link…' : referralClicked ? '✅ Message Copied!' : '🔗 Text 2 Classmates → Unlock 1 Free Token Immediately'}
-                </span>
-                {!referralClicked && (
-                  <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#3b82f6', lineHeight: 1.5, textAlign: 'center' }}>
-                    Each friend who signs up adds 1 token to your balance instantly
-                  </span>
-                )}
-              </button>
-
-              {referralClicked && copiedPayload && (
-                <div style={{ background: '#0f172a', borderRadius: 12, padding: '12px 14px', border: '1px solid #1e293b' }}>
-                  <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>📋 Paste this in your group chat</p>
-                  <p style={{ fontFamily: dm, fontSize: 11, color: '#94a3b8', margin: 0, lineHeight: 1.6 }}>{copiedPayload}</p>
-                </div>
-              )}
             </div>
           ) : (
-          /* ── Standard Dual Action Grid ── */
+          /* ── Standard / Downsell Action ── */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
-
-            {/* Option A — Pay */}
             <button
               onClick={handlePay}
               style={{
@@ -318,89 +217,6 @@ export default function PremiumPaywallModal({
                 {isDownsell ? `${price}/wk today only · Cancel anytime` : 'Cancel anytime in one click · Secured by Stripe'}
               </span>
             </button>
-
-            {/* Divider with OR */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#94a3b8' }}>OR</span>
-              <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
-            </div>
-
-            {/* Option B — Referral */}
-            {freeWeekGranted ? (
-              <div style={{ background: '#f0fdf4', border: '2px solid #86efac', borderRadius: 16, padding: '18px 20px', textAlign: 'center' }}>
-                <p style={{ fontFamily: sat, fontSize: 18, fontWeight: 900, color: '#15803d', margin: '0 0 4px' }}>🎉 Free Week Unlocked!</p>
-                <p style={{ fontFamily: dm, fontSize: 13, color: '#166534', margin: 0 }}>3 friends signed up — your free week starts now.</p>
-              </div>
-            ) : (
-              <>
-                <button
-                  onClick={handleReferral}
-                  disabled={referralLoading}
-                  style={{
-                    width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 700, color: '#1e3a8a',
-                    background: referralClicked ? '#f0fdf4' : '#eff6ff',
-                    border: `1.5px solid ${referralClicked ? '#86efac' : '#bfdbfe'}`,
-                    borderRadius: 16, padding: '14px 20px',
-                    cursor: referralLoading ? 'wait' : 'pointer', minHeight: 'auto',
-                    display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: 4,
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={e => { if (!referralClicked) { e.currentTarget.style.background = '#dbeafe'; e.currentTarget.style.borderColor = '#93c5fd'; }}}
-                  onMouseLeave={e => { if (!referralClicked) { e.currentTarget.style.background = '#eff6ff'; e.currentTarget.style.borderColor = '#bfdbfe'; }}}
-                >
-                  <span style={{ fontSize: 14 }}>
-                    {referralLoading ? '⏳ Generating your link…' : referralClicked ? '✅ Message Copied — Send to 2 more friends!' : '🎁 Text 3 friends → Get 1 Free Week'}
-                  </span>
-                  <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#3b82f6', lineHeight: 1.5, textAlign: 'center' }}>
-                    {referralClicked
-                      ? `${referralCount}/3 friends signed up${referralCount > 0 ? ' ✓' : ''} — keep sharing!`
-                      : 'When all 3 sign up, you get a full free week instantly — no card needed'}
-                  </span>
-                </button>
-
-                {/* Progress tracker */}
-                {referralClicked && (
-                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 16px' }}>
-                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#475569', margin: '0 0 8px', textAlign: 'center' }}>
-                      📊 Friend Sign-Up Progress
-                    </p>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 8 }}>
-                      {[1, 2, 3].map(n => (
-                        <div key={n} style={{
-                          width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          background: referralCount >= n ? '#16a34a' : '#e2e8f0',
-                          border: `2px solid ${referralCount >= n ? '#15803d' : '#cbd5e1'}`,
-                          fontFamily: dm, fontSize: 14, fontWeight: 800, color: referralCount >= n ? '#fff' : '#94a3b8',
-                          transition: 'all 0.3s',
-                        }}>
-                          {referralCount >= n ? '✓' : n}
-                        </div>
-                      ))}
-                    </div>
-                    <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: 0, textAlign: 'center' }}>
-                      {referralCount === 0 ? 'Share the link above — we\'ll notify you when friends join' : `${referralCount} friend${referralCount > 1 ? 's' : ''} joined! ${3 - referralCount} more to unlock your free week.`}
-                    </p>
-                  </div>
-                )}
-
-                {/* Clipboard preview */}
-                {referralClicked && copiedPayload && (
-                  <div style={{ background: '#0f172a', borderRadius: 12, padding: '12px 14px', border: '1px solid #1e293b' }}>
-                    <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>
-                      📱 Tap to copy &amp; paste in your group chat
-                    </p>
-                    <p
-                      onClick={() => navigator.clipboard.writeText(copiedPayload).catch(() => {})}
-                      style={{ fontFamily: dm, fontSize: 11, color: '#94a3b8', margin: 0, lineHeight: 1.6, cursor: 'pointer' }}
-                    >
-                      {copiedPayload}
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
           </div>
           )}
 
