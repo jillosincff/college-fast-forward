@@ -3,23 +3,38 @@ import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
 
 // ── Design Tokens — match StudentLandingPage ──────────────────
-const FONT = "'Inter', 'DM Sans', system-ui, sans-serif";
-const BG = '#F8FAFC';
-const CARD = '#FFFFFF';
-const TEXT = '#0F172A';
-const TEXT2 = '#64748B';
-const TEXT3 = '#94A3B8';
-const BLUE = '#0066FF';
-const BLUE_LIGHT = '#EFF6FF';
-const BLUE_BORDER = '#BFDBFE';
-const GREEN = '#10B981';
-const GREEN_LIGHT = '#F0FDF4';
-const GREEN_BORDER = '#BBF7D0';
-const ORANGE = '#F97316';
-const SHADOW = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)';
-const SHADOW_MD = '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -2px rgba(0,0,0,0.04)';
-const SHADOW_LG = '0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04)';
-const R = 12;
+const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
+const FONT = SF;
+const BG = '#f8f9ff';
+const BG2 = '#ffffff';
+const CARD = '#ffffff';
+const CARD2 = '#f1f5ff';
+const TEXT = '#0f172a';
+const TEXT2 = '#475569';
+const TEXT3 = '#94a3b8';
+const INDIGO = '#6d28d9';
+const INDIGO_DIM = '#5b21b6';
+const INDIGO_LIGHT = 'rgba(109,40,217,0.08)';
+const INDIGO_BORDER = 'rgba(109,40,217,0.20)';
+const VIOLET = '#7c3aed';
+const VIOLET_LIGHT = 'rgba(124,58,237,0.08)';
+const VIOLET_BORDER = 'rgba(124,58,237,0.20)';
+const PINK = '#ec4899';
+const PINK_LIGHT = 'rgba(236,72,153,0.08)';
+const PINK_BORDER = 'rgba(236,72,153,0.22)';
+const TEAL = '#06b6d4';
+const TEAL_LIGHT = 'rgba(6,182,212,0.08)';
+const TEAL_BORDER = 'rgba(6,182,212,0.22)';
+const TEAL_DARK = '#0891b2';
+const CORAL = '#f43f5e';
+const CORAL_LIGHT = 'rgba(244,63,94,0.07)';
+const CORAL_BORDER = 'rgba(244,63,94,0.22)';
+const GRAD_INDIGO = 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)';
+const GRAD_WARM = 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)';
+const SHADOW = '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)';
+const SHADOW_MD = '0 4px 16px rgba(109,40,217,0.12), 0 1px 4px rgba(0,0,0,0.06)';
+const SHADOW_LG = '0 24px 48px rgba(109,40,217,0.16), 0 4px 12px rgba(0,0,0,0.08)';
+const R = 16;
 
 const SCHOOLS = ['University of Florida', 'Florida State', 'Ohio State', 'UCF', 'USC', 'Penn State', 'University of Michigan', 'Tulane', 'University of Maryland', 'And growing…'];
 
@@ -98,12 +113,12 @@ export default function ParentLandingPage({ onStudentClick }) {
     }, 600);
   };
 
-  const SectionLabel = ({ text, center = true }) => (
-    <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: center ? 'center' : 'left' }}>{text}</p>
+  const SectionLabel = ({ text, color = INDIGO }) => (
+    <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
 
   const inputStyle = {
-    fontFamily: FONT, fontSize: 15, color: TEXT,
+    fontFamily: SF, fontSize: 15, color: TEXT,
     background: '#F8FAFC', border: '1.5px solid #E2E8F0',
     borderRadius: R, padding: '14px 16px', width: '100%',
     outline: 'none', transition: 'border-color 0.15s',
@@ -114,50 +129,69 @@ export default function ParentLandingPage({ onStudentClick }) {
     <div style={{ background: BG, fontFamily: FONT, color: TEXT, overflowX: 'hidden' }}>
       <style>{`
         @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        .parent-input:focus { border-color: ${BLUE} !important; background: #fff !important; }
+        @keyframes pulseGreen { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes float { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-8px)} }
+        .parent-input:focus { border-color: ${INDIGO} !important; background: #fff !important; }
       `}</style>
 
       {/* ── NAV ── */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, background: 'rgba(248,250,252,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E2E8F0', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontFamily: FONT, fontSize: 17, fontWeight: 800, color: TEXT, letterSpacing: '-0.02em' }}>
-          College <span style={{ color: BLUE }}>Fast Forward</span>
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        background: 'rgba(248,249,255,0.90)', backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(79,70,229,0.10)',
+        padding: '0 clamp(16px,5vw,32px)', height: 64,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <span style={{ fontFamily: SF, fontSize: 'clamp(15px, 3vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          College{' '}
+          <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            Fast Forward
+          </span>
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={student} style={{ fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '8px 12px' }}>I'm a student →</button>
-          <button onClick={go} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 12px rgba(0,102,255,0.25)', transition: 'all 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={student} style={{ fontFamily: SF, fontSize: 13, fontWeight: 500, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, padding: '8px 12px' }}>For Students</button>
+          <button onClick={go} style={{
+            fontFamily: SF, fontSize: 14, fontWeight: 700, color: '#fff',
+            background: GRAD_INDIGO, border: 'none', borderRadius: 10,
+            padding: '10px 20px', cursor: 'pointer', minHeight: 44,
+            boxShadow: '0 4px 14px rgba(109,40,217,0.35)', transition: 'all 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
           >Join the Network →</button>
         </div>
       </nav>
 
       {/* ── HERO + FORM ── */}
       <div style={{
-        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        minHeight: '90vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        padding: '120px 24px 80px', textAlign: 'center',
-        background: 'linear-gradient(180deg, #EFF6FF 0%, #F8FAFC 60%)',
+        padding: 'clamp(80px, 12vw, 120px) clamp(20px, 5vw, 40px) clamp(60px, 10vw, 80px)', textAlign: 'center',
+        background: 'linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #f0f4f8 100%)', position: 'relative', overflow: 'hidden',
       }}>
+        {/* Subtle radial glow */}
+        <div style={{ position: 'absolute', top: '50%', right: '0%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 70%)', transform: 'translate(-20%, -50%)', pointerEvents: 'none' }} />
+        
         {/* Badge */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`,
-          borderRadius: 100, padding: '7px 18px', marginBottom: 32,
+          background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`,
+          borderRadius: 999, padding: '12px 28px', marginBottom: 32,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
         }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN }} />
-          <span style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Join 1,500+ parents helping students succeed</span>
+          <div style={{ width: 6, height: 6, borderRadius: '50%', background: TEAL }} />
+          <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>⚡ JOIN 1,500+ PARENTS & ALUMNI</span>
         </div>
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 620, textAlign: 'center', marginBottom: 16 }}>
-          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(32px, 5.5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: TEXT, margin: '0 0 16px' }}>
+          <h1 style={{ fontFamily: SF, fontSize: 'clamp(32px, 5.5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: TEXT, margin: '0 0 16px' }}>
             Help students{' '}
-            <span style={{ color: BLUE }}>open doors.</span>
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>open doors.</span>
           </h1>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 2vw, 19px)', color: TEXT2, lineHeight: 1.65, maxWidth: 500, margin: '0 auto 8px' }}>
+          <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 2vw, 19px)', color: TEXT2, lineHeight: 1.65, maxWidth: 500, margin: '0 auto 8px' }}>
             Your experience can create real opportunities for the next generation.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT3, margin: 0 }}>
+          <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 15, color: TEXT3, margin: 0 }}>
             Add your information below — it only takes 30 seconds.
           </p>
         </div>
@@ -165,11 +199,13 @@ export default function ParentLandingPage({ onStudentClick }) {
         {/* ── SIGNUP FORM ── */}
         <div style={{
           width: '100%', maxWidth: 480,
-          background: CARD, borderRadius: 20, boxShadow: SHADOW_LG,
-          padding: '32px 28px', marginTop: 32,
+          background: CARD, borderRadius: 20, boxShadow: SHADOW_LG, border: `1px solid ${INDIGO_BORDER}`,
+          padding: 'clamp(28px, 6vw, 36px)', marginTop: 32,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s',
-          textAlign: 'left',
+          textAlign: 'left', position: 'relative',
         }}>
+          {/* Top gradient accent */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: GRAD_INDIGO, borderRadius: '20px 20px 0 0' }} />
           {submitted ? (
             <div style={{ textAlign: 'center', padding: '24px 16px' }}>
               <div style={{ fontSize: 56, marginBottom: 16 }}>🎉</div>
@@ -180,7 +216,7 @@ export default function ParentLandingPage({ onStudentClick }) {
               <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 0 24px' }}>
                 Each parent connection strengthens the student community. Your profile will now be surfaced to relevant students from your school who are looking in your industry — creating real opportunities for the next generation.
               </p>
-              <p style={{ fontFamily: FONT, fontSize: 13, fontWeight: 600, color: GREEN, margin: '0 0 24px' }}>
+              <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: TEAL, margin: '0 0 24px' }}>
                 You just helped make the network better for everyone.
               </p>
 
@@ -188,32 +224,31 @@ export default function ParentLandingPage({ onStudentClick }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
                 <button
                   onClick={() => {
-                    // Open email client with pre-filled message
                     const subject = encodeURIComponent('Join me on College Fast Forward');
                     const body = encodeURIComponent('Hey! I just joined the College Fast Forward network to help students in my industry. You should sign up too - it\'s free and only takes 30 seconds.\n\nJoin here: https://collegefastforward.com\n\nLet me know if you have any questions!');
                     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
                   }}
                   style={{
-                    fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
-                    background: BLUE, border: 'none', borderRadius: R, padding: '15px 24px',
-                    cursor: 'pointer', minHeight: 'auto',
-                    boxShadow: '0 6px 20px rgba(0,102,255,0.25)',
+                    fontFamily: SF, fontSize: 15, fontWeight: 700, color: '#fff',
+                    background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: '16px 24px',
+                    cursor: 'pointer', minHeight: 52,
+                    boxShadow: '0 8px 28px rgba(109,40,217,0.30)',
                     transition: 'all 0.2s ease', width: '100%',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
                 >
                   Invite My Student →
                 </button>
                 <button
                   onClick={student}
                   style={{
-                    fontFamily: FONT, fontSize: 15, fontWeight: 600, color: TEXT2,
-                    background: '#F8FAFC', border: '1.5px solid #E2E8F0', borderRadius: R, padding: '15px 24px',
-                    cursor: 'pointer', minHeight: 'auto',
+                    fontFamily: SF, fontSize: 15, fontWeight: 600, color: TEXT2,
+                    background: '#F8FAFC', border: '1.5px solid #E2E8F0', borderRadius: 14, padding: '16px 24px',
+                    cursor: 'pointer', minHeight: 52,
                     transition: 'all 0.2s ease', width: '100%',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = BLUE; e.currentTarget.style.color = BLUE; e.currentTarget.style.background = BLUE_LIGHT; }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = INDIGO; e.currentTarget.style.color = INDIGO; e.currentTarget.style.background = INDIGO_LIGHT; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; e.currentTarget.style.background = '#F8FAFC'; }}
                 >
                   Done — Return Home
@@ -230,10 +265,10 @@ export default function ParentLandingPage({ onStudentClick }) {
                     'You can edit or remove your profile anytime',
                   ].map((line, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                      <div style={{ width: 14, height: 14, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <span style={{ fontSize: 8, color: GREEN }}>✓</span>
+                      <div style={{ width: 18, height: 18, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                        <span style={{ fontSize: 9, color: '#fff', fontWeight: 800 }}>✓</span>
                       </div>
-                      <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.5 }}>{line}</p>
+                      <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.5 }}>{line}</p>
                     </div>
                   ))}
                 </div>
@@ -302,16 +337,16 @@ export default function ParentLandingPage({ onStudentClick }) {
                 type="submit"
                 disabled={submitting}
                 style={{
-                  fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff',
-                  background: submitting ? '#94A3B8' : BLUE,
-                  border: 'none', borderRadius: R, padding: '16px 24px',
-                  cursor: submitting ? 'default' : 'pointer', minHeight: 'auto',
-                  boxShadow: submitting ? 'none' : '0 8px 24px rgba(0,102,255,0.3)',
+                  fontFamily: SF, fontSize: 15, fontWeight: 700, color: '#fff',
+                  background: submitting ? '#94A3B8' : GRAD_INDIGO,
+                  border: 'none', borderRadius: 14, padding: '16px 24px',
+                  cursor: submitting ? 'default' : 'pointer', minHeight: 52,
+                  boxShadow: submitting ? 'none' : '0 8px 28px rgba(109,40,217,0.30)',
                   transition: 'all 0.2s ease', marginTop: 4,
                   width: '100%',
                 }}
-                onMouseEnter={e => { if (!submitting) { e.currentTarget.style.transform = 'scale(1.01)'; e.currentTarget.style.background = '#0052CC'; } }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = submitting ? '#94A3B8' : BLUE; }}
+                onMouseEnter={e => { if (!submitting) { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; } }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = submitting ? 'none' : '0 8px 28px rgba(109,40,217,0.30)'; }}
               >
                 {submitting ? 'Setting up your profile…' : 'Join the Network →'}
               </button>
@@ -324,16 +359,16 @@ export default function ParentLandingPage({ onStudentClick }) {
                   'You control what\'s visible',
                 ].map((line, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 14, height: 14, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: 8, color: GREEN }}>✓</span>
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: 9, color: '#fff', fontWeight: 800 }}>✓</span>
                     </div>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.4 }}>{line}</p>
+                    <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.4 }}>{line}</p>
                   </div>
                 ))}
               </div>
 
               {/* Match note */}
-              <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0, textAlign: 'center', fontStyle: 'italic', borderTop: '1px solid #F1F5F9', paddingTop: 12 }}>
+              <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: 0, textAlign: 'center', fontStyle: 'italic', borderTop: '1px solid #f1f5f9', paddingTop: 12 }}>
                 Your profile will only be surfaced when a student matches your school + industry.
               </p>
             </form>
@@ -341,101 +376,125 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', marginTop: 52, paddingTop: 36, borderTop: '1px solid #E2E8F0', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.5s', gap: 0, width: '100%', maxWidth: 520 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', marginTop: 52, paddingTop: 36, borderTop: '1px solid #f1f5f9', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.5s', gap: 0, width: '100%', maxWidth: 520 }}>
           {[{ number: '1,500+', label: 'Parents & Alumni' }, { number: '15+', label: 'Universities' }, { number: '50+', label: 'Industries' }].map((s, i) => (
-            <div key={i} style={{ textAlign: 'center', padding: '0 36px', borderRight: i < 2 ? '1px solid #E2E8F0' : 'none' }}>
-              <p style={{ fontFamily: FONT, fontSize: 32, fontWeight: 800, color: BLUE, margin: '0 0 4px', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.number}</p>
-              <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 600, color: TEXT3, margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{s.label}</p>
+            <div key={i} style={{ textAlign: 'center', padding: '0 36px', borderRight: i < 2 ? '1px solid #f1f5f9' : 'none' }}>
+              <p style={{ fontFamily: SF, fontSize: 32, fontWeight: 800, color: INDIGO, margin: '0 0 4px', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.number}</p>
+              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: TEXT3, margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{s.label}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── TRUSTED BY ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '44px 24px', textAlign: 'center' }}>
-        <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: TEXT3, letterSpacing: '0.15em', textTransform: 'uppercase', margin: '0 0 20px' }}>Parents & Alumni at</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
-          {SCHOOLS.map((school, i) => (
-            <div key={i} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 500, color: i === SCHOOLS.length - 1 ? TEXT3 : TEXT2, background: i === SCHOOLS.length - 1 ? '#F8FAFC' : BLUE_LIGHT, border: `1px solid ${i === SCHOOLS.length - 1 ? '#E2E8F0' : BLUE_BORDER}`, borderRadius: 100, padding: '7px 16px', fontStyle: i === SCHOOLS.length - 1 ? 'italic' : 'normal' }}>
-              {school}
+      <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
+          {[
+            { emoji: '🎓', stat: '1,500+', label: 'Parents & Alumni' },
+            { emoji: '🏢', stat: '15+', label: 'Universities' },
+            { emoji: '🤝', stat: '50+', label: 'Industries' },
+            { emoji: '⭐', stat: '4.9/5', label: 'Parent Rating' },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px' }}>
+              <span style={{ fontSize: 20 }}>{item.emoji}</span>
+              <div>
+                <p style={{ fontFamily: SF, fontSize: 15, fontWeight: 800, color: TEXT, margin: 0, letterSpacing: '-0.02em' }}>{item.stat}</p>
+                <p style={{ fontFamily: SF, fontSize: 11, color: TEXT3, margin: 0, fontWeight: 500 }}>{item.label}</p>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background: BG, padding: '80px 24px' }}>
+      <div style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', borderTop: '1px solid #f1f5f9' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <SectionLabel text="How it works" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 8px', textAlign: 'center' }}>Simple, on your terms.</h2>
-          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT3, textAlign: 'center', margin: '0 0 48px', fontStyle: 'italic' }}>No commitments. Just helping.</p>
+          <SectionLabel text="How it works" color={VIOLET} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 44px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
+            Simple, on your terms.<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Just helping.</span>
+          </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 40 }}>
             {HOW_IT_WORKS.map(({ number, title, desc }, i) => (
-              <div key={number} style={{ display: 'flex', alignItems: 'flex-start', gap: 24, padding: '28px 0', borderBottom: i < HOW_IT_WORKS.length - 1 ? '1px solid #E2E8F0' : 'none' }}>
-                <div style={{ width: 48, height: 48, borderRadius: 14, flexShrink: 0, background: BLUE_LIGHT, border: `1.5px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT, fontSize: 13, fontWeight: 800, color: BLUE, marginTop: 2 }}>
+              <div key={number} style={{ display: 'flex', alignItems: 'flex-start', gap: 24, padding: 'clamp(24px, 5vw, 32px) 0', borderBottom: i < HOW_IT_WORKS.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 14, flexShrink: 0, background: INDIGO_LIGHT, border: `1.5px solid ${INDIGO_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: SF, fontSize: 13, fontWeight: 800, color: INDIGO, marginTop: 2 }}>
                   {number}
                 </div>
                 <div style={{ paddingTop: 10 }}>
-                  <p style={{ fontFamily: FONT, fontSize: 16, fontWeight: 700, color: TEXT, margin: '0 0 5px' }}>{title}</p>
-                  <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.7 }}>{desc}</p>
+                  <p style={{ fontFamily: SF, fontSize: 16, fontWeight: 700, color: TEXT, margin: '0 0 5px' }}>{title}</p>
+                  <p style={{ fontFamily: SF, fontSize: 14, color: TEXT2, margin: 0, lineHeight: 1.7 }}>{desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <div style={{ textAlign: 'center' }}>
-            <button onClick={go} style={{ fontFamily: FONT, fontSize: 15, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: R, padding: '16px 36px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 24px rgba(0,102,255,0.25)', transition: 'all 0.2s ease' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
+            <button onClick={go} style={{
+              fontFamily: SF, fontSize: 15, fontWeight: 700, color: '#fff',
+              background: GRAD_INDIGO, border: 'none', borderRadius: 14, padding: '16px 36px',
+              cursor: 'pointer', minHeight: 52,
+              boxShadow: '0 8px 28px rgba(109,40,217,0.30)',
+              transition: 'all 0.2s ease',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
             >Join the Network →</button>
           </div>
         </div>
       </div>
 
       {/* ── FAQ ── */}
-      <div style={{ background: CARD, borderTop: '1px solid #E2E8F0', padding: '80px 24px' }}>
+      <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <SectionLabel text="FAQ" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 4vw, 42px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 40px', textAlign: 'center' }}>Got questions? Fair.</h2>
+          <SectionLabel text="FAQ" color={TEAL_DARK} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(24px, 6vw, 44px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
+            Got questions?<br />
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Fair.</span>
+          </h2>
           {FAQS.map((faq, i) => <FAQItem key={i} q={faq.q} a={faq.a} />)}
         </div>
       </div>
 
       {/* ── FINAL CTA ── */}
-      <div style={{ padding: '88px 24px 72px', textAlign: 'center', background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 100%)' }}>
-        <div style={{ maxWidth: 500, margin: '0 auto' }}>
-          <SectionLabel text="One connection changes everything" />
-          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(26px, 4vw, 48px)', fontWeight: 800, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.03em', margin: '0 0 16px' }}>
-            One introduction from you can<br />
-            <span style={{ color: BLUE }}>lead to an interview.</span>
+      <div style={{ padding: 'clamp(56px, 12vw, 100px) clamp(20px, 5vw, 40px)', textAlign: 'center', background: 'linear-gradient(160deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 540, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 16px' }}>One connection changes everything</p>
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(28px, 7vw, 52px)', fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 16px' }}>
+            One introduction from you can<br />lead to an interview.
           </h2>
-          <p style={{ fontFamily: FONT, fontSize: 15, color: TEXT2, margin: '0 0 32px', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', color: 'rgba(255,255,255,0.75)', margin: '0 0 clamp(28px, 6vw, 36px)', lineHeight: 1.65 }}>
             Free. 30 seconds. No obligation.<br />Students at your school genuinely need you.
           </p>
-          <button onClick={go} style={{ fontFamily: FONT, fontSize: 16, fontWeight: 700, color: '#fff', background: BLUE, border: 'none', borderRadius: 14, padding: '19px 48px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 8px 32px rgba(0,102,255,0.3)', marginBottom: 14, transition: 'all 0.2s ease', display: 'inline-block' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#0052CC'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = BLUE; }}
-          >Join the Network →</button>
-          <br />
-          <button onClick={student} style={{ fontFamily: FONT, fontSize: 13, fontWeight: 500, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, display: 'inline-block', marginTop: 8, transition: 'color 0.15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = TEXT2}
-            onMouseLeave={e => e.currentTarget.style.color = TEXT3}
-          >I'm a student →</button>
+          <button onClick={go} style={{
+            fontFamily: SF, fontSize: 'clamp(16px, 4vw, 18px)', fontWeight: 700, color: INDIGO,
+            background: '#fff', border: 'none', borderRadius: 14,
+            padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
+            cursor: 'pointer', minHeight: 56,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            transition: 'all 0.2s ease', touchAction: 'manipulation',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'; }}
+          >
+            Join the Network →
+          </button>
+          <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '16px 0 0', lineHeight: 1.4 }}>No credit card required to start.</p>
         </div>
       </div>
 
       {/* ── FOOTER ── */}
-      <div style={{ borderTop: '1px solid #E2E8F0', padding: '28px 24px', textAlign: 'center', background: CARD }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div style={{ borderTop: '1px solid #f1f5f9', padding: 'clamp(20px, 5vw, 28px) clamp(16px, 5vw, 32px)', textAlign: 'center', background: '#fff' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(16px, 4vw, 28px)', marginBottom: 12, flexWrap: 'wrap' }}>
           {[['Privacy', '#Privacy'], ['Terms', '#Terms'], ['Contact', 'mailto:hello@collegefastforward.com']].map(([label, href]) => (
-            <a key={label} href={href} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.color = TEXT2}
+            <a key={label} href={href} style={{ fontFamily: SF, fontSize: 13, color: TEXT3, textDecoration: 'none', minHeight: 44, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.color = TEXT}
               onMouseLeave={e => e.currentTarget.style.color = TEXT3}
             >{label}</a>
           ))}
         </div>
-        <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, margin: 0 }}>
+        <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, margin: 0, lineHeight: 1.5 }}>
           © {new Date().getFullYear()} College Fast Forward · Helping students land faster with less stress.
         </p>
       </div>
