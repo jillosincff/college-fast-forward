@@ -1254,18 +1254,11 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                   <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: '#fff', background: INDIGO, borderRadius: 6, padding: '3px 9px', flexShrink: 0, marginTop: 2 }}>FAST</span>
                 </button>
 
-                {/* Quick Start */}
-                <button onClick={() => setDataInputMode('quickstart')}
-                  style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 14, background: CARD, border: `2px solid #E2E8F0`, borderRadius: 14, padding: '18px 18px', cursor: 'pointer', textAlign: 'left', minHeight: 'auto', transition: 'all 0.15s', boxShadow: SHADOW }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW_MD; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = SHADOW; }}
-                >
-                  <span style={{ fontSize: 22, flexShrink: 0, width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFBEB', borderRadius: 10, border: '1px solid #FDE68A' }}>⚡</span>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: '0 0 3px' }}>Quick Start (3 questions)</p>
-                    <p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '0 0 5px' }}>No resume or LinkedIn? Answer 3 quick questions and we'll build a strong starter profile for you.</p>
-                    <p style={{ fontFamily: FONT, fontSize: 11, color: '#D97706', margin: 0, fontStyle: 'italic' }}>Takes under 2 minutes</p>
-                  </div>
+              </div>
+
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <button onClick={next} style={{ fontFamily: FONT, fontSize: 13, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: '4px 8px', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                  Skip for now →
                 </button>
               </div>
 
@@ -1290,7 +1283,7 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
                 Choose the fastest way for you — most students see their first "wow" moment within 60 seconds.
               </p>
 
-              <div style={{ textAlign: 'center', marginTop: 16 }}>
+              <div style={{ textAlign: 'center', marginTop: 8 }}>
                 <button onClick={back} style={{ fontFamily: FONT, fontSize: 12, color: TEXT3, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>← Back</button>
               </div>
             </>
