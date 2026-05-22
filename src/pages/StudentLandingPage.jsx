@@ -309,15 +309,15 @@ export default function StudentLandingPage({ onParentClick }) {
             </div>
           )}
 
-          {/* Main headline — split layout */}
+          {/* Main headline */}
           {mounted && (
             <div className="hero-animate-2">
-              <h1 style={{ fontFamily: SF, fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 0.95, margin: '0 0 16px', textAlign: 'center' }}>
+              <h1 style={{ fontFamily: SF, fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 0.95, margin: '0 0 20px', textAlign: 'center' }}>
                 <span style={{ display: 'block', fontSize: 'clamp(42px, 10vw, 84px)', color: TEXT }}>
-                  Stop getting
+                  Tired of the
                 </span>
                 <span style={{ display: 'block', fontSize: 'clamp(42px, 10vw, 84px)', background: 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 40%, #ec4899 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  ghosted.
+                  black hole?
                 </span>
               </h1>
             </div>
@@ -326,8 +326,11 @@ export default function StudentLandingPage({ onParentClick }) {
           {/* Sub-headline */}
           {mounted && (
             <div className="hero-animate-3">
-              <p style={{ fontFamily: SF, fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 500, color: TEXT2, lineHeight: 1.6, margin: '0 auto 40px', maxWidth: 600 }}>
-                CFF gives you hidden jobs, <span style={{ color: INDIGO, fontWeight: 700 }}>warm alumni intros</span>, and AI-powered tools — so a real human sees your resume.
+              <h2 style={{ fontFamily: SF, fontSize: 'clamp(20px, 5vw, 28px)', fontWeight: 700, color: TEXT, lineHeight: 1.25, margin: '0 auto 16px', maxWidth: 620, letterSpacing: '-0.02em' }}>
+                CFF finds the path around it.
+              </h2>
+              <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: TEXT2, lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 620 }}>
+                We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
               </p>
             </div>
           )}
