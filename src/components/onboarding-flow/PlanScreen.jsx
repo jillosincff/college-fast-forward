@@ -357,20 +357,20 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           2. INSIDE TRACK — Dark highlight section
       ───────────────────────────────────────────────────── */}
-      <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', borderRadius: 20, padding: '24px 24px 20px', marginBottom: 28, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}>
+      <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: 20, padding: '24px 24px 20px', marginBottom: 28, boxShadow: '0 4px 16px rgba(109,40,217,0.08)' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <span style={{ fontSize: 20 }}>🔥</span>
           <div>
-            <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: '#f8fafc', margin: 0, letterSpacing: '-0.01em' }}>Inside Track Found</p>
-            <p style={{ fontFamily: dm, fontSize: 12, color: '#94a3b8', margin: 0 }}>CLiFF bypassed public job boards and opened active internal pipelines.</p>
+            <p style={{ fontFamily: sat, fontSize: 16, fontWeight: 800, color: '#1e1b4b', margin: 0, letterSpacing: '-0.01em' }}>Inside Track Found</p>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>CLiFF bypassed public job boards and opened active internal pipelines.</p>
           </div>
-          <div style={{ marginLeft: 'auto', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#fca5a5', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Live</span>
+          <div style={{ marginLeft: 'auto', background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#ef4444', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Live</span>
           </div>
         </div>
-        <p style={{ fontFamily: dm, fontSize: 13, color: '#cbd5e1', margin: '0 0 18px', lineHeight: 1.6 }}>
-          Here are your hidden opportunities with verified <strong style={{ color: '#93c5fd' }}>{schoolName} alumni</strong>:
+        <p style={{ fontFamily: dm, fontSize: 13, color: '#4b5563', margin: '0 0 18px', lineHeight: 1.6 }}>
+          Here are your hidden opportunities with verified <strong style={{ color: BLUE }}>{schoolName} alumni</strong>:
         </p>
 
         {/* Teaser cards */}
@@ -381,32 +381,32 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
             { role: 'Marketing Director', company: '████', dept: 'Marketing & Growth', badge: `1 ${schoolName.split(' ').slice(-2).join(' ')} Alum Found` },
           ].map((card, i) => (
             <div key={i} style={{
-              background: i === 0 ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)',
-              border: i === 0 ? '1px solid rgba(255,255,255,0.18)' : '1px solid rgba(255,255,255,0.08)',
+              background: i === 0 ? '#fff' : 'rgba(255,255,255,0.6)',
+              border: i === 0 ? `1px solid ${BLUE_BORDER}` : '1px solid #e5e7eb',
               borderRadius: 12, padding: '14px 16px',
               display: 'flex', alignItems: 'center', gap: 12,
               filter: i > 0 ? 'blur(2.5px)' : 'none',
               opacity: i === 0 ? 1 : i === 1 ? 0.7 : 0.45,
               userSelect: i > 0 ? 'none' : 'auto',
             }}>
-              <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(99,102,241,0.25)', border: '1px solid rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>
                 {['👩‍💼', '👨‍💼', '👩‍💻'][i]}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#f1f5f9', margin: '0 0 2px' }}>{card.role}</p>
-                <p style={{ fontFamily: dm, fontSize: 12, color: '#94a3b8', margin: '0 0 5px', letterSpacing: '0.03em' }}>{card.company} · {card.dept}</p>
-                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#86efac', background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6, padding: '2px 8px' }}>✓ {card.badge}</span>
+                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: TEXT, margin: '0 0 2px' }}>{card.role}</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: '0 0 5px', letterSpacing: '0.03em' }}>{card.company} · {card.dept}</p>
+                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: GREEN, background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>✓ {card.badge}</span>
               </div>
               {i === 0 && (
-                <div style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.35)', borderRadius: 8, padding: '6px 12px', flexShrink: 0 }}>
-                  <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#86efac', margin: 0, whiteSpace: 'nowrap' }}>Ready to Intro →</p>
+                <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 8, padding: '6px 12px', flexShrink: 0 }}>
+                  <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: GREEN, margin: 0, whiteSpace: 'nowrap' }}>Ready to Intro →</p>
                 </div>
               )}
             </div>
           ))}
           {/* Fade overlay on locked cards */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to bottom, transparent, rgba(15,23,42,0.95))', borderRadius: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 14, pointerEvents: 'none' }}>
-            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#93c5fd', background: 'rgba(37,99,235,0.2)', border: '1px solid rgba(37,99,235,0.4)', borderRadius: 100, padding: '6px 18px' }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to bottom, transparent, rgba(245,243,255,0.95))', borderRadius: 12, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', paddingBottom: 14, pointerEvents: 'none' }}>
+            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '6px 18px' }}>
               🔒 2 more alumni connections unlock with your plan
             </span>
           </div>
@@ -533,17 +533,17 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       {/* ─────────────────────────────────────────────────────
           7. THE CLOSE — Dark deployment CTA
       ───────────────────────────────────────────────────── */}
-      <div className="plan-close-card plan-main-cta" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)', borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 16px 48px rgba(0,0,0,0.24), 0 0 0 1px rgba(255,255,255,0.06)' }}>
+      <div className="plan-close-card plan-main-cta" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)', border: '1.5px solid #ddd6fe', borderRadius: 24, padding: '36px 28px', marginBottom: 20, boxShadow: '0 8px 32px rgba(109,40,217,0.12)' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 22 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(167,139,250,0.15)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(109,40,217,0.10)', border: '1px solid rgba(109,40,217,0.25)', borderRadius: 100, padding: '5px 16px', marginBottom: 14 }}>
             <span style={{ fontSize: 12 }}>⚡</span>
-            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#a78bfa', letterSpacing: '0.12em', textTransform: 'uppercase' }}>CLiFF Agent · Ready to Deploy</span>
+            <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#7c3aed', letterSpacing: '0.12em', textTransform: 'uppercase' }}>CLiFF Agent · Ready to Deploy</span>
           </div>
-          <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, color: '#f8fafc', margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+          <h2 style={{ fontFamily: sat, fontSize: 'clamp(22px, 3.5vw, 30px)', fontWeight: 900, color: TEXT, margin: '0 0 8px', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
             {firstName ? `${firstName}, let's get you hired.` : "Let's get you hired."}
           </h2>
-          <p style={{ fontFamily: dm, fontSize: 14, color: '#94a3b8', margin: 0 }}>
+          <p style={{ fontFamily: dm, fontSize: 14, color: TEXT2, margin: 0 }}>
             Unlock Your Full 14-Day Sprint Plan
           </p>
         </div>
@@ -551,11 +551,11 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         {/* Live metrics strip */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 22, flexWrap: 'wrap' }}>
           {[
-            { label: 'Resume Optimization', value: '98% ATS Approved', color: '#4ade80' },
-            { label: 'Alumni Matrix', value: '3 Warm Tracks Isolated', color: '#a78bfa' },
+            { label: 'Resume Optimization', value: '98% ATS Approved', color: GREEN },
+            { label: 'Alumni Matrix', value: '3 Warm Tracks Isolated', color: BLUE },
           ].map((m, i) => (
-            <div key={i} style={{ flex: 1, minWidth: 140, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '12px 14px' }}>
-              <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{m.label}</p>
+            <div key={i} style={{ flex: 1, minWidth: 140, background: '#fff', border: `1px solid ${BLUE_BORDER}`, borderRadius: 12, padding: '12px 14px' }}>
+              <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: TEXT2, textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px' }}>{m.label}</p>
               <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: m.color, margin: 0 }}>{m.value}</p>
             </div>
           ))}
@@ -563,9 +563,9 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
         {/* Pricing */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 100, padding: '8px 24px' }}>
-            <span style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: '#f8fafc' }}>$4.98</span>
-            <span style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8' }}>/week · Cancel anytime</span>
+          <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, background: '#fff', border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '8px 24px' }}>
+            <span style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: BLUE }}>$4.98</span>
+            <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2 }}>/week · Cancel anytime</span>
           </div>
         </div>
 
@@ -608,10 +608,10 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
 
         {/* Trust signals */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0 }}>🏆 Join 2,400+ students landing interviews this month</p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0 }}>No credit card needed to start · Cancel anytime</p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0 }}>
-            <span onClick={() => openPaywall(false)} style={{ color: '#a78bfa', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>🎁 Text 3 friends for free access</span>
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>🏆 Join 2,400+ students landing interviews this month</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>No credit card needed to start · Cancel anytime</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>
+            <span onClick={() => openPaywall(false)} style={{ color: BLUE, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 2 }}>🎁 Text 3 friends for free access</span>
           </p>
         </div>
       </div>

@@ -171,18 +171,18 @@ export default function CliffRevealScreen({
           </div>
 
           {/* RIGHT COLUMN — Status log */}
-          <div style={{ background: '#0F172A', borderRadius: 16, padding: '28px 24px', minHeight: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}>
-            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 20px' }}>
+          <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: 16, padding: '28px 24px', minHeight: 320, boxShadow: '0 4px 16px rgba(109,40,217,0.08)' }}>
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 20px' }}>
               CLiFF · AGENT INIT LOG
             </p>
 
             {/* Acronym */}
             {step >= 2 && (
-              <div style={{ marginBottom: 20, borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: 16 }}>
+              <div style={{ marginBottom: 20, borderBottom: '1px solid #ddd6fe', paddingBottom: 16 }}>
                 {CLIFF_WORDS.map((word, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'baseline', opacity: i < visibleLines ? 1 : 0, animation: i < visibleLines ? 'lineIn 0.3s ease' : 'none', marginBottom: 2 }}>
-                    <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 900, color: '#a78bfa', minWidth: 20, lineHeight: 1.3 }}>{word.letters[0]}</span>
-                    <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>{word.letters[1]}</span>
+                    <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 900, color: INDIGO, minWidth: 20, lineHeight: 1.3 }}>{word.letters[0]}</span>
+                    <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 500, color: '#6b7280', lineHeight: 1.3 }}>{word.letters[1]}</span>
                   </div>
                 ))}
               </div>
@@ -193,20 +193,20 @@ export default function CliffRevealScreen({
               {logLines.map((line, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, animation: 'logIn 0.3s ease' }}>
                   <span style={{ fontSize: 13, flexShrink: 0, lineHeight: 1.5 }}>{line.icon}</span>
-                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: line.icon === '🔒' ? 'rgba(255,255,255,0.4)' : line.icon === '⚡' ? '#a78bfa' : '#4ade80', margin: 0, lineHeight: 1.5 }}>{line.text}</p>
+                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: line.icon === '🔒' ? '#9ca3af' : line.icon === '⚡' ? INDIGO : '#16a34a', margin: 0, lineHeight: 1.5 }}>{line.text}</p>
                 </div>
               ))}
               {/* Blinking cursor */}
               {step >= 3 && !canContinue && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>_</span>
-                  <div style={{ width: 8, height: 14, background: '#a78bfa', borderRadius: 1, animation: 'capFade 0.8s ease infinite alternate' }} />
+                  <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#d1d5db' }}>_</span>
+                  <div style={{ width: 8, height: 14, background: INDIGO, borderRadius: 1, animation: 'capFade 0.8s ease infinite alternate' }} />
                 </div>
               )}
               {canContinue && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, animation: 'fadeUp 0.4s ease' }}>
                   <span style={{ fontSize: 13 }}>✅</span>
-                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#4ade80', margin: 0 }}>Agent ready.</p>
+                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#16a34a', margin: 0 }}>Agent ready.</p>
                 </div>
               )}
             </div>
