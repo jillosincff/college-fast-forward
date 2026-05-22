@@ -277,19 +277,6 @@ export default function ParentLandingPage({ onStudentClick }) {
                 >
                   Invite My Student →
                 </button>
-                <button
-                  onClick={student}
-                  style={{
-                    fontFamily: SF, fontSize: 15, fontWeight: 600, color: TEXT2,
-                    background: '#F8FAFC', border: '1.5px solid #E2E8F0', borderRadius: 14, padding: '16px 24px',
-                    cursor: 'pointer', minHeight: 52,
-                    transition: 'all 0.2s ease', width: '100%',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = INDIGO; e.currentTarget.style.color = INDIGO; e.currentTarget.style.background = INDIGO_LIGHT; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = TEXT2; e.currentTarget.style.background = '#F8FAFC'; }}
-                >
-                  Done — Return Home
-                </button>
               </div>
 
               {/* What happens next */}
