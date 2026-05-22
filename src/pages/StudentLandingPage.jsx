@@ -332,44 +332,6 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
         </div>
 
-        {/* Hero Card Preview */}
-        <div style={{
-          marginTop: 'clamp(32px, 10vw, 56px)', maxWidth: 560, width: '100%',
-          background: CARD, borderRadius: 14, boxShadow: SHADOW_LG, padding: 'clamp(16px, 4vw, 24px)',
-          textAlign: 'left', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.5s',
-        }}>
-          {/* Card Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <div style={{ width: 'clamp(28px, 8vw, 36px)', height: 'clamp(28px, 8vw, 36px)', borderRadius: 8, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'clamp(14px, 4vw, 16px)', flexShrink: 0 }}>⚡</div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 14px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.3 }}>
-                <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span> is already working for you
-              </p>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT2, margin: '2px 0 0', lineHeight: 1.3 }}>Updated just now</p>
-            </div>
-            <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: 'clamp(2px, 1vw, 3px) clamp(6px, 2vw, 10px)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-              <div style={{ width: 'clamp(5px, 1.5vw, 6px)', height: 'clamp(5px, 1.5vw, 6px)', borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
-              <span style={{ fontFamily: FONT, fontSize: 'clamp(9px, 2.5vw, 10px)', fontWeight: 700, color: GREEN, whiteSpace: 'nowrap' }}>Live</span>
-            </div>
-          </div>
-
-          {/* Callout items */}
-          {PROOF_CALLOUTS.map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 'clamp(8px, 2vw, 12px)', padding: 'clamp(9px, 2.5vw, 11px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #F1F5F9` : 'none' }}>
-              <div style={{ width: 'clamp(17px, 4.5vw, 20px)', height: 'clamp(17px, 4.5vw, 20px)', borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                <span style={{ fontSize: 'clamp(8px, 2vw, 10px)', color: GREEN, fontWeight: 700 }}>✓</span>
-              </div>
-              <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT, margin: 0, fontWeight: 500, lineHeight: 1.45 }}>{item.text}</p>
-            </div>
-          ))}
-
-          {/* Bottom teaser */}
-          <div style={{ marginTop: 14, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 10, padding: 'clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)' }}>
-            <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: BLUE, fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
-              🚀 Your personalized plan is being built right now — you're already ahead of 95% of applicants.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* ── OLD WAY VS SMART WAY ── */}
@@ -431,6 +393,39 @@ export default function StudentLandingPage({ onParentClick }) {
             <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: '#94A3B8', margin: 0, lineHeight: 1.4 }}>
               This is how the real world actually works.
             </p>
+          </div>
+
+          {/* ── CLiFF IS ALREADY WORKING FOR YOU ── */}
+          <div style={{ marginTop: 'clamp(24px, 6vw, 36px)', background: CARD, borderRadius: 16, boxShadow: SHADOW_LG, padding: 'clamp(20px, 5vw, 28px) clamp(16px, 4vw, 24px)', border: `1px solid ${BLUE_BORDER}` }}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: BLUE_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>⚡</div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 800, color: TEXT, margin: 0, lineHeight: 1.3 }}>
+                  <span style={{ color: BLUE }}>C</span><span style={{ color: TEXT3 }}>li</span><span style={{ color: BLUE }}>FF</span> is already working for you
+                </p>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 11px)', color: TEXT2, margin: '2px 0 0', lineHeight: 1.3 }}>Updated just now</p>
+              </div>
+              <div style={{ background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, borderRadius: 100, padding: '3px 10px', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: GREEN, animation: 'pulse 2s infinite' }} />
+                <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 700, color: GREEN, whiteSpace: 'nowrap' }}>Live</span>
+              </div>
+            </div>
+            {/* Items */}
+            {PROOF_CALLOUTS.map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 'clamp(9px, 2.5vw, 11px) 0', borderBottom: i < PROOF_CALLOUTS.length - 1 ? `1px solid #F1F5F9` : 'none' }}>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', background: GREEN_LIGHT, border: `1px solid ${GREEN_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <span style={{ fontSize: 10, color: GREEN, fontWeight: 700 }}>✓</span>
+                </div>
+                <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3.5vw, 13px)', color: TEXT, margin: 0, fontWeight: 500, lineHeight: 1.45 }}>{item.text}</p>
+              </div>
+            ))}
+            {/* Bottom teaser */}
+            <div style={{ marginTop: 16, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 10, padding: '10px 16px' }}>
+              <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: BLUE, fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
+                🚀 Your personalized plan is being built right now — you're already ahead of 95% of applicants.
+              </p>
+            </div>
           </div>
         </div>
       </div>
