@@ -393,8 +393,8 @@ export default function StudentLandingPage({ onParentClick }) {
                 <p style={{ fontFamily: SF, fontSize: 9, color: '#64748b', margin: 0 }}>ATS-optimized & ready</p>
               </div>
 
-              {/* Floating Card 3 */}
-              <div style={{ position: 'absolute', top: '50%', left: '0%', width: 140, background: '#fff', borderRadius: 14, padding: 12, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 6.5s ease-in-out infinite 1.5s', zIndex: 3 }}>
+              {/* Floating Card 3 - nudged down */}
+              <div style={{ position: 'absolute', bottom: '10%', right: '15%', width: 140, background: '#fff', borderRadius: 14, padding: 12, border: '1px solid rgba(0,0,0,0.05)', boxShadow: SHADOW, animation: 'float 6.5s ease-in-out infinite 1.5s', zIndex: 3 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ display: 'flex' }}>
                     {[1,2,3].map(i => (
@@ -435,7 +435,7 @@ export default function StudentLandingPage({ onParentClick }) {
           <SectionLabel text="The real talk" color={PINK} />
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 44px)', fontWeight: 900, color: TEXT, letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 20px', textAlign: 'center' }}>
             The modern job hunt is a<br />
-            <span style={{ background: GRAD_WARM, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>literal nightmare 😮‍💨</span>
+            <span style={{ color: TEXT }}>literal nightmare</span><span style={{ marginLeft: 4 }}>😮‍💨</span>
           </h2>
           <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', color: TEXT2, lineHeight: 1.75, margin: '0 0 24px', textAlign: 'center' }}>
             Spending hours tailoring a resume just to get screened out by a bot is exhausting. CFF brings hidden jobs, warm networking, and smart tools into one place.
@@ -480,7 +480,7 @@ export default function StudentLandingPage({ onParentClick }) {
             The Old Way vs.<br />
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>The Smart Way</span>
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(20px, 5vw, 28px)' }}>
             {/* Old Way - "Black Hole" box with warning state */}
             <div style={{ background: 'rgba(254,242,242,0.6)', border: `1px solid ${CORAL_BORDER}`, borderRadius: 20, padding: 'clamp(20px, 5vw, 32px)', boxShadow: '0 1px 3px rgba(244,63,94,0.08)' }}>
               <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: CORAL, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 8px' }}>🕳️ The Old Way</p>
@@ -529,7 +529,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
 
           {/* CFF proof list - connected dashboard element */}
-          <div style={{ marginTop: 28, background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, boxShadow: SHADOW, padding: 'clamp(20px, 5vw, 32px)' }}>
+          <div style={{ marginTop: 'clamp(32px, 8vw, 48px)', background: '#fff', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, boxShadow: SHADOW, padding: 'clamp(20px, 5vw, 32px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: GRAD_INDIGO, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0, boxShadow: '0 4px 12px rgba(109,40,217,0.25)' }}>⚡</div>
               <div style={{ flex: 1 }}>
@@ -593,7 +593,9 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── SOCIAL PROOF ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: '#fff', borderTop: '1px solid #f1f5f9' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <SectionLabel text="Students like you" color={VIOLET} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.20)', borderRadius: 100, padding: '6px 16px', marginBottom: 16 }}>
+            <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: VIOLET, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Student Stories</span>
+          </div>
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(24px, 6vw, 36px)', textAlign: 'center' }}>
             Real results.<br />
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block' }}>Real students.</span>
@@ -608,7 +610,9 @@ export default function StudentLandingPage({ onParentClick }) {
       {/* ── PRICING ── */}
       <div style={{ background: BG, padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: 540, margin: '0 auto' }}>
-          <SectionLabel text="Pricing" color={INDIGO} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(109,40,217,0.08)', border: '1px solid rgba(109,40,217,0.20)', borderRadius: 100, padding: '6px 16px', marginBottom: 16 }}>
+            <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 700, color: INDIGO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Simple Pricing</span>
+          </div>
           <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
             One focused sprint.<br />
             <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'block' }}>Real results.</span>
