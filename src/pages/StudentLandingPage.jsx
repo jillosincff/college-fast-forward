@@ -608,9 +608,9 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: 520, margin: '0 auto' }}>
           <SectionLabel text="Pricing" color={INDIGO} />
-          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.1, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 42px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(28px, 8vw, 40px)', textAlign: 'center' }}>
             One focused sprint.<br />
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Real results.</span>
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-block' }}>Real results.</span>
           </h2>
 
           <div style={{ background: '#fff', borderRadius: 24, padding: 'clamp(24px, 6vw, 40px)', boxShadow: SHADOW_LG, border: `2px solid ${INDIGO_BORDER}`, position: 'relative', overflow: 'hidden' }}>
