@@ -266,9 +266,9 @@ export default function StudentLandingPage({ onParentClick }) {
         padding: '0 clamp(16px,5vw,32px)', height: 64,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <span style={{ fontFamily: SF, fontSize: 17, fontWeight: 800, color: TEXT, letterSpacing: '-0.03em' }}>
+        <span style={{ fontFamily: SF, fontSize: 'clamp(15px, 3vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           College{' '}
-          <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             Fast Forward
           </span>
         </span>
