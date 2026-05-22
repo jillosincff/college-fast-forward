@@ -262,102 +262,77 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(80px, 15vw, 120px) 16px clamp(60px, 10vw, 80px)',
+        padding: 'clamp(80px, 15vw, 120px) clamp(16px, 5vw, 24px) clamp(60px, 10vw, 80px)',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, #0A1628 0%, #0D1F3C 30%, #0A2444 55%, #071A33 80%, #0A1628 100%)',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #312e81 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Ambient glow orbs */}
-        <div style={{ position: 'absolute', top: '15%', left: '10%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '20%', right: '8%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(249,115,22,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,102,255,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        {/* Floating connection dots */}
-        {[
-          { top: '20%', left: '15%', size: 5, color: CYAN, delay: '0s' },
-          { top: '35%', left: '5%', size: 4, color: ORANGE, delay: '1s' },
-          { top: '65%', left: '12%', size: 6, color: '#10B981', delay: '2s' },
-          { top: '25%', right: '12%', size: 5, color: CYAN, delay: '0.5s' },
-          { top: '60%', right: '8%', size: 4, color: ORANGE, delay: '1.5s' },
-          { top: '78%', right: '20%', size: 5, color: BLUE, delay: '0.8s' },
-        ].map((dot, i) => (
-          <div key={i} style={{ position: 'absolute', top: dot.top, left: dot.left, right: dot.right, width: dot.size, height: dot.size, borderRadius: '50%', background: dot.color, opacity: 0.6, animation: `drift 8s ease-in-out ${dot.delay} infinite`, pointerEvents: 'none', boxShadow: `0 0 ${dot.size * 2}px ${dot.color}` }} />
-        ))}
-        {/* Avatar row */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center',
-          marginBottom: 24, opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease',
-          flexWrap: 'wrap',
-        }}>
+        {/* Dot grid overlay */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(96,165,250,0.8) 0.8px, transparent 1px)', backgroundSize: '30px 30px', opacity: 0.18, pointerEvents: 'none' }} />
+
+        {/* Avatar row + social proof */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 28, opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex' }}>
             {[
               'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=64&h=64&fit=crop&crop=face',
               'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=64&h=64&fit=crop&crop=face',
               'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=64&h=64&fit=crop&crop=face',
-              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=face',
-              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&fit=crop&crop=face',
             ].map((src, i) => (
-              <div key={i} style={{ width: 28, height: 28, borderRadius: '50%', border: `2px solid ${BG}`, overflow: 'hidden', marginLeft: i === 0 ? 0 : -8, position: 'relative', zIndex: 5 - i, boxShadow: SHADOW }}>
+              <div key={i} style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid white', overflow: 'hidden', marginLeft: i === 0 ? 0 : -10, zIndex: 3 - i }}>
                 <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             ))}
           </div>
-          <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 13px)', color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
-            Joined by <strong style={{ color: '#fff', fontWeight: 700 }}>2,400+</strong> students
+          <span style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
+            Joined by <strong style={{ color: '#fff' }}>2,400+</strong> students
           </span>
         </div>
 
         {/* Badge */}
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(6,182,212,0.12)', border: `1px solid rgba(6,182,212,0.35)`,
-          borderRadius: 100, padding: '7px 18px', marginBottom: 24,
+          background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+          backdropFilter: 'blur(12px)', borderRadius: 999,
+          padding: '10px 24px', marginBottom: 28,
           opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
-          maxWidth: '100%', animation: 'badgeGlow 3s ease-in-out infinite',
-          backdropFilter: 'blur(8px)',
+          position: 'relative', zIndex: 1,
         }}>
-          <span style={{ fontSize: 14 }}>✨</span>
-          <span style={{ fontFamily: FONT, fontSize: 'clamp(10px, 2.5vw, 12px)', fontWeight: 700, color: CYAN, letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>🎓 Built for College Students</span>
-          <span style={{ fontSize: 14 }}>⚡</span>
+          <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 600, color: '#fff', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
         </div>
 
-        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 720, textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(30px, 8vw, 68px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: '#FFFFFF', margin: '0 0 12px' }}>
+        {/* Headline */}
+        <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.15s', maxWidth: 860, position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontFamily: FONT, fontSize: 'clamp(36px, 9vw, 72px)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.05, color: '#fff', margin: '0 0 16px' }}>
             The job search is a black hole.
           </h1>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(20px, 5vw, 36px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.2, margin: '0 0 20px', background: `linear-gradient(90deg, ${CYAN}, ${BLUE})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <h2 style={{ fontFamily: FONT, fontSize: 'clamp(24px, 6vw, 52px)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.15, color: '#60a5fa', margin: '0 0 28px' }}>
             CFF finds the path around it.
-          </p>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 400, color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, margin: '0 auto 14px', maxWidth: 600 }}>
-            We help you bypass the void: hidden opportunities, warm connections from alumni & parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
+          </h2>
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(16px, 4vw, 20px)', fontWeight: 400, color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, margin: '0 auto 40px', maxWidth: 680 }}>
+            We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
           </p>
         </div>
 
-        <div style={{ width: '100%', maxWidth: 440, marginTop: 'clamp(28px, 8vw, 44px)', opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, position: 'relative', zIndex: 1 }}>
+        {/* CTA */}
+        <div style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.6s ease 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, position: 'relative', zIndex: 1 }}>
           <button onClick={go} style={{
-            width: '100%', fontFamily: FONT, fontSize: 'clamp(16px, 4.5vw, 18px)', fontWeight: 900, color: '#fff',
-            background: `linear-gradient(135deg, ${BLUE} 0%, ${CYAN} 100%)`,
-            border: 'none', borderRadius: 16, padding: 'clamp(18px, 5vw, 22px) clamp(24px, 6vw, 36px)',
+            fontFamily: FONT, fontSize: 'clamp(17px, 4.5vw, 20px)', fontWeight: 700, color: '#fff',
+            background: '#2563EB', border: 'none', borderRadius: 999,
+            padding: 'clamp(16px, 4vw, 20px) clamp(40px, 8vw, 56px)',
             cursor: 'pointer', minHeight: '56px',
-            boxShadow: `0 16px 48px rgba(0,102,255,0.5), 0 4px 12px rgba(6,182,212,0.3)`,
-            transition: 'all 0.25s ease', letterSpacing: '0.01em',
+            boxShadow: '0 8px 32px rgba(37,99,235,0.45)',
+            transition: 'all 0.2s ease',
             touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04) translateY(-2px)'; e.currentTarget.style.boxShadow = `0 24px 60px rgba(0,102,255,0.6), 0 6px 16px rgba(6,182,212,0.4)`; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1) translateY(0)'; e.currentTarget.style.boxShadow = `0 16px 48px rgba(0,102,255,0.5), 0 4px 12px rgba(6,182,212,0.3)`; }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#3b82f6'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#2563EB'; e.currentTarget.style.transform = 'scale(1)'; }}
           >
-            ⚡ Start for Free →
+            Start for Free →
           </button>
-          <p style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.4, textAlign: 'center' }}>
-            8–12 min setup · No credit card required
+          <p style={{ fontFamily: FONT, fontSize: 'clamp(12px, 3vw, 14px)', color: 'rgba(255,255,255,0.5)', margin: 0, lineHeight: 1.5 }}>
+            This guided setup takes 8–12 minutes — you'll have a personalized plan.
           </p>
-          <div style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: 'clamp(6px, 2vw, 9px) clamp(12px, 3vw, 16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, maxWidth: '100%' }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: GREEN, animation: 'pulseGreen 1.8s ease-in-out infinite', flexShrink: 0 }} />
-            <span style={{ fontFamily: FONT, fontSize: 'clamp(11px, 3vw, 12px)', color: '#6EE7B7', fontWeight: 600, lineHeight: 1.4 }}>
-              3,412 students from top campuses are already getting interviews.
-            </span>
-          </div>
         </div>
-
       </div>
 
       {/* ── HONEST SECTION ── */}
