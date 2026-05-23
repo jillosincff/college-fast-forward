@@ -69,7 +69,7 @@ function getDashboardForUser(user) {
 
   const persona = user.persona;
 
-  if (persona === 'parent' || user.roles?.includes('parent')) return 'ParentHome';
+  if (persona === 'parent' || user.roles?.includes('parent')) return 'FreeTierDashboard';
 
   if (persona === 'alumni' || user.roles?.includes('alumni')) {
     return 'FreeTierDashboard';
@@ -730,8 +730,11 @@ function AppContent() {
 
     if (currentPage === 'GatorAuth') { setResolvedPage(currentPage); return; }
 
-    // Admin users bypass all persona/onboarding checks
-    if (user?.roles?.includes('admin')) { setResolvedPage(currentPage); return; }
+    // Admin users bypass routing checks ONLY if they have a completed profile
+    // If they deleted themselves and re-registered, they need onboarding too
+    if (user?.roles?.includes('admin') && user?.persona && user?.onboarding_completed !== false) {
+      setResolvedPage(currentPage); return;
+    }
 
     // Auth loop protection
     const oauthAttempts = parseInt(localStorage.getItem('oauth_attempt_count') || '0');
@@ -783,7 +786,7 @@ function AppContent() {
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard', 'ParentLandingPage', 'StudentLandingPage', 'ResetPassword', 'Unsubscribe'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'ParentLandingPage', 'StudentLandingPage', 'ResetPassword', 'Unsubscribe'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
