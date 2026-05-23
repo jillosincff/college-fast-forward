@@ -73,7 +73,6 @@ function getDashboardForUser(user) {
   if (persona === 'parent' || user.roles?.includes('parent')) return 'ParentHome';
 
   if (persona === 'alumni' || user.roles?.includes('alumni')) {
-    if (user.alumni_intent === 'giving_help') return 'AlumniHome';
     return 'FreeTierDashboard';
   }
 
