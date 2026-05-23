@@ -376,6 +376,7 @@ export default function FreeTierDashboard() {
                 onUnlock={() => triggerUpgrade('Parent Network Introductions')}
                 college={college}
                 theme={campusTheme}
+                user={user}
               />
             )}
 

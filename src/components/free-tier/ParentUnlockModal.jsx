@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -22,7 +21,7 @@ const PERKS = [
   },
 ];
 
-export default function ParentUnlockModal({ onClose, theme, college }) {
+export default function ParentUnlockModal({ onClose, theme, college, user }) {
   const t = theme || { primary: '#1E293B', secondary: '#475569', bgTint: 'rgba(30,41,59,0.03)' };
   const shortName = t.shortName || college || 'Your School\'s';
 
@@ -34,15 +33,26 @@ export default function ParentUnlockModal({ onClose, theme, college }) {
   }, [onClose]);
 
   const handleCheckout = async () => {
-    try {
-      const res = await createCheckoutSession({ price_tier: 'weekly_sprint', college });
-      if (res?.data?.url) {
-        window.location.href = res.data.url;
-      } else {
-        base44.auth.redirectToLogin('/#FreeTierDashboard');
-      }
-    } catch {
+    if (!user) {
       base44.auth.redirectToLogin('/#FreeTierDashboard');
+      return;
+    }
+    try {
+      const res = await base44.functions.invoke('createCheckoutSession', {
+        plan: 'pro_monthly',
+        user: { id: user.id, email: user.email },
+        successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
+        cancelUrl: window.location.origin + '/#FreeTierDashboard',
+      });
+      const url = res?.data?.url || res?.url;
+      if (url) {
+        window.location.href = url;
+      } else {
+        alert('Unable to start checkout. Please try again.');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      alert('Unable to start checkout. Please try again.');
     }
   };
 

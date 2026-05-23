@@ -51,7 +51,7 @@ function AvatarCluster() {
   );
 }
 
-export default function ParentNetworkWidget({ onUnlock, college, theme }) {
+export default function ParentNetworkWidget({ onUnlock, college, theme, user }) {
   const t = theme || { primary: '#1E293B', secondary: '#475569', bgTint: 'rgba(30,41,59,0.03)' };
   const shortName = t.shortName || college || 'Campus';
   const [showModal, setShowModal] = useState(false);
@@ -65,6 +65,7 @@ export default function ParentNetworkWidget({ onUnlock, college, theme }) {
         onClose={() => setShowModal(false)}
         theme={t}
         college={college}
+        user={user}
       />
     )}
     <div
