@@ -26,7 +26,6 @@ import CareerAssessment from '@/pages/CareerAssessment';
 import FastIQDashboard from '@/pages/FastIQDashboard';
 import OutreachDrafts from '@/pages/OutreachDrafts';
 import GatorAuth from '@/pages/GatorAuth';
-import GatorWelcome from '@/pages/GatorWelcome';
 import StudentWelcome from '@/pages/StudentWelcome';
 import SetSearchGoals from '@/pages/SetSearchGoals';
 import ApplicationTracker from '@/pages/ApplicationTracker';
@@ -124,7 +123,7 @@ const AuthenticatedApp = () => {
           <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
           <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />
           <Route path="/GatorAuth" element={<GatorAuth />} />
-          <Route path="/GatorWelcome" element={<StudentWelcome />} />
+          <Route path="/GatorWelcome" element={<Navigate to="/StudentWelcome" replace />} />
           <Route path="/StudentWelcome" element={<StudentWelcome />} />
           <Route path="/SetSearchGoals" element={<SetSearchGoals />} />
           <Route path="/ApplicationTracker" element={<LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper>} />

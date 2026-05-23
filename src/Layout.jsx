@@ -136,7 +136,7 @@ const Notifications = React.lazy(() => import('./pages/Notifications'));
 const MyMatches = React.lazy(() => import('./pages/MyMatches'));
 const GatorAuth = React.lazy(() => import('./pages/GatorAuth'));
 const GatorInviteCode = React.lazy(() => import('./pages/GatorInviteCode'));
-const GatorWelcome = React.lazy(() => import('./pages/GatorWelcome'));
+
 const GatorParentInvite = React.lazy(() => import('./pages/GatorParentInvite'));
 
 const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
@@ -156,6 +156,7 @@ const StudentInvitedOnboarding = React.lazy(() => import('./pages/StudentInvited
 const FreeTierDashboard = React.lazy(() => import('./pages/FreeTierDashboard'));
 const FastIQDashboard = React.lazy(() => import('./pages/FastIQDashboard'));
 const ParentProfileEdit = React.lazy(() => import('./pages/ParentProfileEdit'));
+const StudentWelcome = React.lazy(() => import('./pages/StudentWelcome'));
 
 
 function SimpleHeader({ currentPage, onNavigate, user, logout }) {
@@ -549,7 +550,7 @@ const getPageComponent = (pageName) => {
     case 'PostOpportunity': return PostOpportunity;
     case 'PostRequest': return PostRequest;
     case 'Profile': return Profile;
-    case 'WelcomeRole': return GatorWelcome;
+    case 'WelcomeRole': return StudentWelcome;
     case 'StudentOnboarding': return StudentOnboarding;
     case 'AlumniOnboarding': return AlumniOnboarding;
     case 'ParentOnboarding': return ParentOnboarding;
@@ -570,7 +571,7 @@ const getPageComponent = (pageName) => {
     case 'MyMatches': return MyMatches;
     case 'GatorAuth': return GatorAuth;
     case 'GatorInviteCode': return GatorInviteCode;
-    case 'GatorWelcome': return GatorWelcome;
+    case 'GatorWelcome': return StudentWelcome;
     case 'GatorParentInvite': return GatorParentInvite;
 
     case 'MatchesReview': return MatchesReview;
