@@ -748,12 +748,6 @@ function AppContent() {
     }
 
     if (user && !user.persona?.trim()) {
-      // Existing users without persona should go to FreeTierDashboard, not back to onboarding
-      if (user.created_date && !user.onboarding_completed) {
-        // This is an existing user who never completed onboarding - send them to dashboard
-        navigate('FreeTierDashboard');
-        return;
-      }
       if (currentPage === 'LandingPage') { setResolvedPage(currentPage); return; }
       if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
       const pendingInviteRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
