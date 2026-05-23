@@ -71,6 +71,9 @@ export default function AlumniHome() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loadingMessages, setLoadingMessages] = useState(true);
 
+  // This page is deprecated — redirect to FreeTierDashboard
+  useEffect(() => { navigate('FreeTierDashboard'); }, []);
+
   const firstName = user?.first_name || user?.full_name?.split(' ')[0] || 'there';
   const schoolName = user?.school_name || 'your school';
   const profile = getProfileStrength(user);
