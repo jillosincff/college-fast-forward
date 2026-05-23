@@ -437,8 +437,10 @@ export default function FreeTierDashboard() {
               });
               const url = res?.data?.url || res?.url;
               if (url) window.location.href = url;
-            } catch {
-              base44.auth.redirectToLogin('/#FreeTierDashboard');
+              else alert('Unable to start checkout. Please try again.');
+            } catch (err) {
+              console.error('Checkout error:', err);
+              alert('Unable to start checkout. Please try again.');
             }
           }}
         />
