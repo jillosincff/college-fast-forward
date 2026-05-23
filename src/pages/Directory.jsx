@@ -508,41 +508,11 @@ export default function Directory() {
           </div>
         )}
 
-        {/* ── HERO ── */}
-        <div style={{
-          maxWidth: 960, margin: '0 auto', width: '100%',
-          padding: '48px 24px 32px', textAlign: 'center',
-        }}>
-          <p style={{
-            fontFamily: dmSans, fontSize: 11, fontWeight: 700,
-            color: '#E85D20', letterSpacing: '0.14em',
-            textTransform: 'uppercase', margin: '0 0 16px',
-          }}>
-            Your Network
-          </p>
-          <h1 style={{
-            fontFamily: playfair,
-            fontSize: 'clamp(28px, 4vw, 48px)',
-            fontWeight: 700, color: '#fff',
-            lineHeight: 1.15, letterSpacing: '-0.02em',
-            margin: '0 0 12px',
-          }}>
-            Every door starts with a conversation.
-          </h1>
-          <p style={{
-            fontFamily: dmSans, fontSize: 16,
-            color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
-            margin: '0 0 32px', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto',
-          }}>
-            Parents and alumni — here to open their networks for your student.
-          </p>
-
-          {/* Stat pills */}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <StatPill count={stats.total} label="Total Helpers" active={roleFilter === 'all'} onClick={() => setRoleFilter('all')} />
-            <StatPill count={stats.parents} label="Parents" active={roleFilter === 'parent'} onClick={() => setRoleFilter('parent')} />
-            <StatPill count={stats.alumni} label="Alumni" active={roleFilter === 'alumni'} onClick={() => setRoleFilter('alumni')} />
-          </div>
+        {/* ── STAT PILLS ── */}
+        <div style={{ maxWidth: 960, margin: '0 auto', width: '100%', padding: '24px 24px 16px', display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <StatPill count={stats.total} label="Total Helpers" active={roleFilter === 'all'} onClick={() => setRoleFilter('all')} />
+          <StatPill count={stats.parents} label="Parents" active={roleFilter === 'parent'} onClick={() => setRoleFilter('parent')} />
+          <StatPill count={stats.alumni} label="Alumni" active={roleFilter === 'alumni'} onClick={() => setRoleFilter('alumni')} />
         </div>
 
         {/* ── SEARCH + FILTERS ── */}
