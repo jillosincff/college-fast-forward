@@ -67,9 +67,11 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
-  // Skip spinner for the home page so it renders immediately
-  const isHomePath = window.location.hash === '' || window.location.hash === '#/' || window.location.hash === '#';
-  if (!isHomePath && (isLoadingPublicSettings || isLoadingAuth)) {
+  // Skip spinner for the home page, auth pages, and logout so they render immediately
+  const currentHash = window.location.hash.replace('#/', '').replace('#', '');
+  const noSpinnerPaths = ['', '/', 'GatorAuth', 'GetStarted', 'Logout', 'MigrationSignIn', 'ResetPassword'];
+  const isNoSpinnerPath = noSpinnerPaths.includes(currentHash);
+  if (!isNoSpinnerPath && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
