@@ -69,8 +69,9 @@ export const AuthProvider = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
-    // Always redirect to the auth page — never back to the current page
-    base44.auth.logout(window.location.origin + '/#GatorAuth');
+    // Navigate to Logout page first so layout resolves it immediately (no spinner),
+    // then the Logout component handles the actual base44 auth.logout redirect.
+    window.location.hash = '#/Logout';
   };
 
   return (
