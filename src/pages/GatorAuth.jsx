@@ -170,35 +170,48 @@ export default function GatorAuth() {
       return;
     }
 
-    // Any user with a persona OR completed onboarding goes straight to their dashboard — no onboarding re-entry
-    if (user.persona || user.onboarding_completed === true || user.roles?.includes('parent') || user.roles?.includes('alumni')) {
+    // Logged in — decide where to send them
+    const hasPersona = !!user.persona?.trim();
+    const onboardingDone = user.onboarding_completed === true;
+    const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
+
+    // User who has completed onboarding → go to their dashboard
+    if (hasPersona && onboardingDone) {
+      navigate('/FreeTierDashboard');
+      return;
+    }
+
+    // User with persona but onboarding not completed (e.g. was mid-flow) → resume onboarding
+    if (hasPersona && !onboardingDone) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('/ParentHome');
+        navigate('/ParentOnboarding');
       } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-        navigate(user.alumni_intent === 'giving_help' ? '/AlumniHome' : '/FreeTierDashboard');
+        navigate('/FreeTierDashboard'); // alumni onboarding is handled on dashboard
       } else {
-        navigate('/FreeTierDashboard');
+        // student — resume onboarding
+        localStorage.removeItem('cff_onboarding_screen');
+        setResumeScreen(null);
+        setStep('onboarding');
       }
       return;
     }
 
-    // Logged in but no persona yet — check if existing user or new
-    if (user && !user.persona) {
-      const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
-      
-      // Existing users without persona go straight to dashboard (they can complete onboarding later)
-      const isExistingUser = user.created_date && new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
-      if (isExistingUser || user.onboarding_completed === true) {
+    // No persona at all — brand new user or re-registered user
+    if (!hasPersona) {
+      // Existing account (created > 5 min ago) with no persona → send to dashboard, onboarding optional
+      const isExistingAccount = user.created_date && new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
+      if (isExistingAccount) {
         navigate('/FreeTierDashboard');
         return;
       }
 
+      // Pending parent invite → parent onboarding
       if (pendingRole === 'parent') {
         navigate('/ParentOnboarding');
         return;
       }
 
-      // Always start fresh at screen 1 — stale saved screens cause blank renders
+      // Fresh new user → onboarding
       localStorage.removeItem('cff_onboarding_screen');
       setResumeScreen(null);
       setStep('onboarding');

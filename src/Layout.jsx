@@ -730,9 +730,9 @@ function AppContent() {
 
     if (currentPage === 'GatorAuth') { setResolvedPage(currentPage); return; }
 
-    // Admin users bypass routing checks ONLY if they have a completed profile
-    // If they deleted themselves and re-registered, they need onboarding too
-    if (user?.roles?.includes('admin') && user?.persona && user?.onboarding_completed !== false) {
+    // Admin users bypass routing checks ONLY if they have a completed onboarding
+    // Admins who deleted + re-registered have no persona and must go through onboarding
+    if (user?.roles?.includes('admin') && user?.persona?.trim() && user?.onboarding_completed === true) {
       setResolvedPage(currentPage); return;
     }
 
