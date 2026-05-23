@@ -4,8 +4,7 @@ import { lazy } from 'react';
 // Code splitting for heavy components
 export const LazyComponents = {
   // Split heavy dashboard components
-  ParentDashboard: lazy(() => import('@/pages/ParentDashboard')),
-  AlumniDashboard: lazy(() => import('@/pages/AlumniDashboard')),
+  ParentDashboard: lazy(() => import('@/pages/ParentHome')),
   
   // Split complex modals
   PostRequestModal: lazy(() => import('@/components/jobs/PostRequestModal')),

@@ -52,7 +52,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import Logout from '@/pages/Logout';
 import AdminV2 from '@/pages/AdminV2';
 import EngagementAgentDashboard from '@/pages/EngagementAgentDashboard';
-import HomePage from '@/pages/HomePage';
+
 import PaywallAnalyticsDashboard from '@/pages/PaywallAnalyticsDashboard';
 import Unsubscribe from '@/pages/Unsubscribe';
 
@@ -145,7 +145,7 @@ const AuthenticatedApp = () => {
 
           {/* Main routes */}
           <Route path="/" element={<StudentLandingPage />} />
-      {Object.entries(Pages).map(([path, Page]) => (
+          {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
           path={`/${path}`}

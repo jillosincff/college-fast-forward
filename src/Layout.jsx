@@ -106,7 +106,7 @@ function PageLoader() {
 }
 
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+
 // Connections (Ask the Network) removed
 const Profile = React.lazy(() => import('./pages/Profile'));
 // WelcomeRole removed — replaced by GatorWelcome
@@ -143,7 +143,7 @@ const MatchesReview = React.lazy(() => import('./pages/MatchesReview'));
 const ParentPledge = React.lazy(() => import('./pages/ParentPledge'));
 const SubmitFeedback = React.lazy(() => import('./pages/SubmitFeedback'));
 const FastIQ = React.lazy(() => import('./pages/FastIQ'));
-const FastIQOnboarding = React.lazy(() => import('./pages/FastIQOnboarding'));
+
 const RecentGradDashboard = React.lazy(() => import('./pages/RecentGradDashboard'));
 const FollowedCompanies = React.lazy(() => import('./pages/FollowedCompanies'));
 const ActionPlanTracker = React.lazy(() => import('./pages/ActionPlanTracker'));
@@ -538,7 +538,7 @@ const isUserVerified = (user) => {
 
 const getPageComponent = (pageName) => {
   switch (pageName) {
-    case 'Dashboard': return Dashboard;
+    case 'Dashboard': return FreeTierDashboard;
     case 'ParentDashboard': return ParentHome;
     case 'ParentHome': return ParentHome;
     case 'AlumniDashboard': return FreeTierDashboard;
@@ -574,11 +574,11 @@ const getPageComponent = (pageName) => {
     case 'GatorParentInvite': return GatorParentInvite;
 
     case 'MatchesReview': return MatchesReview;
-    case 'Insights': return Dashboard;
+    case 'Insights': return FreeTierDashboard;
     case 'ParentPledge': return ParentPledge;
     case 'SubmitFeedback': return SubmitFeedback;
     case 'FastIQ': return FastIQ;
-    case 'FastIQOnboarding': return FastIQOnboarding;
+
     case 'FollowedCompanies': return FollowedCompanies;
     case 'ActionPlanTracker': return ActionPlanTracker;
     case 'ResumeTailoring': return ResumeTailoring;
