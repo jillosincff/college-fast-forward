@@ -176,7 +176,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
 
       {/* Header */}
       <div style={{
-        background: '#0A0A0A', borderRadius: 20,
+        background: '#1a1a2e', borderRadius: 20,
         padding: '32px 36px', marginBottom: 32,
       }}>
         <div style={{

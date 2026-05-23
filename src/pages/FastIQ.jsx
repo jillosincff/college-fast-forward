@@ -105,19 +105,19 @@ export default function FastIQ() {
 
   if (user === undefined) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
-        <Loader2 className="w-7 h-7 text-orange-400 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="w-7 h-7 text-orange-500 animate-spin" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0F172A' }}>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
         <div className="text-center">
-          <Zap className="w-10 h-10 text-orange-400 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-white mb-2 tracking-tight">Sign in to access FASTIQ™</h2>
-          <p className="text-slate-400 mb-5 text-sm">Your intelligent networking engine</p>
+          <Zap className="w-10 h-10 text-orange-500 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-gray-900 mb-2 tracking-tight">Sign in to access FASTIQ™</h2>
+          <p className="text-gray-500 mb-5 text-sm">Your intelligent networking engine</p>
           <Button
             onClick={() => base44.auth.redirectToLogin()}
             className="text-white text-sm font-bold px-6"
@@ -136,8 +136,8 @@ export default function FastIQ() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0F172A' }}>
-        <Loader2 className="w-7 h-7 text-orange-400 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <Loader2 className="w-7 h-7 text-orange-500 animate-spin" />
       </div>
     );
   }
@@ -153,7 +153,7 @@ export default function FastIQ() {
         left: 0,
         right: 0,
         bottom: 0,
-        background: '#0d1117',
+        background: '#f8f9fc',
         zIndex: 9999,
         overflow: 'hidden',
       }}>

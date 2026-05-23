@@ -12,10 +12,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 
 import FreeTierDashboard from '@/pages/FreeTierDashboard';
 import JoinPage from '@/pages/JoinPage';
-import AlumniOnboarding from '@/pages/AlumniOnboarding';
-import AlumniAllSet from '@/pages/AlumniAllSet';
 import AlumniHome from '@/pages/AlumniHome';
-import Directory from '@/pages/Directory';
 import FastIQAssessment from '@/pages/FastIQAssessment';
 import StudentOnboarding from '@/pages/StudentOnboarding';
 import ResumeTailoring from '@/pages/ResumeTailoring';
@@ -38,7 +35,6 @@ import ParentProfileEdit from '@/pages/ParentProfileEdit';
 import ParentUpsell from '@/pages/ParentUpsell';
 import ParentAllSet from '@/pages/ParentAllSet';
 import ParentLandingPage from '@/pages/ParentLandingPage';
-import ParentHome from '@/pages/ParentHome';
 import StudentLandingPage from '@/pages/StudentLandingPage';
 import RegistrationSuccess from '@/pages/RegistrationSuccess';
 import OnboardingQuestions from '@/pages/OnboardingQuestions';
@@ -98,7 +94,7 @@ const AuthenticatedApp = () => {
 
           {/* Explicit routes first for higher priority */}
           <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
-          <Route path="/Directory" element={<LayoutWrapper currentPageName="Directory"><Directory /></LayoutWrapper>} />
+
           <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
           <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
           <Route path="/ResumeTailoring" element={<LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper>} />
@@ -108,17 +104,19 @@ const AuthenticatedApp = () => {
           <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
-          <Route path="/AlumniOnboarding" element={<AlumniOnboarding />} />
-          <Route path="/AlumniAllSet" element={<AlumniAllSet />} />
+
           <Route path="/AlumniHome" element={<FreeTierDashboard />} />
+          <Route path="/AlumniAllSet" element={<Navigate to="/FreeTierDashboard" replace />} />
+          <Route path="/AlumniOnboarding" element={<Navigate to="/FreeTierDashboard" replace />} />
+          <Route path="/ParentHome" element={<Navigate to="/FreeTierDashboard" replace />} />
+          <Route path="/Directory" element={<Navigate to="/FreeTierDashboard" replace />} />
           <Route path="/ParentWelcome" element={<ParentWelcome />} />
           <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
           <Route path="/ParentUpsell" element={<ParentUpsell />} />
           <Route path="/ParentAllSet" element={<ParentAllSet />} />
           <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
           <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
-          <Route path="/ParentHome" element={<ParentHome />} />
-          <Route path="/ParentDashboard" element={<Navigate to="/ParentHome" replace />} />
+
           <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
           <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
           <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />

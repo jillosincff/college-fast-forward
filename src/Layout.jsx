@@ -111,14 +111,12 @@ const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Profile = React.lazy(() => import('./pages/Profile'));
 // WelcomeRole removed — replaced by GatorWelcome
 const StudentOnboarding = React.lazy(() => import('./pages/StudentOnboarding'));
-const AlumniOnboarding = React.lazy(() => import('./pages/AlumniOnboarding'));
+
 const ParentOnboarding = React.lazy(() => import('./pages/ParentOnboarding'));
 const PostOpportunity = React.lazy(() => import('./pages/PostOpportunity'));
 const PostRequest = React.lazy(() => import('./pages/PostRequest'));
-// ParentDashboard removed — parents now go to ParentHome
-const ParentHome = React.lazy(() => import('./pages/ParentHome'));
-// AlumniDashboard removed — alumni now route to FreeTierDashboard or ParentHome based on intent
-const Directory = React.lazy(() => import('./pages/Directory'));
+// AlumniDashboard removed — alumni now route to FreeTierDashboard based on intent
+
 const MyRequests = React.lazy(() => import('./pages/MyRequests'));
 // MyImpact removed
 const MyApplications = React.lazy(() => import('./pages/MyApplications'));
@@ -540,8 +538,8 @@ const isUserVerified = (user) => {
 const getPageComponent = (pageName) => {
   switch (pageName) {
     case 'Dashboard': return FreeTierDashboard;
-    case 'ParentDashboard': return ParentHome;
-    case 'ParentHome': return ParentHome;
+    case 'ParentDashboard': return FreeTierDashboard;
+    case 'ParentHome': return FreeTierDashboard;
     case 'AlumniDashboard': return FreeTierDashboard;
     case 'RecentGradDashboard': return RecentGradDashboard;
     case 'AdminDashboard': return AdminDashboard;
@@ -552,9 +550,9 @@ const getPageComponent = (pageName) => {
     case 'Profile': return Profile;
     case 'WelcomeRole': return StudentWelcome;
     case 'StudentOnboarding': return StudentOnboarding;
-    case 'AlumniOnboarding': return AlumniOnboarding;
+    case 'AlumniOnboarding': return FreeTierDashboard;
     case 'ParentOnboarding': return ParentOnboarding;
-    case 'Directory': return Directory;
+    case 'Directory': return FreeTierDashboard;
     case 'MyRequests': return MyRequests;
     case 'MyApplications': return MyApplications;
     case 'MyMessages': return MyMessages;
@@ -592,7 +590,7 @@ const getPageComponent = (pageName) => {
     case 'FastIQDashboard': return FastIQDashboard;
     case 'Profile': return React.lazy(() => import('./pages/Profile'));
     case 'ParentProfileEdit': return ParentProfileEdit;
-    case 'AlumniAllSet': return React.lazy(() => import('./pages/AlumniAllSet'));
+    case 'AlumniAllSet': return FreeTierDashboard;
     case 'AlumniHome': return FreeTierDashboard;
     case 'ProfileEdit': return React.lazy(() => import('./pages/ProfileEdit'));
     case 'OutreachDrafts': return React.lazy(() => import('./pages/OutreachDrafts'));
@@ -874,7 +872,7 @@ function AppContent() {
   // Pages where certain users have their own nav (hide the global header)
   // Pages where specific personas render their own nav bar — hide global header
   const studentOwnNavPages = ['Dashboard', 'Profile', 'MyApplications', 'MyRequests', 'MyMessages', 'FastIQ', 'RecentGradDashboard', 'FreeTierDashboard', 'FastIQDashboard'];
-  const parentOwnNavPages = ['Profile', 'ParentHome', 'ParentProfileEdit', 'Directory'];
+  const parentOwnNavPages = ['Profile', 'ParentProfileEdit'];
   const isStudentUser = user?.persona === 'gator' || user?.persona === 'student' || user?.email?.toLowerCase().endsWith('@ufl.edu');
   const isHelperUser = user?.persona === 'parent' || user?.roles?.includes('parent');
   const hasOwnNav =

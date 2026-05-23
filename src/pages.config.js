@@ -15,7 +15,7 @@ import MyMatches from './pages/MyMatches';
 import MyMessages from './pages/MyMessages';
 import MyRequests from './pages/MyRequests';
 import Notifications from './pages/Notifications';
-import ParentHome from './pages/ParentHome';
+import FreeTierDashboard from './pages/FreeTierDashboard';
 import ParentPledge from './pages/ParentPledge';
 import PostOpportunity from './pages/PostOpportunity';
 import PostRequest from './pages/PostRequest';
@@ -44,7 +44,7 @@ export const PAGES = {
     "MyMessages": MyMessages,
     "MyRequests": MyRequests,
     "Notifications": Notifications,
-    "ParentHome": ParentHome,
+    "ParentHome": FreeTierDashboard,
     "ParentPledge": ParentPledge,
     "PostOpportunity": PostOpportunity,
     "PostRequest": PostRequest,
@@ -59,6 +59,6 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "ParentHome",
+    mainPage: "FreeTierDashboard",
     Pages: PAGES,
 };

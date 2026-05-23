@@ -579,13 +579,13 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           }}
           disabled={checkoutLoading}
           style={{
-            width: '100%', maxWidth: 520, display: 'block', margin: '0 auto 20px',
+            maxWidth: 520, margin: '0 auto 20px',
             fontFamily: dm, fontSize: 17, fontWeight: 800, color: '#fff',
             background: checkoutLoading ? '#4c1d95' : 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
             border: 'none', borderRadius: 14, padding: '20px 32px', cursor: checkoutLoading ? 'default' : 'pointer', minHeight: 'auto',
             boxShadow: '0 8px 32px rgba(109,40,217,0.45), 0 2px 8px rgba(0,0,0,0.2)',
             letterSpacing: '-0.01em', transition: 'all 0.2s',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
           }}
           onMouseEnter={e => { if (!checkoutLoading) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(109,40,217,0.60)'; }}}
           onMouseLeave={e => { if (!checkoutLoading) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(109,40,217,0.45), 0 2px 8px rgba(0,0,0,0.2)'; }}}
