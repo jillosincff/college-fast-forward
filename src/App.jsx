@@ -1,4 +1,5 @@
 // App.css removed — styles handled by globals.css
+import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -65,13 +66,19 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
+  const [timedOut, setTimedOut] = useState(false);
 
-  // Show loading spinner while checking app public settings or auth
-  // Skip spinner for the home page, auth pages, and logout so they render immediately
-  const currentHash = window.location.hash.replace('#/', '').replace('#', '');
-  const noSpinnerPaths = ['', '/', 'GatorAuth', 'GetStarted', 'Logout', 'MigrationSignIn', 'ResetPassword'];
+  useEffect(() => {
+    if (!isLoadingAuth) { setTimedOut(false); return; }
+    const t = setTimeout(() => setTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, [isLoadingAuth]);
+
+  // Show loading spinner while checking auth — but never block public/auth pages, and give up after 3s
+  const currentHash = window.location.hash.replace('#/', '').replace('#', '').split('?')[0];
+  const noSpinnerPaths = ['', '/', 'GatorAuth', 'GetStarted', 'Logout', 'MigrationSignIn', 'ResetPassword', 'StudentLandingPage', 'ParentLandingPage'];
   const isNoSpinnerPath = noSpinnerPaths.includes(currentHash);
-  if (!isNoSpinnerPath && (isLoadingPublicSettings || isLoadingAuth)) {
+  if (!isNoSpinnerPath && !timedOut && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
