@@ -714,7 +714,12 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (isLoading || !currentPage) return;
+    if (!currentPage) return;
+
+    // Always resolve Logout immediately — never block on auth
+    if (currentPage === 'Logout') { setResolvedPage('Logout'); return; }
+
+    if (isLoading) return;
 
     if (sessionStorage.getItem('oauth_redirect_in_progress') === 'true') {
       const redirectStartTime = parseInt(sessionStorage.getItem('oauth_redirect_start') || '0');
@@ -784,7 +789,7 @@ function AppContent() {
 
     if (currentPage === 'AdminDashboard' || currentPage === 'TestingDashboard' || currentPage === 'FastIQDashboard') { setResolvedPage(currentPage); return; }
 
-    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard', 'ParentLandingPage', 'StudentLandingPage'];
+    const trulyPublicPages = ['Privacy', 'Terms', 'CookiePolicy', 'InviteRequired', 'RequestInvite', 'PublicProfile', 'AdminSetup', 'ReferralAnswer', 'Logout', 'AlumniAllSet', 'ProfileEdit', 'FreeTierDashboard', 'ParentLandingPage', 'StudentLandingPage', 'ResetPassword', 'Unsubscribe'];
     if (trulyPublicPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
     if (currentPage === 'LandingPage') {
