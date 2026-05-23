@@ -429,11 +429,10 @@ export default function FreeTierDashboard() {
             }
             try {
               const res = await base44.functions.invoke('createCheckoutSession', {
-                plan: 'weekly',
-                user_id: user.id,
-                user_email: user.email,
-                success_url: window.location.origin + '/#FreeTierDashboard',
-                cancel_url: window.location.origin + '/#FreeTierDashboard',
+                plan: 'pro_monthly',
+                user: { id: user.id, email: user.email },
+                successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
+                cancelUrl: window.location.origin + '/#FreeTierDashboard',
               });
               const url = res?.data?.url || res?.url;
               if (url) window.location.href = url;
