@@ -52,7 +52,7 @@ export default function StudentOnboarding() {
   useEffect(() => {
     if (!user || step !== 1) return;
     // Already onboarded — route them directly to the right dashboard
-    if (user.persona && user.onboarding_completed) {
+    if (user.persona && user.onboarding_completed && user.full_name?.trim()) {
       if (user.persona === 'parent' || user.roles?.includes('parent')) {
         navigate('ParentHome');
       } else if (user.persona === 'alumni' && user.alumni_intent === 'giving_help') {
