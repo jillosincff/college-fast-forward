@@ -1,16 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
-import { Menu, X, User, FileText, MessageSquare, LayoutDashboard, LogOut, Trash2, TestTube } from 'lucide-react';
+import { Menu, X, User, FileText, LayoutDashboard, LogOut, TestTube } from 'lucide-react';
 
 const playfair = "'Playfair Display', Georgia, serif";
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
 const NAV_LINKS = [
   { label: 'Your Plan', page: 'Dashboard' },
-  { label: 'Directory', page: 'GatorDirectory' },
   { label: 'Pipeline', page: 'MyApplications' },
-  { label: 'Messages', page: 'MyMessages' },
   { label: 'FASTIQ', page: 'FastIQ' },
 ];
 
@@ -51,8 +49,6 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
     const dashboardPage = isAlumniHelper ? 'AlumniHome' : 'ParentHome';
     const helperNavLinks = [
       { label: 'Dashboard', page: dashboardPage },
-      { label: 'Directory', page: 'Directory' },
-      { label: 'Messages', page: 'MyMessages' },
     ];
 
     return (
@@ -114,9 +110,6 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
               </div>
               <button onClick={() => { navigate('Profile'); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: '#1a1a1a', minHeight: 'auto', textAlign: 'left' }}>
                 <User size={15} style={{ color: '#888' }} /> Profile
-              </button>
-              <button onClick={() => { navigate('MyMessages'); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: '#1a1a1a', minHeight: 'auto', textAlign: 'left' }}>
-                <MessageSquare size={15} style={{ color: '#888' }} /> Messages
               </button>
               <div style={{ height: 1, background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
               <button onClick={() => { logout(); setMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: dmSans, fontSize: 13, color: '#e53935', minHeight: 'auto', textAlign: 'left' }}>
@@ -219,8 +212,6 @@ export default function DashboardNav({ user, currentPage = 'Dashboard' }) {
                 { icon: User, label: 'Profile', page: 'Profile' },
                 { icon: FileText, label: 'My Pipeline', page: 'MyApplications' },
                 { icon: FileText, label: 'My Requests', page: 'MyRequests' },
-                { icon: MessageSquare, label: 'My Messages', page: 'MyMessages' },
-
               ].map(item => (
                 <button key={item.page} onClick={() => { navigate(item.page); setMenuOpen(false); }} style={{
                   display: 'flex', alignItems: 'center', gap: 10, width: '100%',
