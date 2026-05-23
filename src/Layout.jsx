@@ -703,7 +703,8 @@ function AppContent() {
       if (pageHash === 'PreAuth') pageHash = 'StudentInvitedOnboarding';
       if (pageHash === 'Home') pageHash = 'LandingPage';
       if (pageHash === 'QuestionDetail') pageHash = 'LandingPage';
-      if (pageHash === 'GiftFastIQ') { window.location.hash = '#ParentHome?gift=open'; return; }
+      if (pageHash === 'GiftFastIQ') { window.location.hash = '#FreeTierDashboard?gift=open'; return; }
+      if (pageHash === 'ParentHome') { window.location.hash = '#FreeTierDashboard'; return; }
       setCurrentPage(pageHash || 'LandingPage');
       setResolvedPage(null);
     };
@@ -765,8 +766,8 @@ function AppContent() {
 
     if (user && user.onboarding_completed === false && user.persona) {
       if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
-      // ParentHome and AlumniHome have their own nav — let them through even if onboarding flag hasn't refreshed yet
-      if (currentPage === 'ParentHome') { setResolvedPage(currentPage); return; }
+      // FreeTierDashboard has its own nav — let it through even if onboarding flag hasn't refreshed yet
+      if (currentPage === 'FreeTierDashboard') { setResolvedPage(currentPage); return; }
       const onboardingDashPages = ['Dashboard', 'Profile', 'RecentGradDashboard', 'AlumniDashboard'];
       if (onboardingDashPages.includes(currentPage)) {
         const isParent = user.persona === 'parent' || user.roles?.includes('parent');
@@ -891,7 +892,7 @@ function AppContent() {
 
   const showBottomNav = user && bottomNavPages.includes(resolvedPage);
 
-  const pullRefreshPages = ['Dashboard', 'Profile', 'ParentHome', 'AlumniDashboard', 'RecentGradDashboard', 'Directory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
+  const pullRefreshPages = ['Dashboard', 'Profile', 'FreeTierDashboard', 'AlumniDashboard', 'RecentGradDashboard', 'Directory', 'MyMessages', 'MyRequests', 'MyApplications', 'Notifications'];
   const supportsPullRefresh = pullRefreshPages.includes(resolvedPage);
 
   return (
