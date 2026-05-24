@@ -61,14 +61,12 @@ const AuthProviderInner = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
 
-    // Lock the hash BEFORE calling the SDK so any reload it triggers lands here
-    window.location.hash = '/StudentLandingPage';
-
-    try {
-      base44.auth.logout();
-    } catch (e) {
-      console.error('Silent network sign-out skipped:', e);
-    }
+    // Use replace so the StudentLandingPage is the only entry in history,
+    // then do a hard reload so the Base44 session cookie is fully cleared
+    // and base44.auth.me() returns unauthenticated on next boot.
+    window.location.replace(window.location.origin + '/#/StudentLandingPage');
+    // Slight delay to let replace() commit before reload clears the session
+    setTimeout(() => window.location.reload(), 50);
   };
 
   return (
