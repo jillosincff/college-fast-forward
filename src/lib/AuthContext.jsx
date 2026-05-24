@@ -69,11 +69,9 @@ export const AuthProvider = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
-    // Clear the session token without letting base44 control the redirect
-    base44.auth.logout().catch(() => {});
-    setTimeout(() => {
-      window.location.href = window.location.origin + '/#/StudentLandingPage';
-    }, 200);
+    // Force redirect to StudentLandingPage immediately — do NOT call base44.auth.logout()
+    // as it overrides our redirect with the platform's own login page.
+    window.location.replace(window.location.origin + '/#/StudentLandingPage');
   };
 
   return (
