@@ -1,17 +1,14 @@
 // AuthContext v5 — clean logout via React Router
 import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
-// Inner provider that has access to React Router hooks
 const AuthProviderInner = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [authError, setAuthError] = useState(null);
-  const navigate = useNavigate();
 
   const isLoadingPublicSettings = false;
 
@@ -70,7 +67,7 @@ const AuthProviderInner = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
-    navigate('/StudentLandingPage', { replace: true });
+    window.location.replace(window.location.origin + '/#/StudentLandingPage');
   };
 
   return (
@@ -91,7 +88,6 @@ const AuthProviderInner = ({ children }) => {
   );
 };
 
-// Outer wrapper — must be inside Router but outside everything that needs auth
 export const AuthProvider = ({ children }) => {
   return <AuthProviderInner>{children}</AuthProviderInner>;
 };
