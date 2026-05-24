@@ -1,16 +1,18 @@
-// AuthContext v4 — simplified, non-blocking
-import React, { createContext, useState, useContext, useEffect } from 'react';
+// AuthContext v5 — clean logout via React Router
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+// Inner provider that has access to React Router hooks
+const AuthProviderInner = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [authError, setAuthError] = useState(null);
+  const navigate = useNavigate();
 
-  // isLoadingPublicSettings is always false — no blocking public settings fetch needed
   const isLoadingPublicSettings = false;
 
   useEffect(() => {
@@ -49,7 +51,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear all session/local storage that could cause re-auth loops
     try {
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
@@ -69,9 +70,7 @@ export const AuthProvider = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
-    // Force redirect to StudentLandingPage immediately — do NOT call base44.auth.logout()
-    // as it overrides our redirect with the platform's own login page.
-    window.location.replace(window.location.origin + '/#/StudentLandingPage');
+    navigate('/StudentLandingPage', { replace: true });
   };
 
   return (
@@ -90,6 +89,11 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Outer wrapper — must be inside Router but outside everything that needs auth
+export const AuthProvider = ({ children }) => {
+  return <AuthProviderInner>{children}</AuthProviderInner>;
 };
 
 export const useAuth = () => {

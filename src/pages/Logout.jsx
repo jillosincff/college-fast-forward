@@ -1,31 +1,16 @@
 import { useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { queryClientInstance } from '@/lib/query-client';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function Logout() {
-  useEffect(() => {
-    try {
-      queryClientInstance.clear();
-      localStorage.removeItem('pending_intent');
-      localStorage.removeItem('pending_invite_role');
-      localStorage.removeItem('pending_invite_code');
-      localStorage.removeItem('pending_student_email');
-      localStorage.removeItem('pending_referral_code');
-      localStorage.removeItem('oauth_attempt_count');
-      localStorage.removeItem('oauth_start_time');
-      sessionStorage.clear();
-    } catch (e) { /* private browsing */ }
+  const { logout } = useAuth();
 
-    // Call logout (clears the session token), then redirect ourselves
-    base44.auth.logout().catch(() => {});
-    setTimeout(() => {
-      window.location.href = window.location.origin + '/#/StudentLandingPage';
-    }, 300);
+  useEffect(() => {
+    logout();
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d1117' }}>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: 'rgba(255,255,255,0.45)' }}>Logging out...</p>
+    <div className="fixed inset-0 flex items-center justify-center bg-white">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
     </div>
   );
 }
