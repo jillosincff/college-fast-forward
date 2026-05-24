@@ -6,7 +6,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { HashRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 
@@ -59,65 +59,48 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-// Guard for pages that require a completed onboarding
-// Redirects new/incomplete users to GatorAuth for onboarding
+// Guard for pages that require completed onboarding.
+// Renders synchronously based on current auth state — no extra spinner.
 function OnboardingGuard({ children }) {
   const { user, isLoadingAuth } = useAuth();
-  const [ready, setReady] = useState(false);
-  const [redirect, setRedirect] = useState(null);
 
-  useEffect(() => {
-    if (isLoadingAuth) return;
+  // Still loading — show spinner (AuthenticatedApp already handles the 3s timeout above,
+  // but we need to handle the case where only the guard is waiting)
+  if (isLoadingAuth) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
-    if (!user) {
-      setRedirect('/GatorAuth');
-      setReady(true);
-      return;
+  // Not logged in — go to auth
+  if (!user) {
+    return <Navigate to="/GatorAuth" replace />;
+  }
+
+  const hasPersona = !!user.persona?.trim();
+  const onboardingDone = user.onboarding_completed === true;
+
+  // Fully onboarded — let through
+  if (hasPersona && onboardingDone) return children;
+
+  // Has persona but onboarding not complete — route to appropriate onboarding
+  if (hasPersona && !onboardingDone) {
+    if (user.persona === 'parent' || user.roles?.includes('parent')) {
+      return <Navigate to="/ParentOnboarding" replace />;
     }
+    return <Navigate to="/GatorAuth" replace />;
+  }
 
-    const hasPersona = !!user.persona?.trim();
-    const onboardingDone = user.onboarding_completed === true;
+  // No persona at all
+  // If account is older than 5 minutes, treat as legacy account — let through
+  const isLegacyAccount = user.created_date &&
+    new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
+  if (isLegacyAccount) return children;
 
-    // Fully onboarded — let through
-    if (hasPersona && onboardingDone) {
-      setReady(true);
-      return;
-    }
-
-    // Has persona but not done (mid-flow) — route to appropriate onboarding
-    if (hasPersona && !onboardingDone) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        setRedirect('/ParentOnboarding');
-      } else {
-        setRedirect('/GatorAuth');
-      }
-      setReady(true);
-      return;
-    }
-
-    // No persona — check if truly new or an old account without persona
-    if (!hasPersona) {
-      const isExistingAccount = user.created_date &&
-        new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
-      if (isExistingAccount) {
-        // Old account with no persona — let through, onboarding optional
-        setReady(true);
-      } else {
-        // Brand new user — must go through onboarding
-        setRedirect('/GatorAuth');
-        setReady(true);
-      }
-    }
-  }, [user, isLoadingAuth]);
-
-  if (!ready) return (
-    <div className="fixed inset-0 flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-    </div>
-  );
-
-  if (redirect) return <Navigate to={redirect} replace />;
-  return children;
+  // Brand new user with no persona — must onboard
+  return <Navigate to="/GatorAuth" replace />;
 }
 
 const AuthenticatedApp = () => {
@@ -142,68 +125,68 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Render the main app
-      return (
-        <Routes>
-          {/* Redirects */}
-          <Route path="/Home" element={<Navigate to="/" replace />} />
-          <Route path="/LandingPage" element={<Navigate to="/" replace />} />
+  return (
+    <Routes>
+      {/* Redirects */}
+      <Route path="/Home" element={<Navigate to="/" replace />} />
+      <Route path="/LandingPage" element={<Navigate to="/" replace />} />
 
-          {/* Public/Auth routes - no layout wrapper */}
-          <Route path="/GetStarted" element={<GatorAuth />} />
-          <Route path="/MigrationSignIn" element={<MigrationSignIn />} />
+      {/* Public/Auth routes — NO guard, rendered immediately */}
+      <Route path="/GetStarted" element={<GatorAuth />} />
+      <Route path="/GatorAuth" element={<GatorAuth />} />
+      <Route path="/MigrationSignIn" element={<MigrationSignIn />} />
+      <Route path="/Logout" element={<Logout />} />
+      <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
+      <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
+      <Route path="/ResetPassword" element={<ResetPassword />} />
+      <Route path="/Unsubscribe" element={<Unsubscribe />} />
 
-          {/* Explicit routes first for higher priority */}
-          <Route path="/FreeTierDashboard" element={<OnboardingGuard><FreeTierDashboard /></OnboardingGuard>} />
+      {/* Onboarding routes — no guard */}
+      <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
+      <Route path="/GatorWelcome" element={<Navigate to="/StudentWelcome" replace />} />
+      <Route path="/StudentWelcome" element={<StudentWelcome />} />
+      <Route path="/ParentWelcome" element={<ParentWelcome />} />
+      <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
+      <Route path="/ParentUpsell" element={<ParentUpsell />} />
+      <Route path="/ParentAllSet" element={<ParentAllSet />} />
+      <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
+      <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />
+      <Route path="/SetSearchGoals" element={<SetSearchGoals />} />
 
-          <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
-          <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
-          <Route path="/ResumeTailoring" element={<LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper>} />
-          <Route path="/MockInterview" element={<LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper>} />
-          <Route path="/LinkedInReview" element={<LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper>} />
-          <Route path="/LinkedInActionPlan" element={<LayoutWrapper currentPageName="LinkedInActionPlan"><LinkedInActionPlan /></LayoutWrapper>} />
-          <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
-          <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
-          <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
+      {/* Guarded dashboard routes */}
+      <Route path="/FreeTierDashboard" element={<OnboardingGuard><FreeTierDashboard /></OnboardingGuard>} />
+      <Route path="/AlumniHome" element={<OnboardingGuard><FreeTierDashboard /></OnboardingGuard>} />
 
-          <Route path="/AlumniHome" element={<OnboardingGuard><FreeTierDashboard /></OnboardingGuard>} />
-          <Route path="/AlumniAllSet" element={<Navigate to="/FreeTierDashboard" replace />} />
-          <Route path="/AlumniOnboarding" element={<Navigate to="/FreeTierDashboard" replace />} />
-          <Route path="/ParentHome" element={<Navigate to="/FreeTierDashboard" replace />} />
-          <Route path="/Directory" element={<Navigate to="/FreeTierDashboard" replace />} />
-          <Route path="/ParentWelcome" element={<ParentWelcome />} />
-          <Route path="/ParentOnboarding" element={<LayoutWrapper currentPageName="ParentOnboarding"><ParentOnboarding /></LayoutWrapper>} />
-          <Route path="/ParentUpsell" element={<ParentUpsell />} />
-          <Route path="/ParentAllSet" element={<ParentAllSet />} />
-          <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
-          <Route path="/ParentLandingPage" element={<ParentLandingPage />} />
+      {/* Redirect aliases */}
+      <Route path="/AlumniAllSet" element={<Navigate to="/FreeTierDashboard" replace />} />
+      <Route path="/AlumniOnboarding" element={<Navigate to="/FreeTierDashboard" replace />} />
+      <Route path="/ParentHome" element={<Navigate to="/FreeTierDashboard" replace />} />
+      <Route path="/Directory" element={<Navigate to="/FreeTierDashboard" replace />} />
 
-          <Route path="/StudentLandingPage" element={<StudentLandingPage />} />
-          <Route path="/RegistrationSuccess" element={<RegistrationSuccess />} />
-          <Route path="/OnboardingQuestions" element={<OnboardingQuestions />} />
-          <Route path="/GatorAuth" element={<GatorAuth />} />
-          <Route path="/GatorWelcome" element={<Navigate to="/StudentWelcome" replace />} />
-          <Route path="/StudentWelcome" element={<StudentWelcome />} />
-          <Route path="/SetSearchGoals" element={<SetSearchGoals />} />
-          <Route path="/ApplicationTracker" element={<LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper>} />
-          <Route path="/EmailConnectionSettings" element={<LayoutWrapper currentPageName="EmailConnectionSettings"><EmailConnectionSettings /></LayoutWrapper>} />
-          <Route path="/email-callback" element={<EmailCallbackPage />} />
+      {/* Feature routes */}
+      <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
+      <Route path="/ResumeTailoring" element={<LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper>} />
+      <Route path="/MockInterview" element={<LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper>} />
+      <Route path="/LinkedInReview" element={<LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper>} />
+      <Route path="/LinkedInActionPlan" element={<LayoutWrapper currentPageName="LinkedInActionPlan"><LinkedInActionPlan /></LayoutWrapper>} />
+      <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
+      <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
+      <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
+      <Route path="/ApplicationTracker" element={<LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper>} />
+      <Route path="/EmailConnectionSettings" element={<LayoutWrapper currentPageName="EmailConnectionSettings"><EmailConnectionSettings /></LayoutWrapper>} />
+      <Route path="/email-callback" element={<EmailCallbackPage />} />
+      <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
+      <Route path="/Profile" element={<LayoutWrapper currentPageName="Profile"><Profile /></LayoutWrapper>} />
+      <Route path="/ProfileEdit" element={<LayoutWrapper currentPageName="ProfileEdit"><ProfileEdit /></LayoutWrapper>} />
+      <Route path="/ParentProfileEdit" element={<ParentProfileEdit />} />
+      <Route path="/admin" element={<AdminV2 />} />
+      <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
+      <Route path="/paywall-analytics" element={<PaywallAnalyticsDashboard />} />
+      <Route path="/join" element={<JoinPage />} />
 
-          <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
-
-          <Route path="/Profile" element={<LayoutWrapper currentPageName="Profile"><Profile /></LayoutWrapper>} />
-          <Route path="/ProfileEdit" element={<LayoutWrapper currentPageName="ProfileEdit"><ProfileEdit /></LayoutWrapper>} />
-          <Route path="/ResetPassword" element={<ResetPassword />} />
-          <Route path="/Logout" element={<Logout />} />
-          <Route path="/admin" element={<AdminV2 />} />
-          <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
-          <Route path="/paywall-analytics" element={<PaywallAnalyticsDashboard />} />
-          <Route path="/Unsubscribe" element={<Unsubscribe />} />
-          <Route path="/join" element={<JoinPage />} />
-
-          {/* Main routes */}
-          <Route path="/" element={<StudentLandingPage />} />
-          {Object.entries(Pages).map(([path, Page]) => (
+      {/* Main routes */}
+      <Route path="/" element={<StudentLandingPage />} />
+      {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
           path={`/${path}`}
@@ -214,10 +197,10 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-          <Route path="*" element={<PageNotFound />} />
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
-  };
+};
 
 
 function App() {
