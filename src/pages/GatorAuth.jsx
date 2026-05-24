@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
-import { useAuth } from '@/components/auth/AuthContext';
+import { useAuth } from '@/lib/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { registerUser } from '@/functions/registerUser';
 import { signInWithPassword } from '@/functions/signInWithPassword';
