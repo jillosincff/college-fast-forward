@@ -763,21 +763,19 @@ function AppContent() {
         sessionStorage.removeItem('cff_onboarding_type');
         navigate(safariOnboardingType === 'parent' ? 'ParentOnboarding' : 'StudentOnboarding'); return;
       }
-      // Send to GatorWelcome (role selection) instead of GatorAuth to avoid auth loop
-      navigate('GatorWelcome'); return;
+      // Send to GatorAuth for onboarding
+      navigate('GatorAuth'); return;
     }
 
     if (user && user.onboarding_completed === false && user.persona) {
       if (newUserFlowPages.includes(currentPage) || onboardingPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
-      // FreeTierDashboard has its own nav — let it through even if onboarding flag hasn't refreshed yet
-      if (currentPage === 'FreeTierDashboard') { setResolvedPage(currentPage); return; }
-      const onboardingDashPages = ['Dashboard', 'Profile', 'RecentGradDashboard', 'AlumniDashboard'];
+      const onboardingDashPages = ['Dashboard', 'Profile', 'RecentGradDashboard', 'AlumniDashboard', 'FreeTierDashboard'];
       if (onboardingDashPages.includes(currentPage)) {
         const isParent = user.persona === 'parent' || user.roles?.includes('parent');
         const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
         if (isParent) { navigate('ParentOnboarding'); return; }
-        else if (isAlumni) { navigate('AlumniOnboarding'); return; }
-        else if (user.persona === 'gator' || user.roles?.includes('gator')) { navigate('StudentOnboarding'); return; }
+        else if (isAlumni) { navigate('FreeTierDashboard'); return; } // alumni onboarding is on the dashboard
+        else { navigate('StudentWelcome'); return; } // students finish onboarding
       }
     }
 
@@ -829,9 +827,9 @@ function AppContent() {
     if (user && dashboardPages.includes(currentPage)) {
       let destination = currentPage;
 
-      if (inNewUserFlow) { destination = 'GatorWelcome'; }
-      else if (pendingRole === 'gator' && isUFLStudent && hasNoRole) { destination = 'GatorWelcome'; }
-      else if (hasNoRole && !pendingRole) { destination = 'GatorWelcome'; }
+      if (inNewUserFlow) { destination = 'GatorAuth'; }
+      else if (pendingRole === 'gator' && isUFLStudent && hasNoRole) { destination = 'GatorAuth'; }
+      else if (hasNoRole && !pendingRole) { destination = 'GatorAuth'; }
       else if (needsOnboarding) {
         const isParentRole = effectiveRole === 'parent' || user.roles?.includes('parent');
         const isGatorRole = effectiveRole === 'gator' || user.roles?.includes('gator');
@@ -850,8 +848,8 @@ function AppContent() {
 
     if (newUserFlowPages.includes(currentPage)) { setResolvedPage(currentPage); return; }
 
-    if (inNewUserFlow || (hasNoRole && pendingRole === 'gator' && isUFLStudent)) { navigate('GatorWelcome'); }
-    else if (hasNoRole && !pendingRole) { navigate('GatorWelcome'); }
+    if (inNewUserFlow || (hasNoRole && pendingRole === 'gator' && isUFLStudent)) { navigate('GatorAuth'); }
+    else if (hasNoRole && !pendingRole) { navigate('GatorAuth'); }
     else if (needsOnboarding && user.onboarding_completed === false) {
       const isParent = user.persona === 'parent' || user.roles?.includes('parent');
       const isAlumni = user.persona === 'alumni' || user.roles?.includes('alumni');
