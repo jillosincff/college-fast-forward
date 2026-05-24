@@ -4,7 +4,6 @@ import { queryClientInstance } from '@/lib/query-client';
 
 export default function Logout() {
   useEffect(() => {
-    // Clear all local caches
     try {
       queryClientInstance.clear();
       localStorage.removeItem('pending_intent');
@@ -17,8 +16,11 @@ export default function Logout() {
       sessionStorage.clear();
     } catch (e) { /* private browsing */ }
 
-    // Redirect to fully public route after logout
-    base44.auth.logout(window.location.origin + '/#/StudentLandingPage');
+    // Call logout (clears the session token), then redirect ourselves
+    base44.auth.logout().catch(() => {});
+    setTimeout(() => {
+      window.location.href = window.location.origin + '/#/StudentLandingPage';
+    }, 300);
   }, []);
 
   return (
