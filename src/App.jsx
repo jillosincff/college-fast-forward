@@ -60,12 +60,15 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 // Guard for pages that require completed onboarding.
-// Renders synchronously based on current auth state — no extra spinner.
 function OnboardingGuard({ children }) {
   const { user, isLoadingAuth } = useAuth();
+  const location = useLocation();
 
-  // Still loading — show spinner (AuthenticatedApp already handles the 3s timeout above,
-  // but we need to handle the case where only the guard is waiting)
+  // Normalize path to lowercase to prevent casing deadlocks
+  const currentPath = location.pathname.toLowerCase();
+  const bypassPaths = ['/logout', '/gatorauth', '/getstarted', '/studentlandingpage', '/parentlandingpage'];
+  if (bypassPaths.includes(currentPath)) return children;
+
   if (isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -74,7 +77,6 @@ function OnboardingGuard({ children }) {
     );
   }
 
-  // Not logged in — go to auth
   if (!user) {
     return <Navigate to="/GatorAuth" replace />;
   }
@@ -82,10 +84,8 @@ function OnboardingGuard({ children }) {
   const hasPersona = !!user.persona?.trim();
   const onboardingDone = user.onboarding_completed === true;
 
-  // Fully onboarded — let through
   if (hasPersona && onboardingDone) return children;
 
-  // Has persona but onboarding not complete — route to appropriate onboarding
   if (hasPersona && !onboardingDone) {
     if (user.persona === 'parent' || user.roles?.includes('parent')) {
       return <Navigate to="/ParentOnboarding" replace />;
@@ -93,14 +93,14 @@ function OnboardingGuard({ children }) {
     return <Navigate to="/GatorAuth" replace />;
   }
 
-  // No persona at all
-  // If account is older than 5 minutes, treat as legacy account — let through
-  const isLegacyAccount = user.created_date &&
-    new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
-  if (isLegacyAccount) return children;
+  if (!hasPersona) {
+    const isLegacyAccount = user.created_date &&
+      new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
+    if (isLegacyAccount) return children;
+    return <Navigate to="/GatorAuth" replace />;
+  }
 
-  // Brand new user with no persona — must onboard
-  return <Navigate to="/GatorAuth" replace />;
+  return children;
 }
 
 const AuthenticatedApp = () => {
@@ -114,8 +114,8 @@ const AuthenticatedApp = () => {
   }, [isLoadingAuth]);
 
   // Show loading spinner while checking auth — but never block public/auth pages, and give up after 3s
-  const currentHash = window.location.hash.replace('#/', '').replace('#', '').split('?')[0];
-  const noSpinnerPaths = ['', '/', 'GatorAuth', 'GetStarted', 'Logout', 'MigrationSignIn', 'ResetPassword', 'StudentLandingPage', 'ParentLandingPage'];
+  const currentHash = window.location.hash.replace('#/', '').replace('#', '').split('?')[0].toLowerCase();
+  const noSpinnerPaths = ['', '/', 'gatorauth', 'getstarted', 'logout', 'migrationsignin', 'resetpassword', 'studentlandingpage', 'parentlandingpage'];
   const isNoSpinnerPath = noSpinnerPaths.includes(currentHash);
   if (!isNoSpinnerPath && !timedOut && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
