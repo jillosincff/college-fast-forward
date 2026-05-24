@@ -69,9 +69,11 @@ export const AuthProvider = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
-    // Navigate to Logout page first so layout resolves it immediately (no spinner),
-    // then the Logout component handles the actual base44 auth.logout redirect.
-    window.location.hash = '#/Logout';
+    // Clear the session token without letting base44 control the redirect
+    base44.auth.logout().catch(() => {});
+    setTimeout(() => {
+      window.location.href = window.location.origin + '/#/StudentLandingPage';
+    }, 200);
   };
 
   return (
