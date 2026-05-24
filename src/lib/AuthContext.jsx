@@ -47,7 +47,7 @@ const AuthProviderInner = ({ children }) => {
     base44.auth.redirectToLogin(window.location.href);
   };
 
-  const logout = () => {
+  const logout = async () => {
     try {
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');
@@ -67,7 +67,12 @@ const AuthProviderInner = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
-    base44.auth.logout('/#/StudentLandingPage');
+
+    try {
+      await base44.auth.logout();
+    } catch (e) {
+      console.error('Remote session logout failed:', e);
+    }
   };
 
   return (

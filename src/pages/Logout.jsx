@@ -1,11 +1,17 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Logout() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    logout();
+    const performLogout = async () => {
+      await logout();
+      navigate('/StudentLandingPage', { replace: true });
+    };
+    performLogout();
   }, []);
 
   return (
