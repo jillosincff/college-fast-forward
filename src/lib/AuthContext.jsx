@@ -67,12 +67,7 @@ const AuthProviderInner = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
-    // Pass our desired post-logout URL so Base44 redirects there instead of its own login page
-    base44.auth.logout(window.location.origin + '/#/StudentLandingPage');
-    // Fallback in case base44 doesn't redirect
-    setTimeout(() => {
-      window.location.replace(window.location.origin + '/#/StudentLandingPage');
-    }, 500);
+    base44.auth.logout('/#/StudentLandingPage');
   };
 
   return (
