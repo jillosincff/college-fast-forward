@@ -59,6 +59,67 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
+// Guard for pages that require a completed onboarding
+// Redirects new/incomplete users to GatorAuth for onboarding
+function OnboardingGuard({ children }) {
+  const { user, isLoadingAuth } = useAuth();
+  const [ready, setReady] = useState(false);
+  const [redirect, setRedirect] = useState(null);
+
+  useEffect(() => {
+    if (isLoadingAuth) return;
+
+    if (!user) {
+      setRedirect('/GatorAuth');
+      setReady(true);
+      return;
+    }
+
+    const hasPersona = !!user.persona?.trim();
+    const onboardingDone = user.onboarding_completed === true;
+
+    // Fully onboarded — let through
+    if (hasPersona && onboardingDone) {
+      setReady(true);
+      return;
+    }
+
+    // Has persona but not done (mid-flow) — route to appropriate onboarding
+    if (hasPersona && !onboardingDone) {
+      if (user.persona === 'parent' || user.roles?.includes('parent')) {
+        setRedirect('/ParentOnboarding');
+      } else {
+        setRedirect('/GatorAuth');
+      }
+      setReady(true);
+      return;
+    }
+
+    // No persona — check if truly new or an old account without persona
+    if (!hasPersona) {
+      const isExistingAccount = user.created_date &&
+        new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
+      if (isExistingAccount) {
+        // Old account with no persona — let through, onboarding optional
+        setReady(true);
+      } else {
+        // Brand new user — must go through onboarding
+        setRedirect('/GatorAuth');
+        setReady(true);
+      }
+    }
+  }, [user, isLoadingAuth]);
+
+  if (!ready) return (
+    <div className="fixed inset-0 flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (redirect) return <Navigate to={redirect} replace />;
+  return children;
+}
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
   const [timedOut, setTimedOut] = useState(false);
@@ -93,7 +154,7 @@ const AuthenticatedApp = () => {
           <Route path="/MigrationSignIn" element={<MigrationSignIn />} />
 
           {/* Explicit routes first for higher priority */}
-          <Route path="/FreeTierDashboard" element={<FreeTierDashboard />} />
+          <Route path="/FreeTierDashboard" element={<OnboardingGuard><FreeTierDashboard /></OnboardingGuard>} />
 
           <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
           <Route path="/StudentOnboarding" element={<LayoutWrapper currentPageName="StudentOnboarding"><StudentOnboarding /></LayoutWrapper>} />
@@ -105,7 +166,7 @@ const AuthenticatedApp = () => {
           <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
           <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
 
-          <Route path="/AlumniHome" element={<FreeTierDashboard />} />
+          <Route path="/AlumniHome" element={<OnboardingGuard><FreeTierDashboard /></OnboardingGuard>} />
           <Route path="/AlumniAllSet" element={<Navigate to="/FreeTierDashboard" replace />} />
           <Route path="/AlumniOnboarding" element={<Navigate to="/FreeTierDashboard" replace />} />
           <Route path="/ParentHome" element={<Navigate to="/FreeTierDashboard" replace />} />
