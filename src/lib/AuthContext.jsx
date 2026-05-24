@@ -47,31 +47,27 @@ const AuthProviderInner = ({ children }) => {
     base44.auth.redirectToLogin(window.location.href);
   };
 
-  const logout = async () => {
+  const logout = () => {
     try {
-      localStorage.removeItem('pending_invite_role');
-      localStorage.removeItem('pending_invite_code');
-      localStorage.removeItem('pending_student_email');
-      localStorage.removeItem('pending_referral_code');
-      localStorage.removeItem('oauth_attempt_count');
-      localStorage.removeItem('oauth_start_time');
-      sessionStorage.removeItem('pending_invite_role');
-      sessionStorage.removeItem('pending_invite_code');
-      sessionStorage.removeItem('cff_onboarding_type');
-      sessionStorage.removeItem('oauth_callback_detected');
-      sessionStorage.removeItem('oauth_state_token');
-      sessionStorage.removeItem('email_click_tracked');
-      sessionStorage.removeItem('utm_already_captured');
-      sessionStorage.removeItem('migration_verified_email');
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
     } catch (e) { /* private browsing */ }
 
     setUser(null);
     setIsAuthenticated(false);
 
+    // Lock the hash BEFORE calling the SDK so any reload it triggers lands here
+    window.location.hash = '/StudentLandingPage';
+
     try {
-      await base44.auth.logout();
+      base44.auth.logout();
     } catch (e) {
-      console.error('Remote session logout failed:', e);
+      console.error('Silent network sign-out skipped:', e);
     }
   };
 
