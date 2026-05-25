@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useParams } from '@/components/utils/navigation';
 import { Company } from '@/entities/Company';
-import { CompanyFollow } from '@/entities/CompanyFollow';
-import { CompanyReview } from '@/entities/CompanyReview';
 import { Opportunity } from '@/entities/Opportunity';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,28 +14,20 @@ import {
   Users,
   Globe,
   Briefcase,
-  Star,
   CheckCircle,
-  Heart,
-  MessageSquare,
   TrendingUp,
   Award,
   Calendar
 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
 
 export default function CompanyProfilePage() {
   const { user } = useAuth();
   const params = useParams();
-  const { toast } = useToast();
   const companyId = params.id;
 
   const [company, setCompany] = useState(null);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [reviews, setReviews] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showReviewForm, setShowReviewForm] = useState(false);
 
   useEffect(() => {
     if (companyId) {
@@ -54,14 +44,6 @@ export default function CompanyProfilePage() {
         setCompany(companyData[0]);
       }
 
-      // Load reviews
-      const reviewsData = await CompanyReview.filter(
-        { company_id: companyId, is_approved: true },
-        '-created_date',
-        50
-      );
-      setReviews(reviewsData || []);
-
       // Load jobs
       const jobsData = await Opportunity.filter(
         { org_name: companyData[0]?.name, status: 'active' },
@@ -70,14 +52,6 @@ export default function CompanyProfilePage() {
       );
       setJobs(jobsData || []);
 
-      // Check if following
-      if (user) {
-        const followData = await CompanyFollow.filter({
-          user_id: user.id,
-          company_id: companyId
-        });
-        setIsFollowing(followData && followData.length > 0);
-      }
     } catch (error) {
       console.error('Failed to load company data:', error);
     } finally {
@@ -85,63 +59,7 @@ export default function CompanyProfilePage() {
     }
   };
 
-  const handleFollowToggle = async () => {
-    if (!user) {
-      navigate('LandingPage');
-      return;
-    }
 
-    try {
-      if (isFollowing) {
-        const followRecord = await CompanyFollow.filter({
-          user_id: user.id,
-          company_id: companyId
-        });
-        if (followRecord[0]) {
-          await CompanyFollow.delete(followRecord[0].id);
-        }
-        setIsFollowing(false);
-        await Company.update(companyId, {
-          follower_count: Math.max(0, (company.follower_count || 0) - 1)
-        });
-        toast({
-          title: "Unfollowed",
-          description: `You've unfollowed ${company.name}`,
-        });
-      } else {
-        await CompanyFollow.create({
-          user_id: user.id,
-          company_id: companyId,
-          company_name: company.name
-        });
-        setIsFollowing(true);
-        await Company.update(companyId, {
-          follower_count: (company.follower_count || 0) + 1
-        });
-        toast({
-          title: "Following!",
-          description: `You'll receive notifications about new opportunities from ${company.name}`,
-        });
-      }
-      loadCompanyData();
-    } catch (error) {
-      console.error('Failed to toggle follow:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update follow status",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleReviewSubmitted = () => {
-    setShowReviewForm(false);
-    loadCompanyData();
-    toast({
-      title: "Review submitted!",
-      description: "Your review is pending approval and will be visible soon.",
-    });
-  };
 
   if (isLoading) {
     return (
@@ -247,13 +165,6 @@ export default function CompanyProfilePage() {
                     <Users className="w-4 h-4" />
                     <span>{company.follower_count || 0} followers</span>
                   </div>
-                  {company.average_rating > 0 && (
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <span className="font-semibold">{company.average_rating.toFixed(1)}</span>
-                      <span>({company.review_count} reviews)</span>
-                    </div>
-                  )}
                   {company.active_jobs_count > 0 && (
                     <div className="flex items-center gap-1">
                       <Briefcase className="w-4 h-4" />
@@ -265,25 +176,6 @@ export default function CompanyProfilePage() {
 
               {/* Actions */}
               <div className="flex flex-col gap-2 w-full md:w-auto">
-                <Button
-                  onClick={handleFollowToggle}
-                  className={isFollowing 
-                    ? "bg-slate-200 text-slate-700 hover:bg-slate-300" 
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                  }
-                >
-                  {isFollowing ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Following
-                    </>
-                  ) : (
-                    <>
-                      <Heart className="w-4 h-4 mr-2" />
-                      Follow Company
-                    </>
-                  )}
-                </Button>
                 {company.website && (
                   <Button
                     variant="outline"
@@ -302,13 +194,10 @@ export default function CompanyProfilePage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <Tabs defaultValue="about" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="about">About</TabsTrigger>
             <TabsTrigger value="jobs">
               Jobs {jobs.length > 0 && `(${jobs.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="reviews">
-              Reviews {reviews.length > 0 && `(${reviews.length})`}
             </TabsTrigger>
             <TabsTrigger value="culture">Culture</TabsTrigger>
           </TabsList>
@@ -487,69 +376,10 @@ export default function CompanyProfilePage() {
                   <p className="text-slate-600 mb-4">
                     This company doesn't have any open positions at the moment.
                   </p>
-                  <Button onClick={handleFollowToggle}>
-                    Follow to Get Notified
-                  </Button>
+                  <p className="text-slate-500 text-sm">Check back for new postings.</p>
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
-
-          {/* Reviews Tab */}
-          <TabsContent value="reviews">
-            <div className="space-y-6">
-              {/* Review Summary */}
-              {reviews.length > 0 && (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center mb-6">
-                      <div className="text-5xl font-bold text-slate-900 mb-2">
-                        {company.average_rating.toFixed(1)}
-                      </div>
-                      <div className="flex items-center justify-center gap-1 mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-6 h-6 ${
-                              star <= company.average_rating
-                                ? 'text-yellow-500 fill-current'
-                                : 'text-slate-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-slate-600">Based on {company.review_count} reviews</p>
-                    </div>
-                    <Button onClick={() => setShowReviewForm(true)} className="w-full">
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Write a Review
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Reviews List */}
-              {reviews.length > 0 ? (
-                <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="p-4 border rounded-lg">{review.title}</div>
-                  ))}
-                </div>
-              ) : (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <MessageSquare className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-slate-900 mb-2">No Reviews Yet</h3>
-                    <p className="text-slate-600 mb-4">
-                      Be the first to share your experience with {company.name}
-                    </p>
-                    <Button onClick={() => setShowReviewForm(true)}>
-                      Write First Review
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
           </TabsContent>
 
           {/* Culture Tab */}
