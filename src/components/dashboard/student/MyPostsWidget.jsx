@@ -3,9 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { JobRequest } from '@/entities/JobRequest';
-import { RoommatePost } from '@/entities/RoommatePost';
 import { useAuth } from '@/components/auth/AuthContext';
-import { ArrowRight, Briefcase, Home, AlertCircle, Plus } from 'lucide-react';
+import { ArrowRight, Briefcase, AlertCircle, Plus } from 'lucide-react';
 import { navigate } from '@/components/utils/navigation';
 import { differenceInDays, addDays, formatDistanceToNow } from 'date-fns';
 
@@ -23,15 +22,9 @@ export default function MyPostsWidget() {
     
     setLoading(true);
     try {
-      const [requests, roommates] = await Promise.all([
-        JobRequest.filter({ created_by: user.email }, '-created_date', 10),
-        RoommatePost.filter({ created_by: user.email }, '-created_date', 10)
-      ]);
+      const requests = await JobRequest.filter({ created_by: user.email }, '-created_date', 10);
 
-      const combined = [
-        ...requests.map(r => ({ ...r, type: 'request' })),
-        ...roommates.map(r => ({ ...r, type: 'roommate' }))
-      ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      const combined = requests.map(r => ({ ...r, type: 'request' }));
 
       setMyPosts(combined);
     } catch (error) {
@@ -57,7 +50,7 @@ export default function MyPostsWidget() {
   };
 
   const getIcon = (post) => {
-    return post.type === 'request' ? <Briefcase className="w-4 h-4" /> : <Home className="w-4 h-4" />;
+    return <Briefcase className="w-4 h-4" />;
   };
 
   if (loading) {
@@ -105,10 +98,7 @@ export default function MyPostsWidget() {
                 <Plus className="w-4 h-4 mr-1" />
                 Post Request
               </Button>
-              <Button size="sm" onClick={() => navigate('Roommates')} variant="outline">
-                <Plus className="w-4 h-4 mr-1" />
-                Post Room
-              </Button>
+
             </div>
           </div>
         ) : (

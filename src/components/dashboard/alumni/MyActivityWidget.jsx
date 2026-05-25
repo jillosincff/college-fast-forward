@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,6 @@ import {
 import { Opportunity } from '@/entities/Opportunity';
 import { JobRequest } from '@/entities/JobRequest';
 import { OpportunityApplication } from '@/entities/OpportunityApplication';
-import { RoommatePost } from '@/entities/RoommatePost';
 import { useAuth } from '@/components/auth/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { navigate } from '@/components/utils/navigation';
@@ -35,27 +33,19 @@ export default function AlumniActivityWidget() {
       console.log('🔍 Loading alumni activity for:', user.email);
       
       // Load ALL opportunities created by this user (both manual and shared)
-      const [myOpps, myRoommates, myApps, allOpps, allRequests] = await Promise.all([
+      const [myOpps, myApps, allOpps, allRequests] = await Promise.all([
         Opportunity.filter({ created_by: user.email }, '-created_date', 50),
-        RoommatePost.filter({ created_by: user.email }, '-created_date', 5),
         OpportunityApplication.filter({ applicant_id: user.id }, '-created_date', 5),
         Opportunity.filter({}, '-created_date', 200),
         JobRequest.filter({}, '-created_date', 100)
       ]);
 
-      console.log('✅ Loaded opportunities:', myOpps.length);
-      console.log('📋 Opportunities:', myOpps.map(o => ({ id: o.id, title: o.title, posting_type: o.posting_type })));
-
-      setMyPosts([...myOpps, ...myRoommates]);
+      setMyPosts([...myOpps]);
       setApplications(myApps);
 
       // Load saved items
       const savedOppIds = JSON.parse(localStorage.getItem('gator_saved_opportunities') || '[]');
-      const savedRoommateIds = JSON.parse(localStorage.getItem('gator_saved_roommates') || '[]');
-      const saved = [
-        ...allOpps.filter(opp => savedOppIds.includes(opp.id)),
-        ...myRoommates.filter(rm => savedRoommateIds.includes(rm.id))
-      ];
+      const saved = allOpps.filter(opp => savedOppIds.includes(opp.id));
       setSavedItems(saved);
 
       // Create recommendations based on user's field - with null safety
@@ -75,15 +65,6 @@ export default function AlumniActivityWidget() {
           icon: '💼',
           text: `Your ${myOpps[0].title} post received ${myOpps[0].applications_count} new applications`,
           time: myOpps[0].updated_date || myOpps[0].created_date
-        });
-      }
-      
-      // Recent housing inquiries
-      if (myRoommates.length > 0 && myRoommates[0].applications_count > 0) {
-        activities.push({
-          icon: '🏠',
-          text: `New housing inquiry for your ${myRoommates[0].location} listing`,
-          time: myRoommates[0].updated_date || myRoommates[0].created_date
         });
       }
       
