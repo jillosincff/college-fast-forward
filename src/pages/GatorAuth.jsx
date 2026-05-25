@@ -177,20 +177,21 @@ export default function GatorAuth() {
     // returns persona/onboarding_completed from the auth layer — we must ignore those
     // stale flags and treat them as a brand-new user.
     const checkAndRoute = async () => {
-      let entityExists = false;
+      // Check if this user's entity record actually exists.
+      // If they deleted their profile but kept the auth account, auth.me() still
+      // returns stale persona/onboarding_completed — we must ignore those.
+      let entityExists = true; // assume exists unless we confirm otherwise
       try {
         const records = await base44.entities.User.filter({ email: user.email }, undefined, 1);
         entityExists = Array.isArray(records) && records.length > 0;
       } catch (e) {
-        // If we can't check, fall back to auth-level flags
+        // Can't confirm — assume exists to avoid breaking normal returning users
         entityExists = true;
       }
 
-      // If entity row is gone, wipe auth-level stale flags and start onboarding fresh
       if (!entityExists) {
-        try {
-          await base44.auth.updateMe({ persona: '', onboarding_completed: false });
-        } catch (e) {}
+        // Wipe stale auth-level flags so next routing logic starts clean
+        try { await base44.auth.updateMe({ persona: '', onboarding_completed: false }); } catch (e) {}
         localStorage.removeItem('cff_onboarding_screen');
         setResumeScreen(null);
         setStep('onboarding');
@@ -200,18 +201,18 @@ export default function GatorAuth() {
       const hasPersona = !!user.persona?.trim();
       const onboardingDone = user.onboarding_completed === true;
 
-      // User who has completed onboarding → go to their dashboard
+      // Fully onboarded → send to dashboard
       if (hasPersona && onboardingDone) {
-        navigate('/FreeTierDashboard');
+        window.location.hash = '#/FreeTierDashboard';
         return;
       }
 
-      // User with persona but onboarding not completed → resume onboarding
+      // Has persona but onboarding incomplete → resume correct flow
       if (hasPersona && !onboardingDone) {
         if (user.persona === 'parent' || user.roles?.includes('parent')) {
-          navigate('/ParentOnboarding');
+          window.location.hash = '#/ParentOnboarding';
         } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-          navigate('/FreeTierDashboard');
+          window.location.hash = '#/FreeTierDashboard';
         } else {
           localStorage.removeItem('cff_onboarding_screen');
           setResumeScreen(null);
@@ -220,10 +221,10 @@ export default function GatorAuth() {
         return;
       }
 
-      // No persona at all → always onboard
+      // No persona → new user, always onboard
       if (!hasPersona) {
         if (pendingRole === 'parent') {
-          navigate('/ParentOnboarding');
+          window.location.hash = '#/ParentOnboarding';
           return;
         }
         localStorage.removeItem('cff_onboarding_screen');

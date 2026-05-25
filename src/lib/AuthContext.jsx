@@ -48,21 +48,21 @@ const AuthProviderInner = ({ children }) => {
   };
 
   const logout = async () => {
-    // 1. Clear React state immediately so no authenticated UI flashes
-    setUser(null);
-    setIsAuthenticated(false);
+    // 1. Kill the server session first so the auth cookie is gone
+    try { await base44.auth.logout(); } catch (e) { /* ignore */ }
 
-    // 2. Wipe local storage
+    // 2. Wipe all local state
     try {
       localStorage.clear();
       sessionStorage.clear();
     } catch (e) { /* private browsing */ }
 
-    // 3. Navigate away immediately — before the async SDK call
-    window.location.replace(window.location.origin + '/#/StudentLandingPage');
+    // 3. Clear React state
+    setUser(null);
+    setIsAuthenticated(false);
 
-    // 4. Kill the server session in the background
-    try { await base44.auth.logout(); } catch (e) { /* ignore */ }
+    // 4. Hard redirect to landing page (full reload guarantees clean slate)
+    window.location.href = window.location.origin + '/#/StudentLandingPage';
   };
 
   return (
