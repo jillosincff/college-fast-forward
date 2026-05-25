@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { SuccessStory } from '@/entities/SuccessStory';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Loader2, Sparkles } from 'lucide-react'; // Changed Send to Loader2
 
@@ -39,10 +37,8 @@ export default function ShareSuccessModal({ isOpen, onClose, onStorySubmitted })
     
     setIsSubmitting(true);
     try {
-      await SuccessStory.create({
-        ...formData,
-        is_approved: false // Stories should require approval
-      });
+      // SuccessStory entity removed — submission disabled
+      console.log('Story submission disabled:', formData);
       toast({
         title: '🎉 Story Submitted!',
         description: "Thank you for inspiring other Gators! We'll review your story shortly.",

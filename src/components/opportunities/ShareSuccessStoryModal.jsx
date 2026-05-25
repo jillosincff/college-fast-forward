@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
-import { SuccessStory } from '@/entities/SuccessStory';
 import { UploadFile } from '@/integrations/Core';
 import { Heart, Upload, Star, Loader2, CheckCircle } from 'lucide-react';
 
@@ -138,8 +137,8 @@ export default function ShareSuccessStoryModal({ isOpen, onClose, user }) {
 
       console.log('Submitting success story:', storyData);
 
-      const newStory = await SuccessStory.create(storyData);
-      console.log('Success story created:', newStory);
+      // SuccessStory entity removed — submission disabled
+      console.log('Story submission disabled:', storyData);
 
       setSubmitted(true);
       

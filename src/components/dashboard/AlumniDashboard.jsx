@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate, useParams } from '@/components/utils/navigation';
 import { JobRequest } from '@/entities/JobRequest';
-import { SuccessStory } from '@/entities/SuccessStory';
 import { trackEvent } from '@/components/utils/analytics';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -107,14 +106,8 @@ export default function AlumniDashboard() {
       const offers = [];
       setMyHelpOffers([]);
 
-      // Load shared stories
-      let stories = [];
-      try {
-        stories = await SuccessStory.filter({ created_by: user.email }, '-created_date', 5);
-      } catch (error) {
-        console.warn('Could not load stories:', error);
-        stories = [];
-      }
+      // Stories feature removed
+      const stories = [];
       setMyStories(stories);
 
       // Calculate enhanced impact stats

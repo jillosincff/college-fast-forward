@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
-import { SalarySubmission } from '@/entities/SalarySubmission';
 import { useAuth } from '@/components/auth/AuthContext';
 import { toast } from 'sonner';
 import { DollarSign, Lock, Loader2 } from 'lucide-react';
@@ -91,17 +90,9 @@ export default function SalarySubmissionForm({ onSuccess, onCancel }) {
 
     setIsSubmitting(true);
     try {
-      const salaryRecord = await SalarySubmission.create({
-        ...formData,
-        user_id: user.id,
-        job_title_normalized: formData.job_title.toLowerCase().trim(),
-        company_normalized: formData.company?.toLowerCase().trim() || null,
-        base_salary: parseInt(formData.base_salary),
-        annual_bonus: formData.annual_bonus ? parseInt(formData.annual_bonus) : null,
-        stock_equity: formData.stock_equity ? parseInt(formData.stock_equity) : null,
-        total_comp: totalComp,
-        data_year: parseInt(formData.data_year)
-      });
+      // SalarySubmission entity removed — submission disabled
+      const salaryRecord = { id: 'disabled' };
+      console.log('Salary submission disabled:', formData);
 
       // Award karma for salary submission
       try {

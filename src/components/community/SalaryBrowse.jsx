@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { SalarySubmission } from '@/entities/SalarySubmission';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -55,7 +54,8 @@ export default function SalaryBrowse() {
   const loadSalaries = async () => {
     setIsLoading(true);
     try {
-      const data = await SalarySubmission.filter({ is_visible: true }, '-created_date', 500);
+      // SalarySubmission entity removed
+      const data = [];
       setSalaries(data);
       
       // Calculate stats

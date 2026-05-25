@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -8,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { SuccessStory } from '@/entities/SuccessStory';
 import { UploadFile } from '@/integrations/Core';
 import { useAuth } from '@/components/auth/AuthContext';
 import { Loader2, CheckCircle } from 'lucide-react'; // PartyPopper replaced with CheckCircle
@@ -49,17 +47,8 @@ export default function SubmissionModal({ isOpen, onClose, onSubmitted }) {
         }
       }
 
-      await SuccessStory.create({
-        user_name: data.user_name,
-        user_grad_year: data.user_grad_year,
-        user_role: data.user_role,
-        story_text: data.story_text,
-        story_type: data.story_type,
-        linkedin_url: data.linkedin_url,
-        photo_url,
-        is_approved: false, // For moderation
-        cheer_count: 0
-      });
+      // SuccessStory entity removed — submission disabled
+      console.log('Story submission disabled:', data);
 
       setSuccessMessage("Thank you! Your story has been submitted for review. It will appear on the site once it's approved.");
       setIsSubmitting(false); // Ensure submitting state is reset after success
