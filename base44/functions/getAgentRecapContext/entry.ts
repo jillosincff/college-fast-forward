@@ -14,16 +14,20 @@ Deno.serve(async (req) => {
     const schoolAbbrev = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
     const desiredIndustry = user.desired_industry || user.target_industry || 'your field';
 
-    // Query user's job applications pipeline
-    const applications = await base44.entities.JobApplication.filter({ user_id: user.id, status: { $in: ['APPLIED', 'INTERVIEW_SCHEDULED', 'OFFER_RECEIVED'] } }, '-updated_date', 50);
-    
-    const totalInPipeline = applications?.length || 0;
-    const interviewingCount = applications?.filter(a => a.status === 'INTERVIEW_SCHEDULED').length || 0;
+    // Query user's opportunity applications pipeline (entity is OpportunityApplication)
+    const applications = await base44.entities.OpportunityApplication.filter(
+      { applicant_id: user.id },
+      '-updated_date',
+      50
+    );
 
-    // Find first application needing outreach
+    const totalInPipeline = applications?.length || 0;
+    const interviewingCount = applications?.filter(a => a.status === 'interview').length || 0;
+
+    // Find first application that may need a follow-up
     let needsOutreach = null;
     for (const app of (applications || [])) {
-      if (app.status === 'APPLIED' && !app.hasSentOutreach) {
+      if (app.status === 'applied') {
         needsOutreach = app;
         break;
       }
@@ -31,27 +35,13 @@ Deno.serve(async (req) => {
 
     let actionItem = null;
 
-    // If outreach needed, check for parent connections at that company
     if (needsOutreach) {
-      const companyDomain = needsOutreach.companyDomain || needsOutreach.company?.toLowerCase().replace(/\s+/g, '') + '.com';
-      
-      // Query parent profiles matching company and school
-      const parentMatches = await base44.entities.ParentNetworkProfile.filter({
-        company_domain: companyDomain,
-        school_code: schoolAbbrev,
-        is_active: true
-      });
-
-      const parentCount = parentMatches?.length || 0;
-
-      if (parentCount > 0) {
-        actionItem = {
-          companyName: needsOutreach.company,
-          roleTitle: needsOutreach.role,
-          type: 'SEND_WARM_OUTREACH',
-          parentCount
-        };
-      }
+      actionItem = {
+        companyName: needsOutreach.opportunity_company,
+        roleTitle: needsOutreach.opportunity_title,
+        type: 'SEND_WARM_OUTREACH',
+        parentCount: 0
+      };
     }
 
     // If no outreach needed, suggest fresh feed lookup
