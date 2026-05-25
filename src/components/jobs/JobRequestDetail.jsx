@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { JobRequest } from '@/entities/JobRequest';
 import { User } from '@/entities/User';
-import { HelpOffer } from '@/entities/HelpOffer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -204,15 +202,7 @@ export default function JobRequestDetail({ requestId, onBack, inviteData, onSend
   const handleNetworkHelp = async (helpData) => {
     setIsSubmittingHelp(true);
     try {
-      await HelpOffer.create({
-        request_id: request.id,
-        request_title: request.title || request.role,
-        offerer_user_id: user.id,
-        offerer_role: user.persona,
-        recipient_email: request.created_by,
-        message: helpData.message,
-        selected_degree: helpData.selectedDegree || 1, // Use selectedDegree from helpData, or default to 1
-      });
+      // HelpOffer entity removed — help tracked via Message
 
       trackEvent('help_offer_sent', {
         request_id: request.id,

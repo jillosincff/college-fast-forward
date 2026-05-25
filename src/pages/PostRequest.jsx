@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
 import { JobRequest } from '@/entities/JobRequest';
-import { HelpRequest } from '@/entities/HelpRequest';
 import { useToast } from '@/components/ui/use-toast';
 import { navigate, useParams } from '@/components/utils/navigation';
 import JobRequestForm from '@/components/jobs/JobRequestForm';
@@ -16,7 +15,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
   const params = useParams();
   const editId = params.edit || params.editId;
   const postType = params.type; // 'parent' for parent questions, 'alumni_career' for alumni career requests
-  const entityType = postType === 'HelpRequest' ? 'HelpRequest' : 'JobRequest';
+  const entityType = 'JobRequest';
   const isParentQuestion = postType === 'parent' || (user?.persona === 'parent' && postType !== 'alumni_career');
   const isAlumniCareerRequest = postType === 'alumni_career';
 
@@ -38,25 +37,11 @@ export default function PostRequestPage() { // Renamed from PostRequest
       const fetchRequest = async () => {
         setIsLoadingInitial(true);
         try {
-          // Try to fetch from the appropriate entity type
-          let requestData;
-          if (entityType === 'HelpRequest') {
-            requestData = await HelpRequest.get(editId);
-          } else {
-            requestData = await JobRequest.get(editId);
-          }
+          const requestData = await JobRequest.get(editId);
           setInitialData(requestData);
         } catch (error) {
           console.error("Failed to fetch request for editing:", error);
-          // Try the other entity type as fallback
-          try {
-            const fallbackData = entityType === 'HelpRequest' 
-              ? await JobRequest.get(editId)
-              : await HelpRequest.get(editId);
-            setInitialData(fallbackData);
-          } catch (fallbackError) {
-            toast({ title: "Error loading request", variant: "destructive" });
-          }
+          toast({ title: "Error loading request", variant: "destructive" });
         } finally {
           setIsLoadingInitial(false);
         }
@@ -177,12 +162,7 @@ export default function PostRequestPage() { // Renamed from PostRequest
       let createdRequest;
       
       if (editId) {
-        // Update the correct entity type
-        if (initialData?.entity_name === 'HelpRequest' || initialData?.student_id) {
-          await HelpRequest.update(editId, requestData);
-        } else {
-          await JobRequest.update(editId, requestData);
-        }
+        await JobRequest.update(editId, requestData);
         toast({
           title: "✅ Request Updated",
           description: "Your request has been renewed for another 30 days and is now live.",

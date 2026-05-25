@@ -3,7 +3,6 @@ import { useAuth } from '@/components/auth/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
 import { JobRequest } from '@/entities/JobRequest';
-import { HelpRequest } from '@/entities/HelpRequest';
 import { Answer } from '@/entities/Answer';
 import { JobAnswer } from '@/entities/JobAnswer';
 import DashboardNav from '@/components/dashboard-v2/DashboardNav';
@@ -60,20 +59,13 @@ export default function ConnectionsPage() {
 
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
-    const [jobRequests, helpRequests, directoryResponse] = await Promise.all([
+    const [jobRequests, directoryResponse] = await Promise.all([
       JobRequest.filter({ status: 'active' }, '-created_date', 200).catch(() => []),
-      HelpRequest.filter({ status: 'active' }, '-created_date', 200).catch(() => []),
       base44.entities.User.filter({ onboarding_completed: true }, '-created_date', 300).then(users => ({ data: { data: users || [] } })).catch(() => ({ data: { data: [] } })),
     ]);
 
-    const normalized = (helpRequests || []).map(hr => ({
-      ...hr, role: hr.help_types?.join(', ') || 'Career Help',
-      target_industry: hr.industry, poster_name: hr.student_name,
-      poster_type: hr.poster_type || 'student', created_by: hr.student_email || hr.created_by, _source: 'HelpRequest',
-    }));
     const all = [
       ...(jobRequests || []).map(jr => ({ ...jr, _source: 'JobRequest' })),
-      ...normalized,
     ].filter(r => {
       const d = r.description?.toLowerCase() || '';
       return !d.includes('test request') && !d.includes('notification testing') && !d.includes('demo');

@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
-import { HelpOffer } from "@/entities/HelpOffer";
-import { Opportunity } from "@/entities/Opportunity"; // New import
+import { Opportunity } from "@/entities/Opportunity";
 import { trackEvent } from '@/components/utils/analytics';
 
 import ParentWelcomeHero from "./ParentWelcomeHero";
@@ -36,20 +34,7 @@ export default function ParentDashboard() {
   const loadParentData = async () => {
     setDataLoading(true);
     try {
-      // Load help offers made by this parent - with error handling
-      let offers = [];
-      try {
-        offers = await HelpOffer.filter(
-          { offerer_user_id: user.id }, 
-          '-created_date', 
-          10
-        );
-      } catch (helpOfferError) {
-        console.warn('Could not load help offers:', helpOfferError);
-        offers = [];
-      }
-      
-      setHelpOffers(offers || []);
+      setHelpOffers([]);
 
       // Load posted opportunities // New logic
       let opportunities = [];
@@ -68,10 +53,8 @@ export default function ParentDashboard() {
 
       // Calculate stats based on actual data
       const requestsViewed = parseInt(localStorage.getItem('cff:parent:requestsViewed') || '0');
-      const reachoutsMade = offers?.length || 0;
-      const activeConnections = offers?.filter(offer => 
-        offer.status === 'accepted' || offer.status === 'pending'
-      ).length || 0;
+      const reachoutsMade = 0;
+      const activeConnections = 0;
       
       // Simple impact score calculation, updated to include opportunities
       const impactScore = (requestsViewed * 2) + (reachoutsMade * 10) + (activeConnections * 5) + (opportunities?.length * 15 || 0);

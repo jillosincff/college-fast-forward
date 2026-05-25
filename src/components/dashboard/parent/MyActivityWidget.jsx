@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageSquare, TrendingUp, Users, Mail, ArrowRight, Loader2, Briefcase, Edit, Trash2, Eye } from 'lucide-react';
 import { Message } from '@/entities/Message';
-import { HelpOffer } from '@/entities/HelpOffer';
 import { Opportunity } from '@/entities/Opportunity';
 import { OpportunityApplication } from '@/entities/OpportunityApplication';
 import { navigate } from '@/components/utils/navigation';
@@ -128,17 +127,7 @@ export default function ParentActivityWidget() {
   };
 
   const loadHelpOffers = async () => {
-    try {
-      const data = await HelpOffer.filter(
-        { offerer_email: user.email },
-        '-created_date',
-        5
-      );
-      return data || [];
-    } catch (error) {
-      console.log('Help offers temporarily unavailable');
-      return [];
-    }
+    return [];
   };
 
   const loadOpportunities = async () => {

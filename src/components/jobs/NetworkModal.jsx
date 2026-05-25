@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import {
   Users,
   FileText
 } from "lucide-react";
-import { HelpOffer } from '@/entities/HelpOffer';
 import { trackEvent } from '@/components/utils/analytics';
 import { sendMessageNotification } from '@/functions/sendMessageNotification';
 import { useToast } from "@/components/ui/use-toast";
@@ -128,7 +126,7 @@ export default function NetworkModal({ isOpen, onClose, request, poster, user, o
         selected_degree: 'direct',
       };
 
-      await HelpOffer.create(offerData);
+      // HelpOffer entity removed — notification sent via message
 
       await sendMessageNotification({
         recipient_email: request.created_by,

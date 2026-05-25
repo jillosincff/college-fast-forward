@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { HelpRequest } from '@/entities/HelpRequest';
 import { updateJobRequest } from '@/functions/updateJobRequest';
 import {
   Dialog,
@@ -41,24 +40,15 @@ export default function EditQuestionModal({ question, open, onOpenChange, onUpda
 
     setIsSubmitting(true);
     try {
-      // Update the correct entity type
-      if (question.entity_name === 'HelpRequest' || question.student_id || question._source === 'HelpRequest') {
-        await HelpRequest.update(question.id, {
-          description: formData.description,
-          industry: formData.target_industry,
-        });
-      } else {
-        // Use backend function to bypass RLS issues with anonymous created_by
-        const updateData = {
-          description: formData.description,
-          role: formData.role,
-          target_industry: formData.target_industry,
-          target_company: formData.target_company,
-        };
-        const result = await updateJobRequest({ id: question.id, updateData });
-        if (result.data?.error) {
-          throw new Error(result.data.error);
-        }
+      const updateData = {
+        description: formData.description,
+        role: formData.role,
+        target_industry: formData.target_industry,
+        target_company: formData.target_company,
+      };
+      const result = await updateJobRequest({ id: question.id, updateData });
+      if (result.data?.error) {
+        throw new Error(result.data.error);
       }
 
       toast.success('Question updated successfully');
@@ -76,8 +66,6 @@ export default function EditQuestionModal({ question, open, onOpenChange, onUpda
       setIsSubmitting(false);
     }
   };
-
-  const isHelpRequest = question?.entity_name === 'HelpRequest' || question?.student_id;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,29 +90,25 @@ export default function EditQuestionModal({ question, open, onOpenChange, onUpda
             />
           </div>
 
-          {!isHelpRequest && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role / Position</Label>
-                <Input
-                  id="role"
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  placeholder="e.g., Software Engineer, Marketing Manager"
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="role">Role / Position</Label>
+            <Input
+              id="role"
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              placeholder="e.g., Software Engineer, Marketing Manager"
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="target_company">Target Company (optional)</Label>
-                <Input
-                  id="target_company"
-                  value={formData.target_company}
-                  onChange={(e) => setFormData({ ...formData, target_company: e.target.value })}
-                  placeholder="e.g., Google, Amazon"
-                />
-              </div>
-            </>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="target_company">Target Company (optional)</Label>
+            <Input
+              id="target_company"
+              value={formData.target_company}
+              onChange={(e) => setFormData({ ...formData, target_company: e.target.value })}
+              placeholder="e.g., Google, Amazon"
+            />
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="target_industry">Industry</Label>

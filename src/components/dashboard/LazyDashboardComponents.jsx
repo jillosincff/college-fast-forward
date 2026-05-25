@@ -1,6 +1,5 @@
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
-import { HelpOffer } from '@/entities/HelpOffer';
 import { Message } from '@/entities/Message';
 
 // Lazy load dashboard components
@@ -59,9 +58,7 @@ export function LazyMyConnectionsWidget() {
 
   const loadConnections = async () => {
     try {
-      // Only load help offers for this specific user, not all users
-      const offers = await HelpOffer.filter({ offerer_user_id: user.id }, '-created_date', 5);
-      setConnections(offers || []);
+      setConnections([]);
     } catch (error) {
       console.error("Error loading connections:", error);
       setConnections([]);

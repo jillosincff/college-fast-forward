@@ -4,7 +4,6 @@ import { ArrowRight, Heart, AlertCircle, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { navigate } from '@/components/utils/navigation';
 import { useAuth } from '@/components/auth/AuthContext';
-import { HelpOffer } from '@/entities/HelpOffer';
 import UserAvatar from '@/components/common/UserAvatar';
 
 export default function HelpOffersWidget({ offers: propOffers, loading: propLoading }) {
@@ -20,8 +19,7 @@ export default function HelpOffersWidget({ offers: propOffers, loading: propLoad
     setError(null);
     
     try {
-      const userOffers = await HelpOffer.filter({ request_creator_email: user.email }, '-created_date', 5);
-      setOffers(Array.isArray(userOffers) ? userOffers : []);
+      setOffers([]);
     } catch (error) {
       console.warn('Could not load help offers:', error.message);
       setError('Unable to load offers');

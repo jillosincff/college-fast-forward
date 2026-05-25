@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/components/auth/AuthContext';
 import { navigate, useParams } from '@/components/utils/navigation';
 import { JobRequest } from '@/entities/JobRequest';
-import { HelpOffer } from '@/entities/HelpOffer';
 import { SuccessStory } from '@/entities/SuccessStory';
 import { trackEvent } from '@/components/utils/analytics';
 import { useToast } from '@/components/ui/use-toast';
@@ -106,16 +104,8 @@ export default function AlumniDashboard() {
       }
       setMatchedRequests(requests);
 
-      // Load alumni help offers
-      let offers = [];
-      try {
-        offers = await HelpOffer.filter({ offerer_user_id: user.id }, '-created_date', 10);
-      } catch (error) {
-        console.warn('Could not load help offers:', error);
-        // Generate mock offers for demo
-        offers = generateMockHelpOffers();
-      }
-      setMyHelpOffers(offers);
+      const offers = [];
+      setMyHelpOffers([]);
 
       // Load shared stories
       let stories = [];

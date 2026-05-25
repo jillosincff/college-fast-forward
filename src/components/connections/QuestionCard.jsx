@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { navigate } from '@/components/utils/navigation';
 import moment from 'moment';
 import { useAuth } from '@/components/auth/AuthContext';
-import { HelpRequest } from '@/entities/HelpRequest';
 import { Answer } from '@/entities/Answer';
 import { JobAnswer } from '@/entities/JobAnswer';
 import { deleteJobRequest } from '@/functions/deleteJobRequest';
@@ -216,15 +215,9 @@ export default function QuestionCard({ question, gator, onDeleted, onUpdated }) 
     e.stopPropagation();
     setIsDeleting(true);
     try {
-      // Try HelpRequest first if it's a help request, otherwise use backend function for JobRequest
-      if (question.entity_name === 'HelpRequest' || question.student_id || question._source === 'HelpRequest') {
-        await HelpRequest.delete(question.id);
-      } else {
-        // Use backend function to bypass RLS issues with anonymous created_by
-        const result = await deleteJobRequest({ id: question.id });
-        if (result.data?.error) {
-          throw new Error(result.data.error);
-        }
+      const result = await deleteJobRequest({ id: question.id });
+      if (result.data?.error) {
+        throw new Error(result.data.error);
       }
       toast.success('Question deleted successfully');
       if (onDeleted) onDeleted(question.id);

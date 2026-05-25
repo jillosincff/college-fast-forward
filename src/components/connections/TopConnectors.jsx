@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Trophy, Star, Shield, Zap } from 'lucide-react';
-import { HelpOffer } from '@/entities/HelpOffer';
 import { User } from '@/entities/User';
 import { groupBy, map, orderBy } from 'lodash';
 
@@ -53,31 +52,7 @@ export default function LeaderboardSidebar() {
   useEffect(() => {
     const fetchTopHelpers = async () => {
       setIsLoading(true);
-      try {
-        const [offers, users] = await Promise.all([
-          HelpOffer.list('-created_date', 200), // Fetch recent offers
-          User.list()
-        ]);
-
-        const usersById = users.reduce((acc, u) => {
-          acc[u.id] = u;
-          return acc;
-        }, {});
-
-        const offersByHelper = groupBy(offers, 'offerer_user_id');
-        
-        const helpers = map(offersByHelper, (helperOffers, userId) => ({
-          userId,
-          count: helperOffers.length,
-          user: usersById[userId],
-        })).filter(h => h.user); // Ensure user exists
-
-        const sortedHelpers = orderBy(helpers, ['count'], ['desc']);
-        
-        setTopHelpers(sortedHelpers.slice(0, 5)); // Get top 5
-      } catch (error) {
-        console.error("Error fetching leaderboard data:", error);
-      }
+      setTopHelpers([]);
       setIsLoading(false);
     };
 

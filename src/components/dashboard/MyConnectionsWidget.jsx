@@ -11,8 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from '@/components/auth/AuthContext';
-import { navigate } from '@/components/utils/navigation'; // Fixed import
-import { HelpOffer } from '@/entities/HelpOffer';
+import { navigate } from '@/components/utils/navigation';
 import { User } from '@/entities/User';
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -104,13 +103,8 @@ export default function MyConnectionsWidget() {
   const loadConnections = async () => {
     setIsLoading(true);
     try {
-      let fetchedItems = [];
-      if (isStudent) {
-        fetchedItems = await HelpOffer.filter({ recipient_email: user.email }, '-created_date', 3);
-      } else {
-        fetchedItems = await HelpOffer.filter({ offerer_user_id: user.id }, '-created_date', 3);
-      }
-      setItems(fetchedItems || []);
+      const fetchedItems = [];
+      setItems([]);
 
       if (fetchedItems?.length > 0) {
         const allUsers = await User.list();

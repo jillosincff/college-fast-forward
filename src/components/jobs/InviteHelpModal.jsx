@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, X } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { HelpOffer } from "@/entities/HelpOffer";
+import { base44 } from "@/api/base44Client";
 
 export default function InviteHelpModal({ isOpen, onClose, request, poster, inviteData }) {
   const { user } = useAuth();
@@ -37,17 +37,13 @@ ${helperFirstName}`;
   const handleSend = async () => {
     setIsSending(true);
     try {
-      await HelpOffer.create({
+      await base44.functions.invoke('trackHelpOffer', {
         request_id: request.id,
         request_title: request.role || request.title,
         offerer_user_id: user.id,
         offerer_role: user.persona,
         recipient_email: request.created_by,
         message: message,
-        is_read: false,
-        status: 'pending',
-        template_used: 'invite_1st_degree',
-        selected_degree: 1 // Invited users are always 1st degree
       });
       
       toast({
