@@ -11,9 +11,6 @@ const PRICES = {
 };
 
 const FOUNDING_OFFER_DEADLINE = new Date('2026-04-30T23:59:59');
-// Trials started on or after this date use the new 5-day CC-required auto-convert model.
-// Trials started before this date were grandfathered on the old 7-day no-card model.
-const NEW_TRIAL_CUTOFF = new Date('2026-04-29T00:00:00');
 
 Deno.serve(async (req) => {
   try {
@@ -80,8 +77,7 @@ Deno.serve(async (req) => {
     });
 
     if (isSubscription) {
-      // New model (from NEW_TRIAL_CUTOFF): 5-day trial, CC required at signup, auto-converts at end of day 5.
-      body.append('subscription_data[trial_period_days]', '5');
+      // Hard paywall — no trial, charge immediately at signup.
       body.append('payment_method_collection', 'always');
       body.append('subscription_data[metadata][user_id]', clientUser.id);
       body.append('subscription_data[metadata][plan]', plan);
