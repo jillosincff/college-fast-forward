@@ -537,7 +537,14 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
   const isFullPageScreen = screen >= 11;
   const rawName = resumeData?.original?.name;
-  const firstName = (typeof rawName === 'string' ? rawName : null)?.split(' ')[0] || null;
+  // Try resume name first, then fall back to the auth account's full_name
+  const authFirstName = (() => {
+    try {
+      const stored = sessionStorage.getItem('cff_auth_first_name');
+      return stored || null;
+    } catch { return null; }
+  })();
+  const firstName = (typeof rawName === 'string' ? rawName : null)?.split(' ')[0] || authFirstName || null;
 
   const shell = {
     position: 'fixed', inset: 0, zIndex: 99999,

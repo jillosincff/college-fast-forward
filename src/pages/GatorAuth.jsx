@@ -193,6 +193,11 @@ export default function GatorAuth() {
         // Wipe stale auth-level flags so next routing logic starts clean
         try { await base44.auth.updateMe({ persona: '', onboarding_completed: false }); } catch (e) {}
         localStorage.removeItem('cff_onboarding_screen');
+        // Store first name so the onboarding funnel can greet the user by name even if they skip the resume step
+        try {
+          const fn = user.full_name?.split(' ')[0] || '';
+          if (fn) sessionStorage.setItem('cff_auth_first_name', fn);
+        } catch (e) {}
         setResumeScreen(null);
         setStep('onboarding');
         return;
@@ -228,6 +233,10 @@ export default function GatorAuth() {
           return;
         }
         localStorage.removeItem('cff_onboarding_screen');
+        try {
+          const fn = user.full_name?.split(' ')[0] || '';
+          if (fn) sessionStorage.setItem('cff_auth_first_name', fn);
+        } catch (e) {}
         setResumeScreen(null);
         setStep('onboarding');
       }
