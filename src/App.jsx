@@ -94,9 +94,7 @@ function OnboardingGuard({ children }) {
   }
 
   if (!hasPersona) {
-    const isLegacyAccount = user.created_date &&
-      new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
-    if (isLegacyAccount) return children;
+    // No persona = always needs onboarding, regardless of account age
     return <Navigate to="/GatorAuth" replace />;
   }
 

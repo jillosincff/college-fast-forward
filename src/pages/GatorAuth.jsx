@@ -196,22 +196,15 @@ export default function GatorAuth() {
       return;
     }
 
-    // No persona at all — brand new user or re-registered user
+    // No persona at all — new user or re-registered user → always onboard
     if (!hasPersona) {
-      // Existing account (created > 5 min ago) with no persona → send to dashboard, onboarding optional
-      const isExistingAccount = user.created_date && new Date(user.created_date) < new Date(Date.now() - 5 * 60 * 1000);
-      if (isExistingAccount) {
-        navigate('/FreeTierDashboard');
-        return;
-      }
-
       // Pending parent invite → parent onboarding
       if (pendingRole === 'parent') {
         navigate('/ParentOnboarding');
         return;
       }
 
-      // Fresh new user → onboarding
+      // No persona means they need to go through onboarding regardless of account age
       localStorage.removeItem('cff_onboarding_screen');
       setResumeScreen(null);
       setStep('onboarding');
