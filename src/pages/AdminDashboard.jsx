@@ -27,7 +27,6 @@ import { navigate } from '@/components/utils/navigation';
 import { useToast } from '@/components/ui/use-toast';
 import { approveInviteRequest } from '@/functions/approveInviteRequest';
 import CommunityInviteManager from '@/components/admin/CommunityInviteManager'; // Added CommunityInviteManager import
-import FoundingCircleApplicationsManager from '@/components/admin/FoundingCircleApplicationsManager';
 import ReengagementSettings from '@/components/admin/ReengagementSettings';
 import AmbassadorManager from '@/components/admin/AmbassadorManager';
 import EmailTestPanel from '@/components/admin/EmailTestPanel';
@@ -218,8 +217,8 @@ const AdminDashboard = () => {
 
   const loadFoundingCircleCount = async () => {
     try {
-      const pending = await base44.entities.FoundingCircleApplication.filter({ status: 'pending' });
-      setFoundingCircleCount(pending?.length || 0);
+      // FoundingCircleApplication entity removed
+      setFoundingCircleCount(0);
     } catch (error) {
       console.error('Failed to load founding circle count:', error);
     }
@@ -1118,7 +1117,7 @@ const AdminDashboard = () => {
 
             {/* Founding Circle Applications Tab */}
             <TabsContent value="founding-circle" className="space-y-6">
-              <FoundingCircleApplicationsManager />
+              <Card><CardContent className="pt-6 text-center text-slate-500">Founding Circle Applications feature has been removed.</CardContent></Card>
             </TabsContent>
 
             {/* Referrals Tab */}

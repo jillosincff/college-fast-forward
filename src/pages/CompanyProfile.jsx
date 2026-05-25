@@ -24,8 +24,6 @@ import {
   Award,
   Calendar
 } from 'lucide-react';
-import CompanyReviewForm from '@/components/companies/CompanyReviewForm';
-import CompanyReviewCard from '@/components/companies/CompanyReviewCard';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function CompanyProfilePage() {
@@ -530,20 +528,11 @@ export default function CompanyProfilePage() {
                 </Card>
               )}
 
-              {/* Review Form */}
-              {showReviewForm && (
-                <CompanyReviewForm
-                  company={company}
-                  onSuccess={handleReviewSubmitted}
-                  onCancel={() => setShowReviewForm(false)}
-                />
-              )}
-
               {/* Reviews List */}
               {reviews.length > 0 ? (
                 <div className="space-y-4">
                   {reviews.map((review) => (
-                    <CompanyReviewCard key={review.id} review={review} />
+                    <div key={review.id} className="p-4 border rounded-lg">{review.title}</div>
                   ))}
                 </div>
               ) : (

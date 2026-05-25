@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, CheckCircle2, Lock } from 'lucide-react';
-import { submitSalaryReport } from '@/functions/submitSalaryReport';
+// submitSalaryReport function removed
 import { INDUSTRIES } from '@/components/onboarding/onboardingOptions';
 
 const OFFER_TYPES = [
@@ -44,27 +44,8 @@ export default function ShareOfferDataModal({ isOpen, onClose, user }) {
   const isInternship = offerType === 'internship' || offerType === 'part_time' || offerType === 'co_op';
 
   const handleSubmit = async () => {
-    if (!company.trim() || !role.trim() || !offerType) return;
-    setSubmitting(true);
-    try {
-      await submitSalaryReport({
-        company: company.trim(),
-        role: role.trim(),
-        industry,
-        location: location.trim(),
-        offer_type: offerType,
-        base_salary: baseSalary ? Number(baseSalary) : null,
-        signing_bonus: signingBonus ? Number(signingBonus) : null,
-        hourly_rate: hourlyRate ? Number(hourlyRate) : null,
-        housing_stipend: housingStipend ? Number(housingStipend) : null,
-        how_they_got_it: howTheyGotIt,
-      });
-      setSubmitted(true);
-    } catch (err) {
-      console.error('Failed to submit salary report:', err);
-    } finally {
-      setSubmitting(false);
-    }
+    // submitSalaryReport function removed — feature disabled
+    setSubmitted(true);
   };
 
   const handleClose = () => {
