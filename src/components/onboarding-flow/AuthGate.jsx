@@ -167,7 +167,7 @@ export default function AuthGate({ onClose }) {
         )}
 
         <p style={{ fontFamily: FONT, fontSize: 12, color: '#94A3B8', margin: '20px 0 0', lineHeight: 1.6 }}>
-          By continuing, you agree to our Terms of Service. No credit card required.
+          By continuing, you agree to our Terms of Service.
         </p>
       </div>
     </div>

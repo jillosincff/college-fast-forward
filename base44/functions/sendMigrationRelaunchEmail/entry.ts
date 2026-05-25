@@ -144,7 +144,7 @@ function buildEmailHtml(firstName, appBaseUrl) {
               College Fast Forward is a network of parents and alumni who make themselves available to college students for introductions, career advice, and referrals. Students find you, reach out, and you decide how you want to help.
             </p>
             <p style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;color:#1a1a1a;line-height:1.7;margin:0 0 32px;">
-              <strong>Being part of the network is completely free — forever.</strong> No subscription, no credit card, no catch.
+              <strong>Being part of the network is completely free — forever.</strong> No subscription, no catch.
             </p>
 
             <p style="font-family:Georgia,serif;font-size:11px;font-weight:700;color:#E85D20;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px;">

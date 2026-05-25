@@ -92,7 +92,7 @@ const FASTIQ_FEATURES = [
 const FAQS = [
   { q: "Wait — is the network actually free?", a: "Yes. 100% free for parents and alumni, forever. No membership fee, no \"premium tier\", no catch. FastIQ is the optional AI upgrade for students who want to go faster." },
   { q: "What exactly does FastIQ do?", a: "It searches alumni at your target companies, drafts personalized outreach that sounds like you (not a robot), tailors your resume for specific roles, runs mock interviews, and builds your daily action plan. It's a lot." },
-  { q: "How does the 7-day trial work?", a: "Sign up and start immediately — no credit card needed. After 7 days, continue at $14.50/mo (Founding Rate, locked in until April 30, then it goes to $29/mo). Cancel anytime, for any reason." },
+  { q: "How does the 7-day trial work?", a: "Sign up and start immediately. After 7 days, continue at $14.50/mo (Founding Rate, locked in until April 30, then it goes to $29/mo). Cancel anytime, for any reason." },
   { q: "Can my parents pay for FastIQ for me?", a: "Yes! Parents can gift FastIQ directly from their account. A lot of parents are doing this — it's a pretty thoughtful move honestly." },
   { q: "What schools are in the network?", a: "15+ universities and growing — UF, Ohio State, USC, UGA, Penn State, UM, Delaware, and more. If your school isn't listed, you can still join and we'll expand to you." },
   { q: "I'm alumni — can I join to help?", a: "Please do. Students specifically search for alumni at their exact target companies. Your experience is literally what they're looking for. 15 minutes can change someone's trajectory." },
@@ -350,7 +350,7 @@ export default function LandingPage() {
       <FoundingMemberBanner show={showFoundingBanner} onUpgrade={() => navigate('GetStarted')} onDismiss={() => setShowFoundingBanner(false)} />
       <SocialMetaTags
         title="College Fast Forward — Stop cold-applying. Get warm intros + FastIQ AI."
-        description="Free parent & alumni network at your school. FastIQ AI turns connections into interviews. 7-day free trial, no credit card needed."
+        description="Free parent & alumni network at your school. FastIQ AI turns connections into interviews. 7-day free trial."
         image="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/684474c5723dc90efce23588/b27e39f30_collegefastforwardlogo.png"
         url="https://www.collegefastforward.com"
       />
@@ -513,7 +513,7 @@ export default function LandingPage() {
             {isStudent && foundingActive && <Countdown timeLeft={timeLeft} />}
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
               {(isStudent
-                ? ['No credit card', 'Cancel anytime', '2 min to set up']
+                ? ['Cancel anytime', '2 min to set up']
                 : ['No fee ever', 'You control who you talk to', 'Join in 2 min']
               ).map(t => (
                 <span key={t} style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -803,7 +803,7 @@ export default function LandingPage() {
               </button>
             </div>
           </div>
-          <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.35)', textAlign: 'center', margin: '14px 0 0' }}>No credit card · Cancel anytime · Parents can gift FastIQ too</p>
+          <p style={{ fontSize: 11.5, color: 'rgba(0,0,0,0.35)', textAlign: 'center', margin: '14px 0 0' }}>Cancel anytime · Parents can gift FastIQ too</p>
         </div>
 
         {/* ── FAQ ── */}
@@ -824,7 +824,7 @@ export default function LandingPage() {
               {isStudent ? <>Your next opportunity is<br />literally one intro away.</> : <>One intro from you can<br />change everything.</>}
             </h2>
             <p style={{ fontSize: 15, color: 'rgba(0,0,0,0.45)', lineHeight: 1.68, margin: '0 auto 30px', maxWidth: 340, position: 'relative' }}>
-              {isStudent ? 'No credit card. No BS. Just real intros and AI that actually works.' : 'Free. 2 minutes. No obligation. Students at your school genuinely need you.'}
+              {isStudent ? 'No BS. Just real intros and AI that actually works.' : 'Free. 2 minutes. No obligation. Students at your school genuinely need you.'}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', position: 'relative' }}>
               {isStudent ? (

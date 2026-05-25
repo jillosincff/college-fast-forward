@@ -522,7 +522,7 @@ export default function StudentMatchesWidget({ user }) {
                       </Button>
                       
                       <p className="text-slate-400 text-sm mt-4">
-                        Free forever • No credit card • Instant matches
+                        Free forever • Instant matches
                       </p>
                     </>
                   )}
