@@ -170,46 +170,69 @@ export default function GatorAuth() {
       return;
     }
 
-    // Logged in — decide where to send them
-    const hasPersona = !!user.persona?.trim();
-    const onboardingDone = user.onboarding_completed === true;
     const pendingRole = localStorage.getItem('pending_invite_role') || sessionStorage.getItem('pending_invite_role');
 
-    // User who has completed onboarding → go to their dashboard
-    if (hasPersona && onboardingDone) {
-      navigate('/FreeTierDashboard');
-      return;
-    }
+    // Verify the User entity record actually exists in the database.
+    // If a user deletes their record but keeps their auth account, auth.me() still
+    // returns persona/onboarding_completed from the auth layer — we must ignore those
+    // stale flags and treat them as a brand-new user.
+    const checkAndRoute = async () => {
+      let entityExists = false;
+      try {
+        const records = await base44.entities.User.filter({ email: user.email }, undefined, 1);
+        entityExists = Array.isArray(records) && records.length > 0;
+      } catch (e) {
+        // If we can't check, fall back to auth-level flags
+        entityExists = true;
+      }
 
-    // User with persona but onboarding not completed (e.g. was mid-flow) → resume onboarding
-    if (hasPersona && !onboardingDone) {
-      if (user.persona === 'parent' || user.roles?.includes('parent')) {
-        navigate('/ParentOnboarding');
-      } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
-        navigate('/FreeTierDashboard'); // alumni onboarding is handled on dashboard
-      } else {
-        // student — resume onboarding
+      // If entity row is gone, wipe auth-level stale flags and start onboarding fresh
+      if (!entityExists) {
+        try {
+          await base44.auth.updateMe({ persona: '', onboarding_completed: false });
+        } catch (e) {}
+        localStorage.removeItem('cff_onboarding_screen');
+        setResumeScreen(null);
+        setStep('onboarding');
+        return;
+      }
+
+      const hasPersona = !!user.persona?.trim();
+      const onboardingDone = user.onboarding_completed === true;
+
+      // User who has completed onboarding → go to their dashboard
+      if (hasPersona && onboardingDone) {
+        navigate('/FreeTierDashboard');
+        return;
+      }
+
+      // User with persona but onboarding not completed → resume onboarding
+      if (hasPersona && !onboardingDone) {
+        if (user.persona === 'parent' || user.roles?.includes('parent')) {
+          navigate('/ParentOnboarding');
+        } else if (user.persona === 'alumni' || user.roles?.includes('alumni')) {
+          navigate('/FreeTierDashboard');
+        } else {
+          localStorage.removeItem('cff_onboarding_screen');
+          setResumeScreen(null);
+          setStep('onboarding');
+        }
+        return;
+      }
+
+      // No persona at all → always onboard
+      if (!hasPersona) {
+        if (pendingRole === 'parent') {
+          navigate('/ParentOnboarding');
+          return;
+        }
         localStorage.removeItem('cff_onboarding_screen');
         setResumeScreen(null);
         setStep('onboarding');
       }
-      return;
-    }
+    };
 
-    // No persona at all — new user or re-registered user → always onboard
-    if (!hasPersona) {
-      // Pending parent invite → parent onboarding
-      if (pendingRole === 'parent') {
-        navigate('/ParentOnboarding');
-        return;
-      }
-
-      // No persona means they need to go through onboarding regardless of account age
-      localStorage.removeItem('cff_onboarding_screen');
-      setResumeScreen(null);
-      setStep('onboarding');
-      return;
-    }
+    checkAndRoute();
   }, [user, isLoading]);
 
   const inputStyle = {
