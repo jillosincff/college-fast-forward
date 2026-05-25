@@ -431,10 +431,15 @@ export default function OnboardingFlow({ onClose, onAlreadyAuthed, postAuth = fa
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setResumeUrl(file_url);
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a resume parser and expert resume writer. Analyze this resume and return TWO versions:
-1. "original": Extract the EXACT content — name, contact info, education, experience with original bullets, skills, activities. Do NOT invent or change anything.
-2. "optimized_experience": The same experience entries but with bullet points rewritten to be stronger, results-oriented, and ATS-friendly. Keep all company names, titles, dates, and locations EXACTLY the same. Only improve bullet language.
-IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, NOT a JSON object or nested structure. Return valid JSON matching the schema exactly.`,
+        prompt: `You are a resume parser. Analyze this resume file and return TWO versions.
+CRITICAL RULES:
+- Extract the REAL person's name exactly as it appears at the top of the resume. Do NOT use placeholders like "John Doe" or "Jane Smith".
+- If you cannot clearly read the name, return an empty string for name — never guess or fabricate.
+- All fields must be plain string values, NOT nested objects or JSON strings.
+- Do NOT invent or change any content except for "optimized_experience" bullets.
+
+1. "original": Extract EXACT content — name, contact info, education, experience with original bullets, skills, activities.
+2. "optimized_experience": Same experience entries but bullet points rewritten to be stronger, results-oriented, ATS-friendly. Keep company names, titles, dates, locations EXACTLY the same.`,
         file_urls: [file_url],
         response_json_schema: {
           type: 'object',
@@ -537,14 +542,17 @@ IMPORTANT: Each field (name, email, phone, etc.) must be a plain string value, N
 
   const isFullPageScreen = screen >= 11;
   const rawName = resumeData?.original?.name;
-  // Try resume name first, then fall back to the auth account's full_name
   const authFirstName = (() => {
-    try {
-      const stored = sessionStorage.getItem('cff_auth_first_name');
-      return stored || null;
-    } catch { return null; }
+    try { return sessionStorage.getItem('cff_auth_first_name') || null; } catch { return null; }
   })();
-  const firstName = (typeof rawName === 'string' ? rawName : null)?.split(' ')[0] || authFirstName || null;
+  // Guard against LLM placeholder names like "John Doe", "Jane Smith", "Name Surname"
+  const PLACEHOLDER_NAMES = ['john doe', 'jane doe', 'jane smith', 'john smith', 'name surname', 'first last', 'your name'];
+  const resumeFirstName = (() => {
+    if (typeof rawName !== 'string' || !rawName.trim()) return null;
+    if (PLACEHOLDER_NAMES.includes(rawName.trim().toLowerCase())) return null;
+    return rawName.split(' ')[0] || null;
+  })();
+  const firstName = resumeFirstName || authFirstName || null;
 
   const shell = {
     position: 'fixed', inset: 0, zIndex: 99999,
