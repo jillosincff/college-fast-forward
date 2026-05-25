@@ -7,11 +7,12 @@ import PremiumSignalsFeed from './PremiumSignalsFeed';
 import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
+import { useAuth } from '@/lib/AuthContext';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
 function PremiumNav({ user }) {
-  const firstName = user?.full_name?.split(' ')[0] || 'there';
+  const { logout } = useAuth();
   return (
     <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -19,9 +20,17 @@ function PremiumNav({ user }) {
           <CliffLogo size="text-xl" />
           <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 100, padding: '6px 12px', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>Premium Active</span>
         </div>
-        <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>
-          {user?.full_name || user?.email}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>
+            {user?.full_name || user?.email}
+          </span>
+          <button
+            onClick={logout}
+            style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', background: 'none', border: '1px solid #e5e7eb', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto' }}
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </header>
   );
