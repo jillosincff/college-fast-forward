@@ -37,7 +37,7 @@ export default function ChatHeaderMenu({ user }) {
     { label: 'My Profile →', onClick: () => { setOpen(false); navigate('Profile'); } },
     { label: 'Settings →', onClick: () => { setOpen(false); navigate('ProfileEdit'); } },
     { type: 'divider' },
-    { label: 'Log Out →', danger: true, onClick: () => { setOpen(false); base44.auth.logout(); } },
+    { label: 'Log Out →', danger: true, onClick: () => { setOpen(false); base44.auth.logout(window.location.origin + '/#/StudentLandingPage'); } },
   ];
 
   return (

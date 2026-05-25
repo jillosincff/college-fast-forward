@@ -23,7 +23,7 @@ const NAV_ITEMS = [
 
 export default function RGNav({ user, currentPage }) {
   const handleLogout = async () => {
-    try { await base44.auth.logout(); } catch { window.location.href = '/'; }
+    base44.auth.logout(window.location.origin + '/#/StudentLandingPage');
   };
 
   return (
