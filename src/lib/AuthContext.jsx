@@ -48,21 +48,21 @@ const AuthProviderInner = ({ children }) => {
   };
 
   const logout = async () => {
-    // 1. Kill the server session FIRST so me() returns 401 on next call
-    try { await base44.auth.logout(); } catch (e) { /* ignore */ }
+    // 1. Clear React state immediately so no authenticated UI flashes
+    setUser(null);
+    setIsAuthenticated(false);
 
-    // 2. Wipe all local state
+    // 2. Wipe local storage
     try {
       localStorage.clear();
       sessionStorage.clear();
     } catch (e) { /* private browsing */ }
 
-    // 3. Clear React state
-    setUser(null);
-    setIsAuthenticated(false);
-
-    // 4. Navigate to StudentLandingPage — it's a public page that won't redirect
+    // 3. Navigate away immediately — before the async SDK call
     window.location.replace(window.location.origin + '/#/StudentLandingPage');
+
+    // 4. Kill the server session in the background
+    try { await base44.auth.logout(); } catch (e) { /* ignore */ }
   };
 
   return (
