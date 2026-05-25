@@ -47,26 +47,22 @@ const AuthProviderInner = ({ children }) => {
     base44.auth.redirectToLogin(window.location.href);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // 1. Kill the server session FIRST so me() returns 401 on next call
+    try { await base44.auth.logout(); } catch (e) { /* ignore */ }
+
+    // 2. Wipe all local state
     try {
       localStorage.clear();
       sessionStorage.clear();
-      document.cookie.split(";").forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, "")
-          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
     } catch (e) { /* private browsing */ }
 
+    // 3. Clear React state
     setUser(null);
     setIsAuthenticated(false);
 
-    // Use replace so the StudentLandingPage is the only entry in history,
-    // then do a hard reload so the Base44 session cookie is fully cleared
-    // and base44.auth.me() returns unauthenticated on next boot.
+    // 4. Navigate to StudentLandingPage — it's a public page that won't redirect
     window.location.replace(window.location.origin + '/#/StudentLandingPage');
-    // Slight delay to let replace() commit before reload clears the session
-    setTimeout(() => window.location.reload(), 50);
   };
 
   return (
