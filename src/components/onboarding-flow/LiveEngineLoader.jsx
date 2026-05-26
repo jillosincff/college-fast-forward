@@ -49,7 +49,7 @@ function ResonanceScan({ schoolShortName }) {
         @keyframes resonanceSlide { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
       `}</style>
       <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: '#059669', letterSpacing: '0.12em', textTransform: 'uppercase', margin: '0 0 16px' }}>
-        ▶ CLiFF // Network Resonance Scan
+        ▶ Your Agent // Network Resonance Scan
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {steps.map((step, i) => (
@@ -133,7 +133,7 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
 
       {/* Headline */}
       <h1 style={{ fontFamily: FONT, fontSize: 'clamp(20px, 3.2vw, 28px)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', margin: '0 0 28px', lineHeight: 1.25 }}>
-        <span style={{ color: INDIGO, fontWeight: 800 }}>CLiFF is working on your resume...</span>
+        <span style={{ color: INDIGO, fontWeight: 800 }}>Your agent is working on your resume...</span>
       </h1>
 
       {/* Main Card */}
@@ -175,7 +175,7 @@ export default function LiveEngineLoader({ exiting = false, user = null, resonan
             {DID_YOU_KNOW[didYouKnowIdx]}
           </p>
           <p style={{ fontFamily: FONT, fontSize: 13, color: '#94A3B8', margin: '14px 0 0', textAlign: 'center', letterSpacing: '0.02em', lineHeight: 1.6 }}>
-            Most students get auto-rejected by 75% of applications. CLiFF is making sure yours doesn't.
+            Most students get auto-rejected by 75% of applications. Your agent is making sure yours doesn't.
           </p>
         </div>
       </div>
