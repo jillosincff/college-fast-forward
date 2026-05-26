@@ -606,7 +606,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         {/* Trust signals */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
           <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>🏆 Join 2,400+ students landing interviews this month</p>
-          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>No credit card needed to start · Cancel anytime</p>
+          <p style={{ fontFamily: dm, fontSize: 13, color: TEXT2, margin: 0 }}>Cancel anytime</p>
         </div>
       </div>
 
