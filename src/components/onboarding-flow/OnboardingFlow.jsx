@@ -957,7 +957,7 @@ CRITICAL RULES:
             </div>
 
             <h1 style={h1style}>What's the biggest thing holding you back right now?</h1>
-            <p style={{ ...substyle, marginBottom: 20 }}>Select up to 2. Be honest — <strong style={{ color: TEXT }}>CLiFF</strong> will instantly unlock the exact tools to crush these roadblocks.</p>
+            <p style={{ ...substyle, marginBottom: 20 }}>Select up to 2. Be honest — <strong style={{ color: TEXT }}>Your agent</strong> will instantly unlock the exact tools to crush these roadblocks.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, textAlign: 'left' }} className="blocker-card-list">
                {BLOCKERS.map(opt => {
@@ -1028,7 +1028,7 @@ CRITICAL RULES:
                   })}.
                 </p>
                 <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>
-                  CLiFF is already unlocking:
+                  Your agent is already unlocking:
                 </p>
                 {blockers.map(key => {
                   const b = BLOCKERS.find(x => x.key === key);
