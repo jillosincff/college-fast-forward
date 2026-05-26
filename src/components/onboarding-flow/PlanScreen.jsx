@@ -419,7 +419,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0f4ff', border: '1px solid #c7d7ff', borderRadius: 100, padding: '5px 16px' }}>
             <span style={{ fontSize: 12 }}>⚡</span>
             <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: BLUE, letterSpacing: '0.06em' }}>
-              Target Set: {college ? college.split(' ').slice(-2).join(' ') : 'Your University'} Network
+              Target Set: {college || 'Your University'} Network
             </span>
           </div>
         </div>
