@@ -145,7 +145,7 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
         What spaces are you trying to break into?
       </h1>
       <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, lineHeight: 1.7, margin: '0 auto 8px', maxWidth: 460 }}>
-        Select up to 3 fields. CLiFF will use this to map out the right internal pipelines, alumni connections, and tailored strategies for those exact spaces.
+        Select up to 3 fields. Your agent will use this to map out the right internal pipelines, alumni connections, and tailored strategies for those exact spaces.
       </p>
       <p style={{ fontFamily: FONT, fontSize: 12, color: totalSelected >= MAX_TOTAL ? '#EA580C' : TEXT3, margin: '0 0 24px', fontWeight: totalSelected >= MAX_TOTAL ? 700 : 400, transition: 'color 0.2s' }}>
         {totalSelected >= MAX_TOTAL ? '✓ Max 3 selected' : `${MAX_TOTAL - totalSelected} selection${MAX_TOTAL - totalSelected !== 1 ? 's' : ''} remaining`}
@@ -237,7 +237,7 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
               {[...selectedIndustries.map(k => BUCKETS.find(b => b.key === k)?.label), ...targetRoles].filter(Boolean).join(', ')}
             </strong>.
           </p>
-          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>CLiFF is now prioritizing:</p>
+          <p style={{ fontFamily: FONT, fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 10px' }}>Your agent is now prioritizing:</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
             {[
               'Alumni & parent insiders in those spaces',
@@ -251,7 +251,7 @@ export default function IndustryScreen({ selectedIndustries, setSelectedIndustri
             ))}
           </div>
           <p style={{ fontFamily: FONT, fontSize: 13, color: '#059669', margin: '12px 0 0', fontWeight: 700 }}>
-            You just gave CLiFF the coordinates it needs to work effectively for you. 🎯
+            You just gave your agent the coordinates it needs to work effectively for you. 🎯
           </p>
         </div>
       )}
