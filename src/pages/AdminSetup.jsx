@@ -55,7 +55,7 @@ export default function AdminSetup() {
   };
 
   const handleLogout = async () => {
-    base44.auth.logout(window.location.origin + '/#/StudentLandingPage');
+    base44.auth.logout(window.location.origin + '/');
   };
 
   return (
