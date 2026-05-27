@@ -58,8 +58,9 @@ const AuthProviderInner = ({ children }) => {
 
     // Pass the post-logout URL so Base44's server logout redirects here. Without it,
     // from_url defaults to the current (now unauthenticated) page, which bounces to
-    // Base44's hosted login screen.
-    base44.auth.logout(window.location.origin + '/#/StudentLandingPage');
+    // Base44's hosted login screen. Use the bare origin (not a hash route) so the
+    // server's from_url validation accepts it; "/" renders StudentLandingPage.
+    base44.auth.logout(window.location.origin + '/');
   };
 
   return (
