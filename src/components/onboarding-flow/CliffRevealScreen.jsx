@@ -116,6 +116,8 @@ export default function CliffRevealScreen({
         @keyframes logIn  { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes spin   { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes capFade{ from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes terminalGlow { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes buttonWake { from { opacity: 0.45; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
       `}</style>
 
       {skipped ? (
@@ -155,13 +157,23 @@ export default function CliffRevealScreen({
                 <button
                   onClick={onNext}
                   disabled={!canContinue}
-                  style={{ display: 'block', width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff', background: canContinue ? GRAD_INDIGO : '#CBD5E1', border: 'none', borderRadius: 12, padding: '18px 32px', cursor: canContinue ? 'pointer' : 'default', minHeight: 'auto', boxShadow: canContinue ? '0 10px 28px rgba(109,40,217,0.28)' : 'none', transition: 'all 0.25s ease' }}
-                  onMouseEnter={e => { if (canContinue) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 36px rgba(109,40,217,0.40)'; }}}
-                  onMouseLeave={e => { if (canContinue) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(109,40,217,0.28)'; }}}
+                  style={{
+                    display: 'block', width: '100%', fontFamily: FONT, fontSize: 15, fontWeight: 800, color: '#fff',
+                    background: canContinue ? GRAD_INDIGO : 'rgba(109,40,217,0.35)',
+                    border: canContinue ? 'none' : '1px solid rgba(109,40,217,0.4)',
+                    borderRadius: 12, padding: '18px 32px',
+                    cursor: canContinue ? 'pointer' : 'default', minHeight: 'auto',
+                    boxShadow: canContinue ? '0 10px 28px rgba(109,40,217,0.40), 0 0 0 1px rgba(168,85,247,0.3)' : 'none',
+                    opacity: canContinue ? 1 : 0.5,
+                    animation: canContinue ? 'buttonWake 0.5s ease forwards' : 'none',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={e => { if (canContinue) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 36px rgba(109,40,217,0.55), 0 0 24px rgba(168,85,247,0.3)'; }}}
+                  onMouseLeave={e => { if (canContinue) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(109,40,217,0.40), 0 0 0 1px rgba(168,85,247,0.3)'; }}}
                 >
                   {canContinue ? 'Activate My Agent →' : (
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                      <span style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid #fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
+                      <span style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid rgba(255,255,255,0.8)', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
                       Blueprint initializing…
                     </span>
                   )}
@@ -170,19 +182,35 @@ export default function CliffRevealScreen({
             )}
           </div>
 
-          {/* RIGHT COLUMN — Status log */}
-          <div style={{ background: '#f5f3ff', border: '1.5px solid #ddd6fe', borderRadius: 16, padding: '28px 24px', minHeight: 320, boxShadow: '0 4px 16px rgba(109,40,217,0.08)' }}>
-            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 20px' }}>
+          {/* RIGHT COLUMN — Terminal Glass */}
+          <div style={{
+            background: 'rgba(11, 18, 43, 0.92)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(147, 51, 234, 0.3)',
+            borderRadius: 16,
+            padding: '28px 24px',
+            minHeight: 320,
+            boxShadow: '0 8px 40px rgba(109,40,217,0.20), 0 0 0 1px rgba(147,51,234,0.15) inset',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {/* Subtle purple glow behind card when agent ready */}
+            {canContinue && (
+              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 110%, rgba(124,58,237,0.18) 0%, transparent 70%)', pointerEvents: 'none', animation: 'terminalGlow 1.5s ease' }} />
+            )}
+
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 10, fontWeight: 700, color: 'rgba(147,51,234,0.7)', textTransform: 'uppercase', letterSpacing: '0.14em', margin: '0 0 20px' }}>
               CLiFF · AGENT INIT LOG
             </p>
 
-            {/* Acronym */}
+            {/* Acronym — massive letters */}
             {step >= 2 && (
-              <div style={{ marginBottom: 20, borderBottom: '1px solid #ddd6fe', paddingBottom: 16 }}>
+              <div style={{ marginBottom: 20, borderBottom: '1px solid rgba(147,51,234,0.2)', paddingBottom: 16 }}>
                 {CLIFF_WORDS.map((word, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'baseline', opacity: i < visibleLines ? 1 : 0, animation: i < visibleLines ? 'lineIn 0.3s ease' : 'none', marginBottom: 2 }}>
-                    <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 900, color: INDIGO, minWidth: 20, lineHeight: 1.3 }}>{word.letters[0]}</span>
-                    <span style={{ fontFamily: FONT, fontSize: 13, fontWeight: 500, color: '#6b7280', lineHeight: 1.3 }}>{word.letters[1]}</span>
+                  <div key={i} style={{ display: 'flex', alignItems: 'baseline', opacity: i < visibleLines ? 1 : 0, animation: i < visibleLines ? 'lineIn 0.3s ease' : 'none', marginBottom: 3 }}>
+                    <span style={{ fontFamily: FONT, fontSize: 26, fontWeight: 900, color: '#a855f7', minWidth: 26, lineHeight: 1.2, textShadow: '0 0 16px rgba(168,85,247,0.5)' }}>{word.letters[0]}</span>
+                    <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 500, color: 'rgba(203,213,225,0.75)', lineHeight: 1.2, marginLeft: 4 }}>{word.letters[1]}</span>
                   </div>
                 ))}
               </div>
@@ -192,21 +220,25 @@ export default function CliffRevealScreen({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {logLines.map((line, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, animation: 'logIn 0.3s ease' }}>
-                  <span style={{ fontSize: 13, flexShrink: 0, lineHeight: 1.5 }}>{line.icon}</span>
-                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: line.icon === '🔒' ? '#9ca3af' : line.icon === '⚡' ? INDIGO : '#16a34a', margin: 0, lineHeight: 1.5 }}>{line.text}</p>
+                  {/* Dot indicator */}
+                  <div style={{
+                    width: 8, height: 8, borderRadius: '50%', flexShrink: 0, marginTop: 5,
+                    background: line.icon === '🔒' ? 'rgba(148,163,184,0.4)' : line.icon === '⚡' ? '#a855f7' : '#10b981',
+                    boxShadow: line.icon === '🔒' ? 'none' : line.icon === '⚡' ? '0 0 8px rgba(168,85,247,0.7)' : '0 0 8px rgba(16,185,129,0.7)',
+                  }} />
+                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: line.icon === '🔒' ? 'rgba(148,163,184,0.5)' : line.icon === '⚡' ? '#c084fc' : '#34d399', margin: 0, lineHeight: 1.5 }}>{line.text}</p>
                 </div>
               ))}
               {/* Blinking cursor */}
               {step >= 3 && !canContinue && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#d1d5db' }}>_</span>
-                  <div style={{ width: 8, height: 14, background: INDIGO, borderRadius: 1, animation: 'capFade 0.8s ease infinite alternate' }} />
+                  <div style={{ width: 7, height: 13, background: '#a855f7', borderRadius: 1, animation: 'capFade 0.7s ease infinite alternate', boxShadow: '0 0 8px rgba(168,85,247,0.6)' }} />
                 </div>
               )}
               {canContinue && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, animation: 'fadeUp 0.4s ease' }}>
-                  <span style={{ fontSize: 13 }}>✅</span>
-                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#16a34a', margin: 0 }}>Agent ready.</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, animation: 'fadeUp 0.4s ease' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px rgba(16,185,129,0.9)', flexShrink: 0 }} />
+                  <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: '#34d399', margin: 0, fontWeight: 700 }}>🟢 Agent Ready.</p>
                 </div>
               )}
             </div>
