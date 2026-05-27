@@ -258,19 +258,27 @@ function WarmCompanyCard({ lead, maxAlumni, university, onUnlock, onContact, isF
         <div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#aaa', margin: '0 0 8px' }}>UF alumni here</p>
 
-          {/* Teaser blurred profile row — initials visible but blurred */}
+          {/* Teaser profile row */}
           {lead.teaser_profile && (() => {
             const tp = lead.teaser_profile;
             const tpInitials = (tp.display_name || 'U A').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            const hasLinkedIn = !!tp.linkedin_url;
             return (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F0F0F0', filter: 'blur(4px)', userSelect: 'none', pointerEvents: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F0F0F0', filter: hasLinkedIn ? 'none' : 'blur(4px)', userSelect: hasLinkedIn ? 'auto' : 'none', pointerEvents: hasLinkedIn ? 'auto' : 'none' }}>
                 <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#94A3B8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{tpInitials}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>{tp.display_name || 'S.K.'}</span>
                   {tp.title && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#666' }}> · {tp.title}</span>}
                   {tp.grad_year && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#999' }}> · UF {tp.grad_year}</span>}
                 </div>
-                <span style={{ fontSize: 11, color: '#999' }}>🔒</span>
+                {hasLinkedIn ? (
+                  <a href={tp.linkedin_url} target="_blank" rel="noopener noreferrer"
+                    style={{ width: 28, height: 28, background: '#0077B5', color: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, textDecoration: 'none', flexShrink: 0 }}>
+                    in
+                  </a>
+                ) : (
+                  <span style={{ fontSize: 11, color: '#999' }}>🔒</span>
+                )}
               </div>
             );
           })()}

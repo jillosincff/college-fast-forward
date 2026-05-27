@@ -301,14 +301,32 @@ export default function CompanyIntelCard({ company, isFastIQ, onUpgrade, onResea
             {/* Alumni teaser */}
             <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #f5f5f5' }}>
               {company.alumni_count > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#22C55E', fontWeight: 500, margin: 0 }}>
-                    🎓 ~{company.alumni_count} {user?.school || 'UF'} alumni work here
-                  </p>
-                  <button onClick={() => setShowParentsModal(true)}
-                    style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, whiteSpace: 'nowrap' }}>
-                    See who →
-                  </button>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: company.teaser_profile?.linkedin_url ? 8 : 0 }}>
+                    <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#22C55E', fontWeight: 500, margin: 0 }}>
+                      🎓 ~{company.alumni_count} {user?.school || 'UF'} alumni work here
+                    </p>
+                    <button onClick={() => setShowParentsModal(true)}
+                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#E85D20', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', padding: 0, whiteSpace: 'nowrap' }}>
+                      See who →
+                    </button>
+                  </div>
+                  {/* Show teaser profile LinkedIn link if available */}
+                  {company.teaser_profile?.linkedin_url && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0' }}>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#94A3B8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, flexShrink: 0 }}>
+                        {(company.teaser_profile.display_name || 'UF').split('.').filter(Boolean).join('').slice(0, 2).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#1A1A1A', fontWeight: 500 }}>{company.teaser_profile.display_name}</span>
+                        {company.teaser_profile.title && <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666' }}> · {company.teaser_profile.title}</span>}
+                      </div>
+                      <a href={company.teaser_profile.linkedin_url} target="_blank" rel="noopener noreferrer"
+                        style={{ width: 26, height: 26, background: '#0077B5', color: '#fff', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 11, textDecoration: 'none', flexShrink: 0 }}>
+                        in
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
