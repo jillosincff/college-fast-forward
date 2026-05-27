@@ -1586,7 +1586,7 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                     onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
                     onMouseLeave={e => e.currentTarget.style.background = BG}
                   >
-                    <div><p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>$4.99 / week</p><p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>Cancel anytime</p></div>
+                    <div><p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>$4.99 / week</p><p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>Billed monthly at $19.96 · Cancel anytime</p></div>
                     <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>Flexible</span>
                   </button>
                   <button onClick={saveAndAuth} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: R, padding: '16px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}

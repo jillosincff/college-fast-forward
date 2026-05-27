@@ -214,7 +214,7 @@ export default function PremiumPaywallModal({
                 {isDownsell ? `🔥 Claim 50% Off — ${price}/wk →` : `⚡ Unlock Everything — ${price}/wk →`}
               </span>
               <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, opacity: 0.85 }}>
-                {isDownsell ? `${price}/wk today only · Cancel anytime` : 'Cancel anytime in one click · Secured by Stripe'}
+                {isDownsell ? `${price}/wk, billed monthly at $9.96 today only · Cancel anytime` : '$4.99/wk, billed monthly at $19.96 · Cancel anytime · Secured by Stripe'}
               </span>
             </button>
           </div>
