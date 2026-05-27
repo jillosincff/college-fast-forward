@@ -1597,19 +1597,12 @@ Create a plausible profile with 1-2 experience entries (clubs, part-time jobs, c
                 <h2 style={{ fontFamily: FONT, fontSize: 20, fontWeight: 800, color: TEXT, textAlign: 'center', margin: '0 0 8px', letterSpacing: '-0.02em' }}>Unlock the Full Agent</h2>
                 <p style={{ fontFamily: FONT, fontSize: 14, color: TEXT2, textAlign: 'center', margin: '0 0 24px', lineHeight: 1.6 }}>Unlimited modern resumes, tailoring for any job, tracking, reminders, and more.</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <button onClick={saveAndAuth} style={{ width: '100%', background: BG, border: `1px solid #E2E8F0`, borderRadius: R, padding: '16px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: SHADOW }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
-                    onMouseLeave={e => e.currentTarget.style.background = BG}
-                  >
-                    <div><p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>$4.99 / week</p><p style={{ fontFamily: FONT, fontSize: 12, color: TEXT2, margin: '2px 0 0' }}>Cancel anytime</p></div>
-                    <span style={{ fontFamily: FONT, fontSize: 10, fontWeight: 600, color: BLUE, background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`, borderRadius: 6, padding: '2px 8px' }}>Flexible</span>
-                  </button>
-                  <button onClick={saveAndAuth} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: R, padding: '16px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}
+                  <button onClick={saveAndAuth} style={{ width: '100%', background: `linear-gradient(to bottom, ${GREEN}, #059669)`, border: 'none', borderRadius: R, padding: '16px', cursor: 'pointer', minHeight: 'auto', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                     onMouseEnter={e => e.currentTarget.style.opacity = '0.92'}
                     onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                   >
-                    <div><p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>$19 for 30 days</p><p style={{ fontFamily: FONT, fontSize: 12, color: '#D1FAE5', margin: '2px 0 0' }}>Best value · Most students choose this</p></div>
-                    <span style={{ fontFamily: FONT, fontSize: 9, fontWeight: 700, color: GREEN, background: '#fff', borderRadius: 6, padding: '4px 10px', position: 'absolute', top: -10, right: 12 }}>POPULAR</span>
+                    <div><p style={{ fontFamily: FONT, fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>$4.99 / week</p><p style={{ fontFamily: FONT, fontSize: 12, color: '#D1FAE5', margin: '2px 0 0' }}>Billed monthly at $19.96 · Cancel anytime</p></div>
+                    <span style={{ fontFamily: FONT, fontSize: 14, fontWeight: 800, color: '#fff' }}>→</span>
                   </button>
                 </div>
                 <button onClick={() => setShowPaywall(false)} style={{ width: '100%', fontFamily: FONT, fontSize: 13, color: TEXT2, background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', textDecoration: 'underline', textAlign: 'center', marginTop: 18 }}>

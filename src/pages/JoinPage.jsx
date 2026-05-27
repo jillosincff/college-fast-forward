@@ -159,8 +159,6 @@ export default function JoinPage() {
             <span>🔒 Free account</span>
             <span>•</span>
             <span>⏱️ Under 60 seconds</span>
-            <span>•</span>
-            <span>No credit card</span>
           </div>
         </div>
       </div>

@@ -661,9 +661,6 @@ export default function StudentLandingPage({ onParentClick }) {
             </div>
 
             <CTAButton label="⚡ Check My ATS Match Score" fullWidth />
-            <p style={{ fontFamily: SF, fontSize: 12, color: TEXT3, textAlign: 'center', margin: '16px 0 0', lineHeight: 1.4 }}>
-              No credit card required to start.
-            </p>
           </div>
         </div>
       </div>
@@ -692,7 +689,6 @@ export default function StudentLandingPage({ onParentClick }) {
           >
             ⚡ Optimize My Resume File
           </button>
-          <p style={{ fontFamily: SF, fontSize: 12, color: 'rgba(255,255,255,0.55)', margin: '16px 0 0', lineHeight: 1.4 }}>No credit card required to start.</p>
         </div>
       </div>
 

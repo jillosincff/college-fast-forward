@@ -74,7 +74,7 @@ function MiniLinkedInCard({ name, college }) {
   );
 }
 
-/* ── 3-Day Sprint Roadmap ── */
+/* ── 14-Day Plan Roadmap ── */
 function SprintRoadmap({ targetRole, location, schoolName }) {
   const days = [
     {
@@ -123,7 +123,7 @@ function SprintRoadmap({ targetRole, location, schoolName }) {
       <div style={{ padding: '18px 22px 14px', borderBottom: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 16 }}>⚡</span>
         <div>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Your 3-Day Sprint Roadmap</p>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: TEXT2, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Your 14-Day Plan Roadmap</p>
           <p style={{ fontFamily: dm, fontSize: 12, color: TEXT2, margin: 0 }}>Exactly what to do — and the Agent handles the rest.</p>
         </div>
       </div>
@@ -562,7 +562,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6, background: '#fff', border: `1px solid ${BLUE_BORDER}`, borderRadius: 100, padding: '8px 24px' }}>
             <span style={{ fontFamily: sat, fontSize: 26, fontWeight: 900, color: BLUE }}>$4.99</span>
-            <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2 }}>/week · Cancel anytime</span>
+            <span style={{ fontFamily: dm, fontSize: 13, color: TEXT2 }}>/week — billed monthly at $19.96 · Cancel anytime</span>
           </div>
         </div>
 

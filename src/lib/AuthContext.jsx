@@ -48,21 +48,18 @@ const AuthProviderInner = ({ children }) => {
   };
 
   const logout = async () => {
-    // 1. Kill the server session first so the auth cookie is gone
-    try { await base44.auth.logout(); } catch (e) { /* ignore */ }
-
-    // 2. Wipe all local state
+    // base44.auth.logout() navigates away immediately, so wipe local state first.
     try {
       localStorage.clear();
       sessionStorage.clear();
     } catch (e) { /* private browsing */ }
-
-    // 3. Clear React state
     setUser(null);
     setIsAuthenticated(false);
 
-    // 4. Hard redirect to landing page (full reload guarantees clean slate)
-    window.location.href = window.location.origin + '/#/StudentLandingPage';
+    // Pass the post-logout URL so Base44's server logout redirects here. Without it,
+    // from_url defaults to the current (now unauthenticated) page, which bounces to
+    // Base44's hosted login screen.
+    base44.auth.logout(window.location.origin + '/#/StudentLandingPage');
   };
 
   return (
