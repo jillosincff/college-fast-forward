@@ -9,6 +9,7 @@ import CareerAssetsCard from '@/components/free-tier/CareerAssetsCard';
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
 import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
+import OrganizedFeeds from '@/components/free-tier/OrganizedFeeds';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 
@@ -327,7 +328,12 @@ export default function FreeTierDashboard() {
 
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Three-Tier Lead Hierarchy Feed */}
+            <OrganizedFeeds user={user} />
+            
+            {/* Application Pipeline (Active Tracking) */}
             <ApplicationTracker onUpgrade={triggerUpgrade} />
+            
             <TeaserSignalsCard onUnlock={() => triggerUpgrade('Inside Track Signals')} college={college} theme={campusTheme} />
           </div>
 

@@ -1,18 +1,16 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 /**
- * getPersonalizedNetworkCarousel
+ * getOrganizedFeeds - Three-Tier Lead Hierarchy
  *
- * 3-Tier Match Hierarchy (strictly ordered):
- *  1. Anchor (Job): A real/sourced job opening matching the user's target industries & role.
- *  2. Backdoor Lever (Alumni): The company must have a verified school alumnus for a warm intro.
- *  3. Mentorship Boost (Parent): Any school parents who work in the same industry as the job
- *     are layered on as advisory assets.
+ * 🔥 HOT LEADS: Has verified school alumnus at that exact company
+ *   - CTA: [ ⚡ Draft Backdoor Message ]
  *
- * sourceCategory labels:
- *   'A' = 🔥 Hidden Network Referral  — surfaced directly from parent/alumni network intake
- *   'B' = 🛰️ Hiring Manager Social Feed — native social post by a hiring manager (pre-ATS)
- *   'C' = ⚡ Direct Backdoor Track     — rolling ATS talent pool / evergreen pipeline on company site
+ * ☀️ WARM LEADS: No company insider, but has industry connections (alumni/parents in same industry)
+ *   - CTA: [ 💡 Request Industry Insight ]
+ *
+ * ❄️ COLD LEADS: No direct or industry connections yet
+ *   - CTA: [ 🔍 View Role & Hunt Insiders ]
  */
 
 const INDUSTRY_KEYWORDS = {
@@ -310,9 +308,10 @@ Deno.serve(async (req) => {
       }, industryKeywords);
     });
 
-    // ─── Step 4: Build final premium cards ──────────────────────────────────
-    const premiumCards = [];
-    const coldOpportunities = []; // Industry-matched roles without alumni connections
+    // ─── Step 4: Three-Tier Lead Hierarchy ──────────────────────────────────
+    const hotLeads = [];
+    const warmLeads = [];
+    const coldLeads = [];
 
     for (const job of jobPool) {
       const normalizedJobCompany = normalizeCompanyName(job.company);
@@ -330,19 +329,64 @@ Deno.serve(async (req) => {
       const alumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
-      // Build parent advisor list first (needed for both hot and cold cards)
+      // Build parent advisor list (for warm leads)
       const industryParentAdvisors = industryParents.slice(0, 3);
       const allParentAdvisors = [...new Map(
         [...parentsAtCompany, ...industryParentAdvisors].map(p => [p.id, p])
       ).values()];
 
-      // Separate "hot" (alumni) from "cold" (no alumni) opportunities
-      // Only show companies with alumni in the main "Live Backdoor Matches" section
-      const isHotMatch = alumni.length > 0;
-      
-      if (!isHotMatch) {
-        // Collect cold opportunities for separate "Cold Discovery" section
-        coldOpportunities.push({
+      // 🔥 HOT LEAD: Has alumni at exact company
+      if (alumni.length > 0) {
+        const featuredParent = allParentAdvisors.find(p =>
+          memberInIndustry({ title: p.title, industry: p.industry, bio: '' }, industryKeywords)
+        ) || allParentAdvisors[0] || null;
+
+        const hasNetworkReferral = alumni.some(a => a.referred_opening === true);
+        const effectiveCategory = hasNetworkReferral ? 'A' : (job.sourceCategory || 'C');
+
+        // Calculate match score
+        const roleKeywords = targetRole.toLowerCase().split(/\s+/);
+        const jobRoleLower = job.role.toLowerCase();
+        const jobDescLower = job.description.toLowerCase();
+        
+        let matchScore = 50;
+        if (targetIndustries.some(ind => jobDescLower.includes(ind))) matchScore += 30;
+        const roleMatchCount = roleKeywords.filter(kw => kw.length > 3 && (jobRoleLower.includes(kw) || jobDescLower.includes(kw))).length;
+        matchScore += Math.min(20, roleMatchCount * 5);
+        matchScore += Math.min(10, alumni.length * 2);
+        if (allParentAdvisors.length > 0) matchScore += 5;
+
+        hotLeads.push({
+          company: job.company,
+          role: job.role,
+          jobDescription: job.description,
+          jobSource: job.source || null,
+          jobSourceCategory: effectiveCategory,
+          displayStyle: job.displayStyle || 'HIDDEN_SIGNAL',
+          daysPosted: job.daysPosted || null,
+          applicantCount: job.applicantCount || null,
+          nichePlatform: job.nichePlatform || null,
+          targetIndustry: targetIndustries[0] || '',
+          matchedIndustries: targetIndustries,
+          alumniCount: alumni.length,
+          parentCount: parentsAtCompany.length > 0 ? parentsAtCompany.length : allParentAdvisors.length,
+          alumni: alumni.slice(0, 5),
+          featuredParent: featuredParent ? {
+            full_name: featuredParent.full_name,
+            title: featuredParent.title,
+            persona: 'parent',
+          } : null,
+          hasParentBonus: allParentAdvisors.length > 0,
+          networkWeight: Math.min(99, matchScore),
+          ctaType: 'draft_backdoor',
+          leadTier: 'hot',
+        });
+
+        if (hotLeads.length >= 6) continue; // Cap hot leads
+      }
+      // ☀️ WARM LEAD: No company alumni, but has industry connections
+      else if (allParentAdvisors.length > 0) {
+        coldLeads.push({
           company: job.company,
           role: job.role,
           jobDescription: job.description,
@@ -353,95 +397,41 @@ Deno.serve(async (req) => {
           matchedIndustries: targetIndustries,
           alumniCount: 0,
           parentCount: allParentAdvisors.length,
-          hasParentBonus: allParentAdvisors.length > 0,
-          isColdDiscovery: true,
+          hasParentBonus: true,
+          industryConnections: allParentAdvisors.slice(0, 3),
+          ctaType: 'request_industry',
+          leadTier: 'warm',
         });
-        continue;
       }
-
-      const featuredParent = allParentAdvisors.find(p =>
-        memberInIndustry({ title: p.title, industry: p.industry, bio: '' }, industryKeywords)
-      ) || allParentAdvisors[0] || null;
-
-      // If this card has alumni who explicitly referred via network intake, upgrade to category A
-      const hasNetworkReferral = alumni.some(a => a.referred_opening === true);
-      const effectiveCategory = hasNetworkReferral ? 'A' : (job.sourceCategory || 'C');
-
-      const finalAlumniCount = alumni.length;
-      const finalParentCount = parentsAtCompany.length > 0 ? parentsAtCompany.length : allParentAdvisors.length;
-      const finalMembers = [...alumni.slice(0, 5), ...parentsAtCompany.slice(0, 3)];
-
-      // Calculate dynamic match percentage based on role/industry alignment
-      const roleKeywords = targetRole.toLowerCase().split(/\s+/);
-      const jobRoleLower = job.role.toLowerCase();
-      const jobDescLower = job.description.toLowerCase();
-      
-      let matchScore = 50; // Base score
-      
-      // Industry match (major boost)
-      if (targetIndustries.some(ind => jobDescLower.includes(ind))) {
-        matchScore += 30;
+      // ❄️ COLD LEAD: No connections at all
+      else {
+        coldLeads.push({
+          company: job.company,
+          role: job.role,
+          jobDescription: job.description,
+          jobSource: job.source || null,
+          jobSourceCategory: job.sourceCategory || 'C',
+          nichePlatform: job.nichePlatform || null,
+          targetIndustry: targetIndustries[0] || '',
+          matchedIndustries: targetIndustries,
+          alumniCount: 0,
+          parentCount: 0,
+          hasParentBonus: false,
+          ctaType: 'view_role',
+          leadTier: 'cold',
+        });
       }
-      
-      // Role keyword match
-      const roleMatchCount = roleKeywords.filter(kw => kw.length > 3 && (jobRoleLower.includes(kw) || jobDescLower.includes(kw))).length;
-      matchScore += Math.min(20, roleMatchCount * 5);
-      
-      // Alumni network strength bonus
-      matchScore += Math.min(10, finalAlumniCount * 2);
-      
-      // Parent advisor bonus
-      if (allParentAdvisors.length > 0) {
-        matchScore += 5;
-      }
-      
-      const dynamicMatchPct = Math.min(99, matchScore);
-
-      // Determine CTA button type based on connection strength
-      let ctaType = 'view_details';
-      if (finalAlumniCount > 0) {
-        ctaType = 'draft_backdoor';
-      } else if (allParentAdvisors.length > 0) {
-        ctaType = 'request_parent';
-      }
-
-      premiumCards.push({
-        company: job.company,
-        role: job.role,
-        jobDescription: job.description,
-        jobSource: job.source || null,
-        jobSourceCategory: effectiveCategory,
-        displayStyle: job.displayStyle || 'HIDDEN_SIGNAL',
-        daysPosted: job.daysPosted || null,
-        applicantCount: job.applicantCount || null,
-        nichePlatform: job.nichePlatform || null,
-        targetIndustry: targetIndustries[0] || '',
-        matchedIndustries: targetIndustries,
-        alumniCount: finalAlumniCount,
-        parentCount: finalParentCount,
-        alumni: alumni.slice(0, 5),
-        featuredParent: featuredParent ? {
-          full_name: featuredParent.full_name,
-          title: featuredParent.title,
-          persona: 'parent',
-        } : null,
-        hasParentBonus: allParentAdvisors.length > 0,
-        networkWeight: dynamicMatchPct,
-        ctaType: ctaType,
-        _members: finalMembers,
-      });
-
-      if (premiumCards.length >= 6) break;
     }
 
     // ─── Fallback removed: Never show cards with 0 alumni in "Live Backdoor Matches" ─────────
     // If no alumni connections exist, show the empty state instead of fake cards
 
-    console.log(`[getPersonalizedNetworkCarousel] Built ${premiumCards.length} hot matches + ${coldOpportunities.length} cold opportunities for industries: [${targetIndustries.join(', ')}]`);
+    console.log(`[getOrganizedFeeds] 🔥 ${hotLeads.length} HOT | ☀️ ${warmLeads.length} WARM | ❄️ ${coldLeads.length} COLD for industries: [${targetIndustries.join(', ')}]`);
     return Response.json({
       success: true,
-      cards: premiumCards,
-      coldOpportunities: coldOpportunities.slice(0, 3), // Limit to 3 cold discoveries
+      hotLeads: hotLeads.slice(0, 6),
+      warmLeads: warmLeads.slice(0, 6),
+      coldLeads: coldLeads.slice(0, 12),
       wasFiltered: targetIndustries.length > 0,
       targetIndustries,
     });
