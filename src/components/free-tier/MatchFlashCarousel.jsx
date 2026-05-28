@@ -20,33 +20,45 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [wasFiltered, setWasFiltered] = useState(false);
+  const [targetIndustries, setTargetIndustries] = useState([]);
   const trackRef = useRef(null);
 
   useEffect(() => {
     setLoading(true);
-    getVerifiedNetworkCompanies({})
+    // Pass user's target industries so backend strictly filters
+    const userTargets = user?.career_goals?.target_industries
+      || user?.industries_interested
+      || user?.industries_of_interest
+      || [];
+    getVerifiedNetworkCompanies({ target_industries: userTargets })
       .then(res => {
         const companies = res?.data?.companies || [];
-        // Map DB records to match card shape
+        const filtered = res?.data?.wasFiltered || false;
+        const targets = res?.data?.targetIndustries || userTargets;
+        setWasFiltered(filtered);
+        setTargetIndustries(targets);
         const mapped = companies
           .filter(c => c.alumniCount + c.parentCount >= 1)
           .slice(0, 6)
           .map(c => ({
             company: c.company,
-            role: c.members.find(m => m.persona === 'alumni')?.title || 'Warm Intro Available',
+            role: c.members.find(m => m.persona === 'alumni')?.title
+              || c.members.find(m => m.persona === 'parent')?.title
+              || 'Warm Intro Available',
             logo: '🏢',
             alumCount: c.alumniCount,
             parentCount: c.parentCount,
             matchPct: calculateNetworkMatchScore(c.alumniCount, c.parentCount),
             tag: tagLabel(c.alumniCount, c.parentCount),
-            // Pass through real members for the modal
+            matchedIndustries: c.matchedIndustries || [],
             _members: c.members,
           }));
         setMatches(mapped);
       })
       .catch(() => setMatches([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.id]);
 
   const handleScroll = () => {
     if (!trackRef.current) return;
@@ -80,6 +92,9 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
   }
 
   if (!matches.length) {
+    const industryLabel = targetIndustries.length > 0
+      ? targetIndustries.slice(0, 2).join(' & ')
+      : null;
     return (
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -88,10 +103,19 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
             CLIFF's Top High-Outreach Matches Today
           </p>
         </div>
-        <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 16, padding: '24px', textAlign: 'center' }}>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>
-            No verified network connections found yet. As more alumni and parents join, your warm match carousel will populate here.
-          </p>
+        <div style={{ background: 'linear-gradient(135deg, #f0f4ff, #faf5ff)', border: '1px dashed #a5b4fc', borderRadius: 16, padding: '24px 28px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+            <span style={{ fontSize: 28, flexShrink: 0 }}>🛰️</span>
+            <div>
+              <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#1e1b4b', margin: '0 0 6px' }}>CLiFF is on the lookout!</p>
+              <p style={{ fontFamily: dm, fontSize: 12, color: '#4c1d95', margin: 0, lineHeight: 1.7 }}>
+                {industryLabel
+                  ? `You have strict targets locked in for ${industryLabel}. We don't have a verified ${shortName} parent or alum at an active opening in those industries yet — but CLiFF is actively crawling backdoor channels for you 24/7.`
+                  : `No verified network connections found yet. As more alumni and parents join, your warm match carousel will populate here.`
+                }
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -179,6 +203,7 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
 }
 
 function MatchCard({ match, shortName, theme, onClick }) {
+  // match.matchedIndustries drives the personalized insight copy
   const t = theme || { primary: '#2563eb' };
   const [hovered, setHovered] = useState(false);
 
@@ -224,15 +249,26 @@ function MatchCard({ match, shortName, theme, onClick }) {
         </div>
       </div>
 
-      {/* Network intel */}
-      <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)', border: '1px solid #c7d2fe', borderRadius: 12, padding: '10px 14px' }}>
-        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#1e1b4b', margin: '0 0 4px', lineHeight: 1.3 }}>
-          🔥 {match.alumCount} {shortName} Alum{match.alumCount !== 1 ? 's' : ''} &amp; {match.parentCount} Parent{match.parentCount !== 1 ? 's' : ''} confirmed in network
-        </p>
-        <p style={{ fontFamily: dm, fontSize: 11, color: '#4c1d95', margin: 0, fontWeight: 600 }}>
-          Warm entry point — no cold applications needed
-        </p>
-      </div>
+      {/* Network intel — personalized if industry match, generic otherwise */}
+      {match.matchedIndustries?.length > 0 ? (
+        <div style={{ background: 'linear-gradient(135deg, #fefce8 0%, #fdf4ff 100%)', border: '1px solid #fde68a', borderRadius: 12, padding: '10px 14px' }}>
+          <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#78350f', margin: '0 0 4px', lineHeight: 1.3 }}>
+            💡 Insiders in Your Target Field
+          </p>
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#92400e', margin: 0, lineHeight: 1.6, fontWeight: 500 }}>
+            {`We found ${match.parentCount > 0 ? match.parentCount + ' ' + shortName + ' Parent' + (match.parentCount !== 1 ? 's' : '') : ''}${match.parentCount > 0 && match.alumCount > 0 ? ' & ' : ''}${match.alumCount > 0 ? match.alumCount + ' Alum' + (match.alumCount !== 1 ? 's' : '') : ''} here working in ${match.matchedIndustries.slice(0, 2).join(' & ')}. Tap to connect for advice, mock interviews, or an insider breakdown.`}
+          </p>
+        </div>
+      ) : (
+        <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)', border: '1px solid #c7d2fe', borderRadius: 12, padding: '10px 14px' }}>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#1e1b4b', margin: '0 0 4px', lineHeight: 1.3 }}>
+            🔥 {match.alumCount} {shortName} Alum{match.alumCount !== 1 ? 's' : ''} &amp; {match.parentCount} Parent{match.parentCount !== 1 ? 's' : ''} confirmed in network
+          </p>
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#4c1d95', margin: 0, fontWeight: 600 }}>
+            Warm entry point — no cold applications needed
+          </p>
+        </div>
+      )}
 
       {/* Match score + CTA */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
