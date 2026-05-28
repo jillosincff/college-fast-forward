@@ -1,46 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAlumniAtCompanies } from '@/functions/getAlumniAtCompanies';
+import { getDashboardParentMatch } from '@/functions/getDashboardParentMatch';
 
 const dm = "'DM Sans', system-ui, sans-serif";
-
-// Generate a plausible LinkedIn search URL for a name + company
-function linkedInUrl(name, company) {
-  const q = encodeURIComponent(`${name} ${company}`);
-  return `https://www.linkedin.com/search/results/people/?keywords=${q}`;
-}
-
-const MOCK_ALUMNI = {
-  Salesforce: [
-    { name: 'Marcus Reid', title: 'Account Executive', grad: '2019', mutual: true },
-    { name: 'Priya Nair', title: 'Business Development Rep', grad: '2021', mutual: false },
-    { name: 'Jason Cho', title: 'Solutions Engineer', grad: '2020', mutual: true },
-  ],
-  Deloitte: [
-    { name: 'Alicia Torres', title: 'Consulting Analyst', grad: '2020', mutual: true },
-    { name: 'Ben Walsh', title: 'Technology Consultant', grad: '2022', mutual: false },
-    { name: 'Naomi Patel', title: 'Senior Associate', grad: '2018', mutual: true },
-    { name: 'Derek Kim', title: 'Strategy Analyst', grad: '2021', mutual: false },
-    { name: 'Lauren Moss', title: 'Manager, Tech Advisory', grad: '2017', mutual: false },
-  ],
-  Amazon: [
-    { name: 'Carlos Vega', title: 'Operations Analyst', grad: '2021', mutual: false },
-    { name: 'Tiffany Grant', title: 'Program Manager', grad: '2019', mutual: true },
-  ],
-};
-
-const MOCK_PARENTS = {
-  Salesforce: [
-    { name: 'Robert Chen', title: 'VP of Enterprise Sales', student: 'Sophie Chen, UF \'25' },
-    { name: 'Diana Okafor', title: 'Senior Director, Partnerships', student: 'Emeka Okafor, UF \'26' },
-  ],
-  Deloitte: [
-    { name: 'James Whitfield', title: 'Managing Director', student: 'Alex Whitfield, UF \'25' },
-  ],
-  Amazon: [
-    { name: 'Susan Park', title: 'Director, Ops Excellence', student: 'Jason Park, UF \'26' },
-    { name: 'Michael Torres', title: 'Sr. Manager, Logistics', student: 'Camila Torres, UF \'25' },
-    { name: 'Angela Wu', title: 'Principal PM', student: 'Kevin Wu, UF \'24' },
-  ],
-};
 
 const MATCH_REASONS = {
   Salesforce: [
@@ -63,27 +25,62 @@ const MATCH_REASONS = {
   ],
 };
 
-export default function MatchDeepDiveModal({ match, shortName, onClose, onGenerateOutreach }) {
+export default function MatchDeepDiveModal({ match, shortName, onClose, onGenerateOutreach, user }) {
   const [tab, setTab] = useState('alumni');
   const [selectedContact, setSelectedContact] = useState(null);
   const [launched, setLaunched] = useState(false);
+  const [alumni, setAlumni] = useState([]);
+  const [parents, setParents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!match) return;
+    setLoading(true);
+    setAlumni([]);
+    setParents([]);
+    setSelectedContact(null);
+
+    Promise.all([
+      getAlumniAtCompanies({ companies: [match.company] }).catch(() => ({ data: null })),
+      getDashboardParentMatch({ company: match.company }).catch(() => ({ data: null })),
+    ]).then(([alumniRes, parentRes]) => {
+      // Alumni: flatten results for this company
+      const alumniData = alumniRes?.data?.alumni || alumniRes?.data?.[match.company] || [];
+      setAlumni(
+        alumniData.slice(0, 8).map(a => ({
+          name: a.full_name || a.name || 'UF Alumni',
+          title: a.headline || a.current_role || a.title || 'UF Alumni',
+          grad: a.graduation_year || a.class_year || '',
+          mutual: false,
+          linkedin_url: a.linkedin_url || null,
+        }))
+      );
+
+      // Parents: from getDashboardParentMatch
+      const parentData = parentRes?.data?.matches || parentRes?.data?.parents || [];
+      setParents(
+        parentData.slice(0, 5).map(p => ({
+          name: p.full_name || p.name || 'UF Parent',
+          title: p.current_role || p.job_title || p.title || 'UF Parent',
+          student: p.student_name ? `${p.student_name}, UF` : 'UF Student',
+          linkedin_url: p.linkedin_url || null,
+        }))
+      );
+    }).finally(() => setLoading(false));
+  }, [match?.company]);
 
   if (!match) return null;
 
-  const alumni = MOCK_ALUMNI[match.company] || MOCK_ALUMNI.Salesforce;
-  const parents = MOCK_PARENTS[match.company] || MOCK_PARENTS.Salesforce;
-  const reasons = MATCH_REASONS[match.company] || MATCH_REASONS.Salesforce;
   const contacts = tab === 'alumni' ? alumni : parents;
+  const reasons = MATCH_REASONS[match.company] || MATCH_REASONS.Salesforce;
 
   const handleTrackAndDraft = () => {
-    const contact = selectedContact || (tab === 'alumni' ? alumni[0] : parents[0]);
+    const contact = selectedContact || contacts[0];
     setLaunched(true);
-    // Hand-off: add to pipeline + open outreach drafts with pre-populated context
     onGenerateOutreach && onGenerateOutreach({ match, contact, tab });
     setTimeout(() => {
       onClose();
-      // Navigate to OutreachDrafts with context pre-filled
-      window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(contact.name)}`;
+      window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(contact?.name || '')}`;
     }, 600);
   };
 
@@ -119,7 +116,6 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
 
           {/* ── Zone 1: Tactical Overview ── */}
           <div style={{ paddingTop: 4, paddingBottom: 20, borderBottom: '1px solid #f1f5f9' }}>
-            {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
               <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>
                 {match.logo}
@@ -136,7 +132,6 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
               </button>
             </div>
 
-            {/* Match score */}
             <div style={{ background: 'linear-gradient(135deg, #f5f3ff, #eff6ff)', border: '1px solid #c7d2fe', borderRadius: 14, padding: '14px 16px', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 14 }}>⚡</span>
@@ -156,7 +151,6 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
               </div>
             </div>
 
-            {/* Network summary pills */}
             <div style={{ display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
                 <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 900, color: '#2563eb', margin: '0 0 2px' }}>{match.alumCount}</p>
@@ -192,78 +186,94 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                     minHeight: 'auto', transition: 'all 0.2s',
                   }}
                 >
-                  {t === 'alumni' ? `🎓 Alumni (${alumni.length})` : `👨‍👩‍👧 Parents (${parents.length})`}
+                  {t === 'alumni' ? `🎓 Alumni (${loading ? '…' : alumni.length})` : `👨‍👩‍👧 Parents (${loading ? '…' : parents.length})`}
                 </button>
               ))}
             </div>
 
             {/* Contact cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {contacts.map((c, i) => {
-                const isAlum = tab === 'alumni';
-                const isSelected = selectedContact === c;
-                return (
-                  <div
-                    key={i}
-                    onClick={() => setSelectedContact(isSelected ? null : c)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      background: isSelected ? (isAlum ? '#eff6ff' : '#f5f3ff') : '#f8fafc',
-                      border: `1.5px solid ${isSelected ? (isAlum ? '#93c5fd' : '#c4b5fd') : '#e2e8f0'}`,
-                      borderRadius: 12, padding: '12px 14px', cursor: 'pointer',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    {/* Avatar */}
-                    <div style={{
-                      width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-                      background: isAlum ? '#dbeafe' : '#ede9fe',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: dm, fontSize: 14, fontWeight: 800,
-                      color: isAlum ? '#2563eb' : '#7c3aed',
-                    }}>
-                      {c.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                    </div>
+            {loading ? (
+              <div style={{ padding: '24px 0', textAlign: 'center' }}>
+                <div style={{ width: 28, height: 28, border: '3px solid #e2e8f0', borderTopColor: '#7c3aed', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 10px' }} />
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#94a3b8', margin: 0 }}>Loading real network data…</p>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              </div>
+            ) : contacts.length === 0 ? (
+              <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>
+                  No {tab === 'alumni' ? 'alumni' : 'parents'} found at {match.company} yet.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {contacts.map((c, i) => {
+                  const isAlum = tab === 'alumni';
+                  const isSelected = selectedContact === c;
+                  return (
+                    <div
+                      key={i}
+                      onClick={() => setSelectedContact(isSelected ? null : c)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        background: isSelected ? (isAlum ? '#eff6ff' : '#f5f3ff') : '#f8fafc',
+                        border: `1.5px solid ${isSelected ? (isAlum ? '#93c5fd' : '#c4b5fd') : '#e2e8f0'}`,
+                        borderRadius: 12, padding: '12px 14px', cursor: 'pointer',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <div style={{
+                        width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+                        background: isAlum ? '#dbeafe' : '#ede9fe',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: dm, fontSize: 14, fontWeight: 800,
+                        color: isAlum ? '#2563eb' : '#7c3aed',
+                      }}>
+                        {c.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      </div>
 
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0f172a', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</p>
-                      <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {isAlum ? `${c.title} · Class of ${c.grad}` : `${c.title} · Parent of ${c.student}`}
-                      </p>
-                    </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#0f172a', margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</p>
+                        <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {isAlum
+                            ? `${c.title}${c.grad ? ` · Class of ${c.grad}` : ''}`
+                            : `${c.title} · Parent of ${c.student}`}
+                        </p>
+                      </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                      {isAlum && c.mutual && (
-                        <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 100, padding: '2px 7px' }}>
-                          Mutual
-                        </span>
-                      )}
-                      {!isAlum && (
-                        <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '2px 7px' }}>
-                          Opted-in
-                        </span>
-                      )}
-                      {/* LinkedIn launchpad button */}
-                      <a
-                        href={linkedInUrl(c.name, match.company)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={e => e.stopPropagation()}
-                        title={`View ${c.name} on LinkedIn`}
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 4,
-                          background: '#0a66c2', borderRadius: 6, padding: '3px 8px',
-                          textDecoration: 'none', minHeight: 'auto', flexShrink: 0,
-                        }}
-                      >
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                        <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#fff' }}>View</span>
-                      </a>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        {isAlum && c.mutual && (
+                          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 100, padding: '2px 7px' }}>
+                            Mutual
+                          </span>
+                        )}
+                        {!isAlum && (
+                          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '2px 7px' }}>
+                            Opted-in
+                          </span>
+                        )}
+                        {c.linkedin_url && (
+                          <a
+                            href={c.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            title={`View ${c.name} on LinkedIn`}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 4,
+                              background: '#0a66c2', borderRadius: 6, padding: '3px 8px',
+                              textDecoration: 'none', minHeight: 'auto', flexShrink: 0,
+                            }}
+                          >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                            <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#fff' }}>View</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
 
             {selectedContact && (
               <p style={{ fontFamily: dm, fontSize: 11, color: '#7c3aed', fontWeight: 600, margin: '10px 0 0', textAlign: 'center' }}>
