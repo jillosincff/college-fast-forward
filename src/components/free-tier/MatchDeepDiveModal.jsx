@@ -118,6 +118,13 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
               </button>
             </div>
 
+            {match.jobDescription && (
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px', marginBottom: 14 }}>
+                <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px' }}>📋 About This Role</p>
+                <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.6 }}>{match.jobDescription}</p>
+              </div>
+            )}
+
             <div style={{ background: 'linear-gradient(135deg, #f5f3ff, #eff6ff)', border: '1px solid #c7d2fe', borderRadius: 14, padding: '14px 16px', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 14 }}>⚡</span>
