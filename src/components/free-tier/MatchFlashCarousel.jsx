@@ -338,7 +338,7 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
   const [targetIndustries, setTargetIndustries] = useState([]);
   const trackRef = useRef(null);
 
-  useEffect(() => {
+  const refreshCards = () => {
     setLoading(true);
     const userTargets = (
       user?.career_goals?.target_industries
@@ -350,6 +350,7 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
     getPersonalizedNetworkCarousel({
       target_industries: userTargets,
       target_role: user?.career_goals?.role || user?.target_role || '',
+      refresh: Date.now(),
     })
       .then(res => {
         const data = res?.data || {};
@@ -358,7 +359,18 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
       })
       .catch(() => setCards([]))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    refreshCards();
   }, [user?.id]);
+
+  // Listen for refresh events
+  useEffect(() => {
+    const handleRefresh = () => refreshCards();
+    document.addEventListener('cff:refresh-matches', handleRefresh);
+    return () => document.removeEventListener('cff:refresh-matches', handleRefresh);
+  }, []);
 
   const handleScroll = () => {
     if (!trackRef.current) return;
