@@ -54,7 +54,10 @@ export default function FreeTierDashboard() {
 
   // Listen for goals modal open event from child components
   useEffect(() => {
-    const handleOpenGoals = () => setShowGoalsModal(true);
+    const handleOpenGoals = () => {
+      console.log('Opening goals modal from event');
+      setShowGoalsModal(true);
+    };
     window.addEventListener('cff:open-goals-modal', handleOpenGoals);
     return () => window.removeEventListener('cff:open-goals-modal', handleOpenGoals);
   }, []);
@@ -465,8 +468,14 @@ export default function FreeTierDashboard() {
         <EditGoalsModal
           goals={user?.career_goals}
           user={user}
-          onClose={() => setShowGoalsModal(false)}
-          onSave={() => setShowGoalsModal(false)}
+          onClose={() => {
+            console.log('Closing goals modal');
+            setShowGoalsModal(false);
+          }}
+          onSave={() => {
+            console.log('Saving goals and closing modal');
+            setShowGoalsModal(false);
+          }}
         />
       )}
 

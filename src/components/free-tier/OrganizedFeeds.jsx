@@ -203,8 +203,12 @@ export default function OrganizedFeeds({ user }) {
           Tell us what you're looking for and we'll show you HOT, WARM, and COLD leads tailored to your interests.
         </p>
         <button
-          onClick={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
+          onClick={() => {
+            console.log('Button clicked, dispatching event');
+            window.dispatchEvent(new CustomEvent('cff:open-goals-modal'));
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors cursor-pointer"
+          style={{ cursor: 'pointer' }}
         >
           Update Career Goals →
         </button>
