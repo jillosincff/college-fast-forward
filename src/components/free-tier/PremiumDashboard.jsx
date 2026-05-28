@@ -8,6 +8,7 @@ import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
 import MobileBottomNav from './PremiumMobileNav';
+import MatchFlashCarousel from './MatchFlashCarousel';
 import { useAuth } from '@/lib/AuthContext';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -221,6 +222,18 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
           </div>
         </div>
       )}
+
+      {/* ── Match Flash Hero Carousel ── */}
+      <div style={{ background: '#f8f9fc', paddingTop: isMobile ? 8 : 16, paddingBottom: 4 }}>
+        <MatchFlashCarousel
+          college={college}
+          theme={t}
+          onCardClick={(match) => {
+            // Find matching lead from pipeline and select it
+            setSelectedLead({ company: match.company, role: match.role, logo: match.logo, alumCount: match.alumCount, recruiter: '—', posted: 'Not yet public', source: 'CLIFF Top Match' });
+          }}
+        />
+      </div>
 
       {/* ── Main Content ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
