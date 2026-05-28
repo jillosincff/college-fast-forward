@@ -10,6 +10,7 @@ import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
 import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
 import OrganizedFeeds from '@/components/free-tier/OrganizedFeeds';
+import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
 
@@ -49,6 +50,14 @@ export default function FreeTierDashboard() {
   const [parentCount, setParentCount] = useState(null);
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
   const [showEmailSyncModal, setShowEmailSyncModal] = useState(false);
+  const [showGoalsModal, setShowGoalsModal] = useState(false);
+
+  // Listen for goals modal open event from child components
+  useEffect(() => {
+    const handleOpenGoals = () => setShowGoalsModal(true);
+    window.addEventListener('cff:open-goals-modal', handleOpenGoals);
+    return () => window.removeEventListener('cff:open-goals-modal', handleOpenGoals);
+  }, []);
 
   useEffect(() => {
     base44.auth.me().then(u => {
@@ -449,6 +458,15 @@ export default function FreeTierDashboard() {
               alert('Unable to start checkout. Please try again.');
             }
           }}
+        />
+      )}
+
+      {showGoalsModal && (
+        <EditGoalsModal
+          goals={user?.career_goals}
+          user={user}
+          onClose={() => setShowGoalsModal(false)}
+          onSave={() => setShowGoalsModal(false)}
         />
       )}
 

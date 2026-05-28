@@ -147,6 +147,18 @@ function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
 export default function OrganizedFeeds({ user }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const { target_industries, target_role } = user.career_goals || {};
+  
+  // Listen for goals modal open event
+  useEffect(() => {
+    const handleOpenGoals = () => {
+      // Dispatch custom event that parent components can listen to
+      window.dispatchEvent(new CustomEvent('cff:open-goals-modal'));
+    };
+    
+    return () => {
+      // Cleanup if needed
+    };
+  }, []);
 
   const { data: feedsData, isLoading } = useQuery({
     queryKey: ['organizedFeeds', target_industries, target_role],
@@ -191,11 +203,7 @@ export default function OrganizedFeeds({ user }) {
           Tell us what you're looking for and we'll show you HOT, WARM, and COLD leads tailored to your interests.
         </p>
         <button
-          onClick={() => {
-            // Trigger goals modal or navigation
-            const event = new CustomEvent('cff:open-goals-modal');
-            window.dispatchEvent(event);
-          }}
+          onClick={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
         >
           Update Career Goals →
