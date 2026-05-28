@@ -1,17 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
+import { calculateNetworkMatchScore } from '@/utils/networkScore';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
-
-// Derive a match % from network size (purely cosmetic scoring)
-function scoreMatch(alumniCount, parentCount) {
-  const total = alumniCount * 2 + parentCount;
-  if (total >= 10) return 98;
-  if (total >= 6) return 94;
-  if (total >= 3) return 89;
-  return 82;
-}
 
 function tagLabel(alumniCount, parentCount) {
   if (alumniCount > 0 && parentCount > 0) return 'Alumni + Parent paths available';
@@ -43,7 +35,7 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick }
             logo: '🏢',
             alumCount: c.alumniCount,
             parentCount: c.parentCount,
-            matchPct: scoreMatch(c.alumniCount, c.parentCount),
+            matchPct: calculateNetworkMatchScore(c.alumniCount, c.parentCount),
             tag: tagLabel(c.alumniCount, c.parentCount),
             // Pass through real members for the modal
             _members: c.members,
@@ -242,7 +234,7 @@ function MatchCard({ match, shortName, theme, onClick }) {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '5px 10px' }}>
           <span style={{ fontSize: 12 }}>⚡</span>
           <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#7c3aed' }}>
-            CLIFF Match: {match.matchPct}%
+            Network Weight: {match.matchPct}%
           </span>
           <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', fontWeight: 500 }}>· {match.tag}</span>
         </div>

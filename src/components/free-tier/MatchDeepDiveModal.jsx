@@ -2,13 +2,19 @@ import { useState, useEffect } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
-// Match reasons are derived from real verified data — no hardcoded company specifics
+// Bullet points derived purely from verified DB counts — no AI, no guessing
 function buildMatchReasons(match, shortName) {
   const reasons = [];
-  if (match.alumCount > 0) reasons.push(`${match.alumCount} verified ${shortName} alumni confirmed at this company`);
-  if (match.parentCount > 0) reasons.push(`${match.parentCount} ${shortName} parent${match.parentCount > 1 ? 's' : ''} opted in for referrals`);
-  reasons.push('Direct warm intro path — no cold application required');
-  reasons.push('Company is in the verified CFF network');
+  if (match.alumCount > 0) {
+    reasons.push(`Exceptional institutional bond — ${match.alumCount} verified ${shortName} alumni confirmed at this employer`);
+  }
+  if (match.parentCount > 0) {
+    reasons.push(`Active parent ecosystem — ${match.parentCount} ${shortName} parent${match.parentCount > 1 ? 's have' : ' has'} opted in for referrals here`);
+  }
+  reasons.push('Warm path confirmed — this company is in the verified CFF network');
+  if (match.alumCount + match.parentCount >= 5) {
+    reasons.push('High network density — multiple entry points into this employer');
+  }
   return reasons;
 }
 
@@ -116,7 +122,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 14 }}>⚡</span>
                 <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#4c1d95', margin: 0 }}>
-                  CLIFF Match: {match.matchPct}% — Here's why
+                  Network Connection Weight: {match.matchPct}% — Here's why
                 </p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
