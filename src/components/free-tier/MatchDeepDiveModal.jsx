@@ -3,25 +3,44 @@ import { useState, useEffect } from 'react';
 const dm = "'DM Sans', system-ui, sans-serif";
 
 const SOURCE_CATEGORY_CONFIG = {
-  A: { emoji: '🔥', label: 'Hidden Network Referral', bg: '#fff1f2', border: '#fecaca', color: '#991b1b' },
-  B: { emoji: '🛰️', label: 'Hiring Manager Social Feed', bg: '#f0f9ff', border: '#bae6fd', color: '#075985' },
-  C: { emoji: '⚡', label: 'Direct Backdoor Track', bg: '#f5f3ff', border: '#ddd6fe', color: '#5b21b6' },
+  A: {
+    emoji: '🔥', label: 'HIDDEN NETWORK REFERRAL',
+    subtext: 'Surfaced directly from a parent or alumni referral — not posted anywhere public.',
+    bg: 'linear-gradient(135deg, #fff1f2, #fff5f5)', border: '#fecaca', color: '#991b1b',
+    ctaLabel: '🔥 Draft Warm Intro via Alumni',
+  },
+  B: {
+    emoji: '🛰️', label: 'SOURCED VIA NATIVE LINKEDIN MENTION',
+    subtext: 'Found on a hiring manager\'s active feed before HR published to major public portals.',
+    bg: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)', border: '#bae6fd', color: '#075985',
+    ctaLabel: '🛰️ Draft DM to Hiring Manager via CLiFF',
+  },
+  C: {
+    emoji: '⚡', label: 'DIRECT COMPANY BACKDOOR TRACK',
+    subtext: 'Posted only on the company\'s own career page — not cross-listed on LinkedIn Jobs or Indeed.',
+    bg: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', border: '#ddd6fe', color: '#5b21b6',
+    ctaLabel: '⚡ Route Resume via Verified Alumnus',
+  },
+  D: {
+    emoji: '💬', label: 'SOURCED FROM INDUSTRY COMMUNITY THREADS',
+    subtext: 'Spotted in a weekly hiring megathread — founder post with direct email, no ATS black hole.',
+    bg: 'linear-gradient(135deg, #fff7ed, #fef3c7)', border: '#fcd34d', color: '#92400e',
+    ctaLabel: '💬 Browse Original Thread via CLiFF',
+  },
 };
 
 function SourceCategoryBadge({ category, source }) {
   const cfg = SOURCE_CATEGORY_CONFIG[category] || SOURCE_CATEGORY_CONFIG['C'];
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        background: cfg.bg, border: `1px solid ${cfg.border}`,
-        borderRadius: 100, padding: '3px 10px',
-      }}>
-        <span style={{ fontSize: 10 }}>{cfg.emoji}</span>
-        <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: cfg.color }}>{cfg.label}</span>
-      </span>
+    <div style={{ borderRadius: 8, background: cfg.bg, border: `1px solid ${cfg.border}`, padding: '8px 10px' }}>
+      <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: cfg.color, letterSpacing: '0.07em', margin: '0 0 3px' }}>
+        {cfg.emoji} {cfg.label}
+      </p>
+      <p style={{ fontFamily: dm, fontSize: 10, color: cfg.color, opacity: 0.8, margin: 0, lineHeight: 1.5 }}>
+        "{cfg.subtext}"
+      </p>
       {source && (
-        <span style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af' }}>{source}</span>
+        <p style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af', margin: '4px 0 0' }}>{source}</p>
       )}
     </div>
   );
@@ -318,7 +337,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
               onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)'; }}
             >
               <span style={{ fontSize: 16 }}>{launched ? '✅' : '🚀'}</span>
-              {launched ? 'Saved to Pipeline — Opening Drafts...' : 'Track Job & Draft Outreach with CLIFF'}
+              {launched ? 'Saved to Pipeline — Opening Drafts...' : ((SOURCE_CATEGORY_CONFIG[match.jobSourceCategory] || SOURCE_CATEGORY_CONFIG['C']).ctaLabel)}
             </button>
             <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
               Saves to pipeline · Selects best contact · Opens pre-drafted message

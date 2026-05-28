@@ -92,6 +92,7 @@ const JOB_POOL = {
     { company: 'Meta', role: 'Data Engineer', description: 'Data and engineering roles across ads and product infrastructure.', source: 'metacareers.com', sourceCategory: 'B' },
     { company: 'Ramp', role: 'Software Engineer', description: 'Fast-growing fintech — real engineering ownership from day one.', source: 'ramp.com/careers', sourceCategory: 'B' },
     { company: 'Notion', role: 'Product Analyst', description: 'Productivity startup scaling globally — product and data roles.', source: 'notion.com/careers', sourceCategory: 'B' },
+    { company: 'Early-Stage AI Startup', role: 'Software Engineer', description: 'Seed-stage AI startup seeking early engineers — spotted in r/cscareerquestions monthly hiring thread. Direct founder contact, no recruiter screen.', source: 'reddit.com/r/cscareerquestions', sourceCategory: 'D' },
   ],
   'technology, information & media': [
     { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
@@ -103,6 +104,7 @@ const JOB_POOL = {
     { company: 'Deloitte', role: 'Strategy & Analytics Consultant', description: 'Consulting and business analysts in advisory practices nationwide.', source: 'deloitte.com/careers', sourceCategory: 'C' },
     { company: 'BCG', role: 'Associate Consultant', description: 'Entry-level strategy roles for new graduates.', source: 'bcg.com/careers', sourceCategory: 'C' },
     { company: 'West Monroe', role: 'Business Analyst', description: 'Digital consulting firm actively hiring analysts.', source: 'westmonroe.com/careers', sourceCategory: 'B' },
+    { company: 'Boutique Strategy Firm', role: 'Junior Consultant', description: 'Founder-led strategy consultancy hiring via r/consulting megathread — direct email contact, no ATS.', source: 'reddit.com/r/consulting', sourceCategory: 'D' },
   ],
   'professional services': [
     { company: 'Deloitte', role: 'Consulting Analyst', description: 'Advisory associates in strategy, digital, and operations.', source: 'deloitte.com/careers', sourceCategory: 'C' },
@@ -128,6 +130,7 @@ const JOB_POOL = {
     { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
     { company: 'Weber Shandwick', role: 'PR Associate', description: 'Hiring entry-level PR and communications associates.', source: 'webershandwick.com/careers', sourceCategory: 'B' },
     { company: 'WPP', role: 'Strategy Analyst', description: 'Global holding company with entry-level roles across agency brands.', source: 'wpp.com/careers', sourceCategory: 'C' },
+    { company: 'Independent Creative Agency', role: 'Junior Copywriter', description: 'Boutique creative agency posting directly in r/design weekly thread — DM founder with portfolio link.', source: 'reddit.com/r/design', sourceCategory: 'D' },
   ],
   'real_estate': [
     { company: 'CBRE', role: 'Real Estate Analyst', description: "World's largest commercial real estate services firm hiring analysts.", source: 'cbre.com/careers', sourceCategory: 'C' },

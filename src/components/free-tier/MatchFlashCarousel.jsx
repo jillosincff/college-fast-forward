@@ -21,28 +21,52 @@ function HiringSignal({ signal }) {
   );
 }
 
-// ── Source category badge ────────────────────────────────────────────────────
+// ── Source category config ───────────────────────────────────────────────────
+// A = 🔥 Hidden Network Referral (from parent/alumni intake)
+// B = 🛰️ Native LinkedIn Mention (hiring manager status post, pre-HR)
+// C = ⚡ Direct Company Backdoor (Greenhouse/Lever career page, not cross-posted)
+// D = 💬 Industry Community Thread (Reddit megathread, founder direct post)
 const SOURCE_CATEGORY_CONFIG = {
-  A: { emoji: '🔥', label: 'Hidden Network Referral', bg: '#fff1f2', border: '#fecaca', color: '#991b1b' },
-  B: { emoji: '🛰️', label: 'Hiring Manager Social Feed', bg: '#f0f9ff', border: '#bae6fd', color: '#075985' },
-  C: { emoji: '⚡', label: 'Direct Backdoor Track', bg: '#f5f3ff', border: '#ddd6fe', color: '#5b21b6' },
+  A: {
+    emoji: '🔥', label: 'HIDDEN NETWORK REFERRAL',
+    subtext: 'Surfaced directly from a parent or alumni referral — not posted anywhere public.',
+    bg: 'linear-gradient(135deg, #fff1f2, #fff5f5)', border: '#fecaca', color: '#991b1b',
+    ctaLabel: '🚀 Draft Warm Intro via Alumni', ctaBg: '#dc2626',
+  },
+  B: {
+    emoji: '🛰️', label: 'SOURCED VIA NATIVE LINKEDIN MENTION',
+    subtext: 'Found on a hiring manager\'s active feed before HR published to major public portals.',
+    bg: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)', border: '#bae6fd', color: '#075985',
+    ctaLabel: '🚀 Draft DM to Hiring Manager via CLiFF', ctaBg: '#0284c7',
+  },
+  C: {
+    emoji: '⚡', label: 'DIRECT COMPANY BACKDOOR TRACK',
+    subtext: 'Posted only on the company\'s own career page — not cross-listed on LinkedIn Jobs or Indeed.',
+    bg: 'linear-gradient(135deg, #f5f3ff, #ede9fe)', border: '#ddd6fe', color: '#5b21b6',
+    ctaLabel: '🚀 Route Resume via Verified Alumnus', ctaBg: '#7c3aed',
+  },
+  D: {
+    emoji: '💬', label: 'SOURCED FROM INDUSTRY COMMUNITY THREADS',
+    subtext: 'Spotted in a weekly hiring megathread — founder post with direct email, no ATS black hole.',
+    bg: 'linear-gradient(135deg, #fff7ed, #fef3c7)', border: '#fcd34d', color: '#92400e',
+    ctaLabel: '🚀 Browse Original Thread via CLiFF', ctaBg: '#d97706',
+  },
 };
 
-function SourceBadge({ category, source }) {
+function SourceProvenanceBanner({ category }) {
   const cfg = SOURCE_CATEGORY_CONFIG[category] || SOURCE_CATEGORY_CONFIG['C'];
   return (
-    <div style={{ padding: '6px 16px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        background: cfg.bg, border: `1px solid ${cfg.border}`,
-        borderRadius: 100, padding: '3px 9px',
-      }}>
-        <span style={{ fontSize: 10 }}>{cfg.emoji}</span>
-        <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: cfg.color }}>{cfg.label}</span>
-      </span>
-      {source && (
-        <span style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af' }}>{source}</span>
-      )}
+    <div style={{
+      margin: '0 10px', borderRadius: 10,
+      background: cfg.bg, border: `1px solid ${cfg.border}`,
+      padding: '8px 12px',
+    }}>
+      <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: cfg.color, letterSpacing: '0.08em', margin: '0 0 3px' }}>
+        {cfg.emoji} {cfg.label}
+      </p>
+      <p style={{ fontFamily: dm, fontSize: 10, color: cfg.color, opacity: 0.8, margin: 0, lineHeight: 1.5 }}>
+        "{cfg.subtext}"
+      </p>
     </div>
   );
 }
@@ -138,24 +162,33 @@ function MatchCard({ card, shortName, onClick }) {
         </div>
       )}
 
-      {/* ── Row 4b: Source category badge ── */}
+      {/* ── Row 4b: Sourcing provenance banner ── */}
       {card.jobSourceCategory && (
-        <SourceBadge category={card.jobSourceCategory} source={card.jobSource} />
+        <div style={{ padding: '8px 0 4px' }}>
+          <SourceProvenanceBanner category={card.jobSourceCategory} />
+        </div>
       )}
 
-      {/* ── Row 5: Footer ── */}
-      <div style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '4px 10px' }}>
+      {/* ── Row 5: Footer — category-specific CTA ── */}
+      <div style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>
           <span style={{ fontSize: 11 }}>⚡</span>
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#7c3aed' }}>
-            Network Weight: {card.networkWeight}%
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#7c3aed' }}>
+            {card.networkWeight}% match
           </span>
         </div>
         <button
           onClick={e => { e.stopPropagation(); onClick && onClick(); }}
-          style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', whiteSpace: 'nowrap' }}
+          style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 800,
+            color: '#fff',
+            background: (SOURCE_CATEGORY_CONFIG[card.jobSourceCategory] || SOURCE_CATEGORY_CONFIG['C']).ctaBg,
+            border: 'none', borderRadius: 8, padding: '6px 12px',
+            cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          }}
         >
-          View Details →
+          {(SOURCE_CATEGORY_CONFIG[card.jobSourceCategory] || SOURCE_CATEGORY_CONFIG['C']).ctaLabel}
         </button>
       </div>
     </div>
