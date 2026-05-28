@@ -428,8 +428,27 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ─── Fallback removed: Never show cards with 0 alumni in "Live Backdoor Matches" ─────────
-    // If no alumni connections exist, show the empty state instead of fake cards
+    // Ensure we always show at least some opportunities (cold leads) for new schools
+    if (hotLeads.length === 0 && warmLeads.length === 0 && coldLeads.length === 0) {
+      // Show fallback cold leads when no network exists
+      jobPool.slice(0, 6).forEach(job => {
+        coldLeads.push({
+          company: job.company,
+          role: job.role,
+          jobDescription: job.description,
+          jobSource: job.source || null,
+          jobSourceCategory: job.sourceCategory || 'C',
+          nichePlatform: job.nichePlatform || null,
+          targetIndustry: targetIndustries[0] || '',
+          matchedIndustries: targetIndustries,
+          alumniCount: 0,
+          parentCount: 0,
+          hasParentBonus: false,
+          ctaType: 'view_role',
+          leadTier: 'cold',
+        });
+      });
+    }
 
     console.log(`[getOrganizedFeeds] 🔥 ${hotLeads.length} HOT | ☀️ ${warmLeads.length} WARM | ❄️ ${coldLeads.length} COLD for industries: [${targetIndustries.join(', ')}]`);
     return Response.json({
