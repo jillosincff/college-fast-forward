@@ -18,7 +18,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 const INDUSTRY_KEYWORDS = {
   'finance': ['finance', 'financial', 'investment', 'banking', 'capital', 'wealth', 'equity', 'trading', 'accounting', 'cfo', 'analyst', 'insurance'],
   'finance & insurance': ['finance', 'financial', 'investment', 'banking', 'capital', 'wealth', 'equity', 'trading', 'accounting', 'cfo', 'analyst', 'insurance'],
-  'human resources': ['hr', 'human resources', 'talent', 'recruiting', 'recruiter', 'people ops', 'people operations', 'workforce', 'benefits'],
+  'human resources': ['hr', 'human resources', 'talent', 'recruiting', 'recruiter', 'people ops', 'people operations', 'workforce', 'benefits', 'chro', 'hrbp'],
   'creative': ['creative', 'design', 'designer', 'marketing', 'brand', 'content', 'media', 'advertising', 'art', 'ux', 'ui', 'copywriter'],
   'advertising & pr': ['marketing', 'brand', 'advertising', 'social media', 'content', 'public relations', 'communications', 'digital marketing', 'seo', 'copywriter', 'creative'],
   'entrepreneur': ['founder', 'co-founder', 'ceo', 'owner', 'entrepreneur', 'startup', 'venture', 'managing partner'],
@@ -66,6 +66,22 @@ function memberInIndustry(member, keywords) {
 //   'A' = 🔥 Hidden Network Referral — sourced directly from parent/alumni intake
 //   'B' = 🛰️ Hiring Manager Social Feed — surfaced from native LinkedIn/social manager posts
 //   'C' = ⚡ Direct Backdoor Track — rolling ATS talent pool / evergreen pipeline on company site
+//   'D' = 💬 Industry Community Thread — Reddit/Slack megathread, founder direct post
+//   'E' = 🔭 Niche Platform Scout — curated from Wellfound, Dribbble, Otta, etc.
+//         requires: nichePlatform field (key into NICHE_PLATFORM_CONFIG)
+
+// Niche platform metadata — used by the frontend to render the "Curated Via" banner
+const NICHE_PLATFORM_CONFIG = {
+  wellfound:    { label: 'Wellfound (AngelList)', icon: '🚀', insight: 'Sourced from an exclusive startup network. This role has 85% fewer public applicants than LinkedIn.' },
+  builtin:      { label: 'Built In', icon: '🏙️', insight: 'Local tech ecosystem listing — not syndicated to mainstream job boards. Applies from talent who already know the city.' },
+  keyvalues:    { label: 'Key Values', icon: '🧭', insight: 'Companies post here when culture fit matters more than a keyword-matched resume. High response rates.' },
+  workingnotworking: { label: 'Working Not Working', icon: '🎨', insight: 'Elite creative community — only top agencies recruit here. Applicant pool is 10x smaller than Behance.' },
+  dribbble:     { label: 'Dribbble Jobs', icon: '🏀', insight: 'Design studios post here to catch creatives actively shipping work — not passive resume uploaders.' },
+  otta:         { label: 'Otta', icon: '📊', insight: 'Otta scores companies on salary transparency & growth. Only high-quality roles make the cut.' },
+  jobbio:       { label: 'Jobbio', icon: '🌿', insight: 'Culture-first curation — roles are matched on values, not just keywords. Much lower noise than LinkedIn.' },
+  lattice_rfh:  { label: 'Resources for Humans (Lattice)', icon: '👥', insight: 'Posted inside an invite-only HR Slack community — seen by People Ops insiders before anyone else.' },
+  shrm:         { label: 'SHRM Job Board', icon: '🏛️', insight: 'The official SHRM board is largely ignored by students — yet it hosts thousands of HR coordinator roles with almost zero Gen-Z competition.' },
+};
 
 const JOB_POOL = {
   'finance': [
@@ -85,6 +101,13 @@ const JOB_POOL = {
     { company: 'Deloitte', role: 'Finance & Advisory Associate', description: 'Audit, tax, and financial advisory associates across US offices.', source: 'deloitte.com/careers', sourceCategory: 'C' },
     { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Fast-growing fintech with high-ownership finance roles.', source: 'ramp.com/careers', sourceCategory: 'B' },
   ],
+  'human resources': [
+    { company: 'Lattice', role: 'People Operations Coordinator', description: 'HR tech company — and their own people ops team is actively hiring entry-level coordinators.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Rippling', role: 'HR Generalist (New Grad)', description: 'Fast-scaling HR/payroll platform. Hiring people ops from their own Wellfound page.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Gusto', role: 'People Operations Associate', description: 'Payroll & benefits platform building out their internal HR team.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'HR Tech Startup', role: 'Talent Coordinator', description: 'Posted inside the Lattice "Resources for Humans" Slack — seen by People Ops professionals only, days before any public listing.', source: 'lattice.com/resources-for-humans', sourceCategory: 'E', nichePlatform: 'lattice_rfh' },
+    { company: 'Mid-Market SaaS Co.', role: 'HR Coordinator', description: 'Overlooked by most students — this role posted on the SHRM job board has received zero Gen-Z applications.', source: 'shrm.org/jobs', sourceCategory: 'E', nichePlatform: 'shrm' },
+  ],
   'tech': [
     { company: 'Adobe', role: 'Junior Product Designer', description: 'Design roles across Creative Cloud and Digital Experience — highly competitive public listing.', source: 'linkedin.com/jobs', sourceCategory: 'C', displayStyle: 'REALITY_CHECK', daysPosted: 16, applicantCount: 349 },
     { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
@@ -94,6 +117,9 @@ const JOB_POOL = {
     { company: 'Ramp', role: 'Software Engineer', description: 'Fast-growing fintech — real engineering ownership from day one.', source: 'ramp.com/careers', sourceCategory: 'B' },
     { company: 'Notion', role: 'Product Analyst', description: 'Productivity startup scaling globally — product and data roles.', source: 'notion.com/careers', sourceCategory: 'B' },
     { company: 'Early-Stage AI Startup', role: 'Software Engineer', description: 'Seed-stage AI startup seeking early engineers — spotted in r/cscareerquestions monthly hiring thread. Direct founder contact, no recruiter screen.', source: 'reddit.com/r/cscareerquestions', sourceCategory: 'D' },
+    { company: 'Webflow', role: 'Junior Creative Strategist', description: 'No-code design platform with a strong creative culture — posted exclusively on Wellfound.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Linear', role: 'Product Designer', description: 'Premium software tool beloved by engineers — Key Values listing targeting culture-aligned candidates only.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
+    { company: 'Otta-Curated Startup', role: 'Growth Analyst', description: 'Otta scores this company 9/10 for salary transparency and growth trajectory — and it has under 30 applicants.', source: 'otta.com', sourceCategory: 'E', nichePlatform: 'otta' },
   ],
   'technology, information & media': [
     { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
@@ -127,11 +153,18 @@ const JOB_POOL = {
     { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
     { company: 'Ogilvy', role: 'Creative Account Manager', description: 'Creative and account management roles for recent grads in advertising.', source: 'ogilvy.com/careers', sourceCategory: 'B' },
   ],
+  'creative': [
+    { company: 'Superside', role: 'Junior Creative Strategist', description: 'Remote-first creative agency — posted on Working Not Working, not on LinkedIn. Applicant pool is a fraction of mainstream job boards.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
+    { company: 'Figma', role: 'Brand Designer', description: 'Design tool powerhouse — role posted on Dribbble Jobs to reach designers actively sharing their work.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    { company: 'Mailchimp', role: 'UX Writer', description: 'Strong brand and content culture — curated on Key Values for candidates who care about autonomy and craft.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
+    { company: 'Jobbio Creative Agency', role: 'Content Strategist', description: 'Boutique agency matched on Jobbio for culture alignment — much less noise than a LinkedIn Easy Apply.', source: 'jobbio.com', sourceCategory: 'E', nichePlatform: 'jobbio' },
+  ],
   'advertising & pr': [
     { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
     { company: 'Weber Shandwick', role: 'PR Associate', description: 'Hiring entry-level PR and communications associates.', source: 'webershandwick.com/careers', sourceCategory: 'B' },
     { company: 'WPP', role: 'Strategy Analyst', description: 'Global holding company with entry-level roles across agency brands.', source: 'wpp.com/careers', sourceCategory: 'C' },
     { company: 'Independent Creative Agency', role: 'Junior Copywriter', description: 'Boutique creative agency posting directly in r/design weekly thread — DM founder with portfolio link.', source: 'reddit.com/r/design', sourceCategory: 'D' },
+    { company: 'Global Creative Studio', role: 'Art Director (Junior)', description: 'Curated by Working Not Working — only top-tier creative studios recruit on this platform. 90% fewer applicants than a job posted on LinkedIn.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
   ],
   'real_estate': [
     { company: 'CBRE', role: 'Real Estate Analyst', description: "World's largest commercial real estate services firm hiring analysts.", source: 'cbre.com/careers', sourceCategory: 'C' },
@@ -320,6 +353,7 @@ Deno.serve(async (req) => {
         displayStyle: job.displayStyle || 'HIDDEN_SIGNAL',
         daysPosted: job.daysPosted || null,
         applicantCount: job.applicantCount || null,
+        nichePlatform: job.nichePlatform || null,
         targetIndustry: targetIndustries[0] || '',
         matchedIndustries: targetIndustries,
         alumniCount: alumni.length,

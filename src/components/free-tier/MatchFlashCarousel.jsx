@@ -51,16 +51,47 @@ const SOURCE_CATEGORY_CONFIG = {
     bg: 'linear-gradient(135deg, #fff7ed, #fef3c7)', border: '#fcd34d', color: '#92400e',
     ctaLabel: '🚀 Browse Original Thread via CLiFF', ctaBg: '#d97706',
   },
+  E: {
+    emoji: '🔭', label: 'NICHE PLATFORM SCOUT',
+    subtext: 'Curated from a specialist job network mainstream applicants never check.',
+    bg: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)', border: '#6ee7b7', color: '#065f46',
+    ctaLabel: '🔭 View via CLiFF Scout', ctaBg: '#059669',
+  },
 };
 
-function SourceProvenanceBanner({ category }) {
+// Niche platform micro-badge config (mirrors backend NICHE_PLATFORM_CONFIG)
+const NICHE_PLATFORM_CONFIG = {
+  wellfound:         { label: 'Wellfound (AngelList)', icon: '🚀', insight: 'Sourced from an exclusive startup network. This role has 85% fewer public applicants than LinkedIn.' },
+  builtin:           { label: 'Built In', icon: '🏙️', insight: 'Local tech ecosystem listing — not syndicated to mainstream job boards.' },
+  keyvalues:         { label: 'Key Values', icon: '🧭', insight: 'Companies post here when culture fit matters more than a keyword-matched resume. High response rates.' },
+  workingnotworking: { label: 'Working Not Working', icon: '🎨', insight: 'Elite creative community — only top agencies recruit here. Applicant pool is 10x smaller than Behance.' },
+  dribbble:          { label: 'Dribbble Jobs', icon: '🏀', insight: 'Design studios post here to catch creatives actively shipping work, not passive resume uploaders.' },
+  otta:              { label: 'Otta', icon: '📊', insight: 'Otta scores companies on salary transparency & growth. Only high-quality roles make the cut.' },
+  jobbio:            { label: 'Jobbio', icon: '🌿', insight: 'Culture-first curation — roles matched on values, not keywords. Much lower noise than LinkedIn.' },
+  lattice_rfh:       { label: 'Resources for Humans (Lattice)', icon: '👥', insight: 'Posted inside an invite-only HR Slack community — seen by People Ops insiders before anyone else.' },
+  shrm:              { label: 'SHRM Job Board', icon: '🏛️', insight: 'Overlooked by students — thousands of HR coordinator roles with almost zero Gen-Z competition.' },
+};
+
+function SourceProvenanceBanner({ category, nichePlatform }) {
+  // Category E: use the specific niche platform config for richer copy
+  if (category === 'E' && nichePlatform) {
+    const plat = NICHE_PLATFORM_CONFIG[nichePlatform];
+    if (plat) {
+      return (
+        <div style={{ margin: '0 10px', borderRadius: 10, background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)', border: '1px solid #6ee7b7', padding: '8px 12px' }}>
+          <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: '#065f46', letterSpacing: '0.08em', margin: '0 0 3px' }}>
+            🔭 CURATED VIA {plat.icon} {plat.label.toUpperCase()}
+          </p>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#065f46', opacity: 0.85, margin: 0, lineHeight: 1.5 }}>
+            "{plat.insight}"
+          </p>
+        </div>
+      );
+    }
+  }
   const cfg = SOURCE_CATEGORY_CONFIG[category] || SOURCE_CATEGORY_CONFIG['C'];
   return (
-    <div style={{
-      margin: '0 10px', borderRadius: 10,
-      background: cfg.bg, border: `1px solid ${cfg.border}`,
-      padding: '8px 12px',
-    }}>
+    <div style={{ margin: '0 10px', borderRadius: 10, background: cfg.bg, border: `1px solid ${cfg.border}`, padding: '8px 12px' }}>
       <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: cfg.color, letterSpacing: '0.08em', margin: '0 0 3px' }}>
         {cfg.emoji} {cfg.label}
       </p>
@@ -265,7 +296,7 @@ function MatchCard({ card, shortName, onClick }) {
       {/* ── Row 4b: Sourcing provenance banner ── */}
       {card.jobSourceCategory && (
         <div style={{ padding: '8px 0 4px' }}>
-          <SourceProvenanceBanner category={card.jobSourceCategory} />
+          <SourceProvenanceBanner category={card.jobSourceCategory} nichePlatform={card.nichePlatform} />
         </div>
       )}
 
