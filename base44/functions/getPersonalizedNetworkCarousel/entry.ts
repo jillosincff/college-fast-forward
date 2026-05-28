@@ -86,6 +86,7 @@ const JOB_POOL = {
     { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Fast-growing fintech with high-ownership finance roles.', source: 'ramp.com/careers', sourceCategory: 'B' },
   ],
   'tech': [
+    { company: 'Adobe', role: 'Junior Product Designer', description: 'Design roles across Creative Cloud and Digital Experience — highly competitive public listing.', source: 'linkedin.com/jobs', sourceCategory: 'C', displayStyle: 'REALITY_CHECK', daysPosted: 16, applicantCount: 349 },
     { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
     { company: 'Microsoft', role: 'Software Development Engineer', description: 'New grad programs spanning cloud, AI, and productivity divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
     { company: 'Salesforce', role: 'Associate Software Engineer', description: 'Rotational and entry-level engineering roles across the platform.', source: 'salesforce.com/careers', sourceCategory: 'C' },
@@ -316,6 +317,9 @@ Deno.serve(async (req) => {
         jobDescription: job.description,
         jobSource: job.source || null,
         jobSourceCategory: effectiveCategory,
+        displayStyle: job.displayStyle || 'HIDDEN_SIGNAL',
+        daysPosted: job.daysPosted || null,
+        applicantCount: job.applicantCount || null,
         targetIndustry: targetIndustries[0] || '',
         matchedIndustries: targetIndustries,
         alumniCount: alumni.length,

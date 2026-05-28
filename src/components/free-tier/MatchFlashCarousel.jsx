@@ -71,6 +71,106 @@ function SourceProvenanceBanner({ category }) {
   );
 }
 
+// ── Reality Check Card (public listing with backdoor lever) ─────────────────
+function RealityCheckCard({ card, shortName, onClick }) {
+  const [hovered, setHovered] = useState(false);
+  const daysAgo = card.daysPosted || 16;
+  const applicants = card.applicantCount || 349;
+
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        flexShrink: 0,
+        width: 'calc(100vw - 56px)',
+        maxWidth: 480,
+        scrollSnapAlign: 'start',
+        background: '#fff',
+        borderRadius: 20,
+        border: hovered ? '1.5px solid rgba(124,58,237,0.55)' : '1.5px solid rgba(0,0,0,0.10)',
+        boxShadow: hovered ? '0 8px 32px rgba(124,58,237,0.18)' : '0 2px 16px rgba(0,0,0,0.07)',
+        cursor: 'pointer',
+        transition: 'box-shadow 0.25s, border-color 0.25s',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* ── Row 1: Company header ── */}
+      <div style={{ padding: '14px 16px 12px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+            🏢
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ fontFamily: dm, fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '0 0 1px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {card.company}
+            </p>
+            <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#64748b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {card.role}
+            </p>
+          </div>
+        </div>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 100, padding: '3px 8px', flexShrink: 0 }}>
+          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#991b1b', letterSpacing: '0.06em' }}>⚠️ PUBLIC</span>
+        </span>
+      </div>
+
+      {/* ── Row 2: Reality Check Banner ── */}
+      <div style={{ padding: '10px 14px', background: 'linear-gradient(135deg, #fef2f2, #fff5f5)', borderBottom: '1px solid #fecaca' }}>
+        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: '#b91c1c', letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 8px' }}>
+          ⚠️ PUBLIC REALITY CHECK
+        </p>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 8 }}>
+          <span style={{ fontFamily: dm, fontSize: 11, color: '#7f1d1d', fontWeight: 700 }}>
+            📅 Posted: {daysAgo} days ago
+          </span>
+          <span style={{ fontFamily: dm, fontSize: 11, color: '#7f1d1d', fontWeight: 700 }}>
+            👥 Applicants: {applicants.toLocaleString()}
+          </span>
+        </div>
+        <p style={{ fontFamily: dm, fontSize: 11, color: '#991b1b', fontWeight: 700, margin: '0 0 0', lineHeight: 1.5 }}>
+          ❌ The front door is completely flooded.
+        </p>
+      </div>
+
+      {/* ── Row 3: Backdoor Lever ── */}
+      <div style={{ padding: '10px 14px', background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', borderBottom: '1px solid #bbf7d0' }}>
+        <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: '#166534', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px' }}>
+          🟢 YOUR BACKDOOR LEVER:
+        </p>
+        <p style={{ fontFamily: dm, fontSize: 11, color: '#14532d', fontWeight: 600, margin: 0, lineHeight: 1.6 }}>
+          "{card.alumniCount} {shortName} Alum{card.alumniCount !== 1 ? 's' : ''} work here. Don't join the pile of {applicants.toLocaleString()} blind applications — bypass the ATS entirely with an alumni warm introduction."
+        </p>
+      </div>
+
+      {/* ── Row 4: Footer ── */}
+      <div style={{ padding: '10px 14px', borderTop: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>
+          <span style={{ fontSize: 11 }}>⚡</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#7c3aed' }}>
+            Network Weight: {card.networkWeight}%
+          </span>
+        </div>
+        <button
+          onClick={e => { e.stopPropagation(); onClick && onClick(); }}
+          style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 800,
+            color: '#fff', background: '#16a34a',
+            border: 'none', borderRadius: 8, padding: '6px 14px',
+            cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
+            boxShadow: '0 2px 8px rgba(22,163,74,0.35)',
+          }}
+        >
+          Bypass the Pile →
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Main card ────────────────────────────────────────────────────────────────
 function MatchCard({ card, shortName, onClick }) {
   const [hovered, setHovered] = useState(false);
@@ -298,12 +398,9 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
         style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none', gap: 12, padding: '4px 16px 8px' }}
       >
         {cards.map((card, i) => (
-          <MatchCard
-            key={i}
-            card={card}
-            shortName={shortName}
-            onClick={() => setSelectedMatch(card)}
-          />
+          card.displayStyle === 'REALITY_CHECK'
+            ? <RealityCheckCard key={i} card={card} shortName={shortName} onClick={() => setSelectedMatch(card)} />
+            : <MatchCard key={i} card={card} shortName={shortName} onClick={() => setSelectedMatch(card)} />
         ))}
         <ColdDiscoveryCard firstName={firstName} onOptIn={onColdOptIn} />
       </div>
