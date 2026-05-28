@@ -316,8 +316,8 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
       <div style={{ background: 'linear-gradient(135deg, #020617 0%, #0a0f1e 60%, #0d1a3a 100%)', padding: '18px 22px', display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontSize: 20 }}>⚡</span>
         <div style={{ flex: 1 }}>
-          <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#ffffff', margin: 0, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>Live Career Signals Feed</p>
-          <p style={{ fontFamily: mono, fontSize: 11, color: '#e2e8f0', margin: 0, letterSpacing: '0.04em', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>Agent crawling 24/7 · All signals unlocked</p>
+          <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#ffffff', margin: 0, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Live Career Signals Feed</p>
+          <p style={{ fontFamily: mono, fontSize: 11, color: '#f1f5f9', margin: 0, letterSpacing: '0.04em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Agent crawling 24/7 · All signals unlocked</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#22c55e', animation: 'pulse-glow 2s infinite', flexShrink: 0 }} />

@@ -196,7 +196,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
             <div style={{ marginBottom: 2 }}>
               <CliffLogo size="text-lg" />
             </div>
-            <p style={{ fontFamily: dm, fontSize: 10, color: '#e2e8f0', margin: 0, letterSpacing: '0.03em', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>Your CFF Career Agent</p>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#cbd5e1', margin: 0, letterSpacing: '0.03em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>Your CFF Career Agent</p>
           </div>
         </div>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(6,78,59,0.5)', border: '1px solid #065f46', borderRadius: 6, padding: '4px 10px' }}>
