@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 
 export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFresh, openedFromNudge = false }) {
-  const [roles, setRoles] = useState(goals?.target_roles || []);
-  const [industries, setIndustries] = useState(goals?.target_industries || []);
+  // Use goals prop if provided, otherwise fall back to user.career_goals
+  const effectiveGoals = goals || user?.career_goals;
+  const [roles, setRoles] = useState(effectiveGoals?.target_roles || []);
+  const [industries, setIndustries] = useState(effectiveGoals?.target_industries || []);
   const [roleInput, setRoleInput] = useState('');
   const [industryInput, setIndustryInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -46,8 +48,8 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
     setSaving(false);
   };
 
-  const currentRoles = goals?.target_roles || [];
-  const currentIndustries = goals?.target_industries || [];
+  const currentRoles = effectiveGoals?.target_roles || [];
+  const currentIndustries = effectiveGoals?.target_industries || [];
   const rolesChanged = JSON.stringify(roles.sort()) !== JSON.stringify(currentRoles.sort());
   const industriesChanged = JSON.stringify(industries.sort()) !== JSON.stringify(currentIndustries.sort());
 
@@ -60,10 +62,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', color: '#888' }}>×</button>
         </div>
 
-        {/* DEBUG INFO - Remove after testing */}
-        <div style={{ padding: '12px 24px', background: '#FEF3C7', borderBottom: '1px solid #FDE68A', fontSize: 11, fontFamily: "'DM Sans', sans-serif" }}>
-          <strong>Debug:</strong> goals prop = {goals ? JSON.stringify(goals) : 'undefined'} | user.career_goals = {user?.career_goals ? JSON.stringify(user.career_goals) : 'undefined'}
-        </div>
+
 
         {/* Form */}
         <div style={{ padding: '24px 28px' }}>
