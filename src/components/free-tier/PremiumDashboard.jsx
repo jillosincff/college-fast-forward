@@ -191,7 +191,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
         <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: t.primary, margin: 0, flex: 1 }}>
           Synced: {college || 'UF'} Alumni & Parent Grid
         </p>
-        <span style={{ fontFamily: dm, fontSize: 11, color: t.primary, opacity: 0.6, fontWeight: 600 }}>Tap to view →</span>
+        <span style={{ fontFamily: dm, fontSize: 11, color: t.primary, opacity: 0.8, fontWeight: 700 }}>50 Network Matches Unlocked — Tap to view →</span>
       </div>
 
       {/* Network Modal */}

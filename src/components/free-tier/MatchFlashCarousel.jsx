@@ -191,7 +191,7 @@ function MatchCard({ match, shortName, theme, onClick }) {
 
         <button
           onClick={e => { e.stopPropagation(); onClick && onClick(); }}
-          style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none', whiteSpace: 'nowrap' }}
+          style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none', whiteSpace: 'nowrap', marginLeft: 'auto' }}
         >
           View Warm Intro →
         </button>
