@@ -329,7 +329,9 @@ Deno.serve(async (req) => {
       const alumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
-      if (alumni.length === 0 && parentsAtCompany.length === 0) continue;
+      // For niche platform jobs (category E), show them even without direct company connections
+      const isNichePlatform = job.sourceCategory === 'E';
+      if (!isNichePlatform && alumni.length === 0 && parentsAtCompany.length === 0) continue;
 
       const industryParentAdvisors = industryParents.slice(0, 3);
       const allParentAdvisors = [...new Map(
@@ -344,6 +346,13 @@ Deno.serve(async (req) => {
       const hasNetworkReferral = alumni.some(a => a.referred_opening === true);
       const effectiveCategory = hasNetworkReferral ? 'A' : (job.sourceCategory || 'C');
 
+      // For niche platform jobs, use industry parents if no direct company connections
+      const finalAlumniCount = isNichePlatform && alumni.length === 0 ? 0 : alumni.length;
+      const finalParentCount = isNichePlatform && parentsAtCompany.length === 0 ? allParentAdvisors.length : parentsAtCompany.length;
+      const finalMembers = isNichePlatform && alumni.length === 0 && parentsAtCompany.length === 0 
+        ? [...industryParentAdvisors.slice(0, 3)] 
+        : [...alumni.slice(0, 3), ...parentsAtCompany.slice(0, 3)];
+
       premiumCards.push({
         company: job.company,
         role: job.role,
@@ -356,8 +365,8 @@ Deno.serve(async (req) => {
         nichePlatform: job.nichePlatform || null,
         targetIndustry: targetIndustries[0] || '',
         matchedIndustries: targetIndustries,
-        alumniCount: alumni.length,
-        parentCount: allParentAdvisors.length,
+        alumniCount: finalAlumniCount,
+        parentCount: finalParentCount,
         alumni: alumni.slice(0, 5),
         featuredParent: featuredParent ? {
           full_name: featuredParent.full_name,
@@ -365,8 +374,8 @@ Deno.serve(async (req) => {
           persona: 'parent',
         } : null,
         hasParentBonus: allParentAdvisors.length > 0,
-        networkWeight: Math.min(98, 60 + alumni.length * 10 + (allParentAdvisors.length > 0 ? 14 : 0)),
-        _members: [...alumni.slice(0, 3), ...parentsAtCompany.slice(0, 3)],
+        networkWeight: Math.min(98, 60 + finalAlumniCount * 10 + (allParentAdvisors.length > 0 ? 14 : 0)),
+        _members: finalMembers,
       });
 
       if (premiumCards.length >= 6) break;
