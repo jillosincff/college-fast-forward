@@ -271,14 +271,20 @@ Deno.serve(async (req) => {
       }, industryKeywords);
     });
 
-    // ─── Step 4: Build final premium cards (alumni-gated) ───────────────────
+    // ─── Step 4: Build final premium cards ──────────────────────────────────
+    // FIX: Alumni are a BACKDOOR CHANNEL regardless of their internal department.
+    // We keep the job pool strictly industry-targeted (Gate 1), but we look for
+    // ANY alumni at the company — not just ones whose profile tags match the industry (Gate 2 removed).
+    // Parents are still filtered by industry for targeted advisory value.
+
     const premiumCards = [];
+
     for (const job of jobPool) {
       const normalizedJobCompany = normalizeCompanyName(job.company);
-      // Find network entry for this company (try exact then partial)
+
+      // Find network entry for this company — exact match first, then partial
       let networkEntry = companyNetworkMap[normalizedJobCompany];
       if (!networkEntry) {
-        // Try partial match (e.g., "jpmorgan chase" matches "jpmorgan")
         for (const [key, val] of Object.entries(companyNetworkMap)) {
           if (key.includes(normalizedJobCompany) || normalizedJobCompany.includes(key)) {
             networkEntry = val;
@@ -287,13 +293,17 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Tier 2: Must have alumni to be a premium card
+      // Tier 2 (LOOSENED): ANY alumni at this company qualify as a backdoor lever,
+      // regardless of their specific role or department.
       const alumni = networkEntry?.alumni || [];
-      if (alumni.length === 0) continue;
-
-      // Tier 3: Parent advisory bonus — parents at this company OR in the industry
+      // Also count parents at this company as a weak alumni signal — they can route resumes too
       const parentsAtCompany = networkEntry?.parents || [];
-      const industryParentAdvisors = industryParents.slice(0, 3); // cap to avoid noise
+
+      // Must have at least one warm connection (alumni OR parent at this specific company)
+      if (alumni.length === 0 && parentsAtCompany.length === 0) continue;
+
+      // Tier 3: Parent advisory bonus — industry-matched parents (any company)
+      const industryParentAdvisors = industryParents.slice(0, 3);
       const allParentAdvisors = [...new Map(
         [...parentsAtCompany, ...industryParentAdvisors].map(p => [p.id, p])
       ).values()];
@@ -323,6 +333,30 @@ Deno.serve(async (req) => {
       });
 
       if (premiumCards.length >= 6) break;
+    }
+
+    // ─── Fallback: If strict company matching produced nothing, surface jobs
+    // from the pool paired with any industry-matched parents as advisory cards.
+    // This ensures the user always sees something actionable.
+    if (premiumCards.length === 0 && industryParents.length > 0) {
+      const fallbackJobs = jobPool.slice(0, 3);
+      for (const job of fallbackJobs) {
+        const advisors = industryParents.slice(0, 3);
+        premiumCards.push({
+          company: job.company,
+          role: job.role,
+          jobDescription: job.description,
+          targetIndustry: targetIndustries[0] || '',
+          matchedIndustries: targetIndustries,
+          alumniCount: 0,
+          parentCount: advisors.length,
+          alumni: [],
+          featuredParent: advisors[0] ? { full_name: advisors[0].full_name, title: advisors[0].title, persona: 'parent' } : null,
+          hasParentBonus: advisors.length > 0,
+          networkWeight: Math.min(75, 50 + advisors.length * 8),
+          _members: advisors.slice(0, 3),
+        });
+      }
     }
 
     console.log(`[getPersonalizedNetworkCarousel] Built ${premiumCards.length} premium cards for industries: [${targetIndustries.join(', ')}]`);
