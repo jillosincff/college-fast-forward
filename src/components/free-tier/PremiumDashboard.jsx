@@ -11,12 +11,23 @@ import PremiumHiringChat from './PremiumHiringChat';
 import MobileBottomNav from './PremiumMobileNav';
 import MatchFlashCarousel from './MatchFlashCarousel';
 import ColdDiscoverySection from './ColdDiscoverySection';
+import { useRef } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import EditGoalsModal from './EditGoalsModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
-function PremiumNav({ user }) {
+function PremiumNav({ user, onEditGoals }) {
   const { logout } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   return (
     <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -35,15 +46,37 @@ function PremiumNav({ user }) {
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>
-            {user?.full_name || user?.email}
-          </span>
-          <button
-            onClick={logout}
-            style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', background: 'none', border: '1px solid #e5e7eb', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto' }}
-          >
-            Logout
-          </button>
+          <div ref={dropRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setDropdownOpen(p => !p)}
+              style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6, transition: 'border-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = '#d1d5db'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+            >
+              {user?.full_name || user?.email}
+              <span style={{ fontSize: 10, color: '#9ca3af' }}>▾</span>
+            </button>
+            {dropdownOpen && (
+              <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', minWidth: 200, zIndex: 200, overflow: 'hidden' }}>
+                <button
+                  onClick={() => { setDropdownOpen(false); onEditGoals(); }}
+                  style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  🎯 Update Career Goals
+                </button>
+                <button
+                  onClick={() => { setDropdownOpen(false); logout(); }}
+                  style={{ fontFamily: dm, fontSize: 13, color: '#ef4444', background: 'none', border: 'none', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  🚪 Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
@@ -75,6 +108,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const [networkStats, setNetworkStats] = useState(null);
   const [showColdDiscovery, setShowColdDiscovery] = useState(false);
   const [warmCompanyNames, setWarmCompanyNames] = useState([]);
+  const [showGoalsModal, setShowGoalsModal] = useState(false);
 
   useEffect(() => {
     getVerifiedNetworkCompanies({})
@@ -128,7 +162,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: dm }}>
-      <PremiumNav user={user} />
+      <PremiumNav user={user} onEditGoals={() => setShowGoalsModal(true)} />
 
       {/* Mobile-first responsive container */}
       <style>{`
@@ -301,6 +335,15 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav dm={dm} />
+
+      {showGoalsModal && (
+        <EditGoalsModal
+          goals={user?.career_goals}
+          user={user}
+          onClose={() => setShowGoalsModal(false)}
+          onSave={() => setShowGoalsModal(false)}
+        />
+      )}
     </div>
   );
 }
