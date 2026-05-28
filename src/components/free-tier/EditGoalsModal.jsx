@@ -46,6 +46,11 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
     setSaving(false);
   };
 
+  const currentRoles = goals?.target_roles || [];
+  const currentIndustries = goals?.target_industries || [];
+  const rolesChanged = JSON.stringify(roles.sort()) !== JSON.stringify(currentRoles.sort());
+  const industriesChanged = JSON.stringify(industries.sort()) !== JSON.stringify(currentIndustries.sort());
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }} onClick={onClose}>
       <div style={{ background: '#fff', borderRadius: 16, maxWidth: 520, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
@@ -58,25 +63,32 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
         {/* Form */}
         <div style={{ padding: '24px 28px' }}>
           {/* Current snapshot banner */}
-          {goals && (goals.target_roles?.length > 0 || goals.target_industries?.length > 0) && (
+          {currentRoles.length > 0 || currentIndustries.length > 0 ? (
             <div style={{ background: '#F8F9FF', border: '1px solid #E0E7FF', borderRadius: 10, padding: '12px 14px', marginBottom: 20 }}>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#6366F1', letterSpacing: '0.07em', margin: '0 0 8px', textTransform: 'uppercase' }}>📋 Your Current Goals</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#6366F1', letterSpacing: '0.07em', margin: '0 0 8px', textTransform: 'uppercase' }}>📋 Currently Saved</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {goals.target_roles?.map(r => (
+                {currentRoles.map(r => (
                   <span key={r} style={{ background: '#FFF5F0', border: '1px solid #FBBF7A', color: '#92400E', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>{r}</span>
                 ))}
-                {goals.target_industries?.map(i => (
+                {currentIndustries.map(i => (
                   <span key={i} style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1E40AF', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>{i}</span>
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
 
           {error && <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', padding: '10px 12px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{error}</div>}
 
           {/* Target Roles */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>TARGET ROLES</label>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>
+              TARGET ROLES
+              {rolesChanged && currentRoles.length > 0 && (
+                <span style={{ display: 'block', marginTop: 4, fontWeight: 500, color: '#E85D20', fontSize: 11 }}>
+                  ← Was: {currentRoles.join(', ')}
+                </span>
+              )}
+            </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
               {roles.map(r => (
                 <span key={r} style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', padding: '6px 12px', borderRadius: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -97,7 +109,14 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
 
           {/* Industries */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>INDUSTRIES</label>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>
+              INDUSTRIES
+              {industriesChanged && currentIndustries.length > 0 && (
+                <span style={{ display: 'block', marginTop: 4, fontWeight: 500, color: '#4F8CFF', fontSize: 11 }}>
+                  ← Was: {currentIndustries.join(', ')}
+                </span>
+              )}
+            </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
               {industries.map(i => (
                 <span key={i} style={{ background: '#F0F5FF', border: '1px solid #4F8CFF', color: '#4F8CFF', padding: '6px 12px', borderRadius: 20, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
