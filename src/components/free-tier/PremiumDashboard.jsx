@@ -111,6 +111,16 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const [warmCompanyNames, setWarmCompanyNames] = useState([]);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
 
+  // Listen for goals modal open event from child components
+  useEffect(() => {
+    const handleOpenGoals = () => {
+      console.log('PremiumDashboard: Opening goals modal from event');
+      setShowGoalsModal(true);
+    };
+    window.addEventListener('cff:open-goals-modal', handleOpenGoals);
+    return () => window.removeEventListener('cff:open-goals-modal', handleOpenGoals);
+  }, []);
+
   useEffect(() => {
     getVerifiedNetworkCompanies({})
       .then(res => {
