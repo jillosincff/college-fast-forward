@@ -112,6 +112,14 @@ function MatchCard({ card, shortName, onClick }) {
         </div>
       )}
 
+      {/* ── Row 4b: Source attribution ── */}
+      {card.jobSource && (
+        <div style={{ padding: '5px 16px 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af' }}>🔗 Found on</span>
+          <span style={{ fontFamily: dm, fontSize: 10, color: '#6b7280', fontWeight: 600 }}>{card.jobSource}</span>
+        </div>
+      )}
+
       {/* ── Row 5: Footer ── */}
       <div style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '4px 10px' }}>
