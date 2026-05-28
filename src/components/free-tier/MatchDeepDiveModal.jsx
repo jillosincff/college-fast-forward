@@ -49,14 +49,17 @@ function SourceCategoryBadge({ category, source }) {
 // Bullet points derived purely from verified DB counts — no AI, no guessing
 function buildMatchReasons(match, shortName) {
   const reasons = [];
-  if (match.alumCount > 0) {
-    reasons.push(`Exceptional institutional bond — ${match.alumCount} verified ${shortName} alumni confirmed at this employer`);
+  const alumCount = match.alumCount || match.alumniCount || 0;
+  const parentCount = match.parentCount || 0;
+  
+  if (alumCount > 0) {
+    reasons.push(`Exceptional institutional bond — ${alumCount} verified ${shortName} alumni confirmed at this employer`);
   }
-  if (match.parentCount > 0) {
-    reasons.push(`Active parent ecosystem — ${match.parentCount} ${shortName} parent${match.parentCount > 1 ? 's have' : ' has'} opted in for referrals here`);
+  if (parentCount > 0) {
+    reasons.push(`Active parent ecosystem — ${parentCount} ${shortName} parent${parentCount > 1 ? 's have' : ' has'} opted in for referrals here`);
   }
   reasons.push('Warm path confirmed — this company is in the verified CFF network');
-  if (match.alumCount + match.parentCount >= 5) {
+  if (alumCount + parentCount >= 5) {
     reasons.push('High network density — multiple entry points into this employer');
   }
   return reasons;
