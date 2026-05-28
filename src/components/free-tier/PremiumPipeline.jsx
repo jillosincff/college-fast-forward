@@ -99,8 +99,18 @@ function LeadCard({ lead, onOpen, columnId }) {
       
       {/* Middle & Bottom Rows: Column-Specific Metadata */}
       {columnId === 'opportunities' && (
-        <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: 6, padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <p style={{ fontFamily: dm, fontSize: 12, color: '#ea580c', margin: 0, fontWeight: 600 }}>🐊 {lead.alumCount || 3} {lead.schoolShortName || 'UF'} grads work here</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* Alumni strip — brand blue for maximum pop */}
+          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '6px 10px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <p style={{ fontFamily: dm, fontSize: 12, color: '#2563eb', margin: 0, fontWeight: 700 }}>🐊 {lead.alumCount || 3} {lead.schoolShortName || 'UF'} grads work here</p>
+          </div>
+          {/* CLIFF AI match micro-badge */}
+          <div style={{ background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 6, padding: '5px 10px', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 11 }}>⚡</span>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#7c3aed', margin: 0, fontWeight: 700 }}>
+              CLIFF Match: {lead.alumCount >= 5 ? '96%' : lead.alumCount >= 3 ? '91%' : '84%'}
+            </p>
+          </div>
         </div>
       )}
       

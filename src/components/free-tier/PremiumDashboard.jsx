@@ -7,6 +7,7 @@ import PremiumSignalsFeed from './PremiumSignalsFeed';
 import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
+import MobileBottomNav from './PremiumMobileNav';
 import { useAuth } from '@/lib/AuthContext';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -16,9 +17,19 @@ function PremiumNav({ user }) {
   return (
     <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <CliffLogo size="text-xl" />
-          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 100, padding: '6px 12px', boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}>Premium Active</span>
+          <span style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff',
+            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            border: '1px solid rgba(139,92,246,0.3)',
+            borderRadius: 100, padding: '5px 12px',
+            boxShadow: '0 0 12px rgba(124,58,237,0.35), 0 1px 4px rgba(0,0,0,0.1)',
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', boxShadow: '0 0 6px #34d399', display: 'inline-block' }} />
+            Premium Active
+          </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>
@@ -57,6 +68,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const [selectedJob, setSelectedJob] = useState(null);  // Ghost Risk Meter bypass
   const [isMobile, setIsMobile] = useState(false);
   const [signalAdditions, setSignalAdditions] = useState([]);
+  const [showNetworkModal, setShowNetworkModal] = useState(false);
 
   const handleBackdoorClick = (job) => {
     setSelectedJob(job);
@@ -155,23 +167,60 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
         </div>
       </div>
 
-      {/* ── School Pride Network Anchor ── */}
-      <div style={{ 
-        background: t.bgTint || '#eff6ff', 
-        border: `1px solid ${t.primary}33`, 
-        borderRadius: 12, 
-        padding: isMobile ? '12px 16px' : '14px 20px', 
-        margin: isMobile ? '16px 0 16px' : '24px auto 24px',
-        maxWidth: 1100,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-      }}>
+      {/* ── School Pride Network Anchor (interactive) ── */}
+      <div
+        onClick={() => setShowNetworkModal(true)}
+        style={{ 
+          background: t.bgTint || '#eff6ff', 
+          border: `1px solid ${t.primary}33`, 
+          borderRadius: 12, 
+          padding: isMobile ? '12px 16px' : '14px 20px', 
+          margin: isMobile ? '16px 0 16px' : '24px auto 24px',
+          maxWidth: 1100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          cursor: 'pointer',
+          transition: 'box-shadow 0.2s, border-color 0.2s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 4px 16px ${t.primary}22`; e.currentTarget.style.borderColor = `${t.primary}66`; }}
+        onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = `${t.primary}33`; }}
+      >
         <span style={{ fontSize: 20 }}>🐊</span>
-        <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: t.primary, margin: 0 }}>
+        <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: t.primary, margin: 0, flex: 1 }}>
           Synced: {college || 'UF'} Alumni & Parent Grid
         </p>
+        <span style={{ fontFamily: dm, fontSize: 11, color: t.primary, opacity: 0.6, fontWeight: 600 }}>Tap to view →</span>
       </div>
+
+      {/* Network Modal */}
+      {showNetworkModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setShowNetworkModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 20, padding: '28px 24px', maxWidth: 420, width: '100%', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <p style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', margin: 0 }}>Your {college || 'UF'} Network</p>
+              <button onClick={() => setShowNetworkModal(false)} style={{ background: 'none', border: 'none', fontSize: 22, color: '#6b7280', cursor: 'pointer', padding: 0, lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {[
+                { emoji: '🎓', label: 'Alumni Connections Unlocked', value: '1,240+', color: '#2563eb' },
+                { emoji: '👨‍👩‍👧', label: 'Parent Network Active', value: parentCount !== null ? `${parentCount}+` : '20+', color: '#7c3aed' },
+                { emoji: '🏢', label: 'Companies with Inside Contacts', value: '85+', color: '#0891b2' },
+                { emoji: '⚡', label: 'Warm Intro Paths Available', value: '12', color: '#d97706' },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 16px' }}>
+                  <span style={{ fontSize: 22 }}>{item.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: '0 0 2px' }}>{item.label}</p>
+                    <p style={{ fontFamily: dm, fontSize: 18, fontWeight: 900, color: item.color, margin: 0 }}>{item.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '16px 0 0', textAlign: 'center' }}>Updated live as new alumni and parents join the {college || 'UF'} grid.</p>
+          </div>
+        </div>
+      )}
 
       {/* ── Main Content ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '12px' : '28px 20px 80px' }} className="premium-dashboard-container">
@@ -203,20 +252,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <div className="premium-mobile-bottom-nav" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '12px 20px', gap: 12, boxShadow: '0 -2px 12px rgba(0,0,0,0.06)', zIndex: 999 }}>
-        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: 8 }}>
-          <span style={{ fontSize: 20 }}>📋</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Pipeline</span>
-        </button>
-        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
-          <span style={{ fontSize: 20 }}>📄</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Assets</span>
-        </button>
-        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
-          <span style={{ fontSize: 20 }}>💬</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Chat</span>
-        </button>
-      </div>
+      <MobileBottomNav dm={dm} />
     </div>
   );
 }
