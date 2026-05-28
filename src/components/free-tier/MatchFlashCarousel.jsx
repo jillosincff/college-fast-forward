@@ -1,50 +1,63 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
-const MATCHES = [
-  {
-    company: 'Salesforce',
-    role: 'Business Development Representative',
-    logo: '☁️',
-    alumCount: 3,
-    parentCount: 2,
-    matchPct: 98,
-    tag: 'Alumni Intro Draft Ready',
-  },
-  {
-    company: 'Deloitte',
-    role: 'Consulting Analyst, Technology',
-    logo: '🏢',
-    alumCount: 5,
-    parentCount: 1,
-    matchPct: 94,
-    tag: '3 Intro Drafts Ready',
-  },
-  {
-    company: 'Amazon',
-    role: 'Operations Analyst — Summer Intern',
-    logo: '📦',
-    alumCount: 2,
-    parentCount: 3,
-    matchPct: 89,
-    tag: 'Parent Referral Available',
-  },
-];
+// Derive a match % from network size (purely cosmetic scoring)
+function scoreMatch(alumniCount, parentCount) {
+  const total = alumniCount * 2 + parentCount;
+  if (total >= 10) return 98;
+  if (total >= 6) return 94;
+  if (total >= 3) return 89;
+  return 82;
+}
 
-export default function MatchFlashCarousel({ college, theme, onCardClick }) {
+function tagLabel(alumniCount, parentCount) {
+  if (alumniCount > 0 && parentCount > 0) return 'Alumni + Parent paths available';
+  if (alumniCount > 0) return `${alumniCount} Alumni intro path${alumniCount > 1 ? 's' : ''}`;
+  return `${parentCount} Parent referral${parentCount > 1 ? 's' : ''} available`;
+}
+
+export default function MatchFlashCarousel({ college, theme, user, onCardClick }) {
   const t = theme || { primary: '#2563eb', bgTint: '#eff6ff' };
   const shortName = t.shortName || college || 'UF';
   const [activeIdx, setActiveIdx] = useState(0);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
   const trackRef = useRef(null);
+
+  useEffect(() => {
+    setLoading(true);
+    getVerifiedNetworkCompanies({})
+      .then(res => {
+        const companies = res?.data?.companies || [];
+        // Map DB records to match card shape
+        const mapped = companies
+          .filter(c => c.alumniCount + c.parentCount >= 1)
+          .slice(0, 6)
+          .map(c => ({
+            company: c.company,
+            role: c.members.find(m => m.persona === 'alumni')?.title || 'Warm Intro Available',
+            logo: '🏢',
+            alumCount: c.alumniCount,
+            parentCount: c.parentCount,
+            matchPct: scoreMatch(c.alumniCount, c.parentCount),
+            tag: tagLabel(c.alumniCount, c.parentCount),
+            // Pass through real members for the modal
+            _members: c.members,
+          }));
+        setMatches(mapped);
+      })
+      .catch(() => setMatches([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleScroll = () => {
     if (!trackRef.current) return;
     const { scrollLeft, clientWidth } = trackRef.current;
-    const idx = Math.round(scrollLeft / clientWidth);
-    setActiveIdx(idx);
+    setActiveIdx(Math.round(scrollLeft / clientWidth));
   };
 
   const scrollTo = (idx) => {
@@ -52,6 +65,43 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
     trackRef.current.scrollTo({ left: idx * trackRef.current.clientWidth, behavior: 'smooth' });
     setActiveIdx(idx);
   };
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+          <span style={{ fontSize: 16 }}>🚀</span>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#374151', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
+            CLIFF's Top High-Outreach Matches Today
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 12, padding: '4px 0' }}>
+          {[1, 2].map(i => (
+            <div key={i} style={{ flexShrink: 0, width: 280, height: 140, borderRadius: 18, background: '#f1f5f9', animation: 'shimmer 1.5s infinite linear', backgroundSize: '1000px 100%', backgroundImage: 'linear-gradient(to right, #f1f5f9 4%, #e2e8f0 25%, #f1f5f9 36%)' }} />
+          ))}
+        </div>
+        <style>{`@keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }`}</style>
+      </div>
+    );
+  }
+
+  if (!matches.length) {
+    return (
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+          <span style={{ fontSize: 16 }}>🚀</span>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#374151', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
+            CLIFF's Top High-Outreach Matches Today
+          </p>
+        </div>
+        <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 16, padding: '24px', textAlign: 'center' }}>
+          <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>
+            No verified network connections found yet. As more alumni and parents join, your warm match carousel will populate here.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 0 4px' }}>
@@ -61,7 +111,6 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
         .match-track::-webkit-scrollbar { display: none; }
       `}</style>
 
-      {/* Section label */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 16px', marginBottom: 10 }}>
         <span style={{ fontSize: 16 }}>🚀</span>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#374151', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
@@ -69,7 +118,6 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
         </p>
       </div>
 
-      {/* Horizontal snap track */}
       <div
         ref={trackRef}
         className="match-track"
@@ -84,7 +132,7 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
           padding: '4px 16px 8px',
         }}
       >
-        {MATCHES.map((m, i) => (
+        {matches.map((m, i) => (
           <MatchCard
             key={i}
             match={m}
@@ -95,9 +143,8 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
         ))}
       </div>
 
-      {/* Pagination dots */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10, marginBottom: 4 }}>
-        {MATCHES.map((_, i) => (
+        {matches.map((_, i) => (
           <button
             key={i}
             onClick={() => scrollTo(i)}
@@ -117,7 +164,7 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
         ))}
       </div>
       <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', textAlign: 'center', margin: '0 0 6px', letterSpacing: '0.04em' }}>
-        Swipe for more curated matches
+        Verified {shortName} network · {matches.length} companies with warm paths
       </p>
 
       {selectedMatch && (
@@ -163,7 +210,7 @@ function MatchCard({ match, shortName, theme, onClick }) {
         gap: 12,
       }}
     >
-      {/* Top row: badge + logo + company */}
+      {/* Top row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
           <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
@@ -174,25 +221,23 @@ function MatchCard({ match, shortName, theme, onClick }) {
             <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 500, color: '#64748b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{match.role}</p>
           </div>
         </div>
-
-        {/* CLIFF TOP SELECTION badge */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', borderRadius: 100, padding: '4px 10px', flexShrink: 0 }}>
           <span style={{ fontSize: 10, animation: 'boltFlash 2s ease-in-out infinite' }}>⚡</span>
-          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Top Pick</span>
+          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Verified</span>
         </div>
       </div>
 
-      {/* Network Intel row — the high-contrast hero stat */}
+      {/* Network intel */}
       <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)', border: '1px solid #c7d2fe', borderRadius: 12, padding: '10px 14px' }}>
         <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#1e1b4b', margin: '0 0 4px', lineHeight: 1.3 }}>
-          🔥 {match.alumCount} {shortName} Alums &amp; {match.parentCount} Parent{match.parentCount !== 1 ? 's' : ''} in this network
+          🔥 {match.alumCount} {shortName} Alum{match.alumCount !== 1 ? 's' : ''} &amp; {match.parentCount} Parent{match.parentCount !== 1 ? 's' : ''} confirmed in network
         </p>
         <p style={{ fontFamily: dm, fontSize: 11, color: '#4c1d95', margin: 0, fontWeight: 600 }}>
           Warm entry point — no cold applications needed
         </p>
       </div>
 
-      {/* Match score row + CTA */}
+      {/* Match score + CTA */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '5px 10px' }}>
           <span style={{ fontSize: 12 }}>⚡</span>
@@ -201,10 +246,9 @@ function MatchCard({ match, shortName, theme, onClick }) {
           </span>
           <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', fontWeight: 500 }}>· {match.tag}</span>
         </div>
-
         <button
           onClick={e => { e.stopPropagation(); onClick && onClick(); }}
-          style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', textDecoration: 'none', whiteSpace: 'nowrap', marginLeft: 'auto' }}
+          style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#7c3aed', background: 'none', border: 'none', cursor: 'pointer', padding: 0, minHeight: 'auto', whiteSpace: 'nowrap', marginLeft: 'auto' }}
         >
           View Warm Intro →
         </button>

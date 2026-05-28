@@ -62,37 +62,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Step 2: For companies with no in-network results, try Exa LinkedIn search
-    const companiesWithNoMatch = companies.filter(c => !networkMap[c] || networkMap[c].length === 0);
-
-    if (companiesWithNoMatch.length > 0 && schoolName) {
-      for (const companyName of companiesWithNoMatch.slice(0, 3)) { // limit Exa calls
-        try {
-          const exaRes = await base44.asServiceRole.functions.invoke('exaService', {
-            action: 'searchAlumni',
-            jobTitle: '',
-            universityName: schoolName,
-            companyName: companyName,
-            maxResults: 2,
-          });
-
-          if (exaRes?.profiles?.length > 0) {
-            networkMap[companyName] = exaRes.profiles.map(p => ({
-              id: null,
-              full_name: p.full_name || p.name || 'Alumni',
-              job_title: p.headline || p.title || '',
-              persona: 'alumni',
-              linkedin_url: p.linkedin_url || '',
-              profile_image_url: '',
-              intro_willingness: 'unknown',
-              source: 'exa',
-            }));
-          }
-        } catch (e) {
-          console.warn(`[getAlumniAtCompanies] Exa failed for ${companyName}:`, e.message);
-        }
-      }
-    }
+    // Step 2: REMOVED — Exa/web-search fallback was returning unverified people.
+    // Only in-network verified members are surfaced. If a company has 0 matches, it returns empty.
 
     // Build final results
     const results = companies.map(companyName => ({

@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { getAlumniAtCompanies } from '@/functions/getAlumniAtCompanies';
-import { getDashboardParentMatch } from '@/functions/getDashboardParentMatch';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -33,40 +31,33 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Members are passed directly from the carousel — already verified, no extra API call needed
   useEffect(() => {
     if (!match) return;
-    setLoading(true);
-    setAlumni([]);
-    setParents([]);
     setSelectedContact(null);
-
-    Promise.all([
-      getAlumniAtCompanies({ companies: [match.company] }).catch(() => ({ data: null })),
-      getDashboardParentMatch({ company: match.company }).catch(() => ({ data: null })),
-    ]).then(([alumniRes, parentRes]) => {
-      // Alumni: flatten results for this company
-      const alumniData = alumniRes?.data?.alumni || alumniRes?.data?.[match.company] || [];
-      setAlumni(
-        alumniData.slice(0, 8).map(a => ({
-          name: a.full_name || a.name || 'UF Alumni',
-          title: a.headline || a.current_role || a.title || 'UF Alumni',
-          grad: a.graduation_year || a.class_year || '',
+    const members = match._members || [];
+    setAlumni(
+      members
+        .filter(m => m.persona === 'alumni')
+        .map(m => ({
+          name: m.full_name || 'Alumni',
+          title: m.title || '',
+          grad: m.graduation_year || '',
           mutual: false,
-          linkedin_url: a.linkedin_url || null,
+          linkedin_url: m.linkedin_url || null,
         }))
-      );
-
-      // Parents: from getDashboardParentMatch
-      const parentData = parentRes?.data?.matches || parentRes?.data?.parents || [];
-      setParents(
-        parentData.slice(0, 5).map(p => ({
-          name: p.full_name || p.name || 'UF Parent',
-          title: p.current_role || p.job_title || p.title || 'UF Parent',
-          student: p.student_name ? `${p.student_name}, UF` : 'UF Student',
-          linkedin_url: p.linkedin_url || null,
+    );
+    setParents(
+      members
+        .filter(m => m.persona === 'parent')
+        .map(m => ({
+          name: m.full_name || 'Parent',
+          title: m.title || '',
+          student: m.student_name ? `${m.student_name}, UF` : 'UF Student',
+          linkedin_url: m.linkedin_url || null,
         }))
-      );
-    }).finally(() => setLoading(false));
+    );
+    setLoading(false);
   }, [match?.company]);
 
   if (!match) return null;
