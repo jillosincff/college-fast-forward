@@ -26,7 +26,18 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
   };
 
   const handleSave = async () => {
-    if (roles.length === 0 && industries.length === 0) {
+    // Auto-add any text in the input fields before saving
+    let finalRoles = [...roles];
+    let finalIndustries = [...industries];
+    
+    if (roleInput.trim() && !finalRoles.includes(roleInput.trim())) {
+      finalRoles.push(roleInput.trim());
+    }
+    if (industryInput.trim() && !finalIndustries.includes(industryInput.trim())) {
+      finalIndustries.push(industryInput.trim());
+    }
+    
+    if (finalRoles.length === 0 && finalIndustries.length === 0) {
       setError('Please add at least one role or industry.');
       return;
     }
@@ -35,12 +46,12 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
       await base44.auth.updateMe({
         career_goals: {
           ...goals,
-          target_roles: roles,
-          target_industries: industries,
+          target_roles: finalRoles,
+          target_industries: finalIndustries,
           saved_at: new Date().toISOString()
         }
       });
-      onSave({ target_roles: roles, target_industries: industries });
+      onSave({ target_roles: finalRoles, target_industries: finalIndustries });
     } catch (e) {
       console.error('Save failed:', e);
       setError('Failed to save. Try again.');
