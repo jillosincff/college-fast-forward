@@ -169,6 +169,12 @@ export default function OrganizedFeeds({ user }) {
     enabled: true, // Always run the query
   });
 
+  // Robust safety envelope: guarantee empty arrays instead of undefined/null
+  const hotLeads = feedsData?.hotLeads || [];
+  const warmLeads = feedsData?.warmLeads || [];
+  const coldLeads = feedsData?.coldLeads || [];
+  const totalCount = (hotLeads.length || 0) + (warmLeads.length || 0) + (coldLeads.length || 0);
+
   const handleAddToPipeline = async (lead) => {
     try {
       await base44.entities.Opportunity.create({
@@ -228,32 +234,38 @@ export default function OrganizedFeeds({ user }) {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-2">🚀 CLiFF's Live Target Matches</h1>
       <p className="text-sm text-slate-600 mb-6">
-        Your personalized feed of {(feedsData.hotLeads?.length || 0) + (feedsData.warmLeads?.length || 0) + (feedsData.coldLeads?.length || 0)} opportunities
+        Your personalized feed of {totalCount} opportunities
       </p>
 
       {/* 🔥 HOT LEADS */}
-      <LeadSection
-        tier="hot"
-        leads={feedsData.hotLeads || []}
-        onAddToPipeline={handleAddToPipeline}
-        onSelectLead={setSelectedLead}
-      />
+      {hotLeads.length > 0 && (
+        <LeadSection
+          tier="hot"
+          leads={hotLeads}
+          onAddToPipeline={handleAddToPipeline}
+          onSelectLead={setSelectedLead}
+        />
+      )}
 
       {/* ☀️ WARM LEADS */}
-      <LeadSection
-        tier="warm"
-        leads={feedsData.warmLeads || []}
-        onAddToPipeline={handleAddToPipeline}
-        onSelectLead={setSelectedLead}
-      />
+      {warmLeads.length > 0 && (
+        <LeadSection
+          tier="warm"
+          leads={warmLeads}
+          onAddToPipeline={handleAddToPipeline}
+          onSelectLead={setSelectedLead}
+        />
+      )}
 
       {/* ❄️ COLD LEADS */}
-      <LeadSection
-        tier="cold"
-        leads={feedsData.coldLeads || []}
-        onAddToPipeline={handleAddToPipeline}
-        onSelectLead={setSelectedLead}
-      />
+      {coldLeads.length > 0 && (
+        <LeadSection
+          tier="cold"
+          leads={coldLeads}
+          onAddToPipeline={handleAddToPipeline}
+          onSelectLead={setSelectedLead}
+        />
+      )}
 
       {/* Deep Dive Modal */}
       {selectedLead && (
