@@ -139,6 +139,20 @@ export default function DownloadBar({ tailoredContent, acceptedCount, totalChang
           <RefreshCw className="w-3.5 h-3.5" />
           Start over
         </button>
+        <button
+          onClick={() => {
+            // Navigate to dashboard instead of undefined route
+            window.location.hash = '#FreeTierDashboard';
+          }}
+          style={{
+            fontFamily: dmSans, fontSize: 13, fontWeight: 400, color: '#666',
+            background: 'rgba(232,93,32,0.08)', border: '1px solid rgba(232,93,32,0.2)',
+            borderRadius: 100, padding: '10px 20px', cursor: 'pointer',
+            minHeight: 'auto', width: 'auto',
+          }}
+        >
+          Route via alumnus →
+        </button>
       </div>
     </div>
   );
