@@ -62,8 +62,6 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', color: '#888' }}>×</button>
         </div>
 
-
-
         {/* Form */}
         <div style={{ padding: '24px 28px' }}>
           {/* Current snapshot banner */}
