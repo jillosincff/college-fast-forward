@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import MatchDeepDiveModal from './MatchDeepDiveModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -36,6 +37,7 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
   const t = theme || { primary: '#2563eb', bgTint: '#eff6ff' };
   const shortName = t.shortName || college || 'UF';
   const [activeIdx, setActiveIdx] = useState(0);
+  const [selectedMatch, setSelectedMatch] = useState(null);
   const trackRef = useRef(null);
 
   const handleScroll = () => {
@@ -88,7 +90,7 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
             match={m}
             shortName={shortName}
             theme={t}
-            onClick={() => onCardClick && onCardClick(m)}
+            onClick={() => setSelectedMatch(m)}
           />
         ))}
       </div>
@@ -117,6 +119,17 @@ export default function MatchFlashCarousel({ college, theme, onCardClick }) {
       <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', textAlign: 'center', margin: '0 0 6px', letterSpacing: '0.04em' }}>
         Swipe for more curated matches
       </p>
+
+      {selectedMatch && (
+        <MatchDeepDiveModal
+          match={selectedMatch}
+          shortName={shortName}
+          onClose={() => setSelectedMatch(null)}
+          onGenerateOutreach={(data) => {
+            onCardClick && onCardClick(data.match);
+          }}
+        />
+      )}
     </div>
   );
 }
