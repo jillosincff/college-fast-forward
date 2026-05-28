@@ -154,7 +154,7 @@ export default function OrganizedFeeds({ user }) {
       target_industries: target_industries || [],
       target_role: target_role || '',
     }),
-    enabled: !!target_industries?.length,
+    enabled: true, // Always run the query
   });
 
   const handleAddToPipeline = async (lead) => {
@@ -181,10 +181,33 @@ export default function OrganizedFeeds({ user }) {
     );
   }
 
-  if (!feedsData || (!feedsData.hotLeads?.length && !feedsData.warmLeads?.length && !feedsData.coldLeads?.length)) {
+  // Show helpful message if no career goals set
+  if (!target_industries?.length) {
+    return (
+      <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200">
+        <div className="text-4xl mb-4">🎯</div>
+        <h3 className="text-lg font-bold text-slate-800 mb-2">Set Your Career Goals</h3>
+        <p className="text-slate-600 mb-4 max-w-md">
+          Tell us what you're looking for and we'll show you HOT, WARM, and COLD leads tailored to your interests.
+        </p>
+        <button
+          onClick={() => {
+            // Trigger goals modal or navigation
+            const event = new CustomEvent('cff:open-goals-modal');
+            window.dispatchEvent(event);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
+        >
+          Update Career Goals →
+        </button>
+      </div>
+    );
+  }
+
+  if (!feedsData) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500">No opportunities found. Update your career goals to see matches.</p>
+        <p className="text-slate-500">Loading your opportunities...</p>
       </div>
     );
   }

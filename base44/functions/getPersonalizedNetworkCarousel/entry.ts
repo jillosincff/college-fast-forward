@@ -229,13 +229,18 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const targetIndustries = (
+    let targetIndustries = (
       body.target_industries
       || user.career_goals?.target_industries
       || user.industries_interested
       || user.industries_of_interest
       || []
     ).map(i => i.toLowerCase());
+
+    // If no industries set, use a default to show some opportunities
+    if (!targetIndustries.length) {
+      targetIndustries = ['tech']; // Default fallback
+    }
 
     const targetRole = body.target_role || user.career_goals?.role || user.target_role || '';
     const schoolCode = (user.school_code || '').toLowerCase();
