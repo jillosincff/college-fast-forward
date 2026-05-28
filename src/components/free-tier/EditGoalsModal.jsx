@@ -39,16 +39,24 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
   const [error, setError] = useState('');
 
   const handleAddRole = (role) => {
+    console.log('handleAddRole called with:', role);
     if (role.trim() && !roles.includes(role.trim())) {
+      console.log('Adding role:', role.trim());
       setRoles([...roles, role.trim()]);
       setRoleInput('');
+    } else {
+      console.log('Role not added - empty or duplicate');
     }
   };
 
   const handleAddIndustry = (ind) => {
+    console.log('handleAddIndustry called with:', ind);
     if (ind.trim() && !industries.includes(ind.trim())) {
+      console.log('Adding industry:', ind.trim());
       setIndustries([...industries, ind.trim()]);
       setIndustryInput('');
+    } else {
+      console.log('Industry not added - empty or duplicate');
     }
   };
 
@@ -60,12 +68,25 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
   };
 
   const handleSave = async () => {
+    console.log('Save clicked - roles:', roles, 'industries:', industries);
     if (roles.length === 0 && industries.length === 0) {
+      console.log('Validation failed: no roles or industries');
       setError('Please add at least one role or industry.');
       return;
     }
+    console.log('Validation passed, saving...');
     setSaving(true);
     try {
+      console.log('Calling updateMe with career_goals:', {
+        target_roles: roles,
+        target_industries: industries,
+        seeking: lookingFor,
+        graduation_year: gradYear,
+        location_preference: location,
+        target_companies: targetCompanies,
+        experience_level: experience,
+        major: major,
+      });
       await base44.auth.updateMe({
         career_goals: {
           ...goals,
@@ -80,6 +101,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           saved_at: new Date().toISOString()
         }
       });
+      console.log('Save successful!');
       onSave({ target_roles: roles, target_industries: industries, seeking: lookingFor, graduation_year: gradYear, location_preference: location, target_companies: targetCompanies, experience_level: experience, major });
     } catch (e) {
       console.error('Save failed:', e);
