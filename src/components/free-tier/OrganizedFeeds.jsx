@@ -81,12 +81,12 @@ function LeadCard({ lead, onAddToPipeline, onSelect }) {
           {/* Connection info based on tier */}
           {lead.leadTier === 'hot' && (
             <div className="text-xs text-slate-600 mb-2">
-              🎓 {lead.alumniCount} UF {lead.alumniCount === 1 ? 'Alum' : 'Alums'} work here
+              🎓 {(lead.alumniCount || 0)} {lead.schoolName || 'UF'} {(lead.alumniCount || 0) === 1 ? 'Alum' : 'Alums'} work here
             </div>
           )}
           {lead.leadTier === 'warm' && (
             <div className="text-xs text-slate-600 mb-2">
-              💡 {lead.parentCount} UF {lead.parentCount === 1 ? 'Alum' : 'Alums'} in {lead.targetIndustry}
+              💡 {(lead.parentCount || 0)} {lead.schoolName || 'UF'} {(lead.parentCount || 0) === 1 ? 'Alum' : 'Alums'} in {lead.targetIndustry}
             </div>
           )}
           {lead.leadTier === 'cold' && (
