@@ -1,48 +1,97 @@
 const dm = "'DM Sans', system-ui, sans-serif";
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
+import EditGoalsModal from './EditGoalsModal';
 
-export default function FreeTierNav({ user, onUpgrade }) {
+export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated }) {
   const { logout } = useAuth();
   const isPremium = user?.fastiq_active || user?.membership_tier === 'premium';
-  
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const dropRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   return (
-    <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
-            <span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span>
+    <>
+      <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
+              <span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span>
+            </div>
+            {isPremium ? (
+              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 100, padding: '3px 12px', boxShadow: '0 2px 6px rgba(37,99,235,0.2)' }}>Sprint Active</span>
+            ) : (
+              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 100, padding: '3px 10px' }}>Free</span>
+            )}
           </div>
-          {isPremium ? (
-            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 100, padding: '3px 12px', boxShadow: '0 2px 6px rgba(37,99,235,0.2)' }}>Sprint Active</span>
-          ) : (
-            <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 100, padding: '3px 10px' }}>Free</span>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {user && (
+              <div ref={dropRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setDropdownOpen(p => !p)}
+                  style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = '#d1d5db'}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}
+                >
+                  {user.full_name || user.email}
+                  <span style={{ fontSize: 10, color: '#9ca3af' }}>▾</span>
+                </button>
+                {dropdownOpen && (
+                  <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', minWidth: 200, zIndex: 200, overflow: 'hidden' }}>
+                    <button
+                      onClick={() => { setDropdownOpen(false); setShowGoalsModal(true); }}
+                      style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      🎯 Update Career Goals
+                    </button>
+                    <button
+                      onClick={() => { setDropdownOpen(false); navigate('ProfileEdit'); }}
+                      style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      👤 Edit Profile
+                    </button>
+                    <button
+                      onClick={() => { setDropdownOpen(false); logout(); }}
+                      style={{ fontFamily: dm, fontSize: 13, color: '#ef4444', background: 'none', border: 'none', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      🚪 Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            {!isPremium && (
+              <button
+                onClick={onUpgrade}
+                style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}
+              >
+                ⚡ Upgrade
+              </button>
+            )}
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {user && (
-            <span style={{ fontFamily: dm, fontSize: 13, color: '#6b7280' }}>
-              {user.full_name || user.email}
-            </span>
-          )}
-          <button
-            onClick={logout}
-            style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#6b7280', background: 'none', border: '1px solid #e5e7eb', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#f9fafb'; e.currentTarget.style.borderColor = '#d1d5db'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
-          >
-            Logout
-          </button>
-          {!isPremium && (
-            <button
-              onClick={onUpgrade}
-              style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}
-            >
-              ⚡ Upgrade
-            </button>
-          )}
-        </div>
-      </div>
-    </header>
+      </header>
+      {showGoalsModal && (
+        <EditGoalsModal
+          goals={user?.career_goals}
+          user={user}
+          onClose={() => setShowGoalsModal(false)}
+          onSave={(updated) => { onGoalsUpdated?.(updated); setShowGoalsModal(false); }}
+        />
+      )}
+    </>
   );
 }
