@@ -10,8 +10,17 @@ import { getFreeTierCompanyRecs } from '@/functions/getFreeTierCompanyRecs';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
-function ColdRoleCard({ role, onGenerateScript }) {
+function ColdRoleCard({ role, onGenerateScript, onAddToPipeline }) {
   const [hovered, setHovered] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  const handleAddToPipeline = (e) => {
+    e.stopPropagation();
+    onAddToPipeline(role);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 3000);
+  };
+
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -24,9 +33,12 @@ function ColdRoleCard({ role, onGenerateScript }) {
         display: 'flex',
         alignItems: 'flex-start',
         gap: 12,
-        transition: 'border-color 0.2s, background 0.2s',
+        transition: 'border-color 0.2s, background 0.2s, box-shadow 0.2s',
         borderColor: hovered ? '#d1d5db' : '#e5e7eb',
+        boxShadow: hovered ? '0 4px 12px rgba(0,0,0,0.08)' : 'none',
+        cursor: 'pointer',
       }}
+      onClick={() => window.open(`https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(role.company + ' ' + (role.role || ''))}`, '_blank')}
     >
       <div style={{ width: 36, height: 36, borderRadius: 8, background: '#f1f5f9', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
         🏢
@@ -40,25 +52,44 @@ function ColdRoleCard({ role, onGenerateScript }) {
         </div>
         <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>{role.role || 'Open Positions Available'}</p>
         <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
-          No alumni or parent contact confirmed yet. You'll need to apply directly or use CLIFF to craft a cold outreach script.
+          No alumni or parent contact confirmed yet. Click card to view on LinkedIn, or use CLIFF to craft a cold outreach script.
         </p>
       </div>
-      <button
-        onClick={() => onGenerateScript(role)}
-        style={{
-          fontFamily: dm, fontSize: 11, fontWeight: 700,
-          color: '#374151', background: '#f3f4f6', border: '1px solid #e5e7eb',
-          borderRadius: 8, padding: '7px 12px', cursor: 'pointer', minHeight: 'auto',
-          whiteSpace: 'nowrap', flexShrink: 0,
-        }}
-      >
-        ✉️ Cold Script
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); onGenerateScript(role); }}
+          style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 700,
+            color: '#374151', background: '#f3f4f6', border: '1px solid #e5e7eb',
+            borderRadius: 8, padding: '7px 12px', cursor: 'pointer', minHeight: 'auto',
+            whiteSpace: 'nowrap', transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = '#e5e7eb'}
+          onMouseLeave={e => e.currentTarget.style.background = '#f3f4f6'}
+        >
+          ✉️ Cold Script
+        </button>
+        <button
+          onClick={handleAddToPipeline}
+          disabled={added}
+          style={{
+            fontFamily: dm, fontSize: 11, fontWeight: 700,
+            color: added ? '#fff' : '#fff',
+            background: added ? '#16a34a' : '#2563eb',
+            border: 'none',
+            borderRadius: 8, padding: '7px 12px', cursor: added ? 'default' : 'pointer',
+            minHeight: 'auto', whiteSpace: 'nowrap', transition: 'all 0.2s',
+            boxShadow: added ? 'none' : '0 2px 6px rgba(37,99,235,0.3)',
+          }}
+        >
+          {added ? '✅ Added' : '📥 Add to Pipeline'}
+        </button>
+      </div>
     </div>
   );
 }
 
-export default function ColdDiscoverySection({ warmCompanyNames = [], onGenerateScript, onDismiss }) {
+export default function ColdDiscoverySection({ warmCompanyNames = [], onGenerateScript, onDismiss, onAddToPipeline }) {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -136,7 +167,7 @@ export default function ColdDiscoverySection({ warmCompanyNames = [], onGenerate
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {roles.map((role, i) => (
-            <ColdRoleCard key={i} role={role} onGenerateScript={onGenerateScript} />
+            <ColdRoleCard key={i} role={role} onGenerateScript={onGenerateScript} onAddToPipeline={onAddToPipeline} />
           ))}
         </div>
       )}

@@ -309,6 +309,20 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
                     setSelectedLead({ company: role.company, role: role.role || 'Open Role', logo: '🏢', alumCount: 0, recruiter: '—', posted: 'Not yet public', source: 'Cold Discovery' });
                   }}
                   onDismiss={() => setShowColdDiscovery(false)}
+                  onAddToPipeline={(role) => {
+                    // Add cold role to pipeline via signal additions
+                    const newCard = {
+                      company: role.company,
+                      role: role.role || 'Open Role',
+                      source: 'Cold Discovery',
+                      recruiter: '—',
+                      posted: 'Not yet public',
+                      logo: '🏢',
+                      alumCount: 0,
+                      fromCold: true,
+                    };
+                    setSignalAdditions(prev => [...prev, newCard]);
+                  }}
                 />
               </div>
             )}
