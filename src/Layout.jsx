@@ -945,6 +945,10 @@ function AppContent() {
 }
 
 export default function Layout() {
+  // Guard: if AuthContext is already provided by a parent (App.jsx),
+  // this extra AuthProvider is a no-op because useAuth() will find the
+  // existing context. But if layout is mounted standalone (e.g. via pages.config),
+  // this ensures there's always a provider available.
   useEffect(() => {
     const isReloading = handleCacheBusting();
     if (isReloading) return;
@@ -972,11 +976,13 @@ export default function Layout() {
 
   return (
     <AppErrorBoundary name="App">
-      <ThemeProvider>
-        <AppContent />
-        <Toaster />
-        {(window.location.hostname.includes('localhost') || window.location.hostname.includes('preview')) && <ErrorLogger />}
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <AppContent />
+          <Toaster />
+          {(window.location.hostname.includes('localhost') || window.location.hostname.includes('preview')) && <ErrorLogger />}
+        </ThemeProvider>
+      </AuthProvider>
     </AppErrorBoundary>
   );
 }
