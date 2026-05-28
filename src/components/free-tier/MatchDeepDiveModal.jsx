@@ -2,6 +2,12 @@ import { useState } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
+// Generate a plausible LinkedIn search URL for a name + company
+function linkedInUrl(name, company) {
+  const q = encodeURIComponent(`${name} ${company}`);
+  return `https://www.linkedin.com/search/results/people/?keywords=${q}`;
+}
+
 const MOCK_ALUMNI = {
   Salesforce: [
     { name: 'Marcus Reid', title: 'Account Executive', grad: '2019', mutual: true },
@@ -60,6 +66,7 @@ const MATCH_REASONS = {
 export default function MatchDeepDiveModal({ match, shortName, onClose, onGenerateOutreach }) {
   const [tab, setTab] = useState('alumni');
   const [selectedContact, setSelectedContact] = useState(null);
+  const [launched, setLaunched] = useState(false);
 
   if (!match) return null;
 
@@ -68,10 +75,16 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const reasons = MATCH_REASONS[match.company] || MATCH_REASONS.Salesforce;
   const contacts = tab === 'alumni' ? alumni : parents;
 
-  const handleGenerate = () => {
+  const handleTrackAndDraft = () => {
     const contact = selectedContact || (tab === 'alumni' ? alumni[0] : parents[0]);
+    setLaunched(true);
+    // Hand-off: add to pipeline + open outreach drafts with pre-populated context
     onGenerateOutreach && onGenerateOutreach({ match, contact, tab });
-    onClose();
+    setTimeout(() => {
+      onClose();
+      // Navigate to OutreachDrafts with context pre-filled
+      window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(contact.name)}`;
+    }, 600);
   };
 
   return (
@@ -219,16 +232,34 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                       </p>
                     </div>
 
-                    {isAlum && c.mutual && (
-                      <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 100, padding: '2px 7px', flexShrink: 0 }}>
-                        Mutual
-                      </span>
-                    )}
-                    {!isAlum && (
-                      <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '2px 7px', flexShrink: 0 }}>
-                        Opted-in
-                      </span>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                      {isAlum && c.mutual && (
+                        <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 100, padding: '2px 7px' }}>
+                          Mutual
+                        </span>
+                      )}
+                      {!isAlum && (
+                        <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '2px 7px' }}>
+                          Opted-in
+                        </span>
+                      )}
+                      {/* LinkedIn launchpad button */}
+                      <a
+                        href={linkedInUrl(c.name, match.company)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        title={`View ${c.name} on LinkedIn`}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                          background: '#0a66c2', borderRadius: 6, padding: '3px 8px',
+                          textDecoration: 'none', minHeight: 'auto', flexShrink: 0,
+                        }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#fff' }}>View</span>
+                      </a>
+                    </div>
                   </div>
                 );
               })}
@@ -244,23 +275,24 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
           {/* ── Zone 3: Action Hand-off ── */}
           <div style={{ paddingTop: 20 }}>
             <button
-              onClick={handleGenerate}
+              onClick={handleTrackAndDraft}
+              disabled={launched}
               style={{
                 width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff',
-                background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-                border: 'none', borderRadius: 14, padding: '16px 0', cursor: 'pointer',
-                minHeight: 'auto', boxShadow: '0 4px 16px rgba(124,58,237,0.35)',
+                background: launched ? '#6b7280' : 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                border: 'none', borderRadius: 14, padding: '16px 0', cursor: launched ? 'default' : 'pointer',
+                minHeight: 'auto', boxShadow: launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 transition: 'transform 0.15s, box-shadow 0.15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(124,58,237,0.45)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(124,58,237,0.35)'; }}
+              onMouseEnter={e => { if (!launched) { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(124,58,237,0.45)'; }}}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)'; }}
             >
-              <span style={{ fontSize: 16 }}>🚀</span>
-              Generate Outreach via CLIFF
+              <span style={{ fontSize: 16 }}>{launched ? '✅' : '🚀'}</span>
+              {launched ? 'Saved to Pipeline — Opening Drafts...' : 'Track Job & Draft Outreach with CLIFF'}
             </button>
             <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
-              Bypasses ATS — sends directly through your warm network
+              Saves to pipeline · Selects best contact · Opens pre-drafted message
             </p>
           </div>
         </div>
