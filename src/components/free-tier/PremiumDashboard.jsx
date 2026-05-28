@@ -11,6 +11,7 @@ import PremiumHiringChat from './PremiumHiringChat';
 import MobileBottomNav from './PremiumMobileNav';
 import MatchFlashCarousel from './MatchFlashCarousel';
 import ColdDiscoverySection from './ColdDiscoverySection';
+import OrganizedFeeds from './OrganizedFeeds';
 import { useRef } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import EditGoalsModal from './EditGoalsModal';
@@ -275,20 +276,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
         </div>
       )}
 
-      {/* ── Match Flash Hero Carousel ── */}
+      {/* ── Three-Tier Organized Feeds ── */}
       <div style={{ background: '#f8f9fc', paddingTop: isMobile ? 8 : 16, paddingBottom: 4 }}>
-        <MatchFlashCarousel
-          college={college}
-          theme={t}
-          user={user}
-          onCardClick={(match) => {
-            setSelectedLead({ company: match.company, role: match.role, logo: match.logo, alumCount: match.alumCount, recruiter: '—', posted: 'Not yet public', source: 'CLIFF Top Match' });
-          }}
-          onColdOptIn={() => {
-            setShowColdDiscovery(true);
-            setTimeout(() => document.getElementById('cold-discovery-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-          }}
-        />
+        <OrganizedFeeds user={user} />
       </div>
 
       {/* ── Main Content ── */}
@@ -297,7 +287,10 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Application Pipeline (Active Tracking) */}
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
+            
+            {/* Signals Feed */}
             <PremiumSignalsFeed 
               college={college} 
               theme={t} 
@@ -323,33 +316,6 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
                 }
               }}
             />
-
-            {/* Cold Discovery Section — only shown after explicit opt-in */}
-            {showColdDiscovery && (
-              <div id="cold-discovery-section">
-                <ColdDiscoverySection
-                  warmCompanyNames={warmCompanyNames}
-                  onGenerateScript={(role) => {
-                    setSelectedLead({ company: role.company, role: role.role || 'Open Role', logo: '🏢', alumCount: 0, recruiter: '—', posted: 'Not yet public', source: 'Cold Discovery' });
-                  }}
-                  onDismiss={() => setShowColdDiscovery(false)}
-                  onAddToPipeline={(role) => {
-                    // Add cold role to pipeline via signal additions
-                    const newCard = {
-                      company: role.company,
-                      role: role.role || 'Open Role',
-                      source: 'Cold Discovery',
-                      recruiter: '—',
-                      posted: 'Not yet public',
-                      logo: '🏢',
-                      alumCount: 0,
-                      fromCold: true,
-                    };
-                    setSignalAdditions(prev => [...prev, newCard]);
-                  }}
-                />
-              </div>
-            )}
           </div>
 
           {/* Right Column (Desktop Only) */}
