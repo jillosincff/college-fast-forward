@@ -234,6 +234,9 @@ export default function StudentOnboarding() {
   };
 
   const handleWelcomeComplete = useCallback(() => {
+    // Generate LinkedIn optimization in background (non-blocking)
+    base44.functions.invoke('generateLinkedInOptimization', {}).catch(() => {});
+    
     // Flow B: Go to PostJoinUpsell (7-day trial offer)
     navigate('PostJoinUpsell');
   }, []);

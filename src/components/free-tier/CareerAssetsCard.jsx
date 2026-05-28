@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getUniversityBrand } from '@/lib/universityBrand';
+import LinkedInOptimizationHub from './LinkedInOptimizationHub';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -242,6 +243,7 @@ export default function CareerAssetsCard({ user, onUpgrade, isPremium = false })
         <div style={{ display: 'flex', gap: 0 }}>
           {[
             { id: 'pain', label: panel.tabLabel },
+            { id: 'linkedin', label: '🌐 LinkedIn Hub' },
             { id: 'premium', label: '⚡ AI Optimizations' },
           ].map(tab => (
             <button
@@ -262,7 +264,9 @@ export default function CareerAssetsCard({ user, onUpgrade, isPremium = false })
       </div>
 
       {/* Tab content */}
-      {activeTab === 'pain' ? (
+      {activeTab === 'linkedin' ? (
+        <LinkedInOptimizationHub user={user} onUpgrade={onUpgrade} isPremium={isPremium} />
+      ) : activeTab === 'pain' ? (
         <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Title + badge */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
