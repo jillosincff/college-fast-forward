@@ -21,6 +21,32 @@ function HiringSignal({ signal }) {
   );
 }
 
+// ── Source category badge ────────────────────────────────────────────────────
+const SOURCE_CATEGORY_CONFIG = {
+  A: { emoji: '🔥', label: 'Hidden Network Referral', bg: '#fff1f2', border: '#fecaca', color: '#991b1b' },
+  B: { emoji: '🛰️', label: 'Hiring Manager Social Feed', bg: '#f0f9ff', border: '#bae6fd', color: '#075985' },
+  C: { emoji: '⚡', label: 'Direct Backdoor Track', bg: '#f5f3ff', border: '#ddd6fe', color: '#5b21b6' },
+};
+
+function SourceBadge({ category, source }) {
+  const cfg = SOURCE_CATEGORY_CONFIG[category] || SOURCE_CATEGORY_CONFIG['C'];
+  return (
+    <div style={{ padding: '6px 16px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        background: cfg.bg, border: `1px solid ${cfg.border}`,
+        borderRadius: 100, padding: '3px 9px',
+      }}>
+        <span style={{ fontSize: 10 }}>{cfg.emoji}</span>
+        <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: cfg.color }}>{cfg.label}</span>
+      </span>
+      {source && (
+        <span style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af' }}>{source}</span>
+      )}
+    </div>
+  );
+}
+
 // ── Main card ────────────────────────────────────────────────────────────────
 function MatchCard({ card, shortName, onClick }) {
   const [hovered, setHovered] = useState(false);
@@ -112,12 +138,9 @@ function MatchCard({ card, shortName, onClick }) {
         </div>
       )}
 
-      {/* ── Row 4b: Source attribution ── */}
-      {card.jobSource && (
-        <div style={{ padding: '5px 16px 0', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af' }}>🔗 Found on</span>
-          <span style={{ fontFamily: dm, fontSize: 10, color: '#6b7280', fontWeight: 600 }}>{card.jobSource}</span>
-        </div>
+      {/* ── Row 4b: Source category badge ── */}
+      {card.jobSourceCategory && (
+        <SourceBadge category={card.jobSourceCategory} source={card.jobSource} />
       )}
 
       {/* ── Row 5: Footer ── */}

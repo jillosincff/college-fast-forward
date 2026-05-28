@@ -9,10 +9,12 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
  *  3. Mentorship Boost (Parent): Any school parents who work in the same industry as the job
  *     are layered on as advisory assets.
  *
- * Cards with no alumni are skipped entirely.
+ * sourceCategory labels:
+ *   'A' = 🔥 Hidden Network Referral  — surfaced directly from parent/alumni network intake
+ *   'B' = 🛰️ Hiring Manager Social Feed — native social post by a hiring manager (pre-ATS)
+ *   'C' = ⚡ Direct Backdoor Track     — rolling ATS talent pool / evergreen pipeline on company site
  */
 
-// Map industry labels → title/field keywords for matching network members
 const INDUSTRY_KEYWORDS = {
   'finance': ['finance', 'financial', 'investment', 'banking', 'capital', 'wealth', 'equity', 'trading', 'accounting', 'cfo', 'analyst', 'insurance'],
   'finance & insurance': ['finance', 'financial', 'investment', 'banking', 'capital', 'wealth', 'equity', 'trading', 'accounting', 'cfo', 'analyst', 'insurance'],
@@ -45,7 +47,6 @@ function getMemberKeywords(targetIndustries) {
     const key = ind.toLowerCase();
     const matches = INDUSTRY_KEYWORDS[key] || [];
     matches.forEach(k => kws.add(k));
-    // also allow partial key match
     for (const [mapKey, mapKws] of Object.entries(INDUSTRY_KEYWORDS)) {
       if (mapKey.includes(key.split(' ')[0]) || key.includes(mapKey.split(' ')[0])) {
         mapKws.forEach(k => kws.add(k));
@@ -61,121 +62,125 @@ function memberInIndustry(member, keywords) {
   return keywords.some(kw => haystack.includes(kw));
 }
 
-// Static job pool per industry (anchor tier). Expanded to ensure overlap with real companies.
+// sourceCategory:
+//   'A' = 🔥 Hidden Network Referral — sourced directly from parent/alumni intake
+//   'B' = 🛰️ Hiring Manager Social Feed — surfaced from native LinkedIn/social manager posts
+//   'C' = ⚡ Direct Backdoor Track — rolling ATS talent pool / evergreen pipeline on company site
+
 const JOB_POOL = {
   'finance': [
-    { company: 'JPMorgan', role: 'Financial Operations Specialist', description: 'Analyst roles in investment banking and corporate finance divisions.' },
-    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', description: 'Summer and new associate programs across all divisions.' },
-    { company: 'Stripe', role: 'Financial Operations Specialist', description: 'Finance and strategy analyst roles at a leading fintech.' },
-    { company: 'Deloitte', role: 'Finance & Advisory Associate', description: 'Audit, tax, and financial advisory associates across US offices.' },
-    { company: 'BlackRock', role: 'Investment Analyst', description: 'Analyst programs across multi-asset and quant divisions.' },
-    { company: 'SoFi', role: 'Finance Analyst', description: 'Personal finance platform — lending, analytics, and operations.' },
-    { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Fast-growing fintech with high-ownership finance roles.' },
-    { company: 'PwC', role: 'Assurance Associate', description: 'Big 4 hiring across all service lines for new graduates.' },
+    { company: 'JPMorgan', role: 'Financial Operations Specialist', description: 'Analyst roles in investment banking and corporate finance divisions.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
+    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', description: 'Summer and new associate programs across all divisions.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
+    { company: 'Stripe', role: 'Financial Operations Specialist', description: 'Finance and strategy analyst roles at a leading fintech.', source: 'stripe.com/jobs', sourceCategory: 'B' },
+    { company: 'Deloitte', role: 'Finance & Advisory Associate', description: 'Audit, tax, and financial advisory associates across US offices.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'BlackRock', role: 'Investment Analyst', description: 'Analyst programs across multi-asset and quant divisions.', source: 'blackrock.com/careers', sourceCategory: 'C' },
+    { company: 'SoFi', role: 'Finance Analyst', description: 'Personal finance platform — lending, analytics, and operations.', source: 'sofi.com/careers', sourceCategory: 'B' },
+    { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Fast-growing fintech with high-ownership finance roles.', source: 'ramp.com/careers', sourceCategory: 'B' },
+    { company: 'PwC', role: 'Assurance Associate', description: 'Big 4 hiring across all service lines for new graduates.', source: 'pwc.com/careers', sourceCategory: 'C' },
   ],
   'finance & insurance': [
-    { company: 'JPMorgan', role: 'Financial Operations Specialist', description: 'Analyst roles in investment banking and corporate finance divisions.' },
-    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', description: 'Summer and new associate programs across all divisions.' },
-    { company: 'Stripe', role: 'Financial Operations Specialist', description: 'Finance and strategy analyst roles at a leading fintech.' },
-    { company: 'Deloitte', role: 'Finance & Advisory Associate', description: 'Audit, tax, and financial advisory associates across US offices.' },
-    { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Fast-growing fintech with high-ownership finance roles.' },
+    { company: 'JPMorgan', role: 'Financial Operations Specialist', description: 'Analyst roles in investment banking and corporate finance divisions.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
+    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', description: 'Summer and new associate programs across all divisions.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
+    { company: 'Stripe', role: 'Financial Operations Specialist', description: 'Finance and strategy analyst roles at a leading fintech.', source: 'stripe.com/jobs', sourceCategory: 'B' },
+    { company: 'Deloitte', role: 'Finance & Advisory Associate', description: 'Audit, tax, and financial advisory associates across US offices.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Fast-growing fintech with high-ownership finance roles.', source: 'ramp.com/careers', sourceCategory: 'B' },
   ],
   'tech': [
-    { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.' },
-    { company: 'Microsoft', role: 'Software Development Engineer', description: 'New grad programs spanning cloud, AI, and productivity divisions.' },
-    { company: 'Salesforce', role: 'Associate Software Engineer', description: 'Rotational and entry-level engineering roles across the platform.' },
-    { company: 'Meta', role: 'Data Engineer', description: 'Data and engineering roles across ads and product infrastructure.' },
-    { company: 'Ramp', role: 'Software Engineer', description: 'Fast-growing fintech — real engineering ownership from day one.' },
-    { company: 'Notion', role: 'Product Analyst', description: 'Productivity startup scaling globally — product and data roles.' },
+    { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
+    { company: 'Microsoft', role: 'Software Development Engineer', description: 'New grad programs spanning cloud, AI, and productivity divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
+    { company: 'Salesforce', role: 'Associate Software Engineer', description: 'Rotational and entry-level engineering roles across the platform.', source: 'salesforce.com/careers', sourceCategory: 'C' },
+    { company: 'Meta', role: 'Data Engineer', description: 'Data and engineering roles across ads and product infrastructure.', source: 'metacareers.com', sourceCategory: 'B' },
+    { company: 'Ramp', role: 'Software Engineer', description: 'Fast-growing fintech — real engineering ownership from day one.', source: 'ramp.com/careers', sourceCategory: 'B' },
+    { company: 'Notion', role: 'Product Analyst', description: 'Productivity startup scaling globally — product and data roles.', source: 'notion.com/careers', sourceCategory: 'B' },
   ],
   'technology, information & media': [
-    { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.' },
-    { company: 'Microsoft', role: 'Software Development Engineer', description: 'New grad programs spanning cloud, AI, and productivity divisions.' },
-    { company: 'Meta', role: 'Data Engineer', description: 'Data and engineering roles across ads and product infrastructure.' },
+    { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
+    { company: 'Microsoft', role: 'Software Development Engineer', description: 'New grad programs spanning cloud, AI, and productivity divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
+    { company: 'Meta', role: 'Data Engineer', description: 'Data and engineering roles across ads and product infrastructure.', source: 'metacareers.com', sourceCategory: 'B' },
   ],
   'consulting': [
-    { company: 'McKinsey', role: 'Business Analyst', description: 'Analyst roles for top undergrads entering management consulting.' },
-    { company: 'Deloitte', role: 'Strategy & Analytics Consultant', description: 'Consulting and business analysts in advisory practices nationwide.' },
-    { company: 'BCG', role: 'Associate Consultant', description: 'Entry-level strategy roles for new graduates.' },
-    { company: 'West Monroe', role: 'Business Analyst', description: 'Digital consulting firm actively hiring analysts.' },
+    { company: 'McKinsey', role: 'Business Analyst', description: 'Analyst roles for top undergrads entering management consulting.', source: 'mckinsey.com/careers', sourceCategory: 'C' },
+    { company: 'Deloitte', role: 'Strategy & Analytics Consultant', description: 'Consulting and business analysts in advisory practices nationwide.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'BCG', role: 'Associate Consultant', description: 'Entry-level strategy roles for new graduates.', source: 'bcg.com/careers', sourceCategory: 'C' },
+    { company: 'West Monroe', role: 'Business Analyst', description: 'Digital consulting firm actively hiring analysts.', source: 'westmonroe.com/careers', sourceCategory: 'B' },
   ],
   'professional services': [
-    { company: 'Deloitte', role: 'Consulting Analyst', description: 'Advisory associates in strategy, digital, and operations.' },
-    { company: 'EY', role: 'Associate', description: 'Entry-level roles across audit, tax, and advisory.' },
-    { company: 'KPMG', role: 'Advisory Associate', description: 'Associate-level hiring across US offices.' },
-    { company: 'McKinsey', role: 'Business Analyst', description: 'Analyst roles for top undergrads entering management consulting.' },
+    { company: 'Deloitte', role: 'Consulting Analyst', description: 'Advisory associates in strategy, digital, and operations.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'EY', role: 'Associate', description: 'Entry-level roles across audit, tax, and advisory.', source: 'ey.com/careers', sourceCategory: 'C' },
+    { company: 'KPMG', role: 'Advisory Associate', description: 'Associate-level hiring across US offices.', source: 'kpmg.com/careers', sourceCategory: 'C' },
+    { company: 'McKinsey', role: 'Business Analyst', description: 'Analyst roles for top undergrads entering management consulting.', source: 'mckinsey.com/careers', sourceCategory: 'C' },
   ],
   'healthcare': [
-    { company: 'HCA Healthcare', role: 'Clinical Coordinator', description: 'Hospital network consistently hiring nurses across hundreds of facilities.' },
-    { company: 'AdventHealth', role: 'Registered Nurse', description: 'Faith-based hospital network with strong nursing culture.' },
-    { company: 'Carbon Health', role: 'Care Coordinator', description: 'Tech-enabled primary care startup rapidly expanding clinical teams.' },
+    { company: 'HCA Healthcare', role: 'Clinical Coordinator', description: 'Hospital network consistently hiring nurses across hundreds of facilities.', source: 'hcahealthcare.com/careers', sourceCategory: 'C' },
+    { company: 'AdventHealth', role: 'Registered Nurse', description: 'Faith-based hospital network with strong nursing culture.', source: 'adventhealth.com/careers', sourceCategory: 'C' },
+    { company: 'Carbon Health', role: 'Care Coordinator', description: 'Tech-enabled primary care startup rapidly expanding clinical teams.', source: 'carbonhealth.com/careers', sourceCategory: 'B' },
   ],
   'healthcare & pharmaceuticals': [
-    { company: 'HCA Healthcare', role: 'Clinical Coordinator', description: 'Hospital network consistently hiring nurses across hundreds of facilities.' },
-    { company: 'CVS Health', role: 'Pharmacy Operations Analyst', description: 'Hiring clinical and operations staff for pharmacy and MinuteClinic.' },
+    { company: 'HCA Healthcare', role: 'Clinical Coordinator', description: 'Hospital network consistently hiring nurses across hundreds of facilities.', source: 'hcahealthcare.com/careers', sourceCategory: 'C' },
+    { company: 'CVS Health', role: 'Pharmacy Operations Analyst', description: 'Hiring clinical and operations staff for pharmacy and MinuteClinic.', source: 'cvshealth.com/careers', sourceCategory: 'C' },
   ],
   'marketing': [
-    { company: 'Procter & Gamble', role: 'Brand Management Associate', description: 'Brand management and operations rotational roles for recent grads.' },
-    { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates." },
-    { company: 'Ogilvy', role: 'Creative Account Manager', description: 'Creative and account management roles for recent grads in advertising.' },
+    { company: 'Procter & Gamble', role: 'Brand Management Associate', description: 'Brand management and operations rotational roles for recent grads.', source: 'pg.com/careers', sourceCategory: 'C' },
+    { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
+    { company: 'Ogilvy', role: 'Creative Account Manager', description: 'Creative and account management roles for recent grads in advertising.', source: 'ogilvy.com/careers', sourceCategory: 'B' },
   ],
   'advertising & pr': [
-    { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates." },
-    { company: 'Weber Shandwick', role: 'PR Associate', description: 'Hiring entry-level PR and communications associates.' },
-    { company: 'WPP', role: 'Strategy Analyst', description: 'Global holding company with entry-level roles across agency brands.' },
+    { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
+    { company: 'Weber Shandwick', role: 'PR Associate', description: 'Hiring entry-level PR and communications associates.', source: 'webershandwick.com/careers', sourceCategory: 'B' },
+    { company: 'WPP', role: 'Strategy Analyst', description: 'Global holding company with entry-level roles across agency brands.', source: 'wpp.com/careers', sourceCategory: 'C' },
   ],
   'real_estate': [
-    { company: 'CBRE', role: 'Real Estate Analyst', description: "World's largest commercial real estate services firm hiring analysts." },
-    { company: 'JLL', role: 'Research Associate', description: 'Global RE firm with strong graduate development programs.' },
+    { company: 'CBRE', role: 'Real Estate Analyst', description: "World's largest commercial real estate services firm hiring analysts.", source: 'cbre.com/careers', sourceCategory: 'C' },
+    { company: 'JLL', role: 'Research Associate', description: 'Global RE firm with strong graduate development programs.', source: 'jll.com/careers', sourceCategory: 'C' },
   ],
   'construction & agriculture': [
-    { company: 'Turner Construction', role: 'Project Engineer', description: 'One of the largest construction firms — hiring project managers and engineers nationwide.' },
-    { company: 'CBRE', role: 'Project Manager', description: "World's largest commercial real estate services firm — project management division." },
-    { company: 'Procore', role: 'Implementation Analyst', description: 'Construction management software — sales, support, and analyst roles.' },
+    { company: 'Turner Construction', role: 'Project Engineer', description: 'One of the largest construction firms — hiring project managers and engineers nationwide.', source: 'turnerconstruction.com/careers', sourceCategory: 'C' },
+    { company: 'CBRE', role: 'Project Manager', description: "World's largest commercial real estate services firm — project management division.", source: 'cbre.com/careers', sourceCategory: 'C' },
+    { company: 'Procore', role: 'Implementation Analyst', description: 'Construction management software — sales, support, and analyst roles.', source: 'procore.com/careers', sourceCategory: 'B' },
   ],
   'education': [
-    { company: 'Teach For America', role: 'Corps Member', description: 'Two-year teaching fellowship placing grads in under-resourced schools.' },
-    { company: 'Duolingo', role: 'Curriculum Analyst', description: 'Language learning platform hiring for content and product roles.' },
+    { company: 'Teach For America', role: 'Corps Member', description: 'Two-year teaching fellowship placing grads in under-resourced schools.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
+    { company: 'Duolingo', role: 'Curriculum Analyst', description: 'Language learning platform hiring for content and product roles.', source: 'duolingo.com/careers', sourceCategory: 'B' },
   ],
   'education & training': [
-    { company: 'Teach For America', role: 'Corps Member', description: 'Two-year teaching fellowship in under-resourced schools.' },
-    { company: 'Duolingo', role: 'Curriculum Analyst', description: 'Language learning platform hiring for content and product roles.' },
+    { company: 'Teach For America', role: 'Corps Member', description: 'Two-year teaching fellowship in under-resourced schools.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
+    { company: 'Duolingo', role: 'Curriculum Analyst', description: 'Language learning platform hiring for content and product roles.', source: 'duolingo.com/careers', sourceCategory: 'B' },
   ],
   'nonprofit': [
-    { company: 'Teach For America', role: 'Program Associate', description: 'Educational non-profit with operations and program roles.' },
-    { company: 'Code for America', role: 'Civic Tech Fellow', description: 'Non-profit improving government services through technology.' },
+    { company: 'Teach For America', role: 'Program Associate', description: 'Educational non-profit with operations and program roles.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
+    { company: 'Code for America', role: 'Civic Tech Fellow', description: 'Non-profit improving government services through technology.', source: 'codeforamerica.org/careers', sourceCategory: 'B' },
   ],
   'government': [
-    { company: 'Booz Allen Hamilton', role: 'Government Analyst', description: 'Government consulting firm with strong entry-level programs.' },
-    { company: 'Deloitte Government', role: 'Federal Consultant', description: 'Federal consulting division hiring for public sector projects.' },
+    { company: 'Booz Allen Hamilton', role: 'Government Analyst', description: 'Government consulting firm with strong entry-level programs.', source: 'boozallen.com/careers', sourceCategory: 'C' },
+    { company: 'Deloitte Government', role: 'Federal Consultant', description: 'Federal consulting division hiring for public sector projects.', source: 'deloitte.com/careers', sourceCategory: 'C' },
   ],
   'government & public sector': [
-    { company: 'Booz Allen Hamilton', role: 'Government Analyst', description: 'Government consulting firm with strong entry-level programs.' },
-    { company: 'Deloitte Government', role: 'Federal Consultant', description: 'Federal consulting division hiring for public sector projects.' },
+    { company: 'Booz Allen Hamilton', role: 'Government Analyst', description: 'Government consulting firm with strong entry-level programs.', source: 'boozallen.com/careers', sourceCategory: 'C' },
+    { company: 'Deloitte Government', role: 'Federal Consultant', description: 'Federal consulting division hiring for public sector projects.', source: 'deloitte.com/careers', sourceCategory: 'C' },
   ],
   'sports & entertainment': [
-    { company: 'Live Nation', role: 'Marketing Coordinator', description: "World's largest live entertainment company — events and operations roles." },
-    { company: 'ESPN', role: 'Content Associate', description: 'Hiring for content, production, and marketing roles in sports media.' },
-    { company: 'Nike', role: 'Brand Marketing Associate', description: 'Brand marketing and product roles for sports or business backgrounds.' },
+    { company: 'Live Nation', role: 'Marketing Coordinator', description: "World's largest live entertainment company — events and operations roles.", source: 'livenation.com/careers', sourceCategory: 'C' },
+    { company: 'ESPN', role: 'Content Associate', description: 'Hiring for content, production, and marketing roles in sports media.', source: 'espncareers.com', sourceCategory: 'B' },
+    { company: 'Nike', role: 'Brand Marketing Associate', description: 'Brand marketing and product roles for sports or business backgrounds.', source: 'jobs.nike.com', sourceCategory: 'C' },
   ],
   'logistics': [
-    { company: 'Arrive Logistics', role: 'Account Manager', description: 'Growing freight brokerage — strong entry-level training program.' },
-    { company: 'Samsara', role: 'Sales Development Rep', description: 'Fleet management platform — sales and operations roles.' },
-    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', description: 'Supply chain and freight brokerage roles with strong training.' },
+    { company: 'Arrive Logistics', role: 'Account Manager', description: 'Growing freight brokerage — strong entry-level training program.', source: 'arrivelogistics.com/careers', sourceCategory: 'B' },
+    { company: 'Samsara', role: 'Sales Development Rep', description: 'Fleet management platform — sales and operations roles.', source: 'samsara.com/careers', sourceCategory: 'B' },
+    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', description: 'Supply chain and freight brokerage roles with strong training.', source: 'chrobinson.com/careers', sourceCategory: 'C' },
   ],
   'transportation & logistics': [
-    { company: 'Arrive Logistics', role: 'Account Manager', description: 'Growing freight brokerage — strong entry-level training program.' },
-    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', description: 'Supply chain and freight brokerage roles with strong training.' },
-    { company: 'Samsara', role: 'Sales Development Rep', description: 'Fleet management platform startup — sales and operations roles.' },
+    { company: 'Arrive Logistics', role: 'Account Manager', description: 'Growing freight brokerage — strong entry-level training program.', source: 'arrivelogistics.com/careers', sourceCategory: 'B' },
+    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', description: 'Supply chain and freight brokerage roles with strong training.', source: 'chrobinson.com/careers', sourceCategory: 'C' },
+    { company: 'Samsara', role: 'Sales Development Rep', description: 'Fleet management platform startup — sales and operations roles.', source: 'samsara.com/careers', sourceCategory: 'B' },
   ],
 };
 
 const FALLBACK_JOBS = [
-  { company: 'Deloitte', role: 'Business Analyst', description: 'Consulting and advisory associates across all US offices.' },
-  { company: 'JPMorgan', role: 'Operations Analyst', description: 'Finance and operations roles nationwide.' },
-  { company: 'Google', role: 'Associate Product Manager', description: 'Product and engineering roles across multiple teams.' },
-  { company: 'Salesforce', role: 'Associate', description: 'Rotational roles across sales, engineering, and marketing.' },
-  { company: 'Procter & Gamble', role: 'Brand Management Associate', description: 'Consumer goods brand and operations roles.' },
+  { company: 'Deloitte', role: 'Business Analyst', description: 'Consulting and advisory associates across all US offices.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+  { company: 'JPMorgan', role: 'Operations Analyst', description: 'Finance and operations roles nationwide.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
+  { company: 'Google', role: 'Associate Product Manager', description: 'Product and engineering roles across multiple teams.', source: 'careers.google.com', sourceCategory: 'C' },
+  { company: 'Salesforce', role: 'Associate', description: 'Rotational roles across sales, engineering, and marketing.', source: 'salesforce.com/careers', sourceCategory: 'C' },
+  { company: 'Procter & Gamble', role: 'Brand Management Associate', description: 'Consumer goods brand and operations roles.', source: 'pg.com/careers', sourceCategory: 'C' },
 ];
 
 function normalizeCompanyName(name) {
@@ -207,7 +212,6 @@ Deno.serve(async (req) => {
       const pool = JOB_POOL[ind] || [];
       jobPool.push(...pool);
     }
-    // Deduplicate by company name
     const seen = new Set();
     jobPool = jobPool.filter(j => {
       if (seen.has(j.company)) return false;
@@ -225,7 +229,6 @@ Deno.serve(async (req) => {
       if (!isParent && !isAlumni) return false;
       if (!u.full_name) return false;
       if (u.visible_in_directory === false) return false;
-      // School match
       if (schoolCode || schoolName) {
         const uCode = (u.school_code || '').toLowerCase();
         const uName = (u.school_name || u.school || u.university || '').toLowerCase();
@@ -238,7 +241,6 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    // Build quick lookup: normalized_company → { alumni: [], parents: [] }
     const companyNetworkMap = {};
     for (const u of networkMembers) {
       const rawCompany = (u.company || u.current_company || u.employer || '').trim();
@@ -272,17 +274,11 @@ Deno.serve(async (req) => {
     });
 
     // ─── Step 4: Build final premium cards ──────────────────────────────────
-    // FIX: Alumni are a BACKDOOR CHANNEL regardless of their internal department.
-    // We keep the job pool strictly industry-targeted (Gate 1), but we look for
-    // ANY alumni at the company — not just ones whose profile tags match the industry (Gate 2 removed).
-    // Parents are still filtered by industry for targeted advisory value.
-
     const premiumCards = [];
 
     for (const job of jobPool) {
       const normalizedJobCompany = normalizeCompanyName(job.company);
 
-      // Find network entry for this company — exact match first, then partial
       let networkEntry = companyNetworkMap[normalizedJobCompany];
       if (!networkEntry) {
         for (const [key, val] of Object.entries(companyNetworkMap)) {
@@ -293,30 +289,30 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Tier 2 (LOOSENED): ANY alumni at this company qualify as a backdoor lever,
-      // regardless of their specific role or department.
       const alumni = networkEntry?.alumni || [];
-      // Also count parents at this company as a weak alumni signal — they can route resumes too
       const parentsAtCompany = networkEntry?.parents || [];
 
-      // Must have at least one warm connection (alumni OR parent at this specific company)
       if (alumni.length === 0 && parentsAtCompany.length === 0) continue;
 
-      // Tier 3: Parent advisory bonus — industry-matched parents (any company)
       const industryParentAdvisors = industryParents.slice(0, 3);
       const allParentAdvisors = [...new Map(
         [...parentsAtCompany, ...industryParentAdvisors].map(p => [p.id, p])
       ).values()];
 
-      // Pick a representative parent advisor for the card copy
       const featuredParent = allParentAdvisors.find(p =>
         memberInIndustry({ title: p.title, industry: p.industry, bio: '' }, industryKeywords)
       ) || allParentAdvisors[0] || null;
+
+      // If this card has alumni who explicitly referred via network intake, upgrade to category A
+      const hasNetworkReferral = alumni.some(a => a.referred_opening === true);
+      const effectiveCategory = hasNetworkReferral ? 'A' : (job.sourceCategory || 'C');
 
       premiumCards.push({
         company: job.company,
         role: job.role,
         jobDescription: job.description,
+        jobSource: job.source || null,
+        jobSourceCategory: effectiveCategory,
         targetIndustry: targetIndustries[0] || '',
         matchedIndustries: targetIndustries,
         alumniCount: alumni.length,
@@ -335,9 +331,7 @@ Deno.serve(async (req) => {
       if (premiumCards.length >= 6) break;
     }
 
-    // ─── Fallback: If strict company matching produced nothing, surface jobs
-    // from the pool paired with any industry-matched parents as advisory cards.
-    // This ensures the user always sees something actionable.
+    // ─── Fallback: surface jobs paired with industry-matched parents ─────────
     if (premiumCards.length === 0 && industryParents.length > 0) {
       const fallbackJobs = jobPool.slice(0, 3);
       for (const job of fallbackJobs) {
@@ -346,6 +340,8 @@ Deno.serve(async (req) => {
           company: job.company,
           role: job.role,
           jobDescription: job.description,
+          jobSource: job.source || null,
+          jobSourceCategory: job.sourceCategory || 'C',
           targetIndustry: targetIndustries[0] || '',
           matchedIndustries: targetIndustries,
           alumniCount: 0,

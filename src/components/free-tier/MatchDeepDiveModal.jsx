@@ -2,6 +2,31 @@ import { useState, useEffect } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
+const SOURCE_CATEGORY_CONFIG = {
+  A: { emoji: '🔥', label: 'Hidden Network Referral', bg: '#fff1f2', border: '#fecaca', color: '#991b1b' },
+  B: { emoji: '🛰️', label: 'Hiring Manager Social Feed', bg: '#f0f9ff', border: '#bae6fd', color: '#075985' },
+  C: { emoji: '⚡', label: 'Direct Backdoor Track', bg: '#f5f3ff', border: '#ddd6fe', color: '#5b21b6' },
+};
+
+function SourceCategoryBadge({ category, source }) {
+  const cfg = SOURCE_CATEGORY_CONFIG[category] || SOURCE_CATEGORY_CONFIG['C'];
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        background: cfg.bg, border: `1px solid ${cfg.border}`,
+        borderRadius: 100, padding: '3px 10px',
+      }}>
+        <span style={{ fontSize: 10 }}>{cfg.emoji}</span>
+        <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: cfg.color }}>{cfg.label}</span>
+      </span>
+      {source && (
+        <span style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af' }}>{source}</span>
+      )}
+    </div>
+  );
+}
+
 // Bullet points derived purely from verified DB counts — no AI, no guessing
 function buildMatchReasons(match, shortName) {
   const reasons = [];
@@ -121,12 +146,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
             {match.jobDescription && (
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px', marginBottom: 14 }}>
                 <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px' }}>📋 About This Role</p>
-                <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: '0 0 8px', lineHeight: 1.6 }}>{match.jobDescription}</p>
-                {match.jobSource && (
-                  <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', margin: 0 }}>
-                    🔗 Found on <span style={{ fontWeight: 600, color: '#6b7280' }}>{match.jobSource}</span>
-                  </p>
-                )}
+                <p style={{ fontFamily: dm, fontSize: 13, color: '#374151', margin: '0 0 10px', lineHeight: 1.6 }}>{match.jobDescription}</p>
+                {match.jobSourceCategory && <SourceCategoryBadge category={match.jobSourceCategory} source={match.jobSource} />}
               </div>
             )}
 
