@@ -51,7 +51,9 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           saved_at: new Date().toISOString()
         }
       });
-      onSave({ target_roles: finalRoles, target_industries: finalIndustries });
+      // Refresh user data so the dashboard shows updated goals
+      const refreshedUser = await base44.auth.me();
+      onSave({ target_roles: finalRoles, target_industries: finalIndustries }, refreshedUser);
     } catch (e) {
       console.error('Save failed:', e);
       setError('Failed to save. Try again.');

@@ -152,8 +152,8 @@ export default function GoalsSummaryCard({ goals, onTabChange, onFindLeads, onRe
           user={user}
           openedFromNudge={openedFromNudge}
           onClose={() => { setShowEditModal(false); setOpenedFromNudge(false); }}
-          onSave={(updated) => {
-            onGoalsUpdated?.(updated);
+          onSave={(updated, refreshedUser) => {
+            onGoalsUpdated?.(updated, refreshedUser);
             setShowEditModal(false);
             setOpenedFromNudge(false);
           }}
