@@ -8,11 +8,11 @@ export function CliffLogo({ size = 'text-base' }) {
       {/* CL for College */}
       <span className="text-slate-900">CL</span>
       
-      {/* The intelligent bridge */}
-      <span className="text-slate-400 font-medium">i</span>
+      {/* The intelligent bridge — uses brighter violet on dark backgrounds */}
+      <span style={{ color: '#A78BFA', fontWeight: 500 }}>i</span>
       
       {/* FF for Fast Forward */}
-      <span className="text-indigo-600">FF</span>
+      <span style={{ color: '#818CF8' }}>FF</span>
     </span>
   );
 }

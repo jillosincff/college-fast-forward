@@ -317,7 +317,7 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
         <span style={{ fontSize: 20 }}>⚡</span>
         <div style={{ flex: 1 }}>
           <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', margin: 0 }}>Live Career Signals Feed</p>
-          <p style={{ fontFamily: mono, fontSize: 11, color: 'rgba(255,255,255,0.5)', margin: 0 }}>Agent crawling 24/7 · All signals unlocked</p>
+          <p style={{ fontFamily: mono, fontSize: 11, color: '#cbd5e1', margin: 0, letterSpacing: '0.04em' }}>Agent crawling 24/7 · All signals unlocked</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#22c55e', animation: 'pulse-glow 2s infinite', flexShrink: 0 }} />
