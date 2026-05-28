@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
 import { calculateNetworkMatchScore } from '@/utils/networkScore';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
+import ColdDiscoveryCard from './ColdDiscoveryCard';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -11,9 +12,10 @@ function tagLabel(alumniCount, parentCount) {
   return `${parentCount} Parent referral${parentCount > 1 ? 's' : ''} available`;
 }
 
-export default function MatchFlashCarousel({ college, theme, user, onCardClick }) {
+export default function MatchFlashCarousel({ college, theme, user, onCardClick, onColdOptIn }) {
   const t = theme || { primary: '#2563eb', bgTint: '#eff6ff' };
   const shortName = t.shortName || college || 'UF';
+  const firstName = user?.full_name?.split(' ')[0] || null;
   const [activeIdx, setActiveIdx] = useState(0);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [matches, setMatches] = useState([]);
@@ -133,10 +135,13 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick }
             onClick={() => setSelectedMatch(m)}
           />
         ))}
+        {/* Cold Discovery opt-in — always the last card in the track */}
+        <ColdDiscoveryCard firstName={firstName} onOptIn={onColdOptIn} />
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 10, marginBottom: 4 }}>
-        {matches.map((_, i) => (
+        {/* +1 dot for the ColdDiscoveryCard at the end */}
+        {[...matches, null].map((_, i) => (
           <button
             key={i}
             onClick={() => scrollTo(i)}

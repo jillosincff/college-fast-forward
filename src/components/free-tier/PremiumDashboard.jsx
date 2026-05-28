@@ -10,6 +10,7 @@ import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
 import MobileBottomNav from './PremiumMobileNav';
 import MatchFlashCarousel from './MatchFlashCarousel';
+import ColdDiscoverySection from './ColdDiscoverySection';
 import { useAuth } from '@/lib/AuthContext';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -72,6 +73,8 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const [signalAdditions, setSignalAdditions] = useState([]);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
   const [networkStats, setNetworkStats] = useState(null);
+  const [showColdDiscovery, setShowColdDiscovery] = useState(false);
+  const [warmCompanyNames, setWarmCompanyNames] = useState([]);
 
   useEffect(() => {
     getVerifiedNetworkCompanies({})
@@ -80,6 +83,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
         const totalAlumni = companies.reduce((s, c) => s + c.alumniCount, 0);
         const totalParents = companies.reduce((s, c) => s + c.parentCount, 0);
         setNetworkStats({ companies: companies.length, alumni: totalAlumni, parents: totalParents });
+        setWarmCompanyNames(companies.map(c => c.company));
       })
       .catch(() => {});
   }, []);
@@ -242,9 +246,13 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
         <MatchFlashCarousel
           college={college}
           theme={t}
+          user={user}
           onCardClick={(match) => {
-            // Find matching lead from pipeline and select it
             setSelectedLead({ company: match.company, role: match.role, logo: match.logo, alumCount: match.alumCount, recruiter: '—', posted: 'Not yet public', source: 'CLIFF Top Match' });
+          }}
+          onColdOptIn={() => {
+            setShowColdDiscovery(true);
+            setTimeout(() => document.getElementById('cold-discovery-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
           }}
         />
       </div>
@@ -257,6 +265,19 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
             <PremiumSignalsFeed college={college} theme={t} onAddToPipeline={handleAddFromSignals} onCoffeeChat={setSelectedSignal} onBackdoorClick={handleBackdoorClick} user={user} />
+
+            {/* Cold Discovery Section — only shown after explicit opt-in */}
+            {showColdDiscovery && (
+              <div id="cold-discovery-section">
+                <ColdDiscoverySection
+                  warmCompanyNames={warmCompanyNames}
+                  onGenerateScript={(role) => {
+                    setSelectedLead({ company: role.company, role: role.role || 'Open Role', logo: '🏢', alumCount: 0, recruiter: '—', posted: 'Not yet public', source: 'Cold Discovery' });
+                  }}
+                  onDismiss={() => setShowColdDiscovery(false)}
+                />
+              </div>
+            )}
           </div>
 
           {/* Right Column (Desktop Only) */}
