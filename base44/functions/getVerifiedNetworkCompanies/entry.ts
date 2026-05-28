@@ -48,6 +48,17 @@ Deno.serve(async (req) => {
       const key = rawCompany.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
       if (!key) continue;
 
+      // Strip non-company placeholders (self-employed, retired, etc.)
+      const INVALID_COMPANY_KEYWORDS = [
+        'self', 'self employed', 'selfemployed', 'self-employed',
+        'retired', 'retirement',
+        'none', 'n/a', 'na', 'not applicable',
+        'unemployed', 'unemployed currently',
+        'stay at home', 'homemaker', 'housewife', 'househusband',
+        'looking for work', 'job searching', 'between jobs',
+      ];
+      if (INVALID_COMPANY_KEYWORDS.includes(key)) continue;
+
       if (!companyMap[key]) {
         companyMap[key] = {
           company: rawCompany, // preserve original casing from first hit
