@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { CliffLogo } from '@/components/brand/CliffLogo';
 import PremiumPipeline from './PremiumPipeline';
@@ -70,6 +71,18 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
   const [isMobile, setIsMobile] = useState(false);
   const [signalAdditions, setSignalAdditions] = useState([]);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
+  const [networkStats, setNetworkStats] = useState(null);
+
+  useEffect(() => {
+    getVerifiedNetworkCompanies({})
+      .then(res => {
+        const companies = res?.data?.companies || [];
+        const totalAlumni = companies.reduce((s, c) => s + c.alumniCount, 0);
+        const totalParents = companies.reduce((s, c) => s + c.parentCount, 0);
+        setNetworkStats({ companies: companies.length, alumni: totalAlumni, parents: totalParents });
+      })
+      .catch(() => {});
+  }, []);
 
   const handleBackdoorClick = (job) => {
     setSelectedJob(job);
@@ -191,7 +204,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
         <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: t.primary, margin: 0, flex: 1 }}>
           Synced: {college || 'UF'} Alumni & Parent Grid
         </p>
-        <span style={{ fontFamily: dm, fontSize: 11, color: t.primary, opacity: 0.8, fontWeight: 700 }}>50 Network Matches Unlocked — Tap to view →</span>
+        <span style={{ fontFamily: dm, fontSize: 11, color: t.primary, opacity: 0.8, fontWeight: 700 }}>
+          {networkStats ? `${networkStats.companies} Companies · ${networkStats.alumni + networkStats.parents} Verified Contacts` : 'Loading network...'} — Tap to view →
+        </span>
       </div>
 
       {/* Network Modal */}
@@ -204,10 +219,9 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {[
-                { emoji: '🎓', label: 'Alumni Connections Unlocked', value: '1,240+', color: '#2563eb' },
-                { emoji: '👨‍👩‍👧', label: 'Parent Network Active', value: parentCount !== null ? `${parentCount}+` : '20+', color: '#7c3aed' },
-                { emoji: '🏢', label: 'Companies with Inside Contacts', value: '85+', color: '#0891b2' },
-                { emoji: '⚡', label: 'Warm Intro Paths Available', value: '12', color: '#d97706' },
+                { emoji: '🎓', label: 'Verified Alumni in Network', value: networkStats ? `${networkStats.alumni}` : '—', color: '#2563eb' },
+                { emoji: '👨‍👩‍👧', label: 'Verified Parents in Network', value: networkStats ? `${networkStats.parents}` : '—', color: '#7c3aed' },
+                { emoji: '🏢', label: 'Companies with Inside Contacts', value: networkStats ? `${networkStats.companies}` : '—', color: '#0891b2' },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 16px' }}>
                   <span style={{ fontSize: 22 }}>{item.emoji}</span>
@@ -218,7 +232,7 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
                 </div>
               ))}
             </div>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '16px 0 0', textAlign: 'center' }}>Updated live as new alumni and parents join the {college || 'UF'} grid.</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '16px 0 0', textAlign: 'center' }}>Counts reflect verified members who have joined and listed their employer in the {college || 'UF'} network.</p>
           </div>
         </div>
       )}
@@ -288,8 +302,10 @@ function PremiumAlumniOutreach({ college, theme, user, selectedLead }) {
   useEffect(() => {
     if (!selectedLead) return;
     const recruiterName = formatGreetingName(selectedLead.recruiter?.split(',')[0]);
-    const alumCount = selectedLead.alumCount || 5;
-    const autoScript = `Hi ${recruiterName},\n\nI came across the ${selectedLead.role} opportunity at ${selectedLead.company} through College Fast Forward. Seeing that there is a strong community of ${alumCount} ${shortName} alumni on the team — that connection immediately stood out to me.\n\nI'm a current ${shortName} student actively pursuing this type of role, and I'd love to connect briefly to learn more about the opportunity and what it's like to transition from campus to the team.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
+    const alumLine = selectedLead.alumCount > 0
+      ? `Seeing that there ${selectedLead.alumCount === 1 ? 'is' : 'are'} ${selectedLead.alumCount} confirmed ${shortName} alumni on the team`
+      : `Seeing that ${shortName} has a verified presence in this network`;
+    const autoScript = `Hi ${recruiterName},\n\nI came across the ${selectedLead.role} opportunity at ${selectedLead.company} through College Fast Forward. ${alumLine} — that connection immediately stood out to me.\n\nI'm a current ${shortName} student actively pursuing this type of role, and I'd love to connect briefly to learn more about the opportunity and what it's like to transition from campus to the team.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
     setTarget(selectedLead.company);
     setScript(autoScript);
     setCopied(false);
@@ -301,8 +317,8 @@ function PremiumAlumniOutreach({ college, theme, user, selectedLead }) {
     setScript('');
     setCopied(false);
     await new Promise(r => setTimeout(r, 1200));
-    const name = user?.full_name || 'a fellow alum';
-    const generated = `Hi [Name],\n\nI noticed you graduated from ${shortName} and are currently working at ${target.trim()} — that connection immediately stood out to me.\n\nI'm a current ${shortName} student studying ${user?.major || 'business'}, and I'm actively exploring opportunities in your field. I'd be incredibly grateful for 15 minutes to hear about your path and any advice you might have.\n\nThank you so much for being part of the ${shortName} network.\n\nWarm regards,\n${user?.full_name || name}`;
+    const majorLine = user?.major ? ` studying ${user.major}` : '';
+    const generated = `Hi [Name],\n\nI noticed you're currently at ${target.trim()} and are part of the ${shortName} network — that connection immediately stood out to me.\n\nI'm a current ${shortName} student${majorLine}, and I'm actively exploring opportunities in your field. I'd be incredibly grateful for 15 minutes to hear about your path and any advice you might have.\n\nThank you so much for being part of the ${shortName} community.\n\nWarm regards,\n${user?.full_name || '[Your Name]'}`;
     setScript(generated);
     setLoading(false);
   };

@@ -2,26 +2,15 @@ import { useState, useEffect } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
-const MATCH_REASONS = {
-  Salesforce: [
-    'Your major aligns with BDR career trajectory',
-    'Resume shows CRM & outreach experience',
-    '3 UF alumni warm intro paths available',
-    '2 UF parents opted in for referrals',
-  ],
-  Deloitte: [
-    'GPA + consulting internship experience match',
-    'Case study background detected on resume',
-    '5 UF alumni warm intro paths available',
-    '1 UF parent referral available',
-  ],
-  Amazon: [
-    'Operations coursework matches role requirements',
-    'Leadership experience detected',
-    '2 UF alumni warm intro paths available',
-    '3 UF parents opted in for referrals',
-  ],
-};
+// Match reasons are derived from real verified data — no hardcoded company specifics
+function buildMatchReasons(match, shortName) {
+  const reasons = [];
+  if (match.alumCount > 0) reasons.push(`${match.alumCount} verified ${shortName} alumni confirmed at this company`);
+  if (match.parentCount > 0) reasons.push(`${match.parentCount} ${shortName} parent${match.parentCount > 1 ? 's' : ''} opted in for referrals`);
+  reasons.push('Direct warm intro path — no cold application required');
+  reasons.push('Company is in the verified CFF network');
+  return reasons;
+}
 
 export default function MatchDeepDiveModal({ match, shortName, onClose, onGenerateOutreach, user }) {
   const [tab, setTab] = useState('alumni');
@@ -63,7 +52,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   if (!match) return null;
 
   const contacts = tab === 'alumni' ? alumni : parents;
-  const reasons = MATCH_REASONS[match.company] || MATCH_REASONS.Salesforce;
+  const reasons = buildMatchReasons(match, shortName || 'UF');
 
   const handleTrackAndDraft = () => {
     const contact = selectedContact || contacts[0];
