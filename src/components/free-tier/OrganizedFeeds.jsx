@@ -228,7 +228,7 @@ export default function OrganizedFeeds({ user }) {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-2">🚀 CLiFF's Live Target Matches</h1>
       <p className="text-sm text-slate-600 mb-6">
-        Your personalized feed of {feedsData.hotLeads?.length + feedsData.warmLeads?.length + feedsData.coldLeads?.length} opportunities
+        Your personalized feed of {(feedsData.hotLeads?.length || 0) + (feedsData.warmLeads?.length || 0) + (feedsData.coldLeads?.length || 0)} opportunities
       </p>
 
       {/* 🔥 HOT LEADS */}
