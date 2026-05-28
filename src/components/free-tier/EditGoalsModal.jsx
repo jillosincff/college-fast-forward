@@ -56,11 +56,13 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
       <div style={{ background: '#fff', borderRadius: 16, maxWidth: 520, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 28px 16px', borderBottom: '1px solid #F0F0F0', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>
-            ✏️ Edit Your Career Goals
-            {console.log('EditGoalsModal rendered with goals:', goals, 'user.career_goals:', user?.career_goals)}
-          </h2>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#1A1A1A', margin: 0 }}>✏️ Edit Your Career Goals</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', color: '#888' }}>×</button>
+        </div>
+
+        {/* DEBUG INFO - Remove after testing */}
+        <div style={{ padding: '12px 24px', background: '#FEF3C7', borderBottom: '1px solid #FDE68A', fontSize: 11, fontFamily: "'DM Sans', sans-serif" }}>
+          <strong>Debug:</strong> goals prop = {goals ? JSON.stringify(goals) : 'undefined'} | user.career_goals = {user?.career_goals ? JSON.stringify(user.career_goals) : 'undefined'}
         </div>
 
         {/* Form */}
