@@ -37,15 +37,29 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
         const recap = recapRes?.data ?? recapRes ?? {};
 
         if (recap.actionItem) {
-          setRecapAction(recap.actionItem);
+        setRecapAction(recap.actionItem);
 
-          if (recap.actionItem.type === 'SEND_WARM_OUTREACH') {
-            const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: We currently have ${recap.metrics.totalInPipeline} opportunities active in your pipeline${recap.metrics.interviewingCount > 0 ? `, and you're locked in for ${recap.metrics.interviewingCount} interview${recap.metrics.interviewingCount > 1 ? 's' : ''}` : ''}. Right now, your application for ${recap.actionItem.companyName || 'your top target'} is sitting in 'Applied.' We found ${recap.actionItem.parentCount} ${recap.schoolAbbreviation} parents who work there—let's write a quick message to them today to make sure your resume doesn't hit a cold black hole. Want to draft it now?`;
-            setMessages([{ role: 'agent', text: greeting }]);
-          } else if (recap.actionItem.type === 'FRESH_FEED_LOOKUP') {
-            const greeting = `Welcome back, ${recap.studentName}! 📎 Your tracker is looking completely clean and up to date. Since we're pushing hard for ${recap.actionItem.industry} roles this week, our live feed just picked up fresh listings at companies with active ${recap.schoolAbbreviation} alumni networks. Should we jump into the feed and load some new warm leads into your pipeline?`;
-            setMessages([{ role: 'agent', text: greeting }]);
-          }
+        const pipelineText = `${recap.metrics.totalInPipeline} opportunities active in your pipeline${recap.metrics.interviewingCount > 0 ? `, and you're locked in for ${recap.metrics.interviewingCount} interview${recap.metrics.interviewingCount > 1 ? 's' : ''}` : ''}`;
+        const companyText = recap.actionItem.companyName || 'your top target';
+
+        if (recap.actionItem.type === 'SEND_WARM_OUTREACH' && recap.actionItem.alumniCount > 0) {
+          // Scenario A: Alumni connections exist
+          const alumniCount = recap.actionItem.alumniCount;
+          const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: We currently have ${pipelineText}. Right now, your application for ${companyText} is sitting in 'Applied.' We found ${alumniCount} ${recap.schoolAbbreviation} alumni who work there right now. Let's write a quick backdoor message to them today to get your resume pulled out of the cold black hole. Want to draft it now?`;
+          setMessages([{ role: 'agent', text: greeting }]);
+        } else if (recap.actionItem.type === 'PARENT_ADVISOR_PATH' && recap.actionItem.parentCount > 0) {
+          // Scenario B: No alumni, but parent advisors exist
+          const parentCount = recap.actionItem.parentCount;
+          const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: We currently have ${pipelineText}. Right now, your application for ${companyText} is sitting in 'Applied.' While we don't have direct alumni there, we found ${parentCount} ${recap.schoolAbbreviation} parents in the same industry who offered to provide guidance. Let's send them a quick note for some interview insight. Want to draft it now?`;
+          setMessages([{ role: 'agent', text: greeting }]);
+        } else if (recap.actionItem.type === 'NO_CONNECTIONS_YET') {
+          // Scenario C: Absolute zero connections
+          const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: We currently have ${pipelineText}. Right now, your application for ${companyText} is sitting in 'Applied.' The front door is packed and we don't have a warm path inside yet. I'm actively crawling backdoor networks and LinkedIn threads today to hunt down an insider for you. Stay tuned.`;
+          setMessages([{ role: 'agent', text: greeting }]);
+        } else if (recap.actionItem.type === 'FRESH_FEED_LOOKUP') {
+          const greeting = `Welcome back, ${recap.studentName}! 📎 Your tracker is looking completely clean and up to date. Since we're pushing hard for ${recap.actionItem.industry} roles this week, our live feed just picked up fresh listings at companies with active ${recap.schoolAbbreviation} alumni networks. Should we jump into the feed and load some new warm leads into your pipeline?`;
+          setMessages([{ role: 'agent', text: greeting }]);
+        }
         }
       } catch (err) {
         console.error('Failed to load recap:', err);
@@ -288,7 +302,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
                       onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
                       onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
                     >
-                      ⚡ Draft Message for {recapAction.companyName}
+                      ⚡ Draft Alumni Intro
                     </button>
                     <button
                       onClick={() => {
@@ -305,6 +319,48 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
                       View Tracker
                     </button>
                   </>
+                )}
+                {recapAction.type === 'PARENT_ADVISOR_PATH' && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setRecapAction(null);
+                        sendMessage(`Draft a message to parent advisors for ${recapAction.companyName}`);
+                      }}
+                      style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                    >
+                      💡 Ask Parent for Advice
+                    </button>
+                    <button
+                      onClick={() => {
+                        window.location.hash = '#FreeTierDashboard';
+                        setTimeout(() => {
+                          const trackerEl = document.querySelector('[data-tracker]');
+                          trackerEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                      }}
+                      style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#6b7280', background: '#f1f5f9', border: '1px solid #e5e7eb', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#e2e8f0'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#f1f5f9'}
+                    >
+                      View Tracker
+                    </button>
+                  </>
+                )}
+                {recapAction.type === 'NO_CONNECTIONS_YET' && (
+                  <button
+                    onClick={() => {
+                      setRecapAction(null);
+                      window.location.hash = '#FreeTierDashboard?tab=signals';
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                  >
+                    🛰️ View Alternate Targets
+                  </button>
                 )}
                 {recapAction.type === 'FRESH_FEED_LOOKUP' && (
                   <button
