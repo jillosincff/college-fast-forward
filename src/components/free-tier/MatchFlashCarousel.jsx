@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import ColdDiscoveryCard from './ColdDiscoveryCard';
+import ColdOpportunityCard from './ColdOpportunityCard';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -334,6 +335,7 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
   const [activeIdx, setActiveIdx] = useState(0);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [cards, setCards] = useState([]);
+  const [coldOpportunities, setColdOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [targetIndustries, setTargetIndustries] = useState([]);
   const trackRef = useRef(null);
@@ -355,6 +357,7 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
       .then(res => {
         const data = res?.data || {};
         setCards(data.cards || []);
+        setColdOpportunities(data.coldOpportunities || []);
         setTargetIndustries(data.targetIndustries || userTargets);
       })
       .catch(() => setCards([]))
@@ -458,9 +461,37 @@ export default function MatchFlashCarousel({ college, theme, user, onCardClick, 
         ))}
       </div>
 
-      <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', textAlign: 'center', margin: '0 0 6px', letterSpacing: '0.04em' }}>
+      <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', textAlign: 'center', margin: '0 0 24px', letterSpacing: '0.04em' }}>
         Verified {shortName} network · {cards.length} live opportunit{cards.length !== 1 ? 'ies' : 'y'} with alumni backdoor paths
       </p>
+
+      {/* Cold Discovery Section - Industry matches without alumni connections */}
+      {coldOpportunities.length > 0 && (
+        <div style={{ marginTop: 32, borderTop: '2px dashed #e5e7eb', paddingTop: 24 }}>
+          <div style={{ padding: '0 16px', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 16 }}>🔭</span>
+              <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 800, color: '#6b7280', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>
+                Cold Discovery — Industry Matches
+              </p>
+            </div>
+            <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', margin: '8px 0 0', lineHeight: 1.5 }}>
+              These roles match your targets but don't have alumni connections yet. CLiFF is still hunting for backdoors.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, padding: '4px 16px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {coldOpportunities.map((card, i) => (
+              <ColdOpportunityCard 
+                key={i} 
+                card={card} 
+                shortName={shortName}
+                onClick={() => setSelectedMatch(card)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {selectedMatch && (
         <MatchDeepDiveModal

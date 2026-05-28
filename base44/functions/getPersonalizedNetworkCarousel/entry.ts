@@ -312,6 +312,7 @@ Deno.serve(async (req) => {
 
     // ─── Step 4: Build final premium cards ──────────────────────────────────
     const premiumCards = [];
+    const coldOpportunities = []; // Industry-matched roles without alumni connections
 
     for (const job of jobPool) {
       const normalizedJobCompany = normalizeCompanyName(job.company);
@@ -329,14 +330,34 @@ Deno.serve(async (req) => {
       const alumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
-      // CRITICAL: Only show companies with alumni in "Live Backdoor Matches" carousel
-      // Companies with 0 alumni should NOT appear here - they break trust
-      if (alumni.length === 0) continue;
-
+      // Build parent advisor list first (needed for both hot and cold cards)
       const industryParentAdvisors = industryParents.slice(0, 3);
       const allParentAdvisors = [...new Map(
         [...parentsAtCompany, ...industryParentAdvisors].map(p => [p.id, p])
       ).values()];
+
+      // Separate "hot" (alumni) from "cold" (no alumni) opportunities
+      // Only show companies with alumni in the main "Live Backdoor Matches" section
+      const isHotMatch = alumni.length > 0;
+      
+      if (!isHotMatch) {
+        // Collect cold opportunities for separate "Cold Discovery" section
+        coldOpportunities.push({
+          company: job.company,
+          role: job.role,
+          jobDescription: job.description,
+          jobSource: job.source || null,
+          jobSourceCategory: job.sourceCategory || 'C',
+          nichePlatform: job.nichePlatform || null,
+          targetIndustry: targetIndustries[0] || '',
+          matchedIndustries: targetIndustries,
+          alumniCount: 0,
+          parentCount: allParentAdvisors.length,
+          hasParentBonus: allParentAdvisors.length > 0,
+          isColdDiscovery: true,
+        });
+        continue;
+      }
 
       const featuredParent = allParentAdvisors.find(p =>
         memberInIndustry({ title: p.title, industry: p.industry, bio: '' }, industryKeywords)
@@ -416,10 +437,11 @@ Deno.serve(async (req) => {
     // ─── Fallback removed: Never show cards with 0 alumni in "Live Backdoor Matches" ─────────
     // If no alumni connections exist, show the empty state instead of fake cards
 
-    console.log(`[getPersonalizedNetworkCarousel] Built ${premiumCards.length} premium cards for industries: [${targetIndustries.join(', ')}]`);
+    console.log(`[getPersonalizedNetworkCarousel] Built ${premiumCards.length} hot matches + ${coldOpportunities.length} cold opportunities for industries: [${targetIndustries.join(', ')}]`);
     return Response.json({
       success: true,
       cards: premiumCards,
+      coldOpportunities: coldOpportunities.slice(0, 3), // Limit to 3 cold discoveries
       wasFiltered: targetIndustries.length > 0,
       targetIndustries,
     });
