@@ -44,16 +44,17 @@ Deno.serve(async (req) => {
         // Search for alumni at the company (users with school_code matching current user and working at company)
         const allUsers = await base44.entities.User.filter({});
         const companyLower = (needsOutreach.opportunity_company || '').toLowerCase();
+        const userSchool = (user.school_code?.toLowerCase() || user.school_abbreviation?.toLowerCase() || '');
         
         alumniCount = allUsers.filter(u => {
           const uSchool = u.school_code?.toLowerCase() || u.school_abbreviation?.toLowerCase() || '';
           const uCompany = (u.current_company || u.company || '').toLowerCase();
-          const isAlumni = uSchool === (user.school_code?.toLowerCase() || user.school_abbreviation?.toLowerCase() || '');
+          const isAlumni = uSchool === userSchool;
           const atCompany = uCompany.includes(companyLower) || companyLower.includes(uCompany);
           return isAlumni && atCompany && u.id !== user.id;
         }).length;
         
-        // Search for parents in the network (users with persona='parent' in same industry)
+        // Search for parents in the same industry
         const parentUsers = allUsers.filter(u => {
           const isParent = u.persona === 'parent' || u.roles?.includes('parent');
           const sameIndustry = (u.industry || '').toLowerCase() === (desiredIndustry || '').toLowerCase();
@@ -65,20 +66,24 @@ Deno.serve(async (req) => {
         console.error('Failed to count connections:', err);
       }
       
-      // Determine action type based on available connections
-      let actionType = 'SEND_WARM_OUTREACH';
-      if (alumniCount === 0 && parentCount === 0) {
-        actionType = 'NO_CONNECTIONS_YET';
-      } else if (alumniCount === 0 && parentCount > 0) {
-        actionType = 'PARENT_ADVISOR_PATH';
+      // Determine action type based on available connections (priority queue)
+      let actionType;
+      if (alumniCount > 0) {
+        actionType = 'DRAFT_ALUMNI_OUTREACH';
+      } else if (parentCount > 0) {
+        actionType = 'DRAFT_PARENT_OUTREACH';
+      } else {
+        actionType = 'VIEW_CAROUSEL_MATCHES';
       }
       
       actionItem = {
         companyName: needsOutreach.opportunity_company,
         roleTitle: needsOutreach.opportunity_title,
+        status: needsOutreach.status || 'Applied',
         type: actionType,
         alumniCount,
-        parentCount
+        parentCount,
+        totalInPipeline: totalInPipeline
       };
     }
 
