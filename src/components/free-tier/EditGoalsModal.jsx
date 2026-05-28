@@ -99,6 +99,33 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
 
         {/* Form */}
         <div style={{ padding: '24px 28px' }}>
+          {/* Current snapshot banner */}
+          {goals && (goals.target_roles?.length > 0 || goals.target_industries?.length > 0 || goals.location_preference || goals.seeking) && (
+            <div style={{ background: '#F8F9FF', border: '1px solid #E0E7FF', borderRadius: 10, padding: '12px 14px', marginBottom: 20 }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, color: '#6366F1', letterSpacing: '0.07em', margin: '0 0 8px', textTransform: 'uppercase' }}>📋 Your Current Goals</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {goals.target_roles?.map(r => (
+                  <span key={r} style={{ background: '#FFF5F0', border: '1px solid #FBBF7A', color: '#92400E', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>{r}</span>
+                ))}
+                {goals.target_industries?.map(i => (
+                  <span key={i} style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', color: '#1E40AF', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>{i}</span>
+                ))}
+                {goals.location_preference && (
+                  <span style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', color: '#166534', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>📍 {goals.location_preference}</span>
+                )}
+                {goals.seeking && (
+                  <span style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', color: '#5B21B6', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>{goals.seeking}</span>
+                )}
+                {goals.graduation_year && (
+                  <span style={{ background: '#FFF7ED', border: '1px solid #FED7AA', color: '#9A3412', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>Class of {goals.graduation_year}</span>
+                )}
+                {goals.target_companies?.map(c => (
+                  <span key={c} style={{ background: '#FDF4FF', border: '1px solid #E9D5FF', color: '#6B21A8', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>🏢 {c}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {error && <div style={{ background: '#FFF5F0', border: '1px solid #E85D20', color: '#E85D20', padding: '10px 12px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>{error}</div>}
 
           {/* Target Roles */}
