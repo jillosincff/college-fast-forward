@@ -329,9 +329,9 @@ Deno.serve(async (req) => {
       const alumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
-      // For niche platform jobs (category E), show them even without direct company connections
-      const isNichePlatform = job.sourceCategory === 'E';
-      if (!isNichePlatform && alumni.length === 0 && parentsAtCompany.length === 0) continue;
+      // CRITICAL: Only show companies with alumni in "Live Backdoor Matches" carousel
+      // Companies with 0 alumni should NOT appear here - they break trust
+      if (alumni.length === 0) continue;
 
       const industryParentAdvisors = industryParents.slice(0, 3);
       const allParentAdvisors = [...new Map(
@@ -346,12 +346,43 @@ Deno.serve(async (req) => {
       const hasNetworkReferral = alumni.some(a => a.referred_opening === true);
       const effectiveCategory = hasNetworkReferral ? 'A' : (job.sourceCategory || 'C');
 
-      // For niche platform jobs, use industry parents if no direct company connections
-      const finalAlumniCount = isNichePlatform && alumni.length === 0 ? 0 : alumni.length;
-      const finalParentCount = isNichePlatform && parentsAtCompany.length === 0 ? allParentAdvisors.length : parentsAtCompany.length;
-      const finalMembers = isNichePlatform && alumni.length === 0 && parentsAtCompany.length === 0 
-        ? [...industryParentAdvisors.slice(0, 3)] 
-        : [...alumni.slice(0, 3), ...parentsAtCompany.slice(0, 3)];
+      const finalAlumniCount = alumni.length;
+      const finalParentCount = parentsAtCompany.length > 0 ? parentsAtCompany.length : allParentAdvisors.length;
+      const finalMembers = [...alumni.slice(0, 5), ...parentsAtCompany.slice(0, 3)];
+
+      // Calculate dynamic match percentage based on role/industry alignment
+      const roleKeywords = targetRole.toLowerCase().split(/\s+/);
+      const jobRoleLower = job.role.toLowerCase();
+      const jobDescLower = job.description.toLowerCase();
+      
+      let matchScore = 50; // Base score
+      
+      // Industry match (major boost)
+      if (targetIndustries.some(ind => jobDescLower.includes(ind))) {
+        matchScore += 30;
+      }
+      
+      // Role keyword match
+      const roleMatchCount = roleKeywords.filter(kw => kw.length > 3 && (jobRoleLower.includes(kw) || jobDescLower.includes(kw))).length;
+      matchScore += Math.min(20, roleMatchCount * 5);
+      
+      // Alumni network strength bonus
+      matchScore += Math.min(10, finalAlumniCount * 2);
+      
+      // Parent advisor bonus
+      if (allParentAdvisors.length > 0) {
+        matchScore += 5;
+      }
+      
+      const dynamicMatchPct = Math.min(99, matchScore);
+
+      // Determine CTA button type based on connection strength
+      let ctaType = 'view_details';
+      if (finalAlumniCount > 0) {
+        ctaType = 'draft_backdoor';
+      } else if (allParentAdvisors.length > 0) {
+        ctaType = 'request_parent';
+      }
 
       premiumCards.push({
         company: job.company,
@@ -374,36 +405,16 @@ Deno.serve(async (req) => {
           persona: 'parent',
         } : null,
         hasParentBonus: allParentAdvisors.length > 0,
-        networkWeight: Math.min(98, 60 + finalAlumniCount * 10 + (allParentAdvisors.length > 0 ? 14 : 0)),
+        networkWeight: dynamicMatchPct,
+        ctaType: ctaType,
         _members: finalMembers,
       });
 
       if (premiumCards.length >= 6) break;
     }
 
-    // ─── Fallback: surface jobs paired with industry-matched parents ─────────
-    if (premiumCards.length === 0 && industryParents.length > 0) {
-      const fallbackJobs = jobPool.slice(0, 3);
-      for (const job of fallbackJobs) {
-        const advisors = industryParents.slice(0, 3);
-        premiumCards.push({
-          company: job.company,
-          role: job.role,
-          jobDescription: job.description,
-          jobSource: job.source || null,
-          jobSourceCategory: job.sourceCategory || 'C',
-          targetIndustry: targetIndustries[0] || '',
-          matchedIndustries: targetIndustries,
-          alumniCount: 0,
-          parentCount: advisors.length,
-          alumni: [],
-          featuredParent: advisors[0] ? { full_name: advisors[0].full_name, title: advisors[0].title, persona: 'parent' } : null,
-          hasParentBonus: advisors.length > 0,
-          networkWeight: Math.min(75, 50 + advisors.length * 8),
-          _members: advisors.slice(0, 3),
-        });
-      }
-    }
+    // ─── Fallback removed: Never show cards with 0 alumni in "Live Backdoor Matches" ─────────
+    // If no alumni connections exist, show the empty state instead of fake cards
 
     console.log(`[getPersonalizedNetworkCarousel] Built ${premiumCards.length} premium cards for industries: [${targetIndustries.join(', ')}]`);
     return Response.json({

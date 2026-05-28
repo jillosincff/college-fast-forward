@@ -300,7 +300,7 @@ function MatchCard({ card, shortName, onClick }) {
         </div>
       )}
 
-      {/* ── Row 5: Footer — category-specific CTA ── */}
+      {/* ── Row 5: Footer — Dynamic CTA based on connection strength ── */}
       <div style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 8, padding: '4px 10px', flexShrink: 0 }}>
           <span style={{ fontSize: 11 }}>⚡</span>
@@ -313,13 +313,13 @@ function MatchCard({ card, shortName, onClick }) {
           style={{
             fontFamily: dm, fontSize: 11, fontWeight: 800,
             color: '#fff',
-            background: (SOURCE_CATEGORY_CONFIG[card.jobSourceCategory] || SOURCE_CATEGORY_CONFIG['C']).ctaBg,
+            background: card.alumniCount > 0 ? '#7c3aed' : '#059669',
             border: 'none', borderRadius: 8, padding: '6px 12px',
             cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap',
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           }}
         >
-          {(SOURCE_CATEGORY_CONFIG[card.jobSourceCategory] || SOURCE_CATEGORY_CONFIG['C']).ctaLabel}
+          {card.alumniCount > 0 ? '⚡ Draft Backdoor Message' : '💡 Request Parent Insight'}
         </button>
       </div>
     </div>
