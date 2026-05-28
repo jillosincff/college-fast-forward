@@ -232,15 +232,27 @@ function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniC
   );
 }
 
-export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, onCoffeeChat, onBackdoorClick, user }) {
+export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, onCoffeeChat, onBackdoorClick, user, onRevealCompany }) {
   const t = theme || { primary: '#2563eb', secondary: '#1d4ed8', bgTint: '#eff6ff' };
   const [expandedId, setExpandedId] = useState(null);
-  const [networkData, setNetworkData] = useState({});
-  const [loadingCounts, setLoadingCounts] = useState({});
+  const [signals, setSignals] = useState([]);
+  const [loadingSignals, setLoadingSignals] = useState(true);
   const [publicListings, setPublicListings] = useState([]);
   const [loadingListings, setLoadingListings] = useState(false);
 
   const toggle = (id) => setExpandedId(prev => prev === id ? null : id);
+
+  // Fetch targeted signals based on user's career goals
+  useEffect(() => {
+    setLoadingSignals(true);
+    base44.functions.invoke('getTargetedSignalsFn', {})
+      .then((res) => {
+        const data = res?.data ?? res ?? {};
+        setSignals(data.signals || []);
+      })
+      .catch(() => setSignals([]))
+      .finally(() => setLoadingSignals(false));
+  }, [user?.career_goals]);
 
   // Fetch live public listings with age/risk scores
   useEffect(() => {
@@ -260,38 +272,13 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
     }).catch(() => {}).finally(() => setLoadingListings(false));
   }, [user?.career_goals]);
 
-  useEffect(() => {
-    const universityName = user?.school_name || user?.school || user?.university;
-    const schoolCode = user?.school_code || college || 'UF';
-    if (!universityName) return;
-
-    LIVE_SIGNALS.forEach((sig) => {
-      setLoadingCounts(prev => ({ ...prev, [sig.id]: true }));
-      base44.functions.invoke('proxycurlService', {
-        action: 'getNetworkCount',
-        params: {
-          companyName: sig.company,
-          companyDomain: sig.company.toLowerCase().replace(/\s+/g, '') + '.com',
-          universityName,
-          schoolCode,
-        },
-      }).then((res) => {
-        const d = res?.data ?? res ?? {};
-        setNetworkData(prev => ({
-          ...prev,
-          [sig.id]: {
-            alumni_count: d.alumni_count ?? 0,
-            parent_count: d.parent_count ?? 0,
-            sample_connections: d.sample_connections ?? [],
-          },
-        }));
-      }).catch(() => {
-        // silently fail
-      }).finally(() => {
-        setLoadingCounts(prev => ({ ...prev, [sig.id]: false }));
-      });
-    });
-  }, [user?.school_name, user?.school, user?.university]);
+  // Handle Reveal button click - scroll carousel to company
+  const handleReveal = (signal) => {
+    if (onRevealCompany) {
+      onRevealCompany(signal.company);
+    }
+    toggle(signal.id);
+  };
 
   return (
     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -327,103 +314,110 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
 
       {/* Signal rows */}
       <div style={{ padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {LIVE_SIGNALS.map((sig, i) => {
-          const isOpen = expandedId === sig.id;
-          const net = networkData[sig.id] || {};
-          const alumniCount = net.alumni_count ?? null;
-          const parentCount = net.parent_count ?? 0;
-          return (
-            <div
-              key={sig.id}
-              className="signal-row"
-              style={{
-                background: i === 0 ? '#f0fdf4' : '#f9fafb',
-                border: `1px solid ${isOpen ? t.primary : (i === 0 ? '#bbf7d0' : '#e5e7eb')}`,
-                borderRadius: 14,
-                overflow: 'hidden',
-                transition: 'border-color 0.2s',
-                boxShadow: isOpen ? `0 4px 16px ${t.primary}18` : 'none',
-              }}
-            >
-              {/* Row header */}
+        {loadingSignals ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ height: 80, borderRadius: 14, background: '#f1f5f9', animation: 'pulse-glow 1.5s infinite' }} />
+            ))}
+          </div>
+        ) : signals.length === 0 ? (
+          <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: 12, padding: 24, textAlign: 'center' }}>
+            <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>No targeted signals right now. Update your career goals to see personalized alerts.</p>
+          </div>
+        ) : (
+          signals.map((sig, i) => {
+            const isOpen = expandedId === sig.id;
+            const alumniCount = sig.realAlumniCount ?? null;
+            const parentCount = sig.parentCount ?? 0;
+            return (
               <div
-                style={{ padding: '14px 16px', cursor: 'pointer' }}
-                onClick={() => toggle(sig.id)}
+                key={sig.id}
+                className="signal-row"
+                style={{
+                  background: i === 0 ? '#f0fdf4' : '#f9fafb',
+                  border: `1px solid ${isOpen ? t.primary : (i === 0 ? '#bbf7d0' : '#e5e7eb')}`,
+                  borderRadius: 14,
+                  overflow: 'hidden',
+                  transition: 'border-color 0.2s',
+                  boxShadow: isOpen ? `0 4px 16px ${t.primary}18` : 'none',
+                }}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{
-                    width: 38, height: 38, borderRadius: 10,
-                    background: `linear-gradient(135deg, ${t.primary}22, ${t.primary}44)`,
-                    border: `1px solid ${t.primary}33`,
-                    flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
-                  }}>
-                    {sig.emoji}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: i === 0 ? '#16a34a' : '#111827' }}>{sig.count}</span>
-                      <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#111827', margin: 0 }}>{sig.label}</p>
-                      {sig.badge && (
-                        <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#fff', background: i === 0 ? '#16a34a' : '#ef4444', borderRadius: 100, padding: '2px 8px' }}>{sig.badge}</span>
-                      )}
+                {/* Row header */}
+                <div
+                  style={{ padding: '14px 16px', cursor: 'pointer' }}
+                  onClick={() => handleReveal(sig)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{
+                      width: 38, height: 38, borderRadius: 10,
+                      background: `linear-gradient(135deg, ${t.primary}22, ${t.primary}44)`,
+                      border: `1px solid ${t.primary}33`,
+                      flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
+                    }}>
+                      {sig.emoji}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: t.primary, background: `${t.primary}15`, borderRadius: 6, padding: '2px 8px' }}>{sig.company}</span>
-                      {loadingCounts[sig.id] ? (
-                        <span style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: '#f1f5f9', borderRadius: 6, padding: '2px 8px', animation: 'pulse-glow 1.5s infinite' }}>
-                          scanning network…
-                        </span>
-                      ) : alumniCount != null ? (
-                        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#ea580c', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                          🎓 {alumniCount} alumni work here
-                          {parentCount > 0 && (
-                            <>
-                              <span style={{ color: '#fbbf24' }}>|</span>
-                              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4f46e5', background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 4, padding: '1px 6px', animation: 'pulse-glow 2s infinite' }}>
-                                💼 {parentCount} Parent Backdoor{parentCount > 1 ? 's' : ''} Open
-                              </span>
-                            </>
-                          )}
-                        </span>
-                      ) : (
-                        <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>{sig.detail}</p>
-                      )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: dm, fontSize: 16, fontWeight: 900, color: i === 0 ? '#16a34a' : '#111827' }}>{sig.count}</span>
+                        <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#111827', margin: 0 }}>{sig.label}</p>
+                        {sig.badge && (
+                          <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#fff', background: i === 0 ? '#16a34a' : '#ef4444', borderRadius: 100, padding: '2px 8px' }}>{sig.badge}</span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: t.primary, background: `${t.primary}15`, borderRadius: 6, padding: '2px 8px' }}>{sig.company}</span>
+                        {alumniCount != null ? (
+                          <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#ea580c', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 6, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                            🎓 {alumniCount} alumni work here
+                            {parentCount > 0 && (
+                              <>
+                                <span style={{ color: '#fbbf24' }}>|</span>
+                                <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#4f46e5', background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 4, padding: '1px 6px', animation: 'pulse-glow 2s infinite' }}>
+                                  💼 {parentCount} Parent Backdoor{parentCount > 1 ? 's' : ''} Open
+                                </span>
+                              </>
+                            )}
+                          </span>
+                        ) : (
+                          <p style={{ fontFamily: dm, fontSize: 12, color: '#6b7280', margin: 0 }}>{sig.detail}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', margin: '0 0 6px' }}>{sig.time}</p>
-                    <button
-                      onClick={e => { e.stopPropagation(); toggle(sig.id); }}
-                      style={{
-                        fontFamily: dm, fontSize: 10, fontWeight: 700,
-                        color: isOpen ? '#fff' : t.primary,
-                        background: isOpen ? t.primary : `${t.primary}15`,
-                        border: `1px solid ${t.primary}33`,
-                        borderRadius: 8, padding: '3px 10px', cursor: 'pointer', minHeight: 'auto',
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {isOpen ? 'Close ↑' : 'Reveal →'}
-                    </button>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', margin: '0 0 6px' }}>{sig.time}</p>
+                      <button
+                        onClick={e => { e.stopPropagation(); handleReveal(sig); }}
+                        style={{
+                          fontFamily: dm, fontSize: 10, fontWeight: 700,
+                          color: isOpen ? '#fff' : t.primary,
+                          background: isOpen ? t.primary : `${t.primary}15`,
+                          border: `1px solid ${t.primary}33`,
+                          borderRadius: 8, padding: '3px 10px', cursor: 'pointer', minHeight: 'auto',
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        {isOpen ? 'Close ↑' : 'Reveal →'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Expansion panel */}
-              {isOpen && (
-                <SignalExpansion
-                  signal={sig}
-                  theme={t}
-                  onAddToPipeline={onAddToPipeline || (() => {})}
-                  onCoffeeChat={onCoffeeChat}
-                  alumniCount={alumniCount}
-                  parentCount={parentCount}
-                  sampleConnections={net.sample_connections || []}
-                />
-              )}
-            </div>
-          );
-        })}
+                {/* Expansion panel */}
+                {isOpen && (
+                  <SignalExpansion
+                    signal={sig}
+                    theme={t}
+                    onAddToPipeline={onAddToPipeline || (() => {})}
+                    onCoffeeChat={onCoffeeChat}
+                    alumniCount={alumniCount}
+                    parentCount={parentCount}
+                    sampleConnections={[]}
+                  />
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Ghost Risk Meter — Public listings with age risk */}

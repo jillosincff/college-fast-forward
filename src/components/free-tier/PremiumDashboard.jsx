@@ -298,7 +298,31 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
-            <PremiumSignalsFeed college={college} theme={t} onAddToPipeline={handleAddFromSignals} onCoffeeChat={setSelectedSignal} onBackdoorClick={handleBackdoorClick} user={user} />
+            <PremiumSignalsFeed 
+              college={college} 
+              theme={t} 
+              onAddToPipeline={handleAddFromSignals} 
+              onCoffeeChat={setSelectedSignal} 
+              onBackdoorClick={handleBackdoorClick} 
+              user={user}
+              onRevealCompany={(companyName) => {
+                // Scroll carousel to the matching company card
+                const carouselEl = document.querySelector('[data-carousel]');
+                if (carouselEl) {
+                  const cards = carouselEl.querySelectorAll('[data-company]');
+                  cards.forEach(card => {
+                    const cardCompany = card.getAttribute('data-company');
+                    if (cardCompany && cardCompany.toLowerCase().includes(companyName.toLowerCase())) {
+                      card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                      card.style.boxShadow = '0 0 0 3px #2563eb, 0 8px 24px rgba(37,99,235,0.4)';
+                      setTimeout(() => {
+                        card.style.boxShadow = '';
+                      }, 3000);
+                    }
+                  });
+                }
+              }}
+            />
 
             {/* Cold Discovery Section — only shown after explicit opt-in */}
             {showColdDiscovery && (
