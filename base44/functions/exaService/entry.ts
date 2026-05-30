@@ -307,7 +307,7 @@ Deno.serve(async (req) => {
 
       const roleQuery = targetRoles.slice(0, 2).join(' OR ') || 'entry level analyst';
       const locationStr = location ? ` ${location}` : '';
-      const query = `${roleQuery}${locationStr} jobs hiring 2025 2026`;
+      const query = `${roleQuery}${locationStr} entry level OR junior OR internship jobs hiring 2025 2026 -senior -lead -principal -director -manager -head -vp -staff`;
 
       const searchRes = await exaFetch('search', {
         query,
@@ -321,8 +321,10 @@ Deno.serve(async (req) => {
 
       const results = searchRes.results || [];
 
+      const SENIOR_KEYWORDS = /\b(senior|sr\.|lead|principal|director|manager|head of|vp |vice president|staff engineer|architect)\b/i;
+
       const jobs = results
-        .filter(r => r.url && r.title)
+        .filter(r => r.url && r.title && !SENIOR_KEYWORDS.test(r.title))
         .map(r => {
           // Calculate age in days
           const publishedDate = r.publishedDate ? new Date(r.publishedDate) : null;
