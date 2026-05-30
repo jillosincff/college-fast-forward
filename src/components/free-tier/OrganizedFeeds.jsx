@@ -1,33 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Zap, Sun, Snowflake } from 'lucide-react';
+import { useState } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import HotJobCard from './HotJobCard';
-import WarmJobCard from './WarmJobCard';
 import ColdJobCard from './ColdJobCard';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-const LEAD_TIER_CONFIG = {
-  hot:  { icon: Zap,      color: 'text-orange-600' },
-  warm: { icon: Sun,      color: 'text-yellow-600' },
-  cold: { icon: Snowflake, color: 'text-blue-600'  },
-};
-
-
-
 const SECTION_META = {
-  hot:  { emoji: '🔥', label: 'HOT LEADS',  badge: 'Backdoor Channels Active',  badgeClass: 'bg-red-50 text-red-600',    emptyIcon: '🛰️', emptyTitle: 'No exact alumni matches today.', emptyBody: 'No one from your network works at the companies with open roles right now. Check Warm Leads below for industry connections.' },
-  warm: { emoji: '☀️', label: 'WARM LEADS', badge: 'Industry Connections Found', badgeClass: 'bg-amber-50 text-amber-600', emptyIcon: '🔍', emptyTitle: 'No industry connections found for these targets.', emptyBody: 'No alumni or parents matched to your selected industries. Try updating your career goals to broaden your search.' },
-  cold: { emoji: '❄️', label: 'COLD LEADS', badge: 'Hidden Board Discoveries',   badgeClass: 'bg-blue-50 text-blue-600',   emptyIcon: '🌐', emptyTitle: 'No open cold leads match your filter targets today.', emptyBody: 'These are front-door roles from niche boards. Try updating your target industries to surface more opportunities.' },
+  insiders: {
+    emoji: '🔥',
+    label: 'COMPANY INSIDERS',
+    badge: 'Verified Alumni & Parent Advisors',
+    badgeClass: 'bg-red-50 text-red-600',
+    emptyIcon: '🛰️',
+    emptyTitle: 'CLiFF is scanning for insiders at your target companies.',
+    emptyBody: 'No verified alumni or parent advisors at exact matching companies yet. Check Targeted Leads below — CLiFF is actively hunting insider connections.',
+  },
+  targets: {
+    emoji: '☀️',
+    label: 'TARGETED HIDDEN LEADS',
+    badge: 'Insider Hunt Active',
+    badgeClass: 'bg-amber-50 text-amber-700',
+    emptyIcon: '🌐',
+    emptyTitle: 'No target-matched openings surfaced today.',
+    emptyBody: 'Try updating your career goals to surface more hidden market opportunities.',
+  },
 };
 
-function LeadSection({ tier, leads, onAddToPipeline, onSelectLead, user }) {
+function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
   const meta = SECTION_META[tier];
+  const CardComponent = tier === 'insiders' ? HotJobCard : ColdJobCard;
 
   return (
     <section className="space-y-4">
-      {/* Section header */}
       <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
         <span className="text-xl">{meta.emoji}</span>
         <h3 className="text-lg font-bold text-gray-900">{meta.label} ({leads?.length || 0})</h3>
@@ -41,12 +46,9 @@ function LeadSection({ tier, leads, onAddToPipeline, onSelectLead, user }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {leads.map((lead, idx) => {
-            const props = { key: idx, lead, onAddToPipeline, onSelect: onSelectLead };
-            if (tier === 'hot')  return <HotJobCard  {...props} />;
-            if (tier === 'warm') return <WarmJobCard {...props} user={user} />;
-            return <ColdJobCard {...props} />;
-          })}
+          {leads.map((lead, idx) => (
+            <CardComponent key={idx} lead={lead} onAddToPipeline={onAddToPipeline} onSelect={onSelectLead} />
+          ))}
         </div>
       )}
     </section>
@@ -57,18 +59,6 @@ export default function OrganizedFeeds({ user }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const { target_industries, target_role } = user.career_goals || {};
   
-  // Listen for goals modal open event
-  useEffect(() => {
-    const handleOpenGoals = () => {
-      // Dispatch custom event that parent components can listen to
-      window.dispatchEvent(new CustomEvent('cff:open-goals-modal'));
-    };
-    
-    return () => {
-      // Cleanup if needed
-    };
-  }, []);
-
   const { data: feedsData, isLoading } = useQuery({
     queryKey: ['organizedFeeds', target_industries, target_role],
     queryFn: () => getPersonalizedNetworkCarousel({
@@ -78,15 +68,10 @@ export default function OrganizedFeeds({ user }) {
     enabled: true, // Always run the query
   });
 
-  // The function returns { data: { success, hotLeads, warmLeads, coldLeads } }
   const payload = feedsData?.data || feedsData;
-  const hotLeads = payload?.hotLeads || [];
-  const warmLeads = payload?.warmLeads || [];
-  const coldLeads = payload?.coldLeads || [];
-  const hotCount  = Array.isArray(hotLeads)  ? hotLeads.length  : 0;
-  const warmCount = Array.isArray(warmLeads) ? warmLeads.length : 0;
-  const coldCount = Array.isArray(coldLeads) ? coldLeads.length : 0;
-  const totalCount = hotCount + warmCount + coldCount;
+  const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
+  const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
+  const totalCount = priorityInsiders.length + targetedDiscoveries.length;
 
   const handleAddToPipeline = async (lead) => {
     try {
@@ -119,7 +104,7 @@ export default function OrganizedFeeds({ user }) {
         <div className="text-4xl mb-4">🎯</div>
         <h3 className="text-lg font-bold text-slate-800 mb-2">Set Your Career Goals</h3>
         <p className="text-slate-600 mb-4 max-w-md">
-          Tell us what you're looking for and we'll show you HOT, WARM, and COLD leads tailored to your interests.
+          Tell us what you're looking for and CLiFF will surface Company Insiders and Targeted Hidden Leads tailored to your goals.
         </p>
         <button
           onClick={() => {
@@ -149,9 +134,8 @@ export default function OrganizedFeeds({ user }) {
       </div>
 
       <div className="space-y-10">
-        <LeadSection tier="hot"  leads={hotLeads}  onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} user={user} />
-        <LeadSection tier="warm" leads={warmLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} user={user} />
-        <LeadSection tier="cold" leads={coldLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} user={user} />
+        <LeadSection tier="insiders" leads={priorityInsiders}    onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
+        <LeadSection tier="targets"  leads={targetedDiscoveries} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
       </div>
 
       {/* Deep Dive Modal */}

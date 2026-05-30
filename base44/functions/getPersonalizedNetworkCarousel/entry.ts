@@ -396,10 +396,11 @@ Deno.serve(async (req) => {
       }, industryKeywords);
     });
 
-    // ─── Step 4: Three-Tier Lead Hierarchy ──────────────────────────────────
-    const hotLeads = [];
-    const warmLeads = [];
-    const coldLeads = [];
+    // ─── Step 4: Two-Tier Lead Hierarchy (Direct Network Leverage) ─────────
+    // PRIORITY 1: priorityInsiders — company has a verified alumni or parent insider
+    // PRIORITY 2: targetedDiscoveries — clean role match, no insider at this company yet
+    const priorityInsiders = [];
+    const targetedDiscoveries = [];
 
     for (const job of jobPool) {
       const normalizedJobCompany = normalizeCompanyName(job.company);
@@ -427,28 +428,32 @@ Deno.serve(async (req) => {
         [...parentsAtCompany, ...industryParentAdvisors].map(p => [p.id, p])
       ).values()];
 
-      // 🔥 HOT LEAD: Has alumni at exact company
-      if (alumni.length > 0) {
-        const featuredParent = allParentAdvisors.find(p =>
-          memberInIndustry({ title: p.title, industry: p.industry, bio: '' }, industryKeywords)
-        ) || allParentAdvisors[0] || null;
+      const hasInsider = alumni.length > 0 || parentsAtCompany.length > 0;
 
+      // 🔥 PRIORITY 1: Company Insiders — verified alumni OR parent advisor at this exact company
+      if (hasInsider) {
+        const featuredParent = parentsAtCompany[0] || null;
         const hasNetworkReferral = alumni.some(a => a.referred_opening === true);
         const effectiveCategory = hasNetworkReferral ? 'A' : (job.sourceCategory || 'C');
 
-        // Calculate match score
-        const roleKeywords = targetRole.toLowerCase().split(/\s+/);
+        const roleKws = targetRole.toLowerCase().split(/\s+/);
         const jobRoleLower = job.role.toLowerCase();
         const jobDescLower = job.description.toLowerCase();
-        
         let matchScore = 50;
         if (targetIndustries.some(ind => jobDescLower.includes(ind))) matchScore += 30;
-        const roleMatchCount = roleKeywords.filter(kw => kw.length > 3 && (jobRoleLower.includes(kw) || jobDescLower.includes(kw))).length;
+        const roleMatchCount = roleKws.filter(kw => kw.length > 3 && (jobRoleLower.includes(kw) || jobDescLower.includes(kw))).length;
         matchScore += Math.min(20, roleMatchCount * 5);
         matchScore += Math.min(10, alumni.length * 2);
-        if (allParentAdvisors.length > 0) matchScore += 5;
+        if (parentsAtCompany.length > 0) matchScore += 5;
 
-        hotLeads.push({
+        // Build insider badge copy
+        const insiderBadge = alumni.length > 0 && parentsAtCompany.length > 0
+          ? `${alumni.length} Alumni + ${parentsAtCompany.length} Parent Insider`
+          : alumni.length > 0
+            ? `${alumni.length} Alumni Work Here`
+            : `${parentsAtCompany.length} Parent Advisor Here`;
+
+        priorityInsiders.push({
           company: job.company,
           role: job.role,
           jobDescription: job.description,
@@ -461,43 +466,21 @@ Deno.serve(async (req) => {
           targetIndustry: targetIndustries[0] || '',
           matchedIndustries: targetIndustries,
           alumniCount: alumni.length,
-          parentCount: parentsAtCompany.length > 0 ? parentsAtCompany.length : allParentAdvisors.length,
+          parentCount: parentsAtCompany.length,
           alumni: alumni.slice(0, 5),
-          featuredParent: featuredParent ? {
-            full_name: featuredParent.full_name,
-            title: featuredParent.title,
-            persona: 'parent',
-          } : null,
-          hasParentBonus: allParentAdvisors.length > 0,
+          featuredParent: featuredParent ? { full_name: featuredParent.full_name, title: featuredParent.title, persona: 'parent' } : null,
+          hasParentBonus: parentsAtCompany.length > 0,
+          insiderBadge,
+          ctaType: alumni.length > 0 ? 'message_alumni' : 'connect_parent',
           networkWeight: Math.min(99, matchScore),
-          ctaType: 'draft_backdoor',
-          leadTier: 'hot',
+          leadTier: 'insider',
         });
 
-        if (hotLeads.length >= 6) continue; // Cap hot leads
+        if (priorityInsiders.length >= 6) continue;
       }
-      // ☀️ WARM LEAD: No company alumni, but has industry connections
-      else if (allParentAdvisors.length > 0) {
-        warmLeads.push({
-          company: job.company,
-          role: job.role,
-          jobDescription: job.description,
-          jobSource: job.source || null,
-          jobSourceCategory: job.sourceCategory || 'C',
-          nichePlatform: job.nichePlatform || null,
-          targetIndustry: targetIndustries[0] || '',
-          matchedIndustries: targetIndustries,
-          alumniCount: 0,
-          parentCount: allParentAdvisors.length,
-          hasParentBonus: true,
-          industryConnections: allParentAdvisors.slice(0, 3),
-          ctaType: 'request_industry',
-          leadTier: 'warm',
-        });
-      }
-      // ❄️ COLD LEAD: No connections at all
+      // ☀️ PRIORITY 2: Targeted Hidden Lead — matches target role/industry, no insider yet
       else {
-        coldLeads.push({
+        targetedDiscoveries.push({
           company: job.company,
           role: job.role,
           jobDescription: job.description,
@@ -509,17 +492,16 @@ Deno.serve(async (req) => {
           alumniCount: 0,
           parentCount: 0,
           hasParentBonus: false,
-          ctaType: 'view_role',
-          leadTier: 'cold',
+          ctaType: 'add_to_pipeline',
+          leadTier: 'target',
         });
       }
     }
 
-    // Ensure we always show at least some opportunities (cold leads) for new schools
-    if (hotLeads.length === 0 && warmLeads.length === 0 && coldLeads.length === 0) {
-      // Show fallback cold leads when no network exists
+    // Fallback: if no targeted discoveries at all, fill from job pool
+    if (priorityInsiders.length === 0 && targetedDiscoveries.length === 0) {
       jobPool.slice(0, 6).forEach(job => {
-        coldLeads.push({
+        targetedDiscoveries.push({
           company: job.company,
           role: job.role,
           jobDescription: job.description,
@@ -531,18 +513,17 @@ Deno.serve(async (req) => {
           alumniCount: 0,
           parentCount: 0,
           hasParentBonus: false,
-          ctaType: 'view_role',
-          leadTier: 'cold',
+          ctaType: 'add_to_pipeline',
+          leadTier: 'target',
         });
       });
     }
 
-    console.log(`[getOrganizedFeeds] 🔥 ${hotLeads.length} HOT | ☀️ ${warmLeads.length} WARM | ❄️ ${coldLeads.length} COLD for industries: [${targetIndustries.join(', ')}]`);
+    console.log(`[getPersonalizedNetworkCarousel] 🔥 ${priorityInsiders.length} INSIDERS | ☀️ ${targetedDiscoveries.length} TARGETS for industries: [${targetIndustries.join(', ')}]`);
     return Response.json({
       success: true,
-      hotLeads: hotLeads.slice(0, 6),
-      warmLeads: warmLeads.slice(0, 6),
-      coldLeads: coldLeads.slice(0, 12),
+      priorityInsiders: priorityInsiders.slice(0, 6),
+      targetedDiscoveries: targetedDiscoveries.slice(0, 12),
       wasFiltered: targetIndustries.length > 0,
       targetIndustries,
     });
