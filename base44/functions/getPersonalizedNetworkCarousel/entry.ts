@@ -247,6 +247,8 @@ Deno.serve(async (req) => {
     const schoolName = (user.school_name || user.school || user.university || '').toLowerCase();
 
     // ─── Step 1: Build the job pool from target industries ──────────────────
+    const SENIOR_FILTER = /\b(senior|sr\.|lead|principal|director|manager|head of|vp |vice president|staff engineer|architect|managing partner)\b/i;
+
     let jobPool = [];
     for (const ind of targetIndustries) {
       const pool = JOB_POOL[ind] || [];
@@ -255,10 +257,11 @@ Deno.serve(async (req) => {
     const seen = new Set();
     jobPool = jobPool.filter(j => {
       if (seen.has(j.company)) return false;
+      if (SENIOR_FILTER.test(j.role)) return false;
       seen.add(j.company);
       return true;
     });
-    if (!jobPool.length) jobPool = [...FALLBACK_JOBS];
+    if (!jobPool.length) jobPool = [...FALLBACK_JOBS].filter(j => !SENIOR_FILTER.test(j.role));
 
     // ─── Step 2: Load all network members (alumni + parents) ────────────────
     const INVALID = ['self employed', 'selfemployed', 'self-employed', 'retired', 'none', 'n/a', 'unemployed', 'stay at home', 'homemaker', 'between jobs'];
