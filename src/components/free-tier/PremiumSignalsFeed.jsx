@@ -117,6 +117,9 @@ function SignalExpansion({ signal, theme, onAddToPipeline, onCoffeeChat, alumniC
         sampleConnections: sampleConnections ?? [],
       });
     }
+    if (signal.expansion.ctaType === 'external_link' && signal.expansion.applyUrl) {
+      window.open(signal.expansion.applyUrl, '_blank', 'noopener');
+    }
   };
 
   const { expansion: ex } = signal;

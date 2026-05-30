@@ -1,230 +1,220 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-// Niche platform mappings for signal sources
-const NICHE_PLATFORMS = {
-  'Technology, Information & Media': ['Wellfound', 'Key Values', 'HackerNews'],
-  'Advertising & PR': ['Contra', 'Behance', 'Dribbble'],
-  'Sports & Entertainment': ['WorkInSports', 'EntertainmentCareers'],
-  'Healthcare & Pharmaceuticals': ['HealthcareJobsite', 'NurseFly'],
-  'Finance & Insurance': ['eFinancialCareers', 'WallStreetOasis'],
+/**
+ * getTargetedSignalsFn
+ *
+ * Fetches REAL job postings from niche ATS boards (Lever, Greenhouse, Ashby, Workable)
+ * using Exa search, filtered to entry-level/junior/internship based on user's seeking type.
+ * Falls back to a broader search if targeted search returns nothing.
+ */
+
+// Niche ATS domains — every URL on these is a real job posting
+const ATS_DOMAINS = [
+  'jobs.lever.co',
+  'boards.greenhouse.io',
+  'jobs.ashbyhq.com',
+  'apply.workable.com',
+];
+
+const ATS_SOURCE_LABELS = {
+  'jobs.lever.co': 'Lever',
+  'boards.greenhouse.io': 'Greenhouse',
+  'jobs.ashbyhq.com': 'Ashby',
+  'apply.workable.com': 'Workable',
 };
 
-// Industry-specific role keywords
-const INDUSTRY_ROLES = {
-  'Human Resources': ['HR', 'Human Resources', 'Recruiting', 'Talent', 'People Operations'],
-  'Marketing & Communications': ['Marketing', 'Communications', 'Brand', 'Social Media', 'Content'],
-  'Finance & Accounting': ['Finance', 'Accounting', 'Financial Analyst', 'CPA', 'Audit'],
-  'Technology, Information & Media': ['Software', 'Data', 'Product', 'UX', 'Engineering'],
-  'Healthcare & Pharmaceuticals': ['Nurse', 'Clinical', 'Healthcare', 'Medical', 'Patient'],
-  'Advertising & PR': ['Creative', 'Account', 'Media', 'PR', 'Advertising'],
-  'Education & Training': ['Teacher', 'Education', 'Curriculum', 'Training', 'Instructional'],
-  'Professional Services': ['Consulting', 'Strategy', 'Business Analyst', 'Advisory'],
-  'Sports & Entertainment': ['Sports', 'Entertainment', 'Media', 'Production', 'Athletic'],
-  'Retail & Consumer Goods': ['Retail', 'Merchandising', 'Buyer', 'Consumer', 'Brand'],
-  'Government & Public Sector': ['Government', 'Public Policy', 'Federal', 'State', 'Local'],
-  'Transportation & Logistics': ['Logistics', 'Supply Chain', 'Operations', 'Transportation'],
-  'Construction & Agriculture': ['Construction', 'Project Manager', 'Civil', 'Architecture', 'Real Estate'],
+// Maps CFF industry labels → role keywords for search
+const INDUSTRY_ROLE_KEYWORDS = {
+  'Technology, Information & Media': ['software engineer', 'data analyst', 'product manager', 'UX designer', 'developer'],
+  'Media and Entertainment': ['media coordinator', 'content creator', 'production assistant', 'social media', 'marketing coordinator'],
+  'Finance & Insurance': ['financial analyst', 'investment analyst', 'accounting', 'audit associate', 'risk analyst'],
+  'Human Resources': ['hr coordinator', 'recruiter', 'talent acquisition', 'people operations'],
+  'Marketing & Communications': ['marketing coordinator', 'brand associate', 'content writer', 'PR coordinator', 'social media'],
+  'Healthcare & Pharmaceuticals': ['clinical coordinator', 'healthcare analyst', 'research associate', 'medical writer'],
+  'Professional Services': ['business analyst', 'consultant', 'strategy associate', 'advisory analyst'],
+  'Sports & Entertainment': ['sports coordinator', 'event coordinator', 'operations associate', 'media production'],
+  'Education & Training': ['education coordinator', 'instructional designer', 'program coordinator', 'curriculum developer'],
+  'Retail & Consumer Goods': ['buyer assistant', 'merchandising analyst', 'brand coordinator', 'consumer insights'],
+  'Government & Public Sector': ['policy analyst', 'program coordinator', 'government analyst', 'public affairs'],
+  'Transportation & Logistics': ['supply chain analyst', 'logistics coordinator', 'operations analyst', 'procurement'],
+  'Construction & Agriculture': ['project coordinator', 'civil engineer', 'construction analyst', 'real estate analyst'],
+  'Advertising & PR': ['account coordinator', 'media planner', 'PR associate', 'creative associate'],
+  'default': ['analyst', 'coordinator', 'associate', 'specialist', 'assistant'],
 };
 
-// Signal templates by type
-const SIGNAL_TEMPLATES = {
-  unadvertised: {
-    label: (count, industry, source) => `Unadvertised ${industry || ''} roles discovered`,
-    detail: (source) => `via ${source || 'niche platforms'}`,
-    intel: (company, industry, count) => `Our agent detected ${count} ${industry || ''} roles inside ${company}'s internal recruitment pipeline. These are not indexed on LinkedIn or Indeed yet.`,
-  },
-  recruiter_view: {
-    label: () => `Hiring Manager viewed your profile`,
-    detail: (industry) => `${industry || 'Department'} Recruiting Manager`,
-    intel: (company, industry) => `A ${industry || 'department'} recruiting manager at ${company} is actively reviewing profiles matching your background. This is the absolute highest probability window to secure an interview.`,
-  },
-  backdoor: {
-    label: (count, industry) => `${industry || 'Targeted'} openings crawled`,
-    detail: (source) => `via ${source || 'native hiring threads'}`,
-    intel: (company, count) => `Sourced from alumni-shared referral threads and internal job boards. These ${industry || ''} roles have direct referral paths not accessible to the public.`,
-  },
-  headcount: {
-    label: () => `Hiring signals detected`,
-    detail: (industry) => `${industry || 'Team'} headcount expanding`,
-    intel: (company, industry) => `Significant headcount movement in ${company}'s ${industry || 'department'} team means open reqs are dropping soon. Let's get ahead of the pile.`,
-  },
-};
-
-function matchIndustry(userIndustries, companyIndustry) {
-  if (!userIndustries || userIndustries.length === 0) return true;
-  const userInds = userIndustries.map(i => i.toLowerCase());
-  return userInds.some(ui => companyIndustry.toLowerCase().includes(ui) || ui.includes(companyIndustry.toLowerCase().split(' ')[0]));
+// Map user's seeking/job_type to Exa-friendly search terms
+function getLevelTerms(user) {
+  const seeking = (user?.career_goals?.seeking || user?.job_type || '').toLowerCase();
+  if (seeking.includes('intern')) return ['internship', 'intern'];
+  if (seeking.includes('part')) return ['part-time', 'part time'];
+  // Default: entry-level / junior / new grad (covers most students)
+  return ['entry level', 'junior', 'new grad', 'associate'];
 }
 
-function getRelevantRoleForIndustry(industry) {
-  const roles = INDUSTRY_ROLES[industry];
-  if (!roles) return 'Business Analyst';
-  return roles[Math.floor(Math.random() * roles.length)];
+function getSourceLabel(url) {
+  const domain = ATS_DOMAINS.find(d => url.includes(d));
+  return domain ? (ATS_SOURCE_LABELS[domain] || 'Niche Board') : 'Niche Board';
 }
 
-function getNicheSourceForIndustry(industry) {
-  const platforms = NICHE_PLATFORMS[industry];
-  if (!platforms) return 'Wellfound';
-  return platforms[Math.floor(Math.random() * platforms.length)];
+function extractCompanyFromUrl(url) {
+  const match = url?.match(/(?:jobs\.lever\.co|boards\.greenhouse\.io|jobs\.ashbyhq\.com|apply\.workable\.com)\/([^/?#]+)/);
+  if (!match) return '';
+  return match[1].replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-async function fetchTargetedSignals(base44, user) {
-  const careerGoals = user.career_goals || {};
-  const targetIndustries = careerGoals.target_industries || [];
-  const targetRoles = careerGoals.target_roles || [];
-  const schoolName = user.school_name || user.school || 'University';
-  const schoolCode = user.school_code || 'UF';
-  
-  // Use defaults if no goals set
-  if (!targetIndustries.length && !targetRoles.length) {
-    targetIndustries.push('Technology');
-    targetRoles.push('Software Engineer');
-  }
+function extractJobTitle(r) {
+  // Try to get title from snippet headers
+  const snippetText = (r.highlights || []).join(' ');
+  const headerMatch = snippetText.match(/##\s*([^\n\[]{5,80})/);
+  if (headerMatch) return headerMatch[1].trim();
 
-  // Get verified network companies with alumni data
-  let networkCompanies = [];
-  try {
-    const networkRes = await base44.functions.invoke('getVerifiedNetworkCompanies', {
-      industries: targetIndustries,
-    });
-    networkCompanies = networkRes?.data?.companies || networkRes?.companies || [];
-  } catch (e) {
-    networkCompanies = [];
-  }
-
-  // Fallback companies if network returns nothing
-  const FALLBACK_COMPANIES = [
-    { company: 'Deloitte', industry: targetIndustries[0] || 'Technology', alumni_count: 12 },
-    { company: 'Google', industry: 'Technology', alumni_count: 25 },
-    { company: 'JPMorgan Chase', industry: 'Finance', alumni_count: 18 },
-    { company: 'Salesforce', industry: 'Technology', alumni_count: 10 },
-  ];
-
-  // Filter companies by user's target industries
-  let targetedCompanies = networkCompanies.filter(c => 
-    matchIndustry(targetIndustries, c.industry)
-  ).slice(0, 8);
-
-  // Use fallback if nothing from network
-  if (!targetedCompanies.length) {
-    targetedCompanies = FALLBACK_COMPANIES;
-  }
-
-  // Generate signals for each targeted company
-  const signals = [];
-  
-  for (const company of targetedCompanies) {
-    const signalType = ['unadvertised', 'recruiter_view', 'backdoor', 'headcount'][Math.floor(Math.random() * 4)];
-    const template = SIGNAL_TEMPLATES[signalType];
-    const relevantRole = getRelevantRoleForIndustry(company.industry);
-    const nicheSource = getNicheSourceForIndustry(company.industry);
-    
-    // Fetch real alumni count
-    let alumniCount = 0;
-    let parentCount = 0;
-    let sampleConnections = [];
-    
-    try {
-      const networkCount = await base44.asServiceRole.integrations.Core.InvokeLLM({
-        prompt: `How many alumni from ${schoolName} work at ${company.company || company.name}? Return just a number.`,
-        add_context_from_internet: true,
-        model: 'gemini_3_flash',
-      });
-      alumniCount = parseInt(networkCount) || Math.floor(Math.random() * 50);
-    } catch (e) {
-      alumniCount = company.alumni_count || Math.floor(Math.random() * 30);
-    }
-
-    parentCount = Math.floor(alumniCount * 0.15); // Estimate 15% are parents
-    
-    const signal = {
-      id: `${signalType}-${company.company || company.name}`.toLowerCase().replace(/\s+/g, '-'),
-      type: signalType,
-      emoji: signalType === 'unadvertised' ? '🔥' : signalType === 'recruiter_view' ? '👀' : signalType === 'backdoor' ? '🎯' : '📡',
-      count: Math.floor(Math.random() * 5) + 1,
-      label: template.label(1, company.industry, nicheSource),
-      company: company.company || company.name,
-      detail: template.detail(company.industry, nicheSource),
-      time: ['This morning', '2 hours ago', 'Today', '4 hours ago'][Math.floor(Math.random() * 4)],
-      badge: signalType === 'recruiter_view' ? 'HOT' : signalType === 'unadvertised' ? 'NEW' : null,
-      industry: company.industry,
-      sourcePlatform: nicheSource,
-      realAlumniCount: alumniCount,
-      parentCount: parentCount,
-      expansion: generateExpansion(signalType, company, relevantRole, nicheSource, alumniCount),
-    };
-    
-    signals.push(signal);
-  }
-
-  return signals.slice(0, 4); // Return top 4 signals
+  // Parse page title: often "Company | Job Title" or "Job Title at Company"
+  const raw = r.title || '';
+  const parts = raw.split(/[|·\-–]/).map(s => s.trim()).filter(Boolean);
+  const roleWords = /\b(engineer|analyst|associate|intern|coordinator|specialist|manager|developer|designer|consultant|researcher|scientist|writer|advisor|representative|assistant|strategist|accountant|producer|planner|buyer|coordinator)\b/i;
+  const candidate = parts.find(p => roleWords.test(p));
+  return candidate || parts[0] || raw;
 }
 
-function generateExpansion(signalType, company, role, source, alumniCount) {
-  const template = SIGNAL_TEMPLATES[signalType];
-  
-  switch (signalType) {
-    case 'unadvertised':
-      return {
-        roles: [
-          { title: `${role} - Early Career`, status: '🟢' },
-          { title: `${role} Associate`, status: '🟢' },
-          { title: `Junior ${role} Specialist`, status: '🟡' },
-        ],
-        intel: template.intel(company.company || company.name, company.industry, 3),
-        cta: '📥 Add Selected to My Opportunities Pipeline',
-        ctaType: 'pipeline',
-      };
-    case 'recruiter_view':
-      return {
-        insider: { 
-          name: 'Recruiting Manager', 
-          title: `${company.industry || 'Department'} Talent Acquisition`, 
-          company: company.company || company.name 
-        },
-        activity: 'Spent 2+ minutes reviewing profiles matching your background.',
-        source: `Detected via ${company.company || company.name}'s talent pipeline.`,
-        intel: template.intel(company.company || company.name, company.industry),
-        cta: '⚡ Open Drawer & Send Direct LinkedIn Outreach',
-        ctaType: 'outreach',
-      };
-    case 'backdoor':
-      return {
-        roles: [
-          { title: `${role} - Referral Path Available`, status: '🟢' },
-          { title: `Entry-Level ${role}`, status: '🟢' },
-          { title: `${role} Rotational Program`, status: '🟡' },
-        ],
-        intel: template.intel(company.company || company.name, company.industry, 2),
-        cta: '📥 Add Selected to My Opportunities Pipeline',
-        ctaType: 'pipeline',
-      };
-    case 'headcount':
-      return {
-        company: company.company || company.name,
-        metric: `${company.industry || 'Department'} team expanded by ${Math.floor(Math.random() * 20) + 5}% in the last 30 days.`,
-        network: `${alumniCount} alumni from your school work here.`,
-        intel: template.intel(company.company || company.name, company.industry),
-        cta: '🔎 Auto-Generate a Warm Coffee Chat Request',
-        ctaType: 'coffeechat',
-      };
-    default:
-      return {};
-  }
-}
+const SENIOR_FILTER = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff engineer|architect|managing partner|executive)\b/i;
 
 Deno.serve(async (req) => {
   try {
+    const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
+    if (!EXA_API_KEY) {
+      return Response.json({ error: 'EXA_API_KEY not set', signals: [] }, { status: 500 });
+    }
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
     if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      return Response.json({ error: 'Unauthorized', signals: [] }, { status: 401 });
     }
-    
-    const signals = await fetchTargetedSignals(base44, user);
-    
+
+    const careerGoals = user.career_goals || {};
+    const targetIndustries = careerGoals.target_industries || [];
+    const targetRoles = careerGoals.target_roles || [];
+    const location = careerGoals.location_preference || careerGoals.preferred_location || '';
+    const levelTerms = getLevelTerms(user);
+
+    // Build role keywords from user's target roles + industry keywords
+    const industryRoleKeywords = targetIndustries.flatMap(ind => {
+      const key = Object.keys(INDUSTRY_ROLE_KEYWORDS).find(k =>
+        k.toLowerCase() === ind.toLowerCase() || ind.toLowerCase().includes(k.toLowerCase().split(' ')[0])
+      );
+      return INDUSTRY_ROLE_KEYWORDS[key] || INDUSTRY_ROLE_KEYWORDS['default'];
+    });
+
+    // Combine explicit target roles with industry-derived keywords, deduplicated
+    // Clean each term: no commas, trim whitespace, skip empty
+    const cleanTerm = t => t.replace(/,/g, '').trim();
+    const allRoleTerms = [...new Set([...targetRoles, ...industryRoleKeywords])]
+      .map(cleanTerm)
+      .filter(Boolean);
+    const roleQuery = allRoleTerms.slice(0, 4).map(t => `"${t}"`).join(' OR ') || '"analyst" OR "coordinator" OR "associate"';
+    const levelQuery = levelTerms.map(t => `"${t}"`).join(' OR ');
+    const locationStr = location ? ` ${location}` : '';
+    const query = `(${roleQuery}) (${levelQuery})${locationStr}`;
+
+    console.log(`[getTargetedSignalsFn] Searching Exa: "${query}"`);
+
+    const exaSearch = async (q, extraParams = {}) => {
+      const res = await fetch('https://api.exa.ai/search', {
+        method: 'POST',
+        headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: q,
+          type: 'keyword',
+          numResults: 20,
+          includeDomains: ATS_DOMAINS,
+          contents: { highlights: { maxCharacters: 600 } },
+          ...extraParams,
+        }),
+      });
+      const data = await res.json();
+      console.log(`[getTargetedSignalsFn] Exa status: ${res.status}, results: ${(data.results || []).length}, error: ${data.error || 'none'}`);
+      return data.results || [];
+    };
+
+    let results = await exaSearch(query, {
+      startPublishedDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+
+    // If targeted search returned nothing, try without date filter
+    if (!results.length) {
+      console.log('[getTargetedSignalsFn] No results with date filter, removing date constraint...');
+      results = await exaSearch(query);
+    }
+
+    // If still nothing, fall back to simple level-only search
+    if (!results.length) {
+      console.log('[getTargetedSignalsFn] No results with targeted query, trying simple fallback...');
+      const fallbackQuery = levelTerms[0] + ' jobs';
+      results = await exaSearch(fallbackQuery);
+    }
+
+    // Filter and map to signal objects — check URL contains any ATS domain
+    const isATSUrl = (url) => ATS_DOMAINS.some(d => url && url.includes(d));
+
+    const signals = results
+      .filter(r => {
+        if (!r.url || !r.title) return false;
+        if (!isATSUrl(r.url)) return false;
+        if (SENIOR_FILTER.test(r.title)) return false;
+        return true;
+      })
+      .map(r => {
+        const publishedDate = r.publishedDate ? new Date(r.publishedDate) : null;
+        const daysLive = publishedDate
+          ? Math.max(0, Math.floor((Date.now() - publishedDate.getTime()) / (1000 * 60 * 60 * 24)))
+          : null;
+
+        let riskLevel = 'LOW';
+        if (daysLive !== null) {
+          if (daysLive > 6) riskLevel = 'HIGH';
+          else if (daysLive > 3) riskLevel = 'MEDIUM';
+        }
+
+        const company = extractCompanyFromUrl(r.url);
+        const jobTitle = extractJobTitle(r);
+        const source = getSourceLabel(r.url);
+
+        // Skip if extracted title is also senior
+        if (SENIOR_FILTER.test(jobTitle)) return null;
+
+        return {
+          id: r.id || r.url,
+          type: 'live_posting',
+          emoji: riskLevel === 'LOW' ? '🔥' : riskLevel === 'MEDIUM' ? '🎯' : '📡',
+          count: 1,
+          label: jobTitle || 'New Opening',
+          company,
+          detail: `Posted on ${source}`,
+          time: daysLive !== null ? (daysLive === 0 ? 'Today' : `${daysLive}d ago`) : 'Recently',
+          badge: daysLive !== null && daysLive <= 1 ? 'NEW' : null,
+          source,
+          sourceUrl: r.url,
+          daysLive,
+          riskLevel,
+          publishedDate: publishedDate?.toISOString() || null,
+          snippet: (r.highlights || [])[0] || '',
+          realAlumniCount: null,
+          parentCount: 0,
+          expansion: {
+            roles: [{ title: jobTitle, status: riskLevel === 'LOW' ? '🟢' : riskLevel === 'MEDIUM' ? '🟡' : '🔴' }],
+            intel: `Posted ${daysLive !== null ? `${daysLive} day${daysLive !== 1 ? 's' : ''} ago` : 'recently'} on ${source}. ${riskLevel === 'LOW' ? 'Fresh listing — apply now for best odds.' : riskLevel === 'MEDIUM' ? 'A few days old — still worth applying but move quickly.' : 'Posting is over a week old — competition may be high.'}`,
+            cta: '🔗 View & Apply on ' + source,
+            ctaType: 'external_link',
+            applyUrl: r.url,
+          },
+        };
+      })
+      .filter(j => j !== null && j.label)
+      .slice(0, 6);
+
+    console.log(`[getTargetedSignalsFn] Returning ${signals.length} real job signals`);
     return Response.json({ signals });
+
   } catch (error) {
     console.error('getTargetedSignalsFn error:', error.message);
     return Response.json({ error: error.message, signals: [] }, { status: 500 });
