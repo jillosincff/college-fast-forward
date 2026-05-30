@@ -83,7 +83,10 @@ export default function OrganizedFeeds({ user }) {
   const hotLeads = payload?.hotLeads || [];
   const warmLeads = payload?.warmLeads || [];
   const coldLeads = payload?.coldLeads || [];
-  const totalCount = (hotLeads.length || 0) + (warmLeads.length || 0) + (coldLeads.length || 0);
+  const hotCount  = Array.isArray(hotLeads)  ? hotLeads.length  : 0;
+  const warmCount = Array.isArray(warmLeads) ? warmLeads.length : 0;
+  const coldCount = Array.isArray(coldLeads) ? coldLeads.length : 0;
+  const totalCount = hotCount + warmCount + coldCount;
 
   const handleAddToPipeline = async (lead) => {
     try {
