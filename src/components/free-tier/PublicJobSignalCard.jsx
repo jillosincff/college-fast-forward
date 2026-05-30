@@ -113,7 +113,7 @@ export default function PublicJobSignalCard({ job, user, onBackdoorClick, school
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
       }}>
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 600, color: '#92400e', margin: 0 }}>
-          🐊 {job.totalAlumni ?? '?'} {school} grads here · {job.parentConnections ?? '?'} parent backdoors
+          🐊 {job.totalAlumni ?? 0} {school} grads here · {job.parentConnections ?? 0} parent backdoors
         </p>
         <button
           onClick={() => onBackdoorClick && onBackdoorClick(job)}
