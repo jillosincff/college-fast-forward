@@ -115,49 +115,33 @@ function LeadCard({ lead, onAddToPipeline, onSelect }) {
   );
 }
 
-const EMPTY_STATE_MESSAGES = {
-  hot: {
-    title: 'Monitoring synced networks...',
-    body: 'CLiFF is actively scanning your synced corporate networks. No new openings detected this morning. Expanding radar to industry backdoor channels below.',
-    icon: '📡',
-  },
-  warm: {
-    title: 'Scanning alumni industry network...',
-    body: 'Searching for roles at companies where your school\'s alumni are active. Results populate as matches are confirmed.',
-    icon: '🔍',
-  },
-  cold: {
-    title: 'Querying niche job boards...',
-    body: 'Hunting for target-matched openings on Lever, Greenhouse, Ashby, and Workable. This feed fills automatically.',
-    icon: '🌐',
-  },
+
+
+const SECTION_META = {
+  hot:  { emoji: '🔥', label: 'HOT LEADS',  badge: 'Backdoor Channels Active',  badgeClass: 'bg-red-50 text-red-600',    emptyIcon: '🛰️', emptyTitle: 'CLiFF is actively monitoring your synchronized corporate networks...', emptyBody: 'No active target openings found inside your exact network today. Expanding search radius below.' },
+  warm: { emoji: '☀️', label: 'WARM LEADS', badge: 'Industry Connections Found', badgeClass: 'bg-amber-50 text-amber-600', emptyIcon: '🔍', emptyTitle: 'Scanning alumni industry network...', emptyBody: 'Searching for roles at companies where your school\'s alumni are active. Results populate as matches are confirmed.' },
+  cold: { emoji: '❄️', label: 'COLD LEADS', badge: 'Hidden Board Discoveries',   badgeClass: 'bg-blue-50 text-blue-600',   emptyIcon: '🌐', emptyTitle: 'Querying niche job boards...', emptyBody: 'Hunting for target-matched openings on Lever, Greenhouse, Ashby, and Workable. This feed fills automatically.' },
 };
 
 function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
-  const config = LEAD_TIER_CONFIG[tier];
-  const Icon = config.icon;
-  const empty = EMPTY_STATE_MESSAGES[tier];
+  const meta = SECTION_META[tier];
 
   return (
-    <div className="mb-6">
-      <div className={`flex items-center gap-2 mb-3 ${config.bgColor} ${config.borderColor} border rounded-lg px-3 py-2`}>
-        <Icon className={`w-5 h-5 ${config.color}`} />
-        <div>
-          <h2 className={`font-bold text-sm ${config.color}`}>{config.label} ({leads?.length || 0})</h2>
-          <p className="text-xs text-slate-600">{config.subtitle}</p>
-        </div>
+    <section className="space-y-4">
+      {/* Section header */}
+      <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+        <span className="text-xl">{meta.emoji}</span>
+        <h3 className="text-lg font-bold text-gray-900">{meta.label} ({leads?.length || 0})</h3>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${meta.badgeClass}`}>{meta.badge}</span>
       </div>
 
       {(!leads || leads.length === 0) ? (
-        <div className="flex items-start gap-3 bg-slate-50 border border-dashed border-slate-200 rounded-lg px-4 py-3">
-          <span className="text-lg mt-0.5">{empty.icon}</span>
-          <div>
-            <p className="text-xs font-semibold text-slate-700 mb-0.5">{empty.title}</p>
-            <p className="text-xs text-slate-500 leading-relaxed">{empty.body}</p>
-          </div>
+        <div className="border border-dashed border-gray-200 rounded-xl p-6 bg-gray-50/50 text-center">
+          <p className="text-sm text-gray-500 font-medium">{meta.emptyIcon} {meta.emptyTitle}</p>
+          <p className="text-xs text-gray-400 mt-1">{meta.emptyBody}</p>
         </div>
       ) : (
-        <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {leads.map((lead, idx) => (
             <LeadCard
               key={idx}
@@ -168,7 +152,7 @@ function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -250,36 +234,24 @@ export default function OrganizedFeeds({ user }) {
     );
   }
 
-  const totalLabel = totalCount > 0 ? `${totalCount} opportunities identified` : 'Scanning live networks now...';
-
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-2">🚀 CLiFF's Live Target Matches</h1>
-      <p className="text-sm text-slate-600 mb-6">{totalLabel}</p>
+    <div className="w-full max-w-6xl mx-auto px-4 py-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          🚀 CLiFF's Live Target Matches
+        </h2>
+        <p className="text-gray-600 mt-1">
+          Your personalized feed of{' '}
+          <span className="font-semibold text-purple-600">{totalCount}</span> opportunities
+        </p>
+      </div>
 
-      {/* 🔥 HOT LEADS — always shown */}
-      <LeadSection
-        tier="hot"
-        leads={hotLeads}
-        onAddToPipeline={handleAddToPipeline}
-        onSelectLead={setSelectedLead}
-      />
-
-      {/* ☀️ WARM LEADS — always shown */}
-      <LeadSection
-        tier="warm"
-        leads={warmLeads}
-        onAddToPipeline={handleAddToPipeline}
-        onSelectLead={setSelectedLead}
-      />
-
-      {/* ❄️ COLD LEADS — always shown */}
-      <LeadSection
-        tier="cold"
-        leads={coldLeads}
-        onAddToPipeline={handleAddToPipeline}
-        onSelectLead={setSelectedLead}
-      />
+      <div className="space-y-10">
+        <LeadSection tier="hot"  leads={hotLeads}  onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
+        <LeadSection tier="warm" leads={warmLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
+        <LeadSection tier="cold" leads={coldLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
+      </div>
 
       {/* Deep Dive Modal */}
       {selectedLead && (
