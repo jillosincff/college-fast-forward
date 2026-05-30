@@ -258,7 +258,11 @@ export default function PremiumSignalsFeed({ college, theme, onAddToPipeline, on
   useEffect(() => {
     const targetRoles = user?.career_goals?.target_roles || [];
     const targetIndustries = user?.career_goals?.target_industries || [];
-    if (!targetRoles.length && !targetIndustries.length) return;
+    if (!targetRoles.length && !targetIndustries.length) {
+      // Use defaults so the feed always shows something
+      targetRoles.push('Software Engineer');
+      targetIndustries.push('Technology');
+    }
     setLoadingListings(true);
     base44.functions.invoke('exaService', {
       action: 'getLivePublicListings',

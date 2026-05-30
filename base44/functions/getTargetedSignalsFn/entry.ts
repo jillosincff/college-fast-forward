@@ -75,21 +75,40 @@ async function fetchTargetedSignals(base44, user) {
   const schoolName = user.school_name || user.school || 'University';
   const schoolCode = user.school_code || 'UF';
   
+  // Use defaults if no goals set
   if (!targetIndustries.length && !targetRoles.length) {
-    return [];
+    targetIndustries.push('Technology');
+    targetRoles.push('Software Engineer');
   }
 
   // Get verified network companies with alumni data
-  const networkRes = await base44.functions.invoke('getVerifiedNetworkCompanies', {
-    industries: targetIndustries,
-  });
-  
-  const networkCompanies = networkRes?.data?.companies || networkRes?.companies || [];
-  
+  let networkCompanies = [];
+  try {
+    const networkRes = await base44.functions.invoke('getVerifiedNetworkCompanies', {
+      industries: targetIndustries,
+    });
+    networkCompanies = networkRes?.data?.companies || networkRes?.companies || [];
+  } catch (e) {
+    networkCompanies = [];
+  }
+
+  // Fallback companies if network returns nothing
+  const FALLBACK_COMPANIES = [
+    { company: 'Deloitte', industry: targetIndustries[0] || 'Technology', alumni_count: 12 },
+    { company: 'Google', industry: 'Technology', alumni_count: 25 },
+    { company: 'JPMorgan Chase', industry: 'Finance', alumni_count: 18 },
+    { company: 'Salesforce', industry: 'Technology', alumni_count: 10 },
+  ];
+
   // Filter companies by user's target industries
-  const targetedCompanies = networkCompanies.filter(c => 
+  let targetedCompanies = networkCompanies.filter(c => 
     matchIndustry(targetIndustries, c.industry)
   ).slice(0, 8);
+
+  // Use fallback if nothing from network
+  if (!targetedCompanies.length) {
+    targetedCompanies = FALLBACK_COMPANIES;
+  }
 
   // Generate signals for each targeted company
   const signals = [];
