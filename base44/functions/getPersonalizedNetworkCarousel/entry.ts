@@ -271,6 +271,14 @@ Deno.serve(async (req) => {
     }
 
     const targetRole = body.target_role || user.career_goals?.role || user.target_role || '';
+    // target_positions is an array of role-type selections from onboarding (e.g. ["UX Design", "Content Strategy"])
+    const targetPositions = (
+      body.target_positions
+      || user.career_goals?.target_positions
+      || user.target_positions
+      || []
+    ).map(p => p.toLowerCase());
+
     const schoolCode = (user.school_code || '').toLowerCase();
     const schoolName = (user.school_name || user.school || user.university || '').toLowerCase();
 
@@ -286,18 +294,22 @@ Deno.serve(async (req) => {
     // Filter out senior roles
     jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
 
-    // Build role keyword list from target_role AND any role-level keywords in target_industries
+    // Build role keyword list from target_role, target_positions, AND industry-derived keywords
     // This is the "double-lock": industry must match AND role title must match
     const roleKeywords = (targetRole || '')
       .toLowerCase()
       .split(/[\s,\/]+/)
       .filter(w => w.length > 2);
 
-    // Also pull function keywords from the industry map for role-level matching
-    // e.g. "creative" industry implies design/ux/content keywords
-    const industryRoleKeywords = getMemberKeywords(targetIndustries);
+    // target_positions keywords — e.g. "ux design" → ["ux", "design"]
+    const positionKeywords = targetPositions
+      .flatMap(p => p.split(/[\s,\/]+/))
+      .filter(w => w.length > 2);
 
-    const allRoleKeywords = [...new Set([...roleKeywords, ...industryRoleKeywords])];
+    // Also pull function keywords from the industry map for role-level matching
+    const industryRoleKeywords = getMemberKeywords([...targetIndustries, ...targetPositions]);
+
+    const allRoleKeywords = [...new Set([...roleKeywords, ...positionKeywords, ...industryRoleKeywords])];
 
     if (allRoleKeywords.length > 0) {
       const roleFiltered = jobPool.filter(j => {
