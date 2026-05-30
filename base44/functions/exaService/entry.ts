@@ -305,26 +305,43 @@ Deno.serve(async (req) => {
         'efinancialcareers.com': 'eFinancialCareers',
       };
 
-      const roleQuery = targetRoles.slice(0, 2).join(' OR ') || 'entry level analyst';
+      const roleQuery = targetRoles.slice(0, 3).join(' OR ') || 'entry level analyst';
       const locationStr = location ? ` ${location}` : '';
-      const query = `${roleQuery}${locationStr} entry level OR junior OR internship jobs hiring 2025 2026 -senior -lead -principal -director -manager -head -vp -staff`;
+      // Use keyword search — Exa neural search drifts to articles; keyword keeps it grounded on job boards
+      const query = `(${roleQuery}) (entry level OR junior OR associate OR new grad OR internship) ${locationStr}`;
 
       const searchRes = await exaFetch('search', {
         query,
-        type: 'auto',
-        numResults: Math.min(limit * 2, 12),
+        type: 'keyword',
+        numResults: Math.min(limit * 3, 20),
         includeDomains: NICHE_DOMAINS,
-        excludeDomains: ['linkedin.com', 'indeed.com', 'glassdoor.com', 'monster.com', 'ziprecruiter.com'],
-        contents: { highlights: { maxCharacters: 800 } },
-        startPublishedDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+        contents: { highlights: { maxCharacters: 600 } },
+        startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       });
 
       const results = searchRes.results || [];
 
-      const SENIOR_KEYWORDS = /\b(senior|sr\.|lead|principal|director|manager|head of|vp |vice president|staff engineer|architect)\b/i;
+      const SENIOR_KEYWORDS = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff engineer|architect|managing partner)\b/i;
+
+      // ATS job posting URL patterns — these patterns only appear in actual job listing URLs
+      const JOB_URL_PATTERNS = [
+        /jobs\.lever\.co\//,
+        /boards\.greenhouse\.io\//,
+        /jobs\.ashbyhq\.com\//,
+        /apply\.workable\.com\//,
+        /wellfound\.com\/jobs\//,
+        /efinancialcareers\.com\//,
+      ];
 
       const jobs = results
-        .filter(r => r.url && r.title && !SENIOR_KEYWORDS.test(r.title))
+        .filter(r => {
+          if (!r.url || !r.title) return false;
+          if (SENIOR_KEYWORDS.test(r.title)) return false;
+          // Must match a real ATS job posting URL pattern
+          const matchesJobUrl = JOB_URL_PATTERNS.some(p => p.test(r.url));
+          if (!matchesJobUrl) return false;
+          return true;
+        })
         .map(r => {
           // Calculate age in days
           const publishedDate = r.publishedDate ? new Date(r.publishedDate) : null;
