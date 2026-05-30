@@ -411,7 +411,7 @@ Deno.serve(async (req) => {
       }
       // ☀️ WARM LEAD: No company alumni, but has industry connections
       else if (allParentAdvisors.length > 0) {
-        coldLeads.push({
+        warmLeads.push({
           company: job.company,
           role: job.role,
           jobDescription: job.description,
