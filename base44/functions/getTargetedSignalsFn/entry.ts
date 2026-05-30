@@ -195,7 +195,7 @@ function generateExpansion(signalType, company, role, source, alumniCount) {
           { title: `Entry-Level ${role}`, status: '🟢' },
           { title: `${role} Rotational Program`, status: '🟡' },
         ],
-        intel: template.intel(company.company || company.name, 2),
+        intel: template.intel(company.company || company.name, company.industry, 2),
         cta: '📥 Add Selected to My Opportunities Pipeline',
         ctaType: 'pipeline',
       };

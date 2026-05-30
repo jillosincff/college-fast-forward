@@ -22,6 +22,13 @@ const INDUSTRY_KEYWORDS = {
   'nonprofit': ['nonprofit', 'non-profit', 'ngo', 'foundation', 'charity', 'social impact', 'advocacy'],
   'government': ['government', 'federal', 'state', 'county', 'city', 'public sector', 'policy', 'agency', 'department of'],
   'education': ['teacher', 'professor', 'education', 'school', 'university', 'college', 'curriculum', 'academic'],
+  'media': ['media', 'entertainment', 'film', 'tv', 'television', 'radio', 'news', 'journalism', 'publishing', 'podcast', 'streaming', 'production', 'studio'],
+  'media and entertainment': ['media', 'entertainment', 'film', 'tv', 'television', 'radio', 'news', 'journalism', 'publishing', 'podcast', 'streaming', 'production', 'studio'],
+  'sports': ['sports', 'athletic', 'fitness', 'coaching', 'nfl', 'nba', 'mlb', 'nhl', 'espn', 'league'],
+  'marketing': ['marketing', 'brand', 'advertising', 'pr', 'public relations', 'growth', 'seo', 'social media', 'digital marketing'],
+  'sales': ['sales', 'account executive', 'business development', 'bdr', 'sdr', 'revenue', 'account manager'],
+  'supply chain': ['supply chain', 'logistics', 'operations', 'procurement', 'inventory', 'warehouse', 'distribution'],
+  'real estate': ['real estate', 'realty', 'property', 'broker', 'mortgage', 'cre', 'leasing'],
 };
 
 function memberMatchesIndustries(member, targetIndustries) {
@@ -48,7 +55,8 @@ Deno.serve(async (req) => {
     let targetIndustries = [];
     try {
       const body = await req.json().catch(() => ({}));
-      targetIndustries = body.target_industries || [];
+      // Accept both "industries" and "target_industries" keys
+      targetIndustries = body.target_industries || body.industries || [];
     } catch {}
 
     // Also fall back to user's saved goals/onboarding industries
