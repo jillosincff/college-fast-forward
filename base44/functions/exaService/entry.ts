@@ -286,23 +286,19 @@ Deno.serve(async (req) => {
     if (action === 'getLivePublicListings') {
       const { targetRoles = [], targetIndustries = [], location = '', limit = 6 } = params;
 
-      // Only ATS subdomain endpoints — these URLs are always actual job postings, never articles
+      // Only pure ATS subdomains — every URL on these domains IS a job posting by design
       const NICHE_DOMAINS = [
         'jobs.lever.co',        // Lever ATS — always a job posting URL
         'boards.greenhouse.io', // Greenhouse ATS — always a job posting URL
         'jobs.ashbyhq.com',     // Ashby ATS — always a job posting URL
         'apply.workable.com',   // Workable ATS — always a job posting URL
-        'wellfound.com',        // Startup job listings (AngelList)
-        'efinancialcareers.com', // Finance niche job board
       ];
 
       const NICHE_SOURCE_LABELS = {
-        'jobs.lever.co': 'Lever ATS',
-        'boards.greenhouse.io': 'Greenhouse ATS',
-        'jobs.ashbyhq.com': 'Ashby ATS',
-        'apply.workable.com': 'Workable ATS',
-        'wellfound.com': 'Wellfound',
-        'efinancialcareers.com': 'eFinancialCareers',
+        'jobs.lever.co': 'Lever',
+        'boards.greenhouse.io': 'Greenhouse',
+        'jobs.ashbyhq.com': 'Ashby',
+        'apply.workable.com': 'Workable',
       };
 
       const roleQuery = targetRoles.slice(0, 3).join(' OR ') || 'entry level analyst';
@@ -323,14 +319,12 @@ Deno.serve(async (req) => {
 
       const SENIOR_KEYWORDS = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff engineer|architect|managing partner)\b/i;
 
-      // ATS job posting URL patterns — these patterns only appear in actual job listing URLs
+      // ATS job posting URL patterns — these subdomains ONLY serve job postings
       const JOB_URL_PATTERNS = [
-        /jobs\.lever\.co\//,
-        /boards\.greenhouse\.io\//,
-        /jobs\.ashbyhq\.com\//,
-        /apply\.workable\.com\//,
-        /wellfound\.com\/jobs\//,
-        /efinancialcareers\.com\//,
+        /^https:\/\/jobs\.lever\.co\//,
+        /^https:\/\/boards\.greenhouse\.io\//,
+        /^https:\/\/jobs\.ashbyhq\.com\//,
+        /^https:\/\/apply\.workable\.com\//,
       ];
 
       const jobs = results
