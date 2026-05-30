@@ -17,9 +17,9 @@ const LEAD_TIER_CONFIG = {
 
 
 const SECTION_META = {
-  hot:  { emoji: '🔥', label: 'HOT LEADS',  badge: 'Backdoor Channels Active',  badgeClass: 'bg-red-50 text-red-600',    emptyIcon: '🛰️', emptyTitle: 'CLiFF is actively monitoring your synchronized corporate networks...', emptyBody: 'No active target openings found inside your exact network today. Expanding search radius below.' },
-  warm: { emoji: '☀️', label: 'WARM LEADS', badge: 'Industry Connections Found', badgeClass: 'bg-amber-50 text-amber-600', emptyIcon: '🔍', emptyTitle: 'Scanning alumni industry network...', emptyBody: 'Searching for roles at companies where your school\'s alumni are active. Results populate as matches are confirmed.' },
-  cold: { emoji: '❄️', label: 'COLD LEADS', badge: 'Hidden Board Discoveries',   badgeClass: 'bg-blue-50 text-blue-600',   emptyIcon: '🌐', emptyTitle: 'Querying niche job boards...', emptyBody: 'Hunting for target-matched openings on Lever, Greenhouse, Ashby, and Workable. This feed fills automatically.' },
+  hot:  { emoji: '🔥', label: 'HOT LEADS',  badge: 'Backdoor Channels Active',  badgeClass: 'bg-red-50 text-red-600',    emptyIcon: '🛰️', emptyTitle: 'No exact alumni matches today.', emptyBody: 'No one from your network works at the companies with open roles right now. Check Warm Leads below for industry connections.' },
+  warm: { emoji: '☀️', label: 'WARM LEADS', badge: 'Industry Connections Found', badgeClass: 'bg-amber-50 text-amber-600', emptyIcon: '🔍', emptyTitle: 'No industry connections found for these targets.', emptyBody: 'No alumni or parents matched to your selected industries. Try updating your career goals to broaden your search.' },
+  cold: { emoji: '❄️', label: 'COLD LEADS', badge: 'Hidden Board Discoveries',   badgeClass: 'bg-blue-50 text-blue-600',   emptyIcon: '🌐', emptyTitle: 'No open cold leads match your filter targets today.', emptyBody: 'These are front-door roles from niche boards. Try updating your target industries to surface more opportunities.' },
 };
 
 function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {

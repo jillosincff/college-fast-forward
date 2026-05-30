@@ -343,8 +343,12 @@ Deno.serve(async (req) => {
 
       let networkEntry = companyNetworkMap[normalizedJobCompany];
       if (!networkEntry) {
+        // Fuzzy match: strip all non-alphanumeric chars and check substring overlap
+        const jobKey = normalizedJobCompany.replace(/[^a-z0-9]/g, '');
         for (const [key, val] of Object.entries(companyNetworkMap)) {
-          if (key.includes(normalizedJobCompany) || normalizedJobCompany.includes(key)) {
+          const netKey = key.replace(/[^a-z0-9]/g, '');
+          if (jobKey.length >= 4 && netKey.length >= 4 &&
+              (jobKey.includes(netKey) || netKey.includes(jobKey))) {
             networkEntry = val;
             break;
           }
