@@ -146,21 +146,26 @@ Deno.serve(async (req) => {
       results = await exaSearch(query);
     }
 
-    // If still nothing, fall back to simple level-only search
-    if (!results.length) {
-      console.log('[getTargetedSignalsFn] No results with targeted query, trying simple fallback...');
-      const fallbackQuery = levelTerms[0] + ' jobs';
+    // If still nothing, try a broad role-only fallback using just first role term
+    if (!results.length && allRoleTerms.length > 0) {
+      console.log('[getTargetedSignalsFn] No results, trying role-only fallback...');
+      const fallbackQuery = `${allRoleTerms[0]} jobs (${levelQuery})`;
       results = await exaSearch(fallbackQuery);
     }
 
     // Filter and map to signal objects — check URL contains any ATS domain
     const isATSUrl = (url) => ATS_DOMAINS.some(d => url && url.includes(d));
 
+    // Professional role whitelist — title must contain at least one of these to be relevant
+    const ROLE_WHITELIST = /\b(engineer|analyst|associate|intern|coordinator|specialist|developer|designer|consultant|researcher|scientist|writer|advisor|strategist|accountant|producer|planner|buyer|manager|recruiter|marketer|marketing|sales|operations|finance|data|software|product|ux|ui|legal|communications|pr|account|media|content|brand|project|program|policy|clinical|research|business|financial|investment|hr|talent|supply chain|logistics|procurement|public relations|social media|growth|customer success|technical|implementation|solution|architect|devops|security|quality|audit|compliance|editorial|creative|digital|event|field|community|partnerships|revenue|insights|reporting|visualization|machine learning|ai|nlp|computer vision|mobile|frontend|backend|full.?stack|infrastructure|platform|api|cloud|embedded|firmware|hardware|electrical|mechanical|civil|biomedical|chemical|industrial|environmental|aerospace|manufacturing)\b/i;
+
     const signals = results
       .filter(r => {
         if (!r.url || !r.title) return false;
         if (!isATSUrl(r.url)) return false;
         if (SENIOR_FILTER.test(r.title)) return false;
+        // Must look like a real professional/white-collar role
+        if (!ROLE_WHITELIST.test(r.title)) return false;
         return true;
       })
       .map(r => {
@@ -179,8 +184,9 @@ Deno.serve(async (req) => {
         const jobTitle = extractJobTitle(r);
         const source = getSourceLabel(r.url);
 
-        // Skip if extracted title is also senior
+        // Skip if extracted title is senior or not a recognized professional role
         if (SENIOR_FILTER.test(jobTitle)) return null;
+        if (!ROLE_WHITELIST.test(jobTitle)) return null;
 
         return {
           id: r.id || r.url,
