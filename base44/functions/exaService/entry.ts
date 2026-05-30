@@ -282,18 +282,50 @@ Deno.serve(async (req) => {
     }
 
     // ── ACTION 3: Live public job listings with age risk ─────────────
+    // Sources niche/non-mainstream job boards only — NOT LinkedIn or Indeed
     if (action === 'getLivePublicListings') {
       const { targetRoles = [], targetIndustries = [], location = '', limit = 6 } = params;
 
+      const NICHE_DOMAINS = [
+        'wellfound.com',       // Tech startups (formerly AngelList)
+        'jobs.lever.co',       // Direct company ATS (lever)
+        'boards.greenhouse.io', // Direct company ATS (greenhouse)
+        'jobs.ashbyhq.com',    // Direct company ATS (Ashby)
+        'apply.workable.com',  // Direct company ATS (Workable)
+        'efinancialcareers.com', // Finance niche
+        'workinstartups.com',  // Startup-focused
+        'otta.com',            // Curated tech/startup jobs
+        'builtin.com',         // Tech community jobs
+        'simplyhired.com',     // Aggregator that surfaces lesser-known postings
+        'theladders.com',      // Professional niche
+        'idealist.org',        // Nonprofit/mission-driven
+      ];
+
+      const NICHE_SOURCE_LABELS = {
+        'wellfound.com': 'Wellfound',
+        'jobs.lever.co': 'Lever ATS',
+        'boards.greenhouse.io': 'Greenhouse ATS',
+        'jobs.ashbyhq.com': 'Ashby ATS',
+        'apply.workable.com': 'Workable ATS',
+        'efinancialcareers.com': 'eFinancialCareers',
+        'workinstartups.com': 'WorkInStartups',
+        'otta.com': 'Otta',
+        'builtin.com': 'Built In',
+        'simplyhired.com': 'SimplyHired',
+        'theladders.com': 'TheLadders',
+        'idealist.org': 'Idealist',
+      };
+
       const roleQuery = targetRoles.slice(0, 2).join(' OR ') || 'entry level analyst';
       const locationStr = location ? ` ${location}` : '';
-      const query = `${roleQuery}${locationStr} jobs 2025 2026 site:linkedin.com OR site:indeed.com`;
+      const query = `${roleQuery}${locationStr} jobs hiring 2025 2026`;
 
       const searchRes = await exaFetch('search', {
         query,
         type: 'auto',
         numResults: Math.min(limit * 2, 12),
-        includeDomains: ['linkedin.com', 'indeed.com'],
+        includeDomains: NICHE_DOMAINS,
+        excludeDomains: ['linkedin.com', 'indeed.com', 'glassdoor.com', 'monster.com', 'ziprecruiter.com'],
         contents: { highlights: { maxCharacters: 800 } },
         startPublishedDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
       });
@@ -320,8 +352,9 @@ Deno.serve(async (req) => {
           const jobTitle = titleParts[0] || r.title;
           const companyName = titleParts[1] || titleParts[2] || '';
 
-          // Determine source
-          const source = r.url?.includes('linkedin.com') ? 'LinkedIn' : 'Indeed';
+          // Determine niche source label
+          const matchedDomain = NICHE_DOMAINS.find(d => r.url?.includes(d));
+          const source = matchedDomain ? (NICHE_SOURCE_LABELS[matchedDomain] || matchedDomain) : 'Niche Board';
 
           return {
             id: r.id || r.url,
