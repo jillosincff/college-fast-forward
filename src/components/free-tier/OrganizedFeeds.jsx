@@ -22,7 +22,7 @@ const SECTION_META = {
   cold: { emoji: '❄️', label: 'COLD LEADS', badge: 'Hidden Board Discoveries',   badgeClass: 'bg-blue-50 text-blue-600',   emptyIcon: '🌐', emptyTitle: 'No open cold leads match your filter targets today.', emptyBody: 'These are front-door roles from niche boards. Try updating your target industries to surface more opportunities.' },
 };
 
-function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
+function LeadSection({ tier, leads, onAddToPipeline, onSelectLead, user }) {
   const meta = SECTION_META[tier];
 
   return (
@@ -44,7 +44,7 @@ function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
           {leads.map((lead, idx) => {
             const props = { key: idx, lead, onAddToPipeline, onSelect: onSelectLead };
             if (tier === 'hot')  return <HotJobCard  {...props} />;
-            if (tier === 'warm') return <WarmJobCard {...props} />;
+            if (tier === 'warm') return <WarmJobCard {...props} user={user} />;
             return <ColdJobCard {...props} />;
           })}
         </div>
@@ -149,9 +149,9 @@ export default function OrganizedFeeds({ user }) {
       </div>
 
       <div className="space-y-10">
-        <LeadSection tier="hot"  leads={hotLeads}  onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
-        <LeadSection tier="warm" leads={warmLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
-        <LeadSection tier="cold" leads={coldLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} />
+        <LeadSection tier="hot"  leads={hotLeads}  onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} user={user} />
+        <LeadSection tier="warm" leads={warmLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} user={user} />
+        <LeadSection tier="cold" leads={coldLeads} onAddToPipeline={handleAddToPipeline} onSelectLead={setSelectedLead} user={user} />
       </div>
 
       {/* Deep Dive Modal */}
