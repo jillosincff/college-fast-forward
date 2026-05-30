@@ -286,34 +286,23 @@ Deno.serve(async (req) => {
     if (action === 'getLivePublicListings') {
       const { targetRoles = [], targetIndustries = [], location = '', limit = 6 } = params;
 
+      // Only ATS subdomain endpoints — these URLs are always actual job postings, never articles
       const NICHE_DOMAINS = [
-        'wellfound.com',       // Tech startups (formerly AngelList)
-        'jobs.lever.co',       // Direct company ATS (lever)
-        'boards.greenhouse.io', // Direct company ATS (greenhouse)
-        'jobs.ashbyhq.com',    // Direct company ATS (Ashby)
-        'apply.workable.com',  // Direct company ATS (Workable)
-        'efinancialcareers.com', // Finance niche
-        'workinstartups.com',  // Startup-focused
-        'otta.com',            // Curated tech/startup jobs
-        'builtin.com',         // Tech community jobs
-        'simplyhired.com',     // Aggregator that surfaces lesser-known postings
-        'theladders.com',      // Professional niche
-        'idealist.org',        // Nonprofit/mission-driven
+        'jobs.lever.co',        // Lever ATS — always a job posting URL
+        'boards.greenhouse.io', // Greenhouse ATS — always a job posting URL
+        'jobs.ashbyhq.com',     // Ashby ATS — always a job posting URL
+        'apply.workable.com',   // Workable ATS — always a job posting URL
+        'wellfound.com',        // Startup job listings (AngelList)
+        'efinancialcareers.com', // Finance niche job board
       ];
 
       const NICHE_SOURCE_LABELS = {
-        'wellfound.com': 'Wellfound',
         'jobs.lever.co': 'Lever ATS',
         'boards.greenhouse.io': 'Greenhouse ATS',
         'jobs.ashbyhq.com': 'Ashby ATS',
         'apply.workable.com': 'Workable ATS',
+        'wellfound.com': 'Wellfound',
         'efinancialcareers.com': 'eFinancialCareers',
-        'workinstartups.com': 'WorkInStartups',
-        'otta.com': 'Otta',
-        'builtin.com': 'Built In',
-        'simplyhired.com': 'SimplyHired',
-        'theladders.com': 'TheLadders',
-        'idealist.org': 'Idealist',
       };
 
       const roleQuery = targetRoles.slice(0, 2).join(' OR ') || 'entry level analyst';
