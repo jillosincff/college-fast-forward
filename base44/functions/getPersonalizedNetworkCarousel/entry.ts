@@ -254,13 +254,30 @@ Deno.serve(async (req) => {
       const pool = JOB_POOL[ind] || [];
       jobPool.push(...pool);
     }
+
+    // Filter out senior roles
+    jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
+
+    // Filter by user's target role keywords if provided
+    if (targetRole && targetRole.trim().length > 2) {
+      const roleKeywords = targetRole.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      const roleFiltered = jobPool.filter(j => {
+        const roleLower = j.role.toLowerCase();
+        const descLower = j.description.toLowerCase();
+        return roleKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
+      });
+      // Only apply role filter if it returns results, otherwise keep all industry matches
+      if (roleFiltered.length > 0) jobPool = roleFiltered;
+    }
+
+    // Deduplicate by company
     const seen = new Set();
     jobPool = jobPool.filter(j => {
       if (seen.has(j.company)) return false;
-      if (SENIOR_FILTER.test(j.role)) return false;
       seen.add(j.company);
       return true;
     });
+
     if (!jobPool.length) jobPool = [...FALLBACK_JOBS].filter(j => !SENIOR_FILTER.test(j.role));
 
     // ─── Step 2: Load all network members (alumni + parents) ────────────────
