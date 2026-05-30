@@ -1,119 +1,18 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Zap, Sun, Snowflake, Plus, MessageSquare, Lightbulb, Search } from 'lucide-react';
+import { Zap, Sun, Snowflake } from 'lucide-react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
+import HotJobCard from './HotJobCard';
+import WarmJobCard from './WarmJobCard';
+import ColdJobCard from './ColdJobCard';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 const LEAD_TIER_CONFIG = {
-  hot: {
-    icon: Zap,
-    label: '🔥 HOT LEADS',
-    subtitle: 'Backdoor Channels Active',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200',
-    ctaIcon: MessageSquare,
-    ctaLabel: 'Draft Backdoor Message',
-  },
-  warm: {
-    icon: Sun,
-    label: '☀️ WARM LEADS',
-    subtitle: 'Industry Connections Found',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-200',
-    ctaIcon: Lightbulb,
-    ctaLabel: 'Request Industry Insight',
-  },
-  cold: {
-    icon: Snowflake,
-    label: '❄️ COLD LEADS',
-    subtitle: 'Hidden Board Discoveries',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    ctaIcon: Search,
-    ctaLabel: 'View Role & Hunt Insiders',
-  },
+  hot:  { icon: Zap,      color: 'text-orange-600' },
+  warm: { icon: Sun,      color: 'text-yellow-600' },
+  cold: { icon: Snowflake, color: 'text-blue-600'  },
 };
-
-function LeadCard({ lead, onAddToPipeline, onSelect }) {
-  const config = LEAD_TIER_CONFIG[lead.leadTier];
-  const Icon = config.icon;
-  const CTAIcon = config.ctaIcon;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-3"
-    >
-      <Card className={`hover:shadow-md transition-shadow cursor-pointer ${config.bgColor}/30 ${config.borderColor}`}>
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className={`w-4 h-4 ${config.color}`} />
-                <h3 className="font-semibold text-base">{lead.company}</h3>
-              </div>
-              <p className="text-sm text-slate-700 font-medium">{lead.role}</p>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 text-xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToPipeline(lead);
-              }}
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              Add
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Connection info based on tier */}
-          {lead.leadTier === 'hot' && (
-            <div className="text-xs text-slate-600 mb-2">
-              🎓 {(lead.alumniCount || 0)} {lead.schoolName || 'UF'} {(lead.alumniCount || 0) === 1 ? 'Alum' : 'Alums'} work here
-            </div>
-          )}
-          {lead.leadTier === 'warm' && (
-            <div className="text-xs text-slate-600 mb-2">
-              💡 {(lead.parentCount || 0)} {lead.schoolName || 'UF'} {(lead.parentCount || 0) === 1 ? 'Alum' : 'Alums'} in {lead.targetIndustry}
-            </div>
-          )}
-          {lead.leadTier === 'cold' && (
-            <div className="text-xs text-slate-500 mb-2 flex items-center gap-1">
-              <Snowflake className="w-3 h-3" />
-              Front door entry. No active network matches yet.
-            </div>
-          )}
-
-          {/* Primary CTA */}
-          <Button
-            size="sm"
-            className={`w-full h-9 text-xs font-medium ${
-              lead.leadTier === 'hot' ? 'bg-orange-600 hover:bg-orange-700' :
-              lead.leadTier === 'warm' ? 'bg-yellow-600 hover:bg-yellow-700' :
-              'bg-blue-600 hover:bg-blue-700'
-            }`}
-            onClick={() => onSelect(lead)}
-          >
-            <CTAIcon className="w-3 h-3 mr-1.5" />
-            {config.ctaLabel}
-          </Button>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
 
 
 
@@ -142,14 +41,12 @@ function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {leads.map((lead, idx) => (
-            <LeadCard
-              key={idx}
-              lead={lead}
-              onAddToPipeline={onAddToPipeline}
-              onSelect={onSelectLead}
-            />
-          ))}
+          {leads.map((lead, idx) => {
+            const props = { key: idx, lead, onAddToPipeline, onSelect: onSelectLead };
+            if (tier === 'hot')  return <HotJobCard  {...props} />;
+            if (tier === 'warm') return <WarmJobCard {...props} />;
+            return <ColdJobCard {...props} />;
+          })}
         </div>
       )}
     </section>
