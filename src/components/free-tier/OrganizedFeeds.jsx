@@ -115,31 +115,59 @@ function LeadCard({ lead, onAddToPipeline, onSelect }) {
   );
 }
 
+const EMPTY_STATE_MESSAGES = {
+  hot: {
+    title: 'Monitoring synced networks...',
+    body: 'CLiFF is actively scanning your synced corporate networks. No new openings detected this morning. Expanding radar to industry backdoor channels below.',
+    icon: '📡',
+  },
+  warm: {
+    title: 'Scanning alumni industry network...',
+    body: 'Searching for roles at companies where your school\'s alumni are active. Results populate as matches are confirmed.',
+    icon: '🔍',
+  },
+  cold: {
+    title: 'Querying niche job boards...',
+    body: 'Hunting for target-matched openings on Lever, Greenhouse, Ashby, and Workable. This feed fills automatically.',
+    icon: '🌐',
+  },
+};
+
 function LeadSection({ tier, leads, onAddToPipeline, onSelectLead }) {
   const config = LEAD_TIER_CONFIG[tier];
   const Icon = config.icon;
-
-  if (!leads || leads.length === 0) return null;
+  const empty = EMPTY_STATE_MESSAGES[tier];
 
   return (
     <div className="mb-6">
       <div className={`flex items-center gap-2 mb-3 ${config.bgColor} ${config.borderColor} border rounded-lg px-3 py-2`}>
         <Icon className={`w-5 h-5 ${config.color}`} />
         <div>
-          <h2 className={`font-bold text-sm ${config.color}`}>{config.label} ({leads.length})</h2>
+          <h2 className={`font-bold text-sm ${config.color}`}>{config.label} ({leads?.length || 0})</h2>
           <p className="text-xs text-slate-600">{config.subtitle}</p>
         </div>
       </div>
-      <div>
-        {leads.map((lead, idx) => (
-          <LeadCard
-            key={idx}
-            lead={lead}
-            onAddToPipeline={onAddToPipeline}
-            onSelect={onSelectLead}
-          />
-        ))}
-      </div>
+
+      {(!leads || leads.length === 0) ? (
+        <div className="flex items-start gap-3 bg-slate-50 border border-dashed border-slate-200 rounded-lg px-4 py-3">
+          <span className="text-lg mt-0.5">{empty.icon}</span>
+          <div>
+            <p className="text-xs font-semibold text-slate-700 mb-0.5">{empty.title}</p>
+            <p className="text-xs text-slate-500 leading-relaxed">{empty.body}</p>
+          </div>
+        </div>
+      ) : (
+        <div>
+          {leads.map((lead, idx) => (
+            <LeadCard
+              key={idx}
+              lead={lead}
+              onAddToPipeline={onAddToPipeline}
+              onSelect={onSelectLead}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -222,50 +250,36 @@ export default function OrganizedFeeds({ user }) {
     );
   }
 
-  if (!feedsData) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-slate-500">Loading your opportunities...</p>
-      </div>
-    );
-  }
+  const totalLabel = totalCount > 0 ? `${totalCount} opportunities identified` : 'Scanning live networks now...';
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-2">🚀 CLiFF's Live Target Matches</h1>
-      <p className="text-sm text-slate-600 mb-6">
-        Your personalized feed of {totalCount} opportunities
-      </p>
+      <p className="text-sm text-slate-600 mb-6">{totalLabel}</p>
 
-      {/* 🔥 HOT LEADS */}
-      {hotLeads.length > 0 && (
-        <LeadSection
-          tier="hot"
-          leads={hotLeads}
-          onAddToPipeline={handleAddToPipeline}
-          onSelectLead={setSelectedLead}
-        />
-      )}
+      {/* 🔥 HOT LEADS — always shown */}
+      <LeadSection
+        tier="hot"
+        leads={hotLeads}
+        onAddToPipeline={handleAddToPipeline}
+        onSelectLead={setSelectedLead}
+      />
 
-      {/* ☀️ WARM LEADS */}
-      {warmLeads.length > 0 && (
-        <LeadSection
-          tier="warm"
-          leads={warmLeads}
-          onAddToPipeline={handleAddToPipeline}
-          onSelectLead={setSelectedLead}
-        />
-      )}
+      {/* ☀️ WARM LEADS — always shown */}
+      <LeadSection
+        tier="warm"
+        leads={warmLeads}
+        onAddToPipeline={handleAddToPipeline}
+        onSelectLead={setSelectedLead}
+      />
 
-      {/* ❄️ COLD LEADS */}
-      {coldLeads.length > 0 && (
-        <LeadSection
-          tier="cold"
-          leads={coldLeads}
-          onAddToPipeline={handleAddToPipeline}
-          onSelectLead={setSelectedLead}
-        />
-      )}
+      {/* ❄️ COLD LEADS — always shown */}
+      <LeadSection
+        tier="cold"
+        leads={coldLeads}
+        onAddToPipeline={handleAddToPipeline}
+        onSelectLead={setSelectedLead}
+      />
 
       {/* Deep Dive Modal */}
       {selectedLead && (
