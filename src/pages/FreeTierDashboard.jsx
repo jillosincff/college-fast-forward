@@ -468,12 +468,9 @@ export default function FreeTierDashboard() {
         <EditGoalsModal
           goals={user?.career_goals}
           user={user}
-          onClose={() => {
-            console.log('Closing goals modal');
-            setShowGoalsModal(false);
-          }}
-          onSave={() => {
-            console.log('Saving goals and closing modal');
+          onClose={() => setShowGoalsModal(false)}
+          onSave={(_, refreshedUser) => {
+            if (refreshedUser) setUser(refreshedUser);
             setShowGoalsModal(false);
           }}
         />

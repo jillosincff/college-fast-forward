@@ -96,7 +96,8 @@ function StatPill({ emoji, label, value, theme }) {
   );
 }
 
-export default function PremiumDashboard({ user, parentCount, college, theme }) {
+export default function PremiumDashboard({ user: userProp, parentCount, college, theme }) {
+  const [user, setUser] = useState(userProp);
   const t = theme || getThemeForSchool(college || 'UF');
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';
@@ -355,7 +356,10 @@ export default function PremiumDashboard({ user, parentCount, college, theme }) 
           goals={user?.career_goals}
           user={user}
           onClose={() => setShowGoalsModal(false)}
-          onSave={() => setShowGoalsModal(false)}
+          onSave={(_, refreshedUser) => {
+            if (refreshedUser) setUser(refreshedUser);
+            setShowGoalsModal(false);
+          }}
         />
       )}
     </div>
