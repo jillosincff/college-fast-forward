@@ -36,7 +36,7 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect }) {
         </div>
 
         <p className="text-xs text-purple-600 font-semibold uppercase tracking-wider mt-4">
-          🚀 LIVE MATCH FOR YOUR TARGET: {industry}
+          🚀 LIVE MATCH FOR YOUR TARGET: {title} ({industry})
         </p>
         {snippet && <p className="text-xs text-gray-600 mt-2 line-clamp-3">{snippet}</p>}
 

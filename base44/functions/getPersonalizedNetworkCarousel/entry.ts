@@ -258,15 +258,26 @@ Deno.serve(async (req) => {
     // Filter out senior roles
     jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
 
-    // Filter by user's target role keywords if provided
-    if (targetRole && targetRole.trim().length > 2) {
-      const roleKeywords = targetRole.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    // Build role keyword list from target_role AND any role-level keywords in target_industries
+    // This is the "double-lock": industry must match AND role title must match
+    const roleKeywords = (targetRole || '')
+      .toLowerCase()
+      .split(/[\s,\/]+/)
+      .filter(w => w.length > 2);
+
+    // Also pull function keywords from the industry map for role-level matching
+    // e.g. "creative" industry implies design/ux/content keywords
+    const industryRoleKeywords = getMemberKeywords(targetIndustries);
+
+    const allRoleKeywords = [...new Set([...roleKeywords, ...industryRoleKeywords])];
+
+    if (allRoleKeywords.length > 0) {
       const roleFiltered = jobPool.filter(j => {
         const roleLower = j.role.toLowerCase();
         const descLower = j.description.toLowerCase();
-        return roleKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
+        return allRoleKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
       });
-      // Only apply role filter if it returns results, otherwise keep all industry matches
+      // Only apply if it narrows the results — prevents total wipeout for sparse industries
       if (roleFiltered.length > 0) jobPool = roleFiltered;
     }
 
@@ -278,7 +289,19 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    if (!jobPool.length) jobPool = [...FALLBACK_JOBS].filter(j => !SENIOR_FILTER.test(j.role));
+    // If still empty, use fallback but still try to role-filter it
+    if (!jobPool.length) {
+      let fallback = [...FALLBACK_JOBS].filter(j => !SENIOR_FILTER.test(j.role));
+      if (allRoleKeywords.length > 0) {
+        const roleFiltered = fallback.filter(j => {
+          const roleLower = j.role.toLowerCase();
+          const descLower = j.description.toLowerCase();
+          return allRoleKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
+        });
+        if (roleFiltered.length > 0) fallback = roleFiltered;
+      }
+      jobPool = fallback;
+    }
 
     // ─── Step 2: Load all network members (alumni + parents) ────────────────
     const INVALID = ['self employed', 'selfemployed', 'self-employed', 'retired', 'none', 'n/a', 'unemployed', 'stay at home', 'homemaker', 'between jobs'];
