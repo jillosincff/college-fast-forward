@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 
 export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const [isScouting, setIsScouting] = useState(false);
@@ -11,10 +12,24 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
 
   const handleScout = async () => {
     setIsScouting(true);
-    // Simulate async backend call — in production wire to a real scout endpoint
-    await new Promise(r => setTimeout(r, 1800));
-    setIsScouting(false);
-    setScoutDeployed(true);
+    try {
+      const result = await scoutCompanyBackdoor({
+        jobId: lead.id || lead.jobId,
+        companyName: lead.company || lead.companyName,
+      });
+      if (result.data?.success) {
+        setScoutDeployed(true);
+        // Optionally refresh parent feed or show toast
+        if (result.data.insiderFound) {
+          alert(`✅ Found ${result.data.connectionsCount} insider connections! This will appear in Priority Insider Tracks on refresh.`);
+        }
+      }
+    } catch (error) {
+      console.error('Scout failed:', error);
+      alert('Scout deployment failed. Please try again.');
+    } finally {
+      setIsScouting(false);
+    }
   };
 
   return (

@@ -397,12 +397,14 @@ Deno.serve(async (req) => {
     });
 
     // ─── Step 4: Two-Tier Lead Hierarchy (Direct Network Leverage) ─────────
-    // PRIORITY 1: priorityInsiders — company has a verified alumni or parent insider
+    // PRIORITY 1: priorityInsiders — company has a verified alumni or parent insider OR user-unlocked via scout
     // PRIORITY 2: targetedDiscoveries — clean role match, no insider at this company yet
     const priorityInsiders = [];
     const targetedDiscoveries = [];
 
     for (const job of jobPool) {
+      // Check if user has unlocked this job via scout backdoor
+      const isUnlockedByScout = unlockedJobIds.has(job.id || job.jobId);
       const normalizedJobCompany = normalizeCompanyName(job.company);
 
       let networkEntry = companyNetworkMap[normalizedJobCompany];
@@ -428,9 +430,9 @@ Deno.serve(async (req) => {
         [...parentsAtCompany, ...industryParentAdvisors].map(p => [p.id, p])
       ).values()];
 
-      const hasInsider = alumni.length > 0 || parentsAtCompany.length > 0;
+      const hasInsider = alumni.length > 0 || parentsAtCompany.length > 0 || isUnlockedByScout;
 
-      // 🔥 PRIORITY 1: Company Insiders — verified alumni OR parent advisor at this exact company
+      // 🔥 PRIORITY 1: Company Insiders — verified alumni OR parent advisor at this exact company OR user-unlocked via scout
       if (hasInsider) {
         const featuredParent = parentsAtCompany[0] || null;
         const hasNetworkReferral = alumni.some(a => a.referred_opening === true);
