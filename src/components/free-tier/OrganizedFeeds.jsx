@@ -78,19 +78,20 @@ export default function OrganizedFeeds({ user }) {
     enabled: true, // Always run the query
   });
 
-  // Robust safety envelope: guarantee empty arrays instead of undefined/null
-  const hotLeads = feedsData?.hotLeads || [];
-  const warmLeads = feedsData?.warmLeads || [];
-  const coldLeads = feedsData?.coldLeads || [];
+  // The function returns { data: { success, hotLeads, warmLeads, coldLeads } }
+  const payload = feedsData?.data || feedsData;
+  const hotLeads = payload?.hotLeads || [];
+  const warmLeads = payload?.warmLeads || [];
+  const coldLeads = payload?.coldLeads || [];
   const totalCount = (hotLeads.length || 0) + (warmLeads.length || 0) + (coldLeads.length || 0);
 
   const handleAddToPipeline = async (lead) => {
     try {
       await base44.entities.Opportunity.create({
         opportunity_type: 'job',
-        title: lead.role,
-        org_name: lead.company,
-        description: lead.jobDescription,
+        title: lead.role || lead.title,
+        org_name: lead.company || lead.companyName,
+        description: lead.jobDescription || lead.description,
         status: 'active',
         created_by_role: user.persona || 'student',
       });

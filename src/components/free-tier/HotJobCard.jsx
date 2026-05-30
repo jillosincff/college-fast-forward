@@ -2,14 +2,13 @@ import { useState } from 'react';
 
 export default function HotJobCard({ lead, onAddToPipeline, onSelect }) {
   const [imgError, setImgError] = useState(false);
-  const company = lead.companyName || lead.company || '';
-  const title = lead.title || lead.role || '';
-  const logo = lead.companyLogo || `https://logo.clearbit.com/${company.toLowerCase().replace(/\s+/g, '')}.com`;
-  const match = lead.matchPercentage ?? lead.match ?? null;
-  const source = lead.sourcePlatform || lead.source || 'Niche Board';
-  const industry = lead.industry || lead.targetIndustry || '';
-  const snippet = lead.descriptionSnippet || lead.description || '';
-  const alumniCount = lead.networkData?.exactAlumniCount ?? lead.alumniCount ?? 0;
+  const company = lead.company || lead.companyName || '';
+  const title = lead.role || lead.title || '';
+  const logo = lead.companyLogo || `https://logo.clearbit.com/${company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+  const match = lead.networkWeight ?? lead.matchPercentage ?? null;
+  const industry = lead.targetIndustry || lead.industry || '';
+  const snippet = lead.jobDescription || lead.descriptionSnippet || lead.description || '';
+  const alumniCount = lead.alumniCount ?? lead.networkData?.exactAlumniCount ?? 0;
 
   return (
     <div className="border border-red-100 rounded-2xl bg-white shadow-sm p-5 hover:shadow-md transition flex flex-col justify-between h-[360px]">

@@ -2,12 +2,12 @@ import { useState } from 'react';
 
 export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const [imgError, setImgError] = useState(false);
-  const company = lead.companyName || lead.company || '';
-  const title = lead.title || lead.role || lead.label || '';
-  const logo = lead.companyLogo || `https://logo.clearbit.com/${company.toLowerCase().replace(/\s+/g, '')}.com`;
-  const match = lead.matchPercentage ?? lead.match ?? null;
-  const source = lead.sourcePlatform || lead.source || 'Niche Board';
-  const snippet = lead.descriptionSnippet || lead.snippet || lead.description || '';
+  const company = lead.company || lead.companyName || '';
+  const title = lead.role || lead.title || '';
+  const logo = lead.companyLogo || `https://logo.clearbit.com/${company.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+  const match = lead.networkWeight ?? lead.matchPercentage ?? null;
+  const source = lead.jobSource || lead.sourcePlatform || lead.source || 'Niche Board';
+  const snippet = lead.jobDescription || lead.descriptionSnippet || lead.snippet || '';
 
   return (
     <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 hover:shadow-md transition flex flex-col justify-between h-[360px]">
