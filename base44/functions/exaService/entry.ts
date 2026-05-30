@@ -349,10 +349,21 @@ Deno.serve(async (req) => {
             else if (daysLive > 3) riskLevel = 'MEDIUM';
           }
 
-          // Extract company name from title or URL
-          const titleParts = (r.title || '').split(/[|\-·@]/).map(s => s.trim()).filter(Boolean);
-          const jobTitle = titleParts[0] || r.title;
-          const companyName = titleParts[1] || titleParts[2] || '';
+          // Extract company from ATS URL slug (most reliable for Lever/Greenhouse)
+          const urlMatch = r.url?.match(/(?:jobs\.lever\.co|boards\.greenhouse\.io|jobs\.ashbyhq\.com|apply\.workable\.com)\/([^/]+)/);
+          const companySlug = urlMatch ? urlMatch[1] : '';
+          const companyName = companySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+          // Extract job title: try snippet header (## Title), then page title parts, then URL-based guess
+          const snippetText = (r.highlights || []).join(' ');
+          const snippetHeaderMatch = snippetText.match(/##\s*([^\n\[]+)/);
+          const rawTitle = r.title || '';
+          // Page title for ATS boards is often "Company Name | Job Title" or just company
+          const titleAfterPipe = rawTitle.split(/[|·]/).map(s => s.trim()).filter(Boolean);
+          const roleWords = /\b(engineer|analyst|associate|intern|coordinator|specialist|manager|developer|designer|consultant|researcher|scientist|writer|advisor|representative|assistant|strategist|accountant)\b/i;
+          const titleCandidate = titleAfterPipe.find(p => roleWords.test(p));
+          
+          let jobTitle = snippetHeaderMatch?.[1]?.trim() || titleCandidate || rawTitle;
 
           // Determine niche source label
           const matchedDomain = NICHE_DOMAINS.find(d => r.url?.includes(d));
