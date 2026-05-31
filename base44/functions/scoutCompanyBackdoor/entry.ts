@@ -112,23 +112,32 @@ Deno.serve(async (req) => {
       console.log(`[scoutCompanyBackdoor] Found ${linkedinResults?.results?.length || 0} alumni on LinkedIn`);
 
       if (linkedinResults?.results && linkedinResults.results.length > 0) {
-        // Save discovered alumni to database
-        const newAlumni = linkedinResults.results.slice(0, 5).map(profile => ({
-          school_code: userSchoolCode,
-          verified: false,
-          role_title: profile.headline || profile.occupation || '',
-          match_score: 85,
-          source_url: profile.profile_url || '',
-          verified_by: null,
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
-          name: profile.full_name || profile.first_name + ' ' + profile.last_name || '',
-          degree_info: profile.education?.[0]?.school_name || userSchool,
-          greek_organization: null,
-          company: profile.experiences?.[0]?.company || companyName,
-          location: profile.city + ', ' + profile.country || '',
-          linkedin_url: profile.profile_url || ''
-        }));
+        // Save discovered alumni to database - ensure required fields (name, company) are always populated
+        const newAlumni = linkedinResults.results.slice(0, 5).map(profile => {
+          const fullName = profile.full_name || 
+                          (profile.first_name && profile.last_name ? `${profile.first_name} ${profile.last_name}` : '') || 
+                          'LinkedIn Professional';
+          const currentCompany = profile.experiences?.[0]?.company || companyName || 'Unknown Company';
+          
+          return {
+            school_code: userSchoolCode,
+            verified: false,
+            role_title: profile.headline || profile.occupation || 'Professional',
+            match_score: 85,
+            source_url: profile.profile_url || '',
+            verified_by: null,
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            name: fullName,
+            degree_info: profile.education?.[0]?.school_name || userSchool,
+            greek_organization: null,
+            company: currentCompany,
+            location: (profile.city && profile.country) ? `${profile.city}, ${profile.country}` : (profile.location || 'Unknown'),
+            linkedin_url: profile.profile_url || '',
+            description: `Found via LinkedIn search for ${userSchool} alumni at ${companyName}`
+          };
+        });
 
+        console.log(`[scoutCompanyBackdoor] Saving ${newAlumni.length} alumni to DiscoveredAlumni entity`);
         await base44.asServiceRole.entities.DiscoveredAlumni.bulkCreate(newAlumni);
 
         // Record the unlock
@@ -174,9 +183,10 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('On-Demand Crawler Pipeline Exception:', error);
+    console.error('Stack trace:', error.stack);
     return Response.json({ 
       success: false, 
-      message: 'Scout routing failed to process transaction.' 
+      message: `Scout routing failed: ${error.message || 'Unknown error'}` 
     }, { status: 500 });
   }
 });
