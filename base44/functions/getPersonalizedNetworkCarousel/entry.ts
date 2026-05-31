@@ -294,6 +294,8 @@ Deno.serve(async (req) => {
     const userCity = (user.location_city || user.city || '').toLowerCase();
     const userState = (user.location_state || user.state || '').toLowerCase();
     const relocationOk = user.relocation_ok === true;
+    const userSchoolCode = (user.school_code || '').toLowerCase();
+    const userSchool = (user.school_name || user.school || user.university || '').toLowerCase();
 
     // ─── Step 1: Build the job pool from target industries ──────────────────
     const SENIOR_FILTER = /\b(senior|sr\.|lead|principal|director|manager|head of|vp |vice president|staff engineer|architect|managing partner)\b/i;
@@ -312,15 +314,30 @@ Deno.serve(async (req) => {
       const locationKeywords = [userLocation, userCity, userState].filter(Boolean);
       jobPool = jobPool.filter(j => {
         const jobDesc = (j.description || '').toLowerCase();
-        // Check if job description mentions any of user's preferred locations
-        // or if it's remote (which matches all locations)
         const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home');
         const matchesLocation = locationKeywords.some(loc => 
           jobDesc.includes(loc) || 
-          jobDesc.includes(loc.replace(' ', '')) // handle "new york" vs "newyork"
+          jobDesc.includes(loc.replace(' ', ''))
         );
         return isRemote || matchesLocation || relocationOk;
       });
+    }
+
+    // ─── Step 2: Find REAL alumni at each company ──────────────────
+    // Query the User entity for alumni from user's school who work at these companies
+    const companyNames = jobPool.map(j => j.company.toLowerCase());
+    const allSchoolUsers = await base44.asServiceRole.entities.User.filter({
+      school_code: userSchoolCode || userSchool
+    });
+    
+    // Build a map of company -> alumni count
+    const alumniByCompany = {};
+    for (const company of companyNames) {
+      const alumniAtCompany = allSchoolUsers.filter(u => {
+        const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase();
+        return userCompany.includes(company) || company.includes(userCompany);
+      });
+      alumniByCompany[company] = alumniAtCompany.length;
     }
 
     // Build role keyword list from target_role, target_positions, AND industry-derived keywords
@@ -450,6 +467,8 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Get REAL alumni count from user's school at this company
+      const realAlumniCount = alumniByCompany[normalizedJobCompany] || 0;
       const alumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
@@ -459,7 +478,8 @@ Deno.serve(async (req) => {
         [...parentsAtCompany, ...industryParentAdvisors].map(p => [p.id, p])
       ).values()];
 
-      const hasInsider = alumni.length > 0 || parentsAtCompany.length > 0 || isUnlockedByScout;
+      // Has insider if: real alumni from their school OR parent at company OR unlocked via scout
+      const hasInsider = realAlumniCount > 0 || parentsAtCompany.length > 0 || isUnlockedByScout;
 
       // 🔥 PRIORITY 1: Company Insiders — verified alumni OR parent advisor at this exact company OR user-unlocked via scout
       if (hasInsider) {
@@ -478,10 +498,10 @@ Deno.serve(async (req) => {
         if (parentsAtCompany.length > 0) matchScore += 5;
 
         // Build insider badge copy
-        const insiderBadge = alumni.length > 0 && parentsAtCompany.length > 0
-          ? `${alumni.length} Alumni + ${parentsAtCompany.length} Parent Insider`
-          : alumni.length > 0
-            ? `${alumni.length} Alumni Work Here`
+        const insiderBadge = realAlumniCount > 0 && parentsAtCompany.length > 0
+          ? `${realAlumniCount} Alumni + ${parentsAtCompany.length} Parent Insider`
+          : realAlumniCount > 0
+            ? `${realAlumniCount} Alumni Work Here`
             : `${parentsAtCompany.length} Parent Advisor Here`;
 
         priorityInsiders.push({
@@ -496,13 +516,13 @@ Deno.serve(async (req) => {
           nichePlatform: job.nichePlatform || null,
           targetIndustry: targetIndustries[0] || '',
           matchedIndustries: targetIndustries,
-          alumniCount: alumni.length,
+          alumniCount: realAlumniCount,
           parentCount: parentsAtCompany.length,
           alumni: alumni.slice(0, 5),
           featuredParent: featuredParent ? { full_name: featuredParent.full_name, title: featuredParent.title, persona: 'parent' } : null,
           hasParentBonus: parentsAtCompany.length > 0,
           insiderBadge,
-          ctaType: alumni.length > 0 ? 'message_alumni' : 'connect_parent',
+          ctaType: realAlumniCount > 0 ? 'message_alumni' : 'connect_parent',
           networkWeight: Math.min(99, matchScore),
           leadTier: 'insider',
         });
