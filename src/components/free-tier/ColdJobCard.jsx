@@ -37,8 +37,8 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{role}</p>
         
         {/* Job Snippet */}
-        <div className="mt-4 text-xs text-gray-600">
-          <p className="leading-relaxed line-clamp-6">
+        <div className="mt-4 text-xs text-gray-600 max-h-48 overflow-y-auto">
+          <p className="leading-relaxed">
             {snippet || 'Matches your target role and industry profile.'}
           </p>
         </div>
