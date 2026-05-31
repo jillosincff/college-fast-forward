@@ -83,7 +83,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         .filter(m => m.persona === 'alumni')
         .map(m => ({
           name: m.full_name || 'Alumni',
-          title: m.title || '',
+          title: m.role_title || m.title || '',
           grad: m.graduation_year || '',
           mutual: false,
           linkedin_url: m.linkedin_url || null,
@@ -94,7 +94,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         .filter(m => m.persona === 'parent')
         .map(m => ({
           name: m.full_name || 'Parent',
-          title: m.title || '',
+          title: m.role_title || m.title || '',
           student: m.student_name ? `${m.student_name}, UF` : 'UF Student',
           linkedin_url: m.linkedin_url || null,
         }))
