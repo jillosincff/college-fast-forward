@@ -34,7 +34,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
         
         {/* Job Snippet with View More Hook */}
         <div className="mt-4 text-xs text-gray-600 relative">
-          <p className="line-clamp-3 leading-relaxed">
+          <p className="leading-relaxed line-clamp-6">
             {lead.jobDescription || lead.description || "No description preview available."}
           </p>
           <button 
