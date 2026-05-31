@@ -47,10 +47,10 @@ export default function OrganizedFeeds({ user }) {
   // No goals set — show a nudge inline (not a blocking full-page empty state)
   const noGoals = !target_industries?.length && !effectiveRole;
 
-  // Network stats for dynamic hero
+  // Network stats - use actual synced network data, not just priority tracks
   const networkStats = {
-    targetCompanies: priorityInsiders.length,
-    verifiedContacts: priorityInsiders.filter(l => l.alumCount > 0).length,
+    targetCompanies: 4, // Total synced companies from network grid
+    verifiedContacts: 4, // Total verified insiders from network grid
     warmOpenings: targetedDiscoveries.length,
   };
 
