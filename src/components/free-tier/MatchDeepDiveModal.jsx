@@ -349,6 +349,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            e.preventDefault();
                             handleMessageViaCLiFF(c);
                           }}
                           style={{
@@ -356,20 +357,10 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                             background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: 8, padding: '4px 10px',
                             border: 'none', minHeight: 'auto', flexShrink: 0, cursor: 'pointer',
                             fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#fff',
-                            transition: 'all 0.2s',
-                            boxShadow: '0 2px 8px rgba(124,58,237,0.25)',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #1d4ed8, #6d28d9)';
-                            e.target.style.transform = 'scale(1.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
-                            e.target.style.transform = 'scale(1)';
+                            pointerEvents: 'auto',
                           }}
                         >
-                          <span>⚡</span>
-                          <span>CLiFF Draft</span>
+                          ⚡ CLiFF Draft
                         </button>
                       </div>
                     </div>
