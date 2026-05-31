@@ -5,9 +5,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
   const [scoutDeployed, setScoutDeployed] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   
-  // Debug logging
-  console.log('[DiscoveryJobCard] lead data:', lead);
-  console.log('[DiscoveryJobCard] jobDescription:', lead?.jobDescription);
+
 
   const handleScoutDeployment = async () => {
     setIsScouting(true);
@@ -41,12 +39,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
           <p className="leading-relaxed text-sm">
             {lead.jobDescription || lead.description || "No description preview available."}
           </p>
-          {/* Debug info - visible only for testing */}
-          <div className="mt-2 pt-2 border-t border-gray-200 text-[10px] text-gray-400 font-mono">
-            <div>Has jobDescription: {lead.jobDescription ? '✅ YES' : '❌ NO'}</div>
-            <div>Has description: {lead.description ? '✅ YES' : '❌ NO'}</div>
-            <div>Description length: {lead.jobDescription?.length || lead.description?.length || 0} chars</div>
-          </div>
+
           {lead.jobDescription && lead.jobDescription.length > 200 && (
             <button 
               onClick={() => setShowFullDesc(true)}

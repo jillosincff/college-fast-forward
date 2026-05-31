@@ -11,8 +11,7 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const logoUrl = lead?.logoUrl || lead?.logo_url || null;
   
   // Debug logging
-  console.log('[ColdJobCard] lead data:', lead);
-  console.log('[ColdJobCard] snippet:', snippet);
+
 
   const handleScout = async () => {
     setIsScouting(true);
@@ -25,8 +24,8 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
       
       if (result.data?.success) {
         setScoutDeployed(true);
-        // Open the deep dive modal with the lead data
-        if (onSelect) {
+        // Only open modal if insiders were actually found
+        if (result.data.insiderFound && onSelect) {
           onSelect({
             ...lead,
             company,
@@ -38,12 +37,15 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
             logo: '🏢',
             jobSourceCategory: 'C',
             jobSource: 'Company Career Page',
-            _members: []
+            _members: result.data.alumni || []
           });
+        } else if (!result.data.insiderFound) {
+          // No insiders found - just show the updated status
+          console.log('No insiders found yet - scout deployed for background search');
         }
       } else {
         console.error('Scout failed:', result.data?.message);
-        alert('⚠️ No insiders found at this company yet. Try another!');
+        alert('⚠️ Scout failed. Please try again.');
       }
     } catch (error) {
       console.error('Scout error:', error);
@@ -70,13 +72,6 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
           <p className="leading-relaxed text-sm">
             {snippet || 'Matches your target role and industry profile.'}
           </p>
-          {/* Debug info - visible only for testing */}
-          <div className="mt-2 pt-2 border-t border-gray-200 text-[10px] text-gray-400 font-mono">
-            <div>Has jobDescription: {lead.jobDescription ? '✅ YES' : '❌ NO'}</div>
-            <div>Has description: {lead.description ? '✅ YES' : '❌ NO'}</div>
-            <div>Has snippet: {lead.descriptionSnippet ? '✅ YES' : '❌ NO'}</div>
-            <div>Snippet length: {snippet?.length || 0} chars</div>
-          </div>
         </div>
         
         {/* Clean Passive Network Status Box */}
