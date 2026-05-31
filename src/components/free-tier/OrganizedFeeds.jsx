@@ -148,9 +148,12 @@ export default function OrganizedFeeds({ user }) {
 
       {selectedLead && (
         <MatchDeepDiveModal
-          lead={selectedLead}
-          isOpen={!!selectedLead}
+          match={selectedLead}
           onClose={() => setSelectedLead(null)}
+          onGenerateOutreach={(data) => {
+            console.log('Generating outreach:', data);
+          }}
+          user={user}
         />
       )}
     </div>

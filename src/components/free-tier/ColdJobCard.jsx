@@ -22,10 +22,12 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         companyName: company
       });
       
+      console.log('[ColdJobCard] Scout result:', result.data);
       if (result.data?.success) {
         setScoutDeployed(true);
         // Only open modal if insiders were actually found
-        if (result.data.insiderFound && onSelect) {
+        if (result.data.insiderFound && onSelect && result.data.alumni && result.data.alumni.length > 0) {
+          console.log('[ColdJobCard] Opening modal with', result.data.alumni.length, 'alumni');
           onSelect({
             ...lead,
             company,
@@ -48,6 +50,8 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         } else if (!result.data.insiderFound) {
           // No insiders found - just show the updated status
           console.log('No insiders found yet - scout deployed for background search');
+        } else if (result.data.alumni?.length === 0) {
+          console.log('Scout succeeded but no alumni returned');
         }
       } else {
         console.error('Scout failed:', result.data?.message);
