@@ -47,18 +47,60 @@ export default function OrganizedFeeds({ user }) {
   // No goals set — show a nudge inline (not a blocking full-page empty state)
   const noGoals = !target_industries?.length && !effectiveRole;
 
-  return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-10">
+  // Network stats for dynamic hero
+  const networkStats = {
+    targetCompanies: priorityInsiders.length,
+    verifiedContacts: priorityInsiders.filter(l => l.alumCount > 0).length,
+    warmOpenings: targetedDiscoveries.length,
+  };
 
-      {/* Header */}
-      <div className="border-b border-gray-100 pb-5">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          🚀 CLiFF's Live Target Matches
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Your personalized feed of{' '}
-          <span className="font-bold text-purple-600">{isLoading ? '...' : totalCount}</span> hand-picked opportunities
-        </p>
+  return (
+    <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-8">
+
+      {/* Dynamic Hero Header */}
+      <div className="space-y-4">
+        {/* Title Group */}
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🚀</span>
+            <h2 className="text-xl font-bold text-gray-900 tracking-tight">CLiFF's Live Target Matches</h2>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Your personalized feed of{' '}
+            <span className="font-bold text-purple-600">{isLoading ? '...' : totalCount}</span> hand-picked opportunities
+          </p>
+        </div>
+
+        {/* Network Intelligence Panel - Only show when priority tracks is 0 */}
+        {priorityInsiders.length === 0 && !isLoading && (
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
+              <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider flex items-center gap-1.5">
+                🔮 CLiFF Network Intelligence Active
+              </span>
+              <span className="text-[10px] text-gray-400 font-medium">Updated live</span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+              <div className="p-4 text-center md:text-left">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Ecosystem</p>
+                <p className="text-lg font-black text-gray-800 mt-1">{networkStats.targetCompanies} Companies</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Under active automation tracking</p>
+              </div>
+              
+              <div className="p-4 text-center md:text-left">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Leverage Points</p>
+                <p className="text-lg font-black text-gray-800 mt-1">{networkStats.verifiedContacts} Verified Insiders</p>
+                <p className="text-[11px] text-purple-600 font-semibold mt-0.5">🐊 UF Network connections ready</p>
+              </div>
+
+              <div className="p-4 text-center md:text-left">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Opportunity Pipeline</p>
+                <p className="text-lg font-black text-orange-600 mt-1">{networkStats.warmOpenings} Fresh Discoveries</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">High-match roles on niche boards below</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* No goals nudge — inline, non-blocking */}
@@ -79,42 +121,28 @@ export default function OrganizedFeeds({ user }) {
       )}
 
       {/* ── PRIORITY 1: DIRECT NETWORK LEVERAGE ─────────────────────── */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🔥</span>
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">
-              Priority Insider Tracks ({isLoading ? '…' : priorityInsiders.length})
-            </h3>
-            <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-              Foot-In-The-Door Active
-            </span>
+      {priorityInsiders.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🔥</span>
+              <h3 className="text-base font-bold text-gray-900 tracking-tight">
+                Priority Insider Tracks ({priorityInsiders.length})
+              </h3>
+              <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                Foot-In-The-Door Active
+              </span>
+            </div>
+            <span className="text-xs text-gray-400 font-medium hidden sm:block">Verified current company insiders</span>
           </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block">Verified current company insiders</span>
-        </div>
 
-        {isLoading ? (
-          <div className="animate-pulse space-y-3 p-6 bg-gray-50 rounded-2xl border border-gray-100">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-          </div>
-        ) : priorityInsiders.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {priorityInsiders.map((lead, idx) => (
               <HotJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
             ))}
           </div>
-        ) : (
-          <div className="border border-dashed border-gray-200 rounded-2xl p-8 bg-gray-50/50 text-center">
-            <p className="text-sm text-gray-600 font-semibold">
-              🛰️ CLiFF is actively monitoring your connected corporate networks...
-            </p>
-            <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
-              No active vacancies found inside your exact alumni or parent networks today. Checking broader target matches below.
-            </p>
-          </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* ── PRIORITY 2: TARGET DISCOVERIES (HUNT ACTIVE) ────────────── */}
       <section className="space-y-4">
