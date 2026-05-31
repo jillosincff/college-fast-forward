@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-
 import { useState, useEffect, useRef } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
