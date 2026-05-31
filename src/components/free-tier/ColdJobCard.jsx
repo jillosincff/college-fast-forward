@@ -77,11 +77,17 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         </div>
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{role}</p>
         
-        {/* Job Description - Full Visible Text */}
+        {/* Job Description - Truncated to 3 lines with Read More */}
         <div className="mt-4 text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-200">
-          <p className="leading-relaxed text-sm">
+          <p className="leading-relaxed text-sm line-clamp-3">
             {snippet || 'Matches your target role and industry profile.'}
           </p>
+          <button 
+            onClick={() => onSelect(lead)}
+            className="text-purple-600 font-bold hover:text-purple-700 mt-1 block text-xs underline cursor-pointer"
+          >
+            Read More
+          </button>
         </div>
         
         {/* Clean Passive Network Status Box */}

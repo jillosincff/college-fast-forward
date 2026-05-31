@@ -333,9 +333,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="premium-ftd-sidebar desktop-only">
             <PremiumCareerAssetsCard user={user} />
 
-            {/* Alumni Outreach Generator — fully unlocked, auto-populates on card click */}
-            <PremiumAlumniOutreach college={college} theme={t} user={user} selectedLead={selectedLead} />
-
             {/* Parent Network — unlocked if ≥20 parents */}
             {(parentCount === null || parentCount >= 20) && (
               <PremiumParentNetworkWidget parentCount={parentCount} college={college} theme={t} user={user} />

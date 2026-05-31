@@ -40,7 +40,17 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect }) {
         <p className="text-xs text-orange-600 font-semibold uppercase tracking-wider mt-4">
           🔥 VERIFIED INSIDER AT THIS COMPANY
         </p>
-        {snippet && <p className="text-xs text-gray-600 mt-2 line-clamp-3">{snippet}</p>}
+        {snippet && (
+          <div className="mt-2">
+            <p className="text-xs text-gray-600 line-clamp-3">{snippet}</p>
+            <button 
+              onClick={() => onSelect(lead)}
+              className="text-purple-600 font-bold hover:text-purple-700 mt-1 block text-xs underline cursor-pointer"
+            >
+              Read More
+            </button>
+          </div>
+        )}
 
         <div className="mt-4 bg-orange-50/50 rounded-xl p-3 border border-orange-100/50 flex items-center gap-2">
           <span className="text-lg">{isAlumniLed ? '🎓' : '💡'}</span>
