@@ -39,7 +39,7 @@ const BACKDOOR_LEADS = [
 
 const COLUMNS = ['OPPORTUNITIES', 'APPLIED', 'INTERVIEWING', 'OFFER 🎉'];
 
-function LeadCard({ lead, onOpen, columnId, onTriggerNudge }) {
+function LeadCard({ lead, onOpen, columnId, onTriggerNudge, onDelete, cardIndex, columnKey }) {
   const emailSyncActive = lead.emailSyncStatus === 'active';
   const [viewed, setViewed] = useState(false);
 
@@ -64,6 +64,13 @@ function LeadCard({ lead, onOpen, columnId, onTriggerNudge }) {
   const handleClick = () => {
     setViewed(true);
     onOpen(lead);
+  };
+
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    if (window.confirm(`Remove ${lead.role} at ${lead.company} from your pipeline?`)) {
+      onDelete && onDelete(columnKey, cardIndex);
+    }
   };
 
   return (
@@ -104,7 +111,7 @@ function LeadCard({ lead, onOpen, columnId, onTriggerNudge }) {
         </div>
       )}
       
-      {/* Top Row: Logo + Title */}
+      {/* Top Row: Logo + Title + Delete Button */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         <div style={{ width: 32, height: 32, borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
           {lead.logo}
@@ -113,6 +120,15 @@ function LeadCard({ lead, onOpen, columnId, onTriggerNudge }) {
           <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#0f172a', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.role}</p>
           <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#64748b', margin: '2px 0 0' }}>{lead.company}</p>
         </div>
+        <button
+          onClick={handleDelete}
+          style={{ background: 'none', border: 'none', fontSize: 16, color: '#94a3b8', cursor: 'pointer', padding: '4px', lineHeight: 1, opacity: 0.6, transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.opacity = 1; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.opacity = 0.6; }}
+          title="Remove from pipeline"
+        >
+          ×
+        </button>
       </div>
       
       {/* Middle & Bottom Rows: Column-Specific Metadata */}
@@ -201,7 +217,7 @@ function LeadCard({ lead, onOpen, columnId, onTriggerNudge }) {
 export default function PremiumPipeline({ theme, onLeadSelect, user, college, parentCount, signalAdditions = [] }) {
   const t = theme || { primary: '#2563eb' };
   const [cards, setCards] = useState({
-    'OPPORTUNITIES': BACKDOOR_LEADS,
+    'OPPORTUNITIES': [],
     'APPLIED': [],
     'INTERVIEWING': [],
     'OFFER 🎉': [],
@@ -247,6 +263,13 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     setTimeout(() => {
       document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 100);
+  };
+
+  const handleDeleteCard = (col, cardIndex) => {
+    setCards(prev => ({
+      ...prev,
+      [col]: prev[col].filter((_, i) => i !== cardIndex),
+    }));
   };
 
   const handleApplied = (lead) => {
@@ -334,7 +357,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: 0 }}>My Application Pipeline</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#16a34a', margin: 0, fontWeight: 600 }}>✅ Unlimited tracking · 3 warm leads loaded</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#16a34a', margin: 0, fontWeight: 600 }}>✅ Unlimited tracking · {cards['OPPORTUNITIES'].length + cards['APPLIED'].length + cards['INTERVIEWING'].length + cards['OFFER 🎉'].length} opportunities tracked</p>
           </div>
         </div>
 
@@ -378,6 +401,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
               key={i} lead={item}
               columnId={activeCol === 'OPPORTUNITIES' ? 'opportunities' : activeCol === 'APPLIED' ? 'applied' : activeCol === 'INTERVIEWING' ? 'interviewing' : 'offer'}
               onOpen={activeCol === 'OPPORTUNITIES' ? handleLeadOpen : setSelectedCard}
+              onDelete={handleDeleteCard} cardIndex={i} columnKey={activeCol}
             />
           ))}
           {newCard.col === activeCol ? (
@@ -409,9 +433,9 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
                     {col === 'OPPORTUNITIES'
-                      ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} />)
+                      ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} onDelete={handleDeleteCard} cardIndex={i} columnKey={col} />)
                       : cards[col].map((item, i) => (
-                          <LeadCard key={i} lead={item} columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} onTriggerNudge={handleTriggerNudge} />
+                          <LeadCard key={i} lead={item} columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} onTriggerNudge={handleTriggerNudge} onDelete={handleDeleteCard} cardIndex={i} columnKey={col} />
                         ))
                     }
                     {newCard.col === col ? (
