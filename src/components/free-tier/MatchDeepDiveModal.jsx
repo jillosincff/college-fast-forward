@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import CliFFOutreachModal from './CliFFOutreachModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -73,8 +72,6 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [alumni, setAlumni] = useState([]);
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showOutreachModal, setShowOutreachModal] = useState(false);
-  const [outreachInitialData, setOutreachInitialData] = useState(null);
 
   // Members are passed directly from the carousel — already verified, no extra API call needed
   useEffect(() => {
@@ -121,22 +118,22 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   };
 
   const handleMessageViaCLiFF = (contact) => {
-    setOutreachInitialData({
-      name: contact.name,
-      title: contact.title,
-      company: match.company,
-    });
-    setShowOutreachModal(true);
-  };
-
-  const handleGenerateFromModal = (formData) => {
-    setShowOutreachModal(false);
-    const contact = selectedContact || contacts[0];
-    onGenerateOutreach && onGenerateOutreach({ match, contact, tab, formData });
+    // Close the modal and trigger CLiFF chat to auto-generate outreach
+    onClose();
+    // Dispatch custom event to notify CLiFF chat widget
+    window.dispatchEvent(new CustomEvent('cliff:outreach-request', {
+      detail: {
+        recipientName: contact.name,
+        recipientTitle: contact.title || contact.currentRole,
+        company: match.company,
+        schoolNetwork: user?.school || user?.school_code || 'your university',
+        tab: tab,
+      }
+    }));
+    // Smooth scroll to CLiFF chat panel
     setTimeout(() => {
-      onClose();
-      window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(formData.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(formData.name)}&tab=${tab}`;
-    }, 300);
+      document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100);
   };
 
   return (
@@ -400,13 +397,6 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         </div>
       </div>
 
-      {/* CLiFF Outreach Modal */}
-      <CliFFOutreachModal
-        isOpen={showOutreachModal}
-        onClose={() => setShowOutreachModal(false)}
-        initialData={outreachInitialData}
-        onGenerate={handleGenerateFromModal}
-      />
     </div>
   );
 }

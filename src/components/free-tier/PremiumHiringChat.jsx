@@ -25,6 +25,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
   const [interviewDismissed, setInterviewDismissed] = useState(false);
   const [recapLoaded, setRecapLoaded] = useState(false);
   const [recapAction, setRecapAction] = useState(null);
+  const [outreachContext, setOutreachContext] = useState(null);
   const bottomRef = useRef(null);
 
   // On mount — run recap context check first, then fall back to interview/parent checks
@@ -122,9 +123,27 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
     setInput('');
   }, [selectedJob]);
 
+  // Listen for outreach requests from job cards
+  useEffect(() => {
+    const handleOutreachRequest = (event) => {
+      const ctx = event.detail;
+      if (!ctx) return;
+      setOutreachContext(ctx);
+      
+      // Generate auto-greeting with outreach draft
+      const greeting = `Welcome back! 📎 I see you want to reach out to **${ctx.recipientName}** at **${ctx.company}**.\n\nI've cooked up an authentic, un-cringe outreach draft leveraging your shared ${ctx.schoolNetwork} network:\n\n---\n\n**Subject:** Fellow ${ctx.schoolNetwork.replace('University of ', '')} / Quick question about ${ctx.company}\n\nHi ${ctx.recipientName.split(' ')[0]},\n\nI saw your path from ${ctx.schoolNetwork} to ${ctx.company}—love what you've done there. I'm a current ${ctx.schoolNetwork} student and would love to grab 10 mins to hear how you made the jump from Gainesville to the team.\n\nGo Gators,\n${user?.full_name || '[Your Name]'}\n\n---\n\n📋 Want me to tweak anything or make it punchier?`;
+      
+      setMessages([{ role: 'agent', text: greeting }]);
+      setRecapAction({ type: 'OUTREACH_DRAFT_READY', context: ctx });
+    };
+
+    window.addEventListener('cliff:outreach-request', handleOutreachRequest);
+    return () => window.removeEventListener('cliff:outreach-request', handleOutreachRequest);
+  }, [user?.full_name]);
+
   // Email sync suggestion — shown after user manually adds applications or when no recap/interview/parent match is found
   useEffect(() => {
-    if (!user?.id || recapLoaded || interviewData || parentMatch || selectedJob || selectedSignal) return;
+    if (!user?.id || recapLoaded || interviewData || parentMatch || selectedJob || selectedSignal || outreachContext) return;
     
     // Only suggest if user hasn't synced email yet
     if (user?.is_email_synced) return;
@@ -335,6 +354,22 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
                     onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
                   >
                     🛰️ View Connected Matches
+                  </button>
+                )}
+                {/* Outreach draft ready - copy to clipboard */}
+                {recapAction.type === 'OUTREACH_DRAFT_READY' && (
+                  <button
+                    onClick={() => {
+                      const ctx = recapAction.context;
+                      const draft = `Subject: Fellow ${ctx.schoolNetwork.replace('University of ', '')} / Quick question about ${ctx.company}\n\nHi ${ctx.recipientName.split(' ')[0]},\n\nI saw your path from ${ctx.schoolNetwork} to ${ctx.company}. I'm a current ${ctx.schoolNetwork} student and would love to grab 10 mins to hear how you made the jump.\n\nGo Gators,\n${user?.full_name || '[Your Name]'}`;
+                      navigator.clipboard.writeText(draft);
+                      setRecapAction(null);
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                  >
+                    📋 Copy Draft
                   </button>
                 )}
                 {/* Legacy / fallback scenarios */}
