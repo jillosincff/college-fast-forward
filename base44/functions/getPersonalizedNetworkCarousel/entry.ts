@@ -396,7 +396,9 @@ Deno.serve(async (req) => {
     const alumniByCompany = {};
     for (const company of companyNames) {
       const alumniAtCompany = schoolAlumni.filter(u => {
-        const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase();
+        const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase().trim();
+        // Skip users with empty company fields
+        if (!userCompany) return false;
         const match = userCompany.includes(company) || company.includes(userCompany);
         if (match) console.log(`[getPersonalizedNetworkCarousel] ✅ Match: ${u.full_name} at ${userCompany} for job company ${company}`);
         return match;
