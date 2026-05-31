@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
+import MobileSwipeStack from './MobileSwipeStack';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
@@ -149,7 +150,12 @@ export default function CliffPrioritizedFeed({ user }) {
           </div>
         ) : targetedDiscoveries.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Mobile: swipe stack */}
+            <div className="block md:hidden">
+              <MobileSwipeStack leads={targetedDiscoveries} onAddToPipeline={handleAddToPipeline} />
+            </div>
+            {/* Desktop: grid */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {(showAllDiscoveries ? targetedDiscoveries : targetedDiscoveries.slice(0, INITIAL_SHOW)).map((lead, idx) => (
                 <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
               ))}
@@ -157,7 +163,7 @@ export default function CliffPrioritizedFeed({ user }) {
             {targetedDiscoveries.length > INITIAL_SHOW && (
               <button
                 onClick={() => setShowAllDiscoveries(v => !v)}
-                className="w-full mt-2 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors"
+                className="hidden md:block w-full mt-2 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors"
                 style={{ minHeight: 'auto', cursor: 'pointer' }}
               >
                 {showAllDiscoveries ? `▲ Show fewer` : `▼ Show ${targetedDiscoveries.length - INITIAL_SHOW} more discoveries`}
