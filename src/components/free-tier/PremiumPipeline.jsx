@@ -229,10 +229,13 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   useEffect(() => {
     const loadPipeline = async () => {
       try {
+        console.log('[Pipeline] Loading applications for user:', user?.id);
         const applications = await base44.entities.OpportunityApplication.filter({
           applicant_id: user?.id,
         }, '-created_date', 50);
 
+        console.log('[Pipeline] Found applications:', applications?.length || 0);
+        
         const newCards = {
           'OPPORTUNITIES': [],
           'APPLIED': [],
@@ -254,7 +257,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
             posted: '—',
           };
 
-          // Map status to column
+          // Map status to column - ONLY show active applications
           if (app.status === 'applied' || app.status === 'in_review') {
             newCards['APPLIED'].push(card);
           } else if (app.status === 'interview') {
@@ -264,6 +267,13 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           } else {
             newCards['OPPORTUNITIES'].push(card);
           }
+        });
+
+        console.log('[Pipeline] Cards by column:', {
+          opportunities: newCards['OPPORTUNITIES'].length,
+          applied: newCards['APPLIED'].length,
+          interviewing: newCards['INTERVIEWING'].length,
+          offer: newCards['OFFER 🎉'].length,
         });
 
         setCards(newCards);
