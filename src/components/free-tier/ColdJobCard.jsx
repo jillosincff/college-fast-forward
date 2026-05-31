@@ -111,7 +111,7 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         <button 
           onClick={() => onAddToPipeline && onAddToPipeline(lead)}
           className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition cursor-pointer"
-          title="Save to Pipeline"
+          title="Add to Pipeline"
         >
           ➕
         </button>
