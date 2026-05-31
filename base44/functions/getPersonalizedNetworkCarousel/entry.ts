@@ -476,7 +476,12 @@ Deno.serve(async (req) => {
       }
 
       // Get REAL alumni count from user's school at this company
-      const realAlumniCount = alumniByCompany[normalizedJobCompany] || 0;
+      // Try both normalized and raw company name for lookup
+      let realAlumniCount = alumniByCompany[normalizedJobCompany] || 0;
+      if (realAlumniCount === 0) {
+        const rawCompany = job.company.toLowerCase();
+        realAlumniCount = alumniByCompany[rawCompany] || 0;
+      }
       const alumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
@@ -578,7 +583,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`[getPersonalizedNetworkCarousel] 🔥 ${priorityInsiders.length} INSIDERS | ☀️ ${targetedDiscoveries.length} TARGETS for industries: [${targetIndustries.join(', ')}]`);
+    console.log(`[getPersonalizedNetworkCarousel] 🔥 ${priorityInsiders.length} INSIDERS | ☀️ ${targetedDiscoveries.length} TARGETS`);
+    console.log(`[getPersonalizedNetworkCarousel] Sample insider:`, priorityInsiders[0]?.company, priorityInsiders[0]?.alumniCount, priorityInsiders[0]?.jobDescription?.substring(0, 50));
     return Response.json({
       success: true,
       priorityInsiders: priorityInsiders.slice(0, 6),
