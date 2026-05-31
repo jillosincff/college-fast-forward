@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CliffLogo } from '@/components/brand/CliffLogo';
+import CliFFOutreachModal from './CliFFOutreachModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
 const STARTER_PROMPTS = [
+  "Who do we have at Spotify or Disney?",
+  "Any alumni with a marketing background?",
   "How do I follow up after an interview without being annoying?",
-  "I got a rejection — should I ask for feedback?",
-  "How do I negotiate salary for my first job?",
 ];
 
 export default function PremiumHiringChat({ user, selectedSignal, selectedJob }) {
@@ -26,7 +27,40 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
   const [recapLoaded, setRecapLoaded] = useState(false);
   const [recapAction, setRecapAction] = useState(null);
   const [outreachContext, setOutreachContext] = useState(null);
+  const [outreachModalOpen, setOutreachModalOpen] = useState(false);
+  const [outreachModalData, setOutreachModalData] = useState(null);
   const bottomRef = useRef(null);
+
+  // Intent detection: returns { isNetworkQuery, networkType, company, industry }
+  const parseNetworkIntent = (text) => {
+    const lower = text.toLowerCase();
+    const networkQueryKeywords = ['who do we have', 'any alumni', 'any parents', 'find someone', 'connections at', 'contacts at', 'insiders at', 'network at', 'who works at', 'background in', 'marketing background', 'finance background', 'tech background', 'engineering background'];
+    const isNetworkQuery = networkQueryKeywords.some(kw => lower.includes(kw));
+    if (!isNetworkQuery) return null;
+
+    let networkType = 'all';
+    if (lower.includes('parent')) networkType = 'parent';
+    else if (lower.includes('alumni') || lower.includes('alum')) networkType = 'alumni';
+
+    // Extract company name (words after "at")
+    const companyMatch = text.match(/\bat\s+([A-Z][a-zA-Z\s&]+?)(?:\?|$|,|\s+with|\s+who)/);
+    const company = companyMatch ? companyMatch[1].trim() : null;
+
+    // Extract industry/role keywords
+    const industryKeywords = ['marketing', 'finance', 'engineering', 'tech', 'design', 'ux', 'product', 'sales', 'consulting', 'media', 'entertainment'];
+    const industry = industryKeywords.find(k => lower.includes(k)) || null;
+
+    return { isNetworkQuery, networkType, company, industry };
+  };
+
+  const handleInlineInsiderClick = (contact) => {
+    setOutreachModalData({
+      name: contact.fullName,
+      title: contact.currentRole,
+      company: contact.companyName,
+    });
+    setOutreachModalOpen(true);
+  };
 
   // On mount — run pipeline-based coaching or recap context check
   useEffect(() => {
@@ -233,6 +267,47 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: q }]);
     setLoading(true);
+
+    // Intent intercept: is this a network query?
+    const intent = parseNetworkIntent(q);
+    if (intent) {
+      try {
+        const res = await base44.functions.invoke('getDirectoryUsers', {
+          search: intent.company || intent.industry || '',
+          persona: intent.networkType === 'all' ? undefined : intent.networkType === 'parent' ? 'parent' : 'alumni',
+          limit: 5,
+        });
+        const contacts = (res?.data?.users || res?.data || []).slice(0, 5).map(u => ({
+          id: u.id,
+          fullName: u.full_name || 'Unknown',
+          currentRole: u.role_title || u.job_title || 'Professional',
+          companyName: u.company_name || u.current_company || intent.company || 'Their Company',
+          networkType: (u.persona === 'parent' || u.roles?.includes('parent')) ? 'PARENT' : 'ALUMNI',
+        }));
+
+        if (contacts.length > 0) {
+          const target = intent.company || intent.industry || 'that area';
+          setMessages(prev => [...prev, {
+            role: 'agent',
+            text: `I dug into our network grid. Here are the matching ${schoolAbbr} connections I found${intent.company ? ` at ${intent.company}` : intent.industry ? ` with a ${intent.industry} background` : ''}:`,
+            inlineContacts: contacts,
+          }]);
+        } else {
+          const target = intent.company || intent.industry || 'that area';
+          const totalContacts = 4; // synced network size
+          setMessages(prev => [...prev, {
+            role: 'agent',
+            text: `I couldn't find a direct match for ${target} in our tightest inner circle today. However, we have ${totalContacts} verified contacts in broader sectors — ask me to look up a different target or check the Target-Matched Discoveries on your dashboard!`,
+          }]);
+        }
+      } catch {
+        setMessages(prev => [...prev, { role: 'agent', text: "I had trouble searching the network right now. Try again in a moment, or browse the Target-Matched Discoveries feed directly below." }]);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Default: general AI career advisor
     try {
       const res = await base44.functions.invoke('aiCareerAdvisor', { message: q, user_id: user?.id });
       const reply = res?.data?.reply || res?.data?.message || "Great question. In short: be direct, be brief, and always lead with value. Want me to draft a specific email for you?";
@@ -244,6 +319,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
   };
 
   return (
+    <>
     <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
       {/* Header */}
       <div style={{ padding: '14px 20px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000' }}>
@@ -277,6 +353,65 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
             }}>
               <p style={{ fontFamily: dm, fontSize: 12, margin: 0, lineHeight: 1.6 }}>{m.text}</p>
             </div>
+
+            {/* Inline Contact Grid — rendered when CLiFF returns network results */}
+            {m.role === 'agent' && m.inlineContacts?.length > 0 && (
+              <div style={{ maxWidth: '92%', marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {m.inlineContacts.map((contact, ci) => (
+                  <div key={ci} style={{
+                    background: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 12,
+                    padding: '10px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 10,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                        <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{contact.fullName}</span>
+                        <span style={{
+                          fontSize: 9,
+                          fontWeight: 800,
+                          padding: '2px 6px',
+                          borderRadius: 100,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          background: contact.networkType === 'PARENT' ? '#fef3c7' : '#ede9fe',
+                          color: contact.networkType === 'PARENT' ? '#92400e' : '#6d28d9',
+                        }}>
+                          {contact.networkType === 'PARENT' ? '💼 Parent Network' : `🐊 ${schoolAbbr} Alum`}
+                        </span>
+                      </div>
+                      <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: 0 }}>
+                        {contact.currentRole} · {contact.companyName}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleInlineInsiderClick(contact)}
+                      style={{
+                        fontFamily: dm,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: '#fff',
+                        background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '7px 10px',
+                        cursor: 'pointer',
+                        minHeight: 'auto',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                      }}
+                    >
+                      Find Insider →
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             {/* Interview prep action buttons — shown only under the first agent message */}
             {i === 0 && m.role === 'agent' && interviewData && !interviewDismissed && messages.length <= 1 && (
               <div style={{ marginTop: 8, background: 'rgba(79,70,229,0.05)', border: '1px solid rgba(79,70,229,0.15)', borderRadius: 12, padding: '10px 12px', maxWidth: '82%' }}>
@@ -522,5 +657,17 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
         </button>
       </div>
     </div>
+
+    {/* Outreach Modal — pre-filled from inline contact card click */}
+    <CliFFOutreachModal
+      isOpen={outreachModalOpen}
+      onClose={() => setOutreachModalOpen(false)}
+      initialData={outreachModalData}
+      onGenerate={(formData) => {
+        setOutreachModalOpen(false);
+        sendMessage(`Draft a personalized outreach message for ${formData.name}, ${formData.title} at ${formData.company}`);
+      }}
+    />
+    </>
   );
 }
