@@ -43,7 +43,7 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
               ...a,
               persona: 'alumni',
               full_name: a.name,
-              title: a.title,
+              title: a.role_title,
               linkedin_url: a.linkedin_url
             }))
           });

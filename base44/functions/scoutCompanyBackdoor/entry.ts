@@ -104,10 +104,15 @@ Deno.serve(async (req) => {
           const nameMatch = result.title?.match(/^(.+?)\s*[-|]/) || result.url?.match(/\/in\/([^/?]+)/);
           const name = nameMatch ? nameMatch[1].trim() : 'LinkedIn Professional';
           
+          // Extract job title from the title (after the name) or from snippet
+          const titleParts = result.title?.split('-').map(s => s.trim());
+          const jobTitle = titleParts?.length > 1 ? titleParts.slice(1).join(' - ') : 
+                          result.text?.match(/([^|]+)\|/)?.[1]?.trim() || 'Professional';
+          
           return {
             school_code: userSchoolCode,
             verified: false,
-            role_title: result.title?.split('-')[0]?.trim() || 'Professional',
+            role_title: jobTitle,
             match_score: 85,
             source_url: result.url || '',
             verified_by: null,
