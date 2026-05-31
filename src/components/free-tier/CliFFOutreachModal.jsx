@@ -299,7 +299,7 @@ export default function CliFFOutreachModal({ isOpen, onClose, initialData, onGen
               e.target.style.boxShadow = '0 4px 14px rgba(124,58,237,0.35)';
             }}
           >
-            ⚡ Generate Un-Cringe Message
+            ⚡ Generate Message
           </button>
         </form>
       </div>
