@@ -1,121 +1,129 @@
 import { useState } from 'react';
-import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 
 export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const [isScouting, setIsScouting] = useState(false);
   const [scoutDeployed, setScoutDeployed] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
 
   const company = lead?.company || lead?.companyName || 'Unknown Company';
   const role = lead?.role || lead?.title || 'Open Role';
   const snippet = lead?.jobDescription || lead?.descriptionSnippet || lead?.description || '';
+  const fullDesc = lead?.fullDescription || lead?.jobDescription || lead?.description || '';
   const logoUrl = lead?.logoUrl || lead?.logo_url || null;
 
   const handleScout = async () => {
     setIsScouting(true);
     try {
-      const result = await scoutCompanyBackdoor({
-        jobId: lead.id || lead.jobId,
-        companyName: lead.company || lead.companyName,
-      });
-      if (result.data?.success) {
-        setScoutDeployed(true);
-        // Optionally refresh parent feed or show toast
-        if (result.data.insiderFound) {
-          alert(`✅ Found ${result.data.connectionsCount} insider connections! This will appear in Priority Insider Tracks on refresh.`);
-        }
+      if (onSelect) {
+        await onSelect(lead);
       }
+      setScoutDeployed(true);
+      window.dispatchEvent(new CustomEvent('cff:refresh-feed'));
     } catch (error) {
       console.error('Scout failed:', error);
-      alert('Scout deployment failed. Please try again.');
     } finally {
       setIsScouting(false);
     }
   };
 
   return (
-    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between h-[360px] hover:border-gray-300 transition-all">
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between min-h-[380px] hover:border-gray-300 transition-all relative" data-component="ColdJobCard-v2">
       <div>
-        {/* Header */}
-        <div className="flex justify-between items-start gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt={company}
-                className="w-8 h-8 rounded-lg object-contain border border-gray-100 shrink-0"
-                onError={e => { e.target.style.display = 'none'; }}
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 shrink-0">
-                {company[0]}
-              </div>
-            )}
-            <div className="min-w-0">
-              <h4 className="font-bold text-gray-900 text-sm leading-tight truncate">{company}</h4>
-              <p className="text-xs text-gray-500 font-medium truncate">{role}</p>
-            </div>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 uppercase tracking-wide shrink-0">
-            🛰️ Discovery
+        {/* Card Header */}
+        <div className="flex justify-between items-start">
+          <h4 className="font-bold text-gray-900 leading-tight truncate max-w-[70%]">{company}</h4>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase tracking-wide">
+            Discovery
           </span>
         </div>
-
-        {/* Snippet */}
-        <p className="text-xs text-gray-600 mt-4 line-clamp-3 leading-relaxed">
-          {snippet || 'Matches your target role and industry profile.'}
-        </p>
-
-        {/* Passive / Active Network Status Box */}
-        <div className="mt-4 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-start gap-2.5">
-          <span className="text-base mt-0.5">{scoutDeployed ? '✅' : '🔒'}</span>
+        <p className="text-xs text-gray-500 mt-0.5 font-medium">{role}</p>
+        
+        {/* Job Snippet with View More Hook */}
+        <div className="mt-4 text-xs text-gray-600 relative">
+          <p className="line-clamp-3 leading-relaxed">
+            {snippet || 'No description preview available.'}
+          </p>
+          <button 
+            onClick={() => setShowFullDesc(true)}
+            className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-1 block underline cursor-pointer"
+          >
+            Read Full Description
+          </button>
+        </div>
+        
+        {/* Clean Passive Network Status Box */}
+        <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center gap-2.5">
+          <span className="text-base">{scoutDeployed ? '✅' : '🔒'}</span>
           <div>
             <p className="text-xs font-bold text-gray-800">
-              {scoutDeployed ? 'Backdoor Scan Dispatched' : 'Direct Backdoor Unmapped'}
+              {scoutDeployed ? 'Insider Search Active' : 'Direct Backdoor Unmapped'}
             </p>
             <p className="text-[10px] text-gray-500 leading-normal mt-0.5">
-              {scoutDeployed
-                ? 'CLiFF is pulling unindexed alumni & parent networks for this company.'
-                : 'Matches your career profile. Tap below to have CLiFF hunt for an insider connection.'}
+              {scoutDeployed 
+                ? 'CLiFF is actively querying your university network for a live path.'
+                : 'Matches your profile. Click below to look for a verified connection.'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Action Footer */}
-      <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-2">
-        <button
+      {/* Card Action Footer */}
+      <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+        <button 
           onClick={() => onAddToPipeline && onAddToPipeline(lead)}
-          className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition shrink-0"
+          className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition cursor-pointer"
           title="Save to Pipeline"
-          style={{ minHeight: 'auto', minWidth: 'auto' }}
         >
           ➕
         </button>
-
-        <button
+        
+        <button 
           onClick={handleScout}
           disabled={isScouting || scoutDeployed}
-          className={`flex-1 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase text-center ${
+          className={`px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer ${
             scoutDeployed
               ? 'bg-green-50 text-green-700 border border-green-200 cursor-not-allowed'
-              : isScouting
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
-              : 'bg-orange-500 hover:bg-orange-600 text-white'
+              : isScouting 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                : 'bg-orange-500 hover:bg-orange-600 text-white'
           }`}
-          style={{ minHeight: 'auto' }}
         >
-          {isScouting ? (
-            <span className="flex items-center justify-center gap-1.5">
-              <span className="w-3 h-3 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin inline-block" />
-              Scouting Network...
-            </span>
-          ) : scoutDeployed ? (
-            'Scan Triggered ✓'
-          ) : (
-            'Scout Backdoor Channels'
-          )}
+          {isScouting ? 'Searching...' : scoutDeployed ? 'Search Initiated' : '🔍 Find an Insider'}
         </button>
       </div>
+
+      {/* Simple Overlaid Full Description Modal */}
+      {showFullDesc && (
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ animation: 'fadeIn 0.2s ease-out' }}>
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col p-6 shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="font-bold text-gray-900 text-base">{role}</h3>
+                <p className="text-xs text-gray-500 font-medium">{company} — Job Details</p>
+              </div>
+              <button 
+                onClick={() => setShowFullDesc(false)}
+                className="text-gray-400 hover:text-gray-600 text-sm font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-4 leading-relaxed whitespace-pre-line font-sans">
+              {fullDesc}
+            </div>
+
+            <div className="border-t border-gray-100 pt-3 flex justify-end">
+              <button 
+                onClick={() => setShowFullDesc(false)}
+                className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
