@@ -55,12 +55,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Step 2: No insiders in database - search LinkedIn via Proxycurl
-    console.log(`[scoutCompanyBackdoor] No database matches for ${companyName}. Searching LinkedIn...`);
+    // Step 2: No insiders in database - search using Exa API (web search for LinkedIn profiles)
+    console.log(`[scoutCompanyBackdoor] No database matches for ${companyName}. Searching via Exa...`);
     
-    const PROXYCURL_API_KEY = Deno.env.get('PROXYCURL_API_KEY');
-    if (!PROXYCURL_API_KEY) {
-      console.error('[scoutCompanyBackdoor] PROXYCURL_API_KEY not configured');
+    const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
+    if (!EXA_API_KEY) {
+      console.error('[scoutCompanyBackdoor] EXA_API_KEY not configured');
       return Response.json({
         success: true,
         insiderFound: false,
@@ -71,77 +71,64 @@ Deno.serve(async (req) => {
     }
 
     try {
-      // Search for alumni from user's school at target company
-      // Using LinkedIn Profile Search endpoint instead (advance endpoint deprecated)
-      const searchQuery = `${userSchool} ${companyName}`;
-      const proxycurlUrl = `https://nubela.co/proxycurl/api/linkedin/profile/search`;
+      // Search for LinkedIn profiles of university alumni at the target company
+      const searchQuery = `"${userSchool}" "${companyName}" site:linkedin.com/in`;
       
-      const response = await fetch(proxycurlUrl, {
-        method: 'GET',
+      const exaResponse = await fetch('https://api.exa.ai/search', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${PROXYCURL_API_KEY}`,
+          'Authorization': `Bearer ${EXA_API_KEY}`,
           'Content-Type': 'application/json'
         },
-        params: {
-          keyword: searchQuery,
-          company_name: companyName,
-          school: userSchool,
-          size: '10'
-        }
+        body: JSON.stringify({
+          query: searchQuery,
+          type: 'keyword',
+          numResults: 10,
+          includeDomains: ['linkedin.com'],
+          text: true
+        })
       });
 
-      if (!response.ok) {
-        console.error(`[scoutCompanyBackdoor] Proxycurl API error: ${response.status}`);
-        if (response.status === 410 || response.status === 404) {
-          console.warn('[scoutCompanyBackdoor] Proxycurl endpoint deprecated, skipping LinkedIn search');
-          return Response.json({
-            success: true,
-            insiderFound: false,
-            message: `No ${userSchoolCode} alumni found at ${companyName} yet.`,
-            connectionsCount: 0,
-            alumni: []
-          });
-        }
-        throw new Error(`Proxycurl API returned ${response.status}`);
+      if (!exaResponse.ok) {
+        throw new Error(`Exa API returned ${exaResponse.status}`);
       }
 
-      const linkedinResults = await response.json();
-      console.log(`[scoutCompanyBackdoor] Found ${linkedinResults?.results?.length || 0} alumni on LinkedIn`);
+      const exaData = await exaResponse.json();
+      const results = exaData.results || [];
+      console.log(`[scoutCompanyBackdoor] Found ${results.length} LinkedIn profiles via Exa`);
 
-      if (linkedinResults?.results && linkedinResults.results.length > 0) {
-        // Save discovered alumni to database - ensure required fields (name, company) are always populated
-        const newAlumni = linkedinResults.results.slice(0, 5).map(profile => {
-          const fullName = profile.full_name || 
-                          (profile.first_name && profile.last_name ? `${profile.first_name} ${profile.last_name}` : '') || 
-                          'LinkedIn Professional';
-          const currentCompany = profile.experiences?.[0]?.company || companyName || 'Unknown Company';
+      if (results.length > 0) {
+        // Extract alumni info from search results
+        const newAlumni = results.slice(0, 5).map(result => {
+          // Extract name from URL or title
+          const nameMatch = result.title?.match(/^(.+?)\s*[-|]/) || result.url?.match(/\/in\/([^/?]+)/);
+          const name = nameMatch ? nameMatch[1].trim() : 'LinkedIn Professional';
           
           return {
             school_code: userSchoolCode,
             verified: false,
-            role_title: profile.headline || profile.occupation || 'Professional',
+            role_title: result.title?.split('-')[0]?.trim() || 'Professional',
             match_score: 85,
-            source_url: profile.profile_url || '',
+            source_url: result.url || '',
             verified_by: null,
             expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-            name: fullName,
-            degree_info: profile.education?.[0]?.school_name || userSchool,
+            name: name,
+            degree_info: userSchool,
             greek_organization: null,
-            company: currentCompany,
-            location: (profile.city && profile.country) ? `${profile.city}, ${profile.country}` : (profile.location || 'Unknown'),
-            linkedin_url: profile.profile_url || '',
-            description: `Found via LinkedIn search for ${userSchool} alumni at ${companyName}`
+            company: companyName,
+            location: 'Unknown',
+            linkedin_url: result.url || '',
+            description: `Found via Exa search: ${result.text?.substring(0, 200) || ''}`
           };
         });
 
         console.log(`[scoutCompanyBackdoor] Saving ${newAlumni.length} alumni to DiscoveredAlumni entity`);
         await base44.asServiceRole.entities.DiscoveredAlumni.bulkCreate(newAlumni);
 
-        // Skip NetworkingPipeline creation due to schema validation issues
         return Response.json({
           success: true,
           insiderFound: true,
-          message: `Found ${newAlumni.length} ${userSchoolCode} alumni at ${companyName} on LinkedIn!`,
+          message: `Found ${newAlumni.length} ${userSchoolCode} alumni at ${companyName}!`,
           connectionsCount: newAlumni.length,
           newlyDiscovered: true,
           alumni: newAlumni.map(a => ({
@@ -154,7 +141,7 @@ Deno.serve(async (req) => {
         });
       }
     } catch (error) {
-      console.error('[scoutCompanyBackdoor] LinkedIn search failed:', error);
+      console.error('[scoutCompanyBackdoor] Exa search failed:', error);
     }
 
     // Step 3: No LinkedIn results - return message without creating pipeline record (to avoid validation errors)
