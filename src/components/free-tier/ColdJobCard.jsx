@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { base44 } from '@/api/base44Client';
 
 export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const [isScouting, setIsScouting] = useState(false);
@@ -17,13 +18,12 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
     setIsScouting(true);
     try {
       // Call the backend function to scout for alumni
-      const { scoutCompanyBackdoor } = await import('@/functions/scoutCompanyBackdoor');
-      const result = await scoutCompanyBackdoor({
+      const result = await base44.functions.invoke('scoutCompanyBackdoor', {
         jobId: lead.id || 'unknown',
         companyName: company
       });
       
-      if (result.success) {
+      if (result.data?.success) {
         setScoutDeployed(true);
         // Open the deep dive modal with the lead data
         if (onSelect) {
@@ -32,17 +32,17 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
             company,
             role,
             jobDescription: snippet,
-            alumCount: result.alumniCount || 0,
-            parentCount: result.parentCount || 0,
-            matchPct: result.matchScore || 85,
+            alumCount: result.data.connectionsCount || 0,
+            parentCount: 0,
+            matchPct: result.data.matchScore || 85,
             logo: '🏢',
             jobSourceCategory: 'C',
             jobSource: 'Company Career Page',
-            _members: result.alumni || []
+            _members: []
           });
         }
       } else {
-        console.error('Scout failed:', result.message);
+        console.error('Scout failed:', result.data?.message);
         alert('⚠️ No insiders found at this company yet. Try another!');
       }
     } catch (error) {
