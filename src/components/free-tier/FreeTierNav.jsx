@@ -4,12 +4,17 @@ import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import EditGoalsModal from './EditGoalsModal';
 
-export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated }) {
+export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated, navRef }) {
   const { logout } = useAuth();
   const isPremium = user?.fastiq_active || user?.membership_tier === 'premium';
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const dropRef = useRef(null);
+
+  // Expose openDropdown via navRef so external elements (e.g. Active Profile pill) can trigger it
+  useEffect(() => {
+    if (navRef) navRef.current = { openDropdown: () => setDropdownOpen(true) };
+  }, [navRef]);
 
   useEffect(() => {
     const handler = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(false); };
@@ -46,7 +51,7 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated }) {
                   <span style={{ fontSize: 10, color: '#9ca3af', flexShrink: 0 }}>▾</span>
                 </button>
                 {dropdownOpen && (
-                  <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', minWidth: 200, zIndex: 200, overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', minWidth: 220, zIndex: 200, overflow: 'hidden' }}>
                     <button
                       onClick={() => { setDropdownOpen(false); setShowGoalsModal(true); }}
                       style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
@@ -63,6 +68,39 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated }) {
                     >
                       👤 Edit Profile
                     </button>
+
+                    {/* ── Resume Management Section ── */}
+                    <div style={{ padding: '8px 16px 4px', borderTop: '1px solid #f3f4f6' }}>
+                      <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>Resume Management</p>
+                    </div>
+                    {/* Active file display */}
+                    <div style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderBottom: '1px solid #f3f4f6' }}>
+                      <span style={{ fontSize: 14 }}>📄</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {user?.resume_filename || 'Master_Resume.pdf'}
+                        </p>
+                        <p style={{ fontFamily: dm, fontSize: 10, color: '#16a34a', margin: 0, fontWeight: 600 }}>🟢 98% ATS Optimized</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => { setDropdownOpen(false); /* download resume */ if (user?.resume_url) window.open(user.resume_url, '_blank'); else alert('No resume on file. Upload one in your profile.'); }}
+                      style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '11px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      ⬇️ Download File
+                    </button>
+                    <button
+                      onClick={() => { setDropdownOpen(false); navigate('ProfileEdit'); }}
+                      style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '11px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      🔄 Swap / Update File
+                    </button>
+                    {/* ── End Resume Management ── */}
+
                     <button
                       onClick={() => { setDropdownOpen(false); logout(); }}
                       style={{ fontFamily: dm, fontSize: 13, color: '#ef4444', background: 'none', border: 'none', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}

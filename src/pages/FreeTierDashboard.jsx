@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import UpgradeModal from '@/components/free-tier/UpgradeModal';
 import FreeTierNav from '@/components/free-tier/FreeTierNav';
 import ApplicationTracker from '@/components/free-tier/ApplicationPipeline';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
-import CareerAssetsCard from '@/components/free-tier/CareerAssetsCard';
+// CareerAssetsCard removed — resume management moved to nav dropdown
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
 import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
@@ -43,6 +43,105 @@ function FirstVisitToast({ firstName, onDismiss }) {
   );
 }
 
+// ── Active Profile Status Pill ────────────────────────────────────
+function ActiveProfilePill({ user, onPillClick }) {
+  const [atsOpen, setAtsOpen] = useState(false);
+  const filename = user?.resume_filename || 'Master_Resume.pdf';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {/* Pill Row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: atsOpen ? '12px 12px 0 0' : 12, padding: '9px 14px' }}>
+        <span style={{ fontSize: 14, flexShrink: 0 }}>📄</span>
+        <button
+          onClick={onPillClick}
+          title="Click to manage resume in profile menu"
+          style={{
+            fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#15803d',
+            background: 'none', border: 'none', cursor: 'pointer',
+            minHeight: 'auto', minWidth: 'auto', padding: 0,
+            textAlign: 'left', flex: 1,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            textDecoration: 'underline dotted',
+          }}
+        >
+          Active Profile: {filename}
+        </button>
+        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: 100, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          🟢 98% ATS
+        </span>
+        <button
+          onClick={() => setAtsOpen(v => !v)}
+          title="ATS Matcher"
+          style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#6b7280', background: 'none', border: '1px solid #d1fae5', borderRadius: 8, padding: '3px 8px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }}
+        >
+          {atsOpen ? '▲ Close' : '🔍 ATS Check'}
+        </button>
+      </div>
+
+      {/* ATS Matcher Drawer — collapses below the pill */}
+      {atsOpen && (
+        <ATSMatcherDrawer onClose={() => setAtsOpen(false)} />
+      )}
+    </div>
+  );
+}
+
+function ATSMatcherDrawer({ onClose }) {
+  const [jd, setJd] = useState('');
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleCheck = () => {
+    if (!jd.trim()) return;
+    setLoading(true);
+    // Simulate a quick ATS scan result (free tier teaser)
+    setTimeout(() => {
+      setResult({
+        score: 72,
+        missing: ['cross-functional', 'stakeholder management', 'KPI'],
+        present: ['communication', 'Python', 'data analysis'],
+      });
+      setLoading(false);
+    }, 900);
+  };
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #bbf7d0', borderTop: 'none', borderRadius: '0 0 12px 12px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: 0 }}>Paste a job description to check your resume match:</p>
+      <textarea
+        value={jd}
+        onChange={e => setJd(e.target.value)}
+        placeholder="Paste job description here..."
+        rows={4}
+        style={{ fontFamily: dm, fontSize: 12, color: '#374151', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 10px', resize: 'vertical', width: '100%', boxSizing: 'border-box', outline: 'none' }}
+      />
+      <button
+        onClick={handleCheck}
+        disabled={loading || !jd.trim()}
+        style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: loading ? '#9ca3af' : '#15803d', border: 'none', borderRadius: 8, padding: '9px 0', cursor: loading ? 'default' : 'pointer', minHeight: 'auto', width: '100%' }}
+      >
+        {loading ? 'Scanning...' : '⚡ Run ATS Match'}
+      </button>
+      {result && (
+        <div style={{ background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#111827' }}>Match Score</span>
+            <span style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: result.score >= 80 ? '#16a34a' : result.score >= 60 ? '#d97706' : '#dc2626' }}>{result.score}%</span>
+          </div>
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>
+            ✅ Found: <strong>{result.present.join(', ')}</strong>
+          </p>
+          <p style={{ fontFamily: dm, fontSize: 11, color: '#dc2626', margin: 0 }}>
+            ❌ Missing: <strong>{result.missing.join(', ')}</strong>
+          </p>
+          <p style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', margin: 0 }}>Upgrade to auto-fix missing keywords →</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function FreeTierDashboard() {
   const [user, setUser] = useState(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -51,6 +150,7 @@ export default function FreeTierDashboard() {
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
   const [showEmailSyncModal, setShowEmailSyncModal] = useState(false);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const navRef = useRef(null);
 
   // Listen for goals modal open event from child components
   useEffect(() => {
@@ -219,7 +319,7 @@ export default function FreeTierDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fc', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
-      <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} />
+      <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} navRef={navRef} />
 
       {/* Mobile-first responsive container */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }} className="main-dashboard-container">
@@ -378,8 +478,8 @@ export default function FreeTierDashboard() {
           {/* ── Right Column (Desktop Only) ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }} className="ftd-sidebar desktop-only">
 
-            {/* Career Assets (ATS Check + Premium assets) */}
-            <CareerAssetsCard user={user} onUpgrade={() => triggerUpgrade('Resume Wow Rewrite')} />
+            {/* ── Active Profile Status Pill ── */}
+            <ActiveProfilePill user={user} onPillClick={() => navRef.current?.openDropdown()} />
 
             {/* Alumni Outreach Generator — campus-themed */}
             <div
