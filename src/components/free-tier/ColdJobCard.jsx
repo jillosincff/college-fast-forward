@@ -16,13 +16,38 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const handleScout = async () => {
     setIsScouting(true);
     try {
-      if (onSelect) {
-        await onSelect(lead);
+      // Call the backend function to scout for alumni
+      const { scoutCompanyBackdoor } = await import('@/functions/scoutCompanyBackdoor');
+      const result = await scoutCompanyBackdoor({
+        jobId: lead.id || 'unknown',
+        companyName: company
+      });
+      
+      if (result.success) {
+        setScoutDeployed(true);
+        // Open the deep dive modal with the lead data
+        if (onSelect) {
+          onSelect({
+            ...lead,
+            company,
+            role,
+            jobDescription: snippet,
+            alumCount: result.alumniCount || 0,
+            parentCount: result.parentCount || 0,
+            matchPct: result.matchScore || 85,
+            logo: '🏢',
+            jobSourceCategory: 'C',
+            jobSource: 'Company Career Page',
+            _members: result.alumni || []
+          });
+        }
+      } else {
+        console.error('Scout failed:', result.message);
+        alert('⚠️ No insiders found at this company yet. Try another!');
       }
-      setScoutDeployed(true);
-      window.dispatchEvent(new CustomEvent('cff:refresh-feed'));
     } catch (error) {
-      console.error('Scout failed:', error);
+      console.error('Scout error:', error);
+      alert('❌ Scout failed. Please try again.');
     } finally {
       setIsScouting(false);
     }

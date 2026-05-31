@@ -242,7 +242,10 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
             ) : contacts.length === 0 ? (
               <div style={{ padding: '20px 0', textAlign: 'center' }}>
                 <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>
-                  No {tab === 'alumni' ? 'alumni' : 'parents'} found at {match.company} yet.
+                  🔍 CLiFF is actively searching for {tab === 'alumni' ? 'alumni' : 'parents'} at {match.company}...
+                </p>
+                <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '8px 0 0' }}>
+                  Check back soon — new connections are added daily!
                 </p>
               </div>
             ) : (
