@@ -64,7 +64,9 @@ Deno.serve(async (req) => {
       return Response.json({
         success: true,
         insiderFound: false,
-        message: 'LinkedIn search unavailable. Queued for background crawl.'
+        message: `No ${userSchoolCode} alumni found at ${companyName} yet.`,
+        connectionsCount: 0,
+        alumni: []
       });
     }
 
@@ -95,7 +97,9 @@ Deno.serve(async (req) => {
           return Response.json({
             success: true,
             insiderFound: false,
-            message: `No ${userSchoolCode} alumni found at ${companyName} in database. LinkedIn search unavailable.`
+            message: `No ${userSchoolCode} alumni found at ${companyName} yet.`,
+            connectionsCount: 0,
+            alumni: []
           });
         }
         throw new Error(`Proxycurl API returned ${response.status}`);
@@ -159,7 +163,9 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       insiderFound: false,
-      message: `No alumni found at ${companyName} yet. Added to priority crawl queue.`
+      message: `No ${userSchoolCode} alumni found at ${companyName} yet.`,
+      connectionsCount: 0,
+      alumni: []
     });
 
   } catch (error) {
