@@ -2,6 +2,30 @@ import { useState, useEffect, useRef } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
+// School metadata mapper — abbreviation, campus town, mascot cheer
+const SCHOOL_META = {
+  UF:     { abbr: 'UF',    town: 'Gainesville', mascot: 'Gators',       cheer: 'Go Gators! 🐊' },
+  FSU:    { abbr: 'FSU',   town: 'Tallahassee', mascot: 'Seminoles',    cheer: 'Go Noles! 🏹' },
+  UCF:    { abbr: 'UCF',   town: 'Orlando',     mascot: 'Knights',      cheer: 'Go Knights! ⚔️' },
+  USF:    { abbr: 'USF',   town: 'Tampa',       mascot: 'Bulls',        cheer: 'Go Bulls! 🐂' },
+  FIU:    { abbr: 'FIU',   town: 'Miami',       mascot: 'Panthers',     cheer: 'Go Panthers! 🐾' },
+  UM:     { abbr: 'UM',    town: 'Coral Gables', mascot: 'Hurricanes',  cheer: 'Go Canes! 🌀' },
+  UGA:    { abbr: 'UGA',   town: 'Athens',      mascot: 'Bulldogs',     cheer: 'Go Dawgs! 🐾' },
+  OSU:    { abbr: 'OSU',   town: 'Columbus',    mascot: 'Buckeyes',     cheer: 'Go Bucks! 🌰' },
+  USC:    { abbr: 'USC',   town: 'Los Angeles', mascot: 'Trojans',      cheer: 'Fight On! ✌️' },
+  UCLA:   { abbr: 'UCLA',  town: 'Los Angeles', mascot: 'Bruins',       cheer: 'Go Bruins! 🐻' },
+  UMICH:  { abbr: 'U of M', town: 'Ann Arbor',  mascot: 'Wolverines',  cheer: 'Go Blue! 〽️' },
+  PSU:    { abbr: 'Penn State', town: 'State College', mascot: 'Nittany Lions', cheer: 'We Are Penn State! 🦁' },
+  TULANE: { abbr: 'Tulane', town: 'New Orleans', mascot: 'Green Wave', cheer: 'Roll Wave! 🌊' },
+  UDEL:   { abbr: 'UD',    town: 'Newark',      mascot: 'Blue Hens',    cheer: 'Go Hens! 🐓' },
+  UMD:    { abbr: 'UMD',   town: 'College Park', mascot: 'Terps',       cheer: 'Fear the Turtle! 🐢' },
+};
+
+function getSchoolMeta(schoolCode) {
+  const key = (schoolCode || 'UF').toUpperCase();
+  return SCHOOL_META[key] || { abbr: key, town: 'campus', mascot: 'team', cheer: `Go ${key}!` };
+}
+
 const SOURCE_CATEGORY_CONFIG = {
   A: {
     emoji: '🔥', label: 'HIDDEN NETWORK REFERRAL',
@@ -136,10 +160,12 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
       }
     }, 80);
     const firstName = contact.name?.split(' ')[0] || contact.name;
-    const school = shortName || user?.school_code || 'UF';
+    const schoolCode = user?.school_code || shortName || 'UF';
+    const meta = getSchoolMeta(schoolCode);
+    const userType = user?.persona === 'alumni' ? `fellow ${meta.abbr} grad` : `current ${meta.abbr} student`;
     setTimeout(() => {
       setGeneratedScript(
-        `Hey ${firstName}, I noticed you went to ${school} and made it to ${match.company} — that's exactly the kind of path I'm working toward! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would a 15-minute chat work? Go Gators! 🐊`
+        `Hey ${firstName}, ${userType} here! I saw you made it from ${meta.town} to ${match.company} and that's exactly the path I'm working toward right now! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would you be open to a casual 15-minute chat sometime soon? ${meta.cheer}`
       );
       setIsGenerating(false);
     }, 750);
