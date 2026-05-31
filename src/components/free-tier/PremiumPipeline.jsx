@@ -39,9 +39,27 @@ const BACKDOOR_LEADS = [
 
 const COLUMNS = ['OPPORTUNITIES', 'APPLIED', 'INTERVIEWING', 'OFFER 🎉'];
 
-function LeadCard({ lead, onOpen, columnId }) {
+function LeadCard({ lead, onOpen, columnId, onTriggerNudge }) {
   const emailSyncActive = lead.emailSyncStatus === 'active';
   const [viewed, setViewed] = useState(false);
+
+  // Check for stale application nudge
+  const checkNudgeStatus = () => {
+    if (!lead.appliedDate && columnId !== 'applied' && columnId !== 'interviewing') return null;
+    const lastActivity = lead.lastActivityDate || lead.appliedDate;
+    if (!lastActivity) return null;
+    const daysStagnant = Math.floor((new Date() - new Date(lastActivity)) / (1000 * 60 * 60 * 24));
+    
+    if (columnId === 'applied' && daysStagnant >= 5) {
+      return { type: 'FOLLOW_UP', text: `⏰ ${daysStagnant}d Silence — Follow up`, days: daysStagnant };
+    }
+    if (columnId === 'interviewing' && daysStagnant >= 3) {
+      return { type: 'THANK_YOU', text: `⚡ ${daysStagnant}d — Send Thank You`, days: daysStagnant };
+    }
+    return null;
+  };
+
+  const nudge = checkNudgeStatus();
 
   const handleClick = () => {
     setViewed(true);
@@ -115,7 +133,7 @@ function LeadCard({ lead, onOpen, columnId }) {
       )}
       
       {columnId === 'applied' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
           <p style={{ fontFamily: dm, fontSize: 10, color: '#64748b', margin: 0, letterSpacing: '-0.01em' }}>📩 Tracked via Inbox · {lead.appliedDate ? new Date(lead.appliedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Auto-detecting...'}</p>
           {lead.tailoredResume && (
             <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>📄 Version: {lead.tailoredResume.fileName.replace('.pdf', '').split('_').pop() || 'Master'}</p>
@@ -126,16 +144,42 @@ function LeadCard({ lead, onOpen, columnId }) {
               <p style={{ fontFamily: dm, fontSize: 8, color: '#991b1b', margin: '2px 0 0' }}>Recruiter activity paused. Keep looking elsewhere.</p>
             </div>
           )}
+          {/* Smart CRM Nudge Button */}
+          {nudge && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onTriggerNudge && onTriggerNudge(lead, nudge);
+              }}
+              style={{ marginTop: 'auto', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #f97316, #ea580c)', border: 'none', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', minHeight: 'auto', animation: 'pulse 2s ease-in-out infinite', textAlign: 'center' }}
+            >
+              {nudge.text}
+              <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.9;transform:scale(1.02)} }`}</style>
+            </button>
+          )}
         </div>
       )}
       
       {columnId === 'interviewing' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
           <div style={{ background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 6, padding: '6px 10px' }}>
             <p style={{ fontFamily: dm, fontSize: 10, color: '#7c3aed', margin: 0, fontWeight: 700 }}>📅 {lead.interviewRound || 'Round 1'}: {lead.interviewDate ? new Date(lead.interviewDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}</p>
           </div>
           {lead.tailoredResume && (
             <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0, textDecoration: 'underline', cursor: 'pointer' }}>📄 Sent Asset: {lead.tailoredResume.fileName.replace('.pdf', '').split('_').pop() || 'Master'}</p>
+          )}
+          {/* Smart CRM Nudge Button */}
+          {nudge && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onTriggerNudge && onTriggerNudge(lead, nudge);
+              }}
+              style={{ marginTop: 'auto', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #f97316, #ea580c)', border: 'none', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', minHeight: 'auto', animation: 'pulse 2s ease-in-out infinite', textAlign: 'center' }}
+            >
+              {nudge.text}
+              <style>{`@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.9;transform:scale(1.02)} }`}</style>
+            </button>
           )}
         </div>
       )}
@@ -186,6 +230,23 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   const handleLeadOpen = (lead) => {
     setSelectedLead(lead);
     if (onLeadSelect) onLeadSelect(lead);
+  };
+
+  const handleTriggerNudge = (lead, nudge) => {
+    // Trigger CLiFF chat to generate follow-up script
+    window.dispatchEvent(new CustomEvent('cliff:nudge-triggered', {
+      detail: {
+        lead,
+        nudgeType: nudge.type,
+        daysStale: nudge.days,
+        companyName: lead.company,
+        role: lead.role,
+      }
+    }));
+    // Scroll to CLiFF chat
+    setTimeout(() => {
+      document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100);
   };
 
   const handleApplied = (lead) => {
@@ -350,7 +411,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
                     {col === 'OPPORTUNITIES'
                       ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} />)
                       : cards[col].map((item, i) => (
-                          <LeadCard key={i} lead={item} columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} />
+                          <LeadCard key={i} lead={item} columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} onTriggerNudge={handleTriggerNudge} />
                         ))
                     }
                     {newCard.col === col ? (

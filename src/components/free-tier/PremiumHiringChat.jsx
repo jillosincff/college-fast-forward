@@ -28,52 +28,52 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
   const [outreachContext, setOutreachContext] = useState(null);
   const bottomRef = useRef(null);
 
-  // On mount — run recap context check first, then fall back to interview/parent checks
+  // On mount — run pipeline-based coaching or recap context check
   useEffect(() => {
     if (!user?.id || recapLoaded) return;
 
-    const loadRecap = async () => {
+    const loadPipelineCoaching = async () => {
       try {
         const recapRes = await base44.functions.invoke('getAgentRecapContext', {});
         const recap = recapRes?.data ?? recapRes ?? {};
+        const pipelineCount = recap.metrics?.totalInPipeline || 0;
+        const schoolAbbr = recap.schoolAbbreviation || schoolAbbr;
 
-        if (recap.actionItem) {
-        setRecapAction(recap.actionItem);
-
-        const pipelineText = `${recap.actionItem.totalInPipeline || recap.metrics.totalInPipeline} opportunities tracked in your pipeline`;
-        const companyText = recap.actionItem.companyName || 'your top target';
-        const statusText = recap.actionItem.status || 'Applied';
-
-        // Scenario A: Backdoor Lever Available (Alumni exist)
-        if (recap.actionItem.type === 'DRAFT_ALUMNI_OUTREACH' && recap.actionItem.alumniCount > 0) {
-          const alumniCount = recap.actionItem.alumniCount;
-          const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: Your application for ${companyText} is currently sitting in '${statusText}'.\n\nWe found ${alumniCount} ${recap.schoolAbbreviation} alumni who work there right now. Let's write a quick backdoor message to them today to get your resume pulled out of the cold black hole.\n\nYour Next Step: Tap below, and I'll draft a personalized outreach script for you to send to a verified ${recap.schoolAbbreviation} alum.`;
+        if (recap.actionItem && recap.actionItem.type === 'STALE_APPLICATION') {
+          // Smart CRM nudge: stale application detected
+          const daysStale = recap.actionItem.daysStale || 5;
+          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have ${pipelineCount} active opportunities tracked.\n\n⚠️ **Nudge Alert**: Your application for **${recap.actionItem.companyName}** has been sitting for ${daysStale} days without activity. Let's send an elegant check-in to bypass the cold portal.\n\nYour Sprint Objective Today: Deploy a scout to find backdoors for your top targets (Spotify, BuzzFeed, or Warner Bros Discovery), or tap below to draft a follow-up for ${recap.actionItem.companyName}.`;
           setMessages([{ role: 'agent', text: greeting }]);
-        } 
-        // Scenario B: Mentorship Path Available (Parent advisors)
-        else if (recap.actionItem.type === 'DRAFT_PARENT_OUTREACH' && recap.actionItem.parentCount > 0) {
-          const parentCount = recap.actionItem.parentCount;
-          const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: You have ${pipelineText}. For your target role at ${companyText}, we don't have a direct alumni line, but a ${recap.schoolAbbreviation} Parent has offered to provide career guidance.\n\nYour Next Step: Let's drop them a line to get some insider interview advice before you move forward. Want to draft it now?`;
+          setRecapAction(recap.actionItem);
+        } else if (pipelineCount > 0) {
+          // Active pipeline coaching
+          const targetCompanies = ['Spotify', 'BuzzFeed', 'Warner Bros Discovery'];
+          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have **${pipelineCount} active opportunities** saved.\n\nYour main sprint objective today is deploying a scout to find backdoors for **${targetCompanies.join(', ')}**, or ask me how to prep for an upcoming conversation!\n\nPick a target above, or tap below to draft outreach for your top priority.`;
           setMessages([{ role: 'agent', text: greeting }]);
-        } 
-        // Scenario C: Cold Signal (Zero connections)
-        else if (recap.actionItem.type === 'VIEW_CAROUSEL_MATCHES') {
-          const greeting = `Welcome back, ${recap.studentName}! 📎 Quick recap: Your application for ${companyText} is tracked in 'Opportunities'. The front door is incredibly crowded, and we don't have a warm connection path here yet.\n\nYour Next Step: I'm actively crawling backdoor channels, Reddit threads, and corporate pages 24/7 to find an insider. In the meantime, let's look at companies where we already have verified connections.`;
+          setRecapAction({ type: 'PIPELINE_COACHING', pipelineCount });
+        } else if (recap.actionItem) {
+          // Fallback to original recap logic
+          const companyText = recap.actionItem.companyName || 'your top target';
+          if (recap.actionItem.type === 'DRAFT_ALUMNI_OUTREACH' && recap.actionItem.alumniCount > 0) {
+            const greeting = `Welcome back, ${recap.studentName || firstName}! 📎 Quick recap: We found ${recap.actionItem.alumniCount} ${schoolAbbr} alumni at ${companyText}. Let's draft a backdoor message to get your resume pulled from the black hole.`;
+            setMessages([{ role: 'agent', text: greeting }]);
+            setRecapAction(recap.actionItem);
+          } else {
+            const greeting = `Hi ${firstName}! 📎 I'm CLiFF, your career agent. Your pipeline is looking clean — let's load some warm leads or I can help with interview prep, salary negotiations, or outreach scripts.`;
+            setMessages([{ role: 'agent', text: greeting }]);
+          }
+        } else {
+          const greeting = `Hi ${firstName}! 📎 I'm CLiFF, your career agent. Ask me anything — interview follow-ups, salary negotiations, or how to reach out to that alum at your target company. I'm locked in 24/7.`;
           setMessages([{ role: 'agent', text: greeting }]);
-        } 
-        else if (recap.actionItem.type === 'FRESH_FEED_LOOKUP') {
-          const greeting = `Welcome back, ${recap.studentName}! 📎 Your tracker is looking completely clean and up to date. Since we're pushing hard for ${recap.actionItem.industry} roles this week, our live feed just picked up fresh listings at companies with active ${recap.schoolAbbreviation} alumni networks. Should we jump into the feed and load some new warm leads into your pipeline?`;
-          setMessages([{ role: 'agent', text: greeting }]);
-        }
         }
       } catch (err) {
-        console.error('Failed to load recap:', err);
+        console.error('Failed to load pipeline coaching:', err);
       } finally {
         setRecapLoaded(true);
       }
     };
 
-    loadRecap();
+    loadPipelineCoaching();
   }, [user?.id, recapLoaded]);
 
   // Secondary checks — only run if no recap action was found
@@ -139,6 +139,27 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
 
     window.addEventListener('cliff:outreach-request', handleOutreachRequest);
     return () => window.removeEventListener('cliff:outreach-request', handleOutreachRequest);
+  }, [user?.full_name]);
+
+  // Listen for CRM nudge triggers from pipeline
+  useEffect(() => {
+    const handleNudgeTriggered = (event) => {
+      const { lead, nudgeType, daysStale, companyName, role } = event.detail;
+      if (!lead || !companyName) return;
+
+      let greeting;
+      if (nudgeType === 'FOLLOW_UP') {
+        greeting = `Hey ${firstName}! ⏰ I noticed you haven't heard back from **${companyName}** after **${daysStale} days**.\n\nLet's send an elegant check-in prompt to bypass the cold portal. Here's what I recommend:\n\n---\n\n**Subject:** Following up on ${role} application\n\nHi [Recruiter Name],\n\nI hope this message finds you well. I wanted to briefly follow up on my application for the ${role} position at ${companyName}, submitted about ${daysStale} days ago.\n\nI remain incredibly enthusiastic about this opportunity and would love to discuss how my background aligns with your team's needs.\n\nBest regards,\n${user?.full_name || '[Your Name]'}\n\n---\n\n📋 Want me to adjust the tone or make it more specific?`;
+      } else if (nudgeType === 'THANK_YOU') {
+        greeting = `Hey ${firstName}! ⚡ It's been **${daysStale} days** since your last update for **${companyName}**.\n\nLet's send a thoughtful thank-you or status update to keep the momentum going:\n\n---\n\n**Subject:** Thank you / Quick update\n\nHi [Interviewer Name],\n\nThank you again for taking the time to speak with me about the ${role} opportunity at ${companyName}. I really enjoyed learning more about [specific topic from interview].\n\nI wanted to share a quick update: [brief relevant update or continued enthusiasm].\n\nLooking forward to hearing from you.\n\nBest,\n${user?.full_name || '[Your Name]'}\n\n---\n\n📋 Want me to personalize this further?`;
+      }
+
+      setMessages([{ role: 'agent', text: greeting }]);
+      setRecapAction({ type: 'NUDGE_FOLLOW_UP', companyName, role, nudgeType });
+    };
+
+    window.addEventListener('cliff:nudge-triggered', handleNudgeTriggered);
+    return () => window.removeEventListener('cliff:nudge-triggered', handleNudgeTriggered);
   }, [user?.full_name]);
 
   // Email sync suggestion — shown after user manually adds applications or when no recap/interview/parent match is found
@@ -314,6 +335,34 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
             {/* Recap action buttons — shown only under the first agent message */}
             {i === 0 && m.role === 'agent' && recapAction && messages.length <= 1 && (
               <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {/* Pipeline Coaching - General */}
+                {recapAction.type === 'PIPELINE_COACHING' && (
+                  <button
+                    onClick={() => {
+                      setRecapAction(null);
+                      sendMessage('Help me prioritize which company to target first from my pipeline');
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#4f46e5', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                  >
+                    🎯 Prioritize My Pipeline
+                  </button>
+                )}
+                {/* Stale Application Nudge */}
+                {recapAction.type === 'STALE_APPLICATION' && (
+                  <button
+                    onClick={() => {
+                      setRecapAction(null);
+                      sendMessage(`Draft a follow-up message for my application at ${recapAction.companyName}`);
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#f97316', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#ea580c'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#f97316'}
+                  >
+                    ⏰ Draft Follow-up for {recapAction.companyName}
+                  </button>
+                )}
                 {/* Scenario A: Alumni connections exist */}
                 {recapAction.type === 'DRAFT_ALUMNI_OUTREACH' && (
                   <button
@@ -370,6 +419,23 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
                     onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
                   >
                     📋 Copy Draft
+                  </button>
+                )}
+                {/* Nudge follow-up - copy to clipboard */}
+                {recapAction.type === 'NUDGE_FOLLOW_UP' && (
+                  <button
+                    onClick={() => {
+                      const draft = recapAction.nudgeType === 'FOLLOW_UP'
+                        ? `Subject: Following up on ${recapAction.role} application\n\nHi [Recruiter Name],\n\nI hope this message finds you well. I wanted to briefly follow up on my application for the ${recapAction.role} position at ${recapAction.companyName}, submitted about 5 days ago.\n\nI remain incredibly enthusiastic about this opportunity and would love to discuss how my background aligns with your team's needs.\n\nBest regards,\n${user?.full_name || '[Your Name]'}`
+                        : `Subject: Thank you / Quick update\n\nHi [Interviewer Name],\n\nThank you again for taking the time to speak with me about the ${recapAction.role} opportunity at ${recapAction.companyName}. I really enjoyed learning more about the team.\n\nI wanted to share a quick update on my end. Looking forward to hearing from you.\n\nBest,\n${user?.full_name || '[Your Name]'}`;
+                      navigator.clipboard.writeText(draft);
+                      setRecapAction(null);
+                    }}
+                    style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#f97316', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#ea580c'}
+                    onMouseLeave={e => e.currentTarget.style.background = '#f97316'}
+                  >
+                    📋 Copy Follow-up Draft
                   </button>
                 )}
                 {/* Legacy / fallback scenarios */}
