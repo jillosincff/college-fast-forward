@@ -4,7 +4,7 @@ import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompa
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { CliffLogo } from '@/components/brand/CliffLogo';
 import PremiumPipeline from './PremiumPipeline';
-import PremiumSignalsFeed from './PremiumSignalsFeed';
+import CliffSprintTracker from './CliffSprintTracker';
 import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
@@ -103,7 +103,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const shortName = t.shortName || college || 'your university';
   const [selectedLead, setSelectedLead] = useState(null);
   const [selectedSignal, setSelectedSignal] = useState(null);
-  const [selectedJob, setSelectedJob] = useState(null);  // Ghost Risk Meter bypass
+  const [selectedJob, setSelectedJob] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [signalAdditions, setSignalAdditions] = useState([]);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
@@ -301,32 +301,8 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             {/* Application Pipeline (Active Tracking) */}
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
             
-            {/* Signals Feed */}
-            <PremiumSignalsFeed 
-              college={college} 
-              theme={t} 
-              onAddToPipeline={handleAddFromSignals} 
-              onCoffeeChat={setSelectedSignal} 
-              onBackdoorClick={handleBackdoorClick} 
-              user={user}
-              onRevealCompany={(companyName) => {
-                // Scroll carousel to the matching company card
-                const carouselEl = document.querySelector('[data-carousel]');
-                if (carouselEl) {
-                  const cards = carouselEl.querySelectorAll('[data-company]');
-                  cards.forEach(card => {
-                    const cardCompany = card.getAttribute('data-company');
-                    if (cardCompany && cardCompany.toLowerCase().includes(companyName.toLowerCase())) {
-                      card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                      card.style.boxShadow = '0 0 0 3px #2563eb, 0 8px 24px rgba(37,99,235,0.4)';
-                      setTimeout(() => {
-                        card.style.boxShadow = '';
-                      }, 3000);
-                    }
-                  });
-                }
-              }}
-            />
+            {/* 14-Day Sprint Tracker */}
+            <CliffSprintTracker currentDay={3} totalDays={14} />
           </div>
 
           {/* Right Column (Desktop Only) */}
