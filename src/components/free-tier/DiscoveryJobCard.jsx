@@ -1,26 +1,17 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { MapPin, Briefcase, Building2, ExternalLink, Sparkles } from 'lucide-react';
-import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 
 export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
   const [isScouting, setIsScouting] = useState(false);
-  const [hasScouted, setHasScouted] = useState(false);
-  const [scoutResult, setScoutResult] = useState(null);
+  const [scoutDeployed, setScoutDeployed] = useState(false);
+  const [showFullDesc, setShowFullDesc] = useState(false);
 
-  const handleScout = async () => {
+  const handleScoutDeployment = async () => {
     setIsScouting(true);
     try {
-      const result = await scoutCompanyBackdoor({
-        jobId: lead.id || lead.company + '-' + lead.role,
-        companyName: lead.company,
-      });
-      setScoutResult(result.data);
-      setHasScouted(true);
-      
-      // If backdoor found, refresh the feed to promote this to Priority Insider
+      if (onSelect) {
+        await onSelect(lead);
+      }
+      setScoutDeployed(true);
       window.dispatchEvent(new CustomEvent('cff:refresh-feed'));
     } catch (error) {
       console.error('Scout failed:', error);
@@ -30,94 +21,103 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
   };
 
   return (
-    <Card className="card-interactive hover:shadow-lg transition-all duration-300">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Building2 className="w-4 h-4 text-gray-400" />
-              <h3 className="font-bold text-gray-900 text-base">{lead.company}</h3>
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between min-h-[380px] hover:border-gray-300 transition-all relative">
+      <div>
+        {/* Card Header */}
+        <div className="flex justify-between items-start">
+          <h4 className="font-bold text-gray-900 leading-tight truncate max-w-[70%]">{lead.company}</h4>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase tracking-wide">
+            Discovery
+          </span>
+        </div>
+        <p className="text-xs text-gray-500 mt-0.5 font-medium">{lead.role}</p>
+        
+        {/* Job Snippet with View More Hook */}
+        <div className="mt-4 text-xs text-gray-600 relative">
+          <p className="line-clamp-3 leading-relaxed">
+            {lead.jobDescription || lead.description || "No description preview available."}
+          </p>
+          <button 
+            onClick={() => setShowFullDesc(true)}
+            className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-1 block underline cursor-pointer"
+          >
+            Read Full Description
+          </button>
+        </div>
+        
+        {/* Clean Passive Network Status Box */}
+        <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center gap-2.5">
+          <span className="text-base">{scoutDeployed ? '✅' : '🔒'}</span>
+          <div>
+            <p className="text-xs font-bold text-gray-800">
+              {scoutDeployed ? 'Insider Search Active' : 'Direct Backdoor Unmapped'}
+            </p>
+            <p className="text-[10px] text-gray-500 leading-normal mt-0.5">
+              {scoutDeployed 
+                ? 'CLiFF is actively querying your university network for a live path.'
+                : 'Matches your profile. Click below to look for a verified connection.'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Card Action Footer */}
+      <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+        <button 
+          onClick={() => onAddToPipeline && onAddToPipeline(lead)}
+          className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+          title="Save to Pipeline"
+        >
+          ➕
+        </button>
+        
+        <button 
+          onClick={handleScoutDeployment}
+          disabled={isScouting || scoutDeployed}
+          className={`px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer ${
+            scoutDeployed
+              ? 'bg-green-50 text-green-700 border border-green-200 cursor-not-allowed'
+              : isScouting 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                : 'bg-orange-500 hover:bg-orange-600 text-white'
+          }`}
+        >
+          {isScouting ? 'Searching...' : scoutDeployed ? 'Search Initiated' : '🔍 Find an Insider'}
+        </button>
+      </div>
+
+      {/* Simple Overlaid Full Description Modal */}
+      {showFullDesc && (
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col p-6 shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="font-bold text-gray-900 text-base">{lead.role}</h3>
+                <p className="text-xs text-gray-500 font-medium">{lead.company} — Job Details</p>
+              </div>
+              <button 
+                onClick={() => setShowFullDesc(false)}
+                className="text-gray-400 hover:text-gray-600 text-sm font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
-            <div className="flex items-center gap-2 mb-1">
-              <Briefcase className="w-3.5 h-3.5 text-gray-400" />
-              <p className="text-sm font-medium text-gray-700">{lead.role}</p>
+            
+            <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-4 leading-relaxed whitespace-pre-line font-sans">
+              {lead.fullDescription || lead.jobDescription || lead.description}
+            </div>
+
+            <div className="border-t border-gray-100 pt-3 flex justify-end">
+              <button 
+                onClick={() => setShowFullDesc(false)}
+                className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                Close Details
+              </button>
             </div>
           </div>
         </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Job Description Snippet */}
-        <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
-          {lead.jobDescription || lead.description}
-        </p>
-
-        {/* Source Badge */}
-        {lead.nichePlatform && (
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">
-              📊 {lead.nichePlatform}
-            </Badge>
-          </div>
-        )}
-
-        {/* Zero-Waste Action Zone */}
-        <div className="space-y-2 pt-2 border-t border-gray-100">
-          {/* Always show: Add to Pipeline */}
-          <Button
-            onClick={() => onAddToPipeline(lead)}
-            variant="outline"
-            className="w-full text-xs font-semibold border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-            size="sm"
-          >
-            📋 Add to Pipeline
-          </Button>
-
-          {/* On-demand Scout Button — only for Target Discoveries (no insider yet) */}
-          {!hasScouted && !lead.alumniCount && !lead.parentCount && (
-            <Button
-              onClick={handleScout}
-              disabled={isScouting}
-              className="w-full text-xs font-bold bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-0 shadow-md"
-              size="sm"
-            >
-              {isScouting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Scouting Backdoor Channels...
-                </span>
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Scout Backdoor Channels
-                </span>
-              )}
-            </Button>
-          )}
-
-          {/* Scout Success State */}
-          {hasScouted && scoutResult?.success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-center">
-              <p className="text-xs font-bold text-green-800">
-                ✅ Backdoor Unlocked!
-              </p>
-              <p className="text-[10px] text-green-600 mt-0.5">
-                {scoutResult.contactsFound || '0'} insider contacts found
-              </p>
-            </div>
-          )}
-
-          {/* View Details */}
-          <Button
-            onClick={() => onSelect(lead)}
-            variant="ghost"
-            className="w-full text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-            size="sm"
-          >
-            View Details →
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }
