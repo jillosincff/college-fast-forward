@@ -76,14 +76,14 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         
         {/* Clean Passive Network Status Box */}
         <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center gap-2.5">
-          <span className="text-base">{scoutDeployed ? '✅' : '🔒'}</span>
+          <span className="text-base">{scoutDeployed ? '🔍' : '🔒'}</span>
           <div>
             <p className="text-xs font-bold text-gray-800">
-              {scoutDeployed ? 'Insider Search Active' : 'Direct Backdoor Unmapped'}
+              {scoutDeployed ? 'Scanning Network...' : 'Direct Backdoor Unmapped'}
             </p>
             <p className="text-[10px] text-gray-500 leading-normal mt-0.5">
               {scoutDeployed 
-                ? 'CLiFF is actively querying your university network for a live path.'
+                ? 'No direct connection found yet. We\'ll notify you if a path opens up.'
                 : 'Matches your profile. Click below to look for a verified connection.'}
             </p>
           </div>
@@ -105,13 +105,13 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
           disabled={isScouting || scoutDeployed}
           className={`px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer ${
             scoutDeployed
-              ? 'bg-green-50 text-green-700 border border-green-200 cursor-not-allowed'
+              ? 'bg-gray-100 text-gray-500 border border-gray-200 cursor-not-allowed'
               : isScouting 
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
                 : 'bg-orange-500 hover:bg-orange-600 text-white'
           }`}
         >
-          {isScouting ? 'Searching...' : scoutDeployed ? 'Search Initiated' : '🔍 Find an Insider'}
+          {isScouting ? 'Searching...' : scoutDeployed ? '✅ Monitoring' : '🔍 Find an Insider'}
         </button>
       </div>
     </div>
