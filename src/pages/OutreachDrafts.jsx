@@ -32,7 +32,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const user = userProp || authUser;
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [phase, setPhase] = useState('list'); // list | new | compose | followup
+  const [phase, setPhase] = useState('list');
   const [selectedContext, setSelectedContext] = useState(null);
   const [form, setForm] = useState({
     recipientName: '',
@@ -43,6 +43,31 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     jobUrl: '',
     conversationContext: '',
   });
+  
+  // Handle pre-population from URL params (when coming from MatchDeepDiveModal)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const contact = params.get('contact');
+    const company = params.get('company');
+    const role = params.get('role');
+    const tab = params.get('tab');
+    
+    if (contact && company) {
+      setForm({
+        recipientName: decodeURIComponent(contact),
+        recipientCompany: decodeURIComponent(company),
+        recipientTitle: role ? decodeURIComponent(role) : '',
+        recipientLinkedinUrl: '',
+        jobTitle: '',
+        jobUrl: '',
+        conversationContext: '',
+      });
+      setSelectedContext(tab === 'parents' ? 'cff_connection' : 'alumni_search');
+      setPhase('form');
+      // Clean up URL without reloading
+      window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+    }
+  }, []);
   const [generating, setGenerating] = useState(false);
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [editedMessage, setEditedMessage] = useState('');
@@ -238,14 +263,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     color: '#888', display: 'block', marginBottom: 6,
   };
 
-  // Trial expired gate
-  const trialExpired = user?.trial_status === 'expired' && user?.subscription_status !== 'active';
-  if (trialExpired) {
-    return <PostTrialUpgradePrompt message="Draft AI-written outreach messages and track your networking pipeline." />;
-  }
-
-  // FastIQ gate — attempt trial activation first
-  if (!isFastIQ) {
+  // FastIQ gate — attempt trial activation first (only on list view, not when pre-populating from modal)
+  if (!isFastIQ && phase === 'list') {
     const handleTryTrial = async () => {
       const activated = await maybeActivateTrial(user, refreshUser);
       if (!activated) onOpenUpgrade?.();
@@ -262,6 +281,11 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         </button>
       </div>
     );
+  }
+  
+  // Allow access when coming from modal with pre-populated data (even if trial expired)
+  if (!isFastIQ && phase !== 'list') {
+    // Let them use the feature for this specific action
   }
 
   // Follow-up nudge banner
