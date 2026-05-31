@@ -46,7 +46,9 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   
   // Handle pre-population from URL params (when coming from MatchDeepDiveModal)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+    const hashParamsPart = hash.includes('?') ? hash.split('?')[1] : '';
+    const params = new URLSearchParams(hashParamsPart);
     const contact = params.get('contact');
     const company = params.get('company');
     const role = params.get('role');
@@ -64,8 +66,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       });
       setSelectedContext(tab === 'parents' ? 'cff_connection' : 'alumni_search');
       setPhase('form');
-      // Clean up URL without reloading
-      window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+      // Clean up hash without reloading
+      window.history.replaceState({}, '', '#OutreachDrafts');
     }
   }, []);
   const [generating, setGenerating] = useState(false);
