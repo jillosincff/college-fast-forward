@@ -20,28 +20,30 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated }) {
   return (
     <>
       <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ fontFamily: dm, fontSize: 18, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>
-              <span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 12px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <div style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+              <span>C</span><span style={{ color: '#2563eb' }}>FF</span>
+              <span className="nav-full-name" style={{ display: 'none' }}><span> ollege </span><span style={{ color: '#2563eb' }}>Fast Forward</span></span>
             </div>
+            <style>{`@media(min-width:480px){.nav-full-name{display:inline !important}.nav-cff-abbr{display:none !important}}`}</style>
             {isPremium ? (
-              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 100, padding: '3px 12px', boxShadow: '0 2px 6px rgba(37,99,235,0.2)' }}>Sprint Active</span>
+              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 100, padding: '3px 8px', whiteSpace: 'nowrap' }}>⚡ Active</span>
             ) : (
-              <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#6b7280', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 100, padding: '3px 10px' }}>Free</span>
+              <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#6b7280', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: 100, padding: '3px 8px', whiteSpace: 'nowrap' }}>Free</span>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {user && (
               <div ref={dropRef} style={{ position: 'relative' }}>
                 <button
                   onClick={() => setDropdownOpen(p => !p)}
-                  style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s' }}
+                  style={{ fontFamily: dm, fontSize: 12, fontWeight: 600, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '7px 10px', cursor: 'pointer', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 5, transition: 'all 0.15s', maxWidth: 130, overflow: 'hidden' }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = '#d1d5db'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}
                 >
-                  {user.full_name || user.email}
-                  <span style={{ fontSize: 10, color: '#9ca3af' }}>▾</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.full_name?.split(' ')[0] || user.email?.split('@')[0]}</span>
+                  <span style={{ fontSize: 10, color: '#9ca3af', flexShrink: 0 }}>▾</span>
                 </button>
                 {dropdownOpen && (
                   <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', minWidth: 200, zIndex: 200, overflow: 'hidden' }}>
@@ -76,7 +78,7 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated }) {
             {!isPremium && (
               <button
                 onClick={onUpgrade}
-                style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 10, padding: '9px 18px', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 2px 8px rgba(37,99,235,0.25)' }}
+                style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)', border: 'none', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', boxShadow: '0 2px 8px rgba(37,99,235,0.25)', whiteSpace: 'nowrap' }}
               >
                 ⚡ Upgrade
               </button>

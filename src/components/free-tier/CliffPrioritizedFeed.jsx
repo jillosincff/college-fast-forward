@@ -43,14 +43,14 @@ export default function CliffPrioritizedFeed({ user }) {
   const noGoals = !target_industries?.length && !effectiveRole;
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-10">
+    <div className="w-full max-w-6xl mx-auto px-0 py-2 space-y-6">
 
       {/* Header */}
-      <div className="border-b border-gray-100 pb-5">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+      <div className="border-b border-gray-100 pb-4">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
           🚀 CLiFF's Live Target Matches
         </h2>
-        <p className="text-sm text-gray-600 mt-1">
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">
           Your personalized feed of{' '}
           <span className="font-bold text-purple-600">{isLoading ? '...' : totalCount}</span> hand-picked opportunities
         </p>
@@ -74,18 +74,18 @@ export default function CliffPrioritizedFeed({ user }) {
       )}
 
       {/* ── PRIORITY 1: DIRECT NETWORK LEVERAGE ─────────────────────── */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🔥</span>
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">
+      <section className="space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-lg">🔥</span>
+            <h3 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
               Priority Insider Tracks ({isLoading ? '…' : priorityInsiders.length})
             </h3>
             <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-              Foot-In-The-Door Active
+              Foot-In-The-Door
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block">Verified current company insiders</span>
+          <span className="text-xs text-gray-400 font-medium hidden sm:block shrink-0">Verified insiders</span>
         </div>
 
         {isLoading ? (
@@ -112,18 +112,18 @@ export default function CliffPrioritizedFeed({ user }) {
       </section>
 
       {/* ── PRIORITY 2: TARGET DISCOVERIES (HUNT ACTIVE) ────────────── */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🛰️</span>
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">
-              Target-Matched Discoveries ({isLoading ? '…' : targetedDiscoveries.length})
+      <section className="space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-lg">🛰️</span>
+            <h3 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
+              Discoveries ({isLoading ? '…' : targetedDiscoveries.length})
             </h3>
             <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-              Scouting Connections
+              Scouting
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block">Perfect roles on niche boards</span>
+          <span className="text-xs text-gray-400 font-medium hidden sm:block shrink-0">Niche boards</span>
         </div>
 
         {isLoading ? (

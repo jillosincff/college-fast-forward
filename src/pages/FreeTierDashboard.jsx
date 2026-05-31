@@ -222,11 +222,11 @@ export default function FreeTierDashboard() {
       <FreeTierNav user={user} onUpgrade={() => triggerUpgrade('Premium Sprint')} />
 
       {/* Mobile-first responsive container */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px 80px' }} className="main-dashboard-container">
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }} className="main-dashboard-container">
         <style>{`
           @media (max-width: 768px) {
             .main-dashboard-container {
-              padding: 12px !important;
+              padding: 12px 12px 100px !important;
             }
             .ftd-grid {
               grid-template-columns: 1fr !important;
@@ -240,13 +240,34 @@ export default function FreeTierDashboard() {
             .desktop-only {
               display: none !important;
             }
+            .hero-header-card {
+              padding: 16px !important;
+              border-radius: 16px !important;
+            }
+            .hero-title {
+              font-size: 16px !important;
+            }
+            .hero-subtitle {
+              font-size: 12px !important;
+              margin-bottom: 14px !important;
+            }
+            .hero-cta-btn {
+              width: 100% !important;
+              text-align: center !important;
+              font-size: 13px !important;
+              padding: 13px 16px !important;
+            }
+            .school-anchor {
+              padding: 10px 14px !important;
+              font-size: 12px !important;
+            }
           }
         `}</style>
 
         {/* ── Psychological Blueprint Header: "They Heard Me" ── */}
-        <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b)', border: '1px solid #1e293b', borderRadius: 20, padding: '24px 28px', marginBottom: 24, boxShadow: '0 4px 24px rgba(15,23,42,0.15)' }}>
+        <div className="hero-header-card" style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b)', border: '1px solid #1e293b', borderRadius: 20, padding: '24px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(15,23,42,0.15)' }}>
           {/* Badge Row */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
             <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#818cf8', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 100, padding: '4px 12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               {painConfig.badge}
             </span>
@@ -256,16 +277,17 @@ export default function FreeTierDashboard() {
           </div>
 
           {/* Dynamic Mirror Header */}
-          <h2 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 12px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
+          <h2 className="hero-title" style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 10px', lineHeight: 1.3, letterSpacing: '-0.02em' }}>
             {formattedTitle}
           </h2>
-          <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: '0 0 20px', lineHeight: 1.7, fontWeight: 500 }}>
+          <p className="hero-subtitle" style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: '0 0 18px', lineHeight: 1.65, fontWeight: 500 }}>
             {painConfig.subtitle}
           </p>
 
           {/* CTA Button */}
           {!isCareerUnsure && (
             <button
+              className="hero-cta-btn"
               onClick={() => triggerUpgrade(painConfig.feature)}
               style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#fff', background: `linear-gradient(135deg, ${campusTheme.primary}, ${campusTheme.secondary || campusTheme.primary})`, border: 'none', borderRadius: 12, padding: '12px 24px', cursor: 'pointer', minHeight: 'auto', boxShadow: `0 4px 14px ${campusTheme.primary}44`, transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 8px 20px ${campusTheme.primary}55`; }}
@@ -288,10 +310,10 @@ export default function FreeTierDashboard() {
             <p style={{ fontFamily: dm, fontSize: 13, color: '#4B5563', margin: '0 0 16px', lineHeight: 1.7 }}>
               You mentioned during setup that you're not quite sure what you want to do yet. <strong>No sweat at all.</strong> Most college students are in the exact same boat. We're going to help you figure it out step-by-step.
             </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', width: '100%' }}>
               <button
                 onClick={() => triggerUpgrade('Career Archetype Assessment')}
-                style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#4F46E5', border: 'none', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s', boxShadow: '0 2px 8px rgba(79,70,229,0.25)' }}
+                style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: '#4F46E5', border: 'none', borderRadius: 8, padding: '10px 18px', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.15s', boxShadow: '0 2px 8px rgba(79,70,229,0.25)', flex: '1 1 auto' }}
                 onMouseEnter={e => e.currentTarget.style.background = '#4338CA'}
                 onMouseLeave={e => e.currentTarget.style.background = '#4F46E5'}
               >
@@ -319,18 +341,18 @@ export default function FreeTierDashboard() {
         )}
 
         {/* ── School Pride Network Anchor ── */}
-        <div style={{ 
+        <div className="school-anchor" style={{ 
           background: campusTheme.bgTint || '#eff6ff', 
           border: `1px solid ${campusTheme.primary}33`, 
           borderRadius: 12, 
-          padding: '14px 18px', 
-          marginBottom: 20,
+          padding: '12px 16px', 
+          marginBottom: 16,
           display: 'flex',
           alignItems: 'center',
           gap: 10,
         }}>
-          <span style={{ fontSize: 20 }}>🎓</span>
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: campusTheme.primary, margin: 0 }}>
+          <span style={{ fontSize: 18, flexShrink: 0 }}>🎓</span>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: campusTheme.primary, margin: 0, lineHeight: 1.3 }}>
             Synced: {college || 'Campus'} Alumni & Parent Grid
           </p>
         </div>
@@ -341,11 +363,15 @@ export default function FreeTierDashboard() {
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Zero-Waste Prioritized Feed */}
-            <CliffPrioritizedFeed user={user} />
+            <div id="cliff-feed-section">
+              <CliffPrioritizedFeed user={user} />
+            </div>
             
             {/* Application Pipeline (Active Tracking) */}
+            <div id="pipeline-section">
             <ApplicationTracker onUpgrade={triggerUpgrade} />
             
+            </div>
             <TeaserSignalsCard onUnlock={() => triggerUpgrade('Inside Track Signals')} college={college} theme={campusTheme} />
           </div>
 
@@ -477,18 +503,22 @@ export default function FreeTierDashboard() {
       )}
 
       {/* Mobile Bottom Navigation */}
-      <div className="mobile-bottom-nav" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '12px 20px', gap: 12, boxShadow: '0 -2px 12px rgba(0,0,0,0.06)', zIndex: 999 }}>
-        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: 8 }}>
-          <span style={{ fontSize: 20 }}>📋</span>
+      <div className="mobile-bottom-nav" style={{ display: 'none', position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '8px 8px', paddingBottom: 'max(8px, env(safe-area-inset-bottom))', gap: 4, boxShadow: '0 -2px 12px rgba(0,0,0,0.06)', zIndex: 999 }}>
+        <button onClick={() => document.getElementById('cliff-feed-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
+          <span style={{ fontSize: 22 }}>🚀</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Leads</span>
+        </button>
+        <button onClick={() => document.getElementById('pipeline-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
+          <span style={{ fontSize: 22 }}>📋</span>
           <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Pipeline</span>
         </button>
-        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
-          <span style={{ fontSize: 20 }}>📄</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Assets</span>
+        <button onClick={() => triggerUpgrade('Premium Sprint')} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
+          <span style={{ fontSize: 22 }}>⚡</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Upgrade</span>
         </button>
-        <button style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: 8 }}>
-          <span style={{ fontSize: 20 }}>💬</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Chat</span>
+        <button onClick={() => navigate('Profile')} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
+          <span style={{ fontSize: 22 }}>👤</span>
+          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Profile</span>
         </button>
       </div>
     </div>
