@@ -323,23 +323,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ─── Step 2: Find REAL alumni at each company ──────────────────
-    // Query the User entity for alumni from user's school who work at these companies
-    const companyNames = jobPool.map(j => j.company.toLowerCase());
-    const allSchoolUsers = await base44.asServiceRole.entities.User.filter({
-      school_code: userSchoolCode || userSchool
-    });
-    
-    // Build a map of company -> alumni count
-    const alumniByCompany = {};
-    for (const company of companyNames) {
-      const alumniAtCompany = allSchoolUsers.filter(u => {
-        const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase();
-        return userCompany.includes(company) || company.includes(userCompany);
-      });
-      alumniByCompany[company] = alumniAtCompany.length;
-    }
-
     // Build role keyword list from target_role, target_positions, AND industry-derived keywords
     // This is the "double-lock": industry must match AND role title must match
     const roleKeywords = (targetRole || '')
@@ -392,6 +375,31 @@ Deno.serve(async (req) => {
     // ─── Step 2: Load all network members (alumni + parents) ────────────────
     const INVALID = ['self employed', 'selfemployed', 'self-employed', 'retired', 'none', 'n/a', 'unemployed', 'stay at home', 'homemaker', 'between jobs'];
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
+    
+    // Find REAL alumni/parents from user's school at each company
+    const companyNames = jobPool.map(j => j.company.toLowerCase());
+    const schoolAlumni = allUsers.filter(u => {
+      const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
+      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+      if (!isAlumni && !isParent) return false;
+      
+      const uCode = (u.school_code || '').toLowerCase();
+      const uName = (u.school_name || u.school || u.university || '').toLowerCase();
+      const matchesSchool = (userSchoolCode && uCode === userSchoolCode) || 
+                           (userSchool && uName === userSchool);
+      return matchesSchool;
+    });
+    
+    // Build a map of company -> real alumni count from user's school
+    const alumniByCompany = {};
+    for (const company of companyNames) {
+      const alumniAtCompany = schoolAlumni.filter(u => {
+        const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase();
+        return userCompany.includes(company) || company.includes(userCompany);
+      });
+      alumniByCompany[company] = alumniAtCompany.length;
+    }
+    
     const networkMembers = (allUsers || []).filter(u => {
       const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
       const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
