@@ -45,6 +45,13 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
           <p className="leading-relaxed text-sm">
             {snippet || 'Matches your target role and industry profile.'}
           </p>
+          {/* Debug info - visible only for testing */}
+          <div className="mt-2 pt-2 border-t border-gray-200 text-[10px] text-gray-400 font-mono">
+            <div>Has jobDescription: {lead.jobDescription ? '✅ YES' : '❌ NO'}</div>
+            <div>Has description: {lead.description ? '✅ YES' : '❌ NO'}</div>
+            <div>Has snippet: {lead.descriptionSnippet ? '✅ YES' : '❌ NO'}</div>
+            <div>Snippet length: {snippet?.length || 0} chars</div>
+          </div>
         </div>
         
         {/* Clean Passive Network Status Box */}
