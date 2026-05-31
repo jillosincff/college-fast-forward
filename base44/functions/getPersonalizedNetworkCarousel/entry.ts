@@ -288,6 +288,12 @@ Deno.serve(async (req) => {
 
     const schoolCode = (user.school_code || '').toLowerCase();
     const schoolName = (user.school_name || user.school || user.university || '').toLowerCase();
+    
+    // Get user's location preferences
+    const userLocation = (user.location_preference || user.preferred_location || user.location || '').toLowerCase();
+    const userCity = (user.location_city || user.city || '').toLowerCase();
+    const userState = (user.location_state || user.state || '').toLowerCase();
+    const relocationOk = user.relocation_ok === true;
 
     // ─── Step 1: Build the job pool from target industries ──────────────────
     const SENIOR_FILTER = /\b(senior|sr\.|lead|principal|director|manager|head of|vp |vice president|staff engineer|architect|managing partner)\b/i;
@@ -300,6 +306,22 @@ Deno.serve(async (req) => {
 
     // Filter out senior roles
     jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
+    
+    // Filter jobs by location if user has specified preferences
+    if (userLocation || userCity || userState) {
+      const locationKeywords = [userLocation, userCity, userState].filter(Boolean);
+      jobPool = jobPool.filter(j => {
+        const jobDesc = (j.description || '').toLowerCase();
+        // Check if job description mentions any of user's preferred locations
+        // or if it's remote (which matches all locations)
+        const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home');
+        const matchesLocation = locationKeywords.some(loc => 
+          jobDesc.includes(loc) || 
+          jobDesc.includes(loc.replace(' ', '')) // handle "new york" vs "newyork"
+        );
+        return isRemote || matchesLocation || relocationOk;
+      });
+    }
 
     // Build role keyword list from target_role, target_positions, AND industry-derived keywords
     // This is the "double-lock": industry must match AND role title must match
