@@ -8,6 +8,8 @@ import { base44 } from '@/api/base44Client';
 
 export default function OrganizedFeeds({ user }) {
   const [selectedLead, setSelectedLead] = useState(null);
+  const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'Your School';
+  const schoolEmoji = schoolAbbr === 'UF' ? '🐊' : '🎓';
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
 
@@ -90,7 +92,7 @@ export default function OrganizedFeeds({ user }) {
               <div className="p-4 text-center md:text-left">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Leverage Points</p>
                 <p className="text-lg font-black text-gray-800 mt-1">{networkStats.verifiedContacts} Verified Insiders</p>
-                <p className="text-[11px] text-purple-600 font-semibold mt-0.5">🐊 UF Network connections ready</p>
+                <p className="text-[11px] text-purple-600 font-semibold mt-0.5">{schoolEmoji} {schoolAbbr} Network connections ready</p>
               </div>
 
               <div className="p-4 text-center md:text-left">
@@ -181,7 +183,7 @@ export default function OrganizedFeeds({ user }) {
       {selectedLead && (
         <MatchDeepDiveModal
           match={selectedLead}
-          shortName="UF"
+          shortName={schoolAbbr}
           onClose={() => setSelectedLead(null)}
           onGenerateOutreach={(data) => {
             console.log('Generating outreach:', data);
