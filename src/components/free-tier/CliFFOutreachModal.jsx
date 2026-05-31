@@ -1,13 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
 export default function CliFFOutreachModal({ isOpen, onClose, initialData, onGenerate }) {
   const [formData, setFormData] = useState({
-    name: initialData?.name || '',
-    title: initialData?.title || '',
-    company: initialData?.company || '',
+    name: '',
+    title: '',
+    company: '',
   });
+
+  // CRITICAL FIX: Update form fields dynamically when initialData changes or modal opens
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData({
+        name: initialData.name || '',
+        title: initialData.title || '',
+        company: initialData.company || '',
+      });
+    }
+  }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
