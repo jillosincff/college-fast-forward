@@ -37,7 +37,13 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
             logo: '🏢',
             jobSourceCategory: 'C',
             jobSource: 'Company Career Page',
-            _members: result.data.alumni || []
+            _members: (result.data.alumni || []).map(a => ({
+              ...a,
+              persona: 'alumni',
+              full_name: a.name,
+              title: a.title,
+              linkedin_url: a.linkedin_url
+            }))
           });
         } else if (!result.data.insiderFound) {
           // No insiders found - just show the updated status
