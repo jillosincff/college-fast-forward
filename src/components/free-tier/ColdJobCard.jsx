@@ -3,7 +3,6 @@ import { useState } from 'react';
 export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const [isScouting, setIsScouting] = useState(false);
   const [scoutDeployed, setScoutDeployed] = useState(false);
-  const [showFullDesc, setShowFullDesc] = useState(false);
 
   const company = lead?.company || lead?.companyName || 'Unknown Company';
   const role = lead?.role || lead?.title || 'Open Role';
@@ -37,17 +36,11 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         </div>
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{role}</p>
         
-        {/* Job Snippet with View More Hook */}
-        <div className="mt-4 text-xs text-gray-600 relative">
-          <p className="line-clamp-3 leading-relaxed">
-            {snippet || 'No description preview available.'}
+        {/* Job Snippet */}
+        <div className="mt-4 text-xs text-gray-600">
+          <p className="leading-relaxed">
+            {snippet || 'Matches your target role and industry profile.'}
           </p>
-          <button 
-            onClick={() => setShowFullDesc(true)}
-            className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-1 block underline cursor-pointer"
-          >
-            Read Full Description
-          </button>
         </div>
         
         {/* Clean Passive Network Status Box */}
@@ -90,39 +83,6 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
           {isScouting ? 'Searching...' : scoutDeployed ? 'Search Initiated' : '🔍 Find an Insider'}
         </button>
       </div>
-
-      {/* Simple Overlaid Full Description Modal */}
-      {showFullDesc && (
-        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ animation: 'fadeIn 0.2s ease-out' }}>
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col p-6 shadow-2xl border border-gray-100">
-            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-              <div>
-                <h3 className="font-bold text-gray-900 text-base">{role}</h3>
-                <p className="text-xs text-gray-500 font-medium">{company} — Job Details</p>
-              </div>
-              <button 
-                onClick={() => setShowFullDesc(false)}
-                className="text-gray-400 hover:text-gray-600 text-sm font-bold p-1 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-4 leading-relaxed whitespace-pre-line font-sans">
-              {lead?.jobDescription || lead?.description || 'No detailed description available.'}
-            </div>
-
-            <div className="border-t border-gray-100 pt-3 flex justify-end">
-              <button 
-                onClick={() => setShowFullDesc(false)}
-                className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition cursor-pointer"
-              >
-                Close Details
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
