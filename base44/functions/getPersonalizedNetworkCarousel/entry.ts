@@ -394,17 +394,31 @@ Deno.serve(async (req) => {
     
     // Build a map of company -> real alumni count from user's school
     const alumniByCompany = {};
-    for (const company of companyNames) {
+    for (const jobCompany of companyNames) {
       const alumniAtCompany = schoolAlumni.filter(u => {
         const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase().trim();
         // Skip users with empty company fields
         if (!userCompany) return false;
-        const match = userCompany.includes(company) || company.includes(userCompany);
-        if (match) console.log(`[getPersonalizedNetworkCarousel] ✅ Match: ${u.full_name} at ${userCompany} for job company ${company}`);
+        
+        // Normalize both company names for better matching
+        const normalizeCompany = (name) => name
+          .replace(/[^a-z0-9]/g, '')  // Remove special chars
+          .replace(/(inc|ltd|llc|corp|co|company|the)$/, '');  // Remove suffixes
+        
+        const normalizedJobCompany = normalizeCompany(jobCompany);
+        const normalizedUserCompany = normalizeCompany(userCompany);
+        
+        // Check for partial matches in both directions
+        const match = normalizedUserCompany.includes(normalizedJobCompany) || 
+                     normalizedJobCompany.includes(normalizedUserCompany) ||
+                     userCompany.includes(jobCompany) || 
+                     jobCompany.includes(userCompany);
+        
+        if (match) console.log(`[getPersonalizedNetworkCarousel] ✅ Match: ${u.full_name} at "${userCompany}" for job company "${jobCompany}" (normalized: "${normalizedUserCompany}" vs "${normalizedJobCompany}")`);
         return match;
       });
-      alumniByCompany[company] = alumniAtCompany.length;
-      console.log(`[getPersonalizedNetworkCarousel] Company "${company}" has ${alumniAtCompany.length} alumni`);
+      alumniByCompany[jobCompany] = alumniAtCompany.length;
+      console.log(`[getPersonalizedNetworkCarousel] Company "${jobCompany}" has ${alumniAtCompany.length} alumni`);
     }
     
     const networkMembers = (allUsers || []).filter(u => {
