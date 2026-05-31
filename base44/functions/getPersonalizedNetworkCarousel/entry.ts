@@ -256,6 +256,13 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // Fetch user's unlocked jobs (scouted backdoors)
+    const unlocks = await base44.asServiceRole.entities.NetworkingPipeline.filter({
+      user_id: user.id,
+      unlocked: true
+    });
+    const unlockedJobIds = new Set(unlocks.map(u => u.job_id));
+
     const body = await req.json().catch(() => ({}));
     let targetIndustries = (
       body.target_industries
