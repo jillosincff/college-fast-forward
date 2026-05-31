@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
         connectionsCount: foundInsiders.length,
         alumni: foundInsiders.map(a => ({
           name: a.name,
-          role_title: a.role_title || a.title || 'Professional',
+          role_title: a.role_title || 'Professional',
           company: a.company,
           linkedin_url: a.linkedin_url,
           persona: 'alumni'
