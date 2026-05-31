@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 
+import { useState, useEffect, useRef } from 'react';
+
 const dm = "'DM Sans', system-ui, sans-serif";
 
 const SOURCE_CATEGORY_CONFIG = {
@@ -77,6 +79,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const draftPanelRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
   // Members are passed directly from the carousel — already verified, no extra API call needed
   useEffect(() => {
@@ -127,6 +131,12 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     setGeneratedScript('');
     setIsCopied(false);
     setIsGenerating(true);
+    // Scroll draft panel into view inside the modal's scrollable container
+    setTimeout(() => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' });
+      }
+    }, 80);
     const firstName = contact.name?.split(' ')[0] || contact.name;
     const school = shortName || user?.school_code || 'UF';
     setTimeout(() => {
@@ -178,7 +188,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         </div>
 
         {/* Scrollable content */}
-        <div style={{ overflowY: 'auto', flex: 1, padding: '0 20px 20px' }}>
+        <div ref={scrollContainerRef} style={{ overflowY: 'auto', flex: 1, padding: '0 20px 20px' }}>
 
           {/* ── Zone 1: Tactical Overview ── */}
           <div style={{ paddingTop: 4, paddingBottom: 20, borderBottom: '1px solid #f1f5f9' }}>
@@ -377,7 +387,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
 
             {/* ── Inline CLiFF Draft Panel ── */}
             {draftContact && (
-              <div style={{ marginTop: 14, background: '#f5f3ff', border: '1.5px solid #c4b5fd', borderRadius: 16, padding: '14px 16px', animation: 'slideUp 0.3s ease' }}>
+              <div ref={draftPanelRef} style={{ marginTop: 14, background: '#f5f3ff', border: '1.5px solid #c4b5fd', borderRadius: 16, padding: '14px 16px', animation: 'slideUp 0.3s ease' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                   <div>
                     <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: '#7c3aed', letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 2px' }}>⚡ CLiFF Outreach Draft</p>
