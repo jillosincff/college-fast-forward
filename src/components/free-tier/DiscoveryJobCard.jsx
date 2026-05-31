@@ -32,17 +32,19 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
         </div>
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{lead.role}</p>
         
-        {/* Job Snippet with View More Hook */}
-        <div className="mt-4 text-xs text-gray-600 relative max-h-48 overflow-y-auto">
-          <p className="leading-relaxed">
+        {/* Job Description - Full Visible Text */}
+        <div className="mt-4 text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-200">
+          <p className="leading-relaxed text-sm">
             {lead.jobDescription || lead.description || "No description preview available."}
           </p>
-          <button 
-            onClick={() => setShowFullDesc(true)}
-            className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-1 block underline cursor-pointer"
-          >
-            Read Full Description
-          </button>
+          {lead.jobDescription && lead.jobDescription.length > 200 && (
+            <button 
+              onClick={() => setShowFullDesc(true)}
+              className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-2 block underline cursor-pointer"
+            >
+              Read Full Description →
+            </button>
+          )}
         </div>
         
         {/* Clean Passive Network Status Box */}
