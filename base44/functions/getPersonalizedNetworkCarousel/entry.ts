@@ -390,14 +390,19 @@ Deno.serve(async (req) => {
       return matchesSchool;
     });
     
+    console.log(`[getPersonalizedNetworkCarousel] Found ${schoolAlumni.length} total alumni/parents from ${userSchoolCode || userSchool}`);
+    
     // Build a map of company -> real alumni count from user's school
     const alumniByCompany = {};
     for (const company of companyNames) {
       const alumniAtCompany = schoolAlumni.filter(u => {
         const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase();
-        return userCompany.includes(company) || company.includes(userCompany);
+        const match = userCompany.includes(company) || company.includes(userCompany);
+        if (match) console.log(`[getPersonalizedNetworkCarousel] ✅ Match: ${u.full_name} at ${userCompany} for job company ${company}`);
+        return match;
       });
       alumniByCompany[company] = alumniAtCompany.length;
+      console.log(`[getPersonalizedNetworkCarousel] Company "${company}" has ${alumniAtCompany.length} alumni`);
     }
     
     const networkMembers = (allUsers || []).filter(u => {
