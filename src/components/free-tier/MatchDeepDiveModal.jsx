@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CliFFOutreachModal from './CliFFOutreachModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -72,6 +73,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [alumni, setAlumni] = useState([]);
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showOutreachModal, setShowOutreachModal] = useState(false);
+  const [outreachInitialData, setOutreachInitialData] = useState(null);
 
   // Members are passed directly from the carousel — already verified, no extra API call needed
   useEffect(() => {
@@ -115,6 +118,25 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
       onClose();
       window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(contact?.name || '')}`;
     }, 600);
+  };
+
+  const handleMessageViaCLiFF = (contact) => {
+    setOutreachInitialData({
+      name: contact.name,
+      title: contact.title,
+      company: match.company,
+    });
+    setShowOutreachModal(true);
+  };
+
+  const handleGenerateFromModal = (formData) => {
+    setShowOutreachModal(false);
+    const contact = selectedContact || contacts[0];
+    onGenerateOutreach && onGenerateOutreach({ match, contact, tab, formData });
+    setTimeout(() => {
+      onClose();
+      window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(formData.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(formData.name)}&tab=${tab}`;
+    }, 300);
   };
 
   return (
@@ -316,28 +338,27 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onClose();
-                            setTimeout(() => {
-                              onInitiateOutreach && onInitiateOutreach({
-                                contact: c,
-                                company: match.company,
-                                role: match.role,
-                                tab
-                              });
-                            }, 300);
+                            handleMessageViaCLiFF(c);
                           }}
                           style={{
                             display: 'inline-flex', alignItems: 'center', gap: 4,
-                            background: '#7c3aed', borderRadius: 6, padding: '3px 8px',
+                            background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: 8, padding: '4px 10px',
                             border: 'none', minHeight: 'auto', flexShrink: 0, cursor: 'pointer',
-                            fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#fff',
-                            transition: 'background 0.2s',
+                            fontFamily: dm, fontSize: 10, fontWeight: 800, color: '#fff',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 2px 8px rgba(124,58,237,0.25)',
                           }}
-                          onMouseEnter={(e) => e.target.style.background = '#6d28d9'}
-                          onMouseLeave={(e) => e.target.style.background = '#7c3aed'}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #1d4ed8, #6d28d9)';
+                            e.target.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = 'linear-gradient(135deg, #2563eb, #7c3aed)';
+                            e.target.style.transform = 'scale(1)';
+                          }}
                         >
-                          <span>📩</span>
-                          <span>Message via CLiFF</span>
+                          <span>⚡</span>
+                          <span>CLiFF Draft</span>
                         </button>
                       </div>
                     </div>
@@ -378,6 +399,14 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
           </div>
         </div>
       </div>
+
+      {/* CLiFF Outreach Modal */}
+      <CliFFOutreachModal
+        isOpen={showOutreachModal}
+        onClose={() => setShowOutreachModal(false)}
+        initialData={outreachInitialData}
+        onGenerate={handleGenerateFromModal}
+      />
     </div>
   );
 }
