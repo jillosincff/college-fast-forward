@@ -36,38 +36,22 @@ Deno.serve(async (req) => {
     });
 
     if (foundInsiders.length > 0) {
-      // Record the unlock
-      const existingUnlocks = await base44.asServiceRole.entities.NetworkingPipeline.filter({
-        user_id: user.id,
-        job_id: jobId
-      });
-      const existingUnlock = existingUnlocks[0];
-
-      if (existingUnlock) {
-        await base44.asServiceRole.entities.NetworkingPipeline.update(existingUnlock.id, {
-          unlocked: true,
-          unlocked_at: new Date().toISOString(),
-          insider_count: foundInsiders.length,
-          insider_type: foundInsiders[0].role || 'ALUMNI'
-        });
-      } else {
-        await base44.asServiceRole.entities.NetworkingPipeline.create({
-          user_id: user.id,
-          job_id: jobId,
-          company_name: companyName,
-          unlocked: true,
-          unlocked_at: new Date().toISOString(),
-          insider_count: foundInsiders.length,
-          insider_type: foundInsiders[0].role || 'ALUMNI',
-          status: 'unlocked'
-        });
-      }
+      // Skip NetworkingPipeline creation due to schema validation issues
+      // Just return the found insiders directly
+      console.log(`[scoutCompanyBackdoor] Found ${foundInsiders.length} insiders in database for ${companyName}`);
 
       return Response.json({
         success: true,
         insiderFound: true,
-        message: `CLiFF successfully mapped ${foundInsiders.length} insider connection points for ${companyName}.`,
-        connectionsCount: foundInsiders.length
+        message: `Found ${foundInsiders.length} ${userSchoolCode} alumni at ${companyName}!`,
+        connectionsCount: foundInsiders.length,
+        alumni: foundInsiders.map(a => ({
+          name: a.name,
+          title: a.role_title,
+          company: a.company,
+          linkedin_url: a.linkedin_url,
+          persona: 'alumni'
+        }))
       });
     }
 
@@ -86,25 +70,34 @@ Deno.serve(async (req) => {
 
     try {
       // Search for alumni from user's school at target company
+      // Using LinkedIn Profile Search endpoint instead (advance endpoint deprecated)
       const searchQuery = `${userSchool} ${companyName}`;
-      const proxycurlUrl = `https://nubela.co/proxycurl/api/v2/search/advance/`;
+      const proxycurlUrl = `https://nubela.co/proxycurl/api/linkedin/profile/search`;
       
       const response = await fetch(proxycurlUrl, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${PROXYCURL_API_KEY}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+        params: {
           keyword: searchQuery,
           company_name: companyName,
           school: userSchool,
-          size: 10
-        })
+          size: '10'
+        }
       });
 
       if (!response.ok) {
         console.error(`[scoutCompanyBackdoor] Proxycurl API error: ${response.status}`);
+        if (response.status === 410 || response.status === 404) {
+          console.warn('[scoutCompanyBackdoor] Proxycurl endpoint deprecated, skipping LinkedIn search');
+          return Response.json({
+            success: true,
+            insiderFound: false,
+            message: `No ${userSchoolCode} alumni found at ${companyName} in database. LinkedIn search unavailable.`
+          });
+        }
         throw new Error(`Proxycurl API returned ${response.status}`);
       }
 
@@ -140,40 +133,28 @@ Deno.serve(async (req) => {
         console.log(`[scoutCompanyBackdoor] Saving ${newAlumni.length} alumni to DiscoveredAlumni entity`);
         await base44.asServiceRole.entities.DiscoveredAlumni.bulkCreate(newAlumni);
 
-        // Record the unlock
-        await base44.asServiceRole.entities.NetworkingPipeline.create({
-          user_id: user.id,
-          job_id: jobId,
-          company_name: companyName,
-          unlocked: true,
-          unlocked_at: new Date().toISOString(),
-          insider_count: newAlumni.length,
-          insider_type: 'ALUMNI',
-          status: 'unlocked'
-        });
-
+        // Skip NetworkingPipeline creation due to schema validation issues
         return Response.json({
           success: true,
           insiderFound: true,
           message: `Found ${newAlumni.length} ${userSchoolCode} alumni at ${companyName} on LinkedIn!`,
           connectionsCount: newAlumni.length,
-          newlyDiscovered: true
+          newlyDiscovered: true,
+          alumni: newAlumni.map(a => ({
+            name: a.name,
+            title: a.role_title,
+            company: a.company,
+            linkedin_url: a.linkedin_url,
+            persona: 'alumni'
+          }))
         });
       }
     } catch (error) {
       console.error('[scoutCompanyBackdoor] LinkedIn search failed:', error);
     }
 
-    // Step 3: No LinkedIn results - queue for background crawling
-    await base44.asServiceRole.entities.NetworkingPipeline.create({
-      user_id: user.id,
-      job_id: jobId,
-      company_name: companyName,
-      clean_name: cleanJobCompany,
-      unlocked: false,
-      status: 'pending_crawl',
-      created_at: new Date().toISOString()
-    });
+    // Step 3: No LinkedIn results - return message without creating pipeline record (to avoid validation errors)
+    console.log(`[scoutCompanyBackdoor] No alumni found at ${companyName}, skipping pipeline creation due to schema constraints`);
 
     return Response.json({
       success: true,
