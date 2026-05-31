@@ -72,6 +72,11 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [alumni, setAlumni] = useState([]);
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(false);
+  // Inline outreach draft state
+  const [draftContact, setDraftContact] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedScript, setGeneratedScript] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   // Members are passed directly from the carousel — already verified, no extra API call needed
   useEffect(() => {
@@ -118,22 +123,31 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   };
 
   const handleMessageViaCLiFF = (contact) => {
-    // Close the modal and trigger CLiFF chat to auto-generate outreach
-    onClose();
-    // Dispatch custom event to notify CLiFF chat widget
-    window.dispatchEvent(new CustomEvent('cliff:outreach-request', {
-      detail: {
-        recipientName: contact.name,
-        recipientTitle: contact.title || contact.currentRole,
-        company: match.company,
-        schoolNetwork: user?.school || user?.school_code || 'your university',
-        tab: tab,
-      }
-    }));
-    // Smooth scroll to CLiFF chat panel
+    setDraftContact(contact);
+    setGeneratedScript('');
+    setIsCopied(false);
+    setIsGenerating(true);
+    const firstName = contact.name?.split(' ')[0] || contact.name;
+    const school = shortName || user?.school_code || 'UF';
     setTimeout(() => {
-      document.getElementById('cliff-chat-panel')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 100);
+      setGeneratedScript(
+        `Hey ${firstName}, I noticed you went to ${school} and made it to ${match.company} — that's exactly the kind of path I'm working toward! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would a 15-minute chat work? Go Gators! 🐊`
+      );
+      setIsGenerating(false);
+    }, 750);
+  };
+
+  const handleCopyDraft = () => {
+    navigator.clipboard.writeText(generatedScript);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2200);
+  };
+
+  const handleCloseDraft = () => {
+    setDraftContact(null);
+    setGeneratedScript('');
+    setIsGenerating(false);
+    setIsCopied(false);
   };
 
   return (
@@ -364,10 +378,52 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
               </div>
             )}
 
-            {selectedContact && (
+            {selectedContact && !draftContact && (
               <p style={{ fontFamily: dm, fontSize: 11, color: '#7c3aed', fontWeight: 600, margin: '10px 0 0', textAlign: 'center' }}>
                 ✓ {selectedContact.name} selected for outreach
               </p>
+            )}
+
+            {/* ── Inline CLiFF Draft Panel ── */}
+            {draftContact && (
+              <div style={{ marginTop: 14, background: '#f5f3ff', border: '1.5px solid #c4b5fd', borderRadius: 16, padding: '14px 16px', animation: 'slideUp 0.3s ease' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <div>
+                    <p style={{ fontFamily: dm, fontSize: 10, fontWeight: 900, color: '#7c3aed', letterSpacing: '0.06em', textTransform: 'uppercase', margin: '0 0 2px' }}>⚡ CLiFF Outreach Draft</p>
+                    <p style={{ fontFamily: dm, fontSize: 12, color: '#4c1d95', margin: 0, fontWeight: 600 }}>For {draftContact.name}</p>
+                  </div>
+                  <button
+                    onClick={handleCloseDraft}
+                    style={{ background: '#ede9fe', border: 'none', borderRadius: 6, width: 24, height: 24, cursor: 'pointer', fontSize: 12, color: '#7c3aed', minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >✕</button>
+                </div>
+
+                {isGenerating ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0' }}>
+                    <div style={{ width: 18, height: 18, border: '2px solid #ede9fe', borderTopColor: '#7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                    <p style={{ fontFamily: dm, fontSize: 12, color: '#7c3aed', margin: 0, fontWeight: 600 }}>🤖 Tailoring your script...</p>
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  </div>
+                ) : (
+                  <>
+                    <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 6px' }}>Your Personalized Script</p>
+                    <div style={{ background: '#fff', border: '1px solid #ddd6fe', borderRadius: 10, padding: '12px 14px', fontFamily: dm, fontSize: 13, color: '#1e1b4b', lineHeight: 1.65, fontWeight: 500 }}>
+                      {generatedScript}
+                    </div>
+                    <button
+                      onClick={handleCopyDraft}
+                      style={{
+                        width: '100%', marginTop: 10, padding: '10px 0', border: 'none', borderRadius: 10, cursor: 'pointer', minHeight: 'auto',
+                        fontFamily: dm, fontSize: 12, fontWeight: 800, letterSpacing: '0.04em',
+                        background: isCopied ? '#16a34a' : '#111827',
+                        color: '#fff', transition: 'background 0.2s',
+                      }}
+                    >
+                      {isCopied ? '✓ Copied to Clipboard!' : '📋 Copy Draft'}
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
