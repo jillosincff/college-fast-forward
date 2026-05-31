@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
+import { base44 } from '@/api/base44Client';
 import OpportunityDrawer from './OpportunityDrawer';
 
 const dm = "'DM Sans', system-ui, sans-serif";
@@ -222,6 +223,61 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     'INTERVIEWING': [],
     'OFFER 🎉': [],
   });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load user's actual pipeline data from OpportunityApplication entity
+  useEffect(() => {
+    const loadPipeline = async () => {
+      try {
+        const applications = await base44.entities.OpportunityApplication.filter({
+          applicant_id: user?.id,
+        }, '-created_date', 50);
+
+        const newCards = {
+          'OPPORTUNITIES': [],
+          'APPLIED': [],
+          'INTERVIEWING': [],
+          'OFFER 🎉': [],
+        };
+
+        (applications || []).forEach(app => {
+          const card = {
+            id: app.id,
+            company: app.opportunity_company || 'Unknown Company',
+            role: app.opportunity_title || 'Unknown Role',
+            logo: '🏢',
+            status: app.status || 'applied',
+            appliedDate: app.created_date,
+            lastActivityDate: app.created_date,
+            source: 'User Added',
+            recruiter: '—',
+            posted: '—',
+          };
+
+          // Map status to column
+          if (app.status === 'applied' || app.status === 'in_review') {
+            newCards['APPLIED'].push(card);
+          } else if (app.status === 'interview') {
+            newCards['INTERVIEWING'].push(card);
+          } else if (app.status === 'closed') {
+            newCards['OFFER 🎉'].push(card);
+          } else {
+            newCards['OPPORTUNITIES'].push(card);
+          }
+        });
+
+        setCards(newCards);
+      } catch (error) {
+        console.error('Failed to load pipeline:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      loadPipeline();
+    }
+  }, [user?.id, signalAdditions]);
 
   // Merge new signal additions into OPPORTUNITIES (deduplicate by company+role)
   const prevAdditionsRef = React.useRef([]);
@@ -265,11 +321,26 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     }, 100);
   };
 
-  const handleDeleteCard = (col, cardIndex) => {
-    setCards(prev => ({
-      ...prev,
-      [col]: prev[col].filter((_, i) => i !== cardIndex),
-    }));
+  const handleDeleteCard = async (col, cardIndex) => {
+    const cardToDelete = cards[col][cardIndex];
+    if (!cardToDelete?.id) {
+      setCards(prev => ({
+        ...prev,
+        [col]: prev[col].filter((_, i) => i !== cardIndex),
+      }));
+      return;
+    }
+
+    try {
+      await base44.entities.OpportunityApplication.delete(cardToDelete.id);
+      setCards(prev => ({
+        ...prev,
+        [col]: prev[col].filter((_, i) => i !== cardIndex),
+      }));
+    } catch (error) {
+      console.error('Failed to delete from pipeline:', error);
+      alert('❌ Failed to remove from pipeline');
+    }
   };
 
   const handleApplied = (lead) => {

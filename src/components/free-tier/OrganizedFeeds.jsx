@@ -26,17 +26,21 @@ export default function OrganizedFeeds({ user }) {
 
   const handleAddToPipeline = async (lead) => {
     try {
-      await base44.entities.Opportunity.create({
+      // Create an OpportunityApplication to track this in the pipeline
+      await base44.entities.OpportunityApplication.create({
+        opportunity_id: `external_${Date.now()}`,
+        applicant_id: user?.id || 'unknown',
+        method: 'external',
+        note: `Added from feed: ${lead.role || lead.title} at ${lead.company || lead.companyName}`,
+        opportunity_title: lead.role || lead.title,
+        opportunity_company: lead.company || lead.companyName,
         opportunity_type: 'job',
-        title: lead.role || lead.title,
-        org_name: lead.company || lead.companyName,
-        description: lead.jobDescription || lead.description,
-        status: 'active',
-        created_by_role: user?.persona || 'student',
+        status: 'applied',
       });
-      alert('✅ Added to your pipeline!');
+      alert('✅ Added to your pipeline! Check the Opportunities column.');
     } catch (error) {
       console.error('Failed to add to pipeline:', error);
+      alert('❌ Failed to add to pipeline. Please try again.');
     }
   };
 
