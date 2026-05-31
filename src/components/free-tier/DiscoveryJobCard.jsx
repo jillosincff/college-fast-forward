@@ -4,6 +4,10 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
   const [isScouting, setIsScouting] = useState(false);
   const [scoutDeployed, setScoutDeployed] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
+  
+  // Debug logging
+  console.log('[DiscoveryJobCard] lead data:', lead);
+  console.log('[DiscoveryJobCard] jobDescription:', lead?.jobDescription);
 
   const handleScoutDeployment = async () => {
     setIsScouting(true);

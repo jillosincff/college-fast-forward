@@ -8,6 +8,10 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const role = lead?.role || lead?.title || 'Open Role';
   const snippet = lead?.jobDescription || lead?.descriptionSnippet || lead?.description || '';
   const logoUrl = lead?.logoUrl || lead?.logo_url || null;
+  
+  // Debug logging
+  console.log('[ColdJobCard] lead data:', lead);
+  console.log('[ColdJobCard] snippet:', snippet);
 
   const handleScout = async () => {
     setIsScouting(true);
