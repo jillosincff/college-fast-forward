@@ -6,7 +6,7 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
 
   const company = lead?.company || lead?.companyName || 'Unknown Company';
   const role = lead?.role || lead?.title || 'Open Role';
-  const snippet = lead?.jobDescription || lead?.descriptionSnippet || lead?.description || '';
+  const snippet = lead?.jobDescription || lead?.description || '';
   const logoUrl = lead?.logoUrl || lead?.logo_url || null;
   
   // Debug logging
