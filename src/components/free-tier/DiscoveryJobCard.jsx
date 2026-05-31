@@ -21,7 +21,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
   };
 
   return (
-    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between min-h-[380px] hover:border-gray-300 transition-all relative">
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between min-h-[380px] hover:border-gray-300 transition-all relative" data-component="DiscoveryJobCard-v2">
       <div>
         {/* Card Header */}
         <div className="flex justify-between items-start">
