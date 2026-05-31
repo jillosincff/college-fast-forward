@@ -5,8 +5,12 @@ import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
+const INITIAL_SHOW = 6;
+
 export default function CliffPrioritizedFeed({ user }) {
   const [selectedLead, setSelectedLead] = useState(null);
+  const [showAllInsiders, setShowAllInsiders] = useState(false);
+  const [showAllDiscoveries, setShowAllDiscoveries] = useState(false);
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
 
@@ -94,11 +98,22 @@ export default function CliffPrioritizedFeed({ user }) {
             <div className="h-3 bg-gray-200 rounded w-1/2"></div>
           </div>
         ) : priorityInsiders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {priorityInsiders.map((lead, idx) => (
-              <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {(showAllInsiders ? priorityInsiders : priorityInsiders.slice(0, INITIAL_SHOW)).map((lead, idx) => (
+                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
+              ))}
+            </div>
+            {priorityInsiders.length > INITIAL_SHOW && (
+              <button
+                onClick={() => setShowAllInsiders(v => !v)}
+                className="w-full mt-2 py-2.5 text-sm font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition-colors"
+                style={{ minHeight: 'auto', cursor: 'pointer' }}
+              >
+                {showAllInsiders ? `▲ Show fewer` : `▼ Show ${priorityInsiders.length - INITIAL_SHOW} more insider tracks`}
+              </button>
+            )}
+          </>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-2xl p-8 bg-gray-50/50 text-center">
             <p className="text-sm text-gray-600 font-semibold">
@@ -133,11 +148,22 @@ export default function CliffPrioritizedFeed({ user }) {
             ))}
           </div>
         ) : targetedDiscoveries.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {targetedDiscoveries.map((lead, idx) => (
-              <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {(showAllDiscoveries ? targetedDiscoveries : targetedDiscoveries.slice(0, INITIAL_SHOW)).map((lead, idx) => (
+                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
+              ))}
+            </div>
+            {targetedDiscoveries.length > INITIAL_SHOW && (
+              <button
+                onClick={() => setShowAllDiscoveries(v => !v)}
+                className="w-full mt-2 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors"
+                style={{ minHeight: 'auto', cursor: 'pointer' }}
+              >
+                {showAllDiscoveries ? `▲ Show fewer` : `▼ Show ${targetedDiscoveries.length - INITIAL_SHOW} more discoveries`}
+              </button>
+            )}
+          </>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
             No matching industry vacancies found today. Adjust your target positions to broaden search.

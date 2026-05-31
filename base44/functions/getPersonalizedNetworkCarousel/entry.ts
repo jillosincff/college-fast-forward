@@ -561,7 +561,7 @@ Deno.serve(async (req) => {
           leadTier: 'insider',
         });
 
-        if (priorityInsiders.length >= 6) continue;
+        if (priorityInsiders.length >= 12) continue;
       }
       // ☀️ PRIORITY 2: Targeted Hidden Lead — matches target role/industry, no insider yet
       else {
@@ -608,8 +608,8 @@ Deno.serve(async (req) => {
     console.log(`[getPersonalizedNetworkCarousel] Sample insider:`, priorityInsiders[0]?.company, priorityInsiders[0]?.alumniCount, priorityInsiders[0]?.jobDescription?.substring(0, 50));
     return Response.json({
       success: true,
-      priorityInsiders: priorityInsiders.slice(0, 6),
-      targetedDiscoveries: targetedDiscoveries.slice(0, 12),
+      priorityInsiders: priorityInsiders.slice(0, 12),
+      targetedDiscoveries: targetedDiscoveries.slice(0, 20),
       wasFiltered: targetIndustries.length > 0,
       targetIndustries,
     });
