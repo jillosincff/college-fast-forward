@@ -8,7 +8,6 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
   const company = lead?.company || lead?.companyName || 'Unknown Company';
   const role = lead?.role || lead?.title || 'Open Role';
   const snippet = lead?.jobDescription || lead?.descriptionSnippet || lead?.description || '';
-  const fullDesc = lead?.fullDescription || lead?.jobDescription || lead?.description || '';
   const logoUrl = lead?.logoUrl || lead?.logo_url || null;
 
   const handleScout = async () => {
@@ -110,7 +109,7 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
             </div>
             
             <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-4 leading-relaxed whitespace-pre-line font-sans">
-              {fullDesc}
+              {lead?.jobDescription || lead?.description || 'No detailed description available.'}
             </div>
 
             <div className="border-t border-gray-100 pt-3 flex justify-end">
