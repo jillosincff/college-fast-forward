@@ -149,9 +149,14 @@ export default function OrganizedFeeds({ user }) {
       {selectedLead && (
         <MatchDeepDiveModal
           match={selectedLead}
+          shortName="UF"
           onClose={() => setSelectedLead(null)}
           onGenerateOutreach={(data) => {
             console.log('Generating outreach:', data);
+          }}
+          onInitiateOutreach={({ contact, company, role, tab }) => {
+            // Navigate to OutreachDrafts with pre-populated contact details
+            window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}&contact=${encodeURIComponent(contact.name)}&tab=${tab}`;
           }}
           user={user}
         />
