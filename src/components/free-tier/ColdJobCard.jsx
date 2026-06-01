@@ -127,12 +127,15 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect, onDismiss
             </div>
           </div>
         ) : (
-          <div className="mt-5 bg-red-50 rounded-xl p-3 border border-red-200 flex items-center gap-2.5">
-            <span className="text-base">🔥</span>
+          <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
+            <span className="text-base">🤖</span>
             <div>
-              <p className="text-xs font-bold text-red-900">Target Industry Signal</p>
-              <p className="text-[10px] text-red-700 mt-0.5">
-                Verified match for your specific target career track.
+              <p className="text-xs font-bold text-gray-800">
+                {(lead.alumniCount || 0) > 0
+                  ? `CLiFF found ${lead.alumniCount} alumni who work here`
+                  : (lead.parentCount || 0) > 0
+                  ? `CLiFF found ${lead.parentCount} parent connections here`
+                  : `CLiFF is scanning for insiders at ${company}`}
               </p>
             </div>
           </div>

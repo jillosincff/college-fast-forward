@@ -42,17 +42,16 @@ export default function OrganizedFeeds({ user }) {
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
-  const totalCount = priorityInsiders.length + targetedDiscoveries.length;
 
-  // Real network stats from getVerifiedNetworkCompanies (school-wide, not limited to job pool)
-  const networkCompanies = networkData?.data?.companies || networkData?.companies || [];
-  const totalAlumni = networkCompanies.reduce((s, c) => s + (c.alumniCount || 0), 0);
-  const totalParents = networkCompanies.reduce((s, c) => s + (c.parentCount || 0), 0);
-  const networkStats = {
-    targetCompanies: networkCompanies.length,
-    verifiedContacts: totalAlumni + totalParents,
-    warmOpenings: targetedDiscoveries.length,
-  };
+  // Single source of truth — ALL active job cards in the feed
+  const targetOpportunities = [...priorityInsiders, ...targetedDiscoveries];
+  const totalCount = targetOpportunities.length;
+
+  // Derive all stats from targetOpportunities
+  const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
+  const totalNetworkCount = targetOpportunities.reduce(
+    (sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0
+  );
 
   const handleAddToPipeline = async (lead) => {
     try {
@@ -87,7 +86,8 @@ export default function OrganizedFeeds({ user }) {
             <span className="text-2xl">🚀</span>
             <h2 className="text-xl font-bold text-gray-900 tracking-tight">CLiFF's Live Target Matches</h2>
           </div>
-          <p className="text-xs text-gray-500 mt-1">Your personalized feed of{' '}
+          <p className="text-xs text-gray-500 mt-1">
+            Your personalized feed of{' '}
             <span className="font-bold text-purple-600">{isLoading ? '...' : totalCount}</span> hand-picked opportunities
           </p>
         </div>
@@ -95,29 +95,35 @@ export default function OrganizedFeeds({ user }) {
         {/* Network Intelligence Panel - Only show when priority tracks is 0 */}
         {priorityInsiders.length === 0 && !isLoading && (
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-              <span className="text-[10px] font-bold text-purple-700 uppercase tracking-wider flex items-center gap-1.5">
-                🔮 CLiFF Network Intelligence Active
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2.5 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
+                🔵 Synced: {schoolAbbr} Alumni &amp; Parent Grid
               </span>
-              <span className="text-[10px] text-gray-400 font-medium">Updated live</span>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('cff:open-network-modal'))}
+                className="text-[11px] text-blue-100 font-semibold hover:text-white transition"
+                style={{ minHeight: 'auto', minWidth: 'auto' }}
+              >
+                {uniqueCompaniesCount} Companies · {totalNetworkCount} Verified Contacts — Tap to view →
+              </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
               <div className="p-4 text-center md:text-left">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Ecosystem</p>
-                <p className="text-lg font-black text-gray-800 mt-1">{networkStats.targetCompanies} Companies</p>
+                <p className="text-lg font-black text-gray-800 mt-1">{uniqueCompaniesCount} Companies</p>
                 <p className="text-[11px] text-gray-500 mt-0.5">Under active automation tracking</p>
               </div>
               
               <div className="p-4 text-center md:text-left">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Leverage Points</p>
-                <p className="text-lg font-black text-gray-800 mt-1">{networkStats.verifiedContacts} Verified Insiders</p>
+                <p className="text-lg font-black text-gray-800 mt-1">{totalNetworkCount} Verified Insiders</p>
                 <p className="text-[11px] text-purple-600 font-semibold mt-0.5">{schoolEmoji} {schoolAbbr} Network connections ready</p>
               </div>
 
               <div className="p-4 text-center md:text-left">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Opportunity Pipeline</p>
-                <p className="text-lg font-black text-orange-600 mt-1">{networkStats.warmOpenings} Fresh Opportunities</p>
+                <p className="text-lg font-black text-orange-600 mt-1">{totalCount} Fresh Opportunities</p>
                 <p className="text-[11px] text-gray-500 mt-0.5">High-match roles found on company websites</p>
               </div>
             </div>

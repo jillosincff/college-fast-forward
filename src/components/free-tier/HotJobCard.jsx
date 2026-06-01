@@ -84,13 +84,16 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr
             </div>
           </div>
         ) : (
-          // TIER 3: Industry signal
-          <div className="mt-4 bg-red-50 rounded-xl p-3 border border-red-200 flex items-center gap-2.5">
-            <span className="text-xl">🔥</span>
+          // TIER 3: CLiFF dynamic count
+          <div className="mt-4 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
+            <span className="text-xl">🤖</span>
             <div>
-              <p className="text-xs font-bold text-red-900">Target Industry Signal</p>
-              <p className="text-[10px] text-red-700 mt-0.5">
-                Verified match for your specific target career track.
+              <p className="text-xs font-bold text-gray-800">
+                {alumniCount > 0
+                  ? `CLiFF found ${alumniCount} alumni who work here`
+                  : parentCount > 0
+                  ? `CLiFF found ${parentCount} parent connections here`
+                  : `CLiFF is scanning for insiders at ${company}`}
               </p>
             </div>
           </div>
