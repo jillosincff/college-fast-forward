@@ -72,10 +72,10 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr
         {insiderCount > 0 ? (
           // TIER 1: Direct school match
           <div className="mt-4 bg-orange-50 rounded-xl p-3 border border-orange-200 flex items-center gap-2.5">
-            <span className="text-xl">{mascot}</span>
+            <span className="text-xl">🔥</span>
             <div>
               <p className="text-xs font-bold text-orange-900">
-                {mascot} {insiderCount} {school} Insider{insiderCount !== 1 ? 's' : ''} Ready
+                {insiderCount} {school} Insider{insiderCount !== 1 ? 's' : ''} Ready
               </p>
               <p className="text-[10px] text-orange-700 mt-0.5">
                 Alumni &amp; parents verified at {company}.

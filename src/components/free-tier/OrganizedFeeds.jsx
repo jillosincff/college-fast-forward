@@ -98,14 +98,14 @@ export default function OrganizedFeeds({ user }) {
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2.5 flex items-center justify-between">
               <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
-                🔵 Synced: {schoolAbbr} Alumni &amp; Parent Grid
+                🔵 Synced: University of Florida Alumni &amp; Parent Network
               </span>
               <button
                 onClick={() => window.dispatchEvent(new CustomEvent('cff:open-network-modal'))}
                 className="text-[11px] text-blue-100 font-semibold hover:text-white transition"
                 style={{ minHeight: 'auto', minWidth: 'auto' }}
               >
-                {uniqueCompaniesCount} Companies · {totalNetworkCount} Verified Contacts — Tap to view →
+                Tap to view →
               </button>
             </div>
 
