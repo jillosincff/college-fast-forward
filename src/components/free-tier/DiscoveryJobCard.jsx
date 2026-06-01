@@ -12,7 +12,14 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
   const school = schoolAbbr || lead.schoolAbbr || 'UF';
   const mascot = MASCOT[school] || '🎓';
   const insiderCount = (lead.alumniCount || 0) + (lead.parentCount || 0);
-  
+  const companyTier = lead?.companyTier || 1;
+  const TIER_BADGE = {
+    1: { label: 'Enterprise', color: 'bg-slate-100 text-slate-600' },
+    2: { label: 'Mid-Market', color: 'bg-blue-50 text-blue-600' },
+    3: { label: '🚀 Startup', color: 'bg-purple-50 text-purple-700' },
+  };
+  const tierBadge = TIER_BADGE[companyTier] || TIER_BADGE[1];
+
 
 
   const handleScoutDeployment = async () => {
@@ -37,8 +44,8 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 leading-tight truncate max-w-[70%]">{lead.company}</h4>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-50 text-green-600 uppercase tracking-wide">
-              New
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>
+              {tierBadge.label}
             </span>
             <button
               onClick={() => setDismissed(true)}
