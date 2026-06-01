@@ -175,6 +175,15 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     navigator.clipboard.writeText(generatedScript);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2200);
+    // Fire event so pipeline can auto-progress this job to "Applied"
+    window.dispatchEvent(new CustomEvent('cliff:outreach-copied', {
+      detail: {
+        company: match.company,
+        role: match.role,
+        contactName: draftContact?.name || '',
+        contactFirstName: draftContact?.name?.split(' ')[0] || '',
+      }
+    }));
   };
 
   const handleCloseDraft = () => {

@@ -199,6 +199,19 @@ function SchoolPrideBanner({ schoolName, alumniCount }) {
 }
 
 function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobile }) {
+  // Show "💬 Contacted" badge if the job has an outreach activity tag
+  const contactedBadge = job.outreachContact ? (
+    <div style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      background: '#eff6ff', border: '1px solid #bfdbfe',
+      borderRadius: 6, padding: '3px 8px', marginBottom: 6,
+    }}>
+      <span style={{ fontSize: 10 }}>💬</span>
+      <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#1d4ed8', margin: 0 }}>
+        Contacted: {job.outreachContact}
+      </p>
+    </div>
+  ) : null;
   const [showActions, setShowActions] = useState(false);
   const [pulseActive, setPulseActive] = useState(isPulsing || false);
 
@@ -290,6 +303,9 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         </button>
       </div>
       
+      {/* Outreach activity badge */}
+      {contactedBadge}
+
       {/* Network & Sync Indicators - Wrap properly on mobile */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: isMobile ? 6 : 8 }}>
         <div style={{
@@ -416,6 +432,50 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
   useEffect(() => {
     if (!isMobile) setShowSidebar(false);
   }, [isMobile]);
+
+  // Auto-progress pipeline when user copies an outreach draft from the modal
+  useEffect(() => {
+    const handleOutreachCopied = (e) => {
+      const { company, role, contactFirstName } = e.detail || {};
+      if (!company) return;
+
+      setJobs(prev => {
+        // Check if a matching job already exists
+        const exists = prev.find(j => j.company === company);
+        if (exists) {
+          // Move it to "applied" and tag with outreach contact
+          return prev.map(j =>
+            j.company === company
+              ? {
+                  ...j,
+                  stage: 'applied',
+                  outreachContact: `${contactFirstName} (Alumni)`,
+                  appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                }
+              : j
+          );
+        } else {
+          // Auto-create a new pipeline card in "applied"
+          const newJob = {
+            id: Date.now(),
+            title: role || 'Role',
+            company,
+            stage: 'applied',
+            location: '',
+            appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            resumeVersion: null,
+            outreachContact: `${contactFirstName} (Alumni)`,
+          };
+          return [...prev, newJob];
+        }
+      });
+      // Switch to the applied tab so user sees the card
+      setActiveTab('applied');
+    };
+
+    window.addEventListener('cliff:outreach-copied', handleOutreachCopied);
+    return () => window.removeEventListener('cliff:outreach-copied', handleOutreachCopied);
+  }, []);
 
   const totalJobs = jobs.length;
   const atLimit = totalJobs >= FREE_LIMIT;
