@@ -49,12 +49,13 @@ export default function OrganizedFeeds({ user }) {
   // No goals set — show a nudge inline (not a blocking full-page empty state)
   const noGoals = !target_industries?.length && !effectiveRole;
 
-  // Network stats — computed live from real feed data
-  const totalVerifiedInsiders = priorityInsiders.reduce(
+  // Network stats — computed live from real feed data (all leads, not just insiders)
+  const allLeads = [...priorityInsiders, ...targetedDiscoveries];
+  const totalVerifiedInsiders = allLeads.reduce(
     (sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0
   );
   const networkStats = {
-    targetCompanies: priorityInsiders.length + targetedDiscoveries.length,
+    targetCompanies: allLeads.length,
     verifiedContacts: totalVerifiedInsiders,
     warmOpenings: targetedDiscoveries.length,
   };
