@@ -8,6 +8,11 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
+  const handleDismiss = () => {
+    setDismissed(true);
+    onDismiss?.();
+  };
+
   if (dismissed) return null;
   const school = schoolAbbr || lead.schoolAbbr || 'UF';
   const mascot = MASCOT[school] || '🎓';
@@ -48,7 +53,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
               {tierBadge.label}
             </span>
             <button
-              onClick={() => setDismissed(true)}
+              onClick={handleDismiss}
               className="text-gray-300 hover:text-gray-500 transition text-sm leading-none"
               title="Not interested"
               style={{ minHeight: 'auto', minWidth: 'auto' }}

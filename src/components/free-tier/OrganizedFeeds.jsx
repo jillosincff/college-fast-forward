@@ -47,11 +47,12 @@ export default function OrganizedFeeds({ user }) {
   const targetOpportunities = [...priorityInsiders, ...targetedDiscoveries];
   const totalCount = targetOpportunities.length;
 
-  // Derive all stats from targetOpportunities
+  // Derive stats: companies from live feed, verified insiders from network data (real members)
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
-  const totalNetworkCount = targetOpportunities.reduce(
-    (sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0
-  );
+  // Use real verified network member count from getVerifiedNetworkCompanies (not feed-derived)
+  const networkPayload = networkData?.data || networkData;
+  const verifiedNetworkCompanies = Array.isArray(networkPayload?.companies) ? networkPayload.companies : [];
+  const totalNetworkCount = verifiedNetworkCompanies.reduce((sum, c) => sum + (c.alumniCount || 0) + (c.parentCount || 0), 0);
 
   const handleAddToPipeline = async (lead) => {
     try {

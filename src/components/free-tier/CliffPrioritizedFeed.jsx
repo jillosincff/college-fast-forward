@@ -12,6 +12,12 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const [selectedLead, setSelectedLead] = useState(null);
   const [showAllInsiders, setShowAllInsiders] = useState(false);
   const [showAllDiscoveries, setShowAllDiscoveries] = useState(false);
+  const [dismissedKeys, setDismissedKeys] = useState(new Set());
+
+  const handleDismiss = (lead) => {
+    const key = `${lead.company}||${lead.role}`;
+    setDismissedKeys(prev => new Set([...prev, key]));
+  };
   const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
@@ -25,8 +31,12 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   });
 
   const payload = feedsData?.data || feedsData;
-  const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
-  const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
+  const allPriorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
+  const allTargetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
+
+  // Filter out dismissed leads so counts stay accurate
+  const priorityInsiders    = allPriorityInsiders.filter(l => !dismissedKeys.has(`${l.company}||${l.role}`));
+  const targetedDiscoveries = allTargetedDiscoveries.filter(l => !dismissedKeys.has(`${l.company}||${l.role}`));
   const totalCount = priorityInsiders.length + targetedDiscoveries.length;
 
   const handleAddToPipeline = async (lead) => {
@@ -103,7 +113,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {(showAllInsiders ? priorityInsiders : priorityInsiders.slice(0, INITIAL_SHOW)).map((lead, idx) => (
-                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} />
+                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} onDismiss={() => handleDismiss(lead)} />
               ))}
             </div>
             {priorityInsiders.length > INITIAL_SHOW && (
@@ -158,7 +168,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
             {/* Desktop: grid */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {(showAllDiscoveries ? targetedDiscoveries : targetedDiscoveries.slice(0, INITIAL_SHOW)).map((lead, idx) => (
-                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} />
+                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} onDismiss={() => handleDismiss(lead)} />
               ))}
             </div>
             {targetedDiscoveries.length > INITIAL_SHOW && (
