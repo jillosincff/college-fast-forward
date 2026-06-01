@@ -211,7 +211,8 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   }, []);
 
   useEffect(() => {
-    getVerifiedNetworkCompanies({})
+    const industries = user?.career_goals?.target_industries || [];
+    getVerifiedNetworkCompanies({ target_industries: industries })
       .then(res => {
         const companies = res?.data?.companies || [];
         const totalAlumni = companies.reduce((s, c) => s + c.alumniCount, 0);
@@ -220,7 +221,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         setWarmCompanyNames(companies.map(c => c.company));
       })
       .catch(() => {});
-  }, []);
+  }, [user?.career_goals?.target_industries]);
 
   const handleBackdoorClick = (job) => {
     setSelectedJob(job);
