@@ -1,9 +1,14 @@
 import { useState } from 'react';
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
+const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
+
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr }) {
   const [isScouting, setIsScouting] = useState(false);
   const [scoutDeployed, setScoutDeployed] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
+  const school = schoolAbbr || lead.schoolAbbr || 'UF';
+  const mascot = MASCOT[school] || '🎓';
+  const insiderCount = (lead.alumniCount || 0) + (lead.parentCount || 0);
   
 
 
@@ -50,20 +55,34 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect }) {
           )}
         </div>
         
-        {/* Clean Passive Network Status Box */}
-        <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center gap-2.5">
-          <span className="text-base">{scoutDeployed ? '✅' : '🔒'}</span>
-          <div>
-            <p className="text-xs font-bold text-gray-800">
-              {scoutDeployed ? 'Insider Search Active' : 'Direct Backdoor Unmapped'}
-            </p>
-            <p className="text-[10px] text-gray-500 leading-normal mt-0.5">
-              {scoutDeployed 
-                ? 'CLiFF is actively querying your university network for a live path.'
-                : 'Matches your profile. Click below to look for a verified connection.'}
-            </p>
+        {/* Insider count — shown upfront before any button interaction */}
+        {insiderCount > 0 ? (
+          <div className="mt-5 bg-orange-50 rounded-xl p-3 border border-orange-200 flex items-center gap-2.5">
+            <span className="text-base">{mascot}</span>
+            <div>
+              <p className="text-xs font-bold text-orange-900">
+                {mascot} {insiderCount} {school} Insider{insiderCount !== 1 ? 's' : ''} Ready
+              </p>
+              <p className="text-[10px] text-orange-700 mt-0.5">
+                Alumni &amp; parents verified at {lead.company}.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center gap-2.5">
+            <span className="text-base">🔍</span>
+            <div>
+              <p className="text-xs font-bold text-gray-800">
+                {scoutDeployed ? 'Scan Deployed — Monitoring' : 'Network Scan Active'}
+              </p>
+              <p className="text-[10px] text-gray-500 leading-normal mt-0.5">
+                {scoutDeployed
+                  ? 'CLiFF is actively querying your university network for a live path.'
+                  : 'No direct connections yet. Tap to expand cold outreach support.'}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Card Action Footer */}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function HotJobCard({ lead, onAddToPipeline, onSelect }) {
+export default function HotJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr }) {
   const [imgError, setImgError] = useState(false);
   const company = lead.company || lead.companyName || '';
   const title = lead.role || lead.title || '';
@@ -9,7 +9,13 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect }) {
   const snippet = lead.jobDescription || lead.descriptionSnippet || lead.description || '';
   const alumniCount = lead.alumniCount ?? 0;
   const parentCount = lead.parentCount ?? 0;
-  const insiderBadge = lead.insiderBadge || (alumniCount > 0 ? `${alumniCount} Alumni Work Here` : `${parentCount} Parent Insider`);
+  const insiderCount = alumniCount + parentCount;
+  const school = schoolAbbr || lead.schoolAbbr || 'UF';
+
+  // School mascot emoji map
+  const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
+  const mascot = MASCOT[school] || '🎓';
+
   const isAlumniLed = lead.ctaType === 'message_alumni' || alumniCount > 0;
 
   return (
@@ -52,15 +58,30 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect }) {
           </div>
         )}
 
-        <div className="mt-4 bg-orange-50/50 rounded-xl p-3 border border-orange-100/50 flex items-center gap-2">
-          <span className="text-lg">{isAlumniLed ? '🎓' : '💡'}</span>
-          <div>
-            <p className="text-xs font-bold text-orange-900">{insiderBadge}</p>
-            <p className="text-[10px] text-orange-700">
-              {isAlumniLed ? 'Skip the portal — get a direct alumni intro' : 'Parent advisor has inside knowledge here'}
-            </p>
+        {/* Insider Count Block — shown before any interaction */}
+        {insiderCount > 0 ? (
+          <div className="mt-4 bg-orange-50 rounded-xl p-3 border border-orange-200 flex items-center gap-2.5">
+            <span className="text-xl">{mascot}</span>
+            <div>
+              <p className="text-xs font-bold text-orange-900">
+                {mascot} {insiderCount} {school} Insider{insiderCount !== 1 ? 's' : ''} Ready
+              </p>
+              <p className="text-[10px] text-orange-700 mt-0.5">
+                Alumni &amp; parents verified at {company}.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="mt-4 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
+            <span className="text-xl">🔍</span>
+            <div>
+              <p className="text-xs font-bold text-gray-700">Network Scan Active</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">
+                No direct connections yet. Tap to expand cold outreach support.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-5 pt-3 border-t border-gray-50 flex items-center justify-between gap-3">

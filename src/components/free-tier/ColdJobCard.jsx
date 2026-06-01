@@ -90,17 +90,17 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
           </button>
         </div>
         
-        {/* Clean Passive Network Status Box */}
+        {/* Network status — always shown before interaction */}
         <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center gap-2.5">
-          <span className="text-base">{scoutDeployed ? '🔍' : '🔒'}</span>
+          <span className="text-base">🔍</span>
           <div>
             <p className="text-xs font-bold text-gray-800">
-              {scoutDeployed ? 'Scanning Network...' : 'Direct Backdoor Unmapped'}
+              {scoutDeployed ? 'Scan Deployed — Monitoring' : 'Network Scan Active'}
             </p>
             <p className="text-[10px] text-gray-500 leading-normal mt-0.5">
-              {scoutDeployed 
-                ? 'No direct connection found yet. We\'ll notify you if a path opens up.'
-                : 'Matches your profile. Click below to look for a verified connection.'}
+              {scoutDeployed
+                ? "No direct connection found yet. We'll notify you if a path opens up."
+                : 'No direct connections yet. Tap to expand cold outreach support.'}
             </p>
           </div>
         </div>

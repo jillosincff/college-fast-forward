@@ -8,10 +8,11 @@ import { base44 } from '@/api/base44Client';
 
 const INITIAL_SHOW = 6;
 
-export default function CliffPrioritizedFeed({ user }) {
+export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [showAllInsiders, setShowAllInsiders] = useState(false);
   const [showAllDiscoveries, setShowAllDiscoveries] = useState(false);
+  const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
 
@@ -102,7 +103,7 @@ export default function CliffPrioritizedFeed({ user }) {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {(showAllInsiders ? priorityInsiders : priorityInsiders.slice(0, INITIAL_SHOW)).map((lead, idx) => (
-                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
+                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} />
               ))}
             </div>
             {priorityInsiders.length > INITIAL_SHOW && (
@@ -157,7 +158,7 @@ export default function CliffPrioritizedFeed({ user }) {
             {/* Desktop: grid */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {(showAllDiscoveries ? targetedDiscoveries : targetedDiscoveries.slice(0, INITIAL_SHOW)).map((lead, idx) => (
-                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
+                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} />
               ))}
             </div>
             {targetedDiscoveries.length > INITIAL_SHOW && (

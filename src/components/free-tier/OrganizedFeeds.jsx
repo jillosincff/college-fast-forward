@@ -49,10 +49,13 @@ export default function OrganizedFeeds({ user }) {
   // No goals set — show a nudge inline (not a blocking full-page empty state)
   const noGoals = !target_industries?.length && !effectiveRole;
 
-  // Network stats - use actual synced network data, not just priority tracks
+  // Network stats — computed live from real feed data
+  const totalVerifiedInsiders = priorityInsiders.reduce(
+    (sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0
+  );
   const networkStats = {
-    targetCompanies: 4, // Total synced companies from network grid
-    verifiedContacts: 4, // Total verified insiders from network grid
+    targetCompanies: priorityInsiders.length + targetedDiscoveries.length,
+    verifiedContacts: totalVerifiedInsiders,
     warmOpenings: targetedDiscoveries.length,
   };
 
@@ -140,7 +143,7 @@ export default function OrganizedFeeds({ user }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {priorityInsiders.map((lead, idx) => (
-              <HotJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
+              <HotJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} />
             ))}
           </div>
         </section>
