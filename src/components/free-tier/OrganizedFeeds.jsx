@@ -1,17 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
+import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import HotJobCard from './HotJobCard';
 import ColdJobCard from './ColdJobCard';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 export default function OrganizedFeeds({ user }) {
   const [selectedLead, setSelectedLead] = useState(null);
+  const queryClient = useQueryClient();
   const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'Your School';
   const schoolEmoji = schoolAbbr === 'UF' ? '🐊' : '🎓';
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
+
+  // Refresh feed when pipeline changes (e.g. job deleted)
+  useEffect(() => {
+    const handler = () => {
+      queryClient.invalidateQueries({ queryKey: ['organizedFeeds'] });
+      queryClient.invalidateQueries({ queryKey: ['networkStats'] });
+    };
+    window.addEventListener('cff:pipeline-changed', handler);
+    return () => window.removeEventListener('cff:pipeline-changed', handler);
+  }, [queryClient]);
 
   const { data: feedsData, isLoading } = useQuery({
     queryKey: ['organizedFeeds', target_industries, effectiveRole],
@@ -21,14 +33,29 @@ export default function OrganizedFeeds({ user }) {
     }),
   });
 
+  // Fetch real network stats from getVerifiedNetworkCompanies for the intelligence panel
+  const { data: networkData } = useQuery({
+    queryKey: ['networkStats', target_industries],
+    queryFn: () => getVerifiedNetworkCompanies({ target_industries: target_industries || [] }),
+  });
+
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
   const totalCount = priorityInsiders.length + targetedDiscoveries.length;
 
+  // Real network stats from getVerifiedNetworkCompanies (school-wide, not limited to job pool)
+  const networkCompanies = networkData?.data?.companies || networkData?.companies || [];
+  const totalAlumni = networkCompanies.reduce((s, c) => s + (c.alumniCount || 0), 0);
+  const totalParents = networkCompanies.reduce((s, c) => s + (c.parentCount || 0), 0);
+  const networkStats = {
+    targetCompanies: networkCompanies.length,
+    verifiedContacts: totalAlumni + totalParents,
+    warmOpenings: targetedDiscoveries.length,
+  };
+
   const handleAddToPipeline = async (lead) => {
     try {
-      // Create an OpportunityApplication to track this in the pipeline
       await base44.entities.OpportunityApplication.create({
         opportunity_id: `external_${Date.now()}`,
         applicant_id: user?.id || 'unknown',
@@ -48,17 +75,6 @@ export default function OrganizedFeeds({ user }) {
 
   // No goals set — show a nudge inline (not a blocking full-page empty state)
   const noGoals = !target_industries?.length && !effectiveRole;
-
-  // Network stats — computed live from real feed data (all leads, not just insiders)
-  const allLeads = [...priorityInsiders, ...targetedDiscoveries];
-  const totalVerifiedInsiders = allLeads.reduce(
-    (sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0
-  );
-  const networkStats = {
-    targetCompanies: allLeads.length,
-    verifiedContacts: totalVerifiedInsiders,
-    warmOpenings: targetedDiscoveries.length,
-  };
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-8">

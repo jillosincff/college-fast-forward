@@ -386,15 +386,13 @@ Deno.serve(async (req) => {
       return '';
     };
 
-    // Find REAL alumni/parents from user's school at each company
-    const companyNames = jobPool.map(j => j.company.toLowerCase());
+    // All school alumni/parents (with a company listed)
     const schoolAlumni = allUsers.filter(u => {
       const persona = u.persona || u.data?.persona || '';
       const roles = u.roles || u.data?.roles || [];
       const isAlumni = persona === 'alumni' || (Array.isArray(roles) && roles.includes('alumni'));
       const isParent = persona === 'parent' || (Array.isArray(roles) && roles.includes('parent'));
       if (!isAlumni && !isParent) return false;
-      // Must have a company to be useful for matching
       const rawCompany = getField(u, 'current_company', 'company', 'employer').trim();
       if (!rawCompany) return false;
       const uCode = getField(u, 'school_code').toLowerCase();
@@ -405,36 +403,35 @@ Deno.serve(async (req) => {
     });
     
     console.log(`[getPersonalizedNetworkCarousel] Found ${schoolAlumni.length} total alumni/parents from ${userSchoolCode || userSchool}`);
-    
-    // Build a map of company -> real alumni count from user's school
-    // Use normalizeCompanyName as key (same as later lookup)
+
+    // Normalizer for company name comparison (strip suffixes + special chars)
+    const normalizeForMatch = (name) => name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\b(inc|ltd|llc|corp|co|company|the)\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Build a map: normalizedCompanyKey → count of school alumni/parents there
+    // Scan ALL job pool companies against ALL school members (no prior filter on companyNames)
     const alumniByCompany = {};
-    for (const jobCompany of companyNames) {
-      const normalizedKey = normalizeCompanyName(jobCompany);
-      const alumniAtCompany = schoolAlumni.filter(u => {
-        const userCompany = getField(u, 'current_company', 'company', 'employer').toLowerCase().trim();
-        // Skip users with empty company fields
-        if (!userCompany) return false;
-        
-        // Normalize both company names for better matching
-        const normalizeCompany = (name) => name
-          .replace(/[^a-z0-9]/g, '')  // Remove special chars
-          .replace(/(inc|ltd|llc|corp|co|company|the)$/, '');  // Remove suffixes
-        
-        const normalizedJobCompany = normalizeCompany(jobCompany);
-        const normalizedUserCompany = normalizeCompany(userCompany);
-        
-        // Check for partial matches in both directions
-        const match = normalizedUserCompany.includes(normalizedJobCompany) || 
-                     normalizedJobCompany.includes(normalizedUserCompany) ||
-                     userCompany.includes(jobCompany) || 
-                     jobCompany.includes(userCompany);
-        
-        if (match) console.log(`[getPersonalizedNetworkCarousel] ✅ Match: ${u.full_name} at "${userCompany}" for job company "${jobCompany}"`);
-        return match;
+    for (const job of jobPool) {
+      const normalizedKey = normalizeCompanyName(job.company);
+      if (alumniByCompany[normalizedKey] !== undefined) continue; // already counted
+      const jobNorm = normalizeForMatch(job.company);
+      const matches = schoolAlumni.filter(u => {
+        const rawCompany = getField(u, 'current_company', 'company', 'employer').trim();
+        if (!rawCompany) return false;
+        const userNorm = normalizeForMatch(rawCompany);
+        // Partial match in both directions, minimum 4 chars to avoid false positives
+        return (jobNorm.length >= 4 && userNorm.length >= 4) &&
+          (userNorm.includes(jobNorm) || jobNorm.includes(userNorm));
       });
-      alumniByCompany[normalizedKey] = alumniAtCompany.length;
-      if (alumniAtCompany.length > 0) console.log(`[getPersonalizedNetworkCarousel] Company "${jobCompany}" (key: "${normalizedKey}") has ${alumniAtCompany.length} alumni`);
+      alumniByCompany[normalizedKey] = matches.length;
+      if (matches.length > 0) {
+        console.log(`[getPersonalizedNetworkCarousel] ✅ ${job.company}: ${matches.length} school contacts`);
+        matches.forEach(u => console.log(`[getPersonalizedNetworkCarousel]   - ${u.full_name} at "${getField(u, 'current_company', 'company', 'employer')}"`));
+      }
     }
     
     const networkMembers = (allUsers || []).filter(u => {

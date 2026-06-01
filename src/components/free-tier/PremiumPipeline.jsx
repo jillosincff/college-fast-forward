@@ -347,6 +347,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
         ...prev,
         [col]: prev[col].filter((_, i) => i !== cardIndex),
       }));
+      window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
     } catch (error) {
       console.error('Failed to delete from pipeline:', error);
       alert('❌ Failed to remove from pipeline');

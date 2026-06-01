@@ -129,9 +129,18 @@ Deno.serve(async (req) => {
         ways_to_help: u.ways_to_help || u.data?.ways_to_help || [],
       };
 
-      // Strict industry filter — if targets set, only include industry-matching members
-      const industryMatch = memberMatchesIndustries(memberPreview, targetIndustries);
-      if (!industryMatch) continue;
+      // Industry filter: if targets set, check member OR company name against industry keywords.
+      // This ensures alumni AT a media company (e.g. Disney) aren't excluded just because their
+      // title says "engineer" rather than "media".
+      if (targetIndustries.length > 0) {
+        const companyMatchesIndustry = targetIndustries.some(ind => {
+          const kws = INDUSTRY_KEYWORDS[ind.toLowerCase()] || [ind.toLowerCase()];
+          const companyHaystack = rawCompany.toLowerCase();
+          return kws.some(kw => companyHaystack.includes(kw));
+        });
+        const memberMatch = memberMatchesIndustries(memberPreview, targetIndustries);
+        if (!memberMatch && !companyMatchesIndustry) continue;
+      }
 
       if (!companyMap[key]) {
         companyMap[key] = {
