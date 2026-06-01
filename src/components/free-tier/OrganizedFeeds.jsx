@@ -161,7 +161,7 @@ export default function OrganizedFeeds({ user }) {
               Scouting Connections
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block">Perfect roles on niche boards</span>
+          <span className="text-xs text-gray-400 font-medium hidden sm:block">High-match roles found on company websites</span>
         </div>
 
         {isLoading ? (
