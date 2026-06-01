@@ -494,43 +494,6 @@ Deno.serve(async (req) => {
       }, industryKeywords);
     });
 
-    // ─── Step 3b: Inject real network companies not in hardcoded job pool ───
-    // Only inject members who match target industries — then add their companies as insider leads
-    const jobPoolCompanyKeys = new Set(jobPool.map(j => normalizeCompanyName(j.company).replace(/[^a-z0-9]/g, '')));
-
-    // Build industry-matched network members map (company → members who match industry)
-    const industryMatchedMap = {};
-    for (const u of networkMembers) {
-      const title = getField(u, 'job_title', 'current_position', 'position', 'career_background');
-      const industry = getField(u, 'industry');
-      const bio = getField(u, 'bio');
-      if (!memberInIndustry({ title, industry, bio }, industryKeywords)) continue;
-      const rawCompany = getField(u, 'current_company', 'company', 'employer').trim();
-      if (!rawCompany) continue;
-      const key = normalizeCompanyName(rawCompany).replace(/[^a-z0-9]/g, '');
-      if (!industryMatchedMap[key]) industryMatchedMap[key] = { displayName: rawCompany, members: [] };
-      const persona = u.persona || u.data?.persona || '';
-      const roles = u.roles || u.data?.roles || [];
-      const isParent = persona === 'parent' || (Array.isArray(roles) && roles.includes('parent'));
-      industryMatchedMap[key].members.push({ ...companyNetworkMap[normalizeCompanyName(rawCompany)]?.alumni?.[0] || {}, full_name: u.full_name, title, persona: isParent ? 'parent' : 'alumni' });
-    }
-
-    for (const [companyKeyStripped, { displayName, members }] of Object.entries(industryMatchedMap)) {
-      const alreadyInPool = jobPoolCompanyKeys.has(companyKeyStripped) ||
-        [...jobPoolCompanyKeys].some(pk => pk.length >= 4 && companyKeyStripped.length >= 4 &&
-          (pk.includes(companyKeyStripped) || companyKeyStripped.includes(pk)));
-      if (alreadyInPool) continue;
-      const featuredMember = members[0];
-      jobPool.push({
-        company: displayName,
-        role: featuredMember?.title || 'Open Roles',
-        description: `${displayName} has verified ${featuredMember?.persona === 'alumni' ? 'alumni' : 'parent'} network connections from your school. This is a direct insider track — reach out through your network contact.`,
-        source: 'Network Match',
-        sourceCategory: 'A',
-        _isNetworkInjected: true,
-      });
-    }
-
     // ─── Step 4: Two-Tier Lead Hierarchy (Direct Network Leverage) ─────────
     // PRIORITY 1: priorityInsiders — company has a verified alumni or parent insider OR user-unlocked via scout
     // PRIORITY 2: targetedDiscoveries — clean role match, no insider at this company yet
