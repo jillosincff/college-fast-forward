@@ -60,6 +60,7 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr
 
         {/* Insider Count Block — shown before any interaction */}
         {insiderCount > 0 ? (
+          // TIER 1: Direct school match
           <div className="mt-4 bg-orange-50 rounded-xl p-3 border border-orange-200 flex items-center gap-2.5">
             <span className="text-xl">{mascot}</span>
             <div>
@@ -71,13 +72,25 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr
               </p>
             </div>
           </div>
-        ) : (
-          <div className="mt-4 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
-            <span className="text-xl">🔍</span>
+        ) : lead.parentCount > 0 || lead.hasSectorParents ? (
+          // TIER 2: Parent network sector match
+          <div className="mt-4 bg-blue-50 rounded-xl p-3 border border-blue-200 flex items-center gap-2.5">
+            <span className="text-xl">💼</span>
             <div>
-              <p className="text-xs font-bold text-gray-700">Network Scan Active</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">
-                No direct connections yet. Tap to expand cold outreach support.
+              <p className="text-xs font-bold text-blue-900">Parent Network Connected</p>
+              <p className="text-[10px] text-blue-700 mt-0.5">
+                Verified parent contacts active in this sector.
+              </p>
+            </div>
+          </div>
+        ) : (
+          // TIER 3: Industry signal
+          <div className="mt-4 bg-red-50 rounded-xl p-3 border border-red-200 flex items-center gap-2.5">
+            <span className="text-xl">🔥</span>
+            <div>
+              <p className="text-xs font-bold text-red-900">Target Industry Signal</p>
+              <p className="text-[10px] text-red-700 mt-0.5">
+                Verified match for your specific target career track.
               </p>
             </div>
           </div>
