@@ -309,18 +309,18 @@ Deno.serve(async (req) => {
     // Filter out senior roles
     jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
     
-    // Filter jobs by location if user has specified preferences
-    if (userLocation || userCity || userState) {
-      const locationKeywords = [userLocation, userCity, userState].filter(Boolean);
-      jobPool = jobPool.filter(j => {
+    // Location filter: only apply if relocation is NOT ok AND user has a specific city (not just a state)
+    // Skip location filtering if user only has a state/country preference — too aggressive
+    if (!relocationOk && userCity) {
+      const locationKeywords = [userCity].filter(Boolean);
+      const locationFiltered = jobPool.filter(j => {
         const jobDesc = (j.description || '').toLowerCase();
-        const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home');
-        const matchesLocation = locationKeywords.some(loc => 
-          jobDesc.includes(loc) || 
-          jobDesc.includes(loc.replace(' ', ''))
-        );
-        return isRemote || matchesLocation || relocationOk;
+        const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home') || jobDesc.includes('remote-friendly');
+        const matchesLocation = locationKeywords.some(loc => jobDesc.includes(loc));
+        return isRemote || matchesLocation;
       });
+      // Only apply if it keeps at least 4 results
+      if (locationFiltered.length >= 4) jobPool = locationFiltered;
     }
 
     // Build role keyword list from target_role, target_positions, AND industry-derived keywords
@@ -340,14 +340,14 @@ Deno.serve(async (req) => {
 
     const allRoleKeywords = [...new Set([...roleKeywords, ...positionKeywords, ...industryRoleKeywords])];
 
+    // Role filter: only apply if it keeps at least 5 results to prevent sparse wipeout
     if (allRoleKeywords.length > 0) {
       const roleFiltered = jobPool.filter(j => {
         const roleLower = j.role.toLowerCase();
         const descLower = j.description.toLowerCase();
         return allRoleKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
       });
-      // Only apply if it narrows the results — prevents total wipeout for sparse industries
-      if (roleFiltered.length > 0) jobPool = roleFiltered;
+      if (roleFiltered.length >= 5) jobPool = roleFiltered;
     }
 
     // Deduplicate by company+role (allow same company with different roles)
@@ -383,19 +383,23 @@ Deno.serve(async (req) => {
       const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
       const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
       if (!isAlumni && !isParent) return false;
-      
+      // Must have a company to be useful for matching
+      const rawCompany = (u.current_company || u.company || u.employer || '').trim();
+      if (!rawCompany) return false;
       const uCode = (u.school_code || '').toLowerCase();
       const uName = (u.school_name || u.school || u.university || '').toLowerCase();
       const matchesSchool = (userSchoolCode && uCode === userSchoolCode) || 
-                           (userSchool && uName === userSchool);
+                           (userSchool && (uName === userSchool || uName.includes(userSchool) || userSchool.includes(uName)));
       return matchesSchool;
     });
     
     console.log(`[getPersonalizedNetworkCarousel] Found ${schoolAlumni.length} total alumni/parents from ${userSchoolCode || userSchool}`);
     
     // Build a map of company -> real alumni count from user's school
+    // Use normalizeCompanyName as key (same as later lookup)
     const alumniByCompany = {};
     for (const jobCompany of companyNames) {
+      const normalizedKey = normalizeCompanyName(jobCompany);
       const alumniAtCompany = schoolAlumni.filter(u => {
         const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase().trim();
         // Skip users with empty company fields
@@ -415,11 +419,11 @@ Deno.serve(async (req) => {
                      userCompany.includes(jobCompany) || 
                      jobCompany.includes(userCompany);
         
-        if (match) console.log(`[getPersonalizedNetworkCarousel] ✅ Match: ${u.full_name} at "${userCompany}" for job company "${jobCompany}" (normalized: "${normalizedUserCompany}" vs "${normalizedJobCompany}")`);
+        if (match) console.log(`[getPersonalizedNetworkCarousel] ✅ Match: ${u.full_name} at "${userCompany}" for job company "${jobCompany}"`);
         return match;
       });
-      alumniByCompany[jobCompany] = alumniAtCompany.length;
-      console.log(`[getPersonalizedNetworkCarousel] Company "${jobCompany}" has ${alumniAtCompany.length} alumni`);
+      alumniByCompany[normalizedKey] = alumniAtCompany.length;
+      if (alumniAtCompany.length > 0) console.log(`[getPersonalizedNetworkCarousel] Company "${jobCompany}" (key: "${normalizedKey}") has ${alumniAtCompany.length} alumni`);
     }
     
     const networkMembers = (allUsers || []).filter(u => {
@@ -427,11 +431,11 @@ Deno.serve(async (req) => {
       const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
       if (!isParent && !isAlumni) return false;
       if (!u.full_name) return false;
-      if (u.visible_in_directory === false) return false;
-      if (schoolCode || schoolName) {
+      // Use same school matching logic as schoolAlumni (userSchoolCode / userSchool)
+      if (userSchoolCode || userSchool) {
         const uCode = (u.school_code || '').toLowerCase();
         const uName = (u.school_name || u.school || u.university || '').toLowerCase();
-        if (!((schoolCode && uCode === schoolCode) || (schoolName && uName === schoolName))) return false;
+        if (!((userSchoolCode && uCode === userSchoolCode) || (userSchool && uName === userSchool))) return false;
       }
       const rawCompany = (u.company || u.current_company || u.employer || '').trim();
       if (!rawCompany) return false;
@@ -439,6 +443,7 @@ Deno.serve(async (req) => {
       if (!key || INVALID.includes(key)) return false;
       return true;
     });
+    console.log(`[getPersonalizedNetworkCarousel] networkMembers for company map: ${networkMembers.length}`);
 
     const companyNetworkMap = {};
     for (const u of networkMembers) {
@@ -498,12 +503,7 @@ Deno.serve(async (req) => {
       }
 
       // Get REAL alumni count from user's school at this company
-      // Try both normalized and raw company name for lookup
-      let realAlumniCount = alumniByCompany[normalizedJobCompany] || 0;
-      if (realAlumniCount === 0) {
-        const rawCompany = job.company.toLowerCase();
-        realAlumniCount = alumniByCompany[rawCompany] || 0;
-      }
+      const realAlumniCount = alumniByCompany[normalizedJobCompany] || 0;
       const alumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
