@@ -74,23 +74,34 @@ Deno.serve(async (req) => {
 
     const companyMap = {};
 
+    // Helper: resolve a field checking both top-level and nested data.*
+    const gf = (u, ...keys) => {
+      for (const k of keys) {
+        const v = u[k] || u.data?.[k];
+        if (v) return v;
+      }
+      return '';
+    };
+
     for (const u of (allUsers || [])) {
-      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
-      const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
+      const persona = u.persona || u.data?.persona || '';
+      const roles = u.roles || u.data?.roles || [];
+      const isParent = persona === 'parent' || (Array.isArray(roles) && roles.includes('parent'));
+      const isAlumni = persona === 'alumni' || (Array.isArray(roles) && roles.includes('alumni'));
       if (!isParent && !isAlumni) continue;
       if (!u.full_name) continue;
-      if (u.visible_in_directory === false) continue;
+      // Don't filter by visible_in_directory — that hides real insiders from the count
 
       // School isolation
       if (schoolCode || schoolName) {
-        const uCode = (u.school_code || '').toLowerCase();
-        const uName = (u.school_name || u.school || u.university || '').toLowerCase();
+        const uCode = gf(u, 'school_code').toLowerCase();
+        const uName = gf(u, 'school_name', 'school', 'university').toLowerCase();
         const codeMatch = schoolCode && uCode === schoolCode;
-        const nameMatch = schoolName && uName === schoolName;
+        const nameMatch = schoolName && (uName === schoolName || uName.includes(schoolName) || schoolName.includes(uName));
         if (!codeMatch && !nameMatch) continue;
       }
 
-      const rawCompany = (u.company || u.current_company || u.employer || '').trim();
+      const rawCompany = gf(u, 'current_company', 'company', 'employer').trim();
       if (!rawCompany) continue;
 
       const key = rawCompany.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
@@ -108,14 +119,14 @@ Deno.serve(async (req) => {
       const memberPreview = {
         id: u.id,
         full_name: u.full_name,
-        title: u.job_title || u.current_position || u.position || '',
-        industry: u.industry || '',
-        bio: u.bio || '',
+        title: gf(u, 'job_title', 'current_position', 'position', 'career_background'),
+        industry: gf(u, 'industry'),
+        bio: gf(u, 'bio'),
         persona: isParent ? 'parent' : 'alumni',
-        graduation_year: u.graduation_year || u.class_year || '',
-        linkedin_url: u.linkedin_url || null,
-        student_name: isParent ? (u.student_name || null) : null,
-        ways_to_help: u.ways_to_help || [],
+        graduation_year: gf(u, 'graduation_year', 'class_year'),
+        linkedin_url: gf(u, 'linkedin_url') || null,
+        student_name: isParent ? (gf(u, 'student_name') || null) : null,
+        ways_to_help: u.ways_to_help || u.data?.ways_to_help || [],
       };
 
       // Strict industry filter — if targets set, only include industry-matching members
