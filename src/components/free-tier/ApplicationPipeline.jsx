@@ -8,7 +8,7 @@ const FREE_LIMIT = 5;
 
 const STAGES = [
   { key: 'to_apply', label: 'Opportunities', color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb', icon: '📋' },
-  { key: 'applied', label: 'Applied', color: BLUE, bg: BLUE_LIGHT, border: BLUE_BORDER, icon: '✅' },
+  { key: 'applied', label: 'Reached Out', color: BLUE, bg: BLUE_LIGHT, border: BLUE_BORDER, icon: '📩' },
   { key: 'interviewing', label: 'Interviewing', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', icon: '🎤' },
   { key: 'offer', label: 'Offer', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0', icon: '🎉' },
 ];
