@@ -87,154 +87,229 @@ const NICHE_PLATFORM_CONFIG = {
   shrm:         { label: 'SHRM Job Board', icon: '🏛️', insight: 'The official SHRM board is largely ignored by students — yet it hosts thousands of HR coordinator roles with almost zero Gen-Z competition.' },
 };
 
+// companyTier:
+//   1 = Enterprise/Goliath (1,000+ employees) — brand recognition, structured programs
+//   2 = Mid-Market Growth (200–1,000 employees) — scaling rapidly, high ownership
+//   3 = Seed/Series A-C Startup (10–100 employees) — warm intro = almost guaranteed interview
+
 const JOB_POOL = {
   'finance': [
-    { company: 'JPMorgan', role: 'Financial Operations Specialist', description: 'Location: New York, NY | Hybrid. Responsibilities: Support investment banking operations, prepare financial reports, analyze market trends, coordinate with trading desks. Requirements: Bachelor in Finance/Economics, 3.5+ GPA, strong Excel/SQL skills, Series 7/63 preferred. Compensation: $95,000 base + $20-40K bonus, full benefits, 401k match.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
-    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', description: 'Location: New York, NY | On-site. Responsibilities: Build financial models, conduct industry research, prepare pitch books, support M&A transactions. Requirements: Top-tier university, Finance/Econ major, 3.7+ GPA, prior IB internship. Compensation: $110,000 base + $50-100K bonus, premium health benefits, relocation assistance.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
-    { company: 'Stripe', role: 'Financial Operations Specialist', description: 'Location: Remote-friendly (US). Responsibilities: Manage payment operations, analyze transaction data, optimize financial workflows, partner with engineering teams. Requirements: Bachelor degree, 2+ years finance experience, SQL/Tableau skills, fintech interest. Compensation: $105,000 base + equity package, unlimited PTO, $3K learning stipend.', source: 'stripe.com/jobs', sourceCategory: 'B' },
-    { company: 'Deloitte', role: 'Finance & Advisory Associate', description: 'Location: Multiple US offices | Hybrid. Responsibilities: Client financial analysis, audit support, tax preparation, advisory consulting. Requirements: Accounting/Finance degree, CPA track, strong communication skills. Compensation: $75,000-85,000 base + performance bonus, CPA study support, clear promotion path.', source: 'deloitte.com/careers', sourceCategory: 'C' },
-    { company: 'BlackRock', role: 'Investment Analyst', description: 'Location: New York, NY | Hybrid. Responsibilities: Portfolio analysis, risk assessment, market research, client reporting. Requirements: Finance/Econ/Math degree, 3.6+ GPA, Bloomberg certification, CFA Level 1 preferred. Compensation: $100,000 base + $30-50K bonus, comprehensive benefits, tuition reimbursement.', source: 'blackrock.com/careers', sourceCategory: 'C' },
-    { company: 'SoFi', role: 'Finance Analyst', description: 'Location: Charlotte, NC | Remote options. Responsibilities: Credit risk analysis, loan portfolio management, financial modeling, regulatory compliance. Requirements: Bachelor in Finance, 1-3 years experience, Python/R skills. Compensation: $85,000-95,000 base + equity, 100% health premium coverage, parental leave.', source: 'sofi.com/careers', sourceCategory: 'B' },
-    { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Location: New York, NY | Hybrid. Responsibilities: Strategic planning, financial forecasting, business intelligence, cross-functional projects. Requirements: Top university, analytical mindset, Excel/SQL expertise, startup interest. Compensation: $110,000 base + significant equity, unlimited PTO, home office budget.', source: 'ramp.com/careers', sourceCategory: 'B' },
-    { company: 'PwC', role: 'Assurance Associate', description: 'Location: Multiple US cities | Hybrid. Responsibilities: Financial statement audits, internal controls testing, client communication, team collaboration. Requirements: Accounting degree, 150 credit hours, CPA eligibility. Compensation: $70,000-80,000 base + busy season bonus, CPA bonuses, career development.', source: 'pwc.com/careers', sourceCategory: 'C' },
+    // Tier 1: Enterprise
+    { company: 'JPMorgan', role: 'Financial Operations Specialist', companyTier: 1, description: 'Location: New York, NY | Hybrid. Responsibilities: Support investment banking operations, prepare financial reports, analyze market trends, coordinate with trading desks. Requirements: Bachelor in Finance/Economics, 3.5+ GPA, strong Excel/SQL skills, Series 7/63 preferred. Compensation: $95,000 base + $20-40K bonus, full benefits, 401k match.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
+    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', companyTier: 1, description: 'Location: New York, NY | On-site. Responsibilities: Build financial models, conduct industry research, prepare pitch books, support M&A transactions. Requirements: Top-tier university, Finance/Econ major, 3.7+ GPA, prior IB internship. Compensation: $110,000 base + $50-100K bonus, premium health benefits, relocation assistance.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
+    { company: 'BlackRock', role: 'Investment Analyst', companyTier: 1, description: 'Location: New York, NY | Hybrid. Responsibilities: Portfolio analysis, risk assessment, market research, client reporting. Requirements: Finance/Econ/Math degree, 3.6+ GPA, Bloomberg certification, CFA Level 1 preferred. Compensation: $100,000 base + $30-50K bonus, comprehensive benefits, tuition reimbursement.', source: 'blackrock.com/careers', sourceCategory: 'C' },
+    { company: 'PwC', role: 'Assurance Associate', companyTier: 1, description: 'Location: Multiple US cities | Hybrid. Responsibilities: Financial statement audits, internal controls testing, client communication, team collaboration. Requirements: Accounting degree, 150 credit hours, CPA eligibility. Compensation: $70,000-80,000 base + busy season bonus, CPA bonuses, career development.', source: 'pwc.com/careers', sourceCategory: 'C' },
+    // Tier 2: Mid-Market
+    { company: 'Stripe', role: 'Financial Operations Specialist', companyTier: 2, description: 'Location: Remote-friendly (US). Responsibilities: Manage payment operations, analyze transaction data, optimize financial workflows, partner with engineering teams. Requirements: Bachelor degree, 2+ years finance experience, SQL/Tableau skills, fintech interest. Compensation: $105,000 base + equity package, unlimited PTO, $3K learning stipend.', source: 'stripe.com/jobs', sourceCategory: 'B' },
+    { company: 'SoFi', role: 'Finance Analyst', companyTier: 2, description: 'Location: Charlotte, NC | Remote options. Responsibilities: Credit risk analysis, loan portfolio management, financial modeling, regulatory compliance. Requirements: Bachelor in Finance, 1-3 years experience, Python/R skills. Compensation: $85,000-95,000 base + equity, 100% health premium coverage, parental leave.', source: 'sofi.com/careers', sourceCategory: 'B' },
+    { company: 'Brex', role: 'Finance Operations Analyst', companyTier: 2, description: 'Location: Remote-friendly (US) | Hybrid. Responsibilities: Manage corporate card reconciliations, support month-end close, build financial dashboards, optimize spend workflows. Requirements: Bachelor in Finance/Accounting, SQL comfort, startup mindset. Compensation: $90,000-105,000 base + meaningful equity, full benefits, unlimited PTO.', source: 'brex.com/careers', sourceCategory: 'B' },
+    // Tier 3: Startup
+    { company: 'Ramp', role: 'Finance & Strategy Analyst', companyTier: 3, description: 'Location: New York, NY | Hybrid. Series C fintech redefining corporate finance. Responsibilities: Strategic planning, financial forecasting, business intelligence. Requirements: Top university, analytical mindset, Excel/SQL expertise. Compensation: $110,000 base + significant equity, unlimited PTO, home office budget. An alumni intro here is worth more than any application.', source: 'ramp.com/careers', sourceCategory: 'B' },
+    { company: 'Jeeves', role: 'Finance Analyst', companyTier: 3, description: 'Location: Remote (US) | Series B global expense platform. Responsibilities: FP&A support, revenue analysis, investor reporting, cross-functional projects. Requirements: Finance/Economics degree, strong modeling skills. Compensation: $85,000-100,000 + equity. Team of 200 — your work is seen immediately.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Finley Technologies', role: 'Credit Operations Analyst', companyTier: 3, description: 'Location: Remote-first | Series A debt capital management startup backed by Y Combinator. Responsibilities: Manage borrower data, build credit reporting workflows, partner with engineering. Requirements: Finance/CS background, analytical mindset. A warm intro to the founding team via an alum is an almost guaranteed first call.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'finance & insurance': [
-    { company: 'JPMorgan', role: 'Financial Operations Specialist', description: 'Analyst roles in investment banking and corporate finance divisions.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
-    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', description: 'Summer and new associate programs across all divisions.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
-    { company: 'Stripe', role: 'Financial Operations Specialist', description: 'Finance and strategy analyst roles at a leading fintech.', source: 'stripe.com/jobs', sourceCategory: 'B' },
-    { company: 'Deloitte', role: 'Finance & Advisory Associate', description: 'Audit, tax, and financial advisory associates across US offices.', source: 'deloitte.com/careers', sourceCategory: 'C' },
-    { company: 'Ramp', role: 'Finance & Strategy Analyst', description: 'Fast-growing fintech with high-ownership finance roles.', source: 'ramp.com/careers', sourceCategory: 'B' },
+    { company: 'JPMorgan', role: 'Financial Operations Specialist', companyTier: 1, description: 'Analyst roles in investment banking and corporate finance divisions.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
+    { company: 'Goldman Sachs', role: 'Investment Banking Analyst', companyTier: 1, description: 'Summer and new associate programs across all divisions.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
+    { company: 'Stripe', role: 'Financial Operations Specialist', companyTier: 2, description: 'Finance and strategy analyst roles at a leading fintech.', source: 'stripe.com/jobs', sourceCategory: 'B' },
+    { company: 'Brex', role: 'Finance Operations Analyst', companyTier: 2, description: 'Fast-scaling corporate card startup with strong internal finance ownership.', source: 'brex.com/careers', sourceCategory: 'B' },
+    { company: 'Ramp', role: 'Finance & Strategy Analyst', companyTier: 3, description: 'Fast-growing Series C fintech with high-ownership finance roles.', source: 'ramp.com/careers', sourceCategory: 'B' },
+    { company: 'Finley Technologies', role: 'Credit Operations Analyst', companyTier: 3, description: 'YC-backed Series A startup — team of 30, direct founder access.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'human resources': [
-    { company: 'Lattice', role: 'People Operations Coordinator', description: 'Location: Remote (US) | Fully Remote. Responsibilities: Manage offer letter generation and background checks, own new hire onboarding scheduling, maintain HRIS data integrity, coordinate engagement surveys, support benefits administration. Requirements: 0-2 years HR/operations experience, exceptional organizational skills, Google Suite proficiency, interest in people ops. Compensation: $65,000-80,000 base + equity, 100% medical/dental/vision, unlimited PTO, $3K learning stipend, home office budget.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-    { company: 'Rippling', role: 'HR Generalist (New Grad)', description: 'Location: Remote-friendly (US) | Hybrid options. Responsibilities: Full-cycle recruiting coordination, onboard 50+ new hires monthly, administer benefits, manage employee relations, ensure compliance. Requirements: Bachelor degree, strong communication skills, ability to manage multiple priorities, discretion with confidential info. Compensation: $70,000-85,000 base + meaningful equity, full health benefits.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-    { company: 'Gusto', role: 'People Operations Associate', description: 'Location: Remote-first (US). Responsibilities: Coordinate 100+ annual hires, manage I-9 verification, administer open enrollment for 1,200+ employees, track HR metrics, support DEI initiatives. Requirements: 0-2 years HR/operations experience, passion for employee experience, attention to detail, data comfort. Compensation: $68,000-82,000 + equity, 100% employer-paid premiums, unlimited PTO, $3K development stipend, parental leave.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-    { company: 'Workday', role: 'HR Systems Analyst', description: 'Location: Remote-friendly (US) | Hybrid. Responsibilities: Configure Workday HCM, troubleshoot system issues, generate reports, train users on HR technology. Requirements: Bachelor degree, HRIS experience preferred, analytical skills, HR certification track. Compensation: $75,000-90,000 base + bonus, premium benefits, certification support, career growth.', source: 'workday.com/careers', sourceCategory: 'C' },
-    { company: 'LinkedIn', role: 'Talent Operations Specialist', description: 'Location: Remote-friendly (US) | Hybrid options. Responsibilities: Optimize recruiting processes, manage ATS workflows, coordinate candidate communications, analyze hiring metrics. Requirements: 2+ years recruiting ops experience, Greenhouse/Workday expertise, data analysis skills. Compensation: $95,000-115,000 base + equity, comprehensive benefits, learning budget.', source: 'linkedin.com/careers', sourceCategory: 'B' },
+    // Tier 1
+    { company: 'Workday', role: 'HR Systems Analyst', companyTier: 1, description: 'Location: Remote-friendly (US) | Hybrid. Responsibilities: Configure Workday HCM, troubleshoot system issues, generate reports, train users on HR technology. Requirements: Bachelor degree, HRIS experience preferred, analytical skills, HR certification track. Compensation: $75,000-90,000 base + bonus, premium benefits, certification support, career growth.', source: 'workday.com/careers', sourceCategory: 'C' },
+    { company: 'LinkedIn', role: 'Talent Operations Specialist', companyTier: 1, description: 'Location: Remote-friendly (US) | Hybrid options. Responsibilities: Optimize recruiting processes, manage ATS workflows, coordinate candidate communications, analyze hiring metrics. Requirements: 2+ years recruiting ops experience, Greenhouse/Workday expertise, data analysis skills. Compensation: $95,000-115,000 base + equity, comprehensive benefits, learning budget.', source: 'linkedin.com/careers', sourceCategory: 'B' },
+    // Tier 2
+    { company: 'Rippling', role: 'HR Generalist (New Grad)', companyTier: 2, description: 'Location: Remote-friendly (US) | Hybrid options. Responsibilities: Full-cycle recruiting coordination, onboard 50+ new hires monthly, administer benefits, manage employee relations, ensure compliance. Requirements: Bachelor degree, strong communication skills, ability to manage multiple priorities. Compensation: $70,000-85,000 base + meaningful equity, full health benefits.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Gusto', role: 'People Operations Associate', companyTier: 2, description: 'Location: Remote-first (US). Responsibilities: Coordinate 100+ annual hires, manage I-9 verification, administer open enrollment for 1,200+ employees, track HR metrics. Compensation: $68,000-82,000 + equity, 100% employer-paid premiums, unlimited PTO, $3K development stipend.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    // Tier 3
+    { company: 'Lattice', role: 'People Operations Coordinator', companyTier: 3, description: 'Location: Remote (US) | Series E HR tech platform. Responsibilities: Manage onboarding, maintain HRIS data, coordinate engagement surveys, support benefits. Requirements: 0-2 years HR experience, exceptional organizational skills. Compensation: $65,000-80,000 base + equity, 100% medical/dental/vision, unlimited PTO, $3K learning stipend. Alumni intro = direct recruiter conversation.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Leapsome', role: 'HR Success Associate', companyTier: 3, description: 'Location: Remote-friendly (US) | Series A people enablement platform. Responsibilities: Onboard HR clients, drive product adoption, gather feedback for product team. Requirements: Bachelor degree, people-first mindset, SaaS interest. Compensation: $60,000-75,000 + equity. 150-person team — a warm intro via the CFF parent network gets you past the ATS instantly.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'tech': [
-    { company: 'Adobe', role: 'Junior Product Designer', description: 'Design roles across Creative Cloud and Digital Experience — highly competitive public listing.', source: 'linkedin.com/jobs', sourceCategory: 'C', displayStyle: 'REALITY_CHECK', daysPosted: 16, applicantCount: 349 },
-    { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
-    { company: 'Microsoft', role: 'Software Development Engineer', description: 'New grad programs spanning cloud, AI, and productivity divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
-    { company: 'Salesforce', role: 'Associate Software Engineer', description: 'Rotational and entry-level engineering roles across the platform.', source: 'salesforce.com/careers', sourceCategory: 'C' },
-    { company: 'Meta', role: 'Data Engineer', description: 'Data and engineering roles across ads and product infrastructure.', source: 'metacareers.com', sourceCategory: 'B' },
-    { company: 'Ramp', role: 'Software Engineer', description: 'Fast-growing fintech — real engineering ownership from day one.', source: 'ramp.com/careers', sourceCategory: 'B' },
-    { company: 'Notion', role: 'Product Analyst', description: 'Productivity startup scaling globally — product and data roles.', source: 'notion.com/careers', sourceCategory: 'B' },
-    { company: 'Early-Stage AI Startup', role: 'Software Engineer', description: 'Seed-stage AI startup seeking early engineers — spotted in r/cscareerquestions monthly hiring thread. Direct founder contact, no recruiter screen.', source: 'reddit.com/r/cscareerquestions', sourceCategory: 'D' },
-    { company: 'Webflow', role: 'Junior Creative Strategist', description: 'No-code design platform with a strong creative culture — posted exclusively on Wellfound.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-    { company: 'Linear', role: 'Product Designer', description: 'Premium software tool beloved by engineers — Key Values listing targeting culture-aligned candidates only.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
-    { company: 'Otta-Curated Startup', role: 'Growth Analyst', description: 'Otta scores this company 9/10 for salary transparency and growth trajectory — and it has under 30 applicants.', source: 'otta.com', sourceCategory: 'E', nichePlatform: 'otta' },
+    // Tier 1
+    { company: 'Google', role: 'Software Engineer (New Grad)', companyTier: 1, description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
+    { company: 'Microsoft', role: 'Software Development Engineer', companyTier: 1, description: 'New grad programs spanning cloud, AI, and productivity divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
+    { company: 'Salesforce', role: 'Associate Software Engineer', companyTier: 1, description: 'Rotational and entry-level engineering roles across the platform.', source: 'salesforce.com/careers', sourceCategory: 'C' },
+    { company: 'Adobe', role: 'Junior Product Designer', companyTier: 1, description: 'Design roles across Creative Cloud and Digital Experience — highly competitive public listing.', source: 'linkedin.com/jobs', sourceCategory: 'C', displayStyle: 'REALITY_CHECK', daysPosted: 16, applicantCount: 349 },
+    { company: 'Meta', role: 'Data Engineer', companyTier: 1, description: 'Data and engineering roles across ads and product infrastructure.', source: 'metacareers.com', sourceCategory: 'B' },
+    // Tier 2
+    { company: 'Notion', role: 'Product Analyst', companyTier: 2, description: 'Productivity startup scaling globally — product and data roles with real ownership.', source: 'notion.com/careers', sourceCategory: 'B' },
+    { company: 'Webflow', role: 'Junior Front-End Engineer', companyTier: 2, description: 'Location: Remote-friendly (US) | No-code platform with strong engineering culture. Responsibilities: Build and maintain UI components, collaborate with design, ship features for 300K+ customers. Requirements: React/JavaScript proficiency, 1-2 years experience. Compensation: $130,000-155,000 base + equity, learning budget.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Figma', role: 'Product Engineer', companyTier: 2, description: 'Location: San Francisco/Remote | Design infrastructure team building collaborative tools at scale. Responsibilities: Core product engineering, performance optimization, cross-team collaboration. Requirements: Strong CS fundamentals, 2+ years experience. Compensation: $160,000-190,000 + equity. Posted on Dribbble to target active builders.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    // Tier 3
+    { company: 'Linear', role: 'Product Designer', companyTier: 3, description: 'Location: Remote-first | Team of 50. Premium issue-tracking tool beloved by engineers everywhere. Responsibilities: Design core product workflows, contribute to design system, ship features directly. Requirements: Strong product instincts, Figma mastery. Compensation: Top-of-market + equity. An alumni intro to their team skips every recruiter screen.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
+    { company: 'Ramp', role: 'Software Engineer', companyTier: 3, description: 'Location: New York, NY | Series D fintech. Real engineering ownership from day one.', source: 'ramp.com/careers', sourceCategory: 'B' },
+    { company: 'Retool', role: 'Software Engineer', companyTier: 3, description: 'Location: San Francisco/Remote | Series C internal tools platform. Responsibilities: Build core platform features, work directly with founders, ship products used by 100K+ developers. Requirements: Strong CS fundamentals, 1+ years experience. Compensation: $160,000-200,000 + substantial equity. Direct alumni intro = ~80% interview rate.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Vercel', role: 'Growth Engineer', companyTier: 3, description: 'Location: Remote-first | Series C developer platform scaling rapidly. Responsibilities: Activate new users, build onboarding flows, instrument analytics, collaborate with product. Requirements: Full-stack comfort, growth mindset. Compensation: $130,000-160,000 + equity. Parent or alumni connection here = direct hiring manager intro.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'technology, information & media': [
-    { company: 'Google', role: 'Software Engineer (New Grad)', description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
-    { company: 'Microsoft', role: 'Software Development Engineer', description: 'New grad programs spanning cloud, AI, and productivity divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
-    { company: 'Meta', role: 'Data Engineer', description: 'Data and engineering roles across ads and product infrastructure.', source: 'metacareers.com', sourceCategory: 'B' },
+    { company: 'Google', role: 'Software Engineer (New Grad)', companyTier: 1, description: 'Engineering and product roles across cloud, AI, and consumer teams.', source: 'careers.google.com', sourceCategory: 'C' },
+    { company: 'Microsoft', role: 'Software Development Engineer', companyTier: 1, description: 'New grad programs spanning cloud, AI, and productivity divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
+    { company: 'Meta', role: 'Data Engineer', companyTier: 1, description: 'Data and engineering roles across ads and product infrastructure.', source: 'metacareers.com', sourceCategory: 'B' },
+    { company: 'Notion', role: 'Product Analyst', companyTier: 2, description: 'Productivity startup scaling globally — product and data roles.', source: 'notion.com/careers', sourceCategory: 'B' },
+    { company: 'Vercel', role: 'Growth Engineer', companyTier: 3, description: 'Remote-first Series C developer platform — warm intro = direct hiring manager access.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'consulting': [
-    { company: 'McKinsey', role: 'Business Analyst', description: 'Analyst roles for top undergrads entering management consulting.', source: 'mckinsey.com/careers', sourceCategory: 'C' },
-    { company: 'Deloitte', role: 'Strategy & Analytics Consultant', description: 'Consulting and business analysts in advisory practices nationwide.', source: 'deloitte.com/careers', sourceCategory: 'C' },
-    { company: 'BCG', role: 'Associate Consultant', description: 'Entry-level strategy roles for new graduates.', source: 'bcg.com/careers', sourceCategory: 'C' },
-    { company: 'West Monroe', role: 'Business Analyst', description: 'Digital consulting firm actively hiring analysts.', source: 'westmonroe.com/careers', sourceCategory: 'B' },
-    { company: 'Boutique Strategy Firm', role: 'Junior Consultant', description: 'Founder-led strategy consultancy hiring via r/consulting megathread — direct email contact, no ATS.', source: 'reddit.com/r/consulting', sourceCategory: 'D' },
+    // Tier 1
+    { company: 'McKinsey', role: 'Business Analyst', companyTier: 1, description: 'Analyst roles for top undergrads entering management consulting.', source: 'mckinsey.com/careers', sourceCategory: 'C' },
+    { company: 'BCG', role: 'Associate Consultant', companyTier: 1, description: 'Entry-level strategy roles for new graduates.', source: 'bcg.com/careers', sourceCategory: 'C' },
+    { company: 'Deloitte', role: 'Strategy & Analytics Consultant', companyTier: 1, description: 'Consulting and business analysts in advisory practices nationwide.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    // Tier 2
+    { company: 'West Monroe', role: 'Business Analyst', companyTier: 2, description: 'Location: Multiple US offices | Digital consulting firm with a startup culture. Responsibilities: Client analysis, process improvement, technology advisory. Compensation: $75,000-85,000 base + bonus + profit sharing. Strong alumni network makes CFF intros extremely effective.', source: 'westmonroe.com/careers', sourceCategory: 'B' },
+    { company: 'Slalom', role: 'Business Analyst', companyTier: 2, description: 'Location: Multiple US cities | Modern consulting firm with local market model. Responsibilities: Strategy and tech consulting, client workshops, delivery. Requirements: Bachelor degree, analytical skills, communication. Compensation: $70,000-85,000 base + bonus, excellent benefits.', source: 'slalom.com/careers', sourceCategory: 'B' },
+    // Tier 3
+    { company: 'Boutique Strategy Firm', role: 'Junior Consultant', companyTier: 3, description: 'Location: Remote-friendly | Founder-led strategy consultancy hiring via r/consulting megathread — direct email contact, no ATS. Team of 15 analysts. A referral from an alum at the firm skips every step.', source: 'reddit.com/r/consulting', sourceCategory: 'D' },
+    { company: 'Clarkston Consulting', role: 'Associate Consultant', companyTier: 3, description: 'Location: Multiple US offices | 300-person boutique specializing in consumer goods and life sciences. Responsibilities: Client deliverables, data analysis, process design. Compensation: $65,000-75,000 base + bonus. Less name recognition than MBB — meaning your alumni intro carries much more weight.', source: 'clarktonconsulting.com/careers', sourceCategory: 'B' },
   ],
   'professional services': [
-    { company: 'Deloitte', role: 'Consulting Analyst', description: 'Advisory associates in strategy, digital, and operations.', source: 'deloitte.com/careers', sourceCategory: 'C' },
-    { company: 'EY', role: 'Associate', description: 'Entry-level roles across audit, tax, and advisory.', source: 'ey.com/careers', sourceCategory: 'C' },
-    { company: 'KPMG', role: 'Advisory Associate', description: 'Associate-level hiring across US offices.', source: 'kpmg.com/careers', sourceCategory: 'C' },
-    { company: 'McKinsey', role: 'Business Analyst', description: 'Analyst roles for top undergrads entering management consulting.', source: 'mckinsey.com/careers', sourceCategory: 'C' },
+    { company: 'Deloitte', role: 'Consulting Analyst', companyTier: 1, description: 'Advisory associates in strategy, digital, and operations.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'EY', role: 'Associate', companyTier: 1, description: 'Entry-level roles across audit, tax, and advisory.', source: 'ey.com/careers', sourceCategory: 'C' },
+    { company: 'KPMG', role: 'Advisory Associate', companyTier: 1, description: 'Associate-level hiring across US offices.', source: 'kpmg.com/careers', sourceCategory: 'C' },
+    { company: 'McKinsey', role: 'Business Analyst', companyTier: 1, description: 'Analyst roles for top undergrads entering management consulting.', source: 'mckinsey.com/careers', sourceCategory: 'C' },
+    { company: 'West Monroe', role: 'Business Analyst', companyTier: 2, description: 'Digital consulting firm with strong alumni placement and entry-level training.', source: 'westmonroe.com/careers', sourceCategory: 'B' },
+    { company: 'Clarkston Consulting', role: 'Associate Consultant', companyTier: 3, description: 'Boutique 300-person firm — warm intro carries far more weight than at MBB.', source: 'clarktonconsulting.com/careers', sourceCategory: 'B' },
   ],
   'healthcare': [
-    { company: 'HCA Healthcare', role: 'Clinical Coordinator', description: 'Hospital network consistently hiring nurses across hundreds of facilities.', source: 'hcahealthcare.com/careers', sourceCategory: 'C' },
-    { company: 'AdventHealth', role: 'Registered Nurse', description: 'Faith-based hospital network with strong nursing culture.', source: 'adventhealth.com/careers', sourceCategory: 'C' },
-    { company: 'Carbon Health', role: 'Care Coordinator', description: 'Tech-enabled primary care startup rapidly expanding clinical teams.', source: 'carbonhealth.com/careers', sourceCategory: 'B' },
+    // Tier 1
+    { company: 'HCA Healthcare', role: 'Clinical Coordinator', companyTier: 1, description: 'Hospital network consistently hiring nurses across hundreds of facilities.', source: 'hcahealthcare.com/careers', sourceCategory: 'C' },
+    { company: 'AdventHealth', role: 'Registered Nurse', companyTier: 1, description: 'Faith-based hospital network with strong nursing culture.', source: 'adventhealth.com/careers', sourceCategory: 'C' },
+    // Tier 2
+    { company: 'Carbon Health', role: 'Care Coordinator', companyTier: 2, description: 'Location: Multiple US cities | Tech-enabled primary care startup with 100+ clinics. Responsibilities: Patient care coordination, scheduling, care plan follow-up. Compensation: $55,000-65,000 base + equity, full health benefits.', source: 'carbonhealth.com/careers', sourceCategory: 'B' },
+    { company: 'Hims & Hers', role: 'Clinical Operations Analyst', companyTier: 2, description: 'Location: Remote-friendly (US) | Telehealth platform scaling rapidly. Responsibilities: Analyze clinical workflows, coordinate with provider teams, report on outcomes. Compensation: $70,000-85,000 + equity.', source: 'himshers.com/careers', sourceCategory: 'B' },
+    // Tier 3
+    { company: 'Nomi Health', role: 'Operations Associate', companyTier: 3, description: 'Location: Remote-first | Series B direct healthcare company. Team of 250 reimagining employer health benefits. A warm intro from an alum or parent on the team gets you a call with the hiring manager within days.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Grow Therapy', role: 'Clinical Network Associate', companyTier: 3, description: 'Location: Remote-first | Series B mental health startup growing 3x YoY. Responsibilities: Onboard therapist partners, manage clinical compliance, support patient matching. Compensation: $60,000-70,000 + equity. Alumni intro = almost guaranteed recruiter screen.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'healthcare & pharmaceuticals': [
-    { company: 'HCA Healthcare', role: 'Clinical Coordinator', description: 'Hospital network consistently hiring nurses across hundreds of facilities.', source: 'hcahealthcare.com/careers', sourceCategory: 'C' },
-    { company: 'CVS Health', role: 'Pharmacy Operations Analyst', description: 'Hiring clinical and operations staff for pharmacy and MinuteClinic.', source: 'cvshealth.com/careers', sourceCategory: 'C' },
+    { company: 'HCA Healthcare', role: 'Clinical Coordinator', companyTier: 1, description: 'Hospital network consistently hiring nurses across hundreds of facilities.', source: 'hcahealthcare.com/careers', sourceCategory: 'C' },
+    { company: 'CVS Health', role: 'Pharmacy Operations Analyst', companyTier: 1, description: 'Hiring clinical and operations staff for pharmacy and MinuteClinic.', source: 'cvshealth.com/careers', sourceCategory: 'C' },
+    { company: 'Hims & Hers', role: 'Clinical Operations Analyst', companyTier: 2, description: 'Telehealth platform with 800+ employees scaling rapidly.', source: 'himshers.com/careers', sourceCategory: 'B' },
+    { company: 'Grow Therapy', role: 'Clinical Network Associate', companyTier: 3, description: 'Series B mental health startup — warm intro = near-guaranteed first interview.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'marketing': [
-    { company: 'Procter & Gamble', role: 'Brand Management Associate', description: 'Brand management and operations rotational roles for recent grads.', source: 'pg.com/careers', sourceCategory: 'C' },
-    { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
-    { company: 'Ogilvy', role: 'Creative Account Manager', description: 'Creative and account management roles for recent grads in advertising.', source: 'ogilvy.com/careers', sourceCategory: 'B' },
+    // Tier 1
+    { company: 'Procter & Gamble', role: 'Brand Management Associate', companyTier: 1, description: 'Brand management and operations rotational roles for recent grads.', source: 'pg.com/careers', sourceCategory: 'C' },
+    { company: 'Ogilvy', role: 'Account Coordinator', companyTier: 1, description: 'Creative and account management roles for recent grads in advertising.', source: 'ogilvy.com/careers', sourceCategory: 'B' },
+    // Tier 2
+    { company: 'Edelman', role: 'PR Account Coordinator', companyTier: 2, description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
+    { company: 'Klaviyo', role: 'Marketing Operations Analyst', companyTier: 2, description: 'Location: Boston, MA / Remote | E-commerce marketing platform post-IPO. Responsibilities: Campaign analysis, marketing automation, cross-channel reporting. Compensation: $75,000-90,000 + equity.', source: 'klaviyo.com/careers', sourceCategory: 'B' },
+    // Tier 3
+    { company: 'Attentive', role: 'Growth Marketing Associate', companyTier: 3, description: 'Location: Remote-friendly | Series E SMS marketing platform. Responsibilities: Campaign management, performance analysis, A/B testing. Compensation: $65,000-80,000 + equity. 500-person team where alumni intro = hiring manager fast-track.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Triple Whale', role: 'Marketing Analyst', companyTier: 3, description: 'Location: Remote-first | Series B e-commerce analytics startup. Team of 120. Alumni or parent connection goes directly to the marketing lead — no ATS black hole.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'creative': [
-    { company: 'Superside', role: 'Junior Creative Strategist', description: 'Remote-first creative agency — posted on Working Not Working, not on LinkedIn. Applicant pool is a fraction of mainstream job boards.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
-    { company: 'Figma', role: 'Brand Designer', description: 'Design tool powerhouse — role posted on Dribbble Jobs to reach designers actively sharing their work.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
-    { company: 'Mailchimp', role: 'UX Writer', description: 'Strong brand and content culture — curated on Key Values for candidates who care about autonomy and craft.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
-    { company: 'Jobbio Creative Agency', role: 'Content Strategist', description: 'Boutique agency matched on Jobbio for culture alignment — much less noise than a LinkedIn Easy Apply.', source: 'jobbio.com', sourceCategory: 'E', nichePlatform: 'jobbio' },
+    // Tier 1
+    { company: 'Ogilvy', role: 'Junior Art Director', companyTier: 1, description: 'Global creative agency — junior creative and art direction roles for new talent.', source: 'ogilvy.com/careers', sourceCategory: 'C' },
+    // Tier 2
+    { company: 'Figma', role: 'Brand Designer', companyTier: 2, description: 'Design tool powerhouse — role posted on Dribbble Jobs to reach designers actively sharing their work.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    { company: 'Superside', role: 'Junior Creative Strategist', companyTier: 2, description: 'Remote-first creative agency — posted on Working Not Working, not on LinkedIn. Applicant pool is a fraction of mainstream job boards.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
+    // Tier 3
+    { company: 'Mailchimp', role: 'UX Writer', companyTier: 2, description: 'Strong brand and content culture — curated on Key Values for candidates who care about autonomy and craft.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
+    { company: 'Contra', role: 'Brand Designer', companyTier: 3, description: 'Location: Remote-first | Series B freelance platform for independents. Team of 60. Responsibilities: Visual identity, campaign assets, design system contributions. An alumni connection here = direct portfolio review from the creative lead.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Jobbio Creative Agency', role: 'Content Strategist', companyTier: 3, description: 'Boutique agency matched on Jobbio for culture alignment — much less noise than a LinkedIn Easy Apply.', source: 'jobbio.com', sourceCategory: 'E', nichePlatform: 'jobbio' },
   ],
   'advertising & pr': [
-    { company: 'Edelman', role: 'PR Account Coordinator', description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
-    { company: 'Weber Shandwick', role: 'PR Associate', description: 'Hiring entry-level PR and communications associates.', source: 'webershandwick.com/careers', sourceCategory: 'B' },
-    { company: 'WPP', role: 'Strategy Analyst', description: 'Global holding company with entry-level roles across agency brands.', source: 'wpp.com/careers', sourceCategory: 'C' },
-    { company: 'Independent Creative Agency', role: 'Junior Copywriter', description: 'Boutique creative agency posting directly in r/design weekly thread — DM founder with portfolio link.', source: 'reddit.com/r/design', sourceCategory: 'D' },
-    { company: 'Global Creative Studio', role: 'Art Director (Junior)', description: 'Curated by Working Not Working — only top-tier creative studios recruit on this platform. 90% fewer applicants than a job posted on LinkedIn.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
+    // Tier 1
+    { company: 'Edelman', role: 'PR Account Coordinator', companyTier: 1, description: "World's largest PR firm — hiring communications and PR associates.", source: 'edelman.com/careers', sourceCategory: 'C' },
+    { company: 'WPP', role: 'Strategy Analyst', companyTier: 1, description: 'Global holding company with entry-level roles across agency brands.', source: 'wpp.com/careers', sourceCategory: 'C' },
+    // Tier 2
+    { company: 'Weber Shandwick', role: 'PR Associate', companyTier: 2, description: 'Hiring entry-level PR and communications associates.', source: 'webershandwick.com/careers', sourceCategory: 'B' },
+    { company: 'Klaviyo', role: 'Content Marketing Associate', companyTier: 2, description: 'Location: Boston, MA / Remote | Post-IPO e-commerce marketing platform. Responsibilities: Blog content, case studies, social copy, SEO. Compensation: $65,000-80,000 + equity.', source: 'klaviyo.com/careers', sourceCategory: 'B' },
+    // Tier 3
+    { company: 'Independent Creative Agency', role: 'Junior Copywriter', companyTier: 3, description: 'Boutique creative agency posting directly in r/design weekly thread — DM founder with portfolio link. 20-person shop where a parent referral gets you a same-week interview.', source: 'reddit.com/r/design', sourceCategory: 'D' },
+    { company: 'Global Creative Studio', role: 'Art Director (Junior)', companyTier: 3, description: 'Curated by Working Not Working — only top-tier creative studios recruit on this platform. 90% fewer applicants than a job posted on LinkedIn.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
   ],
   'real_estate': [
-    { company: 'CBRE', role: 'Real Estate Analyst', description: "World's largest commercial real estate services firm hiring analysts.", source: 'cbre.com/careers', sourceCategory: 'C' },
-    { company: 'JLL', role: 'Research Associate', description: 'Global RE firm with strong graduate development programs.', source: 'jll.com/careers', sourceCategory: 'C' },
+    { company: 'CBRE', role: 'Real Estate Analyst', companyTier: 1, description: "World's largest commercial real estate services firm hiring analysts.", source: 'cbre.com/careers', sourceCategory: 'C' },
+    { company: 'JLL', role: 'Research Associate', companyTier: 1, description: 'Global RE firm with strong graduate development programs.', source: 'jll.com/careers', sourceCategory: 'C' },
+    { company: 'Opendoor', role: 'Operations Analyst', companyTier: 2, description: 'Location: Remote-friendly (US) | Tech-enabled homebuying platform. Responsibilities: Market analysis, transaction ops, pricing models. Compensation: $80,000-95,000 + equity.', source: 'opendoor.com/careers', sourceCategory: 'B' },
+    { company: 'Pacaso', role: 'Market Associate', companyTier: 3, description: 'Location: Remote-first | Series C fractional vacation home startup. Team of 250. A warm intro from an alum on the sales or ops team skips all recruiter steps.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'construction & agriculture': [
-    { company: 'Turner Construction', role: 'Project Engineer', description: 'One of the largest construction firms — hiring project managers and engineers nationwide.', source: 'turnerconstruction.com/careers', sourceCategory: 'C' },
-    { company: 'CBRE', role: 'Project Manager', description: "World's largest commercial real estate services firm — project management division.", source: 'cbre.com/careers', sourceCategory: 'C' },
-    { company: 'Procore', role: 'Implementation Analyst', description: 'Construction management software — sales, support, and analyst roles.', source: 'procore.com/careers', sourceCategory: 'B' },
+    { company: 'Turner Construction', role: 'Project Engineer', companyTier: 1, description: 'One of the largest construction firms — hiring project managers and engineers nationwide.', source: 'turnerconstruction.com/careers', sourceCategory: 'C' },
+    { company: 'CBRE', role: 'Project Manager', companyTier: 1, description: "World's largest commercial real estate services firm — project management division.", source: 'cbre.com/careers', sourceCategory: 'C' },
+    { company: 'Procore', role: 'Implementation Analyst', companyTier: 2, description: 'Construction management software — sales, support, and analyst roles.', source: 'procore.com/careers', sourceCategory: 'B' },
+    { company: 'Deepfield Robotics', role: 'Operations Associate', companyTier: 3, description: 'Location: Remote-friendly | Series A precision agriculture startup. Team of 80. Responsibilities: Manage field partner relationships, track deployment data, support product rollout. Alumni intro = direct team access.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'education': [
-    { company: 'Teach For America', role: 'Corps Member', description: 'Two-year teaching fellowship placing grads in under-resourced schools.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
-    { company: 'Duolingo', role: 'Curriculum Analyst', description: 'Language learning platform hiring for content and product roles.', source: 'duolingo.com/careers', sourceCategory: 'B' },
+    { company: 'Teach For America', role: 'Corps Member', companyTier: 1, description: 'Two-year teaching fellowship placing grads in under-resourced schools.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
+    { company: 'Duolingo', role: 'Curriculum Analyst', companyTier: 2, description: 'Language learning platform hiring for content and product roles.', source: 'duolingo.com/careers', sourceCategory: 'B' },
+    { company: 'Synthesis', role: 'Learning Experience Associate', companyTier: 3, description: 'Location: Remote-first | Series A edtech startup spun out of SpaceX. Team of 100. Responsibilities: Design learning experiences, analyze student outcomes, work with instructors. Alumni connection here = direct conversation with the curriculum team.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Primer', role: 'Education Operations Associate', companyTier: 3, description: 'Location: Remote-first | Series B AI tutoring platform. Team of 60. Responsibilities: Support school partnerships, track learning outcomes, assist curriculum development. Compensation: $60,000-75,000 + equity. An alumni intro = founder-level visibility.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'education & training': [
-    { company: 'Teach For America', role: 'Corps Member', description: 'Two-year teaching fellowship in under-resourced schools.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
-    { company: 'Duolingo', role: 'Curriculum Analyst', description: 'Language learning platform hiring for content and product roles.', source: 'duolingo.com/careers', sourceCategory: 'B' },
+    { company: 'Teach For America', role: 'Corps Member', companyTier: 1, description: 'Two-year teaching fellowship in under-resourced schools.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
+    { company: 'Duolingo', role: 'Curriculum Analyst', companyTier: 2, description: 'Language learning platform hiring for content and product roles.', source: 'duolingo.com/careers', sourceCategory: 'B' },
+    { company: 'Synthesis', role: 'Learning Experience Associate', companyTier: 3, description: 'Series A edtech from SpaceX — team of 100, direct curriculum team access via alumni intro.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'nonprofit': [
-    { company: 'Teach For America', role: 'Program Associate', description: 'Educational non-profit with operations and program roles.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
-    { company: 'Code for America', role: 'Civic Tech Fellow', description: 'Non-profit improving government services through technology.', source: 'codeforamerica.org/careers', sourceCategory: 'B' },
+    { company: 'Teach For America', role: 'Program Associate', companyTier: 1, description: 'Educational non-profit with operations and program roles.', source: 'teachforamerica.org/join-tfa', sourceCategory: 'C' },
+    { company: 'Code for America', role: 'Civic Tech Fellow', companyTier: 2, description: 'Non-profit improving government services through technology.', source: 'codeforamerica.org/careers', sourceCategory: 'B' },
+    { company: 'GiveDirectly', role: 'Operations Associate', companyTier: 3, description: 'Location: Remote-friendly | High-impact international nonprofit. Team of 200. Responsibilities: Program support, data analysis, partner coordination. Alumni at GiveDirectly are actively connected to the CFF network and can refer directly.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'government': [
-    { company: 'Booz Allen Hamilton', role: 'Government Analyst', description: 'Government consulting firm with strong entry-level programs.', source: 'boozallen.com/careers', sourceCategory: 'C' },
-    { company: 'Deloitte Government', role: 'Federal Consultant', description: 'Federal consulting division hiring for public sector projects.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'Booz Allen Hamilton', role: 'Government Analyst', companyTier: 1, description: 'Government consulting firm with strong entry-level programs.', source: 'boozallen.com/careers', sourceCategory: 'C' },
+    { company: 'Deloitte Government', role: 'Federal Consultant', companyTier: 1, description: 'Federal consulting division hiring for public sector projects.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'Palantir', role: 'Forward Deployed Software Engineer', companyTier: 2, description: 'Location: Multiple US cities | Data analytics platform with major government contracts. Responsibilities: Deploy and customize software for government clients, solve mission-critical problems. Strong alumni pipeline.', source: 'palantir.com/careers', sourceCategory: 'B' },
   ],
   'government & public sector': [
-    { company: 'Booz Allen Hamilton', role: 'Government Analyst', description: 'Government consulting firm with strong entry-level programs.', source: 'boozallen.com/careers', sourceCategory: 'C' },
-    { company: 'Deloitte Government', role: 'Federal Consultant', description: 'Federal consulting division hiring for public sector projects.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'Booz Allen Hamilton', role: 'Government Analyst', companyTier: 1, description: 'Government consulting firm with strong entry-level programs.', source: 'boozallen.com/careers', sourceCategory: 'C' },
+    { company: 'Deloitte Government', role: 'Federal Consultant', companyTier: 1, description: 'Federal consulting division hiring for public sector projects.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+    { company: 'Palantir', role: 'Forward Deployed Software Engineer', companyTier: 2, description: 'Data analytics platform with major government contracts. Alumni network is well-represented.', source: 'palantir.com/careers', sourceCategory: 'B' },
   ],
   'sports & entertainment': [
-    { company: 'Live Nation', role: 'Marketing Coordinator', description: "World's largest live entertainment company — events and operations roles.", source: 'livenation.com/careers', sourceCategory: 'C' },
-    { company: 'ESPN', role: 'Content Associate', description: 'Hiring for content, production, and marketing roles in sports media.', source: 'espncareers.com', sourceCategory: 'B' },
-    { company: 'Nike', role: 'Brand Marketing Associate', description: 'Brand marketing and product roles for sports or business backgrounds.', source: 'jobs.nike.com', sourceCategory: 'C' },
+    // Tier 1
+    { company: 'Live Nation', role: 'Marketing Coordinator', companyTier: 1, description: "World's largest live entertainment company — events and operations roles.", source: 'livenation.com/careers', sourceCategory: 'C' },
+    { company: 'Nike', role: 'Brand Marketing Associate', companyTier: 1, description: 'Brand marketing and product roles for sports or business backgrounds.', source: 'jobs.nike.com', sourceCategory: 'C' },
+    // Tier 2
+    { company: 'ESPN', role: 'Content Associate', companyTier: 2, description: 'Hiring for content, production, and marketing roles in sports media.', source: 'espncareers.com', sourceCategory: 'B' },
+    { company: 'Overtime', role: 'Social Media Coordinator', companyTier: 2, description: 'Location: New York, NY | Digital sports media brand serving Gen Z. Responsibilities: Create social content, manage channels, analyze performance. Compensation: $55,000-70,000 + equity.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    // Tier 3
+    { company: 'Buzzer', role: 'Growth Associate', companyTier: 3, description: 'Location: Remote-friendly | Series B sports streaming platform. Team of 70. Responsibilities: User acquisition, partnership activation, marketing operations. Alumni intro = direct conversation with the VP of Growth.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Athlete Studio', role: 'Brand Operations Associate', companyTier: 3, description: 'Location: Los Angeles / Remote | Seed-stage athlete media company. Team of 25. Responsibilities: Manage athlete partnerships, coordinate content production, track brand deals. A warm intro from a CFF alum or parent skips every recruiter barrier.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'media and entertainment': [
-    { company: 'Netflix', role: 'Junior Content Designer', description: 'Location: Remote-friendly (US) | Hybrid options. Responsibilities: Design product features for 250M+ subscribers, create user journey maps, collaborate with engineering on interface improvements. Requirements: Bachelor in Design/UX, 1-2 years product design experience, Figma expertise, strong portfolio. Compensation: $95,000-115,000 base + equity, premium health/dental/vision, unlimited PTO, content stipend.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-    { company: 'Disney', role: 'Content Coordinator', description: 'Location: Multiple US offices | Hybrid options. Responsibilities: Manage editorial calendars for Disney+/Hulu/ESPN+, coordinate content rollout schedules, track deliverables across teams. Requirements: Bachelor in Communications/Media, excellent writing skills, project management experience, passion for streaming. Compensation: $70,000-80,000 base + bonus, Disney+ bundle, comprehensive benefits.', source: 'disney.com/careers', sourceCategory: 'C' },
-    { company: 'Spotify', role: 'UX Writer', description: 'Location: New York, NY | Remote-friendly. Responsibilities: Craft voice/tone for world\'s largest audio platform, write app copy and onboarding flows, partner with product designers. Requirements: 2+ years UX writing, portfolio of shipped digital products, collaboration skills. Compensation: $100,000-120,000 base + equity, Spotify Premium Family, wellness stipend, parental leave.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
-    { company: 'BuzzFeed', role: 'Junior Content Strategist', description: 'Location: New York, NY | Hybrid. Responsibilities: Develop branded content campaigns, work with editorial teams on social-first strategies, analyze performance metrics. Requirements: Bachelor in Marketing/Communications, 1-2 years content experience, social media expertise. Compensation: $65,000-75,000 base + performance bonus, health benefits, flexible PTO, creative freedom.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
-    { company: 'Hulu', role: 'Brand Designer', description: 'Location: Remote-friendly (US) | Hybrid options. Responsibilities: Create visual assets for Hulu brand campaigns, design marketing materials, maintain brand consistency across platforms. Requirements: Bachelor in Graphic Design, strong portfolio, Adobe Creative Suite mastery. Compensation: $85,000-100,000 base + bonus, Hulu subscription, health coverage, professional development budget.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
-    { company: 'Warner Bros Discovery', role: 'Social Media Coordinator', description: 'Location: New York, NY | Hybrid. Responsibilities: Manage social channels for HBO Max/CNN/DC, create engaging content, monitor community engagement, track analytics. Requirements: Bachelor in Marketing/Communications, 1+ years social media experience, knowledge of entertainment landscape. Compensation: $60,000-70,000 base + bonus, Max subscription, full benefits, career growth opportunities.', source: 'wbd.com/careers', sourceCategory: 'C' },
+    // Tier 1
+    { company: 'Netflix', role: 'Junior Content Designer', companyTier: 1, description: 'Location: Remote-friendly (US) | Hybrid options. Responsibilities: Design product features for 250M+ subscribers, create user journey maps, collaborate with engineering. Requirements: Bachelor in Design/UX, 1-2 years product design experience, Figma expertise. Compensation: $95,000-115,000 base + equity, premium health/dental/vision, unlimited PTO.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Disney', role: 'Content Coordinator', companyTier: 1, description: 'Location: Multiple US offices | Hybrid options. Responsibilities: Manage editorial calendars for Disney+/Hulu/ESPN+, coordinate content rollout schedules, track deliverables. Requirements: Bachelor in Communications/Media, excellent writing skills, project management experience. Compensation: $70,000-80,000 base + bonus, Disney+ bundle, comprehensive benefits.', source: 'disney.com/careers', sourceCategory: 'C' },
+    { company: 'Warner Bros Discovery', role: 'Social Media Coordinator', companyTier: 1, description: 'Location: New York, NY | Hybrid. Responsibilities: Manage social channels for HBO Max/CNN/DC, create engaging content, monitor community engagement. Requirements: Bachelor in Marketing/Communications, 1+ years social media experience. Compensation: $60,000-70,000 base + bonus, Max subscription, full benefits.', source: 'wbd.com/careers', sourceCategory: 'C' },
+    // Tier 2
+    { company: 'Spotify', role: 'UX Writer', companyTier: 2, description: 'Location: New York, NY | Remote-friendly. Responsibilities: Craft voice/tone for world\'s largest audio platform, write app copy and onboarding flows, partner with product designers. Requirements: 2+ years UX writing, portfolio of shipped digital products. Compensation: $100,000-120,000 base + equity, Spotify Premium Family, wellness stipend.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    { company: 'Hulu', role: 'Brand Designer', companyTier: 2, description: 'Location: Remote-friendly (US) | Hybrid. Responsibilities: Create visual assets for Hulu brand campaigns, design marketing materials, maintain brand consistency. Compensation: $85,000-100,000 base + bonus, Hulu subscription, professional development budget.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    { company: 'Vox Media', role: 'Editorial Associate', companyTier: 2, description: 'Location: Remote-friendly | Publisher behind The Verge, Vox, NY Mag. Responsibilities: Research, fact-checking, editorial coordination, audience analysis. Compensation: $55,000-68,000 base + benefits. Strong alumni placement in digital media editorial.', source: 'voxmedia.com/careers', sourceCategory: 'B' },
+    // Tier 3
+    { company: 'BuzzFeed', role: 'Junior Content Strategist', companyTier: 3, description: 'Location: New York, NY | Hybrid. Responsibilities: Develop branded content campaigns, work with editorial on social-first strategies, analyze performance metrics. Compensation: $65,000-75,000 base + performance bonus. Alumni intro at BuzzFeed = direct editor conversation.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
+    { company: 'Puck News', role: 'Operations Associate', companyTier: 3, description: 'Location: Remote-first | Series A media startup disrupting political and entertainment journalism. Team of 40. Responsibilities: Operations support, subscriber analytics, editorial coordination. A CFF alumni referral here goes directly to the founding team.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'media & entertainment': [
-    { company: 'Netflix', role: 'Junior Content Designer', description: 'Netflix is hiring junior content designers for their product design team — creative roles with real ownership over how 250M subscribers experience the interface.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-    { company: 'Disney', role: 'Content Coordinator', description: 'Disney Streaming is hiring a Content Coordinator to manage editorial calendars and content rollout across Disney+, Hulu, and ESPN+.', source: 'disney.com/careers', sourceCategory: 'C' },
-    { company: 'Spotify', role: 'UX Writer', description: 'Spotify is looking for a UX writer to craft the voice and language of the world\'s largest audio platform.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
-    { company: 'Hulu', role: 'Brand Designer', description: 'Hulu is sourcing a brand designer for their in-house creative team — posted on Dribbble.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
-    { company: 'Warner Bros Discovery', role: 'Social Media Coordinator', description: 'Entry-level social media coordinator role across WBD\'s flagship properties.', source: 'wbd.com/careers', sourceCategory: 'C' },
+    { company: 'Netflix', role: 'Junior Content Designer', companyTier: 1, description: 'Netflix is hiring junior content designers for their product design team.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Disney', role: 'Content Coordinator', companyTier: 1, description: 'Disney Streaming is hiring a Content Coordinator to manage editorial calendars across Disney+, Hulu, and ESPN+.', source: 'disney.com/careers', sourceCategory: 'C' },
+    { company: 'Warner Bros Discovery', role: 'Social Media Coordinator', companyTier: 1, description: 'Entry-level social media coordinator role across WBD\'s flagship properties.', source: 'wbd.com/careers', sourceCategory: 'C' },
+    { company: 'Spotify', role: 'UX Writer', companyTier: 2, description: 'Spotify is looking for a UX writer to craft the voice of the world\'s largest audio platform.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    { company: 'Hulu', role: 'Brand Designer', companyTier: 2, description: 'Hulu is sourcing a brand designer for their in-house creative team.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    { company: 'Puck News', role: 'Operations Associate', companyTier: 3, description: 'Series A media startup — team of 40, founding team access via alumni intro.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'content & ux design': [
-    { company: 'Figma', role: 'Brand Designer', description: 'Design tool powerhouse — role posted on Dribbble Jobs to reach designers actively sharing their work.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
-    { company: 'Mailchimp', role: 'UX Writer', description: 'Strong brand and content culture — curated on Key Values for candidates who care about autonomy and craft.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
-    { company: 'Superside', role: 'Junior Creative Strategist', description: 'Remote-first creative agency — posted on Working Not Working. Applicant pool is a fraction of mainstream job boards.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
-    { company: 'Webflow', role: 'Junior Content Strategist', description: 'No-code design platform with a strong creative culture — posted exclusively on Wellfound.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-    { company: 'Linear', role: 'Product Designer', description: 'Premium software tool — Key Values listing targeting culture-aligned designers only.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
+    { company: 'Figma', role: 'Brand Designer', companyTier: 2, description: 'Design tool powerhouse — role posted on Dribbble Jobs to reach designers actively sharing their work.', source: 'dribbble.com/jobs', sourceCategory: 'E', nichePlatform: 'dribbble' },
+    { company: 'Mailchimp', role: 'UX Writer', companyTier: 2, description: 'Strong brand and content culture — curated on Key Values for candidates who care about autonomy and craft.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
+    { company: 'Superside', role: 'Junior Creative Strategist', companyTier: 2, description: 'Remote-first creative agency — posted on Working Not Working. Applicant pool is a fraction of mainstream job boards.', source: 'workingnotworking.com', sourceCategory: 'E', nichePlatform: 'workingnotworking' },
+    { company: 'Webflow', role: 'Junior Content Strategist', companyTier: 2, description: 'No-code design platform with a strong creative culture — posted exclusively on Wellfound.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Linear', role: 'Product Designer', companyTier: 3, description: 'Premium software tool — team of 50, Key Values listing targeting culture-aligned designers only.', source: 'keyvalues.com', sourceCategory: 'E', nichePlatform: 'keyvalues' },
+    { company: 'Contra', role: 'Brand Designer', companyTier: 3, description: 'Series B freelance platform — team of 60, alumni intro = direct creative lead conversation.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'logistics': [
-    { company: 'Arrive Logistics', role: 'Account Manager', description: 'Growing freight brokerage — strong entry-level training program.', source: 'arrivelogistics.com/careers', sourceCategory: 'B' },
-    { company: 'Samsara', role: 'Sales Development Rep', description: 'Fleet management platform — sales and operations roles.', source: 'samsara.com/careers', sourceCategory: 'B' },
-    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', description: 'Supply chain and freight brokerage roles with strong training.', source: 'chrobinson.com/careers', sourceCategory: 'C' },
+    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', companyTier: 1, description: 'Supply chain and freight brokerage roles with strong training.', source: 'chrobinson.com/careers', sourceCategory: 'C' },
+    { company: 'Arrive Logistics', role: 'Account Manager', companyTier: 2, description: 'Growing freight brokerage — strong entry-level training program.', source: 'arrivelogistics.com/careers', sourceCategory: 'B' },
+    { company: 'Samsara', role: 'Sales Development Rep', companyTier: 2, description: 'Fleet management platform — sales and operations roles.', source: 'samsara.com/careers', sourceCategory: 'B' },
+    { company: 'Flexport', role: 'Operations Analyst', companyTier: 3, description: 'Location: Remote-friendly | Series E freight platform reinventing global trade. Team of 2,000 but ops teams are lean — alumni intro = hiring manager fast-track.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'transportation & logistics': [
-    { company: 'Arrive Logistics', role: 'Account Manager', description: 'Growing freight brokerage — strong entry-level training program.', source: 'arrivelogistics.com/careers', sourceCategory: 'B' },
-    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', description: 'Supply chain and freight brokerage roles with strong training.', source: 'chrobinson.com/careers', sourceCategory: 'C' },
-    { company: 'Samsara', role: 'Sales Development Rep', description: 'Fleet management platform startup — sales and operations roles.', source: 'samsara.com/careers', sourceCategory: 'B' },
+    { company: 'C.H. Robinson', role: 'Supply Chain Analyst', companyTier: 1, description: 'Supply chain and freight brokerage roles with strong training.', source: 'chrobinson.com/careers', sourceCategory: 'C' },
+    { company: 'Arrive Logistics', role: 'Account Manager', companyTier: 2, description: 'Growing freight brokerage — strong entry-level training program.', source: 'arrivelogistics.com/careers', sourceCategory: 'B' },
+    { company: 'Samsara', role: 'Sales Development Rep', companyTier: 2, description: 'Fleet management platform startup — sales and operations roles.', source: 'samsara.com/careers', sourceCategory: 'B' },
+    { company: 'Flexport', role: 'Operations Analyst', companyTier: 3, description: 'Series E freight startup reinventing global trade — alumni intro skips the recruiter queue entirely.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
 };
 
@@ -358,6 +433,26 @@ Deno.serve(async (req) => {
       seen.add(key);
       return true;
     });
+
+    // ─── Balanced Feed Mix: Enforce ≥30% mid-market/startup (Tier 2/3) ─────
+    // Prevents the feed from being all enterprise brands
+    const tier1 = jobPool.filter(j => (j.companyTier || 1) === 1);
+    const tier23 = jobPool.filter(j => (j.companyTier || 1) >= 2);
+    const totalPool = jobPool.length;
+    const tier23Ratio = totalPool > 0 ? tier23.length / totalPool : 0;
+    if (tier23Ratio < 0.3 && tier23.length < 3) {
+      // Pull in cross-industry Tier 2/3 starters to pad the feed
+      const crossTier23 = [
+        { company: 'Retool', role: 'Implementation Engineer', companyTier: 3, description: 'Location: San Francisco/Remote | Series C internal tools platform. Team of 200. Responsibilities: Implement Retool for enterprise clients, build custom dashboards, ensure successful deployments. Requirements: Technical background, client-facing skills. Compensation: $110,000-140,000 + equity. Alumni intro = founder-level visibility.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+        { company: 'Notion', role: 'Customer Success Manager', companyTier: 2, description: 'Location: Remote-friendly | Productivity platform with 30M+ users. Responsibilities: Onboard enterprise clients, drive adoption, gather product feedback. Compensation: $90,000-110,000 + equity.', source: 'notion.com/careers', sourceCategory: 'B' },
+        { company: 'Vercel', role: 'Solutions Engineer', companyTier: 3, description: 'Location: Remote-first | Series C developer platform. Direct hiring manager intro via alumni.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+      ].filter(j => !SENIOR_FILTER.test(j.role));
+      for (const j of crossTier23) {
+        const key = `${j.company}||${j.role}`;
+        if (!seen.has(key)) { seen.add(key); jobPool.push(j); }
+        if (jobPool.filter(x => (x.companyTier || 1) >= 2).length / jobPool.length >= 0.3) break;
+      }
+    }
 
     // If still empty, use fallback but still try to role-filter it
     if (!jobPool.length) {
@@ -573,6 +668,7 @@ Deno.serve(async (req) => {
           insiderBadge,
           ctaType: realAlumniCount > 0 ? 'message_alumni' : 'connect_parent',
           networkWeight: Math.min(99, matchScore),
+          companyTier: job.companyTier || 1,
           leadTier: 'insider',
         });
 
@@ -593,6 +689,7 @@ Deno.serve(async (req) => {
           parentCount: 0,
           hasParentBonus: false,
           ctaType: 'add_to_pipeline',
+          companyTier: job.companyTier || 1,
           leadTier: 'target',
         });
       }

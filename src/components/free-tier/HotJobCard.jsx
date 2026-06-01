@@ -17,6 +17,13 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr
   const mascot = MASCOT[school] || '🎓';
 
   const isAlumniLed = lead.ctaType === 'message_alumni' || alumniCount > 0;
+  const companyTier = lead?.companyTier || 1;
+  const TIER_BADGE = {
+    1: { label: 'Enterprise', color: 'bg-slate-100 text-slate-600' },
+    2: { label: 'Mid-Market', color: 'bg-blue-50 text-blue-600' },
+    3: { label: '🚀 Startup', color: 'bg-purple-50 text-purple-700' },
+  };
+  const tierBadge = TIER_BADGE[companyTier] || TIER_BADGE[1];
 
   return (
     <div className="border border-orange-100 rounded-2xl bg-white shadow-sm p-5 hover:shadow-md transition flex flex-col justify-between h-[360px]">
@@ -40,7 +47,10 @@ export default function HotJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr
               <p className="text-sm text-gray-500 mt-0.5">{title}</p>
             </div>
           </div>
-          <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-50 text-orange-600 shrink-0">Insider</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-50 text-orange-600 shrink-0">Insider</span>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>{tierBadge.label}</span>
+          </div>
         </div>
 
         <p className="text-xs text-orange-600 font-semibold uppercase tracking-wider mt-4">
