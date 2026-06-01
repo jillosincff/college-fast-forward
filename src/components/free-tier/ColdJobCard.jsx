@@ -90,20 +90,40 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
           </button>
         </div>
         
-        {/* Network status — always shown before interaction */}
-        <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-100 flex items-center gap-2.5">
-          <span className="text-base">🔍</span>
-          <div>
-            <p className="text-xs font-bold text-gray-800">
-              {scoutDeployed ? 'Scan Deployed — Monitoring' : 'Network Scan Active'}
-            </p>
-            <p className="text-[10px] text-gray-500 leading-normal mt-0.5">
-              {scoutDeployed
-                ? "No direct connection found yet. We'll notify you if a path opens up."
-                : 'No direct connections yet. Tap to expand cold outreach support.'}
-            </p>
+        {/* Network status — 3-tier priority signal */}
+        {(lead.alumniCount || 0) + (lead.parentCount || 0) > 0 ? (
+          <div className="mt-5 bg-orange-50 rounded-xl p-3 border border-orange-200 flex items-center gap-2.5">
+            <span className="text-base">🐊</span>
+            <div>
+              <p className="text-xs font-bold text-orange-900">
+                {(lead.alumniCount || 0) + (lead.parentCount || 0)} Insiders Ready
+              </p>
+              <p className="text-[10px] text-orange-700 mt-0.5">
+                Alumni &amp; parents verified at {company}.
+              </p>
+            </div>
           </div>
-        </div>
+        ) : lead.hasSectorParents ? (
+          <div className="mt-5 bg-blue-50 rounded-xl p-3 border border-blue-200 flex items-center gap-2.5">
+            <span className="text-base">💼</span>
+            <div>
+              <p className="text-xs font-bold text-blue-900">Parent Network Connected</p>
+              <p className="text-[10px] text-blue-700 mt-0.5">
+                Verified parent contacts active in this sector.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-5 bg-red-50 rounded-xl p-3 border border-red-200 flex items-center gap-2.5">
+            <span className="text-base">🔥</span>
+            <div>
+              <p className="text-xs font-bold text-red-900">Target Industry Signal</p>
+              <p className="text-[10px] text-red-700 mt-0.5">
+                Verified match for your specific target career track.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Card Action Footer */}
