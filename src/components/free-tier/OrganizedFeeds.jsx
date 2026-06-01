@@ -100,7 +100,7 @@ export default function OrganizedFeeds({ user }) {
 
               <div className="p-4 text-center md:text-left">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Opportunity Pipeline</p>
-                <p className="text-lg font-black text-orange-600 mt-1">{networkStats.warmOpenings} Fresh Discoveries</p>
+                <p className="text-lg font-black text-orange-600 mt-1">{networkStats.warmOpenings} Fresh Opportunities</p>
                 <p className="text-[11px] text-gray-500 mt-0.5">High-match roles found on company websites</p>
               </div>
             </div>
