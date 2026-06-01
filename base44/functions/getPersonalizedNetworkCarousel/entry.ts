@@ -468,9 +468,12 @@ Deno.serve(async (req) => {
       jobPool = fallback;
     }
 
-    // ─── Step 2: Load all network members (alumni + parents) ────────────────
+    // ─── Step 2: Load all network members (alumni + parents) + DiscoveredAlumni ──
     const INVALID = ['self employed', 'selfemployed', 'self-employed', 'retired', 'none', 'n/a', 'unemployed', 'stay at home', 'homemaker', 'between jobs'];
-    const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
+    const [allUsers, discoveredAlumni] = await Promise.all([
+      base44.asServiceRole.entities.User.list('-created_date', 5000),
+      base44.asServiceRole.entities.DiscoveredAlumni.filter({ school_code: (userSchoolCode || 'uf').toUpperCase() }, '-created_date', 1000).catch(() => []),
+    ]);
     
     // Helper: resolve a field from user object, checking both top-level and nested data.*
     const getField = (u, ...keys) => {
@@ -526,6 +529,21 @@ Deno.serve(async (req) => {
       if (matches.length > 0) {
         console.log(`[getPersonalizedNetworkCarousel] ✅ ${job.company}: ${matches.length} school contacts`);
         matches.forEach(u => console.log(`[getPersonalizedNetworkCarousel]   - ${u.full_name} at "${getField(u, 'current_company', 'company', 'employer')}"`));
+      }
+    }
+
+    // Also count DiscoveredAlumni (sourced by scoutCompanyBackdoor) per job company
+    for (const job of jobPool) {
+      const normalizedKey = normalizeCompanyName(job.company);
+      const jobNorm = normalizeForMatch(job.company);
+      const discoveredMatches = (discoveredAlumni || []).filter(a => {
+        const aNorm = normalizeForMatch(a.company || '');
+        return aNorm.length >= 4 && jobNorm.length >= 4 &&
+          (aNorm.includes(jobNorm) || jobNorm.includes(aNorm));
+      });
+      if (discoveredMatches.length > 0) {
+        alumniByCompany[normalizedKey] = (alumniByCompany[normalizedKey] || 0) + discoveredMatches.length;
+        console.log(`[getPersonalizedNetworkCarousel] 🛰️ ${job.company}: +${discoveredMatches.length} DiscoveredAlumni (total: ${alumniByCompany[normalizedKey]})`);
       }
     }
     
