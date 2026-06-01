@@ -38,7 +38,7 @@ const BACKDOOR_LEADS = [
   },
 ];
 
-const COLUMNS = ['OPPORTUNITIES', 'APPLIED', 'INTERVIEWING', 'OFFER 🎉'];
+const COLUMNS = ['OPPORTUNITIES', 'REACHED OUT', 'INTERVIEWING', 'OFFER 🎉'];
 
 function LeadCard({ lead, onOpen, columnId, onTriggerNudge, onDelete, cardIndex, columnKey }) {
   const emailSyncActive = lead.emailSyncStatus === 'active';
@@ -219,7 +219,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   const t = theme || { primary: '#2563eb' };
   const [cards, setCards] = useState({
     'OPPORTUNITIES': [],
-    'APPLIED': [],
+    'REACHED OUT': [],
     'INTERVIEWING': [],
     'OFFER 🎉': [],
   });
@@ -238,7 +238,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
         
         const newCards = {
           'OPPORTUNITIES': [],
-          'APPLIED': [],
+          'REACHED OUT': [],
           'INTERVIEWING': [],
           'OFFER 🎉': [],
         };
@@ -259,7 +259,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
 
           // Map status to column - ONLY show active applications
           if (app.status === 'applied' || app.status === 'in_review') {
-            newCards['APPLIED'].push(card);
+            newCards['REACHED OUT'].push(card);
           } else if (app.status === 'interview') {
             newCards['INTERVIEWING'].push(card);
           } else if (app.status === 'closed') {
@@ -271,7 +271,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
 
         console.log('[Pipeline] Cards by column:', {
           opportunities: newCards['OPPORTUNITIES'].length,
-          applied: newCards['APPLIED'].length,
+          applied: newCards['REACHED OUT'].length,
           interviewing: newCards['INTERVIEWING'].length,
           offer: newCards['OFFER 🎉'].length,
         });
@@ -365,7 +365,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     setCards(prev => ({
       ...prev,
       'OPPORTUNITIES': prev['OPPORTUNITIES'].filter(l => l.company !== lead.company || l.role !== lead.role),
-      'APPLIED': [...prev['APPLIED'], { ...lead, appliedDate: new Date().toISOString(), tailoredResume }],
+      'REACHED OUT': [...prev['REACHED OUT'], { ...lead, appliedDate: new Date().toISOString(), tailoredResume }],
     }));
     setSelectedLead(null);
   };
@@ -438,7 +438,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#111827', margin: 0 }}>My Application Pipeline</p>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#16a34a', margin: 0, fontWeight: 600 }}>✅ Unlimited tracking · {cards['OPPORTUNITIES'].length + cards['APPLIED'].length + cards['INTERVIEWING'].length + cards['OFFER 🎉'].length} opportunities tracked</p>
+            <p style={{ fontFamily: dm, fontSize: 11, color: '#16a34a', margin: 0, fontWeight: 600 }}>✅ Unlimited tracking · {cards['OPPORTUNITIES'].length + cards['REACHED OUT'].length + cards['INTERVIEWING'].length + cards['OFFER 🎉'].length} opportunities tracked</p>
           </div>
         </div>
 
@@ -480,7 +480,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           {cards[activeCol]?.map((item, i) => (
             <LeadCard
               key={i} lead={item}
-              columnId={activeCol === 'OPPORTUNITIES' ? 'opportunities' : activeCol === 'APPLIED' ? 'applied' : activeCol === 'INTERVIEWING' ? 'interviewing' : 'offer'}
+              columnId={activeCol === 'OPPORTUNITIES' ? 'opportunities' : activeCol === 'REACHED OUT' ? 'applied' : activeCol === 'INTERVIEWING' ? 'interviewing' : 'offer'}
               onOpen={activeCol === 'OPPORTUNITIES' ? handleLeadOpen : setSelectedCard}
               onDelete={handleDeleteCard} cardIndex={i} columnKey={activeCol}
             />
@@ -516,7 +516,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
                     {col === 'OPPORTUNITIES'
                       ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} onDelete={handleDeleteCard} cardIndex={i} columnKey={col} />)
                       : cards[col].map((item, i) => (
-                          <LeadCard key={i} lead={item} columnId={col === 'APPLIED' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} onTriggerNudge={handleTriggerNudge} onDelete={handleDeleteCard} cardIndex={i} columnKey={col} />
+                          <LeadCard key={i} lead={item} columnId={col === 'REACHED OUT' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} onTriggerNudge={handleTriggerNudge} onDelete={handleDeleteCard} cardIndex={i} columnKey={col} />
                         ))
                     }
                     {newCard.col === col ? (

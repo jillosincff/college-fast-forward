@@ -615,7 +615,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
                     color: isActive ? stage.color : '#6b7280',
                     margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em',
                   }}>
-                    {isMobile ? stage.label.substring(0, 3).toUpperCase() : stage.label}
+                    {isMobile ? (stage.key === 'applied' ? 'RCVD' : stage.label.substring(0, 3).toUpperCase()) : stage.label}
                   </p>
                 </div>
                 <span style={{
