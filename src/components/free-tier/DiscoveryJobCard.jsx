@@ -2,10 +2,13 @@ import { useState } from 'react';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr }) {
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr, onDismiss }) {
   const [isScouting, setIsScouting] = useState(false);
   const [scoutDeployed, setScoutDeployed] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
   const school = schoolAbbr || lead.schoolAbbr || 'UF';
   const mascot = MASCOT[school] || '🎓';
   const insiderCount = (lead.alumniCount || 0) + (lead.parentCount || 0);
@@ -33,9 +36,19 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
         {/* Card Header */}
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 leading-tight truncate max-w-[70%]">{lead.company}</h4>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase tracking-wide">
-            Discovery
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-50 text-green-600 uppercase tracking-wide">
+              New
+            </span>
+            <button
+              onClick={() => setDismissed(true)}
+              className="text-gray-300 hover:text-gray-500 transition text-sm leading-none"
+              title="Not interested"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{lead.role}</p>
         

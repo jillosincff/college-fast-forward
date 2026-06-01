@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 
-export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
+export default function ColdJobCard({ lead, onAddToPipeline, onSelect, onDismiss }) {
   const [isScouting, setIsScouting] = useState(false);
   const [scoutDeployed, setScoutDeployed] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed) return null;
 
   const company = lead?.company || lead?.companyName || 'Unknown Company';
   const role = lead?.role || lead?.title || 'Open Role';
@@ -71,9 +74,19 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect }) {
         {/* Card Header */}
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 leading-tight truncate max-w-[70%]">{company}</h4>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-600 uppercase tracking-wide">
-            Discovery
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-green-50 text-green-600 uppercase tracking-wide">
+              New
+            </span>
+            <button
+              onClick={() => setDismissed(true)}
+              className="text-gray-300 hover:text-gray-500 transition text-sm leading-none"
+              title="Not interested"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{role}</p>
         

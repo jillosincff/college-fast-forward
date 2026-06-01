@@ -173,7 +173,7 @@ export default function OrganizedFeeds({ user }) {
         ) : targetedDiscoveries.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {targetedDiscoveries.map((lead, idx) => (
-              <ColdJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} />
+              <ColdJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} onDismiss={() => {}} />
             ))}
           </div>
         ) : (

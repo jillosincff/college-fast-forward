@@ -6,7 +6,7 @@ import MobileSwipeStack from './MobileSwipeStack';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-const INITIAL_SHOW = 6;
+const INITIAL_SHOW = 9;
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp }) {
   const [selectedLead, setSelectedLead] = useState(null);
@@ -134,13 +134,13 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-lg">🛰️</span>
             <h3 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
-              Discoveries ({isLoading ? '…' : targetedDiscoveries.length})
+              Opportunities ({isLoading ? '…' : targetedDiscoveries.length})
             </h3>
             <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
               Scouting
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block shrink-0">Niche boards</span>
+          <span className="text-xs text-gray-400 font-medium hidden sm:block shrink-0">Company websites</span>
         </div>
 
         {isLoading ? (
@@ -167,7 +167,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
                 className="hidden md:block w-full mt-2 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors"
                 style={{ minHeight: 'auto', cursor: 'pointer' }}
               >
-                {showAllDiscoveries ? `▲ Show fewer` : `▼ Show ${targetedDiscoveries.length - INITIAL_SHOW} more discoveries`}
+                {showAllDiscoveries ? `▲ Show fewer` : `▼ Show ${targetedDiscoveries.length - INITIAL_SHOW} more opportunities`}
               </button>
             )}
           </>
