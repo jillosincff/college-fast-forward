@@ -1,0 +1,69 @@
+{
+  "name": "UserBadge",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who earned the badge"
+    },
+    "badge_type": {
+      "type": "string",
+      "enum": [
+        "parent_verified",
+        "network_expanding",
+        "supported_family",
+        "founding_gator",
+        "helper_streak",
+        "top_connector",
+        "first_conversation",
+        "follow_up_pro",
+        "five_star_networker",
+        "rising_star",
+        "fast_tracked",
+        "comeback_kid",
+        "streak_master"
+      ],
+      "description": "Type of badge earned"
+    },
+    "badge_name": {
+      "type": "string",
+      "description": "Display name of the badge"
+    },
+    "badge_description": {
+      "type": "string",
+      "description": "What the badge represents"
+    },
+    "badge_icon": {
+      "type": "string",
+      "description": "Emoji or icon for the badge"
+    },
+    "earned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the badge was earned"
+    },
+    "granted_by_parent_email": {
+      "type": "string",
+      "description": "Email of parent who triggered this badge (for family badges)"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional badge data",
+      "default": {}
+    }
+  },
+  "required": [
+    "user_id",
+    "badge_type",
+    "badge_name",
+    "earned_at"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

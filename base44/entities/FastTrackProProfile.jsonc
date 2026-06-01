@@ -1,0 +1,174 @@
+{
+  "name": "FastTrackProProfile",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "target_companies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Up to 5 target companies"
+    },
+    "target_industry": {
+      "type": "string",
+      "description": "Comma-separated target industries"
+    },
+    "target_role": {
+      "type": "string",
+      "description": "Comma-separated target role types (e.g. Marketing, Engineering, Finance)"
+    },
+    "position_type": {
+      "type": "string",
+      "description": "What type of position they are looking for (summer_internship, semester_internship, entry_level, experienced, exploring)"
+    },
+    "job_search_type": {
+      "type": "string",
+      "description": "What the student is looking for right now (internship, entry_level, co_op, exploring)"
+    },
+    "start_timeline": {
+      "type": "string",
+      "description": "When they are looking to start (immediately, summer_2026, fall_2026, spring_2027, after_graduation, browsing)"
+    },
+    "career_timeline": {
+      "type": "string",
+      "description": "Legacy: When they want to start working"
+    },
+    "biggest_challenge": {
+      "type": "string",
+      "description": "Primary job search challenge"
+    },
+    "current_stage": {
+      "type": "string",
+      "description": "Current career search stage"
+    },
+    "assessment_complete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the initial assessment is complete"
+    },
+    "pro_tier": {
+      "type": "string",
+      "default": "free_trial",
+      "description": "Pro subscription tier"
+    },
+    "company_size_preference": {
+      "type": "string",
+      "description": "Preferred company size (large, mid_size, startup, no_preference)"
+    },
+    "location_preference": {
+      "type": "string",
+      "description": "Preferred work location"
+    },
+    "greek_organization": {
+      "type": "string",
+      "description": "Fraternity or sorority name (optional, e.g. Kappa Delta, Sigma Chi)"
+    },
+    "companies_researched": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of companies researched via agent"
+    },
+    "alumni_discovered": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of alumni discovered via agent"
+    },
+    "messages_drafted": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of outreach messages drafted"
+    },
+    "roadmaps_generated": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of roadmaps generated via agent"
+    },
+    "roadmap_steps": {
+      "type": "string",
+      "description": "JSON string of roadmap steps with completion state"
+    },
+    "roadmap_completed_items": {
+      "type": "string",
+      "description": "JSON string of completed action item keys"
+    },
+    "new_alerts_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of unseen scouted opportunities"
+    },
+    "last_scout_run": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the weekly scout last ran for this profile"
+    },
+    "weekly_scout_summary": {
+      "type": "string",
+      "description": "JSON string of the latest weekly scout summary"
+    },
+    "resume_text": {
+      "type": "string",
+      "description": "Student's resume text for AI analysis"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "Student's LinkedIn profile URL"
+    },
+    "active_flow": {
+      "type": "string",
+      "description": "Current multi-step flow in progress (e.g. resume_builder, interview_prep). Null when no flow active."
+    },
+    "flow_step": {
+      "type": "string",
+      "description": "Current step within the active flow (e.g. contact_info, education, experience, skills, projects, complete)"
+    },
+    "flow_data": {
+      "type": "string",
+      "description": "JSON string of accumulated data collected during the active flow"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "parent"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

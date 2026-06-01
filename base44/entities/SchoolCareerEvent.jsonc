@@ -1,0 +1,79 @@
+{
+  "name": "SchoolCareerEvent",
+  "type": "object",
+  "properties": {
+    "school_code": {
+      "type": "string",
+      "default": "UF",
+      "description": "School identifier (e.g. UF)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Full event name/title"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event start date/time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event end date/time (null if single-day)"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Application/registration deadline"
+    },
+    "description": {
+      "type": "string",
+      "description": "Short 1-2 sentence summary"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "career_trek",
+        "career_fair",
+        "workshop",
+        "resume_lab",
+        "drop_in",
+        "virtual_series",
+        "info_session",
+        "other"
+      ],
+      "description": "Type of career event"
+    },
+    "url": {
+      "type": "string",
+      "description": "Direct link to event page or registration"
+    },
+    "location": {
+      "type": "string",
+      "description": "Physical or virtual location"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the event is still upcoming/relevant"
+    },
+    "source_hash": {
+      "type": "string",
+      "description": "Hash of title+start_date for deduplication"
+    }
+  },
+  "required": [
+    "school_code",
+    "title",
+    "start_date",
+    "event_type"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

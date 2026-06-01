@@ -1,0 +1,68 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "participant_emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Email addresses of all participants in this conversation"
+    },
+    "participant_names": {
+      "type": "object",
+      "description": "Map of email to display name for participants",
+      "default": {}
+    },
+    "last_message_preview": {
+      "type": "string",
+      "description": "Preview text of the last message"
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last message"
+    },
+    "last_message_sender": {
+      "type": "string",
+      "description": "Email of the last message sender"
+    },
+    "unread_count": {
+      "type": "object",
+      "description": "Map of email to unread count for each participant",
+      "default": {}
+    },
+    "subject": {
+      "type": "string",
+      "description": "Subject/title of the conversation"
+    },
+    "related_post_id": {
+      "type": "string",
+      "description": "ID of related job request or opportunity"
+    },
+    "related_post_title": {
+      "type": "string",
+      "description": "Title of related post for context"
+    },
+    "is_archived": {
+      "type": "object",
+      "description": "Map of email to archived status",
+      "default": {}
+    }
+  },
+  "required": [
+    "participant_emails"
+  ],
+  "rls": {
+    "read": {
+      "participant_emails": {
+        "$contains": "{{user.email}}"
+      }
+    },
+    "write": {
+      "participant_emails": {
+        "$contains": "{{user.email}}"
+      }
+    }
+  }
+}

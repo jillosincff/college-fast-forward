@@ -1,0 +1,75 @@
+{
+  "name": "CompanyAlert",
+  "type": "object",
+  "properties": {
+    "student_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "signal_change",
+        "new_roles",
+        "new_alumni",
+        "warning"
+      ],
+      "description": "Type of alert"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student has seen this alert"
+    },
+    "data": {
+      "type": "object",
+      "default": {},
+      "description": "Alert-specific data (previous_signal, new_signal, role counts, etc.)"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of the alert"
+    }
+  },
+  "required": [
+    "student_email",
+    "company_name",
+    "alert_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,40 +1,36 @@
 {
-  "name": "ProActivityLog",
+  "name": "ProAgentConversation",
   "type": "object",
   "properties": {
     "user_email": {
       "type": "string",
       "description": "Email of the student"
     },
-    "action_type": {
+    "role": {
       "type": "string",
-      "enum": [
-        "company_search",
-        "alumni_view",
-        "message_draft",
-        "roadmap_created"
-      ],
-      "description": "Type of action performed"
+      "description": "Message sender role (user or assistant)"
     },
-    "target_name": {
+    "content": {
       "type": "string",
-      "description": "Company or alumni name related to the action"
+      "description": "Text content of the message"
     },
-    "description": {
+    "message_type": {
       "type": "string",
-      "maxLength": 1000,
-      "description": "Additional details about this activity"
+      "description": "Type of message for rich card rendering (text, company_intel, alumni_card, outreach_draft, roadmap)"
     },
-    "timestamp": {
+    "payload": {
       "type": "string",
-      "format": "date-time",
-      "description": "When the action occurred"
+      "description": "JSON string of structured data for rich cards"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Groups messages into conversation sessions"
     }
   },
   "required": [
     "user_email",
-    "action_type",
-    "timestamp"
+    "role",
+    "content"
   ],
   "rls": {
     "read": {

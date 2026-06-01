@@ -1,0 +1,111 @@
+{
+  "name": "ApplicationBoost",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "job_description": {
+      "type": "string",
+      "description": "Job description text"
+    },
+    "company_size": {
+      "type": "string",
+      "enum": [
+        "startup",
+        "mid",
+        "large"
+      ],
+      "description": "Company size category"
+    },
+    "role_type": {
+      "type": "string",
+      "enum": [
+        "general",
+        "creative",
+        "technical",
+        "other"
+      ],
+      "description": "Role type category"
+    },
+    "cover_letter_needed": {
+      "type": "boolean",
+      "description": "Whether FASTIQ recommends a cover letter"
+    },
+    "output_type": {
+      "type": "string",
+      "enum": [
+        "cover_letter",
+        "note_to_hiring_manager",
+        "none_needed"
+      ],
+      "description": "Type of output generated"
+    },
+    "reasoning": {
+      "type": "string",
+      "description": "FASTIQ's one-sentence honest assessment"
+    },
+    "content": {
+      "type": "string",
+      "description": "Generated cover letter or note content"
+    },
+    "word_count": {
+      "type": "number",
+      "description": "Word count of generated content"
+    },
+    "tips": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Application-specific tips"
+    }
+  },
+  "required": [
+    "user_email",
+    "company_name",
+    "job_title"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

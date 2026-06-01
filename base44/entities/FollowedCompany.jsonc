@@ -1,0 +1,115 @@
+{
+  "name": "FollowedCompany",
+  "type": "object",
+  "properties": {
+    "student_email": {
+      "type": "string",
+      "description": "Email of the student following the company"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "company_domain": {
+      "type": "string",
+      "description": "Company domain e.g. nike.com"
+    },
+    "added_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the company was followed"
+    },
+    "last_checked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When FASTIQ last checked this company"
+    },
+    "last_signal": {
+      "type": "string",
+      "enum": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "default": "yellow",
+      "description": "Current overall signal"
+    },
+    "previous_signal": {
+      "type": "string",
+      "enum": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "description": "Previous signal for change detection"
+    },
+    "alerts_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to send alerts for this company"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Student personal notes on this company"
+    },
+    "latest_brief_id": {
+      "type": "string",
+      "description": "ID of latest CompanyIntelCache record"
+    },
+    "latest_recommendation": {
+      "type": "string",
+      "description": "Cached recommendation text from latest brief"
+    },
+    "entry_level_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cached entry-level roles count"
+    },
+    "intern_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cached intern roles count"
+    },
+    "alumni_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cached alumni count at this company"
+    }
+  },
+  "required": [
+    "student_email",
+    "company_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

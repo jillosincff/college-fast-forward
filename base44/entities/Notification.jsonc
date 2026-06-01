@@ -1,0 +1,117 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user receiving the notification"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user receiving the notification (used for service-role writes)"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email of the user receiving the notification"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "new_message",
+        "connection_request",
+        "intro_received",
+        "help_offer",
+        "opportunity_posted",
+        "referral_signup",
+        "referral_payment",
+        "application_received",
+        "profile_view",
+        "system",
+        "student_request_match",
+        "opportunity_application",
+        "family_linked",
+        "karma_boost"
+      ],
+      "description": "Type of notification"
+    },
+    "title": {
+      "type": "string",
+      "description": "Notification title/headline"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message content"
+    },
+    "action_url": {
+      "type": "string",
+      "description": "URL or page to navigate to when clicked"
+    },
+    "action_label": {
+      "type": "string",
+      "description": "Label for the action button"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the notification has been read"
+    },
+    "email_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether an email notification was sent"
+    },
+    "push_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a push notification was sent"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ],
+      "default": "normal",
+      "description": "Notification priority level"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional data related to the notification",
+      "default": {}
+    }
+  },
+  "required": [
+    "type",
+    "title",
+    "message"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "recipient_email": "{{user.email}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "recipient_email": "{{user.email}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

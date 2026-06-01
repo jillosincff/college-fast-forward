@@ -1,0 +1,94 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "properties": {
+    "student_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "outreach_sent",
+        "reply_received",
+        "conversation_had",
+        "interview_scheduled",
+        "interview_completed",
+        "offer_received",
+        "resume_tailored",
+        "company_researched",
+        "question_posted",
+        "alumni_found",
+        "follow_up_sent"
+      ],
+      "description": "Type of activity"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company associated with this activity"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Contact person name"
+    },
+    "contact_role": {
+      "type": "string",
+      "description": "Contact person role/title"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Student notes about this activity"
+    },
+    "fastiq_generated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this action was taken via FASTIQ"
+    },
+    "follow_up_due_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When to follow up"
+    },
+    "follow_up_complete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether follow-up was completed"
+    }
+  },
+  "required": [
+    "student_email",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

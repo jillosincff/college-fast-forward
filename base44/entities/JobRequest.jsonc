@@ -1,0 +1,339 @@
+{
+  "name": "JobRequest",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "The core job role or title being sought (e.g., 'Software Engineer'). Used for card titles."
+    },
+    "title": {
+      "type": "string",
+      "description": "The full, descriptive title or headline for the request. Used for detail view headers. Defaults to role if not provided."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of what the user is looking for"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "networking",
+        "career_path",
+        "first_job",
+        "industry"
+      ],
+      "description": "Question category: networking, career_path, first_job, or industry"
+    },
+    "target_industry": {
+      "type": "string",
+      "description": "Industry of interest (legacy single-select field)"
+    },
+    "target_industries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Industries of interest (multi-select, up to 3). Empty array means 'Anyone'"
+    },
+    "industry_other_text": {
+      "type": "string",
+      "description": "Custom industry text when 'other' is selected"
+    },
+    "target_company": {
+      "type": "string",
+      "description": "Specific company of interest (optional)"
+    },
+    "job_type": {
+      "type": "string",
+      "enum": [
+        "full_time",
+        "internship",
+        "part_time",
+        "contract"
+      ],
+      "description": "Type of opportunity sought"
+    },
+    "role_type": {
+      "type": "string",
+      "enum": [
+        "full_time",
+        "internship",
+        "part_time",
+        "contract"
+      ],
+      "default": "full_time",
+      "description": "Normalized role type for filtering and display"
+    },
+    "poster_type": {
+      "type": "string",
+      "enum": [
+        "student",
+        "parent",
+        "alumni"
+      ],
+      "default": "student",
+      "description": "Type of user who posted this question"
+    },
+    "poster_email": {
+      "type": "string",
+      "description": "Email of the poster (always saved for notifications, even for anonymous posts)"
+    },
+    "is_anonymous": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the question is posted anonymously (parents only)"
+    },
+    "is_alumni_career_request": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is an alumni career request (visible only to parents and alumni)"
+    },
+    "alumni_help_type": {
+      "type": "string",
+      "enum": [
+        "new_job_search",
+        "career_transition",
+        "industry_shift",
+        "business_advice"
+      ],
+      "description": "Type of help alumni is seeking for their career"
+    },
+    "work_mode": {
+      "type": "string",
+      "enum": [
+        "remote",
+        "hybrid",
+        "on_site"
+      ],
+      "default": "on_site",
+      "description": "Preferred work arrangement"
+    },
+    "location_city": {
+      "type": "string",
+      "description": "Preferred city for work"
+    },
+    "location_state": {
+      "type": "string",
+      "description": "Preferred state for work"
+    },
+    "location_preference": {
+      "type": "string",
+      "description": "Preferred work location"
+    },
+    "relocation_ok": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether open to relocating"
+    },
+    "visa_needed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether visa sponsorship is needed"
+    },
+    "start_timing": {
+      "type": "string",
+      "enum": [
+        "immediate",
+        "this_semester",
+        "next_semester",
+        "summer"
+      ],
+      "description": "When they want to start"
+    },
+    "resume_url": {
+      "type": "string",
+      "description": "URL of uploaded resume file"
+    },
+    "linkedin_url": {
+      "type": "string",
+      "description": "URL of the poster's LinkedIn profile"
+    },
+    "poster_profile_image": {
+      "type": "string",
+      "description": "URL of the poster's profile image at time of posting"
+    },
+    "poster_name": {
+      "type": "string",
+      "description": "Full name of the poster for display purposes"
+    },
+    "poster_first_name": {
+      "type": "string",
+      "description": "First name of the poster"
+    },
+    "poster_last_name": {
+      "type": "string",
+      "description": "Last name of the poster"
+    },
+    "student_year": {
+      "type": "string",
+      "description": "Student's graduation year for display"
+    },
+    "student_major": {
+      "type": "string",
+      "description": "Student's major for display"
+    },
+    "student_minor": {
+      "type": "string",
+      "description": "Student's minor for display"
+    },
+    "student_pre_track": {
+      "type": "string",
+      "description": "Student's pre-professional track for display"
+    },
+    "help_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Types of help requested"
+    },
+    "is_boosted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this request has been boosted by parent job posting"
+    },
+    "boost_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the boost expires (14 days from boost)"
+    },
+    "priority_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Priority score for sorting (999 = boosted)"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Admin-curated featured request"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "closed",
+        "fulfilled"
+      ],
+      "default": "active",
+      "description": "Current status of the request"
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "Normal",
+        "Urgent",
+        "Interviewing Now"
+      ],
+      "description": "Urgency of the request"
+    },
+    "messages_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of messages received for this request"
+    },
+    "intros_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of intros made for this request"
+    },
+    "offers_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of help offers for this request"
+    },
+    "view_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times this question has been viewed"
+    },
+    "views_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Legacy: Number of times this request has been viewed"
+    },
+    "comments_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of comments on this request"
+    },
+    "answer_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of public answers on this question"
+    },
+    "total_upvotes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total upvotes across all answers"
+    },
+    "has_best_answer": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a best answer has been marked"
+    },
+    "karma_boost": {
+      "type": "number",
+      "default": 0,
+      "description": "Boost score from family karma (0-3)"
+    },
+    "boosted_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When karma boost expires"
+    },
+    "last_activity_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the request last received activity (message or intro)"
+    },
+    "target_helpers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "alumni",
+          "parents"
+        ]
+      },
+      "description": "Which group(s) the user wants to target for help."
+    }
+  },
+  "required": [
+    "role",
+    "description"
+  ],
+  "rls": {
+    "read": {},
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "poster_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "poster_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

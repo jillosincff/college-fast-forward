@@ -1,0 +1,187 @@
+{
+  "name": "Opportunity",
+  "type": "object",
+  "properties": {
+    "opportunity_type": {
+      "type": "string",
+      "enum": [
+        "student_gig",
+        "internship",
+        "job",
+        "full_time",
+        "part_time"
+      ],
+      "description": "The main category of the opportunity."
+    },
+    "posting_type": {
+      "type": "string",
+      "enum": [
+        "manual_entry",
+        "shared_link"
+      ],
+      "default": "manual_entry",
+      "description": "Whether this was manually posted or shared from an external link"
+    },
+    "job_schedule": {
+      "type": "string",
+      "enum": [
+        "full_time",
+        "part_time",
+        "contract",
+        "flexible"
+      ],
+      "description": "Schedule for jobs and internships (e.g., full-time, part-time)."
+    },
+    "title": {
+      "type": "string",
+      "description": "Title of the opportunity"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the opportunity"
+    },
+    "org_name": {
+      "type": "string",
+      "description": "Organization name (company, restaurant, club, lab, etc.)"
+    },
+    "created_by_role": {
+      "type": "string",
+      "enum": [
+        "student",
+        "parent",
+        "alumni",
+        "admin",
+        "university",
+        "faculty"
+      ],
+      "description": "Role of the user who created this opportunity"
+    },
+    "location_type": {
+      "type": "string",
+      "enum": [
+        "remote",
+        "hybrid",
+        "onsite"
+      ],
+      "description": "Work location type"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "contact_url": {
+      "type": "string"
+    },
+    "application_email": {
+      "type": "string",
+      "description": "Email address where applicants should send their applications"
+    },
+    "hourly_wage": {
+      "type": "number",
+      "description": "Hourly wage, primarily for student gigs."
+    },
+    "salary_min": {
+      "type": "number",
+      "description": "Minimum salary amount"
+    },
+    "salary_max": {
+      "type": "number",
+      "description": "Maximum salary amount"
+    },
+    "salary_period": {
+      "type": "string",
+      "enum": [
+        "hourly",
+        "monthly",
+        "yearly"
+      ],
+      "description": "Salary time period"
+    },
+    "salary_currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "Currency code (e.g., USD, EUR)"
+    },
+    "salary_display": {
+      "type": "string",
+      "description": "A display-friendly string for salary (e.g., '$8,000/month', '$95,000/year')."
+    },
+    "applications_count": {
+      "type": "number",
+      "default": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "closed",
+        "expired"
+      ],
+      "default": "active"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "public",
+        "campus_only"
+      ],
+      "default": "public"
+    },
+    "moderation": {
+      "type": "object",
+      "properties": {
+        "reviewed": {
+          "type": "boolean",
+          "default": false
+        },
+        "flagged": {
+          "type": "boolean",
+          "default": false
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "default": {
+        "reviewed": false,
+        "flagged": false
+      }
+    }
+  },
+  "required": [
+    "opportunity_type",
+    "title",
+    "description",
+    "org_name"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

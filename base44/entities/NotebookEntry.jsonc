@@ -1,0 +1,73 @@
+{
+  "name": "NotebookEntry",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who saved this entry"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full saved message content"
+    },
+    "source_page": {
+      "type": "string",
+      "enum": [
+        "career_path_research",
+        "career_goals",
+        "company_intel",
+        "career_concierge",
+        "assessment"
+      ],
+      "description": "Which FastIQ page this was saved from"
+    },
+    "source_label": {
+      "type": "string",
+      "description": "Human-readable source label"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags for filtering"
+    },
+    "saved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this was saved"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Related company name if applicable"
+    }
+  },
+  "required": [
+    "user_email",
+    "content",
+    "source_page"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}

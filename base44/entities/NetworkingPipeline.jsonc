@@ -1,0 +1,133 @@
+{
+  "name": "NetworkingPipeline",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "alumni_name": {
+      "type": "string",
+      "description": "Full name of the alumni contact"
+    },
+    "alumni_role": {
+      "type": "string",
+      "description": "Job title of the alumni"
+    },
+    "alumni_source": {
+      "type": "string",
+      "enum": [
+        "top_match",
+        "strong_match",
+        "fastiq",
+        "community",
+        "manual"
+      ],
+      "default": "manual",
+      "description": "How the alumni was discovered"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "matched",
+        "messaged",
+        "replied",
+        "coffee_chat",
+        "intro_made",
+        "offer",
+        "no_response"
+      ],
+      "default": "matched",
+      "description": "Current networking status"
+    },
+    "status_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the status was last updated"
+    },
+    "identified_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the alumni was first identified"
+    },
+    "reached_out_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When outreach was sent"
+    },
+    "replied_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the alumni replied"
+    },
+    "interview_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When interview was scheduled"
+    },
+    "offer_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When offer was received"
+    },
+    "follow_up_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When follow-up was sent"
+    },
+    "follow_up_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of follow-ups sent (max 2)"
+    },
+    "outreach_message_id": {
+      "type": "string",
+      "description": "Links to ProAgentConversation for outreach message"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-form notes about this contact"
+    }
+  },
+  "required": [
+    "user_email",
+    "company",
+    "alumni_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

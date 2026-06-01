@@ -1,0 +1,99 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "ID of the conversation this message belongs to"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email of the user receiving the message"
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "Email of the user sending the message"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Display name of the sender"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Subject line of the message"
+    },
+    "body": {
+      "type": "string",
+      "description": "Content of the message"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the recipient has read the message"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the message was read"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "File attachments"
+    },
+    "post_id": {
+      "type": "string",
+      "description": "ID of the related post/opportunity (optional)"
+    },
+    "post_title": {
+      "type": "string",
+      "description": "Title of the related post/opportunity (optional)"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "system",
+        "intro_offer"
+      ],
+      "default": "text",
+      "description": "Type of message"
+    }
+  },
+  "required": [
+    "sender_email",
+    "body"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "$or": [
+        {
+          "sender_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

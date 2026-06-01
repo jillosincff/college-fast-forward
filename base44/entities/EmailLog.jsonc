@@ -1,0 +1,128 @@
+{
+  "name": "EmailLog",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the recipient user"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email address of the recipient"
+    },
+    "persona": {
+      "type": "string",
+      "enum": [
+        "student",
+        "parent",
+        "alumni",
+        "gator"
+      ],
+      "description": "User persona at time of sending"
+    },
+    "email_type": {
+      "type": "string",
+      "enum": [
+        "welcome",
+        "new_answer",
+        "nudge_24h",
+        "nudge_48h",
+        "thank_you",
+        "daily_match_digest",
+        "parent_joined",
+        "weekly_digest",
+        "reengagement_7d",
+        "reengagement_21d",
+        "reengagement_45d",
+        "feedback_request",
+        "answer_notification",
+        "onboarding_abandonment",
+        "weekly_parent_digest",
+        "pay_it_forward",
+        "first_match_notification",
+        "fastiq_unanswered_trigger"
+      ],
+      "description": "Type of email sent"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject line"
+    },
+    "content_preview": {
+      "type": "string",
+      "description": "Short preview of email content"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed",
+        "bounced",
+        "opened",
+        "clicked"
+      ],
+      "default": "sent",
+      "description": "Delivery status"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was sent"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was opened"
+    },
+    "clicked": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a link in the email was clicked"
+    },
+    "clicked_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a link was clicked"
+    },
+    "utm_source": {
+      "type": "string",
+      "description": "UTM source tag from click tracking"
+    },
+    "utm_campaign": {
+      "type": "string",
+      "description": "UTM campaign tag from click tracking"
+    },
+    "metadata": {
+      "type": "object",
+      "default": {},
+      "description": "Additional context (question IDs, match IDs, membership_tier, fastiq_alumni_count, converted_to_fastiq, etc.)"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error details if sending failed"
+    }
+  },
+  "required": [
+    "user_email",
+    "email_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

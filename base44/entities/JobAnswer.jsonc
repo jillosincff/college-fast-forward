@@ -1,0 +1,87 @@
+{
+  "name": "JobAnswer",
+  "type": "object",
+  "properties": {
+    "job_request_id": {
+      "type": "string",
+      "description": "ID of the JobRequest this answer belongs to"
+    },
+    "responder_id": {
+      "type": "string",
+      "description": "User ID of the responder"
+    },
+    "responder_email": {
+      "type": "string",
+      "description": "Email of the responder"
+    },
+    "responder_name": {
+      "type": "string",
+      "description": "Display name of the responder"
+    },
+    "responder_title": {
+      "type": "string",
+      "description": "Job title of the responder"
+    },
+    "responder_company": {
+      "type": "string",
+      "description": "Company of the responder"
+    },
+    "responder_type": {
+      "type": "string",
+      "enum": [
+        "parent",
+        "alumni",
+        "gator"
+      ],
+      "description": "Type of user responding"
+    },
+    "responder_avatar": {
+      "type": "string",
+      "description": "Avatar URL or initials"
+    },
+    "message": {
+      "type": "string",
+      "description": "The answer text"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student has read this answer"
+    },
+    "is_helpful": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the student marked this as helpful"
+    },
+    "upvote_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of upvotes"
+    }
+  },
+  "required": [
+    "job_request_id",
+    "responder_id",
+    "responder_name",
+    "responder_type",
+    "message"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "$or": [
+        {
+          "responder_id": "{{user.id}}"
+        },
+        {
+          "responder_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "name": "LinkedInProfile",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "review",
+        "build"
+      ],
+      "default": "review",
+      "description": "Whether this was a review or build from scratch"
+    },
+    "pasted_content": {
+      "type": "string",
+      "description": "Raw pasted LinkedIn profile text"
+    },
+    "target_role": {
+      "type": "string",
+      "description": "What role they are targeting"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "Overall profile strength score 0-100"
+    },
+    "section_scores": {
+      "type": "object",
+      "default": {},
+      "description": "Scores for each section: headline, about, experience, skills, education, completeness"
+    },
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "issue": {
+            "type": "string"
+          },
+          "suggestion": {
+            "type": "string"
+          },
+          "example_content": {
+            "type": "string"
+          },
+          "implemented": {
+            "type": "boolean"
+          }
+        }
+      },
+      "default": [],
+      "description": "Specific improvement suggestions"
+    },
+    "optimized_headline": {
+      "type": "string",
+      "description": "FASTIQ optimized headline"
+    },
+    "optimized_about": {
+      "type": "string",
+      "description": "FASTIQ optimized About section"
+    },
+    "optimized_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "FASTIQ optimized skills list"
+    },
+    "parsed_headline": {
+      "type": "string",
+      "description": "Parsed current headline"
+    },
+    "parsed_about": {
+      "type": "string",
+      "description": "Parsed current About section"
+    },
+    "parsed_experience": {
+      "type": "string",
+      "description": "Parsed current Experience section"
+    },
+    "parsed_skills": {
+      "type": "string",
+      "description": "Parsed current Skills"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

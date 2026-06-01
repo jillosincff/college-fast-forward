@@ -1,0 +1,104 @@
+{
+  "name": "Answer",
+  "type": "object",
+  "properties": {
+    "question_id": {
+      "type": "string",
+      "description": "ID of the HelpRequest/question this answers"
+    },
+    "question_type": {
+      "type": "string",
+      "description": "Type of question (HelpRequest or JobRequest)"
+    },
+    "answerer_user_id": {
+      "type": "string",
+      "description": "ID of the user who wrote this answer (null for lightweight responders)"
+    },
+    "answerer_email": {
+      "type": "string",
+      "description": "Email of the answerer for easy lookup"
+    },
+    "answerer_name": {
+      "type": "string",
+      "description": "Cached name of the answerer"
+    },
+    "answerer_title": {
+      "type": "string",
+      "description": "Cached title/role of the answerer"
+    },
+    "answerer_company": {
+      "type": "string",
+      "description": "Cached company of the answerer"
+    },
+    "answerer_years_experience": {
+      "type": "string",
+      "description": "Cached years of experience"
+    },
+    "answerer_persona": {
+      "type": "string",
+      "enum": [
+        "parent",
+        "alumni",
+        "gator"
+      ],
+      "description": "Role of the answerer"
+    },
+    "answerer_role": {
+      "type": "string",
+      "description": "Self-reported role for lightweight responders"
+    },
+    "answer_text": {
+      "type": "string",
+      "description": "The actual answer content (max 5000 chars)"
+    },
+    "upvote_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Cached count of upvotes for sorting"
+    },
+    "is_best_answer": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the question asker marked this as best answer"
+    },
+    "is_lightweight_responder": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this was submitted by a lightweight (non-user) responder"
+    },
+    "lightweight_responder_id": {
+      "type": "string",
+      "description": "ID of the LightweightResponder record if applicable"
+    },
+    "is_flagged_for_review": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this answer needs moderation review"
+    }
+  },
+  "required": [
+    "question_id",
+    "answer_text"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "$or": [
+        {
+          "answerer_user_id": "{{user.id}}"
+        },
+        {
+          "answerer_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

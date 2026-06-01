@@ -1,0 +1,125 @@
+{
+  "name": "ActionPlan",
+  "type": "object",
+  "properties": {
+    "student_email": {
+      "type": "string",
+      "description": "Email of the student"
+    },
+    "path": {
+      "type": "string",
+      "enum": [
+        "focused",
+        "explorer"
+      ],
+      "default": "focused",
+      "description": "FASTIQ path type"
+    },
+    "graduation_year": {
+      "type": "number",
+      "description": "Expected graduation year"
+    },
+    "weekly_goal_outreach": {
+      "type": "number",
+      "default": 3,
+      "description": "Weekly outreach messages goal"
+    },
+    "weekly_goal_conversations": {
+      "type": "number",
+      "default": 1,
+      "description": "Weekly alumni conversations goal"
+    },
+    "weekly_goal_research": {
+      "type": "number",
+      "default": 2,
+      "description": "Weekly companies researched goal"
+    },
+    "weekly_goal_resumes": {
+      "type": "number",
+      "default": 1,
+      "description": "Weekly resume tailoring goal"
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "due_date": {
+            "type": "string"
+          },
+          "completed_at": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "complete",
+              "overdue"
+            ]
+          }
+        }
+      },
+      "default": [],
+      "description": "Plan milestones with status tracking"
+    },
+    "current_focus": {
+      "type": "string",
+      "description": "FASTIQ's current recommendation text"
+    },
+    "current_focus_action": {
+      "type": "string",
+      "description": "Pre-loaded chat prompt for the focus CTA"
+    },
+    "last_reviewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When FASTIQ last regenerated the plan"
+    }
+  },
+  "required": [
+    "student_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "student_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

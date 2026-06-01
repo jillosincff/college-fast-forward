@@ -1,0 +1,163 @@
+{
+  "name": "Company",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "Company logo image URL"
+    },
+    "cover_image_url": {
+      "type": "string",
+      "description": "Header/cover image URL"
+    },
+    "website": {
+      "type": "string",
+      "description": "Company website URL"
+    },
+    "description": {
+      "type": "string",
+      "description": "Company description/about section"
+    },
+    "mission": {
+      "type": "string",
+      "description": "Company mission statement"
+    },
+    "values": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Company core values",
+      "default": []
+    },
+    "culture_highlights": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Key culture highlights",
+      "default": []
+    },
+    "industry": {
+      "type": "string",
+      "description": "Primary industry"
+    },
+    "company_size": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-500",
+        "501-1000",
+        "1001-5000",
+        "5000+"
+      ],
+      "description": "Company size range"
+    },
+    "founded_year": {
+      "type": "number",
+      "description": "Year company was founded"
+    },
+    "headquarters": {
+      "type": "string",
+      "description": "Company headquarters location"
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All office locations",
+      "default": []
+    },
+    "benefits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Employee benefits and perks",
+      "default": []
+    },
+    "social_links": {
+      "type": "object",
+      "properties": {
+        "linkedin": {
+          "type": "string"
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "instagram": {
+          "type": "string"
+        },
+        "facebook": {
+          "type": "string"
+        },
+        "glassdoor": {
+          "type": "string"
+        }
+      },
+      "description": "Social media links",
+      "default": {}
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the company profile is officially verified"
+    },
+    "is_hiring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the company is actively hiring"
+    },
+    "follower_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of users following this company"
+    },
+    "review_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of reviews"
+    },
+    "average_rating": {
+      "type": "number",
+      "default": 0,
+      "description": "Average review rating (0-5)"
+    },
+    "active_jobs_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of active job postings"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Contact email for inquiries"
+    },
+    "verified_by": {
+      "type": "string",
+      "description": "Admin who verified the company"
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

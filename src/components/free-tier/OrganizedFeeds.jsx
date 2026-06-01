@@ -155,7 +155,7 @@ export default function OrganizedFeeds({ user }) {
           <div className="flex items-center gap-2">
             <span className="text-xl">🛰️</span>
             <h3 className="text-base font-bold text-gray-900 tracking-tight">
-              Target-Matched Discoveries ({isLoading ? '…' : targetedDiscoveries.length})
+              Target-Matched Opportunities ({isLoading ? '…' : targetedDiscoveries.length})
             </h3>
             <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
               Scouting Connections

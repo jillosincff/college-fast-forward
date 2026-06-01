@@ -1,0 +1,136 @@
+{
+  "name": "CompanyIntelCache",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "School identifier (e.g. UF)"
+    },
+    "hiring_score": {
+      "type": "number",
+      "description": "Hiring health score (0-100) based on entry-level/intern availability"
+    },
+    "hiring_signal": {
+      "type": "string",
+      "description": "Hiring signal label (hot/warm/cool) based on entry-level/intern roles"
+    },
+    "overall_signal": {
+      "type": "string",
+      "enum": [
+        "green",
+        "yellow",
+        "red"
+      ],
+      "description": "Advisory signal: green (pursue), yellow (cautious), red (deprioritize)"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "pursue",
+        "cautious",
+        "deprioritize"
+      ],
+      "description": "Action recommendation for the student"
+    },
+    "recommendation_text": {
+      "type": "string",
+      "description": "One honest sentence of career advice about this company"
+    },
+    "warning_signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "layoff",
+              "freeze",
+              "instability",
+              "financial"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          }
+        }
+      },
+      "default": [],
+      "description": "Warning signals: layoffs, freezes, instability, financial issues"
+    },
+    "similar_companies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "signal": {
+            "type": "string",
+            "enum": [
+              "green",
+              "yellow"
+            ]
+          },
+          "alumni_count": {
+            "type": "number"
+          }
+        }
+      },
+      "default": [],
+      "description": "Alternative companies worth considering"
+    },
+    "intel_summary": {
+      "type": "string",
+      "description": "AI-generated company hiring intelligence summary"
+    },
+    "open_roles_count": {
+      "type": "number",
+      "description": "Total number of open roles found (all levels)"
+    },
+    "entry_level_roles_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of entry-level / new grad roles"
+    },
+    "intern_roles_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of internship roles"
+    },
+    "salary_range": {
+      "type": "string",
+      "description": "Salary range string for entry-level roles (e.g. '$55K-$85K')"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Cache expiration (24h TTL)"
+    }
+  },
+  "required": [
+    "company_name"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

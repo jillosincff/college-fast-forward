@@ -1,0 +1,54 @@
+{
+  "name": "Ambassador",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the ambassador"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email of the ambassador"
+    },
+    "invite_code": {
+      "type": "string",
+      "description": "Unique ambassador invite code (e.g., BrandonUF, MichelleUF)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "deactivated"
+      ],
+      "default": "active",
+      "description": "Current status of the ambassador"
+    },
+    "total_signups": {
+      "type": "number",
+      "default": 0,
+      "description": "Total users who signed up with this code"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Admin notes about this ambassador"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "invite_code"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

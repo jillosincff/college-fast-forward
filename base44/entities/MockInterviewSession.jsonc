@@ -1,0 +1,162 @@
+{
+  "name": "MockInterviewSession",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company name (optional)"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job title (optional)"
+    },
+    "interview_type": {
+      "type": "string",
+      "enum": [
+        "behavioral",
+        "technical",
+        "case",
+        "mixed",
+        "company_specific"
+      ],
+      "default": "mixed",
+      "description": "Type of interview"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "entry",
+        "mid",
+        "senior"
+      ],
+      "default": "entry",
+      "description": "Difficulty level"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "in_progress",
+        "complete",
+        "abandoned"
+      ],
+      "default": "in_progress",
+      "description": "Current status"
+    },
+    "question_count": {
+      "type": "number",
+      "default": 5,
+      "description": "Total number of questions"
+    },
+    "current_question_index": {
+      "type": "number",
+      "default": 0,
+      "description": "Current question index"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "student_response": {
+            "type": "string"
+          },
+          "skipped": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "number"
+          },
+          "feedback": {
+            "type": "object"
+          }
+        }
+      },
+      "default": [],
+      "description": "Questions with responses and feedback"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "Overall performance score 0-100"
+    },
+    "overall_feedback": {
+      "type": "string",
+      "description": "Overall assessment text"
+    },
+    "strengths_shown": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Key strengths demonstrated"
+    },
+    "areas_to_improve": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Areas needing improvement"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the interview started"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the interview was completed"
+    }
+  },
+  "required": [
+    "user_id",
+    "interview_type",
+    "difficulty"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}

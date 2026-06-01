@@ -1,0 +1,138 @@
+{
+  "name": "InterviewReport",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of user who submitted (internal tracking only, never displayed)"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "company_normalized": {
+      "type": "string",
+      "description": "Lowercase trimmed company name for search"
+    },
+    "role": {
+      "type": "string",
+      "description": "Job role/position interviewed for"
+    },
+    "industry": {
+      "type": "string",
+      "enum": [
+        "Technology",
+        "Finance & Banking",
+        "Consulting",
+        "Healthcare",
+        "Marketing & Advertising",
+        "Law & Legal",
+        "Engineering",
+        "Real Estate",
+        "Media & Entertainment",
+        "Retail & Consumer",
+        "Manufacturing",
+        "Education",
+        "Non-Profit",
+        "Government",
+        "Other"
+      ],
+      "description": "Industry category"
+    },
+    "interview_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "behavioral",
+          "case",
+          "technical",
+          "product",
+          "system_design",
+          "group",
+          "phone_screen",
+          "panel",
+          "other"
+        ]
+      },
+      "default": [],
+      "description": "Types of interview rounds experienced"
+    },
+    "experience_level": {
+      "type": "string",
+      "enum": [
+        "intern",
+        "entry",
+        "mid",
+        "senior"
+      ],
+      "description": "Experience level for the role"
+    },
+    "what_they_asked": {
+      "type": "string",
+      "description": "Description of questions asked during the interview"
+    },
+    "tips_for_students": {
+      "type": "string",
+      "description": "Tips and advice for other students preparing"
+    },
+    "got_the_offer": {
+      "type": "string",
+      "enum": [
+        "yes",
+        "no",
+        "pending",
+        "prefer_not_to_say"
+      ],
+      "description": "Whether the student received an offer"
+    },
+    "interview_date": {
+      "type": "string",
+      "description": "When the interview happened (e.g. Q1 2025)"
+    },
+    "num_rounds": {
+      "type": "number",
+      "description": "Number of interview rounds"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "description": "Overall difficulty rating"
+    },
+    "upvote_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many found this helpful"
+    },
+    "is_visible": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether visible to users"
+    }
+  },
+  "required": [
+    "company",
+    "role",
+    "industry",
+    "what_they_asked"
+  ],
+  "rls": {
+    "read": {},
+    "write": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
