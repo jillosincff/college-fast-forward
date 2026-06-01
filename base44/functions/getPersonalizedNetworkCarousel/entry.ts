@@ -377,17 +377,28 @@ Deno.serve(async (req) => {
     const INVALID = ['self employed', 'selfemployed', 'self-employed', 'retired', 'none', 'n/a', 'unemployed', 'stay at home', 'homemaker', 'between jobs'];
     const allUsers = await base44.asServiceRole.entities.User.list('-created_date', 5000);
     
+    // Helper: resolve a field from user object, checking both top-level and nested data.*
+    const getField = (u, ...keys) => {
+      for (const k of keys) {
+        const v = u[k] || u.data?.[k];
+        if (v) return v;
+      }
+      return '';
+    };
+
     // Find REAL alumni/parents from user's school at each company
     const companyNames = jobPool.map(j => j.company.toLowerCase());
     const schoolAlumni = allUsers.filter(u => {
-      const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
-      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+      const persona = u.persona || u.data?.persona || '';
+      const roles = u.roles || u.data?.roles || [];
+      const isAlumni = persona === 'alumni' || (Array.isArray(roles) && roles.includes('alumni'));
+      const isParent = persona === 'parent' || (Array.isArray(roles) && roles.includes('parent'));
       if (!isAlumni && !isParent) return false;
       // Must have a company to be useful for matching
-      const rawCompany = (u.current_company || u.company || u.employer || '').trim();
+      const rawCompany = getField(u, 'current_company', 'company', 'employer').trim();
       if (!rawCompany) return false;
-      const uCode = (u.school_code || '').toLowerCase();
-      const uName = (u.school_name || u.school || u.university || '').toLowerCase();
+      const uCode = getField(u, 'school_code').toLowerCase();
+      const uName = getField(u, 'school_name', 'school', 'university').toLowerCase();
       const matchesSchool = (userSchoolCode && uCode === userSchoolCode) || 
                            (userSchool && (uName === userSchool || uName.includes(userSchool) || userSchool.includes(uName)));
       return matchesSchool;
@@ -401,7 +412,7 @@ Deno.serve(async (req) => {
     for (const jobCompany of companyNames) {
       const normalizedKey = normalizeCompanyName(jobCompany);
       const alumniAtCompany = schoolAlumni.filter(u => {
-        const userCompany = (u.current_company || u.company || u.employer || '').toLowerCase().trim();
+        const userCompany = getField(u, 'current_company', 'company', 'employer').toLowerCase().trim();
         // Skip users with empty company fields
         if (!userCompany) return false;
         
@@ -427,17 +438,19 @@ Deno.serve(async (req) => {
     }
     
     const networkMembers = (allUsers || []).filter(u => {
-      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
-      const isAlumni = u.persona === 'alumni' || (Array.isArray(u.roles) && u.roles.includes('alumni'));
+      const persona = u.persona || u.data?.persona || '';
+      const roles = u.roles || u.data?.roles || [];
+      const isParent = persona === 'parent' || (Array.isArray(roles) && roles.includes('parent'));
+      const isAlumni = persona === 'alumni' || (Array.isArray(roles) && roles.includes('alumni'));
       if (!isParent && !isAlumni) return false;
       if (!u.full_name) return false;
       // Use same school matching logic as schoolAlumni (userSchoolCode / userSchool)
       if (userSchoolCode || userSchool) {
-        const uCode = (u.school_code || '').toLowerCase();
-        const uName = (u.school_name || u.school || u.university || '').toLowerCase();
-        if (!((userSchoolCode && uCode === userSchoolCode) || (userSchool && uName === userSchool))) return false;
+        const uCode = getField(u, 'school_code').toLowerCase();
+        const uName = getField(u, 'school_name', 'school', 'university').toLowerCase();
+        if (!((userSchoolCode && uCode === userSchoolCode) || (userSchool && (uName === userSchool || uName.includes(userSchool) || userSchool.includes(uName))))) return false;
       }
-      const rawCompany = (u.company || u.current_company || u.employer || '').trim();
+      const rawCompany = getField(u, 'current_company', 'company', 'employer').trim();
       if (!rawCompany) return false;
       const key = normalizeCompanyName(rawCompany);
       if (!key || INVALID.includes(key)) return false;
@@ -447,18 +460,20 @@ Deno.serve(async (req) => {
 
     const companyNetworkMap = {};
     for (const u of networkMembers) {
-      const rawCompany = (u.company || u.current_company || u.employer || '').trim();
+      const rawCompany = getField(u, 'current_company', 'company', 'employer').trim();
       const key = normalizeCompanyName(rawCompany);
       if (!companyNetworkMap[key]) companyNetworkMap[key] = { alumni: [], parents: [] };
-      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+      const persona = u.persona || u.data?.persona || '';
+      const roles = u.roles || u.data?.roles || [];
+      const isParent = persona === 'parent' || (Array.isArray(roles) && roles.includes('parent'));
       const member = {
         id: u.id,
         full_name: u.full_name,
-        title: u.job_title || u.current_position || u.position || '',
-        industry: u.industry || '',
-        graduation_year: u.graduation_year || u.class_year || '',
-        linkedin_url: u.linkedin_url || null,
-        student_name: isParent ? (u.student_name || null) : null,
+        title: getField(u, 'job_title', 'current_position', 'position', 'career_background'),
+        industry: getField(u, 'industry'),
+        graduation_year: getField(u, 'graduation_year', 'class_year'),
+        linkedin_url: getField(u, 'linkedin_url') || null,
+        student_name: isParent ? (getField(u, 'student_name') || null) : null,
         persona: isParent ? 'parent' : 'alumni',
       };
       if (isParent) companyNetworkMap[key].parents.push(member);
@@ -468,12 +483,14 @@ Deno.serve(async (req) => {
     // ─── Step 3: Find industry-matched parents (any company) ────────────────
     const industryKeywords = getMemberKeywords(targetIndustries);
     const industryParents = networkMembers.filter(u => {
-      const isParent = u.persona === 'parent' || (Array.isArray(u.roles) && u.roles.includes('parent'));
+      const persona = u.persona || u.data?.persona || '';
+      const roles = u.roles || u.data?.roles || [];
+      const isParent = persona === 'parent' || (Array.isArray(roles) && roles.includes('parent'));
       if (!isParent) return false;
       return memberInIndustry({
-        title: u.job_title || u.current_position || u.position || '',
-        industry: u.industry || '',
-        bio: u.bio || '',
+        title: getField(u, 'job_title', 'current_position', 'position', 'career_background'),
+        industry: getField(u, 'industry'),
+        bio: getField(u, 'bio'),
       }, industryKeywords);
     });
 
