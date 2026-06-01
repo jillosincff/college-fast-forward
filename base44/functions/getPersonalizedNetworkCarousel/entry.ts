@@ -350,11 +350,12 @@ Deno.serve(async (req) => {
       if (roleFiltered.length > 0) jobPool = roleFiltered;
     }
 
-    // Deduplicate by company
+    // Deduplicate by company+role (allow same company with different roles)
     const seen = new Set();
     jobPool = jobPool.filter(j => {
-      if (seen.has(j.company)) return false;
-      seen.add(j.company);
+      const key = `${j.company}||${j.role}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
 
@@ -561,7 +562,7 @@ Deno.serve(async (req) => {
           leadTier: 'insider',
         });
 
-        if (priorityInsiders.length >= 12) continue;
+        if (priorityInsiders.length >= 20) continue;
       }
       // ☀️ PRIORITY 2: Targeted Hidden Lead — matches target role/industry, no insider yet
       else {
@@ -585,7 +586,7 @@ Deno.serve(async (req) => {
 
     // Fallback: if no targeted discoveries at all, fill from job pool
     if (priorityInsiders.length === 0 && targetedDiscoveries.length === 0) {
-      jobPool.slice(0, 6).forEach(job => {
+      jobPool.slice(0, 20).forEach(job => {
         targetedDiscoveries.push({
           company: job.company,
           role: job.role,
