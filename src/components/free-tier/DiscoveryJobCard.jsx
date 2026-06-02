@@ -109,17 +109,17 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
         </button>
         
         <button 
-          onClick={handleScoutDeployment}
-          disabled={isScouting || scoutDeployed}
+          onClick={scoutDeployed ? () => onSelect && onSelect(lead) : handleScoutDeployment}
+          disabled={isScouting}
           className={`px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer ${
-            scoutDeployed
-              ? 'bg-green-50 text-green-700 border border-green-200 cursor-not-allowed'
-              : isScouting 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+            isScouting 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+              : scoutDeployed
+                ? 'bg-green-500 hover:bg-green-600 text-white'
                 : 'bg-orange-500 hover:bg-orange-600 text-white'
           }`}
         >
-          {isScouting ? 'Searching...' : scoutDeployed ? 'Search Initiated' : '🔍 Find an Insider'}
+          {isScouting ? 'Searching...' : scoutDeployed ? '✅ View Insiders' : '🔍 Find an Insider'}
         </button>
       </div>
 
