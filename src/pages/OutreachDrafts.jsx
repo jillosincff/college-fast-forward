@@ -300,8 +300,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     color: '#888', display: 'block', marginBottom: 6,
   };
 
-  // FastIQ gate — attempt trial activation first (only on list view, not when pre-populating from modal)
-  if (!isFastIQ && phase === 'list') {
+  // FastIQ gate — only show when embedded as a component (onOpenUpgrade provided), not as a standalone page route
+  if (!isFastIQ && phase === 'list' && typeof onOpenUpgrade === 'function') {
     const handleTryTrial = async () => {
       const activated = await maybeActivateTrial(user, refreshUser);
       if (!activated) onOpenUpgrade?.();
@@ -318,11 +318,6 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         </button>
       </div>
     );
-  }
-  
-  // Allow access when coming from modal with pre-populated data (even if trial expired)
-  if (!isFastIQ && phase !== 'list') {
-    // Let them use the feature for this specific action
   }
 
   // Follow-up nudge banner
