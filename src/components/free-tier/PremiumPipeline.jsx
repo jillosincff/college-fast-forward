@@ -263,6 +263,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
         } else if (['identified', 'manual'].includes(r.status) && r.alumni_source === 'manual') {
           // Only show manually added opportunities (not auto-matched ones)
           newCards['OPPORTUNITIES'].push(card);
+        }
       });
 
       setCards(newCards);
