@@ -193,6 +193,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               alumni_source: 'manual',
             });
           }
+          window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
         } catch (e) {
           console.error('Pipeline update failed:', e);
         }
@@ -253,6 +254,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               alumni_source: 'manual',
             });
           }
+          window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
         } catch (e) {
           console.error('Pipeline sync failed:', e);
         }

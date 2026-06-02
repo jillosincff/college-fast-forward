@@ -450,7 +450,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
   }, []);
 
   // Load from NetworkingPipeline entity
-  useEffect(() => {
+  const loadPipeline = () => {
     if (!user?.email) { setLoading(false); return; }
     base44.entities.NetworkingPipeline.list('-created_date', 200)
       .then(records => {
@@ -469,6 +469,35 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
       })
       .catch(() => setJobs([]))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadPipeline();
+  }, [user?.email]);
+
+  // Re-fetch when returning from OutreachDrafts (outreach_sent=1 param) or tab becomes visible
+  useEffect(() => {
+    // Check URL param on mount
+    const params = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    if (params.get('outreach_sent') === '1' || hashParams.get('outreach_sent') === '1') {
+      loadPipeline();
+    }
+
+    // Re-fetch when tab regains focus
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') loadPipeline();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+
+    // Re-fetch on custom event from OutreachDrafts / other sources
+    const onRefresh = () => loadPipeline();
+    window.addEventListener('cliff:pipeline-refresh', onRefresh);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('cliff:pipeline-refresh', onRefresh);
+    };
   }, [user?.email]);
 
   // Close sidebar when switching to desktop
