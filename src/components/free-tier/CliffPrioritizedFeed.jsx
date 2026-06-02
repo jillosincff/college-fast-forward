@@ -10,8 +10,7 @@ const INITIAL_SHOW = 9;
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp }) {
   const [selectedLead, setSelectedLead] = useState(null);
-  const [showAllInsiders, setShowAllInsiders] = useState(false);
-  const [showAllDiscoveries, setShowAllDiscoveries] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [dismissedKeys, setDismissedKeys] = useState(new Set());
 
   const handleDismiss = (lead) => {
@@ -31,13 +30,14 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   });
 
   const payload = feedsData?.data || feedsData;
-  const allPriorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
-  const allTargetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
+  const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
+  const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
 
-  // Filter out dismissed leads so counts stay accurate
-  const priorityInsiders    = allPriorityInsiders.filter(l => !dismissedKeys.has(`${l.company}||${l.role}`));
-  const targetedDiscoveries = allTargetedDiscoveries.filter(l => !dismissedKeys.has(`${l.company}||${l.role}`));
-  const totalCount = priorityInsiders.length + targetedDiscoveries.length;
+  // UNIFIED feed — all cards merged and filtered
+  const allLeads = [...priorityInsiders, ...targetedDiscoveries].filter(
+    l => !dismissedKeys.has(`${l.company}||${l.role}`)
+  );
+  const totalCount = allLeads.length;
 
   const handleAddToPipeline = async (lead) => {
     try {
@@ -55,7 +55,6 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
     }
   };
 
-  // No goals set — show a nudge inline (not a blocking full-page empty state)
   const noGoals = !target_industries?.length && !effectiveRole;
 
   return (
@@ -72,7 +71,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
         </p>
       </div>
 
-      {/* No goals nudge — inline, non-blocking */}
+      {/* No goals nudge */}
       {noGoals && !isLoading && (
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -89,68 +88,19 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
         </div>
       )}
 
-      {/* ── PRIORITY 1: DIRECT NETWORK LEVERAGE ─────────────────────── */}
-      <section className="space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-lg">🔥</span>
-            <h3 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
-              Priority Insider Tracks ({isLoading ? '…' : priorityInsiders.length})
-            </h3>
-            <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-              Foot-In-The-Door
-            </span>
-          </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block shrink-0">Verified insiders</span>
-        </div>
-
-        {isLoading ? (
-          <div className="animate-pulse space-y-3 p-6 bg-gray-50 rounded-2xl border border-gray-100">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-          </div>
-        ) : priorityInsiders.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {(showAllInsiders ? priorityInsiders : priorityInsiders.slice(0, INITIAL_SHOW)).map((lead, idx) => (
-                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} onDismiss={() => handleDismiss(lead)} />
-              ))}
-            </div>
-            {priorityInsiders.length > INITIAL_SHOW && (
-              <button
-                onClick={() => setShowAllInsiders(v => !v)}
-                className="w-full mt-2 py-2.5 text-sm font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition-colors"
-                style={{ minHeight: 'auto', cursor: 'pointer' }}
-              >
-                {showAllInsiders ? `▲ Show fewer` : `▼ Show ${priorityInsiders.length - INITIAL_SHOW} more insider tracks`}
-              </button>
-            )}
-          </>
-        ) : (
-          <div className="border border-dashed border-gray-200 rounded-2xl p-8 bg-gray-50/50 text-center">
-            <p className="text-sm text-gray-600 font-semibold">
-              🛰️ CLiFF is actively monitoring your connected corporate networks...
-            </p>
-            <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
-              No active vacancies found inside your exact alumni or parent networks today. Checking broader target matches below.
-            </p>
-          </div>
-        )}
-      </section>
-
-      {/* ── PRIORITY 2: TARGET DISCOVERIES (HUNT ACTIVE) ────────────── */}
+      {/* ── UNIFIED Target-Matched Opportunities ── */}
       <section className="space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-lg">🛰️</span>
             <h3 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">
-              Opportunities ({isLoading ? '…' : targetedDiscoveries.length})
+              Target-Matched Opportunities ({isLoading ? '…' : totalCount})
             </h3>
             <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-              Scouting
+              Scouting Connections
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block shrink-0">Company websites</span>
+          <span className="text-xs text-gray-400 font-medium hidden sm:block shrink-0">High-match roles found on company websites</span>
         </div>
 
         {isLoading ? (
@@ -159,25 +109,32 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
               <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
             ))}
           </div>
-        ) : targetedDiscoveries.length > 0 ? (
+        ) : allLeads.length > 0 ? (
           <>
             {/* Mobile: swipe stack */}
             <div className="block md:hidden">
-              <MobileSwipeStack leads={targetedDiscoveries} onAddToPipeline={handleAddToPipeline} />
+              <MobileSwipeStack leads={allLeads} onAddToPipeline={handleAddToPipeline} />
             </div>
             {/* Desktop: grid */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {(showAllDiscoveries ? targetedDiscoveries : targetedDiscoveries.slice(0, INITIAL_SHOW)).map((lead, idx) => (
-                <DiscoveryJobCard key={idx} lead={lead} onAddToPipeline={handleAddToPipeline} onSelect={setSelectedLead} schoolAbbr={schoolAbbr} onDismiss={() => handleDismiss(lead)} />
+              {(showAll ? allLeads : allLeads.slice(0, INITIAL_SHOW)).map((lead, idx) => (
+                <DiscoveryJobCard
+                  key={idx}
+                  lead={lead}
+                  onAddToPipeline={handleAddToPipeline}
+                  onSelect={setSelectedLead}
+                  schoolAbbr={schoolAbbr}
+                  onDismiss={() => handleDismiss(lead)}
+                />
               ))}
             </div>
-            {targetedDiscoveries.length > INITIAL_SHOW && (
+            {allLeads.length > INITIAL_SHOW && (
               <button
-                onClick={() => setShowAllDiscoveries(v => !v)}
+                onClick={() => setShowAll(v => !v)}
                 className="hidden md:block w-full mt-2 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors"
                 style={{ minHeight: 'auto', cursor: 'pointer' }}
               >
-                {showAllDiscoveries ? `▲ Show fewer` : `▼ Show ${targetedDiscoveries.length - INITIAL_SHOW} more opportunities`}
+                {showAll ? `▲ Show fewer` : `▼ Show ${allLeads.length - INITIAL_SHOW} more opportunities`}
               </button>
             )}
           </>

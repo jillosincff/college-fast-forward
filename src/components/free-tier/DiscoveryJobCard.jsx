@@ -80,43 +80,15 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
           )}
         </div>
         
-        {/* Insider count — shown upfront before any button interaction */}
-        {insiderCount > 0 ? (
-          // TIER 1: Direct school match
-          <div className="mt-5 bg-orange-50 rounded-xl p-3 border border-orange-200 flex items-center gap-2.5">
-            <span className="text-base">{mascot}</span>
-            <div>
-              <p className="text-xs font-bold text-orange-900">
-                {mascot} {insiderCount} {school} Insider{insiderCount !== 1 ? 's' : ''} Ready
-              </p>
-              <p className="text-[10px] text-orange-700 mt-0.5">
-                Alumni &amp; parents verified at {lead.company}.
-              </p>
-            </div>
-          </div>
-        ) : lead.parentCount > 0 || lead.hasSectorParents ? (
-          // TIER 2: Parent network sector match
-          <div className="mt-5 bg-blue-50 rounded-xl p-3 border border-blue-200 flex items-center gap-2.5">
-            <span className="text-base">💼</span>
-            <div>
-              <p className="text-xs font-bold text-blue-900">Parent Network Connected</p>
-              <p className="text-[10px] text-blue-700 mt-0.5">
-                Verified parent contacts active in this sector.
-              </p>
-            </div>
-          </div>
-        ) : (
-          // TIER 3: Industry signal
-          <div className="mt-5 bg-red-50 rounded-xl p-3 border border-red-200 flex items-center gap-2.5">
-            <span className="text-base">🔥</span>
-            <div>
-              <p className="text-xs font-bold text-red-900">Target Industry Signal</p>
-              <p className="text-[10px] text-red-700 mt-0.5">
-                Verified match for your specific target career track.
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Insider footer — dynamic CLiFF language */}
+        <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
+          <span className="text-base">🤖</span>
+          <p className="text-xs font-bold text-gray-800">
+            {insiderCount > 0
+              ? `🤖 CLiFF found ${insiderCount} alumni who work here`
+              : `🤖 CLiFF is scanning for insiders at ${lead.company}`}
+          </p>
+        </div>
       </div>
 
       {/* Card Action Footer */}
