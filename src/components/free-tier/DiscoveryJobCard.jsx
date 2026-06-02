@@ -85,8 +85,8 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
           <span className="text-base">🤖</span>
           <p className="text-xs font-bold text-gray-800">
             {insiderCount > 0
-              ? `🤖 CLiFF found ${insiderCount} alumni who work here`
-              : `🤖 CLiFF is scanning for insiders at ${lead.company}`}
+              ? `CLiFF found ${insiderCount} alumni who work here`
+              : `CLiFF is scanning for insiders at ${lead.company}`}
           </p>
         </div>
       </div>
