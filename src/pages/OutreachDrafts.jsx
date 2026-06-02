@@ -163,14 +163,13 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
 
       setDrafts(prev => [draft, ...prev]);
 
-      // When marking as sent, also update the matching NetworkingPipeline record
+      // When marking as sent, update or create a NetworkingPipeline record
       if (status === 'sent' && user?.email && form.recipientName) {
         try {
           const pipelines = await base44.entities.NetworkingPipeline.filter({
             user_email: user.email,
             alumni_name: form.recipientName,
           });
-          // Also try matching by company if name lookup returns nothing
           let match = pipelines?.[0];
           if (!match && form.recipientCompany) {
             const byCompany = await base44.entities.NetworkingPipeline.filter({
@@ -179,11 +178,26 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             });
             match = byCompany?.[0];
           }
-          if (match && match.status !== 'messaged' && match.status !== 'replied' && match.status !== 'coffee_chat' && match.status !== 'offer') {
-            await base44.entities.NetworkingPipeline.update(match.id, {
-              status: 'messaged',
+          const ADVANCED_STATUSES = ['replied', 'coffee_chat', 'interview', 'offer'];
+          if (match) {
+            if (!ADVANCED_STATUSES.includes(match.status)) {
+              await base44.entities.NetworkingPipeline.update(match.id, {
+                status: 'reached_out',
+                reached_out_date: now,
+                status_date: now,
+              });
+            }
+          } else {
+            // No existing record — create one in the "reached_out" stage
+            await base44.entities.NetworkingPipeline.create({
+              user_email: user.email,
+              alumni_name: form.recipientName,
+              alumni_role: form.recipientTitle || '',
+              company: form.recipientCompany || '',
+              status: 'reached_out',
               reached_out_date: now,
               status_date: now,
+              alumni_source: 'manual',
             });
           }
         } catch (e) {
