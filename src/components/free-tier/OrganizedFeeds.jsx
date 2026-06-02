@@ -33,8 +33,7 @@ export default function OrganizedFeeds({ user }) {
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
-  // Debug: log first insider's alumni array
-  if (priorityInsiders.length > 0) console.log('[OrganizedFeeds] first insider alumni:', priorityInsiders[0]?.company, priorityInsiders[0]?.alumni);
+
 
   // UNIFIED feed — all cards merged
   const targetOpportunities = [...priorityInsiders, ...targetedDiscoveries];

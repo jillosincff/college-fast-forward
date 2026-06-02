@@ -112,7 +112,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     setGeneratedScript('');
 
     // Backend returns alumni in match.alumni (array of member objects with full_name field)
-    console.log('[MatchDeepDiveModal] match.alumni:', match.alumni, 'match.company:', match.company);
+
     const alumniList = Array.isArray(match.alumni) ? match.alumni : [];
     const mappedAlumni = alumniList
       .map(m => ({
