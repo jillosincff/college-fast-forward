@@ -110,13 +110,18 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
 
       {/* Card Action Footer */}
       <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-        <button 
-          onClick={() => onAddToPipeline && onAddToPipeline(lead)}
-          className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition cursor-pointer"
-          title="Save to Pipeline"
-        >
-          ➕
-        </button>
+        <div className="relative group">
+          <button 
+            onClick={() => onAddToPipeline && onAddToPipeline(lead)}
+            className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+          >
+            ➕
+          </button>
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[11px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            Add to Pipeline
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+          </div>
+        </div>
         
         {insiderCount === 0 ? (
           <button 
