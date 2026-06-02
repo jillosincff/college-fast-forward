@@ -7,6 +7,14 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
   const [scoutDeployed, setScoutDeployed] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [added, setAdded] = useState(false);
+
+  const handleAddToPipeline = () => {
+    if (!onAddToPipeline) return;
+    onAddToPipeline(lead);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2500);
+  };
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -112,15 +120,25 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
       <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
         <div className="relative group">
           <button 
-            onClick={() => onAddToPipeline && onAddToPipeline(lead)}
-            className="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 hover:text-gray-600 transition cursor-pointer"
+            onClick={handleAddToPipeline}
+            disabled={added}
+            className={`p-2 border rounded-xl transition cursor-pointer ${added ? 'border-green-400 bg-green-50 text-green-600' : 'border-gray-200 hover:bg-gray-50 text-gray-400 hover:text-gray-600'}`}
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
           >
-            ➕
+            {added ? '✅' : '➕'}
           </button>
-          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[11px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            Add to Pipeline
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-          </div>
+          {!added && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[11px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              Add to Pipeline
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+            </div>
+          )}
+          {added && (
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-green-600 text-white text-[11px] font-semibold rounded-lg whitespace-nowrap pointer-events-none shadow-lg">
+              ✅ Added to Pipeline!
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-green-600" />
+            </div>
+          )}
         </div>
         
         {insiderCount === 0 ? (
