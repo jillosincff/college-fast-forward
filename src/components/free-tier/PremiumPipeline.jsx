@@ -260,8 +260,9 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           newCards['INTERVIEWING'].push(card);
         } else if (['reached_out', 'messaged', 'replied', 'coffee_chat', 'intro_made', 'no_response'].includes(r.status)) {
           newCards['REACHED OUT'].push(card);
-        }
-        // identified/matched/manual statuses are NOT shown — users add opportunities manually
+        } else if (['identified', 'manual'].includes(r.status) && r.alumni_source === 'manual') {
+          // Only show manually added opportunities (not auto-matched ones)
+          newCards['OPPORTUNITIES'].push(card);
       });
 
       setCards(newCards);
@@ -356,9 +357,25 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   };
   const [newCard, setNewCard] = useState({ col: null, text: '' });
 
-  const addCard = (col) => {
+  const addCard = async (col) => {
     if (!newCard.text.trim()) { setNewCard({ col: null, text: '' }); return; }
-    setCards(prev => ({ ...prev, [col]: [...prev[col], { company: newCard.text, role: 'Position', source: 'Manual entry', recruiter: '—', posted: '—', logo: '🏢' }] }));
+    const now = new Date().toISOString();
+    const colToStatus = { 'OPPORTUNITIES': 'identified', 'REACHED OUT': 'reached_out', 'INTERVIEWING': 'interview', 'OFFER 🎉': 'offer' };
+    const status = colToStatus[col] || 'identified';
+    try {
+      const record = await base44.entities.NetworkingPipeline.create({
+        user_email: user?.email,
+        alumni_name: newCard.text,
+        alumni_role: 'Position',
+        company: newCard.text,
+        status,
+        status_date: now,
+        alumni_source: 'manual',
+      });
+      setCards(prev => ({ ...prev, [col]: [...prev[col], { id: record.id, company: newCard.text, role: 'Position', source: 'Manual entry', recruiter: '—', posted: '—', logo: '🏢', _entity: 'NetworkingPipeline' }] }));
+    } catch (e) {
+      console.error('Failed to add card:', e);
+    }
     setNewCard({ col: null, text: '' });
   };
 
