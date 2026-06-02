@@ -93,10 +93,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     const loadDrafts = async () => {
       setLoading(true);
       try {
-        const res = await base44.entities.OutreachDraft.filter(
-          { created_by: user?.email },
-          '-created_date'
-        );
+        const res = await base44.entities.OutreachDraft.list('-created_date');
         setDrafts(res || []);
       } catch (e) {
         console.error('Failed to load drafts:', e);
@@ -151,7 +148,6 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         : null;
 
       const draft = await base44.entities.OutreachDraft.create({
-        created_by: user?.email,
         recipient_name: form.recipientName,
         recipient_title: form.recipientTitle,
         recipient_company: form.recipientCompany,
