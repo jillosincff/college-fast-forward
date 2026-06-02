@@ -108,8 +108,11 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   useEffect(() => {
     if (!match) return;
     setSelectedContact(null);
+    setDraftContact(null);
+    setGeneratedScript('');
 
     // Backend returns alumni in match.alumni (array of member objects with full_name field)
+    console.log('[MatchDeepDiveModal] match.alumni:', match.alumni, 'match.company:', match.company);
     const alumniList = Array.isArray(match.alumni) ? match.alumni : [];
     const mappedAlumni = alumniList
       .map(m => ({
@@ -135,7 +138,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     setParents(mappedParents);
 
     setLoading(false);
-  }, [match?.company]);
+  }, [match]);
 
   if (!match) return null;
 
