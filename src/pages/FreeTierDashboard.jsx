@@ -148,6 +148,7 @@ export default function FreeTierDashboard() {
   const [upgradeFeature, setUpgradeFeature] = useState('');
   const [parentCount, setParentCount] = useState(null);
   const [showWelcomeToast, setShowWelcomeToast] = useState(false);
+  const [showOutreachToast, setShowOutreachToast] = useState(false);
   const [showEmailSyncModal, setShowEmailSyncModal] = useState(false);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
   const navRef = useRef(null);
@@ -160,6 +161,19 @@ export default function FreeTierDashboard() {
     };
     window.addEventListener('cff:open-goals-modal', handleOpenGoals);
     return () => window.removeEventListener('cff:open-goals-modal', handleOpenGoals);
+  }, []);
+
+  // Show outreach success toast when redirected from OutreachDrafts
+  useEffect(() => {
+    const hash = window.location.hash;
+    const paramStr = hash.includes('?') ? hash.split('?')[1] : '';
+    const params = new URLSearchParams(paramStr);
+    if (params.get('outreach_sent') === '1') {
+      setShowOutreachToast(true);
+      setTimeout(() => setShowOutreachToast(false), 5000);
+      // Clean up the URL param
+      window.history.replaceState({}, '', window.location.origin + '/#FreeTierDashboard');
+    }
   }, []);
 
   useEffect(() => {
@@ -544,6 +558,25 @@ export default function FreeTierDashboard() {
 
       {showWelcomeToast && (
         <FirstVisitToast firstName={firstName} onDismiss={() => setShowWelcomeToast(false)} />
+      )}
+
+      {showOutreachToast && (
+        <div style={{
+          position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, background: '#0f172a', color: '#fff', borderRadius: 16,
+          padding: '14px 20px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+          display: 'flex', alignItems: 'center', gap: 12, maxWidth: 440, width: 'calc(100% - 40px)',
+          animation: 'toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
+        }}>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>📋</span>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>
+            Script copied! Pipeline updated to <span style={{ color: '#4ade80' }}>"Reached Out"</span>.
+          </p>
+          <button
+            onClick={() => setShowOutreachToast(false)}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 18, cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: 0, flexShrink: 0, lineHeight: 1 }}
+          >×</button>
+        </div>
       )}
 
       {showUpgrade && (

@@ -160,8 +160,14 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       });
 
       setDrafts(prev => [draft, ...prev]);
-      setPhase('list');
       resetForm();
+
+      if (status === 'sent') {
+        // Redirect to dashboard with a success signal — no legacy paywall
+        navigate('FreeTierDashboard?outreach_sent=1');
+      } else {
+        setPhase('list');
+      }
     } catch (e) {
       console.error('Save failed:', e);
     }
@@ -823,7 +829,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <div style={{
               width: 40, height: 40, borderRadius: '50%',
-              border: '3px solid rgba(232,93,32,0.2)',
+              border: '3px solid rgba(30,58,95,0.15)',
               borderTop: '3px solid #1e3a5f',
               margin: '0 auto 16px',
               animation: 'spin 1s linear infinite',
