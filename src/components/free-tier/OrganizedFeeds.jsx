@@ -44,18 +44,19 @@ export default function OrganizedFeeds({ user }) {
   const totalNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
 
   const handleAddToPipeline = async (lead) => {
+    const company = lead.company || lead.companyName || 'Unknown';
+    const role = lead.role || lead.title || 'Position';
     try {
-      await base44.entities.OpportunityApplication.create({
-        opportunity_id: `external_${Date.now()}`,
-        applicant_id: user?.id || 'unknown',
-        method: 'external',
-        note: `Added from feed: ${lead.role || lead.title} at ${lead.company || lead.companyName}`,
-        opportunity_title: lead.role || lead.title,
-        opportunity_company: lead.company || lead.companyName,
-        opportunity_type: 'job',
-        status: 'applied',
+      await base44.entities.NetworkingPipeline.create({
+        user_email: user?.email,
+        alumni_name: role,
+        alumni_role: role,
+        company,
+        status: 'identified',
+        status_date: new Date().toISOString(),
+        alumni_source: 'manual',
       });
-      alert('✅ Added to your pipeline!');
+      window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
     } catch (error) {
       console.error('Failed to add to pipeline:', error);
     }
