@@ -109,30 +109,30 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     if (!match) return;
     setSelectedContact(null);
 
-    // Backend returns alumni in match.alumni (array of member objects)
+    // Backend returns alumni in match.alumni (array of member objects with full_name field)
     const alumniList = Array.isArray(match.alumni) ? match.alumni : [];
-    setAlumni(
-      alumniList.map(m => ({
-        name: m.full_name || m.name || 'Alumni',
+    const mappedAlumni = alumniList
+      .map(m => ({
+        name: m.full_name || m.name || '',
         title: m.title || m.role_title || '',
         grad: m.graduation_year || m.grad || '',
         mutual: false,
         linkedin_url: m.linkedin_url || null,
       }))
-    );
+      .filter(m => m.name);
+    setAlumni(mappedAlumni);
 
-    // Backend returns parents via featuredParent (single) — build a list from it
-    const parentsRaw = match.featuredParent
-      ? [match.featuredParent]
-      : [];
-    setParents(
-      parentsRaw.map(m => ({
-        name: m.full_name || m.name || 'Parent',
+    // Backend returns parents via featuredParent (single object) — build a list from it
+    const parentsRaw = match.featuredParent ? [match.featuredParent] : [];
+    const mappedParents = parentsRaw
+      .map(m => ({
+        name: m.full_name || m.name || '',
         title: m.title || m.role_title || '',
         student: m.student_name ? `${m.student_name}, UF` : 'UF Student',
         linkedin_url: m.linkedin_url || null,
       }))
-    );
+      .filter(m => m.name);
+    setParents(mappedParents);
 
     setLoading(false);
   }, [match?.company]);
@@ -257,7 +257,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 14 }}>⚡</span>
                 <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#4c1d95', margin: 0 }}>
-                  Network Connection Weight: {match.matchPct}% — Here's why
+                  Network Connection Weight: {match.networkWeight || match.matchPct || 0}% — Here's why
                 </p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -352,7 +352,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                         fontFamily: dm, fontSize: 14, fontWeight: 800,
                         color: isAlum ? '#2563eb' : '#7c3aed',
                       }}>
-                        {c.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        {(c.name || '?').split(' ').map(n => n[0]).join('').slice(0, 2)}
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
