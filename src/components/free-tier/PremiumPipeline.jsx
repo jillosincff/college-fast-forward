@@ -229,7 +229,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   const loadPipeline = async () => {
     if (!user?.id && !user?.email) { setIsLoading(false); return; }
     try {
-      const records = await base44.entities.NetworkingPipeline.list('-created_date', 200);
+      const records = await base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 200);
 
       const newCards = {
         'OPPORTUNITIES': [],
@@ -359,25 +359,36 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   const [newCard, setNewCard] = useState({ col: null, text: '' });
 
   const addCard = async (col) => {
-    if (!newCard.text.trim()) { setNewCard({ col: null, text: '' }); return; }
+    const text = newCard.text.trim();
+    if (!text) { setNewCard({ col: null, text: '' }); return; }
+    setNewCard({ col: null, text: '' });
     const now = new Date().toISOString();
     const colToStatus = { 'OPPORTUNITIES': 'identified', 'REACHED OUT': 'reached_out', 'INTERVIEWING': 'interview', 'OFFER 🎉': 'offer' };
     const status = colToStatus[col] || 'identified';
+    // Optimistic update immediately
+    const tempId = `temp_${Date.now()}`;
+    const newEntry = { id: tempId, company: text, role: 'Position', source: 'Manual entry', recruiter: '—', posted: '—', logo: '🏢', alumni_source: 'manual', _entity: 'NetworkingPipeline' };
+    setCards(prev => ({ ...prev, [col]: [...prev[col], newEntry] }));
     try {
       const record = await base44.entities.NetworkingPipeline.create({
         user_email: user?.email,
-        alumni_name: newCard.text,
+        alumni_name: text,
         alumni_role: 'Position',
-        company: newCard.text,
+        company: text,
         status,
         status_date: now,
         alumni_source: 'manual',
       });
-      setCards(prev => ({ ...prev, [col]: [...prev[col], { id: record.id, company: newCard.text, role: 'Position', source: 'Manual entry', recruiter: '—', posted: '—', logo: '🏢', _entity: 'NetworkingPipeline' }] }));
+      // Replace temp entry with real DB record
+      setCards(prev => ({
+        ...prev,
+        [col]: prev[col].map(c => c.id === tempId ? { ...newEntry, id: record.id } : c),
+      }));
     } catch (e) {
       console.error('Failed to add card:', e);
+      // Revert optimistic update on error
+      setCards(prev => ({ ...prev, [col]: prev[col].filter(c => c.id !== tempId) }));
     }
-    setNewCard({ col: null, text: '' });
   };
 
   return (
