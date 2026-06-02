@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
-import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -31,11 +30,6 @@ export default function OrganizedFeeds({ user }) {
     }),
   });
 
-  const { data: networkData } = useQuery({
-    queryKey: ['networkStats', target_industries],
-    queryFn: () => getVerifiedNetworkCompanies({ target_industries: target_industries || [] }),
-  });
-
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
@@ -45,9 +39,8 @@ export default function OrganizedFeeds({ user }) {
   const totalCount = targetOpportunities.length;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
 
-  const networkPayload = networkData?.data || networkData;
-  const verifiedNetworkCompanies = Array.isArray(networkPayload?.companies) ? networkPayload.companies : [];
-  const totalNetworkCount = verifiedNetworkCompanies.reduce((sum, c) => sum + (c.alumniCount || 0) + (c.parentCount || 0), 0);
+  // Sum insider contacts directly from the active feed cards
+  const totalNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
 
   const handleAddToPipeline = async (lead) => {
     try {
