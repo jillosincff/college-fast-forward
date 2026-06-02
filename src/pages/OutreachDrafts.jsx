@@ -95,7 +95,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       try {
         const res = await base44.entities.OutreachDraft.filter(
           { created_by: user?.email },
-          { sort: 'date_created', order: 'desc' }
+          '-created_date'
         );
         setDrafts(res || []);
       } catch (e) {
