@@ -631,8 +631,36 @@ Deno.serve(async (req) => {
 
       // Get REAL alumni count from user's school at this company
       const realAlumniCount = alumniByCompany[normalizedJobCompany] || 0;
-      const alumni = networkEntry?.alumni || [];
+      const registeredAlumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
+
+      // Also pull matching DiscoveredAlumni for this company to show in the modal
+      const jobNormForDisc = normalizeForMatch(job.company);
+      const discoveredForJob = (discoveredAlumni || []).filter(a => {
+        const aNorm = normalizeForMatch(a.company || '');
+        return aNorm.length >= 4 && jobNormForDisc.length >= 4 &&
+          (aNorm.includes(jobNormForDisc) || jobNormForDisc.includes(aNorm));
+      }).map(a => ({
+        id: a.id,
+        full_name: a.name,
+        title: a.role_title || '',
+        industry: '',
+        graduation_year: a.degree_info || '',
+        linkedin_url: a.linkedin_url || null,
+        student_name: null,
+        persona: 'alumni',
+      }));
+
+      // Merge registered + discovered alumni (deduplicate by full_name)
+      const seenNames = new Set(registeredAlumni.map(a => a.full_name));
+      const mergedAlumni = [...registeredAlumni];
+      for (const da of discoveredForJob) {
+        if (!seenNames.has(da.full_name)) {
+          seenNames.add(da.full_name);
+          mergedAlumni.push(da);
+        }
+      }
+      const alumni = mergedAlumni;
 
       // Build parent advisor list (for warm leads)
       const industryParentAdvisors = industryParents.slice(0, 3);
