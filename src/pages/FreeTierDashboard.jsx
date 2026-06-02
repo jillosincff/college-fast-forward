@@ -440,22 +440,6 @@ export default function FreeTierDashboard() {
           />
         )}
 
-        {/* ── School Pride Network Anchor ── */}
-        <div className="school-anchor" style={{ 
-          background: campusTheme.bgTint || '#eff6ff', 
-          border: `1px solid ${campusTheme.primary}33`, 
-          borderRadius: 12, 
-          padding: '12px 16px', 
-          marginBottom: 16,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-        }}>
-          <span style={{ fontSize: 18, flexShrink: 0 }}>🎓</span>
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 600, color: campusTheme.primary, margin: 0, lineHeight: 1.3 }}>
-            Synced: {college || 'Campus'} Alumni & Parent Grid
-          </p>
-        </div>
 
         {/* ── Main Grid ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="ftd-grid">
