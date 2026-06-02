@@ -64,21 +64,28 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
         </div>
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{lead.role}</p>
         
-        {/* Job Description - Full Visible Text */}
-        <div className="mt-4 text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-200">
-          <p className="leading-relaxed text-sm">
-            {lead.jobDescription || lead.description || "No description preview available."}
-          </p>
-
-          {lead.jobDescription && lead.jobDescription.length > 200 && (
-            <button 
-              onClick={() => setShowFullDesc(true)}
-              className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-2 block underline cursor-pointer"
-            >
-              Read Full Description →
-            </button>
-          )}
-        </div>
+        {/* Job Description - Truncated Preview */}
+        {(() => {
+          const fullDesc = lead.jobDescription || lead.description || '';
+          const LIMIT = 180;
+          const isTruncated = fullDesc.length > LIMIT;
+          const preview = isTruncated ? fullDesc.slice(0, LIMIT).trimEnd() + '…' : fullDesc;
+          return (
+            <div className="mt-4 text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-200">
+              <p className="leading-relaxed text-sm">
+                {preview || "No description preview available."}
+              </p>
+              {isTruncated && (
+                <button
+                  onClick={() => setShowFullDesc(true)}
+                  className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-2 block underline cursor-pointer"
+                >
+                  Read Full Description →
+                </button>
+              )}
+            </div>
+          );
+        })()}
         
         {/* Insider footer — dynamic CLiFF language */}
         <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
