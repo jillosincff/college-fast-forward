@@ -582,7 +582,7 @@ Deno.serve(async (req) => {
         title: getField(u, 'job_title', 'current_position', 'position', 'career_background'),
         industry: getField(u, 'industry'),
         graduation_year: getField(u, 'graduation_year', 'class_year'),
-        linkedin_url: getField(u, 'linkedin_url') || null,
+        linkedin_url: getField(u, 'linkedin_url', 'linkedin', 'linkedin_profile', 'linkedinUrl') || null,
         student_name: isParent ? (getField(u, 'student_name') || null) : null,
         persona: isParent ? 'parent' : 'alumni',
       };

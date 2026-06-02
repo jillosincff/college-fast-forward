@@ -115,21 +115,14 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
 
     const alumniList = Array.isArray(match.alumni) ? match.alumni : [];
     const mappedAlumni = alumniList
-      .map(m => {
-        const name = m.full_name || m.name || '';
-        const company = match.company || '';
-        // Fall back to a LinkedIn people-search URL so there's always a way to find them
-        const linkedinUrl = m.linkedin_url ||
-          (name ? `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(name + ' ' + company)}` : null);
-        return {
-          name,
-          title: m.title || m.role_title || '',
-          grad: m.graduation_year || m.grad || '',
-          mutual: false,
-          linkedin_url: linkedinUrl,
-          linkedin_is_search: !m.linkedin_url && !!linkedinUrl,
-        };
-      })
+      .map(m => ({
+        name: m.full_name || m.name || '',
+        title: m.title || m.role_title || '',
+        grad: m.graduation_year || m.grad || '',
+        mutual: false,
+        linkedin_url: m.linkedin_url || null,
+        linkedin_is_search: false,
+      }))
       .filter(m => m.name);
     setAlumni(mappedAlumni);
 
@@ -392,19 +385,16 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            title={c.linkedin_is_search ? `Search ${c.name} on LinkedIn` : `View ${c.name} on LinkedIn`}
+                            title={`View ${c.name} on LinkedIn`}
                             style={{
                               display: 'inline-flex', alignItems: 'center', gap: 4,
-                              background: c.linkedin_is_search ? '#fff7ed' : '#f1f5f9',
-                              border: `1px solid ${c.linkedin_is_search ? '#fed7aa' : '#e2e8f0'}`,
-                              borderRadius: 6, padding: '3px 8px',
+                              background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, padding: '3px 8px',
                               textDecoration: 'none', minHeight: 'auto', flexShrink: 0,
-                              fontFamily: dm, fontSize: 9, fontWeight: 700,
-                              color: c.linkedin_is_search ? '#c2410c' : '#475569',
+                              fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569',
                             }}
                           >
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill={c.linkedin_is_search ? '#c2410c' : '#475569'}><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                            <span>{c.linkedin_is_search ? 'Find' : 'View'}</span>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="#475569"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                            <span>View</span>
                           </a>
                         )}
                         <button
@@ -487,7 +477,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                           }}
                         >
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                          {draftContact.linkedin_is_search ? 'Find on LinkedIn' : 'Send on LinkedIn'}
+                          Send on LinkedIn
                         </a>
                       ) : (
                         <div style={{
