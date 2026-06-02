@@ -5,14 +5,20 @@ import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
+const TABS = ['All', 'Network Backdoors', 'Hidden Discoveries'];
+
 export default function OrganizedFeeds({ user }) {
   const [selectedLead, setSelectedLead] = useState(null);
+  const [activeTab, setActiveTab] = useState('All');
   const queryClient = useQueryClient();
-  const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'Your School';
+
+  // Dynamic school state with fallback
+  const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'Network';
+  const schoolName = user?.school_name || user?.schoolName || `${schoolAbbr} Network`;
+
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
 
-  // Refresh feed when pipeline changes
   useEffect(() => {
     const handler = () => {
       queryClient.invalidateQueries({ queryKey: ['organizedFeeds'] });
@@ -34,14 +40,17 @@ export default function OrganizedFeeds({ user }) {
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
 
-
-  // UNIFIED feed — all cards merged
   const targetOpportunities = [...priorityInsiders, ...targetedDiscoveries];
   const totalCount = targetOpportunities.length;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
-
-  // Sum insider contacts directly from the active feed cards
   const totalNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
+
+  // Tab filtering
+  const filteredOpportunities = activeTab === 'Network Backdoors'
+    ? targetOpportunities.filter(l => (l.alumniCount || 0) + (l.parentCount || 0) > 0)
+    : activeTab === 'Hidden Discoveries'
+    ? targetOpportunities.filter(l => (l.alumniCount || 0) === 0 && (l.parentCount || 0) === 0)
+    : targetOpportunities;
 
   const handleAddToPipeline = async (lead) => {
     const company = lead.company || lead.companyName || 'Unknown';
@@ -64,6 +73,12 @@ export default function OrganizedFeeds({ user }) {
 
   const noGoals = !target_industries?.length && !effectiveRole;
 
+  const tabDefs = [
+    { key: 'All', label: 'All' },
+    { key: 'Network Backdoors', label: `🤝 ${schoolAbbr} Network Backdoors` },
+    { key: 'Hidden Discoveries', label: '🕵️‍♂️ Hidden Discoveries' },
+  ];
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-6">
 
@@ -71,7 +86,7 @@ export default function OrganizedFeeds({ user }) {
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2.5 flex items-center justify-between">
           <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
-            🔵 Synced: University of Florida Alumni &amp; Parent Network
+            🤝 {schoolAbbr} Network connections ready
           </span>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('cff:open-network-modal'))}
@@ -108,7 +123,7 @@ export default function OrganizedFeeds({ user }) {
         </div>
         <p className="text-xs text-gray-500 mt-1">
           Your personalized feed of{' '}
-          <span className="font-bold text-purple-600">{isLoading ? '...' : totalCount}</span> hand-picked opportunities
+          <span className="font-bold text-purple-600">{isLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
         </p>
       </div>
 
@@ -131,7 +146,8 @@ export default function OrganizedFeeds({ user }) {
 
       {/* ── UNIFIED Target-Matched Opportunities Feed ── */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        {/* Section title row */}
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xl">🛰️</span>
             <h3 className="text-base font-bold text-gray-900 tracking-tight">
@@ -144,15 +160,34 @@ export default function OrganizedFeeds({ user }) {
           <span className="text-xs text-gray-400 font-medium hidden sm:block">High-match roles found on company websites</span>
         </div>
 
+        {/* Three-tab filter pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {tabDefs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+              className={`px-3 py-1.5 rounded-full text-[12px] font-bold border transition-all ${
+                activeTab === tab.key
+                  ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-700'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Cards grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[1, 2, 3].map(n => (
               <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
             ))}
           </div>
-        ) : targetOpportunities.length > 0 ? (
+        ) : filteredOpportunities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {targetOpportunities.map((lead, idx) => (
+            {filteredOpportunities.map((lead, idx) => (
               <DiscoveryJobCard
                 key={idx}
                 lead={lead}
@@ -165,7 +200,9 @@ export default function OrganizedFeeds({ user }) {
           </div>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
-            No matching industry vacancies found today. Adjust your target positions to broaden search.
+            {activeTab === 'All'
+              ? 'No matching industry vacancies found today. Adjust your target positions to broaden search.'
+              : `No ${activeTab === 'Network Backdoors' ? 'network-connected' : 'hidden discovery'} roles found in your current feed.`}
           </div>
         )}
       </section>

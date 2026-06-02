@@ -95,12 +95,12 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
           );
         })()}
         
-        {/* Insider footer — dynamic CLiFF language */}
+        {/* Insider footer — STATE A / STATE B */}
         {insiderCount > 0 ? (
           <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
             <span className="text-base">🤖</span>
             <p className="text-xs font-bold text-gray-800">
-              CLiFF found {insiderCount} alumni who work here
+              CLiFF found {insiderCount} {school} alumni who work here 🌐
             </p>
           </div>
         ) : (
