@@ -320,34 +320,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         </div>
       </div>
 
-      {/* ── School Pride Network Anchor (interactive) ── */}
-      <div
-        onClick={() => setShowNetworkModal(true)}
-        style={{ 
-          background: t.bgTint || '#eff6ff', 
-          border: `1px solid ${t.primary}33`, 
-          borderRadius: 12, 
-          padding: isMobile ? '12px 16px' : '14px 20px', 
-          margin: isMobile ? '16px 0 16px' : '24px auto 24px',
-          maxWidth: 1100,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          cursor: 'pointer',
-          transition: 'box-shadow 0.2s, border-color 0.2s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 4px 16px ${t.primary}22`; e.currentTarget.style.borderColor = `${t.primary}66`; }}
-        onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = `${t.primary}33`; }}
-      >
-        <span style={{ fontSize: 20 }}>🐊</span>
-        <p style={{ fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 600, color: t.primary, margin: 0, flex: 1 }}>
-          Synced: {college || 'UF'} Alumni & Parent Grid
-        </p>
-        <span style={{ fontFamily: dm, fontSize: 11, color: t.primary, opacity: 0.8, fontWeight: 700 }}>
-          {networkStats ? `${networkStats.companies} Companies · ${networkStats.alumni + networkStats.parents} Verified Contacts` : 'Loading network...'} — Tap to view →
-        </span>
-      </div>
-
       {/* Network Modal */}
       {showNetworkModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setShowNetworkModal(false)}>
