@@ -33,11 +33,14 @@
     "status": {
       "type": "string",
       "enum": [
+        "identified",
         "matched",
+        "reached_out",
         "messaged",
         "replied",
         "coffee_chat",
         "intro_made",
+        "interview",
         "offer",
         "no_response"
       ],

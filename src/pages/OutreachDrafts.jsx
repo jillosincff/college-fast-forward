@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { maybeActivateTrial } from '@/utils/trialActivation';
-import PostTrialUpgradePrompt from '@/components/free-tier/PostTrialUpgradePrompt';
 import { navigate } from '@/components/utils/navigation';
 
 const CONTEXTS = [
@@ -28,7 +27,7 @@ const STATUS_LABELS = {
 };
 
 export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
-  const { user: authUser, refreshUser } = useAuth();
+  const { user: authUser } = useAuth();
   const user = userProp || authUser;
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -226,13 +225,45 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
 
   const handleStatusUpdate = async (draft, newStatus) => {
     try {
+      const now = new Date().toISOString();
       const updates = { status: newStatus };
       if (newStatus === 'sent') {
-        updates.sent_at = new Date().toISOString();
+        updates.sent_at = now;
         updates.follow_up_due_at = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
       }
       await base44.entities.OutreachDraft.update(draft.id, updates);
       setDrafts(prev => prev.map(d => d.id === draft.id ? { ...d, ...updates } : d));
+
+      // Sync NetworkingPipeline when marking as sent from the list view
+      if (newStatus === 'sent' && user?.email && draft.recipient_name) {
+        try {
+          const pipelines = await base44.entities.NetworkingPipeline.filter({ user_email: user.email, alumni_name: draft.recipient_name });
+          let match = pipelines?.[0];
+          if (!match && draft.recipient_company) {
+            const byCompany = await base44.entities.NetworkingPipeline.filter({ user_email: user.email, company: draft.recipient_company });
+            match = byCompany?.[0];
+          }
+          const ADVANCED = ['replied', 'coffee_chat', 'interview', 'offer'];
+          if (match) {
+            if (!ADVANCED.includes(match.status)) {
+              await base44.entities.NetworkingPipeline.update(match.id, { status: 'reached_out', reached_out_date: now, status_date: now });
+            }
+          } else {
+            await base44.entities.NetworkingPipeline.create({
+              user_email: user.email,
+              alumni_name: draft.recipient_name,
+              alumni_role: draft.recipient_title || '',
+              company: draft.recipient_company || '',
+              status: 'reached_out',
+              reached_out_date: now,
+              status_date: now,
+              alumni_source: 'manual',
+            });
+          }
+        } catch (e) {
+          console.error('Pipeline sync failed (non-blocking):', e);
+        }
+      }
     } catch (e) {
       console.error('Status update failed:', e);
     }
@@ -318,7 +349,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   // FastIQ gate — only show when embedded as a component (onOpenUpgrade provided), not as a standalone page route
   if (!isFastIQ && phase === 'list' && typeof onOpenUpgrade === 'function') {
     const handleTryTrial = async () => {
-      const activated = await maybeActivateTrial(user, refreshUser);
+      const activated = await maybeActivateTrial(user);
       if (!activated) onOpenUpgrade?.();
     };
     return (
@@ -335,8 +366,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     );
   }
 
-  // Follow-up nudge banner
-  const NudgeBanner = () => draftsDueFollowUp.length > 0 ? (
+  // Follow-up nudge banner — plain JSX variable (not a component) to avoid remount on every render
+  const nudgeBanner = draftsDueFollowUp.length > 0 ? (
     <div style={{
       background: '#FFF5F0', border: '1px solid rgba(232,93,32,0.3)',
       borderRadius: 12, padding: '14px 20px', marginBottom: 24,
@@ -392,7 +423,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         </div>
 
         {/* Follow-up nudge */}
-        <NudgeBanner />
+        {nudgeBanner}
 
         {/* Empty state */}
         {!loading && drafts.length === 0 && (
@@ -807,8 +838,9 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             Save as Draft
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
               handleCopy(editedMessage, 'compose');
+              await new Promise(r => setTimeout(r, 800));
               handleSaveDraft('sent');
             }}
             disabled={saving}

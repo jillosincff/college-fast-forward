@@ -256,6 +256,8 @@ export default function StudentLandingPage({ onParentClick }) {
         .hero-animate-2 { animation: fadeUp 0.7s 0.12s ease both; }
         .hero-animate-3 { animation: fadeUp 0.7s 0.24s ease both; }
         .hero-animate-4 { animation: fadeUp 0.7s 0.36s ease both; }
+        .hero-animate-5 { animation: fadeUp 0.7s 0.48s ease both; }
+        .hero-animate-6 { animation: fadeUp 0.7s 0.60s ease both; }
         /* Nav: hide "For Parents" on mobile, show on desktop */
         @media (max-width: 640px) {
           .nav-for-parents { display: none !important; }
@@ -660,7 +662,7 @@ export default function StudentLandingPage({ onParentClick }) {
               ))}
             </div>
 
-            <CTAButton label="⚡ Check My ATS Match Score" fullWidth />
+            <CTAButton label="⚡ Get Started Free →" fullWidth />
           </div>
         </div>
       </div>
@@ -687,7 +689,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'; }}
           >
-            ⚡ Optimize My Resume File
+            ⚡ Start for Free →
           </button>
         </div>
       </div>
