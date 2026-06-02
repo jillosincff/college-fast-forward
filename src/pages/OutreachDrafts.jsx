@@ -163,21 +163,16 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       setDrafts(prev => [draft, ...prev]);
 
       // When marking as sent, update or create a NetworkingPipeline record
-      if (status === 'sent' && user?.email && form.recipientName) {
+      const currentUser = user;
+      if (status === 'sent' && currentUser?.email && form.recipientName) {
         try {
-          const pipelines = await base44.entities.NetworkingPipeline.filter({
-            user_email: user.email,
-            alumni_name: form.recipientName,
-          });
-          let match = pipelines?.[0];
-          if (!match && form.recipientCompany) {
-            const byCompany = await base44.entities.NetworkingPipeline.filter({
-              user_email: user.email,
-              company: form.recipientCompany,
-            });
-            match = byCompany?.[0];
-          }
+          // RLS already scopes to the current user — filter only by the contact fields
+          const allPipelines = await base44.entities.NetworkingPipeline.list('-created_date', 200);
           const ADVANCED_STATUSES = ['replied', 'coffee_chat', 'interview', 'offer'];
+          const match = allPipelines.find(p =>
+            p.alumni_name?.toLowerCase() === form.recipientName.toLowerCase() ||
+            (form.recipientCompany && p.company?.toLowerCase() === form.recipientCompany.toLowerCase())
+          );
           if (match) {
             if (!ADVANCED_STATUSES.includes(match.status)) {
               await base44.entities.NetworkingPipeline.update(match.id, {
@@ -187,9 +182,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               });
             }
           } else {
-            // No existing record — create one in the "reached_out" stage
             await base44.entities.NetworkingPipeline.create({
-              user_email: user.email,
+              user_email: currentUser.email,
               alumni_name: form.recipientName,
               alumni_role: form.recipientTitle || '',
               company: form.recipientCompany || '',
@@ -200,7 +194,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             });
           }
         } catch (e) {
-          console.error('Pipeline update failed (non-blocking):', e);
+          console.error('Pipeline update failed:', e);
         }
       }
 
@@ -237,13 +231,12 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       // Sync NetworkingPipeline when marking as sent from the list view
       if (newStatus === 'sent' && user?.email && draft.recipient_name) {
         try {
-          const pipelines = await base44.entities.NetworkingPipeline.filter({ user_email: user.email, alumni_name: draft.recipient_name });
-          let match = pipelines?.[0];
-          if (!match && draft.recipient_company) {
-            const byCompany = await base44.entities.NetworkingPipeline.filter({ user_email: user.email, company: draft.recipient_company });
-            match = byCompany?.[0];
-          }
+          const allPipelines = await base44.entities.NetworkingPipeline.list('-created_date', 200);
           const ADVANCED = ['replied', 'coffee_chat', 'interview', 'offer'];
+          const match = allPipelines.find(p =>
+            p.alumni_name?.toLowerCase() === draft.recipient_name.toLowerCase() ||
+            (draft.recipient_company && p.company?.toLowerCase() === draft.recipient_company.toLowerCase())
+          );
           if (match) {
             if (!ADVANCED.includes(match.status)) {
               await base44.entities.NetworkingPipeline.update(match.id, { status: 'reached_out', reached_out_date: now, status_date: now });
@@ -261,7 +254,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             });
           }
         } catch (e) {
-          console.error('Pipeline sync failed (non-blocking):', e);
+          console.error('Pipeline sync failed:', e);
         }
       }
     } catch (e) {
