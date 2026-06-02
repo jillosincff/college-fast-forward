@@ -278,7 +278,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 32px', lineHeight: 1.6 }}>
           Draft AI-written messages for any outreach context, track who you've contacted, and get follow-up nudges 5 days after sending.
         </p>
-        <button onClick={handleTryTrial} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+        <button onClick={handleTryTrial} style={{ background: '#1e3a5f', border: 'none', borderRadius: 10, padding: '14px 32px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
           Start Free 7-Day Trial →
         </button>
       </div>
@@ -304,7 +304,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       <button
         onClick={() => handleGenerateFollowUp(draftsDueFollowUp[0])}
         style={{
-          background: '#E85D20', border: 'none', borderRadius: 8,
+          background: '#1e3a5f', border: 'none', borderRadius: 8,
           padding: '8px 16px', fontSize: 13, fontWeight: 600,
           color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
           whiteSpace: 'nowrap',
@@ -323,7 +323,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16 }}>
           <div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
               OUTREACH DRAFTS
             </p>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
@@ -336,7 +336,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           <button
             onClick={() => setPhase('new')}
             style={{
-              background: '#E85D20', border: 'none', borderRadius: 10,
+              background: '#1e3a5f', border: 'none', borderRadius: 10,
               padding: '10px 20px', fontSize: 13, fontWeight: 600,
               color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
               whiteSpace: 'nowrap', flexShrink: 0,
@@ -365,9 +365,9 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             <button
               onClick={() => setPhase('new')}
               style={{
-                background: '#E85D20', border: 'none', borderRadius: 10,
-                padding: '12px 28px', fontSize: 14, fontWeight: 600,
-                color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+                background: '#1e3a5f', border: 'none', borderRadius: 10,
+                              padding: '12px 28px', fontSize: 14, fontWeight: 600,
+                              color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
               }}
             >
               Draft First Message →
@@ -442,7 +442,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
                         <button
                           onClick={() => handleCopy(draft.message, draft.id)}
                           style={{
-                            background: copyToast === draft.id ? '#22C55E' : '#E85D20',
+                            background: copyToast === draft.id ? '#22C55E' : '#1e3a5f',
                             border: 'none', borderRadius: 8,
                             padding: '8px 16px', fontSize: 12, fontWeight: 600,
                             color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
@@ -482,9 +482,9 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
                               <button
                                 onClick={() => handleGenerateFollowUp(draft)}
                                 style={{
-                                  background: 'none', border: '1px solid #E85D20',
-                                  borderRadius: 8, padding: '8px 16px',
-                                  fontSize: 12, fontWeight: 600, color: '#E85D20',
+                                  background: 'none', border: '1px solid #1e3a5f',
+                                                                  borderRadius: 8, padding: '8px 16px',
+                                                                  fontSize: 12, fontWeight: 600, color: '#1e3a5f',
                                   cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
                                 }}
                               >
@@ -545,7 +545,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           ← Back
         </button>
 
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
           NEW DRAFT
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
@@ -566,7 +566,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
                 display: 'flex', alignItems: 'center', gap: 14,
                 cursor: 'pointer', transition: 'border-color 0.15s',
               }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = '#E85D20'}
+              onMouseEnter={e => e.currentTarget.style.borderColor = '#1e3a5f'}
               onMouseLeave={e => e.currentTarget.style.borderColor = '#E5E5E5'}
             >
               <span style={{ fontSize: 22, flexShrink: 0 }}>{ctx.icon}</span>
@@ -598,7 +598,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           ← Back
         </button>
 
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
           {ctx?.icon} {ctx?.label.toUpperCase()}
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 28px' }}>
@@ -676,7 +676,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             onClick={handleGenerate}
             disabled={!form.recipientName || generating}
             style={{
-              background: !form.recipientName || generating ? '#F0F0F0' : '#E85D20',
+              background: !form.recipientName || generating ? '#F0F0F0' : '#1e3a5f',
               border: 'none', borderRadius: 10,
               padding: '14px', fontSize: 14, fontWeight: 600,
               color: !form.recipientName || generating ? '#CCC' : '#fff',
@@ -704,7 +704,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           ← Regenerate
         </button>
 
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
           YOUR DRAFT
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
@@ -767,7 +767,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             }}
             disabled={saving}
             style={{
-              background: copyToast === 'compose' ? '#22C55E' : '#E85D20',
+              background: copyToast === 'compose' ? '#22C55E' : '#1e3a5f',
               border: 'none', borderRadius: 10,
               padding: '12px 24px', fontSize: 13, fontWeight: 600,
               color: '#fff', cursor: 'pointer',
@@ -808,7 +808,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           ← Back
         </button>
 
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
           FOLLOW-UP DRAFT
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
@@ -823,7 +823,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             <div style={{
               width: 40, height: 40, borderRadius: '50%',
               border: '3px solid rgba(232,93,32,0.2)',
-              borderTop: '3px solid #E85D20',
+              borderTop: '3px solid #1e3a5f',
               margin: '0 auto 16px',
               animation: 'spin 1s linear infinite',
             }} />
@@ -842,7 +842,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             <button
               onClick={handleSendFollowUp}
               style={{
-                background: copyToast === 'followup' ? '#22C55E' : '#E85D20',
+                background: copyToast === 'followup' ? '#22C55E' : '#1e3a5f',
                 border: 'none', borderRadius: 10,
                 padding: '14px', fontSize: 14, fontWeight: 600,
                 color: '#fff', cursor: 'pointer',
