@@ -279,16 +279,19 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   }, [user?.id, user?.email, signalAdditions]);
 
   // Refresh when OutreachDrafts fires the event
+  const loadPipelineRef = React.useRef(loadPipeline);
+  useEffect(() => { loadPipelineRef.current = loadPipeline; });
+
   useEffect(() => {
-    const onRefresh = () => loadPipeline();
+    const onRefresh = () => loadPipelineRef.current();
     window.addEventListener('cliff:pipeline-refresh', onRefresh);
-    const onVisible = () => { if (document.visibilityState === 'visible') loadPipeline(); };
+    const onVisible = () => { if (document.visibilityState === 'visible') loadPipelineRef.current(); };
     document.addEventListener('visibilitychange', onVisible);
     return () => {
       window.removeEventListener('cliff:pipeline-refresh', onRefresh);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [user?.id, user?.email]);
+  }, []);
 
   // signalAdditions are NOT auto-merged — users must explicitly add opportunities to their pipeline
   const [selectedLead, setSelectedLead] = useState(null);
@@ -357,9 +360,11 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     setSelectedLead(null);
   };
   const [newCard, setNewCard] = useState({ col: null, text: '' });
+  const newCardRef = React.useRef(newCard);
+  useEffect(() => { newCardRef.current = newCard; }, [newCard]);
 
   const addCard = async (col) => {
-    const text = newCard.text.trim();
+    const text = newCardRef.current.text.trim();
     if (!text) { setNewCard({ col: null, text: '' }); return; }
     setNewCard({ col: null, text: '' });
     const now = new Date().toISOString();
