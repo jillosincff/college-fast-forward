@@ -73,7 +73,7 @@ function SourceCategoryBadge({ category, source }) {
 // Bullet points derived purely from verified DB counts — no AI, no guessing
 function buildMatchReasons(match, shortName) {
   const reasons = [];
-  const alumCount = match.alumCount || match.alumniCount || 0;
+  const alumCount = match.alumniCount || match.alumCount || 0;
   const parentCount = match.parentCount || 0;
   
   if (alumCount > 0) {
@@ -108,28 +108,32 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   useEffect(() => {
     if (!match) return;
     setSelectedContact(null);
-    const members = match._members || [];
+
+    // Backend returns alumni in match.alumni (array of member objects)
+    const alumniList = Array.isArray(match.alumni) ? match.alumni : [];
     setAlumni(
-      members
-        .filter(m => m.persona === 'alumni')
-        .map(m => ({
-          name: m.full_name || 'Alumni',
-          title: m.role_title || m.title || '',
-          grad: m.graduation_year || '',
-          mutual: false,
-          linkedin_url: m.linkedin_url || null,
-        }))
+      alumniList.map(m => ({
+        name: m.full_name || m.name || 'Alumni',
+        title: m.title || m.role_title || '',
+        grad: m.graduation_year || m.grad || '',
+        mutual: false,
+        linkedin_url: m.linkedin_url || null,
+      }))
     );
+
+    // Backend returns parents via featuredParent (single) — build a list from it
+    const parentsRaw = match.featuredParent
+      ? [match.featuredParent]
+      : [];
     setParents(
-      members
-        .filter(m => m.persona === 'parent')
-        .map(m => ({
-          name: m.full_name || 'Parent',
-          title: m.role_title || m.title || '',
-          student: m.student_name ? `${m.student_name}, UF` : 'UF Student',
-          linkedin_url: m.linkedin_url || null,
-        }))
+      parentsRaw.map(m => ({
+        name: m.full_name || m.name || 'Parent',
+        title: m.title || m.role_title || '',
+        student: m.student_name ? `${m.student_name}, UF` : 'UF Student',
+        linkedin_url: m.linkedin_url || null,
+      }))
     );
+
     setLoading(false);
   }, [match?.company]);
 
@@ -270,7 +274,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
 
             <div style={{ display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
-                <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 900, color: '#2563eb', margin: '0 0 2px' }}>{match.alumCount}</p>
+                <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 900, color: '#2563eb', margin: '0 0 2px' }}>{match.alumniCount || match.alumCount || 0}</p>
                 <p style={{ fontFamily: dm, fontSize: 10, color: '#64748b', margin: 0, fontWeight: 600 }}>🎓 {shortName} Alumni</p>
               </div>
               <div style={{ flex: 1, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
