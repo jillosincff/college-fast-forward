@@ -704,7 +704,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           ← Regenerate
         </button>
 
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#64748b', margin: '0 0 8px' }}>
           YOUR DRAFT
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
@@ -752,10 +752,11 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             onClick={() => handleSaveDraft('draft')}
             disabled={saving}
             style={{
-              background: 'none', border: '1px solid #E0E0E0',
-              borderRadius: 10, padding: '12px 20px',
-              fontSize: 13, color: '#555',
+              background: 'none', border: '1px solid #CBD5E1',
+              borderRadius: 10, padding: '14px 20px',
+              fontSize: 13, fontWeight: 500, color: '#475569',
               cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
+              whiteSpace: 'nowrap',
             }}
           >
             Save as Draft
@@ -769,7 +770,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             style={{
               background: copyToast === 'compose' ? '#22C55E' : '#1e3a5f',
               border: 'none', borderRadius: 10,
-              padding: '12px 24px', fontSize: 13, fontWeight: 600,
+              padding: '14px 24px', fontSize: 13, fontWeight: 600,
               color: '#fff', cursor: 'pointer',
               fontFamily: "'DM Sans', sans-serif", flex: 1,
             }}
