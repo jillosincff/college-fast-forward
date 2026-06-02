@@ -32,7 +32,13 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const user = userProp || authUser;
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [phase, setPhase] = useState('list');
+  const [phase, setPhase] = useState(() => {
+    // Always start on list unless URL params indicate a pre-populated compose flow
+    const hash = window.location.hash;
+    const paramStr = hash.includes('?') ? hash.split('?')[1] : '';
+    const params = new URLSearchParams(paramStr);
+    return (params.get('contact') && params.get('company')) ? 'form' : 'list';
+  });
   const [selectedContext, setSelectedContext] = useState(null);
   const [form, setForm] = useState({
     recipientName: '',
@@ -65,7 +71,6 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         conversationContext: '',
       });
       setSelectedContext(tab === 'parents' ? 'cff_connection' : 'alumni_search');
-      setPhase('form');
       // Clean up hash without reloading
       window.history.replaceState({}, '', '#OutreachDrafts');
     }
