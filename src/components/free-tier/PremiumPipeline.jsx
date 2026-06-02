@@ -225,69 +225,70 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load user's actual pipeline data from OpportunityApplication entity
-  useEffect(() => {
-    const loadPipeline = async () => {
-      try {
-        console.log('[Pipeline] Loading applications for user:', user?.id);
-        const applications = await base44.entities.OpportunityApplication.filter({
-          applicant_id: user?.id,
-        }, '-created_date', 50);
+  // Load user's actual pipeline data from NetworkingPipeline entity
+  const loadPipeline = async () => {
+    if (!user?.id && !user?.email) { setIsLoading(false); return; }
+    try {
+      const records = await base44.entities.NetworkingPipeline.list('-created_date', 200);
 
-        console.log('[Pipeline] Found applications:', applications?.length || 0);
-        
-        const newCards = {
-          'OPPORTUNITIES': [],
-          'REACHED OUT': [],
-          'INTERVIEWING': [],
-          'OFFER 🎉': [],
+      const newCards = {
+        'OPPORTUNITIES': [],
+        'REACHED OUT': [],
+        'INTERVIEWING': [],
+        'OFFER 🎉': [],
+      };
+
+      (records || []).forEach(r => {
+        const card = {
+          id: r.id,
+          company: r.company || r.alumni_name || 'Unknown',
+          role: r.alumni_role || 'Networking Contact',
+          logo: '🏢',
+          status: r.status,
+          appliedDate: r.reached_out_date || r.created_date,
+          lastActivityDate: r.status_date || r.created_date,
+          alumCount: 0,
+          source: r.alumni_source || 'manual',
+          recruiter: r.alumni_name || '—',
+          posted: '—',
+          _entity: 'NetworkingPipeline',
         };
 
-        (applications || []).forEach(app => {
-          const card = {
-            id: app.id,
-            company: app.opportunity_company || 'Unknown Company',
-            role: app.opportunity_title || 'Unknown Role',
-            logo: '🏢',
-            status: app.status || 'applied',
-            appliedDate: app.created_date,
-            lastActivityDate: app.created_date,
-            source: 'User Added',
-            recruiter: '—',
-            posted: '—',
-          };
+        if (r.status === 'offer') {
+          newCards['OFFER 🎉'].push(card);
+        } else if (r.status === 'interview') {
+          newCards['INTERVIEWING'].push(card);
+        } else if (['reached_out', 'messaged', 'replied', 'coffee_chat', 'intro_made', 'no_response'].includes(r.status)) {
+          newCards['REACHED OUT'].push(card);
+        } else {
+          // identified, matched, manual → Opportunities
+          newCards['OPPORTUNITIES'].push(card);
+        }
+      });
 
-          // Map status to column - ONLY show active applications
-          if (app.status === 'applied' || app.status === 'in_review') {
-            newCards['REACHED OUT'].push(card);
-          } else if (app.status === 'interview') {
-            newCards['INTERVIEWING'].push(card);
-          } else if (app.status === 'closed') {
-            newCards['OFFER 🎉'].push(card);
-          } else {
-            newCards['OPPORTUNITIES'].push(card);
-          }
-        });
-
-        console.log('[Pipeline] Cards by column:', {
-          opportunities: newCards['OPPORTUNITIES'].length,
-          applied: newCards['REACHED OUT'].length,
-          interviewing: newCards['INTERVIEWING'].length,
-          offer: newCards['OFFER 🎉'].length,
-        });
-
-        setCards(newCards);
-      } catch (error) {
-        console.error('Failed to load pipeline:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (user?.id) {
-      loadPipeline();
+      setCards(newCards);
+    } catch (error) {
+      console.error('Failed to load pipeline:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [user?.id, signalAdditions]);
+  };
+
+  useEffect(() => {
+    if (user?.id || user?.email) loadPipeline();
+  }, [user?.id, user?.email, signalAdditions]);
+
+  // Refresh when OutreachDrafts fires the event
+  useEffect(() => {
+    const onRefresh = () => loadPipeline();
+    window.addEventListener('cliff:pipeline-refresh', onRefresh);
+    const onVisible = () => { if (document.visibilityState === 'visible') loadPipeline(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('cliff:pipeline-refresh', onRefresh);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [user?.id, user?.email]);
 
   // Merge new signal additions into OPPORTUNITIES (deduplicate by company+role)
   const prevAdditionsRef = React.useRef([]);
@@ -342,7 +343,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     }
 
     try {
-      await base44.entities.OpportunityApplication.delete(cardToDelete.id);
+      await base44.entities.NetworkingPipeline.delete(cardToDelete.id);
       setCards(prev => ({
         ...prev,
         [col]: prev[col].filter((_, i) => i !== cardIndex),
