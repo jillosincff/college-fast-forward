@@ -139,7 +139,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const handleSaveDraft = async (status = 'draft') => {
     setSaving(true);
     try {
-      const sentAt = status === 'sent' ? new Date().toISOString() : null;
+      const now = new Date().toISOString();
+      const sentAt = status === 'sent' ? now : null;
       const followUpDueAt = status === 'sent'
         ? new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
         : null;
@@ -160,10 +161,38 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       });
 
       setDrafts(prev => [draft, ...prev]);
+
+      // When marking as sent, also update the matching NetworkingPipeline record
+      if (status === 'sent' && user?.email && form.recipientName) {
+        try {
+          const pipelines = await base44.entities.NetworkingPipeline.filter({
+            user_email: user.email,
+            alumni_name: form.recipientName,
+          });
+          // Also try matching by company if name lookup returns nothing
+          let match = pipelines?.[0];
+          if (!match && form.recipientCompany) {
+            const byCompany = await base44.entities.NetworkingPipeline.filter({
+              user_email: user.email,
+              company: form.recipientCompany,
+            });
+            match = byCompany?.[0];
+          }
+          if (match && match.status !== 'messaged' && match.status !== 'replied' && match.status !== 'coffee_chat' && match.status !== 'offer') {
+            await base44.entities.NetworkingPipeline.update(match.id, {
+              status: 'messaged',
+              reached_out_date: now,
+              status_date: now,
+            });
+          }
+        } catch (e) {
+          console.error('Pipeline update failed (non-blocking):', e);
+        }
+      }
+
       resetForm();
 
       if (status === 'sent') {
-        // Redirect to dashboard with a success signal — no legacy paywall
         navigate('FreeTierDashboard?outreach_sent=1');
       } else {
         setPhase('list');
