@@ -1,10 +1,33 @@
 import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const BLUE = '#2563eb';
 const BLUE_LIGHT = '#eff6ff';
 const BLUE_BORDER = '#bfdbfe';
 const FREE_LIMIT = 5;
+
+// Map pipeline stage keys → NetworkingPipeline status values
+const STAGE_TO_STATUS = {
+  to_apply:    'identified',
+  applied:     'reached_out',
+  interviewing:'interview',
+  offer:       'offer',
+};
+const STATUS_TO_STAGE = {
+  identified:  'to_apply',
+  matched:     'to_apply',
+  manual:      'to_apply',
+  reached_out: 'applied',
+  messaged:    'applied',
+  replied:     'applied',
+  coffee_chat: 'applied',
+  intro_made:  'applied',
+  interview:   'interviewing',
+  offer:       'offer',
+  no_response: 'applied',
+};
 
 const STAGES = [
   { key: 'to_apply', label: 'Opportunities', color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb', icon: '📋' },
@@ -406,14 +429,12 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
 }
 
 export default function ApplicationPipeline({ onUpgrade, userSchool = 'University of Florida', alumniCount = 847 }) {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('to_apply');
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [jobs, setJobs] = useState([
-    { id: 1, title: 'Marketing Coordinator', company: 'TechCorp', stage: 'to_apply', url: '', location: 'Austin, TX', appliedDate: 'May 15', resumeVersion: 'Master_v2.pdf' },
-    { id: 2, title: 'Growth Analyst Intern', company: 'Startup Co', stage: 'applied', url: '', location: 'Remote', appliedDate: 'May 12', resumeVersion: 'Startup_Tailored.pdf' },
-    { id: 3, title: 'Product Manager', company: 'BigTech', stage: 'interviewing', url: '', location: 'San Francisco, CA', appliedDate: 'May 8', resumeVersion: 'PM_Master.pdf' },
-  ]);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newCompany, setNewCompany] = useState('');
@@ -428,6 +449,28 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Load from NetworkingPipeline entity
+  useEffect(() => {
+    if (!user?.email) { setLoading(false); return; }
+    base44.entities.NetworkingPipeline.list('-created_date', 200)
+      .then(records => {
+        const mapped = (records || []).map(r => ({
+          id: r.id,
+          title: r.alumni_role || 'Role',
+          company: r.alumni_name ? `${r.alumni_name}${r.company ? ` @ ${r.company}` : ''}` : (r.company || 'Unknown'),
+          stage: STATUS_TO_STAGE[r.status] || 'to_apply',
+          location: '',
+          appliedDate: r.reached_out_date ? new Date(r.reached_out_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null,
+          resumeVersion: null,
+          _pipelineId: r.id,
+          _status: r.status,
+        }));
+        setJobs(mapped);
+      })
+      .catch(() => setJobs([]))
+      .finally(() => setLoading(false));
+  }, [user?.email]);
+
   // Close sidebar when switching to desktop
   useEffect(() => {
     if (!isMobile) setShowSidebar(false);
@@ -435,80 +478,125 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
 
   // Auto-progress pipeline when user copies an outreach draft from the modal
   useEffect(() => {
-    const handleOutreachCopied = (e) => {
+    const handleOutreachCopied = async (e) => {
       const { company, role, contactFirstName } = e.detail || {};
-      if (!company) return;
+      if (!company || !user?.email) return;
+      const now = new Date().toISOString();
+      const displayDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-      setJobs(prev => {
-        // Check if a matching job already exists
-        const exists = prev.find(j => j.company === company);
-        if (exists) {
-          // Move it to "applied" and tag with outreach contact
-          return prev.map(j =>
-            j.company === company
-              ? {
-                  ...j,
-                  stage: 'applied',
-                  outreachContact: `${contactFirstName} (Alumni)`,
-                  appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                }
-              : j
-          );
-        } else {
-          // Auto-create a new pipeline card in "applied"
-          const newJob = {
-            id: Date.now(),
+      const exists = jobs.find(j => j.company?.toLowerCase().includes(company.toLowerCase()));
+      if (exists) {
+        moveStage(exists.id, 'applied');
+        setJobs(prev => prev.map(j => j.id === exists.id ? { ...j, outreachContact: `${contactFirstName} (Alumni)` } : j));
+      } else {
+        try {
+          const record = await base44.entities.NetworkingPipeline.create({
+            user_email: user.email,
+            alumni_name: contactFirstName || company,
+            alumni_role: role || '',
+            company: company,
+            status: 'reached_out',
+            status_date: now,
+            reached_out_date: now,
+            alumni_source: 'manual',
+          });
+          setJobs(prev => [...prev, {
+            id: record.id,
             title: role || 'Role',
-            company,
+            company: `${contactFirstName || company}${company ? ` @ ${company}` : ''}`,
             stage: 'applied',
             location: '',
-            appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            appliedDate: displayDate,
             resumeVersion: null,
             outreachContact: `${contactFirstName} (Alumni)`,
-          };
-          return [...prev, newJob];
+            _pipelineId: record.id,
+            _status: 'reached_out',
+          }]);
+        } catch (e) {
+          console.error('Failed to auto-create pipeline entry:', e);
         }
-      });
-      // Switch to the applied tab so user sees the card
+      }
       setActiveTab('applied');
     };
 
     window.addEventListener('cliff:outreach-copied', handleOutreachCopied);
     return () => window.removeEventListener('cliff:outreach-copied', handleOutreachCopied);
-  }, []);
+  }, [user?.email, jobs]);
 
   const totalJobs = jobs.length;
   const atLimit = totalJobs >= FREE_LIMIT;
   const activeTabJobs = jobs.filter(j => j.stage === activeTab);
   const activeStage = STAGES.find(s => s.key === activeTab);
 
-  const addJob = () => {
-    if (!newTitle.trim()) return;
-    setJobs(prev => [...prev, { 
-      id: Date.now(), 
-      title: newTitle, 
-      company: newCompany, 
-      stage: 'to_apply', 
-      url: newUrl,
-      location: newLocation,
-      appliedDate: null,
-      resumeVersion: null,
-    }]);
+  const addJob = async () => {
+    if (!newTitle.trim() || !user?.email) return;
+    const now = new Date().toISOString();
+    try {
+      const record = await base44.entities.NetworkingPipeline.create({
+        user_email: user.email,
+        alumni_name: newTitle,
+        alumni_role: '',
+        company: newCompany || '',
+        status: 'identified',
+        status_date: now,
+        alumni_source: 'manual',
+      });
+      setJobs(prev => [...prev, {
+        id: record.id,
+        title: '',
+        company: `${newTitle}${newCompany ? ` @ ${newCompany}` : ''}`,
+        stage: 'to_apply',
+        location: newLocation,
+        appliedDate: null,
+        resumeVersion: null,
+        _pipelineId: record.id,
+        _status: 'identified',
+      }]);
+    } catch (e) {
+      console.error('Failed to add job:', e);
+    }
     setNewTitle(''); setNewCompany(''); setNewUrl(''); setNewLocation('');
     setShowAdd(false);
   };
 
-  const moveStage = (id, stageKey) => {
-    setJobs(prev => prev.map(j => j.id === id ? { 
-      ...j, 
+  const moveStage = async (id, stageKey) => {
+    const now = new Date().toISOString();
+    const newStatus = STAGE_TO_STATUS[stageKey] || 'identified';
+    setJobs(prev => prev.map(j => j.id === id ? {
+      ...j,
       stage: stageKey,
+      _status: newStatus,
       appliedDate: stageKey === 'applied' ? new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : j.appliedDate,
     } : j));
+    try {
+      await base44.entities.NetworkingPipeline.update(id, {
+        status: newStatus,
+        status_date: now,
+        ...(stageKey === 'applied' ? { reached_out_date: now } : {}),
+        ...(stageKey === 'interviewing' ? { interview_date: now } : {}),
+        ...(stageKey === 'offer' ? { offer_date: now } : {}),
+      });
+    } catch (e) {
+      console.error('Failed to update stage:', e);
+    }
   };
 
-  const removeJob = (id) => {
+  const removeJob = async (id) => {
     setJobs(prev => prev.filter(j => j.id !== id));
+    try {
+      await base44.entities.NetworkingPipeline.delete(id);
+    } catch (e) {
+      console.error('Failed to delete job:', e);
+    }
   };
+
+  if (loading) {
+    return (
+      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, padding: '40px', textAlign: 'center' }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8' }}>Loading your pipeline...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 
