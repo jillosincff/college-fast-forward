@@ -260,10 +260,8 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           newCards['INTERVIEWING'].push(card);
         } else if (['reached_out', 'messaged', 'replied', 'coffee_chat', 'intro_made', 'no_response'].includes(r.status)) {
           newCards['REACHED OUT'].push(card);
-        } else {
-          // identified, matched, manual → Opportunities
-          newCards['OPPORTUNITIES'].push(card);
         }
+        // identified/matched/manual statuses are NOT shown — users add opportunities manually
       });
 
       setCards(newCards);
