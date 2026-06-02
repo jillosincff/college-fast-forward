@@ -290,22 +290,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     };
   }, [user?.id, user?.email]);
 
-  // Merge new signal additions into OPPORTUNITIES (deduplicate by company+role)
-  const prevAdditionsRef = React.useRef([]);
-  React.useEffect(() => {
-    const incoming = signalAdditions.filter(
-      a => !prevAdditionsRef.current.some(p => p.company === a.company && p.role === a.role)
-    );
-    if (incoming.length === 0) return;
-    prevAdditionsRef.current = signalAdditions;
-    setCards(prev => ({
-      ...prev,
-      'OPPORTUNITIES': [
-        ...prev['OPPORTUNITIES'],
-        ...incoming.filter(a => !prev['OPPORTUNITIES'].some(c => c.company === a.company && c.role === a.role)),
-      ],
-    }));
-  }, [signalAdditions]);
+  // signalAdditions are NOT auto-merged — users must explicitly add opportunities to their pipeline
   const [selectedLead, setSelectedLead] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [activeCol, setActiveCol] = useState('OPPORTUNITIES');
