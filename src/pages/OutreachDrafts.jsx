@@ -32,11 +32,12 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const [drafts, setDrafts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [phase, setPhase] = useState(() => {
-    // Always start on list unless URL params indicate a pre-populated compose flow
     const hash = window.location.hash;
     const paramStr = hash.includes('?') ? hash.split('?')[1] : '';
     const params = new URLSearchParams(paramStr);
-    return (params.get('contact') && params.get('company')) ? 'form' : 'list';
+    if (params.get('context') === 'cold_outreach' && params.get('company')) return 'form';
+    if (params.get('contact') && params.get('company')) return 'form';
+    return 'list';
   });
   const [selectedContext, setSelectedContext] = useState(null);
   const [form, setForm] = useState({
@@ -49,7 +50,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     conversationContext: '',
   });
   
-  // Handle pre-population from URL params (when coming from MatchDeepDiveModal)
+  // Handle pre-population from URL params (when coming from MatchDeepDiveModal or Pure Sourcing)
   useEffect(() => {
     const hash = window.location.hash;
     const hashParamsPart = hash.includes('?') ? hash.split('?')[1] : '';
@@ -58,8 +59,22 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     const company = params.get('company');
     const role = params.get('role');
     const tab = params.get('tab');
-    
-    if (contact && company) {
+    const context = params.get('context');
+
+    if (context === 'cold_outreach' && company) {
+      // Pure Sourcing Play — pre-populate company/role, skip to form
+      setForm(prev => ({
+        ...prev,
+        recipientName: '',
+        recipientCompany: decodeURIComponent(company),
+        recipientTitle: role ? decodeURIComponent(role) : '',
+        jobTitle: role ? decodeURIComponent(role) : '',
+        conversationContext: `Cold outreach for a role I found directly on ${decodeURIComponent(company)}'s careers page.`,
+      }));
+      setSelectedContext('cold_outreach');
+      setPhase('form');
+      window.history.replaceState({}, '', '#OutreachDrafts');
+    } else if (contact && company) {
       setForm({
         recipientName: decodeURIComponent(contact),
         recipientCompany: decodeURIComponent(company),
@@ -70,7 +85,6 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         conversationContext: '',
       });
       setSelectedContext(tab === 'parents' ? 'cff_connection' : 'alumni_search');
-      // Clean up hash without reloading
       window.history.replaceState({}, '', '#OutreachDrafts');
     }
   }, []);

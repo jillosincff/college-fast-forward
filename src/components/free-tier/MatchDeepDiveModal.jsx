@@ -324,13 +324,29 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             ) : contacts.length === 0 ? (
-              <div style={{ padding: '20px 0', textAlign: 'center' }}>
-                <p style={{ fontFamily: dm, fontSize: 13, color: '#94a3b8', margin: 0 }}>
-                  🔍 CLiFF is actively searching for {tab === 'alumni' ? 'alumni' : 'parents'} at {match.company}...
+              <div style={{ padding: '16px', background: 'linear-gradient(135deg, #faf5ff, #f0f9ff)', border: '1px solid #e9d5ff', borderRadius: 12, textAlign: 'center' }}>
+                <p style={{ fontFamily: dm, fontSize: 20, margin: '0 0 8px' }}>🕵️‍♂️</p>
+                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#6b21a8', margin: '0 0 4px' }}>Pure Sourcing Play</p>
+                <p style={{ fontFamily: dm, fontSize: 12, color: '#7c3aed', margin: '0 0 12px', lineHeight: 1.5 }}>
+                  Hidden role found on company website. CLiFF is mapping custom inroads — no warm contacts needed.
                 </p>
-                <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', margin: '8px 0 0' }}>
-                  Check back soon — new connections are added daily!
-                </p>
+                <button
+                  onClick={() => {
+                    onClose();
+                    setTimeout(() => {
+                      window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}`;
+                    }, 200);
+                  }}
+                  style={{
+                    fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#fff',
+                    background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                    border: 'none', borderRadius: 10, padding: '10px 20px',
+                    cursor: 'pointer', minHeight: 'auto',
+                    boxShadow: '0 4px 12px rgba(124,58,237,0.35)',
+                  }}
+                >
+                  ⚡ Generate Cold Inroad
+                </button>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -498,26 +514,57 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
 
           {/* ── Zone 3: Action Hand-off ── */}
           <div style={{ paddingTop: 20 }}>
-            <button
-              onClick={handleTrackAndDraft}
-              disabled={launched}
-              style={{
-                width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff',
-                background: launched ? '#6b7280' : 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-                border: 'none', borderRadius: 14, padding: '16px 0', cursor: launched ? 'default' : 'pointer',
-                minHeight: 'auto', boxShadow: launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'transform 0.15s, box-shadow 0.15s',
-              }}
-              onMouseEnter={e => { if (!launched) { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(124,58,237,0.45)'; }}}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)'; }}
-            >
-              <span style={{ fontSize: 16 }}>{launched ? '✅' : '🚀'}</span>
-              {launched ? 'Saved to Pipeline — Opening Drafts...' : ((SOURCE_CATEGORY_CONFIG[match.jobSourceCategory] || SOURCE_CATEGORY_CONFIG['C']).ctaLabel)}
-            </button>
-            <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
-              Saves to pipeline · Selects best contact · Opens pre-drafted message
-            </p>
+            {alumni.length === 0 && parents.length === 0 ? (
+              <>
+                <button
+                  onClick={() => {
+                    onClose();
+                    setTimeout(() => {
+                      window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}`;
+                    }, 200);
+                  }}
+                  style={{
+                    width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff',
+                    background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                    border: 'none', borderRadius: 14, padding: '16px 0', cursor: 'pointer',
+                    minHeight: 'auto', boxShadow: '0 4px 16px rgba(124,58,237,0.35)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    transition: 'transform 0.15s, box-shadow 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(124,58,237,0.45)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(124,58,237,0.35)'; }}
+                >
+                  <span style={{ fontSize: 16 }}>⚡</span>
+                  Generate Cold Inroad
+                </button>
+                <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
+                  No warm contacts needed · CLiFF crafts a cold industry outreach
+                </p>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleTrackAndDraft}
+                  disabled={launched}
+                  style={{
+                    width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff',
+                    background: launched ? '#6b7280' : 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                    border: 'none', borderRadius: 14, padding: '16px 0', cursor: launched ? 'default' : 'pointer',
+                    minHeight: 'auto', boxShadow: launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    transition: 'transform 0.15s, box-shadow 0.15s',
+                  }}
+                  onMouseEnter={e => { if (!launched) { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(124,58,237,0.45)'; }}}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)'; }}
+                >
+                  <span style={{ fontSize: 16 }}>{launched ? '✅' : '🚀'}</span>
+                  {launched ? 'Saved to Pipeline — Opening Drafts...' : ((SOURCE_CATEGORY_CONFIG[match.jobSourceCategory] || SOURCE_CATEGORY_CONFIG['C']).ctaLabel)}
+                </button>
+                <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>
+                  Saves to pipeline · Selects best contact · Opens pre-drafted message
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>

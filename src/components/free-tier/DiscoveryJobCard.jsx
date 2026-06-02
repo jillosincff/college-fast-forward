@@ -88,14 +88,24 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
         })()}
         
         {/* Insider footer — dynamic CLiFF language */}
-        <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
-          <span className="text-base">🤖</span>
-          <p className="text-xs font-bold text-gray-800">
-            {insiderCount > 0
-              ? `CLiFF found ${insiderCount} alumni who work here`
-              : `CLiFF is scanning for insiders at ${lead.company}`}
-          </p>
-        </div>
+        {insiderCount > 0 ? (
+          <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
+            <span className="text-base">🤖</span>
+            <p className="text-xs font-bold text-gray-800">
+              CLiFF found {insiderCount} alumni who work here
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 rounded-xl p-3 border flex items-start gap-2.5" style={{ background: 'linear-gradient(135deg, #faf5ff, #f0f9ff)', borderColor: '#e9d5ff' }}>
+            <span className="text-base">🕵️‍♂️</span>
+            <div>
+              <p className="text-xs font-bold" style={{ color: '#6b21a8', margin: 0 }}>Pure Sourcing Play</p>
+              <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: '#7c3aed', margin: 0 }}>
+                Hidden role found on company website. CLiFF is mapping custom inroads.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Card Action Footer */}
@@ -108,19 +118,31 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
           ➕
         </button>
         
-        <button 
-          onClick={scoutDeployed ? () => onSelect && onSelect(lead) : handleScoutDeployment}
-          disabled={isScouting}
-          className={`px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer ${
-            isScouting 
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-              : scoutDeployed
-                ? 'bg-green-500 hover:bg-green-600 text-white'
-                : 'bg-orange-500 hover:bg-orange-600 text-white'
-          }`}
-        >
-          {isScouting ? 'Searching...' : scoutDeployed ? '✅ View Insiders' : '🔍 Find an Insider'}
-        </button>
+        {insiderCount === 0 ? (
+          <button 
+            onClick={() => {
+              window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(lead.company)}&role=${encodeURIComponent(lead.role)}`;
+            }}
+            className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
+            style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
+          >
+            ⚡ Generate Cold Inroad
+          </button>
+        ) : (
+          <button 
+            onClick={scoutDeployed ? () => onSelect && onSelect(lead) : handleScoutDeployment}
+            disabled={isScouting}
+            className={`px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer ${
+              isScouting 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
+                : scoutDeployed
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white'
+            }`}
+          >
+            {isScouting ? 'Searching...' : scoutDeployed ? '✅ View Insiders' : '🔍 Find an Insider'}
+          </button>
+        )}
       </div>
 
       {/* Simple Overlaid Full Description Modal */}
