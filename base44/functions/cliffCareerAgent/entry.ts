@@ -18,12 +18,14 @@ Deno.serve(async (req) => {
     
     // CRITICAL: Detect network lookup queries and call searchNetworkByBackground IMMEDIATELY
     const networkPatterns = [
-      /any\s+(parents?|alumni|gators?)\s+(?:in|who work (?:in|at))\s+([\w\s]+)/i,
+      /any\s+(parents?|alumni|gators?|uf\s+parents?|uf\s+alumni)\s+(?:in|who work (?:in|at))\s+([\w\s]+)/i,
       /do you know any\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
       /who (?:in the network )?works? in\s+([\w\s]+)/i,
       /are there\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
       /(?:parents?|alumni|gators?)\s+(?:who work)?\s+(?:in|at)\s+([\w\s]+)/i,
       /(?:parents?|alumni|gators?)\s+in\s+([\w\s]+)/i,
+      /find\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
+      /search\s+for\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
     ];
 
     for (const pattern of networkPatterns) {
