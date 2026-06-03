@@ -103,8 +103,49 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── Apollo.io removed due to ToS restrictions (external product use not allowed) ──
-    // Consider alternatives: Hunter.io (current), RocketReach, or Snov.io for external products
+    // ── RocketReach fallback (allows external product use) ──────────────────
+    const ROCKETREACH_API_KEY = Deno.env.get('ROCKETREACH_API_KEY');
+    console.log('RocketReach API key present:', !!ROCKETREACH_API_KEY);
+    if (ROCKETREACH_API_KEY) {
+      try {
+        console.log('RocketReach lookup:', firstName, lastName, 'at', cleanDomain);
+        
+        const rrUrl = 'https://api.rocketreach.co/api/v2/person/lookup';
+        const params = new URLSearchParams();
+        if (firstName && lastName) params.append('name', `${firstName} ${lastName}`);
+        if (cleanDomain) params.append('current_employer', cleanDomain);
+        
+        const rrRes = await fetch(`${rrUrl}?${params.toString()}`, {
+          method: 'GET',
+          headers: {
+            'Api-Key': ROCKETREACH_API_KEY,
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log('RocketReach HTTP status:', rrRes.status);
+        const rrData = await rrRes.json();
+        console.log('RocketReach response:', JSON.stringify(rrData).slice(0, 500));
+        
+        if (rrData.emails && rrData.emails.length > 0) {
+          const bestEmail = rrData.emails.find((e: any) => e.grade === 'A' && e.type === 'professional') ||
+                           rrData.emails.find((e: any) => e.grade === 'A') ||
+                           rrData.emails[0];
+          
+          console.log('RocketReach found email:', bestEmail.email, 'grade:', bestEmail.grade);
+          return Response.json({ 
+            success: true, 
+            email: bestEmail.email, 
+            score: bestEmail.grade === 'A' ? 95 : 85, 
+            source: 'rocketreach' 
+          });
+        }
+        
+        console.log('RocketReach: No emails found');
+      } catch (err) {
+        console.warn('RocketReach failed:', err.message);
+      }
+    }
 
     // ── All sources exhausted → LinkedIn fallback ──────────────────────────
     return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
