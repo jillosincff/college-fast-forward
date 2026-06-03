@@ -116,10 +116,25 @@ Deno.serve(async (req) => {
           headers: { 'accept': 'application/json' }
         });
         const rrData = await rrRes.json();
-        console.log('RocketReach response:', JSON.stringify(rrData).slice(0, 300));
+        console.log('RocketReach response:', JSON.stringify(rrData).slice(0, 500));
 
-        if (rrData && rrData.email && Array.isArray(rrData.email) && rrData.email.length > 0) {
-          return Response.json({ success: true, email: rrData.email[0], score: rrData.confidence || 0, source: 'rocketreach' });
+        // RocketReach returns: { result: { email: [...], emails: [...] }, ... }
+        const result = rrData.result || rrData;
+        const emails = result.emails || result.email || [];
+        
+        if (Array.isArray(emails) && emails.length > 0) {
+          // Filter for verified/work emails
+          const verifiedEmail = emails.find(e => e && (e.verified || e.type === 'work' || e.email_address));
+          const emailToUse = verifiedEmail ? (verifiedEmail.email_address || verifiedEmail) : (emails[0].email_address || emails[0]);
+          return Response.json({ success: true, email: emailToUse, score: result.confidence || 80, source: 'rocketreach' });
+        }
+        
+        // Also check single email field
+        if (result.email_address || result.email) {
+          const singleEmail = result.email_address || result.email;
+          if (typeof singleEmail === 'string' && singleEmail.includes('@')) {
+            return Response.json({ success: true, email: singleEmail, score: result.confidence || 80, source: 'rocketreach' });
+          }
         }
       } catch (err) {
         console.warn('RocketReach failed:', err.message);
