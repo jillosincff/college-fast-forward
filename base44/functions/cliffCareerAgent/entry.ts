@@ -74,13 +74,13 @@ Deno.serve(async (req) => {
         }
         
         // Format results
-        const formattedResults = filtered.map(p => {
+        const formattedResults = filtered.map((p, idx) => {
           const fullName = p.full_name || p.email?.split('@')[0] || 'Network Member';
           const title = p.current_role || 'Professional';
           const company = p.current_company || 'Company';
           const linkedin = p.linkedin_url || '';
           
-          return `**${fullName}** — ${title} at ${company}${linkedin ? `\n🔗 ${linkedin}` : ''}`;
+          return `${idx + 1}. **${fullName}**\n   ${title} at ${company}${linkedin ? `\n   🔗 [LinkedIn Profile](${linkedin})` : ''}`;
         }).join('\n\n');
         
         return Response.json({
