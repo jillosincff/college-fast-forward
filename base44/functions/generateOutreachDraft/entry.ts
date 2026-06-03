@@ -24,25 +24,57 @@ Deno.serve(async (req) => {
     const schoolLabel = user.school_name || user.school || school || '';
     if (!schoolLabel) return Response.json({ error: 'School not set on profile' }, { status: 400 });
 
-    const prompt = `Write a LinkedIn connection request message from a ${schoolLabel} student to a ${schoolLabel} alumni.
+    const schoolNickname = user.school_nickname || schoolLabel.split(' ')[0];
+    const firstName = (studentName || '').split(' ')[0] || studentName;
 
-Student: ${studentName}${major ? `, studying ${major}` : ''}${targetRole ? `, interested in ${targetRole}` : ''}${graduationYear ? `, graduating ${graduationYear}` : ''}.
+    const systemPrompt = `You are a college career coach helping students write authentic, conversational outreach emails to alumni. Your job is to produce direct, human-sounding messages — NOT corporate, NOT formal, NOT stiff.
+
+BANNED PHRASES — never use these, ever:
+- "I hope this email finds you well"
+- "I hope you are doing good"  
+- "Please allow me to introduce myself"
+- "I came across your profile"
+- "I admire your work"
+- "I wanted to reach out"
+- Any corporate pleasantry opener
+
+TONE RULES:
+- Sound like a real college student writing a genuine email
+- Start the body immediately with a direct personal hook referencing their shared school + student's major
+- Keep it warm, specific, and low-pressure
+- The ask should be a simple 15-minute virtual coffee chat`;
+
+    const prompt = `${systemPrompt}
+
+Write a short outreach EMAIL (not LinkedIn message) from a ${schoolLabel} student to a ${schoolLabel} alumni.
+
+Student: ${firstName}, studying ${major || 'business'}${targetRole ? `, interested in ${targetRole} roles` : ''}${graduationYear ? `, graduating ${graduationYear}` : ''}.
 Alumni: ${alumniName}${alumniTitle ? `, ${alumniTitle}` : ''}${alumniCompany ? ` at ${alumniCompany}` : ''}.
 
-Rules (follow exactly):
-- Maximum 3 sentences. No exceptions.
-- No flattery. Do not say "I came across your profile" or "I admire your work."
-- First sentence: lead with the shared ${schoolLabel} connection.
-- Last sentence: one low-ask question (e.g. would you be open to a 15-min chat?).
-- Sound like a real student, not a cover letter.
-- Return the message body only. No subject line. No greeting label. No sign-off label.`;
+Return a JSON object with exactly these two fields:
+{
+  "subject": "${schoolLabel} connection / Question about ${alumniTitle || targetRole || 'your career'} roles at ${alumniCompany || 'your company'}",
+  "body": "Hi ${alumniName?.split(' ')[0] || alumniName}!\\n\\nI'm a fellow ${schoolLabel} student studying ${major || '[major]'}, and I saw your path to becoming a ${alumniTitle || '[title]'} at ${alumniCompany || '[company]'}.\\n\\nYour background in this space is exactly where I'm trying to grow. If you have any availability over the next couple of weeks, I'd love to grab a quick 15-minute virtual coffee to ask you a couple of questions about your journey.\\n\\nGo ${schoolNickname}!\\n\\nBest,\\n${firstName}"
+}
+
+The body field MUST follow that template structure but make the middle paragraph feel genuine and personal — not copy-pasted. Keep the opening line and closing exactly as shown. Return ONLY the JSON object, no extra text.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
+      max_tokens: 500,
       messages: [{ role: 'user', content: prompt }],
     });
-    const result = response.content?.[0]?.text || '';
+    const rawText = response.content?.[0]?.text || '';
+
+    let subject = '';
+    let message = rawText;
+    try {
+      const parsed = JSON.parse(rawText);
+      subject = parsed.subject || '';
+      message = parsed.body || rawText;
+    } catch {
+      // fallback: return raw as message body
+    }
 
     // Log feature usage (fire-and-forget)
     base44.asServiceRole.entities.AnalyticsEvent.create({
@@ -53,7 +85,7 @@ Rules (follow exactly):
       properties: { feature_type: 'outreach_draft' },
     }).catch(() => {});
 
-    return Response.json({ success: true, message: result || '' });
+    return Response.json({ success: true, message, subject });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
