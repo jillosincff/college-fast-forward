@@ -109,30 +109,11 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     setLaunched(true);
     onGenerateOutreach && onGenerateOutreach({ match, contact, tab });
     
-    setDraftContact(contact);
-    setGeneratedScript('');
-    setIsCopied(false);
-    setIsGenerating(true);
+    // Close modal and redirect directly to OutreachDrafts with pre-filled contact
+    onClose();
     setTimeout(() => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' });
-      }
-    }, 80);
-    const firstName = contact.name?.split(' ')[0] || contact.name;
-    const schoolCode = user?.school_code || shortName || 'UF';
-    const meta = getSchoolMeta(schoolCode);
-    const userType = user?.persona === 'alumni' ? `fellow ${meta.abbr} grad` : `current ${meta.abbr} student`;
-    setTimeout(() => {
-      setGeneratedScript(
-        `Hey ${firstName}, ${userType} here! I saw you made it from ${meta.town} to ${match.company} and that's exactly the path I'm working toward right now! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would you be open to a casual 15-minute chat sometime soon? ${meta.cheer}`
-      );
-      setIsGenerating(false);
-      // Close modal and redirect to drafts after script is ready
-      setTimeout(() => {
-        onClose();
-        window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(contact?.name || '')}`;
-      }, 400);
-    }, 750);
+      window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(contact?.name || '')}`;
+    }, 200);
   };
 
   const handleCopyDraft = () => {
