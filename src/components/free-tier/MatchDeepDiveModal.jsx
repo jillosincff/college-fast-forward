@@ -100,7 +100,14 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   }, [match]);
 
   const handleGetEmail = async (contact) => {
-    const key = contact.name;
+    console.log('=== handleGetEmail called ===');
+    console.log('Contact name:', contact?.name);
+    console.log('Contact title:', contact?.title);
+    const key = contact?.name;
+    if (!key) {
+      console.error('No contact name provided!');
+      return;
+    }
     setEmailStates(prev => ({ ...prev, [key]: { loading: true, email: null, checked: false } }));
     try {
       const domainBase = match.company
@@ -109,25 +116,26 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         .replace(/[^a-z0-9]/g, '')
         .trim();
       const domain = domainBase + '.com';
+      console.log('Looking up email for:', contact.name, 'at domain:', domain);
       const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
       // SDK wraps response in .data
       const payload = result?.data || result;
-      console.log('Email lookup result:', payload);
+      console.log('Email lookup result for', contact.name, ':', payload);
       const email = payload?.success && payload?.email ? payload.email : null;
       setEmailStates(prev => ({ ...prev, [key]: { loading: false, email, checked: true } }));
       if (email) {
-        console.log('Email found:', email);
+        console.log('✓ Email found for', contact.name, ':', email);
         setContactEmail(email);
         // Pass the pre-found email so handleMessageViaCLiFF doesn't re-lookup
         handleMessageViaCLiFF(contact, 'email', email);
       } else {
-        console.log('Email not found, switching to LinkedIn');
+        console.log('✗ Email not found for', contact.name, ', switching to LinkedIn');
         setContactEmail('not_found');
         // Email not found — auto-open LinkedIn draft so user always gets something
         handleMessageViaCLiFF(contact, 'linkedin');
       }
     } catch (err) {
-      console.error('Email lookup error:', err);
+      console.error('Email lookup error for', contact.name, ':', err);
       setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true } }));
       setContactEmail('not_found');
       handleMessageViaCLiFF(contact, 'linkedin');
