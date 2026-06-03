@@ -15,70 +15,80 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing contactName or companyDomain' }, { status: 400 });
     }
 
-    // Use Hunter API to find professional email
     const HUNTER_API_KEY = Deno.env.get('HUNTER_API_KEY');
     
     if (!HUNTER_API_KEY) {
-      return Response.json({ 
-        error: 'Email enrichment not configured',
-        fallback: 'linkedin_only'
-      }, { status: 503 });
+      return Response.json({ success: false, error: 'Email enrichment not configured', fallback: 'linkedin_only' }, { status: 503 });
     }
 
-    // Hunter API: Email Finder
-    const hunterUrl = new URL('https://api.hunter.io/v2/email-finder');
-    hunterUrl.searchParams.set('domain', companyDomain);
-    hunterUrl.searchParams.set('first_name', contactName.split(' ')[0]);
-    hunterUrl.searchParams.set('last_name', contactName.split(' ').slice(-1)[0]);
-    hunterUrl.searchParams.set('api_key', HUNTER_API_KEY);
+    const nameParts = contactName.trim().split(/\s+/);
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
 
-    const response = await fetch(hunterUrl.toString());
-    const data = await response.json();
+    // Hunter Email Finder
+    const finderUrl = `https://api.hunter.io/v2/email-finder?domain=${encodeURIComponent(companyDomain)}&first_name=${encodeURIComponent(firstName)}&last_name=${encodeURIComponent(lastName)}&api_key=${HUNTER_API_KEY}`;
+    
+    const response = await fetch(finderUrl);
+    const text = await response.text();
+    
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error('Hunter API non-JSON response:', text.slice(0, 200));
+      return Response.json({ success: false, error: 'Hunter API error', fallback: 'linkedin_only' });
+    }
 
-    if (data.data && data.data.email && data.data.score > 50) {
+    console.log('Hunter finder response:', JSON.stringify(data).slice(0, 300));
+
+    if (data.data?.email) {
+      const score = data.data.score || 0;
+      // Accept any found email (even low confidence — better than nothing)
       return Response.json({
         success: true,
         email: data.data.email,
-        score: data.data.score,
-        source: data.data.source
+        score,
+        source: 'email_finder'
       });
     }
 
-    // Try domain search as fallback
-    const domainUrl = new URL(`https://api.hunter.io/v2/domain-search/${companyDomain}`);
-    domainUrl.searchParams.set('api_key', HUNTER_API_KEY);
-    domainUrl.searchParams.set('limit', '100');
+    // Fallback: domain search
+    const domainUrl = `https://api.hunter.io/v2/domain-search?domain=${encodeURIComponent(companyDomain)}&limit=100&api_key=${HUNTER_API_KEY}`;
+    const domainResponse = await fetch(domainUrl);
+    const domainText = await domainResponse.text();
 
-    const domainResponse = await fetch(domainUrl.toString());
-    const domainData = await domainResponse.json();
+    let domainData;
+    try {
+      domainData = JSON.parse(domainText);
+    } catch {
+      console.error('Hunter domain search non-JSON:', domainText.slice(0, 200));
+      return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
+    }
 
-    if (domainData.data && domainData.data.emails) {
-      const match = domainData.data.emails.find(
-        e => e.first_name && e.last_name && 
-             `${e.first_name} ${e.last_name}`.toLowerCase() === contactName.toLowerCase()
+    console.log('Hunter domain response emails count:', domainData.data?.emails?.length || 0);
+
+    if (domainData.data?.emails?.length > 0) {
+      // Try exact name match
+      const fullName = contactName.toLowerCase();
+      const exactMatch = domainData.data.emails.find(e =>
+        `${e.first_name} ${e.last_name}`.toLowerCase() === fullName
       );
-      
-      if (match && match.score > 50) {
-        return Response.json({
-          success: true,
-          email: match.email,
-          score: match.score,
-          source: 'domain_search'
-        });
+      if (exactMatch) {
+        return Response.json({ success: true, email: exactMatch.value, score: exactMatch.confidence || 0, source: 'domain_search' });
+      }
+      // Try first name match
+      const firstNameMatch = domainData.data.emails.find(e =>
+        e.first_name?.toLowerCase() === firstName.toLowerCase()
+      );
+      if (firstNameMatch) {
+        return Response.json({ success: true, email: firstNameMatch.value, score: firstNameMatch.confidence || 0, source: 'domain_search_firstname' });
       }
     }
 
-    return Response.json({
-      success: false,
-      error: 'Email not found',
-      fallback: 'linkedin_only'
-    });
+    return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
 
   } catch (error) {
     console.error('Email enrichment error:', error);
-    return Response.json({ 
-      error: error.message,
-      fallback: 'linkedin_only'
-    }, { status: 500 });
+    return Response.json({ success: false, error: error.message, fallback: 'linkedin_only' }, { status: 500 });
   }
 });
