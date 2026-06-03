@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { findContactEmail } from '@/functions/findContactEmail';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -131,10 +132,16 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     // Find email if type is email
     if (type === 'email' && match.company) {
       try {
-        const domain = match.company.toLowerCase().replace(/[^a-z0-9.-]/g, '') + '.com';
-        const response = await base44.functions.findContactEmail({ contactName: firstName, companyDomain: domain });
-        if (response.email) {
-          setContactEmail(response.email);
+        // Build a reasonable domain: lowercase, strip common suffixes, spaces→nothing, append .com
+        const domainBase = match.company
+          .toLowerCase()
+          .replace(/\b(inc|llc|ltd|corp|co|group|technologies|technology|solutions|services|consulting|global|international)\b/g, '')
+          .replace(/[^a-z0-9]/g, '')
+          .trim();
+        const domain = domainBase + '.com';
+        const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
+        if (result?.data?.email) {
+          setContactEmail(result.data.email);
         }
       } catch (err) {
         console.warn('Email lookup failed:', err);
