@@ -103,62 +103,8 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── Apollo.io API Enrichment (paid plan with waterfall) ───────────────
-    const APOLLO_API_KEY = Deno.env.get('APOLLO_API_KEY');
-    console.log('Apollo API key present:', !!APOLLO_API_KEY);
-    if (APOLLO_API_KEY) {
-      try {
-        console.log('Apollo enrichment:', firstName, lastName, 'at', cleanDomain);
-        
-        // Paid plan endpoint: People Enrichment with Waterfall
-        const apolloUrl = 'https://api.apollo.io/api/v1/people/match';
-        
-        const apolloRes = await fetch(apolloUrl, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-            'X-Api-Key': APOLLO_API_KEY
-          },
-          body: JSON.stringify({
-            first_name: firstName || undefined,
-            last_name: lastName || undefined,
-            domain: cleanDomain,
-            run_waterfall_email: true,
-            reveal_personal_emails: true
-          })
-        });
-        
-        console.log('Apollo HTTP status:', apolloRes.status);
-        let apolloText = await apolloRes.text();
-        console.log('Apollo raw response:', apolloText.slice(0, 500));
-        
-        let apolloData;
-        try { apolloData = JSON.parse(apolloText); } catch { apolloData = null; }
-        
-        if (!apolloData) {
-          console.warn('Apollo returned non-JSON response');
-          return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
-        }
-
-        const person = apolloData.person;
-        console.log('Apollo enrichment result:', person ? 'found' : 'not found');
-        
-        if (person && person.email && typeof person.email === 'string' && person.email.includes('@')) {
-          console.log('Apollo found email:', person.email, 'status:', person.email_status);
-          return Response.json({ 
-            success: true, 
-            email: person.email, 
-            score: person.email_status === 'verified' ? 98 : 90, 
-            source: 'apollo_waterfall' 
-          });
-        }
-        
-        console.log('Apollo: No valid email found in response');
-      } catch (err) {
-        console.warn('Apollo failed:', err.message);
-      }
-    }
+    // ── Apollo.io removed due to ToS restrictions (external product use not allowed) ──
+    // Consider alternatives: Hunter.io (current), RocketReach, or Snov.io for external products
 
     // ── All sources exhausted → LinkedIn fallback ──────────────────────────
     return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
