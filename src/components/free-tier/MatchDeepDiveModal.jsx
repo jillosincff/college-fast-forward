@@ -198,9 +198,16 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     const subjectLine = editableScript.match(/^Subject: (.+)/)?.[1] || `${(user?.school_code || shortName || 'UF')} connection`;
     const subject = encodeURIComponent(subjectLine);
     const body = encodeURIComponent(editableScript.replace(/^Subject: .+\n\n/, ''));
-    // Open mailto with or without email — browser will prompt user to fill in address if blank
     const to = contactEmail || '';
-    window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_self');
+    const mailtoUrl = `mailto:${to}?subject=${subject}&body=${body}`;
+    // Use a top-level anchor trick to escape iframe sandbox restrictions
+    const a = document.createElement('a');
+    a.href = mailtoUrl;
+    a.target = '_top';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   if (!match) return null;
@@ -334,7 +341,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                     />
                     <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                       <button onClick={handleCopyDraft} style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 10, cursor: 'pointer', minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, letterSpacing: '0.04em', background: isCopied ? '#16a34a' : '#111827', color: '#fff', transition: 'background 0.2s' }}>{isCopied ? '✓ Copied!' : `📋 Copy ${outreachType === 'email' ? 'Email' : 'Draft'}`}</button>
-                      {outreachType === 'linkedin' && draftContact?.linkedin_url ? (<a href={draftContact.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, background: '#0a66c2', color: '#fff', textDecoration: 'none' }}><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>Send on LinkedIn</a>) : (outreachType === 'email' ? (<a href={(() => { const subjectLine = editableScript.match(/^Subject: (.+)/)?.[1] || `${(user?.school_code || shortName || 'UF')} connection`; const body = editableScript.replace(/^Subject: .+\n\n/, ''); return `mailto:${contactEmail || ''}?subject=${encodeURIComponent(subjectLine)}&body=${encodeURIComponent(body)}`; })()} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, background: '#ea4335', color: '#fff', textDecoration: 'none' }}>✉️ Open Email</a>) : (<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#64748b' }}>Paste in LinkedIn DM</div>))}
+                      {outreachType === 'linkedin' && draftContact?.linkedin_url ? (<a href={draftContact.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, background: '#0a66c2', color: '#fff', textDecoration: 'none' }}><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>Send on LinkedIn</a>) : (outreachType === 'email' ? (<button onClick={handleOpenEmailClient} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, background: '#ea4335', color: '#fff', border: 'none', cursor: 'pointer' }}>✉️ Open Email</button>) : (<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#64748b' }}>Paste in LinkedIn DM</div>))}
                     </div>
                   </>
                 )}
