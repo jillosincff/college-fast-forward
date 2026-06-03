@@ -107,24 +107,19 @@ Deno.serve(async (req) => {
     const ROCKETREACH_API_KEY = Deno.env.get('ROCKETREACH_API_KEY');
     if (ROCKETREACH_API_KEY) {
       try {
-        const rrRes = await fetch('https://api.rocketreach.co/v1/people/find', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${ROCKETREACH_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            domain: cleanDomain,
-            first_name: firstName,
-            last_name: lastName,
-            limit: 1
-          })
+        const rrUrl = new URL('https://api.rocketreach.co/api/v2/person/lookup');
+        rrUrl.searchParams.set('key', ROCKETREACH_API_KEY);
+        rrUrl.searchParams.set('name', `${firstName} ${lastName}`);
+        rrUrl.searchParams.set('current_employer', cleanDomain);
+        
+        const rrRes = await fetch(rrUrl.toString(), {
+          headers: { 'accept': 'application/json' }
         });
         const rrData = await rrRes.json();
         console.log('RocketReach response:', JSON.stringify(rrData).slice(0, 300));
 
-        if (rrData.result && rrData.result.email && rrData.result.email.length > 0) {
-          return Response.json({ success: true, email: rrData.result.email[0], score: rrData.result.confidence || 0, source: 'rocketreach' });
+        if (rrData && rrData.email && Array.isArray(rrData.email) && rrData.email.length > 0) {
+          return Response.json({ success: true, email: rrData.email[0], score: rrData.confidence || 0, source: 'rocketreach' });
         }
       } catch (err) {
         console.warn('RocketReach failed:', err.message);
