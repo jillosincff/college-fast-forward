@@ -27,7 +27,9 @@ export default function AskFastIQChat({ onOpenChat }) {
   // Subscribe to agent conversation updates for streaming
   useEffect(() => {
     if (!conversation?.id) return;
+    console.log('[AskFastIQChat] Subscribing to conversation:', conversation.id);
     const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
+      console.log('[AskFastIQChat] Received conversation update:', data.messages?.length, 'messages');
       const agentMessages = (data.messages || []).map(m => ({
         role: m.role,
         content: m.content || '',
@@ -36,10 +38,14 @@ export default function AskFastIQChat({ onOpenChat }) {
       // Check if agent is done responding
       const lastMsg = data.messages?.[data.messages.length - 1];
       if (lastMsg?.role === 'assistant') {
+        console.log('[AskFastIQChat] Agent finished responding');
         setLoading(false);
       }
     });
-    return () => unsubscribe();
+    return () => {
+      console.log('[AskFastIQChat] Unsubscribing from conversation');
+      unsubscribe();
+    };
   }, [conversation?.id]);
 
   const ask = async (q) => {
@@ -54,21 +60,25 @@ export default function AskFastIQChat({ onOpenChat }) {
     try {
       let conv = conversation;
       if (!conv) {
+        console.log('[AskFastIQChat] Creating conversation for agent: fast_track_scout');
         conv = await base44.agents.createConversation({
           agent_name: 'fast_track_scout',
           metadata: { name: 'CLIFF Career Agent' },
         });
+        console.log('[AskFastIQChat] Conversation created:', conv.id);
         setConversation(conv);
       }
 
+      console.log('[AskFastIQChat] Adding message to conversation:', conv.id);
       await base44.agents.addMessage(conv, {
         role: 'user',
         content: question,
       });
+      console.log('[AskFastIQChat] Message added, waiting for response via subscription');
       // Response will come via the subscription above
     } catch (error) {
-      console.error('Agent error:', error);
-      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message || 'Unknown error'}` }]);
+      console.error('[AskFastIQChat] Agent error:', error);
+      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message || 'Unknown error'}. Please try again.` }]);
       setLoading(false);
     }
   };
