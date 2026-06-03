@@ -103,14 +103,14 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── Apollo.io People Enrichment (free tier: 100/month) ────────────────
+    // ── Apollo.io API Enrichment (paid plan with waterfall) ───────────────
     const APOLLO_API_KEY = Deno.env.get('APOLLO_API_KEY');
     console.log('Apollo API key present:', !!APOLLO_API_KEY);
     if (APOLLO_API_KEY) {
       try {
         console.log('Apollo enrichment:', firstName, lastName, 'at', cleanDomain);
         
-        // Free tier endpoint: People Enrichment (100 calls/month)
+        // Paid plan endpoint: People Enrichment with Waterfall
         const apolloUrl = 'https://api.apollo.io/api/v1/people/match';
         
         const apolloRes = await fetch(apolloUrl, {
@@ -124,7 +124,8 @@ Deno.serve(async (req) => {
             first_name: firstName || undefined,
             last_name: lastName || undefined,
             domain: cleanDomain,
-            run_waterfall_email: true
+            run_waterfall_email: true,
+            reveal_personal_emails: true
           })
         });
         
@@ -148,8 +149,8 @@ Deno.serve(async (req) => {
           return Response.json({ 
             success: true, 
             email: person.email, 
-            score: person.email_status === 'verified' ? 95 : 80, 
-            source: 'apollo' 
+            score: person.email_status === 'verified' ? 98 : 90, 
+            source: 'apollo_waterfall' 
           });
         }
         
