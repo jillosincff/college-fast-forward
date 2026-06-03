@@ -69,7 +69,6 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [editableScript, setEditableScript] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [contactEmail, setContactEmail] = useState(null);
-  const [contactEmail, setContactEmail] = useState('');
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -108,7 +107,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     }, 600);
   };
 
-  const handleMessageViaCLiFF = (contact, type = 'linkedin') => {
+  const handleMessageViaCLiFF = async (contact, type = 'linkedin') => {
     // Trigger full pipeline tracking automation
     setLaunched(true);
     onGenerateOutreach && onGenerateOutreach({ match, contact, tab, outreachType: type });
@@ -128,6 +127,20 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     const schoolCode = user?.school_code || shortName || 'UF';
     const meta = getSchoolMeta(schoolCode);
     const userType = user?.persona === 'alumni' ? `fellow ${meta.abbr} grad` : `current ${meta.abbr} student`;
+    
+    // Find email if type is email
+    if (type === 'email' && match.company) {
+      try {
+        const domain = match.company.toLowerCase().replace(/[^a-z0-9.-]/g, '') + '.com';
+        const response = await base44.functions.findContactEmail({ contactName: firstName, companyDomain: domain });
+        if (response.email) {
+          setContactEmail(response.email);
+        }
+      } catch (err) {
+        console.warn('Email lookup failed:', err);
+      }
+    }
+    
     setTimeout(() => {
       if (type === 'email') {
         const script = `Subject: Quick Question from a ${meta.abbr} Student\n\nDear ${firstName},\n\nI hope this email finds you well. My name is ${user?.full_name || 'a student'}, and I'm currently studying at ${meta.name}. I came across your profile and was impressed by your journey from ${meta.town} to your role at ${match.company}.\n\nI'm exploring career opportunities in this space and would greatly appreciate any advice you might have about navigating the pipeline. Would you be open to a brief 15-minute call at your convenience?\n\nThank you for your time and consideration.\n\nBest regards,\n${user?.full_name || user?.email || 'A ${meta.abbr} Student'}`;
@@ -169,8 +182,12 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const handleOpenEmailClient = () => {
     const subject = encodeURIComponent('Quick Question from a ' + (user?.school_code || shortName || 'UF') + ' Student');
     const body = encodeURIComponent(editableScript.replace('Subject: Quick Question from a ' + (user?.school_code || shortName || 'UF') + ' Student\n\n', ''));
-    const emailTo = contactEmail || '';
-    window.location.href = `mailto:${emailTo}?subject=${subject}&body=${body}`;
+    if (contactEmail) {
+      window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
+    } else {
+      navigator.clipboard.writeText(editableScript);
+      alert('Email not found. Script copied to clipboard - paste into your email client manually.');
+    }
   };
 
   if (!match) return null;
