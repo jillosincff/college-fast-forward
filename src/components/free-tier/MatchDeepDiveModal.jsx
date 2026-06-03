@@ -367,7 +367,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                           }
                           if (es?.checked && !es?.email) {
                             return (
-                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 LinkedIn DM</button>
+                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 Can't find email — use LinkedIn</button>
                             );
                           }
                           // Default: not yet looked up
@@ -412,7 +412,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                     {outreachType === 'email' && contactEmail === 'not_found' && (
                       <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, padding: '8px 12px', marginTop: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontSize: 13 }}>⚠️</span>
-                        <p style={{ fontFamily: dm, fontSize: 11, color: '#92400e', margin: 0 }}>Email not auto-found — find it on LinkedIn, then paste it into the To: field when your email client opens.</p>
+                        <p style={{ fontFamily: dm, fontSize: 11, color: '#92400e', margin: 0 }}>Can't find email address — reach out on LinkedIn instead</p>
                       </div>
                     )}
                     {outreachType === 'email' && contactEmail && contactEmail !== 'not_found' && (
