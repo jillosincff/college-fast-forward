@@ -188,11 +188,8 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
             <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-3 leading-relaxed font-sans">
               {(() => {
                 const fullDesc = lead.fullDescription || lead.jobDescription || lead.description || '';
-                const LIMIT = 180;
-                // Show the part that was cut off from the preview
-                const remainingText = fullDesc.length > LIMIT ? fullDesc.slice(LIMIT) : fullDesc;
                 // Split by paragraphs/newlines for better readability
-                const paragraphs = remainingText.split(/\n\n+|\n+/).filter(p => p.trim());
+                const paragraphs = fullDesc.split(/\n\n+|\n+/).filter(p => p.trim());
                 return paragraphs.map((para, idx) => (
                   <p key={idx} className="text-sm">{para.trim()}</p>
                 ));
