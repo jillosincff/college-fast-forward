@@ -26,20 +26,97 @@ Deno.serve(async (req) => {
       /(?:parents?|alumni|gators?)\s+in\s+([\w\s]+)/i,
       /find\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
       /search\s+for\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
+      // Contact-specific queries
+      /do you have (?:contact info|a number|an email) for (.+)/i,
+      /how can i (?:reach|contact) (.+)/i,
+      /(?:contact|reach|get in touch with) (.+)/i,
+      /tell me about (.+)/i,
+      /who is (.+)/i,
     ];
 
     for (const pattern of networkPatterns) {
       const match = message.match(pattern);
       if (match) {
         const personaWord = match[1]?.toLowerCase() || '';
-        const field = match[2]?.trim() || '';
+        const field = match[2]?.trim() || match[1]?.trim() || '';
         
         if (!field) continue;
         
-        // Determine persona filter
+        // Check if this is a contact-specific query (by name)
+        const contactPatterns = [
+          /do you have (?:contact info|a number|an email) for (.+)/i,
+          /how can i (?:reach|contact) (.+)/i,
+          /(?:contact|reach|get in touch with) (.+)/i,
+          /tell me about (.+)/i,
+          /who is (.+)/i,
+        ];
+        
+        let isContactQuery = false;
+        let contactName = null;
+        for (const cp of contactPatterns) {
+          const cm = message.match(cp);
+          if (cm) {
+            isContactQuery = true;
+            contactName = cm[1]?.trim();
+            break;
+          }
+        }
+        
+        // If asking about a specific person by name
+        if (isContactQuery && contactName) {
+          console.log(`[CLIFF] Contact query detected: ${contactName}`);
+          
+          // Search for this person in the network
+          const results = await base44.asServiceRole.entities.User.filter({});
+          const nameLower = contactName.toLowerCase();
+          
+          const found = results.find(u => {
+            const fullName = (u.full_name || '').toLowerCase();
+            const emailPrefix = (u.email || '').split('@')[0].toLowerCase();
+            return fullName.includes(nameLower) || emailPrefix.includes(nameLower);
+          });
+          
+          if (found) {
+            const fullName = found.full_name || found.email?.split('@')[0] || 'Network Member';
+            const title = found.current_role || 'Professional';
+            const company = found.current_company || 'Company';
+            const linkedin = found.linkedin_url || '';
+            const email = found.email || '';
+            
+            let response = `**${fullName}**\n`;
+            response += `${title} at ${company}\n`;
+            if (linkedin) response += `\n🔗 [LinkedIn Profile](${linkedin})`;
+            if (email) response += `\n📧 Email: ${email}`;
+            
+            return Response.json({
+              success: true,
+              response: response,
+              message_type: 'contact_info',
+              payload: {
+                contact: {
+                  name: fullName,
+                  title: title,
+                  company: company,
+                  linkedin_url: linkedin,
+                  email: email
+                },
+                suggested_actions: ['Draft outreach message', 'Search for more contacts']
+              }
+            });
+          } else {
+            return Response.json({
+              success: true,
+              response: `I don't have **${contactName}** in my network database right now. But I can help you find other ${user.school_abbreviation || 'UF'} parents or alumni in similar fields. Want me to search?`,
+              message_type: 'text',
+              payload: { suggested_actions: ['Find similar contacts', 'Try a different search'] }
+            });
+          }
+        }
+        
+        // Determine persona filter for field-based queries
         let personaFilter = 'all';
-        if (personaWord.includes('parent')) personaFilter = 'parent';
-        else if (personaWord.includes('alumni')) personaFilter = 'alumni';
+        if (personaWord && personaWord.includes('parent')) personaFilter = 'parent';
+        else if (personaWord && personaWord.includes('alumni')) personaFilter = 'alumni';
         
         console.log(`[CLIFF] Network query detected: ${personaFilter} in ${field}`);
         

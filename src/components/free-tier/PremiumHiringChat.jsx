@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CliffLogo } from '@/components/brand/CliffLogo';
 import CliFFOutreachModal from './CliFFOutreachModal';
-import ReactMarkdown from 'react-markdown';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
