@@ -118,8 +118,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
       if (email) {
         console.log('Email found:', email);
         setContactEmail(email);
-        // Small delay to ensure state is set before opening draft
-        setTimeout(() => handleMessageViaCLiFF(contact, 'email'), 50);
+        // Pass the pre-found email so handleMessageViaCLiFF doesn't re-lookup
+        handleMessageViaCLiFF(contact, 'email', email);
       } else {
         console.log('Email not found, switching to LinkedIn');
         setContactEmail('not_found');
@@ -145,7 +145,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     }, 600);
   };
 
-  const handleMessageViaCLiFF = async (contact, type = 'linkedin') => {
+  const handleMessageViaCLiFF = async (contact, type = 'linkedin', preFoundEmail = null) => {
     // Trigger full pipeline tracking automation
     setLaunched(true);
     onGenerateOutreach && onGenerateOutreach({ match, contact, tab, outreachType: type });
@@ -164,8 +164,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     const meta = getSchoolMeta(schoolCode);
     const userType = user?.persona === 'alumni' ? `fellow ${meta.abbr} grad` : `current ${meta.abbr} student`;
     
-    // Try to find email via Hunter when type is email
-    if (type === 'email' && match.company) {
+    // Use pre-found email if provided (from handleGetEmail), otherwise lookup
+    if (type === 'email' && !preFoundEmail && match.company) {
       try {
         const domainBase = match.company
           .toLowerCase()
@@ -178,14 +178,17 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
           setContactEmail(result.email);
         } else {
           // All sources exhausted — auto-switch to LinkedIn draft
-          setContactEmail(null);
+          setContactEmail('not_found');
           setOutreachType('linkedin');
         }
       } catch (err) {
         console.warn('Email lookup failed:', err);
-        setContactEmail(null);
+        setContactEmail('not_found');
         setOutreachType('linkedin');
       }
+    } else if (type === 'email' && preFoundEmail) {
+      // Email already found by handleGetEmail — use it
+      setContactEmail(preFoundEmail);
     }
     
     // Sanitize user state — kill all undefined bugs
