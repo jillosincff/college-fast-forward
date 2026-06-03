@@ -185,8 +185,15 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-4 leading-relaxed whitespace-pre-line font-sans">
-              {lead.fullDescription || lead.jobDescription || lead.description}
+            <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-3 leading-relaxed font-sans">
+              {(() => {
+                const desc = lead.fullDescription || lead.jobDescription || lead.description || '';
+                // Split by paragraphs/newlines for better readability
+                const paragraphs = desc.split(/\n\n+|\n+/).filter(p => p.trim());
+                return paragraphs.map((para, idx) => (
+                  <p key={idx} className="text-sm">{para.trim()}</p>
+                ));
+              })()}
             </div>
 
             <div className="border-t border-gray-100 pt-3 flex justify-end">
