@@ -103,18 +103,17 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── Apollo.io fallback (free tier: /v1/contacts/search) ───────────────
+    // ── Apollo.io People Enrichment (free tier: 100/month) ────────────────
     const APOLLO_API_KEY = Deno.env.get('APOLLO_API_KEY');
     console.log('Apollo API key present:', !!APOLLO_API_KEY);
     if (APOLLO_API_KEY) {
       try {
-        console.log('Apollo request: searching', firstName, lastName, 'at', cleanDomain);
+        console.log('Apollo enrichment:', firstName, lastName, 'at', cleanDomain);
         
-        // Free tier endpoint: searches Apollo's database (not just your saved contacts)
-        const apolloUrl = 'https://api.apollo.io/v1/contacts/search';
+        // Free tier endpoint: People Enrichment (100 calls/month)
+        const apolloUrl = 'https://api.apollo.io/api/v1/people/match';
         
-        // Try name + domain search first
-        let apolloRes = await fetch(apolloUrl, {
+        const apolloRes = await fetch(apolloUrl, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -122,11 +121,10 @@ Deno.serve(async (req) => {
             'X-Api-Key': APOLLO_API_KEY
           },
           body: JSON.stringify({
-            page: 1,
-            per_page: 10,
-            q_organization_domains_list: [cleanDomain],
-            person_first_name: firstName || undefined,
-            person_last_name: lastName || undefined
+            first_name: firstName || undefined,
+            last_name: lastName || undefined,
+            domain: cleanDomain,
+            run_waterfall_email: true
           })
         });
         
@@ -142,56 +140,15 @@ Deno.serve(async (req) => {
           return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
         }
 
-        let contacts = apolloData.contacts || [];
-        console.log('Apollo found', contacts.length, 'contacts with name filter');
+        const person = apolloData.person;
+        console.log('Apollo enrichment result:', person ? 'found' : 'not found');
         
-        // If no results, fall back to domain-only search
-        if (contacts.length === 0 && firstName) {
-          console.log('Name search returned 0, trying domain-only search...');
-          apolloRes = await fetch(apolloUrl, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache',
-              'X-Api-Key': APOLLO_API_KEY
-            },
-            body: JSON.stringify({
-              page: 1,
-              per_page: 20,
-              q_organization_domains_list: [cleanDomain]
-            })
-          });
-          
-          apolloText = await apolloRes.text();
-          try { apolloData = JSON.parse(apolloText); } catch { apolloData = null; }
-          contacts = apolloData?.contacts || [];
-          console.log('Domain-only search found', contacts.length, 'contacts');
-        }
-        
-        // Try to match by name if we have first and last name
-        let contact = null;
-        if (firstName && lastName && contacts.length > 0) {
-          const fullName = `${firstName} ${lastName}`.toLowerCase();
-          contact = contacts.find(c => {
-            const cName = `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase();
-            return cName === fullName || cName.includes(firstName.toLowerCase());
-          });
-        }
-        
-        // Fallback to first contact with verified email
-        if (!contact && contacts.length > 0) {
-          contact = contacts.find(c => c.contact_email && c.contact_email_status === 'verified') || contacts[0];
-        }
-        
-        const verifiedEmail = contact ? contact.contact_email : null;
-        console.log('Apollo Lookup Result:', verifiedEmail);
-        
-        if (verifiedEmail && typeof verifiedEmail === 'string' && verifiedEmail.includes('@')) {
-          console.log('Apollo found email:', verifiedEmail);
+        if (person && person.email && typeof person.email === 'string' && person.email.includes('@')) {
+          console.log('Apollo found email:', person.email, 'status:', person.email_status);
           return Response.json({ 
             success: true, 
-            email: verifiedEmail, 
-            score: contact.contact_email_status === 'verified' ? 95 : 80, 
+            email: person.email, 
+            score: person.email_status === 'verified' ? 95 : 80, 
             source: 'apollo' 
           });
         }
