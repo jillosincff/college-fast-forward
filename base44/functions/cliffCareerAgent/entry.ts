@@ -4,20 +4,27 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
+
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { message } = await req.json();
+    const body = await req.json();
+    const message = body.message;
+    const conversationHistory = body.history || []; // optional prior turns
+
     if (!message) {
       return Response.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    const messageLower = message.toLowerCase();
-    
-    // CRITICAL: Detect network lookup queries and call searchNetworkByBackground IMMEDIATELY
-    // Check for company-based "who do we have at X" queries first (before general patterns)
+    // DIAGNOSTIC: Confirm every unique prompt is hitting the backend
+    console.log('[CLIFF] Incoming user prompt:', message);
+    console.log('[CLIFF] History turns received:', conversationHistory.length);
+
+    const schoolAbbr = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
+
+    // ─── 1. COMPANY LOOKUP QUERIES ──────────────────────────────────────────
+    // e.g. "Who do we have at Spotify or Disney?"
     const companyQueryPatterns = [
       /who do (?:we|you) have at\s+([\w\s,&]+)/i,
       /who (?:do we have|works?)\s+(?:at|@)\s+([\w\s,&]+)/i,
@@ -30,62 +37,58 @@ Deno.serve(async (req) => {
       const match = message.match(pattern);
       if (match) {
         const companiesRaw = match[1].trim();
-        // Handle "X or Y" and "X and Y" patterns
         const companies = companiesRaw.split(/\s+(?:or|and)\s+/i).map(c => c.trim()).filter(Boolean);
-        
-        console.log(`[CLIFF] Company query detected for: ${companies.join(', ')}`);
-        
-        // Search DiscoveredAlumni + Users for each company
+
+        console.log('[CLIFF] Company lookup for:', companies.join(', '));
+
+        // Fetch once, filter per company
+        const [discovered, allUsers] = await Promise.all([
+          base44.asServiceRole.entities.DiscoveredAlumni.filter({}),
+          base44.asServiceRole.entities.User.filter({}),
+        ]);
+
         const allResults = [];
         for (const company of companies) {
           const companyLower = company.toLowerCase();
-          
-          // Search DiscoveredAlumni
-          const discovered = await base44.asServiceRole.entities.DiscoveredAlumni.filter({});
-          const matchingAlumni = discovered.filter(a => 
-            (a.company || '').toLowerCase().includes(companyLower)
-          ).slice(0, 4);
-          
-          // Search Users
-          const users = await base44.asServiceRole.entities.User.filter({});
-          const matchingUsers = users.filter(u => 
-            (u.current_company || '').toLowerCase().includes(companyLower) && u.persona
-          ).slice(0, 3);
-          
-          matchingAlumni.forEach(a => allResults.push({
-            name: a.name,
-            title: a.role_title || 'Professional',
-            company: a.company,
-            linkedin: a.linkedin_url,
-            type: 'alumni',
-            degree: a.degree_info,
-          }));
-          
-          matchingUsers.forEach(u => allResults.push({
-            name: u.full_name || u.email?.split('@')[0],
-            title: u.current_role || 'Professional',
-            company: u.current_company || company,
-            linkedin: u.linkedin_url,
-            type: u.persona,
-          }));
+
+          discovered
+            .filter(a => (a.company || '').toLowerCase().includes(companyLower))
+            .slice(0, 4)
+            .forEach(a => allResults.push({
+              name: a.name,
+              title: a.role_title || 'Professional',
+              company: a.company,
+              linkedin: a.linkedin_url,
+              type: 'alumni',
+              degree: a.degree_info,
+            }));
+
+          allUsers
+            .filter(u => (u.current_company || '').toLowerCase().includes(companyLower) && u.persona)
+            .slice(0, 3)
+            .forEach(u => allResults.push({
+              name: u.full_name || u.email?.split('@')[0],
+              title: u.current_role || 'Professional',
+              company: u.current_company || company,
+              linkedin: u.linkedin_url,
+              type: u.persona,
+            }));
         }
-        
+
         if (allResults.length === 0) {
-          const schoolAbbr = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
           return Response.json({
             success: true,
-            response: `I didn't find any ${schoolAbbr} network members at **${companies.join(' or ')}** in the database right now.\n\nTry asking me to search by industry or role — e.g. "Any alumni in entertainment?" or I can help you draft a cold outreach instead.`,
+            response: `I didn't find any ${schoolAbbr} network members at **${companies.join(' or ')}** right now.\n\nTry asking by industry — e.g. "Any alumni in entertainment?" — or I can help draft a cold outreach.`,
             message_type: 'text',
           });
         }
-        
-        const schoolAbbr = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
+
         const formatted = allResults.map((r, i) => {
           const typeLabel = r.type === 'parent' ? '💼 Parent' : `🎓 ${schoolAbbr} Alum`;
           const degreeNote = r.degree ? ` (${r.degree})` : '';
           return `${i + 1}. **${r.name}** — ${r.title} at ${r.company} [${typeLabel}]${degreeNote}${r.linkedin ? `\n   🔗 [LinkedIn](${r.linkedin})` : ''}`;
         }).join('\n\n');
-        
+
         return Response.json({
           success: true,
           response: `Found **${allResults.length} connection${allResults.length !== 1 ? 's' : ''}** at ${companies.join(' / ')}:\n\n${formatted}\n\nWant me to draft a personalized outreach to any of them?`,
@@ -94,210 +97,103 @@ Deno.serve(async (req) => {
       }
     }
 
-    const networkPatterns = [
-      /any\s+(parents?|alumni|gators?|uf\s+parents?|uf\s+alumni)\s+(?:in|who work (?:in|at))\s+([\w\s]+)/i,
-      /do you know any\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
+    // ─── 2. FIELD / PERSONA LOOKUP QUERIES ──────────────────────────────────
+    // e.g. "Any UF alumni in marketing?" / "Find parents in finance"
+    const fieldPatterns = [
+      /any\s+(?:parents?|alumni|gators?|uf\s+(?:parents?|alumni))\s+(?:in|who work (?:in|at))\s+([\w\s]+)/i,
+      /(?:find|search(?: for)?)\s+(?:parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
+      /(?:parents?|alumni|gators?)\s+(?:who work\s+)?(?:in|at)\s+([\w\s]+)/i,
       /who (?:in the network )?works? in\s+([\w\s]+)/i,
-      /are there\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
-      /(?:parents?|alumni|gators?)\s+(?:who work)?\s+(?:in|at)\s+([\w\s]+)/i,
-      /(?:parents?|alumni|gators?)\s+in\s+([\w\s]+)/i,
-      /find\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
-      /search\s+for\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
-      // Contact-specific queries
-      /do you have (?:contact info|a number|an email) for (.+)/i,
-      /how can i (?:reach|contact) (.+)/i,
-      /(?:contact|reach|get in touch with) (.+)/i,
-      /tell me about (.+)/i,
-      /who is (.+)/i,
     ];
 
-    for (const pattern of networkPatterns) {
+    for (const pattern of fieldPatterns) {
       const match = message.match(pattern);
       if (match) {
-        const personaWord = match[1]?.toLowerCase() || '';
-        const field = match[2]?.trim() || match[1]?.trim() || '';
-        
+        const field = match[1]?.trim();
         if (!field) continue;
-        
-        // Check if this is a contact-specific query (by name)
-        const contactPatterns = [
-          /do you have (?:contact info|a number|an email) for (.+)/i,
-          /how can i (?:reach|contact) (.+)/i,
-          /(?:contact|reach|get in touch with) (.+)/i,
-          /tell me about (.+)/i,
-          /who is (.+)/i,
-        ];
-        
-        let isContactQuery = false;
-        let contactName = null;
-        for (const cp of contactPatterns) {
-          const cm = message.match(cp);
-          if (cm) {
-            isContactQuery = true;
-            contactName = cm[1]?.trim();
-            break;
-          }
-        }
-        
-        // If asking about a specific person by name
-        if (isContactQuery && contactName) {
-          console.log(`[CLIFF] Contact query detected: ${contactName}`);
-          
-          // Search for this person in the network
-          const results = await base44.asServiceRole.entities.User.filter({});
-          const nameLower = contactName.toLowerCase().replace(/\s+/g, '');
-          
-          // Try multiple matching strategies
-          let found = null;
-          
-          // Strategy 1: Direct match in full_name or email
-          found = results.find(u => {
-            const fullName = (u.full_name || '').toLowerCase();
-            const emailPrefix = (u.email || '').split('@')[0].toLowerCase();
-            const fullNameNoSpace = fullName.replace(/\s+/g, '');
-            return fullNameNoSpace.includes(nameLower) || fullName.includes(nameLower) || emailPrefix.includes(nameLower);
-          });
-          
-          // Strategy 2: Match by first name or last name separately
-          if (!found) {
-            const nameParts = contactName.toLowerCase().split(/\s+/).filter(p => p.length > 2);
-            if (nameParts.length > 0) {
-              found = results.find(u => {
-                const fullName = (u.full_name || '').toLowerCase();
-                return nameParts.some(part => fullName.includes(part));
-              });
-            }
-          }
-          
-          // Strategy 3: Fuzzy match - check if any significant word matches
-          if (!found && nameLower.length > 4) {
-            found = results.find(u => {
-              const fullName = (u.full_name || '').toLowerCase();
-              const firstName = fullName.split(' ')[0];
-              const lastName = fullName.split(' ').pop();
-              return firstName.includes(nameLower) || lastName.includes(nameLower) || 
-                     (nameLower.includes(firstName) && firstName.length > 3) ||
-                     (nameLower.includes(lastName) && lastName.length > 3);
-            });
-          }
-          
-          if (found) {
-            const fullName = found.full_name || found.email?.split('@')[0] || 'Network Member';
-            const title = found.current_role || 'Professional';
-            const company = found.current_company || 'Company';
-            const linkedin = found.linkedin_url || '';
-            const email = found.email || '';
-            
-            let response = `Found **${fullName}** in the network!\n\n`;
-            response += `**${title}** at **${company}**\n`;
-            if (linkedin) response += `\n🔗 [LinkedIn Profile](${linkedin})`;
-            if (email) response += `\n📧 Email: ${email}`;
-            response += `\n\nWant me to draft an outreach message?`;
-            
-            return Response.json({
-              success: true,
-              response: response,
-              message_type: 'contact_info',
-              payload: {
-                contact: {
-                  name: fullName,
-                  title: title,
-                  company: company,
-                  linkedin_url: linkedin,
-                  email: email
-                },
-                suggested_actions: ['Draft outreach message', 'Search for more contacts']
-              }
-            });
-          } else {
-            return Response.json({
-              success: true,
-              response: `I don't have **${contactName}** in my network database right now. But I can help you find other ${user.school_abbreviation || 'UF'} parents or alumni in similar fields. Want me to search?`,
-              message_type: 'text',
-              payload: { suggested_actions: ['Find similar contacts', 'Try a different search'] }
-            });
-          }
-        }
-        
-        // Determine persona filter for field-based queries
+
+        const personaWord = message.toLowerCase();
         let personaFilter = 'all';
-        if (personaWord && personaWord.includes('parent')) personaFilter = 'parent';
-        else if (personaWord && personaWord.includes('alumni')) personaFilter = 'alumni';
-        
-        console.log(`[CLIFF] Network query detected: ${personaFilter} in ${field}`);
-        
-        // Call searchNetworkByBackground directly
-        const results = await base44.asServiceRole.entities.User.filter({});
-        
-        // Filter and score results
+        if (personaWord.includes('parent')) personaFilter = 'parent';
+        else if (personaWord.includes('alumni')) personaFilter = 'alumni';
+
+        console.log(`[CLIFF] Field lookup: ${personaFilter} in "${field}"`);
+
+        const users = await base44.asServiceRole.entities.User.filter({});
         const fieldLower = field.toLowerCase();
-        const filtered = results.filter(u => {
+        const filtered = users.filter(u => {
           if (!u.persona) return false;
           if (personaFilter !== 'all' && u.persona !== personaFilter) return false;
-          
-          // Check if user's profile matches the field
-          const searchText = [
-            u.current_role || '',
-            u.current_company || '',
-            u.industry || '',
-            u.bio || '',
-            u.expertise_tags || [],
-          ].join(' ').toLowerCase();
-          
-          return searchText.includes(fieldLower);
+          const blob = [u.current_role, u.current_company, u.industry, u.bio, ...(u.expertise_tags || [])].join(' ').toLowerCase();
+          return blob.includes(fieldLower);
         }).slice(0, 10);
-        
+
         if (filtered.length === 0) {
           return Response.json({
             success: true,
-            response: `I didn't find any ${personaFilter === 'all' ? 'network members' : personaFilter + 's'} in **${field}** in the network right now. Want me to search for companies hiring in that space instead?`,
+            response: `No ${personaFilter === 'all' ? 'network members' : personaFilter + 's'} found in **${field}** right now. Want me to look for companies hiring in that space instead?`,
             message_type: 'text',
-            payload: { suggested_actions: ['Find companies hiring in ' + field, 'Try a different search'] }
           });
         }
-        
-        // Format results
+
         const formattedResults = filtered.map((p, idx) => {
-          const fullName = p.full_name || p.email?.split('@')[0] || 'Network Member';
           const title = p.current_role || 'Professional';
-          const company = p.current_company || 'Company';
-          const linkedin = p.linkedin_url || '';
-          
-          return `${idx + 1}. **${fullName}**\n   ${title} at ${company}${linkedin ? `\n   🔗 [LinkedIn Profile](${linkedin})` : ''}`;
+          const company = p.current_company || 'Unknown company';
+          const linkedin = p.linkedin_url ? `\n   🔗 [LinkedIn](${p.linkedin_url})` : '';
+          return `${idx + 1}. **${p.full_name || p.email?.split('@')[0]}** — ${title} at ${company}${linkedin}`;
         }).join('\n\n');
-        
+
         return Response.json({
           success: true,
-          response: `I found **${filtered.length} ${personaFilter === 'all' ? 'network members' : personaFilter + 's'}** in **${field}**:\n\n${formattedResults}`,
+          response: `Found **${filtered.length}** ${personaFilter === 'all' ? 'network members' : personaFilter + 's'} in **${field}**:\n\n${formattedResults}`,
           message_type: 'network_results',
-          payload: { 
-            results: filtered.map(p => ({
-              name: p.full_name || p.email?.split('@')[0],
-              title: p.current_role,
-              company: p.current_company,
-              linkedin_url: p.linkedin_url,
-              persona: p.persona
-            })),
-            suggested_actions: [`Draft outreach message to one of them`, 'Search for more people']
-          }
         });
       }
     }
-    
-    // Fallback: use LLM for general career questions
-    const schoolAbbr = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
-    const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt: `You are CLiFF, a career agent for college students. The student is from ${schoolAbbr}. Answer their question helpfully and concisely.\n\nStudent question: ${message}\n\nGive practical, direct advice. Keep it under 150 words.`,
+
+    // ─── 3. GENERAL CAREER Q&A — LLM WITH PROPER PAYLOAD FORMAT ────────────
+    // Build conversation history in strict alternating user/assistant format
+    const systemPrompt = `You are CLiFF, an elite, no-fluff career agent for ${schoolAbbr} students. You help with networking strategy, outreach scripts, interview prep, salary negotiation, and job search tactics. Be direct, specific, and actionable. Never give generic advice. Keep responses under 200 words unless the user asks for something detailed.`;
+
+    // Sanitize history: enforce strict alternating user/assistant roles
+    const sanitizedHistory = [];
+    for (const turn of conversationHistory) {
+      if (turn.role === 'user' || turn.role === 'assistant') {
+        sanitizedHistory.push({ role: turn.role, content: String(turn.content || '') });
+      }
+    }
+
+    // Build the final messages array: system + history + current user message
+    const messages = [
+      ...sanitizedHistory,
+      { role: 'user', content: message }, // ← dynamic — never hardcoded
+    ];
+
+    // Build full prompt: inject system context + sanitized history + current message
+    // Temperature is controlled via the InvokeLLM model parameter (claude_sonnet_4_6 is highest quality available)
+    const historyText = sanitizedHistory.length > 0
+      ? sanitizedHistory.map(t => `${t.role === 'user' ? 'Student' : 'CLiFF'}: ${t.content}`).join('\n')
+      : '';
+
+    const fullPrompt = `${systemPrompt}\n\n${historyText ? `Conversation so far:\n${historyText}\n\n` : ''}Student: ${message}\n\nCLiFF:`;
+
+    console.log('[CLIFF] Sending to LLM. History turns:', sanitizedHistory.length, '| Current prompt:', message);
+
+    const reply = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: fullPrompt,
+      model: 'claude_sonnet_4_6', // high-quality, dynamic responses
     });
-    
+
+    console.log('[CLIFF] Response generated successfully.');
+
     return Response.json({
       success: true,
-      response: llmResponse || "I'm here to help! Try asking me to find alumni at a specific company, or ask for career advice.",
+      response: reply,
       message_type: 'text',
     });
-    
+
   } catch (error) {
-    console.error('[CLIFF] Error:', error);
+    console.error('[CLIFF] Fatal error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
