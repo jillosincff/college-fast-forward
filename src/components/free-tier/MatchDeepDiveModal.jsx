@@ -138,8 +138,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
           .trim();
         const domain = domainBase + '.com';
         const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
-        if (result?.data?.email) {
-          setContactEmail(result.data.email);
+        if (result?.email) {
+          setContactEmail(result.email);
         }
       } catch (err) {
         console.warn('Email lookup failed:', err);
