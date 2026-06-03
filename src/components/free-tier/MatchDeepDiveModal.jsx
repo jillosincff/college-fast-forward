@@ -291,14 +291,9 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
           {/* ── Zone 2: Warm Connections Grid ── */}
           <div style={{ paddingTop: 20, paddingBottom: 20, borderBottom: '1px solid #f1f5f9' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  🔓 Your Warm Network — Unlocked
-                </p>
-                <div style={{ position: 'relative', group: 'help' }} title="CLiFF Draft: Generates a personalized message instantly. Route Resume: Opens full outreach hub with referral strategy.">
-                  <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#e0e7ff', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, cursor: 'help' }}>?</div>
-                </div>
-              </div>
+              <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                🔓 Your Warm Network — Unlocked
+              </p>
               <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 100, padding: '3px 8px', textTransform: 'uppercase' }}>Premium</span>
             </div>
 
@@ -418,23 +413,6 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                             <span>View</span>
                           </a>
                         )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            handleMessageViaCLiFF(c);
-                          }}
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 4,
-                            background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: 8, padding: '4px 10px',
-                            border: 'none', minHeight: 'auto', flexShrink: 0, cursor: 'pointer',
-                            fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff',
-                            pointerEvents: 'auto',
-                          }}
-                          title="Generate a personalized outreach message using CLiFF AI"
-                        >
-                          ⚡ CLiFF Draft
-                        </button>
                       </div>
                     </div>
                   );
