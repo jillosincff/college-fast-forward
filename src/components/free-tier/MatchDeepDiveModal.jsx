@@ -63,6 +63,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [parents, setParents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [draftContact, setDraftContact] = useState(null);
+  const [outreachType, setOutreachType] = useState('linkedin');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedScript, setGeneratedScript] = useState('');
   const [editableScript, setEditableScript] = useState('');
@@ -105,13 +106,14 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     }, 600);
   };
 
-  const handleMessageViaCLiFF = (contact) => {
+  const handleMessageViaCLiFF = (contact, type = 'linkedin') => {
     // Trigger full pipeline tracking automation
     setLaunched(true);
-    onGenerateOutreach && onGenerateOutreach({ match, contact, tab });
+    onGenerateOutreach && onGenerateOutreach({ match, contact, tab, outreachType: type });
     
     // Show the generated script inline at bottom of modal
     setDraftContact(contact);
+    setOutreachType(type);
     setGeneratedScript('');
     setIsCopied(false);
     setIsGenerating(true);
@@ -125,9 +127,15 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     const meta = getSchoolMeta(schoolCode);
     const userType = user?.persona === 'alumni' ? `fellow ${meta.abbr} grad` : `current ${meta.abbr} student`;
     setTimeout(() => {
-      const script = `Hey ${firstName}, ${userType} here! I saw you made it from ${meta.town} to ${match.company} and that's exactly the path I'm working toward right now! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would you be open to a casual 15-minute chat sometime soon? ${meta.cheer}`;
-      setGeneratedScript(script);
-      setEditableScript(script);
+      if (type === 'email') {
+        const script = `Subject: Quick Question from a ${meta.abbr} Student\n\nDear ${firstName},\n\nI hope this email finds you well. My name is ${user?.full_name || 'a student'}, and I'm currently studying at ${meta.name}. I came across your profile and was impressed by your journey from ${meta.town} to your role at ${match.company}.\n\nI'm exploring career opportunities in this space and would greatly appreciate any advice you might have about navigating the pipeline. Would you be open to a brief 15-minute call at your convenience?\n\nThank you for your time and consideration.\n\nBest regards,\n${user?.full_name || user?.email || 'A ${meta.abbr} Student'}`;
+        setGeneratedScript(script);
+        setEditableScript(script);
+      } else {
+        const script = `Hey ${firstName}, ${userType} here! I saw you made it from ${meta.town} to ${match.company} and that's exactly the path I'm working toward right now! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would you be open to a casual 15-minute chat sometime soon? ${meta.cheer}`;
+        setGeneratedScript(script);
+        setEditableScript(script);
+      }
       setIsGenerating(false);
     }, 750);
   };
@@ -136,8 +144,15 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     navigator.clipboard.writeText(editableScript);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2200);
+    
+    // Update pipeline status to REACHED_OUT
     window.dispatchEvent(new CustomEvent('cliff:outreach-copied', {
-      detail: { company: match.company, role: match.role, contactName: draftContact?.name || '' }
+      detail: { 
+        company: match.company, 
+        role: match.role, 
+        contactName: draftContact?.name || '',
+        outreachType: outreachType
+      }
     }));
   };
 
@@ -241,10 +256,13 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                         <p style={{ fontFamily: dm, fontSize: 11, color: '#64748b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{isAlum ? `${c.title}${c.grad ? ` · Class of ${c.grad}` : ''}` : `${c.title} · Parent of ${c.student}`}</p>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                        {isAlum && c.mutual && <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 100, padding: '2px 7px' }}>Mutual</span>}
-                        {!isAlum && <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '2px 7px' }}>Opted-in</span>}
-                        {c.linkedin_url && <a href={c.linkedin_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, padding: '3px 8px', textDecoration: 'none', minHeight: 'auto', flexShrink: 0, fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}><svg width="11" height="11" viewBox="0 0 24 24" fill="#475569"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span>View</span></a>}
-                        <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'linear-gradient(135deg, #2563eb, #7c3aed)', borderRadius: 8, padding: '4px 10px', border: 'none', minHeight: 'auto', flexShrink: 0, cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff' }}>⚡ Generate</button>
+                      {isAlum && c.mutual && <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#059669', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 100, padding: '2px 7px' }}>Mutual</span>}
+                      {!isAlum && <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '2px 7px' }}>Opted-in</span>}
+                      {c.linkedin_url && <a href={c.linkedin_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, padding: '3px 8px', textDecoration: 'none', minHeight: 'auto', flexShrink: 0, fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}><svg width="11" height="11" viewBox="0 0 24 24" fill="#475569"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span>View</span></a>}
+                      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                        <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'email'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#111827', borderRadius: 8, padding: '4px 10px', border: 'none', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', boxShadow: '0 2px 8px rgba(17,24,39,0.3)' }}>✉️ Email</button>
+                        <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 LinkedIn</button>
+                      </div>
                       </div>
                     </div>
                   );
@@ -264,20 +282,20 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                 {isGenerating ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0' }}>
                     <div style={{ width: 18, height: 18, border: '2px solid #ede9fe', borderTopColor: '#7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
-                    <p style={{ fontFamily: dm, fontSize: 12, color: '#7c3aed', margin: 0, fontWeight: 600 }}>🤖 Tailoring your script...</p>
+                    <p style={{ fontFamily: dm, fontSize: 12, color: '#7c3aed', margin: 0, fontWeight: 600 }}>🤖 Tailoring your {outreachType === 'email' ? 'email' : 'LinkedIn'} script...</p>
                     <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                   </div>
                 ) : (
                   <>
-                    <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 6px' }}>Your Personalized Script (Editable)</p>
+                    <p style={{ fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.07em', margin: '0 0 6px' }}>Your {outreachType === 'email' ? 'Email' : 'LinkedIn'} Script (Editable)</p>
                     <textarea
                       value={editableScript}
                       onChange={(e) => setEditableScript(e.target.value)}
                       style={{ background: '#fff', border: '1px solid #ddd6fe', borderRadius: 10, padding: '12px 14px', fontFamily: dm, fontSize: 13, color: '#1e1b4b', lineHeight: 1.65, fontWeight: 500, width: '100%', minHeight: 120, resize: 'vertical', outline: 'none' }}
                     />
                     <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                      <button onClick={handleCopyDraft} style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 10, cursor: 'pointer', minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, letterSpacing: '0.04em', background: isCopied ? '#16a34a' : '#111827', color: '#fff', transition: 'background 0.2s' }}>{isCopied ? '✓ Copied!' : '📋 Copy Draft'}</button>
-                      {draftContact?.linkedin_url ? (<a href={draftContact.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, background: '#0a66c2', color: '#fff', textDecoration: 'none' }}><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>Send on LinkedIn</a>) : (<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#64748b' }}>Paste in LinkedIn DM</div>)}
+                      <button onClick={handleCopyDraft} style={{ flex: 1, padding: '10px 0', border: 'none', borderRadius: 10, cursor: 'pointer', minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, letterSpacing: '0.04em', background: isCopied ? '#16a34a' : '#111827', color: '#fff', transition: 'background 0.2s' }}>{isCopied ? '✓ Copied!' : `📋 Copy ${outreachType === 'email' ? 'Email' : 'Draft'}`}</button>
+                      {outreachType === 'linkedin' && draftContact?.linkedin_url ? (<a href={draftContact.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 12, fontWeight: 800, background: '#0a66c2', color: '#fff', textDecoration: 'none' }}><svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>Send on LinkedIn</a>) : (outreachType === 'email' ? (<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#64748b' }}>Paste in Email</div>) : (<div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 0', borderRadius: 10, minHeight: 'auto', fontFamily: dm, fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#64748b' }}>Paste in LinkedIn DM</div>))}
                     </div>
                   </>
                 )}
