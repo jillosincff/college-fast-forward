@@ -103,14 +103,14 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── Apollo.io fallback ────────────────────────────────────────────────
+    // ── Apollo.io fallback (free tier: /v1/contacts/search) ───────────────
     const APOLLO_API_KEY = Deno.env.get('APOLLO_API_KEY');
     console.log('Apollo API key present:', !!APOLLO_API_KEY);
     if (APOLLO_API_KEY) {
       try {
         console.log('Apollo request: searching', firstName, lastName, 'at', cleanDomain);
         
-        // Apollo Contacts Search endpoint (free tier compatible)
+        // Free tier endpoint: searches Apollo's database (not just your saved contacts)
         const apolloUrl = 'https://api.apollo.io/v1/contacts/search';
         
         // Try name + domain search first
@@ -124,8 +124,9 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             page: 1,
             per_page: 10,
-            q_organization_domains: cleanDomain,
-            q_person_name: `${firstName} ${lastName}`.trim()
+            q_organization_domains_list: [cleanDomain],
+            person_first_name: firstName || undefined,
+            person_last_name: lastName || undefined
           })
         });
         
@@ -157,7 +158,7 @@ Deno.serve(async (req) => {
             body: JSON.stringify({
               page: 1,
               per_page: 20,
-              q_organization_domains: cleanDomain
+              q_organization_domains_list: [cleanDomain]
             })
           });
           
@@ -179,10 +180,10 @@ Deno.serve(async (req) => {
         
         // Fallback to first contact with verified email
         if (!contact && contacts.length > 0) {
-          contact = contacts.find(c => c.email && c.email_status === 'verified') || contacts[0];
+          contact = contacts.find(c => c.contact_email && c.contact_email_status === 'verified') || contacts[0];
         }
         
-        const verifiedEmail = contact ? contact.email : null;
+        const verifiedEmail = contact ? contact.contact_email : null;
         console.log('Apollo Lookup Result:', verifiedEmail);
         
         if (verifiedEmail && typeof verifiedEmail === 'string' && verifiedEmail.includes('@')) {
@@ -190,7 +191,7 @@ Deno.serve(async (req) => {
           return Response.json({ 
             success: true, 
             email: verifiedEmail, 
-            score: contact.email_status === 'verified' ? 95 : 80, 
+            score: contact.contact_email_status === 'verified' ? 95 : 80, 
             source: 'apollo' 
           });
         }
