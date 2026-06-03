@@ -105,40 +105,56 @@ Deno.serve(async (req) => {
 
     // ── RocketReach fallback ────────────────────────────────────────────────
     const ROCKETREACH_API_KEY = Deno.env.get('ROCKETREACH_API_KEY');
+    console.log('RocketReach API key present:', !!ROCKETREACH_API_KEY);
     if (ROCKETREACH_API_KEY) {
       try {
         const rrUrl = new URL('https://api.rocketreach.co/api/v2/person/lookup');
-        rrUrl.searchParams.set('key', ROCKETREACH_API_KEY);
         rrUrl.searchParams.set('name', `${firstName} ${lastName}`);
         rrUrl.searchParams.set('current_employer', cleanDomain);
+        
+        console.log('RocketReach request URL:', rrUrl.toString());
         
         const rrRes = await fetch(rrUrl.toString(), {
           headers: { 
             'accept': 'application/json',
-            'Authorization': `Bearer ${ROCKETREACH_API_KEY}`
+            'Api-Key': ROCKETREACH_API_KEY
           }
         });
-        const rrData = await rrRes.json();
-        console.log('RocketReach response:', JSON.stringify(rrData).slice(0, 500));
+        
+        console.log('RocketReach HTTP status:', rrRes.status);
+        const rrText = await rrRes.text();
+        console.log('RocketReach raw response:', rrText.slice(0, 500));
+        
+        let rrData;
+        try { rrData = JSON.parse(rrText); } catch { rrData = null; }
+        
+        if (!rrData) {
+          console.warn('RocketReach returned non-JSON response');
+          return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
+        }
 
-        // RocketReach returns: { result: { email: [...], emails: [...] }, ... }
-        const result = rrData.result || rrData;
-        const emails = result.emails || result.email || [];
+        // RocketReach returns: { emails: [...], ... } directly
+        const emails = rrData.emails || [];
+        console.log('RocketReach emails array:', emails);
         
         if (Array.isArray(emails) && emails.length > 0) {
-          // Filter for verified/work emails
-          const verifiedEmail = emails.find(e => e && (e.verified || e.type === 'work' || e.email_address));
-          const emailToUse = verifiedEmail ? (verifiedEmail.email_address || verifiedEmail) : (emails[0].email_address || emails[0]);
-          return Response.json({ success: true, email: emailToUse, score: result.confidence || 80, source: 'rocketreach' });
-        }
-        
-        // Also check single email field
-        if (result.email_address || result.email) {
-          const singleEmail = result.email_address || result.email;
-          if (typeof singleEmail === 'string' && singleEmail.includes('@')) {
-            return Response.json({ success: true, email: singleEmail, score: result.confidence || 80, source: 'rocketreach' });
+          // Filter for verified/work emails with good grades
+          const verifiedEmail = emails.find(e => {
+            const emailAddr = e.email || e.email_address;
+            const grade = e.grade;
+            return emailAddr && (e.verified || grade === 'A' || grade === 'B' || e.type === 'work');
+          });
+          
+          const emailObj = verifiedEmail || emails[0];
+          const emailToUse = emailObj.email || emailObj.email_address;
+          
+          if (emailToUse && typeof emailToUse === 'string' && emailToUse.includes('@')) {
+            console.log('RocketReach found email:', emailToUse);
+            return Response.json({ success: true, email: emailToUse, score: rrData.confidence || 80, source: 'rocketreach' });
           }
         }
+        
+        console.log('RocketReach: No valid email found in response');
       } catch (err) {
         console.warn('RocketReach failed:', err.message);
       }
