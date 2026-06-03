@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { base44 } from '@/api/base44Client';
 import OpportunityDrawer from './OpportunityDrawer';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -343,6 +344,42 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     }
   };
 
+  const colToStatus = { 'OPPORTUNITIES': 'identified', 'REACHED OUT': 'reached_out', 'INTERVIEWING': 'interview', 'OFFER 🎉': 'offer' };
+
+  const onDragEnd = async (result) => {
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+
+    const srcCol = source.droppableId;
+    const dstCol = destination.droppableId;
+
+    setCards(prev => {
+      const srcCards = [...prev[srcCol]];
+      const dstCards = srcCol === dstCol ? srcCards : [...prev[dstCol]];
+      const [moved] = srcCards.splice(source.index, 1);
+      dstCards.splice(destination.index, 0, moved);
+      if (srcCol === dstCol) return { ...prev, [srcCol]: dstCards };
+      return { ...prev, [srcCol]: srcCards, [dstCol]: dstCards };
+    });
+
+    // Persist status change if card moved to a different column
+    if (srcCol !== dstCol) {
+      const card = cards[srcCol][source.index];
+      if (card?.id && !card.id.startsWith('temp_')) {
+        const newStatus = colToStatus[dstCol];
+        try {
+          await base44.entities.NetworkingPipeline.update(card.id, {
+            status: newStatus,
+            status_date: new Date().toISOString(),
+          });
+        } catch (err) {
+          console.error('Failed to persist pipeline status:', err);
+        }
+      }
+    }
+  };
+
   const handleApplied = (lead) => {
     const lastName = user?.full_name?.split(' ')[1] || user?.full_name?.split(' ')[0] || 'Resume';
     const tailoredResume = {
@@ -517,45 +554,85 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           )}
         </div>
 
-        {/* Desktop: 4-column grid */}
+        {/* Desktop: 4-column grid with drag-and-drop */}
         <div className="pipeline-desktop-grid" style={{ overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style>{`.pipeline-desktop-grid::-webkit-scrollbar { display: none; }`}</style>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(200px, 1fr))', gap: 0, minWidth: 720 }}>
-            {COLUMNS.map((col, ci) => {
-              const dotColors = ['#3b82f6','#f97316','#8b5cf6','#10b981'];
-              const glows = ['rgba(59,130,246,0.6)','rgba(249,115,22,0.6)','rgba(139,92,246,0.6)','rgba(16,185,129,0.6)'];
-              return (
-                <div key={col} style={{ borderRight: ci < 3 ? '1px solid #f3f4f6' : 'none', padding: '14px 14px 16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: dotColors[ci], boxShadow: `0 0 6px ${glows[ci]}` }} />
-                    <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{col}</p>
-                    <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', background: '#f3f4f6', borderRadius: 100, padding: '1px 7px', marginLeft: 'auto' }}>{cards[col]?.length || 0}</span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
-                    {col === 'OPPORTUNITIES'
-                      ? cards[col].map((lead, i) => <LeadCard key={i} lead={lead} columnId="opportunities" onOpen={handleLeadOpen} onDelete={handleDeleteCard} cardIndex={i} columnKey={col} />)
-                      : cards[col].map((item, i) => (
-                          <LeadCard key={i} lead={item} columnId={col === 'REACHED OUT' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'} onOpen={setSelectedCard} onTriggerNudge={handleTriggerNudge} onDelete={handleDeleteCard} cardIndex={i} columnKey={col} />
-                        ))
-                    }
-                    {newCard.col === col ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <input autoFocus value={newCard.text} onChange={e => setNewCard(n => ({ ...n, text: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCard(col); if (e.key === 'Escape') setNewCard({ col: null, text: '' }); }} placeholder="Company or role name..." style={{ fontFamily: dm, fontSize: 12, color: '#374151', background: '#fff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 10px', outline: 'none', minHeight: 'auto' }} />
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <button onClick={() => addCard(col)} style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Add</button>
-                          <button onClick={() => setNewCard({ col: null, text: '' })} style={{ flex: 1, fontFamily: dm, fontSize: 11, color: '#6b7280', background: '#f3f4f6', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(200px, 1fr))', gap: 0, minWidth: 720 }}>
+              {COLUMNS.map((col, ci) => {
+                const dotColors = ['#3b82f6','#f97316','#8b5cf6','#10b981'];
+                const glows = ['rgba(59,130,246,0.6)','rgba(249,115,22,0.6)','rgba(139,92,246,0.6)','rgba(16,185,129,0.6)'];
+                return (
+                  <Droppable droppableId={col} key={col}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        style={{
+                          borderRight: ci < 3 ? '1px solid #f3f4f6' : 'none',
+                          padding: '14px 14px 16px',
+                          background: snapshot.isDraggingOver ? '#f0f7ff' : 'transparent',
+                          transition: 'background 0.15s',
+                          borderRadius: snapshot.isDraggingOver ? 10 : 0,
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                          <div style={{ width: 9, height: 9, borderRadius: '50%', background: dotColors[ci], boxShadow: `0 0 6px ${glows[ci]}` }} />
+                          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{col}</p>
+                          <span style={{ fontFamily: dm, fontSize: 10, color: '#9ca3af', background: '#f3f4f6', borderRadius: 100, padding: '1px 7px', marginLeft: 'auto' }}>{cards[col]?.length || 0}</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
+                          {cards[col].map((item, i) => (
+                            <Draggable key={item.id || `card-${col}-${i}`} draggableId={item.id || `card-${col}-${i}`} index={i}>
+                              {(dragProvided, dragSnapshot) => (
+                                <div
+                                  ref={dragProvided.innerRef}
+                                  {...dragProvided.draggableProps}
+                                  {...dragProvided.dragHandleProps}
+                                  style={{
+                                    ...dragProvided.draggableProps.style,
+                                    opacity: dragSnapshot.isDragging ? 0.85 : 1,
+                                    transform: dragSnapshot.isDragging
+                                      ? `${dragProvided.draggableProps.style?.transform} rotate(1.5deg)`
+                                      : dragProvided.draggableProps.style?.transform,
+                                    boxShadow: dragSnapshot.isDragging ? '0 12px 28px rgba(0,0,0,0.15)' : undefined,
+                                  }}
+                                >
+                                  <LeadCard
+                                    lead={item}
+                                    columnId={col === 'OPPORTUNITIES' ? 'opportunities' : col === 'REACHED OUT' ? 'applied' : col === 'INTERVIEWING' ? 'interviewing' : 'offer'}
+                                    onOpen={col === 'OPPORTUNITIES' ? handleLeadOpen : setSelectedCard}
+                                    onTriggerNudge={handleTriggerNudge}
+                                    onDelete={handleDeleteCard}
+                                    cardIndex={i}
+                                    columnKey={col}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                          {newCard.col === col ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              <input autoFocus value={newCard.text} onChange={e => setNewCard(n => ({ ...n, text: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') addCard(col); if (e.key === 'Escape') setNewCard({ col: null, text: '' }); }} placeholder="Company or role name..." style={{ fontFamily: dm, fontSize: 12, color: '#374151', background: '#fff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '8px 10px', outline: 'none', minHeight: 'auto' }} />
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button onClick={() => addCard(col)} style={{ flex: 1, fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#fff', background: '#2563eb', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Add</button>
+                                <button onClick={() => setNewCard({ col: null, text: '' })} style={{ flex: 1, fontFamily: dm, fontSize: 11, color: '#6b7280', background: '#f3f4f6', border: 'none', borderRadius: 7, padding: '6px 0', cursor: 'pointer', minHeight: 'auto' }}>Cancel</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button onClick={() => setNewCard({ col, text: '' })} style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: 'none', border: '1px dashed #e5e7eb', borderRadius: 10, padding: '8px 0', cursor: 'pointer', minHeight: 'auto', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#bfdbfe'} onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}>
+                              + Add card
+                            </button>
+                          )}
                         </div>
                       </div>
-                    ) : (
-                      <button onClick={() => setNewCard({ col, text: '' })} style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', background: 'none', border: '1px dashed #e5e7eb', borderRadius: 10, padding: '8px 0', cursor: 'pointer', minHeight: 'auto', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#bfdbfe'} onMouseLeave={e => e.currentTarget.style.borderColor = '#e5e7eb'}>
-                        + Add card
-                      </button>
                     )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  </Droppable>
+                );
+              })}
+            </div>
+          </DragDropContext>
         </div>
       </div>
     </>
