@@ -110,10 +110,20 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         .trim();
       const domain = domainBase + '.com';
       const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
-      const email = result?.success && result?.email ? result.email : null;
+      // SDK wraps response in .data
+      const payload = result?.data || result;
+      const email = payload?.success && payload?.email ? payload.email : null;
       setEmailStates(prev => ({ ...prev, [key]: { loading: false, email, checked: true } }));
+      if (email) {
+        setContactEmail(email);
+        handleMessageViaCLiFF(contact, 'email');
+      } else {
+        // Email not found — auto-open LinkedIn draft so user always gets something
+        handleMessageViaCLiFF(contact, 'linkedin');
+      }
     } catch (err) {
       setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true } }));
+      handleMessageViaCLiFF(contact, 'linkedin');
     }
   };
 
