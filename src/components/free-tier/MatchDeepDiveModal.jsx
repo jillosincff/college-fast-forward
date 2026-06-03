@@ -128,7 +128,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         handleMessageViaCLiFF(contact, 'linkedin');
       }
     } catch (err) {
-      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true, lookingUp: null } }));
+      console.error('Email lookup failed:', err);
+      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true, lookingUp: null, error: err.message } }));
       setContactEmail('not_found');
       handleMessageViaCLiFF(contact, 'linkedin');
     }
