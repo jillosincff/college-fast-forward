@@ -94,7 +94,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   }, [match]);
 
   const handleTrackAndDraft = () => {
-    const contact = selectedContact || (tab === 'alumni' ? alumni[0] : parents[0]);
+    // Default to first alumni if no contact selected (prioritize alumni over parents)
+    const contact = selectedContact || (alumni.length > 0 ? alumni[0] : parents[0]);
     setLaunched(true);
     onGenerateOutreach && onGenerateOutreach({ match, contact, tab });
     setTimeout(() => {
@@ -184,11 +185,11 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
-                <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 900, color: '#2563eb', margin: '0 0 2px' }}>{match.alumniCount || match.alumCount || 0}</p>
+                <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 900, color: '#2563eb', margin: '0 0 2px' }}>{alumni.length}</p>
                 <p style={{ fontFamily: dm, fontSize: 10, color: '#64748b', margin: 0, fontWeight: 600 }}>🎓 {shortName} Alumni</p>
               </div>
               <div style={{ flex: 1, background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 10, padding: '10px 12px', textAlign: 'center' }}>
-                <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 900, color: '#7c3aed', margin: '0 0 2px' }}>{match.parentCount}</p>
+                <p style={{ fontFamily: dm, fontSize: 20, fontWeight: 900, color: '#7c3aed', margin: '0 0 2px' }}>{parents.length}</p>
                 <p style={{ fontFamily: dm, fontSize: 10, color: '#64748b', margin: 0, fontWeight: 600 }}>👨‍👩‍👧 {shortName} Parents</p>
               </div>
             </div>
