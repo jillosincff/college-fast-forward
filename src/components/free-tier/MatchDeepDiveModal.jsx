@@ -120,9 +120,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     setIsCopied(false);
     setIsGenerating(true);
     setTimeout(() => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' });
-      }
+      scrollContainerRef.current?.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' });
     }, 80);
     const firstName = contact.name?.split(' ')[0] || contact.name;
     const schoolCode = user?.school_code || shortName || 'UF';
@@ -148,18 +146,26 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
       }
     }
     
-    setTimeout(() => {
-      if (type === 'email') {
-        const script = `Subject: Quick Question from a ${meta.abbr} Student\n\nDear ${firstName},\n\nI hope this email finds you well. My name is ${user?.full_name || 'a student'}, and I'm currently studying at ${meta.name}. I came across your profile and was impressed by your journey from ${meta.town} to your role at ${match.company}.\n\nI'm exploring career opportunities in this space and would greatly appreciate any advice you might have about navigating the pipeline. Would you be open to a brief 15-minute call at your convenience?\n\nThank you for your time and consideration.\n\nBest regards,\n${user?.full_name || user?.email || 'A ${meta.abbr} Student'}`;
-        setGeneratedScript(script);
-        setEditableScript(script);
-      } else {
-        const script = `Hey ${firstName}, ${userType} here! I saw you made it from ${meta.town} to ${match.company} and that's exactly the path I'm working toward right now! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would you be open to a casual 15-minute chat sometime soon? ${meta.cheer}`;
-        setGeneratedScript(script);
-        setEditableScript(script);
-      }
-      setIsGenerating(false);
-    }, 750);
+    // Sanitize user state — kill all undefined bugs
+    const schoolAbbrev = (user?.school_code || user?.school_abbreviation || shortName || 'UF').toUpperCase();
+    const schoolMeta = getSchoolMeta(schoolAbbrev);
+    const userMajor = user?.major || user?.field_of_study || 'Business';
+    const userFirstName = (user?.full_name || user?.email || 'Student').split(' ')[0];
+    const contactTitle = contact.title || 'professional';
+    const contactFirstName = contact.name?.split(' ')[0] || contact.name;
+
+    if (type === 'email') {
+      const subject = `${schoolAbbrev} connection / Question about ${contactTitle} roles at ${match.company}`;
+      const body = `Hi ${contactFirstName}!\n\nI'm a fellow ${schoolAbbrev} student studying ${userMajor}, and I saw your path from ${schoolMeta.town} to your role as a ${contactTitle} at ${match.company}.\n\nYour background in this space is exactly where I'm trying to grow. If you have any availability over the next couple of weeks, I'd love to grab a quick 15-minute virtual coffee to ask you a couple of questions about your journey.\n\nGo ${schoolMeta.mascot}!\n\nBest,\n${userFirstName}`;
+      const script = `Subject: ${subject}\n\n${body}`;
+      setGeneratedScript(script);
+      setEditableScript(script);
+    } else {
+      const script = `Hey ${contactFirstName}! I'm a ${schoolAbbrev} student studying ${userMajor} and I saw your path to ${match.company} — that's exactly the direction I'm working toward. Would you be open to a quick 15-minute virtual coffee sometime soon? ${schoolMeta.cheer}`;
+      setGeneratedScript(script);
+      setEditableScript(script);
+    }
+    setIsGenerating(false);
   };
 
   const handleCopyDraft = () => {
@@ -187,8 +193,9 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   };
 
   const handleOpenEmailClient = () => {
-    const subject = encodeURIComponent('Quick Question from a ' + (user?.school_code || shortName || 'UF') + ' Student');
-    const body = encodeURIComponent(editableScript.replace('Subject: Quick Question from a ' + (user?.school_code || shortName || 'UF') + ' Student\n\n', ''));
+    const subjectLine = editableScript.match(/^Subject: (.+)/)?.[1] || `${(user?.school_code || shortName || 'UF')} connection`;
+    const subject = encodeURIComponent(subjectLine);
+    const body = encodeURIComponent(editableScript.replace(/^Subject: .+\n\n/, ''));
     if (contactEmail) {
       window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
     } else {
