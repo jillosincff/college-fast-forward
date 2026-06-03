@@ -100,15 +100,12 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   }, [match]);
 
   const handleGetEmail = async (contact) => {
-    console.log('=== handleGetEmail called ===');
-    console.log('Contact name:', contact?.name);
-    console.log('Contact title:', contact?.title);
     const key = contact?.name;
     if (!key) {
-      console.error('No contact name provided!');
       return;
     }
-    setEmailStates(prev => ({ ...prev, [key]: { loading: true, email: null, checked: false } }));
+    // Set loading with the contact name for debugging
+    setEmailStates(prev => ({ ...prev, [key]: { loading: true, email: null, checked: false, lookingUp: contact.name } }));
     try {
       const domainBase = match.company
         .toLowerCase()
@@ -116,27 +113,22 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         .replace(/[^a-z0-9]/g, '')
         .trim();
       const domain = domainBase + '.com';
-      console.log('Looking up email for:', contact.name, 'at domain:', domain);
       const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
       // SDK wraps response in .data
       const payload = result?.data || result;
-      console.log('Email lookup result for', contact.name, ':', payload);
       const email = payload?.success && payload?.email ? payload.email : null;
-      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email, checked: true } }));
+      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email, checked: true, lookingUp: null } }));
       if (email) {
-        console.log('✓ Email found for', contact.name, ':', email);
         setContactEmail(email);
         // Pass the pre-found email so handleMessageViaCLiFF doesn't re-lookup
         handleMessageViaCLiFF(contact, 'email', email);
       } else {
-        console.log('✗ Email not found for', contact.name, ', switching to LinkedIn');
         setContactEmail('not_found');
         // Email not found — auto-open LinkedIn draft so user always gets something
         handleMessageViaCLiFF(contact, 'linkedin');
       }
     } catch (err) {
-      console.error('Email lookup error for', contact.name, ':', err);
-      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true } }));
+      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true, lookingUp: null } }));
       setContactEmail('not_found');
       handleMessageViaCLiFF(contact, 'linkedin');
     }
@@ -363,7 +355,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                             return (
                               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f8fafc', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', fontFamily: dm, fontSize: 9, color: '#94a3b8' }}>
                                 <div style={{ width: 10, height: 10, border: '2px solid #e2e8f0', borderTopColor: '#7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
-                                Finding…
+                                {es?.lookingUp ? `Finding ${es.lookingUp.split(' ')[0]}…` : 'Finding…'}
                               </div>
                             );
                           }
@@ -380,8 +372,8 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                           // Default: not yet looked up
                           return (
                             <>
-                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleGetEmail(c); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#111827', borderRadius: 8, padding: '4px 10px', border: 'none', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', boxShadow: '0 2px 8px rgba(17,24,39,0.3)' }}>✉️ Get Email</button>
-                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 LinkedIn</button>
+                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); console.log('Get Email clicked for:', c.name); handleGetEmail(c); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#111827', borderRadius: 8, padding: '4px 10px', border: 'none', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', boxShadow: '0 2px 8px rgba(17,24,39,0.3)' }}>✉️ Get Email</button>
+                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); console.log('LinkedIn clicked for:', c.name); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 LinkedIn</button>
                             </>
                           );
                         })()}
