@@ -38,14 +38,19 @@ Deno.serve(async (req) => {
       if (persona_filter === 'alumni' && !isAlumni) continue;
       if (persona_filter === 'parent' && !isParent) continue;
 
-      // School isolation — only apply to alumni, NOT parents
-      // Parents join to support students across schools, so don't filter them by school_code
-      if (schoolCode && isAlumni && !isParent) {
-        const userSchool = (u.school_code || '').toLowerCase();
+      // School isolation — apply to both alumni and parents
+      // Parents store school as school_name/school (full name), may not have school_code
+      if (schoolCode || schoolName) {
+        const userSchoolCode = (u.school_code || '').toLowerCase();
         const userSchoolName = (u.school_name || u.school || u.university || '').toLowerCase();
-        const codeMatch = userSchool === schoolCode.toLowerCase();
-        const nameMatch = userSchoolName && userSchoolName === schoolName.toLowerCase();
-        if (!codeMatch && !nameMatch) continue;
+        const codeMatch = schoolCode && userSchoolCode === schoolCode.toLowerCase();
+        const nameMatch = schoolName && userSchoolName && userSchoolName === schoolName.toLowerCase();
+        // Also match partial: e.g. "University of Florida" contains "florida"
+        const partialMatch = schoolName && userSchoolName && (
+          userSchoolName.includes(schoolName.toLowerCase()) ||
+          schoolName.toLowerCase().includes(userSchoolName)
+        );
+        if (!codeMatch && !nameMatch && !partialMatch) continue;
       }
 
       // Build searchable text from their profile
