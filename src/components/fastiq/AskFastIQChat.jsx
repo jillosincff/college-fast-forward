@@ -66,8 +66,9 @@ export default function AskFastIQChat({ onOpenChat }) {
         content: question,
       });
       // Response will come via the subscription above
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't process that right now. Please try again." }]);
+    } catch (error) {
+      console.error('Agent error:', error);
+      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message || 'Unknown error'}` }]);
       setLoading(false);
     }
   };
