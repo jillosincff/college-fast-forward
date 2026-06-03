@@ -32,26 +32,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
   const bottomRef = useRef(null);
 
   // Intent detection: returns { isNetworkQuery, networkType, company, industry }
-  const parseNetworkIntent = (text) => {
-    const lower = text.toLowerCase();
-    const networkQueryKeywords = ['who do we have', 'any alumni', 'any parents', 'find someone', 'connections at', 'contacts at', 'insiders at', 'network at', 'who works at', 'background in', 'marketing background', 'finance background', 'tech background', 'engineering background'];
-    const isNetworkQuery = networkQueryKeywords.some(kw => lower.includes(kw));
-    if (!isNetworkQuery) return null;
 
-    let networkType = 'all';
-    if (lower.includes('parent')) networkType = 'parent';
-    else if (lower.includes('alumni') || lower.includes('alum')) networkType = 'alumni';
-
-    // Extract company name (words after "at")
-    const companyMatch = text.match(/\bat\s+([A-Z][a-zA-Z\s&]+?)(?:\?|$|,|\s+with|\s+who)/);
-    const company = companyMatch ? companyMatch[1].trim() : null;
-
-    // Extract industry/role keywords
-    const industryKeywords = ['marketing', 'finance', 'engineering', 'tech', 'design', 'ux', 'product', 'sales', 'consulting', 'media', 'entertainment'];
-    const industry = industryKeywords.find(k => lower.includes(k)) || null;
-
-    return { isNetworkQuery, networkType, company, industry };
-  };
 
   const handleInlineInsiderClick = (contact) => {
     setOutreachModalData({
@@ -269,51 +250,15 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
     setLoading(true);
 
     // Intent intercept: is this a network query?
-    const intent = parseNetworkIntent(q);
-    if (intent) {
-      try {
-        const res = await base44.functions.invoke('getDirectoryUsers', {
-          search: intent.company || intent.industry || '',
-          persona: intent.networkType === 'all' ? undefined : intent.networkType === 'parent' ? 'parent' : 'alumni',
-          limit: 5,
-        });
-        const contacts = (res?.data?.users || res?.data || []).slice(0, 5).map(u => ({
-          id: u.id,
-          fullName: u.full_name || 'Unknown',
-          currentRole: u.role_title || u.job_title || 'Professional',
-          companyName: u.company_name || u.current_company || intent.company || 'Their Company',
-          networkType: (u.persona === 'parent' || u.roles?.includes('parent')) ? 'PARENT' : 'ALUMNI',
-        }));
 
-        if (contacts.length > 0) {
-          const target = intent.company || intent.industry || 'that area';
-          setMessages(prev => [...prev, {
-            role: 'agent',
-            text: `I dug into our network grid. Here are the matching ${schoolAbbr} connections I found${intent.company ? ` at ${intent.company}` : intent.industry ? ` with a ${intent.industry} background` : ''}:`,
-            inlineContacts: contacts,
-          }]);
-        } else {
-          const target = intent.company || intent.industry || 'that area';
-          const totalContacts = 4; // synced network size
-          setMessages(prev => [...prev, {
-            role: 'agent',
-            text: `I couldn't find a direct match for ${target} in our tightest inner circle today. However, we have ${totalContacts} verified contacts in broader sectors — ask me to look up a different target or check the Target-Matched Discoveries on your dashboard!`,
-          }]);
-        }
-      } catch {
-        setMessages(prev => [...prev, { role: 'agent', text: "I had trouble searching the network right now. Try again in a moment, or browse the Target-Matched Discoveries feed directly below." }]);
-      }
-      setLoading(false);
-      return;
-    }
 
-    // Default: general AI career advisor
+    // Default: CLIFF agent
     try {
-      const res = await base44.functions.invoke('aiCareerAdvisor', { message: q, user_id: user?.id });
-      const reply = res?.data?.reply || res?.data?.message || "Great question. In short: be direct, be brief, and always lead with value. Want me to draft a specific email for you?";
+      const res = await base44.functions.invoke('cliffCareerAgent', { message: q });
+      const reply = res?.data?.response || "I'm here to help! What can I do for you today?";
       setMessages(prev => [...prev, { role: 'agent', text: reply }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'agent', text: "Great question. Keep your follow-up concise — one paragraph, lead with what you learned from the interview, and propose a specific next step. Want me to draft it for you?" }]);
+      setMessages(prev => [...prev, { role: 'agent', text: "I had trouble processing that request. Please try rephrasing, or ask me something else." }]);
     }
     setLoading(false);
   };
