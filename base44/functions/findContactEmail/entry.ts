@@ -110,8 +110,8 @@ Deno.serve(async (req) => {
       try {
         console.log('Apollo request: searching', firstName, lastName, 'at', cleanDomain);
         
-        // Apollo free tier: use People Search endpoint
-        const apolloUrl = 'https://api.apollo.io/api/v1/mixed_people/api_search';
+        // Apollo Contacts Search endpoint (free tier compatible)
+        const apolloUrl = 'https://api.apollo.io/v1/contacts/search';
         const apolloRes = await fetch(apolloUrl, {
           method: 'POST',
           headers: { 
@@ -122,8 +122,8 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             page: 1,
             per_page: 10,
-            q_organization_domains_list: [cleanDomain],
-            contact_email_status: ['verified', 'likely to engage']
+            q_organization_domains: cleanDomain,
+            q_person_name: `${firstName} ${lastName}`.trim()
           })
         });
         
@@ -139,26 +139,26 @@ Deno.serve(async (req) => {
           return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
         }
 
-        // Apollo people_search returns: { total_entries: N, people: [{ email: "...", ... }], ... }
-        const people = apolloData.people || [];
-        console.log('Apollo found', people.length, 'people');
+        // Apollo contacts/search returns: { contacts: [{ email: "...", ... }], total_count: N }
+        const contacts = apolloData.contacts || [];
+        console.log('Apollo found', contacts.length, 'contacts');
         
         // Try to match by name if we have first and last name
-        let person = null;
-        if (firstName && lastName && people.length > 0) {
+        let contact = null;
+        if (firstName && lastName && contacts.length > 0) {
           const fullName = `${firstName} ${lastName}`.toLowerCase();
-          person = people.find(p => {
-            const pName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
-            return pName === fullName || pName.includes(firstName.toLowerCase());
+          contact = contacts.find(c => {
+            const cName = `${c.first_name || ''} ${c.last_name || ''}`.toLowerCase();
+            return cName === fullName || cName.includes(firstName.toLowerCase());
           });
         }
         
-        // Fallback to first person with email
-        if (!person && people.length > 0) {
-          person = people.find(p => p.email) || people[0];
+        // Fallback to first contact with verified email
+        if (!contact && contacts.length > 0) {
+          contact = contacts.find(c => c.email && c.email_status === 'verified') || contacts[0];
         }
         
-        const verifiedEmail = person ? person.email : null;
+        const verifiedEmail = contact ? contact.email : null;
         console.log('Apollo Lookup Result:', verifiedEmail);
         
         if (verifiedEmail && typeof verifiedEmail === 'string' && verifiedEmail.includes('@')) {
@@ -166,7 +166,7 @@ Deno.serve(async (req) => {
           return Response.json({ 
             success: true, 
             email: verifiedEmail, 
-            score: person.confidence_score || 80, 
+            score: contact.email_status === 'verified' ? 95 : 80, 
             source: 'apollo' 
           });
         }
