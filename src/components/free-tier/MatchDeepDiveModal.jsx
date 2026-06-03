@@ -105,6 +105,10 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   };
 
   const handleMessageViaCLiFF = (contact) => {
+    // Trigger full pipeline tracking automation
+    setLaunched(true);
+    onGenerateOutreach && onGenerateOutreach({ match, contact, tab });
+    
     setDraftContact(contact);
     setGeneratedScript('');
     setIsCopied(false);
@@ -123,6 +127,11 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         `Hey ${firstName}, ${userType} here! I saw you made it from ${meta.town} to ${match.company} and that's exactly the path I'm working toward right now! I'm currently exploring opportunities in this space and would love to ask you one quick question about how you navigated the pipeline. Would you be open to a casual 15-minute chat sometime soon? ${meta.cheer}`
       );
       setIsGenerating(false);
+      // Close modal and redirect to drafts after script is ready
+      setTimeout(() => {
+        onClose();
+        window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}&contact=${encodeURIComponent(contact?.name || '')}`;
+      }, 400);
     }, 750);
   };
 
@@ -274,25 +283,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
             )}
           </div>
 
-          {/* Zone 3: Action Hand-off */}
-          <div style={{ paddingTop: 20 }}>
-            {!hasContacts ? (
-              <>
-                <button onClick={() => { onClose(); setTimeout(() => { window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(match.company)}&role=${encodeURIComponent(match.role)}`; }, 200); }} style={{ width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', border: 'none', borderRadius: 14, padding: '16px 0', cursor: 'pointer', minHeight: 'auto', boxShadow: '0 4px 16px rgba(124,58,237,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>⚡</span>Generate Cold Inroad
-                </button>
-                <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>No warm contacts needed · CLiFF crafts a cold industry outreach</p>
-              </>
-            ) : (
-              <>
-                <button onClick={handleTrackAndDraft} disabled={launched} style={{ width: '100%', fontFamily: dm, fontSize: 14, fontWeight: 800, color: '#fff', background: launched ? '#6b7280' : 'linear-gradient(135deg, #7c3aed, #4f46e5)', border: 'none', borderRadius: 14, padding: '16px 0', cursor: launched ? 'default' : 'pointer', minHeight: 'auto', boxShadow: launched ? 'none' : '0 4px 16px rgba(124,58,237,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>{launched ? '✅' : '🚀'}</span>
-                  {launched ? 'Saved to Pipeline — Opening Drafts...' : '🚀 Generate Outreach & Track Application'}
-                </button>
-                <p style={{ fontFamily: dm, fontSize: 11, color: '#9ca3af', textAlign: 'center', margin: '10px 0 0' }}>Saves to pipeline · Generates personalized message · Tracks your progress</p>
-              </>
-            )}
-          </div>
+
         </div>
       </div>
     </div>
