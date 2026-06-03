@@ -17,6 +17,83 @@ Deno.serve(async (req) => {
     const messageLower = message.toLowerCase();
     
     // CRITICAL: Detect network lookup queries and call searchNetworkByBackground IMMEDIATELY
+    // Check for company-based "who do we have at X" queries first (before general patterns)
+    const companyQueryPatterns = [
+      /who do (?:we|you) have at\s+([\w\s,&]+)/i,
+      /who (?:do we have|works?)\s+(?:at|@)\s+([\w\s,&]+)/i,
+      /(?:any(?:one)?|do you have (?:anyone|contacts?))\s+at\s+([\w\s,&]+)/i,
+      /(?:contacts?|people|connections?)\s+at\s+([\w\s,&]+)/i,
+      /(?:alumni|parents?|gators?)\s+at\s+([\w\s,&]+)/i,
+    ];
+
+    for (const pattern of companyQueryPatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        const companiesRaw = match[1].trim();
+        // Handle "X or Y" and "X and Y" patterns
+        const companies = companiesRaw.split(/\s+(?:or|and)\s+/i).map(c => c.trim()).filter(Boolean);
+        
+        console.log(`[CLIFF] Company query detected for: ${companies.join(', ')}`);
+        
+        // Search DiscoveredAlumni + Users for each company
+        const allResults = [];
+        for (const company of companies) {
+          const companyLower = company.toLowerCase();
+          
+          // Search DiscoveredAlumni
+          const discovered = await base44.asServiceRole.entities.DiscoveredAlumni.filter({});
+          const matchingAlumni = discovered.filter(a => 
+            (a.company || '').toLowerCase().includes(companyLower)
+          ).slice(0, 4);
+          
+          // Search Users
+          const users = await base44.asServiceRole.entities.User.filter({});
+          const matchingUsers = users.filter(u => 
+            (u.current_company || '').toLowerCase().includes(companyLower) && u.persona
+          ).slice(0, 3);
+          
+          matchingAlumni.forEach(a => allResults.push({
+            name: a.name,
+            title: a.role_title || 'Professional',
+            company: a.company,
+            linkedin: a.linkedin_url,
+            type: 'alumni',
+            degree: a.degree_info,
+          }));
+          
+          matchingUsers.forEach(u => allResults.push({
+            name: u.full_name || u.email?.split('@')[0],
+            title: u.current_role || 'Professional',
+            company: u.current_company || company,
+            linkedin: u.linkedin_url,
+            type: u.persona,
+          }));
+        }
+        
+        if (allResults.length === 0) {
+          const schoolAbbr = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
+          return Response.json({
+            success: true,
+            response: `I didn't find any ${schoolAbbr} network members at **${companies.join(' or ')}** in the database right now.\n\nTry asking me to search by industry or role — e.g. "Any alumni in entertainment?" or I can help you draft a cold outreach instead.`,
+            message_type: 'text',
+          });
+        }
+        
+        const schoolAbbr = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
+        const formatted = allResults.map((r, i) => {
+          const typeLabel = r.type === 'parent' ? '💼 Parent' : `🎓 ${schoolAbbr} Alum`;
+          const degreeNote = r.degree ? ` (${r.degree})` : '';
+          return `${i + 1}. **${r.name}** — ${r.title} at ${r.company} [${typeLabel}]${degreeNote}${r.linkedin ? `\n   🔗 [LinkedIn](${r.linkedin})` : ''}`;
+        }).join('\n\n');
+        
+        return Response.json({
+          success: true,
+          response: `Found **${allResults.length} connection${allResults.length !== 1 ? 's' : ''}** at ${companies.join(' / ')}:\n\n${formatted}\n\nWant me to draft a personalized outreach to any of them?`,
+          message_type: 'network_results',
+        });
+      }
+    }
+
     const networkPatterns = [
       /any\s+(parents?|alumni|gators?|uf\s+parents?|uf\s+alumni)\s+(?:in|who work (?:in|at))\s+([\w\s]+)/i,
       /do you know any\s+(parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
@@ -207,12 +284,16 @@ Deno.serve(async (req) => {
       }
     }
     
-    // If no network query detected, provide general guidance
+    // Fallback: use LLM for general career questions
+    const schoolAbbr = user.school_abbreviation || user.school_code?.toUpperCase() || 'UF';
+    const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: `You are CLiFF, a career agent for college students. The student is from ${schoolAbbr}. Answer their question helpfully and concisely.\n\nStudent question: ${message}\n\nGive practical, direct advice. Keep it under 150 words.`,
+    });
+    
     return Response.json({
       success: true,
-      response: "I'm CLIFF, your career scout! I can help you:\n\n→ **Find alumni and parents** in specific fields or companies\n→ **Discover job opportunities** at target companies\n→ **Draft outreach messages** to network contacts\n→ **Get career advice** tailored to your goals\n\nTry asking: \"Any UF parents in marketing?\" or \"Find alumni at Google\"",
+      response: llmResponse || "I'm here to help! Try asking me to find alumni at a specific company, or ask for career advice.",
       message_type: 'text',
-      payload: { suggested_actions: ['Any UF parents in marketing?', 'Find alumni at Google', 'Help me draft an outreach message'] }
     });
     
   } catch (error) {
