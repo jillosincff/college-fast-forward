@@ -14,7 +14,10 @@ Deno.serve(async (req) => {
     }
 
     const HUNTER_API_KEY = Deno.env.get('HUNTER_API_KEY');
-    const PROXYCURL_API_KEY = Deno.env.get('PROXYCURL_API_KEY');
+
+    if (!HUNTER_API_KEY) {
+      return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
+    }
 
     // Sanitize name
     const credentialsRegex = /\b(MBA|PhD|Ph\.D|MD|JD|CPA|CFA|MS|BSc|BA|MA|Esq|Jr|Sr|II|III|IV)\b\.?/gi;
@@ -35,31 +38,7 @@ Deno.serve(async (req) => {
       .toLowerCase()
       .trim();
 
-    // ── SOURCE A: Proxycurl ───────────────────────────────────────────────────
-    if (PROXYCURL_API_KEY && firstName && lastName) {
-      try {
-        const pcRes = await fetch(
-          `https://nubela.co/proxycurl/api/linkedin/profile/email?first_name=${encodeURIComponent(firstName)}&last_name=${encodeURIComponent(lastName)}&company_domain=${encodeURIComponent(cleanDomain)}`,
-          { headers: { Authorization: `Bearer ${PROXYCURL_API_KEY}` } }
-        );
-        if (pcRes.ok) {
-          const pcData = await pcRes.json();
-          console.log('Proxycurl response:', JSON.stringify(pcData).slice(0, 200));
-          if (pcData && pcData.email) {
-            return Response.json({ success: true, email: pcData.email, score: 90, source: 'proxycurl' });
-          }
-        } else {
-          console.warn('Proxycurl returned status', pcRes.status);
-        }
-      } catch (err) {
-        console.warn('Proxycurl lookup failed:', err.message);
-      }
-    }
-
-    // ── SOURCE B: Hunter ──────────────────────────────────────────────────────
-    if (!HUNTER_API_KEY) {
-      return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
-    }
+    console.log(`Looking up: "${firstName} ${lastName}" at "${cleanDomain}"`);
 
     // Hunter Email Finder
     try {
@@ -124,7 +103,7 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── All sources exhausted → LinkedIn fallback ─────────────────────────────
+    // ── Hunter exhausted → LinkedIn fallback ────────────────────────────────
     return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
 
   } catch (error) {
