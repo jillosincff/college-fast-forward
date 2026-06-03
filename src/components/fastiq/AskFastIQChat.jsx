@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
 const SUGGESTIONS = [
-  "What do I need to know before interviewing at Google?",
-  "What are entry-level salaries in marketing?",
+  "Any UF parents in marketing?",
+  "Help me prioritize which company to target first",
   "Find me UF alumni at Nike",
   "Help me tailor my resume",
 ];
@@ -15,23 +15,59 @@ export default function AskFastIQChat({ onOpenChat }) {
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [conversation, setConversation] = useState(null);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, loading]);
+
+  // Subscribe to agent conversation updates for streaming
+  useEffect(() => {
+    if (!conversation?.id) return;
+    const unsubscribe = base44.agents.subscribeToConversation(conversation.id, (data) => {
+      const agentMessages = (data.messages || []).map(m => ({
+        role: m.role,
+        content: m.content || '',
+      }));
+      setMessages(agentMessages);
+      // Check if agent is done responding
+      const lastMsg = data.messages?.[data.messages.length - 1];
+      if (lastMsg?.role === 'assistant') {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [conversation?.id]);
 
   const ask = async (q) => {
     const question = q || query;
     if (!question.trim() || loading) return;
-    setMessages(prev => [...prev, { role: 'user', content: question }]);
     setQuery('');
     setLoading(true);
+
+    // Optimistically add user message
+    setMessages(prev => [...prev, { role: 'user', content: question }]);
+
     try {
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are FASTIQ, an AI career intelligence tool for University of Florida students. You help with company research, salary data, interview prep, and career strategy. Answer concisely (2-3 paragraphs max). Use markdown. Question: ${question}`,
-        add_context_from_internet: true,
-        model: 'gemini_3_flash',
+      let conv = conversation;
+      if (!conv) {
+        conv = await base44.agents.createConversation({
+          agent_name: 'fast_track_scout',
+          metadata: { name: 'FastIQ Scout Chat' },
+        });
+        setConversation(conv);
+      }
+
+      await base44.agents.addMessage(conv, {
+        role: 'user',
+        content: question,
       });
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      // Response will come via the subscription above
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I couldn't process that right now. Please try again." }]);
-    } finally {
       setLoading(false);
     }
   };
@@ -82,7 +118,7 @@ export default function AskFastIQChat({ onOpenChat }) {
                 fontFamily: dmSans, fontSize: 14, lineHeight: 1.6,
               }}>
                 {m.role === 'user' ? m.content : (
-                  <ReactMarkdown className="text-sm prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{m.content}</ReactMarkdown>
+                  <ReactMarkdown className="text-sm prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">{m.content}</ReactMarkdown>
                 )}
               </div>
             </div>
@@ -94,6 +130,7 @@ export default function AskFastIQChat({ onOpenChat }) {
               </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
       )}
 
