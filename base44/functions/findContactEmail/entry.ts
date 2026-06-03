@@ -103,60 +103,77 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── RocketReach fallback ────────────────────────────────────────────────
-    const ROCKETREACH_API_KEY = Deno.env.get('ROCKETREACH_API_KEY');
-    console.log('RocketReach API key present:', !!ROCKETREACH_API_KEY);
-    if (ROCKETREACH_API_KEY) {
+    // ── Apollo.io fallback ────────────────────────────────────────────────
+    const APOLLO_API_KEY = Deno.env.get('APOLLO_API_KEY');
+    console.log('Apollo API key present:', !!APOLLO_API_KEY);
+    if (APOLLO_API_KEY) {
       try {
-        const rrUrl = new URL('https://api.rocketreach.co/api/v2/person/lookup');
-        rrUrl.searchParams.set('name', `${firstName} ${lastName}`);
-        rrUrl.searchParams.set('current_employer', cleanDomain);
+        console.log('Apollo request: searching', firstName, lastName, 'at', cleanDomain);
         
-        console.log('RocketReach request URL:', rrUrl.toString());
-        
-        const rrRes = await fetch(rrUrl.toString(), {
+        // Apollo free tier: use People Search endpoint
+        const apolloUrl = 'https://api.apollo.io/api/v1/mixed_people/api_search';
+        const apolloRes = await fetch(apolloUrl, {
+          method: 'POST',
           headers: { 
-            'accept': 'application/json',
-            'Api-Key': ROCKETREACH_API_KEY
-          }
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'X-Api-Key': APOLLO_API_KEY
+          },
+          body: JSON.stringify({
+            page: 1,
+            per_page: 10,
+            q_organization_domains_list: [cleanDomain],
+            contact_email_status: ['verified', 'likely to engage']
+          })
         });
         
-        console.log('RocketReach HTTP status:', rrRes.status);
-        const rrText = await rrRes.text();
-        console.log('RocketReach raw response:', rrText.slice(0, 500));
+        console.log('Apollo HTTP status:', apolloRes.status);
+        const apolloText = await apolloRes.text();
+        console.log('Apollo raw response:', apolloText.slice(0, 500));
         
-        let rrData;
-        try { rrData = JSON.parse(rrText); } catch { rrData = null; }
+        let apolloData;
+        try { apolloData = JSON.parse(apolloText); } catch { apolloData = null; }
         
-        if (!rrData) {
-          console.warn('RocketReach returned non-JSON response');
+        if (!apolloData) {
+          console.warn('Apollo returned non-JSON response');
           return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
         }
 
-        // RocketReach returns: { emails: [...], ... } directly
-        const emails = rrData.emails || [];
-        console.log('RocketReach emails array:', emails);
+        // Apollo people_search returns: { total_entries: N, people: [{ email: "...", ... }], ... }
+        const people = apolloData.people || [];
+        console.log('Apollo found', people.length, 'people');
         
-        if (Array.isArray(emails) && emails.length > 0) {
-          // Filter for verified/work emails with good grades
-          const verifiedEmail = emails.find(e => {
-            const emailAddr = e.email || e.email_address;
-            const grade = e.grade;
-            return emailAddr && (e.verified || grade === 'A' || grade === 'B' || e.type === 'work');
+        // Try to match by name if we have first and last name
+        let person = null;
+        if (firstName && lastName && people.length > 0) {
+          const fullName = `${firstName} ${lastName}`.toLowerCase();
+          person = people.find(p => {
+            const pName = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase();
+            return pName === fullName || pName.includes(firstName.toLowerCase());
           });
-          
-          const emailObj = verifiedEmail || emails[0];
-          const emailToUse = emailObj.email || emailObj.email_address;
-          
-          if (emailToUse && typeof emailToUse === 'string' && emailToUse.includes('@')) {
-            console.log('RocketReach found email:', emailToUse);
-            return Response.json({ success: true, email: emailToUse, score: rrData.confidence || 80, source: 'rocketreach' });
-          }
         }
         
-        console.log('RocketReach: No valid email found in response');
+        // Fallback to first person with email
+        if (!person && people.length > 0) {
+          person = people.find(p => p.email) || people[0];
+        }
+        
+        const verifiedEmail = person ? person.email : null;
+        console.log('Apollo Lookup Result:', verifiedEmail);
+        
+        if (verifiedEmail && typeof verifiedEmail === 'string' && verifiedEmail.includes('@')) {
+          console.log('Apollo found email:', verifiedEmail);
+          return Response.json({ 
+            success: true, 
+            email: verifiedEmail, 
+            score: person.confidence_score || 80, 
+            source: 'apollo' 
+          });
+        }
+        
+        console.log('Apollo: No valid email found in response');
       } catch (err) {
-        console.warn('RocketReach failed:', err.message);
+        console.warn('Apollo failed:', err.message);
       }
     }
 
