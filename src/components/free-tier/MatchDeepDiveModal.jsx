@@ -112,17 +112,24 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
       const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
       // SDK wraps response in .data
       const payload = result?.data || result;
+      console.log('Email lookup result:', payload);
       const email = payload?.success && payload?.email ? payload.email : null;
       setEmailStates(prev => ({ ...prev, [key]: { loading: false, email, checked: true } }));
       if (email) {
+        console.log('Email found:', email);
         setContactEmail(email);
-        handleMessageViaCLiFF(contact, 'email');
+        // Small delay to ensure state is set before opening draft
+        setTimeout(() => handleMessageViaCLiFF(contact, 'email'), 50);
       } else {
+        console.log('Email not found, switching to LinkedIn');
+        setContactEmail('not_found');
         // Email not found — auto-open LinkedIn draft so user always gets something
         handleMessageViaCLiFF(contact, 'linkedin');
       }
     } catch (err) {
+      console.error('Email lookup error:', err);
       setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true } }));
+      setContactEmail('not_found');
       handleMessageViaCLiFF(contact, 'linkedin');
     }
   };
