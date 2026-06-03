@@ -140,11 +140,14 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
         if (result?.success && result?.email) {
           setContactEmail(result.email);
         } else {
-          setContactEmail('not_found');
+          // All sources exhausted — auto-switch to LinkedIn draft
+          setContactEmail(null);
+          setOutreachType('linkedin');
         }
       } catch (err) {
         console.warn('Email lookup failed:', err);
-        setContactEmail('not_found');
+        setContactEmail(null);
+        setOutreachType('linkedin');
       }
     }
     
