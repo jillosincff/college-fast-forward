@@ -292,12 +292,11 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
             <div style={{
               maxWidth: '82%',
               background: m.role === 'user' ? '#0A0A0A' : '#f9fafb',
-              color: m.role === 'user' ? '#fff' : '#111827',
               border: m.role === 'user' ? 'none' : '1px solid #e5e7eb',
               borderRadius: m.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
               padding: '10px 14px',
             }}>
-              <div style={{ fontFamily: dm, fontSize: 12, lineHeight: 1.6 }}>
+              <div style={{ fontFamily: dm, fontSize: 12, lineHeight: 1.6, color: m.role === 'user' ? '#fff' : '#111827' }}>
                 <ReactMarkdown
                   components={{
                     p: ({node, ...props}) => <p style={{ margin: '0 0 8px', ...props }} />,
