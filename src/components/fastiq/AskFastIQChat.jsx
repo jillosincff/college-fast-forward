@@ -56,7 +56,7 @@ export default function AskFastIQChat({ onOpenChat }) {
       if (!conv) {
         conv = await base44.agents.createConversation({
           agent_name: 'fast_track_scout',
-          metadata: { name: 'FastIQ Scout Chat' },
+          metadata: { name: 'CLIFF Career Agent' },
         });
         setConversation(conv);
       }
@@ -79,11 +79,11 @@ export default function AskFastIQChat({ onOpenChat }) {
     }}>
       {/* Top row: icon + label */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-        <span style={{ fontSize: 20 }}>⚡</span>
+        <span style={{ fontSize: 20 }}>🎯</span>
         <div>
-          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#fff', margin: 0 }}>Ask FASTIQ™</p>
+          <p style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#fff', margin: 0 }}>CLIFF Career Agent</p>
           <p style={{ fontFamily: dmSans, fontSize: 13, fontWeight: 300, color: '#888', margin: 0 }}>
-            Ask anything about companies, careers, salaries, or interview prep.
+            Your personal career scout. Ask about companies, connections, or next steps.
           </p>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function AskFastIQChat({ onOpenChat }) {
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && ask()}
-          placeholder="Ask FASTIQ anything..."
+          placeholder="Ask CLIFF anything..."
           disabled={loading}
           style={{
             flex: 1, padding: '11px 18px', border: '1px solid #2A2A2A',
