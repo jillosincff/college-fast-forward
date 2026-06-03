@@ -112,7 +112,9 @@ Deno.serve(async (req) => {
         
         // Apollo Contacts Search endpoint (free tier compatible)
         const apolloUrl = 'https://api.apollo.io/v1/contacts/search';
-        const apolloRes = await fetch(apolloUrl, {
+        
+        // Try name + domain search first
+        let apolloRes = await fetch(apolloUrl, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -128,7 +130,7 @@ Deno.serve(async (req) => {
         });
         
         console.log('Apollo HTTP status:', apolloRes.status);
-        const apolloText = await apolloRes.text();
+        let apolloText = await apolloRes.text();
         console.log('Apollo raw response:', apolloText.slice(0, 500));
         
         let apolloData;
@@ -139,9 +141,31 @@ Deno.serve(async (req) => {
           return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
         }
 
-        // Apollo contacts/search returns: { contacts: [{ email: "...", ... }], total_count: N }
-        const contacts = apolloData.contacts || [];
-        console.log('Apollo found', contacts.length, 'contacts');
+        let contacts = apolloData.contacts || [];
+        console.log('Apollo found', contacts.length, 'contacts with name filter');
+        
+        // If no results, fall back to domain-only search
+        if (contacts.length === 0 && firstName) {
+          console.log('Name search returned 0, trying domain-only search...');
+          apolloRes = await fetch(apolloUrl, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              'X-Api-Key': APOLLO_API_KEY
+            },
+            body: JSON.stringify({
+              page: 1,
+              per_page: 20,
+              q_organization_domains: cleanDomain
+            })
+          });
+          
+          apolloText = await apolloRes.text();
+          try { apolloData = JSON.parse(apolloText); } catch { apolloData = null; }
+          contacts = apolloData?.contacts || [];
+          console.log('Domain-only search found', contacts.length, 'contacts');
+        }
         
         // Try to match by name if we have first and last name
         let contact = null;
