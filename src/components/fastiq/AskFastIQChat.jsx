@@ -31,7 +31,7 @@ function ContactCard({ c, idx }) {
 
   const handleEmailDirect = async () => {
     if (emailState === 'found' && foundEmail) {
-      window.location.href = `mailto:${foundEmail}`;
+      window.open(`mailto:${foundEmail}`, '_self');
       return;
     }
     setEmailState('loading');

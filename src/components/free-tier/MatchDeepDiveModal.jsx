@@ -200,7 +200,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     const body = encodeURIComponent(editableScript.replace(/^Subject: .+\n\n/, ''));
     // Open mailto with or without email — browser will prompt user to fill in address if blank
     const to = contactEmail || '';
-    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_self');
   };
 
   if (!match) return null;
