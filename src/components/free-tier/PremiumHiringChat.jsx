@@ -297,18 +297,24 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
               padding: '10px 14px',
             }}>
               <div style={{ fontFamily: dm, fontSize: 12, lineHeight: 1.6, color: m.role === 'user' ? '#fff' : '#111827' }}>
-                <ReactMarkdown
-                  components={{
-                    p: ({node, ...props}) => <p style={{ margin: '0 0 8px', ...props }} />,
-                    strong: ({node, ...props}) => <strong style={{ fontWeight: 700, ...props }} />,
-                    a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }} />,
-                    ol: ({node, ...props}) => <ol style={{ margin: '8px 0', paddingLeft: 20 }} />,
-                    ul: ({node, ...props}) => <ul style={{ margin: '8px 0', paddingLeft: 20 }} />,
-                    li: ({node, ...props}) => <li style={{ marginBottom: 4 }} />,
-                  }}
-                >
-                  {m.text}
-                </ReactMarkdown>
+                {m.text.split('\n').map((line, idx) => {
+                  // Simple markdown parsing for bold and links
+                  const parts = line.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\))/g);
+                  return (
+                    <p key={idx} style={{ margin: '0 0 4px' }}>
+                      {parts.map((part, i) => {
+                        if (part.startsWith('**') && part.endsWith('**')) {
+                          return <strong key={i}>{part.slice(2, -2)}</strong>;
+                        }
+                        const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
+                        if (linkMatch) {
+                          return <a key={i} href={linkMatch[2]} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>{linkMatch[1]}</a>;
+                        }
+                        return part;
+                      })}
+                    </p>
+                  );
+                })}
               </div>
             </div>
 
