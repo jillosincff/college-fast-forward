@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CliffLogo } from '@/components/brand/CliffLogo';
 import CliFFOutreachModal from './CliFFOutreachModal';
+import ReactMarkdown from 'react-markdown';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -296,7 +297,20 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
               borderRadius: m.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
               padding: '10px 14px',
             }}>
-              <p style={{ fontFamily: dm, fontSize: 12, margin: 0, lineHeight: 1.6 }}>{m.text}</p>
+              <div style={{ fontFamily: dm, fontSize: 12, lineHeight: 1.6 }}>
+                <ReactMarkdown
+                  components={{
+                    p: ({node, ...props}) => <p style={{ margin: '0 0 8px', ...props }} />,
+                    strong: ({node, ...props}) => <strong style={{ fontWeight: 700, ...props }} />,
+                    a: ({node, ...props}) => <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }} />,
+                    ol: ({node, ...props}) => <ol style={{ margin: '8px 0', paddingLeft: 20 }} />,
+                    ul: ({node, ...props}) => <ul style={{ margin: '8px 0', paddingLeft: 20 }} />,
+                    li: ({node, ...props}) => <li style={{ marginBottom: 4 }} />,
+                  }}
+                >
+                  {m.text}
+                </ReactMarkdown>
+              </div>
             </div>
 
             {/* Inline Contact Grid — rendered when CLiFF returns network results */}
