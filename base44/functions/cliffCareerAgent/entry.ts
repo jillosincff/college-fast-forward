@@ -97,63 +97,99 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ─── 2. FIELD / PERSONA LOOKUP QUERIES ──────────────────────────────────
-    // e.g. "Any UF alumni in marketing?" / "Find parents in finance"
-    const fieldPatterns = [
-      /any\s+(?:parents?|alumni|gators?|uf\s+(?:parents?|alumni))\s+(?:in|who work (?:in|at))\s+([\w\s]+)/i,
-      /(?:find|search(?: for)?)\s+(?:parents?|alumni|gators?)\s+(?:in|at)\s+([\w\s]+)/i,
-      /(?:parents?|alumni|gators?)\s+(?:who work\s+)?(?:in|at)\s+([\w\s]+)/i,
-      /who (?:in the network )?works? in\s+([\w\s]+)/i,
+    // (Section 2 — field/persona lookups — now unified into Section 3 broad network intent below)
+
+    // ─── 3. BROAD NETWORK / PEOPLE LOOKUP — catches any "find me a contact" intent ─
+    // Covers: "UF parents in marketing", "alumni with finance background", "anyone in tech", etc.
+    const networkIntentPatterns = [
+      /(?:find|show|get|list|pull up|do you have|any(?:one)?)\s+.{0,40}(?:parents?|alumni|gators?|network|contacts?|connections?|people|members?)/i,
+      /(?:parents?|alumni|gators?|connections?)\s+(?:with|who have|who work(?:ed)?|in|at|from|with a?|background)/i,
+      /(?:marketing|finance|tech|engineering|consulting|banking|media|advertising|sales|healthcare|law|real estate|accounting)\s+(?:parents?|alumni|contacts?|background|experience|professionals?)/i,
+      /who (?:in (?:the |our )?(?:network|database|app|cliff))/i,
+      /(?:inside|in)\s+(?:the|our|your|cliff'?s?)\s+(?:network|database|app|system)/i,
     ];
 
-    for (const pattern of fieldPatterns) {
-      const match = message.match(pattern);
-      if (match) {
-        const field = match[1]?.trim();
-        if (!field) continue;
+    for (const pattern of networkIntentPatterns) {
+      if (pattern.test(message)) {
+        // Extract industry/field keyword from message
+        // Try to extract a clean industry/field keyword — stop at noise words
+        const fieldMatch = message.match(/\b(marketing|finance|tech|technology|engineering|consulting|banking|media|advertising|sales|healthcare|law|real estate|accounting|operations|hr|human resources|product|design|data|analytics|supply chain|logistics|retail|hospitality|education|nonprofit)\b/i);
 
+        const field = fieldMatch ? fieldMatch[1].trim().toLowerCase() : null;
         const personaWord = message.toLowerCase();
         let personaFilter = 'all';
         if (personaWord.includes('parent')) personaFilter = 'parent';
-        else if (personaWord.includes('alumni')) personaFilter = 'alumni';
+        else if (personaWord.includes('alumni') || personaWord.includes('alum')) personaFilter = 'alumni';
 
-        console.log(`[CLIFF] Field lookup: ${personaFilter} in "${field}"`);
+        console.log(`[CLIFF] Broad network lookup — persona: ${personaFilter}, field: ${field}`);
 
-        const users = await base44.asServiceRole.entities.User.filter({});
-        const fieldLower = field.toLowerCase();
-        const filtered = users.filter(u => {
+        const [allUsers, discoveredAlumni] = await Promise.all([
+          base44.asServiceRole.entities.User.filter({}),
+          field ? base44.asServiceRole.entities.DiscoveredAlumni.filter({}) : Promise.resolve([]),
+        ]);
+
+        const userResults = allUsers.filter(u => {
           if (!u.persona) return false;
           if (personaFilter !== 'all' && u.persona !== personaFilter) return false;
+          if (!field) return true; // no field filter — return all network members of persona
           const blob = [u.current_role, u.current_company, u.industry, u.bio, ...(u.expertise_tags || [])].join(' ').toLowerCase();
-          return blob.includes(fieldLower);
-        }).slice(0, 10);
+          return blob.includes(field);
+        }).slice(0, 8);
 
-        if (filtered.length === 0) {
+        const alumniResults = field ? discoveredAlumni.filter(a => {
+          if (personaFilter === 'parent') return false;
+          const blob = [a.role_title, a.company, a.degree_info, a.description].join(' ').toLowerCase();
+          return blob.includes(field);
+        }).slice(0, 4) : [];
+
+        const totalCount = userResults.length + alumniResults.length;
+
+        if (totalCount === 0) {
           return Response.json({
             success: true,
-            response: `No ${personaFilter === 'all' ? 'network members' : personaFilter + 's'} found in **${field}** right now. Want me to look for companies hiring in that space instead?`,
+            response: `I searched the CLiFF database and didn't find verified ${personaFilter !== 'all' ? personaFilter + 's' : 'network members'}${field ? ` in **${field}**` : ''} yet.\n\nTry a broader term (e.g. "marketing" instead of "brand strategy"), or ask me about a specific company: "Who do we have at Google?"`,
             message_type: 'text',
           });
         }
 
-        const formattedResults = filtered.map((p, idx) => {
-          const title = p.current_role || 'Professional';
-          const company = p.current_company || 'Unknown company';
-          const linkedin = p.linkedin_url ? `\n   🔗 [LinkedIn](${p.linkedin_url})` : '';
-          return `${idx + 1}. **${p.full_name || p.email?.split('@')[0]}** — ${title} at ${company}${linkedin}`;
-        }).join('\n\n');
+        const lines = [];
+        let idx = 1;
+
+        for (const u of userResults) {
+          const typeLabel = u.persona === 'parent' ? '💼 Parent' : `🎓 ${schoolAbbr} Alum`;
+          const title = u.current_role || 'Professional';
+          const company = u.current_company ? ` at ${u.current_company}` : '';
+          const linkedin = u.linkedin_url ? ` — 🔗 [LinkedIn](${u.linkedin_url})` : '';
+          lines.push(`${idx++}. **${u.full_name || u.email?.split('@')[0]}** — ${title}${company} [${typeLabel}]${linkedin}`);
+        }
+        for (const a of alumniResults) {
+          const title = a.role_title || 'Professional';
+          const linkedin = a.linkedin_url ? ` — 🔗 [LinkedIn](${a.linkedin_url})` : '';
+          lines.push(`${idx++}. **${a.name}** — ${title} at ${a.company} [🎓 ${schoolAbbr} Alum]${linkedin}`);
+        }
+
+        const fieldLabel = field ? ` in **${field}**` : '';
+        const personaLabel = personaFilter !== 'all' ? personaFilter + 's' : 'network members';
 
         return Response.json({
           success: true,
-          response: `Found **${filtered.length}** ${personaFilter === 'all' ? 'network members' : personaFilter + 's'} in **${field}**:\n\n${formattedResults}`,
+          response: `Found **${totalCount} verified ${personaLabel}**${fieldLabel} in the CLiFF database:\n\n${lines.join('\n\n')}\n\nWant me to draft a personalized outreach message for any of them?`,
           message_type: 'network_results',
         });
       }
     }
 
-    // ─── 3. GENERAL CAREER Q&A — LLM WITH PROPER PAYLOAD FORMAT ────────────
-    // Build conversation history in strict alternating user/assistant format
-    const systemPrompt = `You are CLiFF, an elite, no-fluff career agent for ${schoolAbbr} students. You help with networking strategy, outreach scripts, interview prep, salary negotiation, and job search tactics. Be direct, specific, and actionable. Never give generic advice. Keep responses under 200 words unless the user asks for something detailed.`;
+    // ─── 4. GENERAL CAREER Q&A — LLM WITH HARD GUARDRAILS ──────────────────
+    const systemPrompt = `You are CLiFF, an elite career agent embedded inside the CLiFF platform for ${schoolAbbr} students. You are the DIRECT INTERFACE to the CLiFF proprietary network database.
+
+HARD RULES — never break these:
+1. NEVER tell users to log into external platforms (LinkedIn, Handshake, GatorLink, Gator CareerLink, etc.) to find contacts. CLiFF IS the tool.
+2. NEVER tell users to "email the alumni association", "check your university portal", or do any manual research outside this app.
+3. If the user asks for specific people, contacts, alumni, or parents — you MUST query the CLiFF database (the backend already handles this before reaching you, so redirect them to ask more specifically: "Try asking: 'Any alumni in marketing?' or 'Who do we have at Nike?'")
+4. Be direct, specific, and actionable. Under 200 words unless user asks for detail.
+5. No corporate buzzwords. No generic career center advice.
+
+You help with: networking strategy, outreach scripts, interview prep, salary negotiation, resume tailoring, job search tactics — all powered by CLiFF's internal data and AI.`;
 
     // Sanitize history: enforce strict alternating user/assistant roles
     const sanitizedHistory = [];
