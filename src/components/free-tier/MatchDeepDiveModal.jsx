@@ -70,6 +70,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
   const [editableScript, setEditableScript] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [contactEmail, setContactEmail] = useState(null);
+  const [emailStates, setEmailStates] = useState({}); // keyed by contact.name → { loading, email, checked }
   const scrollContainerRef = useRef(null);
 
   useEffect(() => {
@@ -77,6 +78,7 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     setSelectedContact(null);
     setDraftContact(null);
     setGeneratedScript('');
+    setEmailStates({});
     const alumniList = Array.isArray(match.alumni) ? match.alumni : [];
     const mappedAlumni = alumniList.map(m => ({
       name: m.full_name || m.name || '',
@@ -96,6 +98,24 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     setParents(mappedParents);
     setLoading(false);
   }, [match]);
+
+  const handleGetEmail = async (contact) => {
+    const key = contact.name;
+    setEmailStates(prev => ({ ...prev, [key]: { loading: true, email: null, checked: false } }));
+    try {
+      const domainBase = match.company
+        .toLowerCase()
+        .replace(/\b(inc|llc|ltd|corp|co|group|technologies|technology|solutions|services|consulting|global|international)\b/g, '')
+        .replace(/[^a-z0-9]/g, '')
+        .trim();
+      const domain = domainBase + '.com';
+      const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
+      const email = result?.success && result?.email ? result.email : null;
+      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email, checked: true } }));
+    } catch (err) {
+      setEmailStates(prev => ({ ...prev, [key]: { loading: false, email: null, checked: true } }));
+    }
+  };
 
   const handleTrackAndDraft = () => {
     // Default to first alumni if no contact selected (prioritize alumni over parents)
@@ -309,8 +329,34 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
                       {!isAlum && <span style={{ fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 100, padding: '2px 7px' }}>Opted-in</span>}
                       {c.linkedin_url && <a href={c.linkedin_url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 6, padding: '3px 8px', textDecoration: 'none', minHeight: 'auto', flexShrink: 0, fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}><svg width="11" height="11" viewBox="0 0 24 24" fill="#475569"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span>View</span></a>}
                       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-                        <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'email'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#111827', borderRadius: 8, padding: '4px 10px', border: 'none', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', boxShadow: '0 2px 8px rgba(17,24,39,0.3)' }}>✉️ Email</button>
-                        <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 LinkedIn</button>
+                        {(() => {
+                          const es = emailStates[c.name];
+                          if (es?.loading) {
+                            return (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f8fafc', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', fontFamily: dm, fontSize: 9, color: '#94a3b8' }}>
+                                <div style={{ width: 10, height: 10, border: '2px solid #e2e8f0', borderTopColor: '#7c3aed', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                                Finding…
+                              </div>
+                            );
+                          }
+                          if (es?.checked && es?.email) {
+                            return (
+                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'email'); setContactEmail(es.email); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#111827', borderRadius: 8, padding: '4px 10px', border: 'none', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', boxShadow: '0 2px 8px rgba(17,24,39,0.3)' }}>✉️ Draft Email</button>
+                            );
+                          }
+                          if (es?.checked && !es?.email) {
+                            return (
+                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 LinkedIn DM</button>
+                            );
+                          }
+                          // Default: not yet looked up
+                          return (
+                            <>
+                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleGetEmail(c); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#111827', borderRadius: 8, padding: '4px 10px', border: 'none', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 800, color: '#fff', boxShadow: '0 2px 8px rgba(17,24,39,0.3)' }}>✉️ Get Email</button>
+                              <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMessageViaCLiFF(c, 'linkedin'); }} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'transparent', borderRadius: 8, padding: '4px 10px', border: '1px solid #e2e8f0', minHeight: 'auto', cursor: 'pointer', fontFamily: dm, fontSize: 9, fontWeight: 700, color: '#475569' }}>🌐 LinkedIn</button>
+                            </>
+                          );
+                        })()}
                       </div>
                       </div>
                     </div>
