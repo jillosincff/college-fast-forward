@@ -103,7 +103,35 @@ Deno.serve(async (req) => {
       console.warn('Hunter domain-search failed:', err.message);
     }
 
-    // ── Hunter exhausted → LinkedIn fallback ────────────────────────────────
+    // ── RocketReach fallback ────────────────────────────────────────────────
+    const ROCKETREACH_API_KEY = Deno.env.get('ROCKETREACH_API_KEY');
+    if (ROCKETREACH_API_KEY) {
+      try {
+        const rrRes = await fetch('https://api.rocketreach.co/v1/people/find', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${ROCKETREACH_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            domain: cleanDomain,
+            first_name: firstName,
+            last_name: lastName,
+            limit: 1
+          })
+        });
+        const rrData = await rrRes.json();
+        console.log('RocketReach response:', JSON.stringify(rrData).slice(0, 300));
+
+        if (rrData.result && rrData.result.email && rrData.result.email.length > 0) {
+          return Response.json({ success: true, email: rrData.result.email[0], score: rrData.result.confidence || 0, source: 'rocketreach' });
+        }
+      } catch (err) {
+        console.warn('RocketReach failed:', err.message);
+      }
+    }
+
+    // ── All sources exhausted → LinkedIn fallback ──────────────────────────
     return Response.json({ success: false, error: 'Email not found', fallback: 'linkedin_only' });
 
   } catch (error) {
