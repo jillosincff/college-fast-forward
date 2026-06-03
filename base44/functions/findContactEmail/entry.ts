@@ -113,7 +113,10 @@ Deno.serve(async (req) => {
         rrUrl.searchParams.set('current_employer', cleanDomain);
         
         const rrRes = await fetch(rrUrl.toString(), {
-          headers: { 'accept': 'application/json' }
+          headers: { 
+            'accept': 'application/json',
+            'Authorization': `Bearer ${ROCKETREACH_API_KEY}`
+          }
         });
         const rrData = await rrRes.json();
         console.log('RocketReach response:', JSON.stringify(rrData).slice(0, 500));
