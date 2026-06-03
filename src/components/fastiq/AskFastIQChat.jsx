@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import ReactMarkdown from 'react-markdown';
 import { cliffCareerAgent } from '@/functions/cliffCareerAgent';
+import { findContactEmail } from '@/functions/findContactEmail';
 
 const dmSans = "'DM Sans', system-ui, sans-serif";
 
@@ -11,6 +12,99 @@ const SUGGESTIONS = [
   "Find me UF alumni at Nike",
   "Help me tailor my resume",
 ];
+
+// Derives a best-guess company domain from a company name
+function guessDomain(company) {
+  if (!company) return null;
+  const cleaned = company.toLowerCase()
+    .replace(/\b(inc|llc|ltd|corp|co|group|partners|associates|international|services|solutions|consulting)\b\.?/gi, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim()
+    .split(/\s+/)[0]; // use first word as the domain slug
+  return `${cleaned}.com`;
+}
+
+// Individual contact card with its own email-lookup state
+function ContactCard({ c, idx }) {
+  const [emailState, setEmailState] = useState('idle'); // idle | loading | found | not_found
+  const [foundEmail, setFoundEmail] = useState(null);
+
+  const handleEmailDirect = async () => {
+    if (emailState === 'found' && foundEmail) {
+      window.location.href = `mailto:${foundEmail}`;
+      return;
+    }
+    setEmailState('loading');
+    const domain = guessDomain(c.company);
+    if (!domain) { setEmailState('not_found'); return; }
+    try {
+      const result = await findContactEmail({ contactName: c.name, companyDomain: domain });
+      if (result?.success && result.email) {
+        setFoundEmail(result.email);
+        setEmailState('found');
+      } else {
+        setEmailState('not_found');
+      }
+    } catch {
+      setEmailState('not_found');
+    }
+  };
+
+  return (
+    <div style={{
+      background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 12,
+      padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+    }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: "'DM Sans', system-ui", fontWeight: 600, fontSize: 14, color: '#fff' }}>{c.name}</span>
+          <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 100, background: c.isParent ? 'rgba(232,93,32,0.12)' : 'rgba(79,140,255,0.12)', color: c.isParent ? '#E85D20' : '#4F8CFF', fontWeight: 500 }}>
+            {c.isParent ? '💼 Parent' : '🎓 Alum'}
+          </span>
+        </div>
+        <p style={{ fontFamily: "'DM Sans', system-ui", fontSize: 13, color: '#888', margin: '2px 0 0', lineHeight: 1.4 }}>
+          {c.title}{c.company ? ` · ${c.company}` : ''}
+        </p>
+        {emailState === 'found' && foundEmail && (
+          <p style={{ fontFamily: "'DM Sans', system-ui", fontSize: 12, color: '#4ade80', margin: '4px 0 0' }}>
+            📧 {foundEmail}
+          </p>
+        )}
+        {emailState === 'not_found' && (
+          <p style={{ fontFamily: "'DM Sans', system-ui", fontSize: 12, color: '#888', margin: '4px 0 0' }}>
+            No email found — try LinkedIn
+          </p>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+        {c.linkedin && (
+          <a href={c.linkedin} target="_blank" rel="noopener noreferrer" style={{
+            fontSize: 11, padding: '5px 10px', borderRadius: 8,
+            background: 'rgba(79,140,255,0.1)', color: '#4F8CFF',
+            border: '1px solid rgba(79,140,255,0.2)', textDecoration: 'none',
+            fontFamily: "'DM Sans', system-ui", fontWeight: 500, whiteSpace: 'nowrap',
+            minHeight: 'auto', minWidth: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}>🔗 LinkedIn</a>
+        )}
+        <button
+          onClick={handleEmailDirect}
+          disabled={emailState === 'loading'}
+          style={{
+            fontSize: 11, padding: '5px 10px', borderRadius: 8,
+            background: emailState === 'found' ? 'rgba(74,222,128,0.1)' : 'rgba(232,93,32,0.1)',
+            color: emailState === 'found' ? '#4ade80' : '#E85D20',
+            border: `1px solid ${emailState === 'found' ? 'rgba(74,222,128,0.25)' : 'rgba(232,93,32,0.25)'}`,
+            cursor: emailState === 'loading' ? 'wait' : 'pointer',
+            fontFamily: "'DM Sans', system-ui", fontWeight: 600, whiteSpace: 'nowrap',
+            minHeight: 'auto', minWidth: 'auto', opacity: emailState === 'loading' ? 0.6 : 1,
+          }}
+        >
+          {emailState === 'loading' ? '⏳ Finding...' : emailState === 'found' ? '📨 Open Email' : '✉️ Email Direct'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // Parses markdown contact list from CLiFF and renders interactive rich cards
 function NetworkResultCards({ content, onEmailDirect }) {
@@ -68,40 +162,7 @@ function NetworkResultCards({ content, onEmailDirect }) {
 
       {/* Contact cards */}
       {contacts.map((c, idx) => (
-        <div key={idx} style={{
-          background: '#1E1E1E', border: '1px solid #2A2A2A', borderRadius: 12,
-          padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-        }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: "'DM Sans', system-ui", fontWeight: 600, fontSize: 14, color: '#fff' }}>{c.name}</span>
-              <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 100, background: c.isParent ? 'rgba(232,93,32,0.12)' : 'rgba(79,140,255,0.12)', color: c.isParent ? '#E85D20' : '#4F8CFF', fontWeight: 500 }}>
-                {c.isParent ? '💼 Parent' : '🎓 Alum'}
-              </span>
-            </div>
-            <p style={{ fontFamily: "'DM Sans', system-ui", fontSize: 13, color: '#888', margin: '2px 0 0', lineHeight: 1.4 }}>
-              {c.title}{c.company ? ` · ${c.company}` : ''}
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-            {c.linkedin && (
-              <a href={c.linkedin} target="_blank" rel="noopener noreferrer" style={{
-                fontSize: 11, padding: '5px 10px', borderRadius: 8,
-                background: 'rgba(79,140,255,0.1)', color: '#4F8CFF',
-                border: '1px solid rgba(79,140,255,0.2)', textDecoration: 'none',
-                fontFamily: "'DM Sans', system-ui", fontWeight: 500, whiteSpace: 'nowrap',
-                minHeight: 'auto', minWidth: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4,
-              }}>🔗 LinkedIn</a>
-            )}
-            <button onClick={() => onEmailDirect(c.name, c.company || 'their company')} style={{
-              fontSize: 11, padding: '5px 10px', borderRadius: 8,
-              background: 'rgba(232,93,32,0.1)', color: '#E85D20',
-              border: '1px solid rgba(232,93,32,0.25)', cursor: 'pointer',
-              fontFamily: "'DM Sans', system-ui", fontWeight: 600, whiteSpace: 'nowrap',
-              minHeight: 'auto', minWidth: 'auto',
-            }}>✉️ Email Direct</button>
-          </div>
-        </div>
+        <ContactCard key={idx} c={c} idx={idx} />
       ))}
 
       {/* CTA */}
