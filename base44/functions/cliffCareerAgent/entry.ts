@@ -68,13 +68,41 @@ Deno.serve(async (req) => {
           
           // Search for this person in the network
           const results = await base44.asServiceRole.entities.User.filter({});
-          const nameLower = contactName.toLowerCase();
+          const nameLower = contactName.toLowerCase().replace(/\s+/g, '');
           
-          const found = results.find(u => {
+          // Try multiple matching strategies
+          let found = null;
+          
+          // Strategy 1: Direct match in full_name or email
+          found = results.find(u => {
             const fullName = (u.full_name || '').toLowerCase();
             const emailPrefix = (u.email || '').split('@')[0].toLowerCase();
-            return fullName.includes(nameLower) || emailPrefix.includes(nameLower);
+            const fullNameNoSpace = fullName.replace(/\s+/g, '');
+            return fullNameNoSpace.includes(nameLower) || fullName.includes(nameLower) || emailPrefix.includes(nameLower);
           });
+          
+          // Strategy 2: Match by first name or last name separately
+          if (!found) {
+            const nameParts = contactName.toLowerCase().split(/\s+/).filter(p => p.length > 2);
+            if (nameParts.length > 0) {
+              found = results.find(u => {
+                const fullName = (u.full_name || '').toLowerCase();
+                return nameParts.some(part => fullName.includes(part));
+              });
+            }
+          }
+          
+          // Strategy 3: Fuzzy match - check if any significant word matches
+          if (!found && nameLower.length > 4) {
+            found = results.find(u => {
+              const fullName = (u.full_name || '').toLowerCase();
+              const firstName = fullName.split(' ')[0];
+              const lastName = fullName.split(' ').pop();
+              return firstName.includes(nameLower) || lastName.includes(nameLower) || 
+                     (nameLower.includes(firstName) && firstName.length > 3) ||
+                     (nameLower.includes(lastName) && lastName.length > 3);
+            });
+          }
           
           if (found) {
             const fullName = found.full_name || found.email?.split('@')[0] || 'Network Member';
@@ -83,10 +111,11 @@ Deno.serve(async (req) => {
             const linkedin = found.linkedin_url || '';
             const email = found.email || '';
             
-            let response = `**${fullName}**\n`;
-            response += `${title} at ${company}\n`;
+            let response = `Found **${fullName}** in the network!\n\n`;
+            response += `**${title}** at **${company}**\n`;
             if (linkedin) response += `\n🔗 [LinkedIn Profile](${linkedin})`;
             if (email) response += `\n📧 Email: ${email}`;
+            response += `\n\nWant me to draft an outreach message?`;
             
             return Response.json({
               success: true,
