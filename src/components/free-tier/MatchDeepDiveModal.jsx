@@ -127,10 +127,9 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     const meta = getSchoolMeta(schoolCode);
     const userType = user?.persona === 'alumni' ? `fellow ${meta.abbr} grad` : `current ${meta.abbr} student`;
     
-    // Find email if type is email
+    // Try to find email via Hunter when type is email
     if (type === 'email' && match.company) {
       try {
-        // Build a reasonable domain: lowercase, strip common suffixes, spaces→nothing, append .com
         const domainBase = match.company
           .toLowerCase()
           .replace(/\b(inc|llc|ltd|corp|co|group|technologies|technology|solutions|services|consulting|global|international)\b/g, '')
@@ -138,8 +137,11 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
           .trim();
         const domain = domainBase + '.com';
         const result = await findContactEmail({ contactName: contact.name, companyDomain: domain });
-        if (result?.email) {
+        if (result?.success && result?.email) {
           setContactEmail(result.email);
+        } else {
+          // Store guessed domain so user sees it as a hint
+          setContactEmail(null);
         }
       } catch (err) {
         console.warn('Email lookup failed:', err);
@@ -196,12 +198,9 @@ export default function MatchDeepDiveModal({ match, shortName, onClose, onGenera
     const subjectLine = editableScript.match(/^Subject: (.+)/)?.[1] || `${(user?.school_code || shortName || 'UF')} connection`;
     const subject = encodeURIComponent(subjectLine);
     const body = encodeURIComponent(editableScript.replace(/^Subject: .+\n\n/, ''));
-    if (contactEmail) {
-      window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`;
-    } else {
-      navigator.clipboard.writeText(editableScript);
-      alert('Email not found. Script copied to clipboard - paste into your email client manually.');
-    }
+    // Open mailto with or without email — browser will prompt user to fill in address if blank
+    const to = contactEmail || '';
+    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
   };
 
   if (!match) return null;
