@@ -90,22 +90,55 @@ export default function DynamicActionPlan({ user }) {
   }
 
   if (!plan || total === 0) {
+    const goals = user?.career_goals || {};
+    const targetRoles = goals.target_roles?.slice(0, 2).join(' or ') || 'your target role';
+    const major = user?.major || 'your major';
+    const school = user?.school_name || user?.school || 'your school';
+    const gradYear = user?.graduation_year;
+    const timeline = gradYear ? `Class of ${gradYear}` : null;
+
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col items-center text-center gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-          <Sparkles className="w-6 h-6 text-white" />
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        {/* Personalized hook header */}
+        <div className="px-5 pt-5 pb-4" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-white/80" />
+            <p className="text-xs font-semibold text-white/80 uppercase tracking-wide">Action Plan Architect</p>
+          </div>
+          <p className="text-white font-bold text-sm leading-snug">
+            Hey! I've synced your profile. Here's what I'm tracking:
+          </p>
+          <div className="mt-3 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-white/60 text-xs">🏫</span>
+              <span className="text-white/90 text-xs font-medium">{school}</span>
+              {timeline && <span className="text-white/60 text-xs">· {timeline}</span>}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-white/60 text-xs">📚</span>
+              <span className="text-white/90 text-xs font-medium">{major}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-white/60 text-xs">🎯</span>
+              <span className="text-white/90 text-xs font-medium">{targetRoles}</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="font-bold text-slate-900 text-sm">No Action Plan Yet</p>
-          <p className="text-xs text-slate-500 mt-1">Chat with the Action Plan Architect to get a custom roadmap built for you in 60 seconds.</p>
+
+        {/* Body */}
+        <div className="px-5 py-4">
+          <p className="text-sm text-slate-600 leading-relaxed">
+            The traditional job hunt is a black hole. We're changing that — tap below and I'll architect a fully personalized, step-by-step roadmap to get you in front of the right people.
+          </p>
+          <a
+            href="/#/action-plan-architect"
+            className="mt-4 w-full text-sm font-bold text-white px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 hover:opacity-90 active:scale-95"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', minHeight: 'auto', display: 'flex', boxShadow: '0 4px 14px rgba(99,102,241,0.4)' }}
+          >
+            <Sparkles className="w-4 h-4" />
+            ✨ Generate My Action Plan
+          </a>
         </div>
-        <a
-          href="/#/action-plan-architect"
-          className="text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
-          style={{ minHeight: 'auto' }}
-        >
-          Build My Plan <ChevronRight className="w-4 h-4" />
-        </a>
       </div>
     );
   }
