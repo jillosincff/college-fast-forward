@@ -18,16 +18,18 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
     setDismissedKeys(prev => new Set([...prev, key]));
   };
   const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
-  const { target_industries, target_role, target_roles } = user?.career_goals || {};
+  const { target_industries, target_role, target_roles, company_size_preference } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
 
   const { data: feedsData, isLoading, error } = useQuery({
-    queryKey: ['cliffPrioritizedFeed', user?.id, target_industries, effectiveRole],
+    queryKey: ['cliffPrioritizedFeed', user?.id, target_industries, effectiveRole, company_size_preference],
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,
+      company_size_preference: company_size_preference || 'all',
     }),
     staleTime: 0,
+    gcTime: 0,
     retry: 2,
     enabled: !!user?.id,
   });

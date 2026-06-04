@@ -353,6 +353,7 @@ Deno.serve(async (req) => {
     }
 
     const targetRole = body.target_role || user.career_goals?.role || user.target_role || '';
+    const companySizePref = body.company_size_preference || user.career_goals?.company_size_preference || 'all';
     // target_positions is an array of role-type selections from onboarding (e.g. ["UX Design", "Content Strategy"])
     const targetPositions = (
       body.target_positions
@@ -382,6 +383,17 @@ Deno.serve(async (req) => {
       jobPool.push(...pool);
     }
 
+    // Apply company size filter to static pool
+    if (companySizePref && companySizePref !== 'all') {
+      const tierMap = { startup: [3], midmarket: [2], enterprise: [1] };
+      const allowedTiers = tierMap[companySizePref];
+      if (allowedTiers) {
+        const sizeFiltered = jobPool.filter(j => allowedTiers.includes(j.companyTier || 1));
+        // Only apply if it keeps at least 3 results — otherwise keep all to avoid empty feed
+        if (sizeFiltered.length >= 3) jobPool = sizeFiltered;
+      }
+    }
+
     // Stream B: live web results via getLiveJobMatchesFn — appended after static entries
     try {
       const liveRes = await Promise.race([
@@ -390,7 +402,7 @@ Deno.serve(async (req) => {
             role: targetRole || (targetIndustries[0] ? `${targetIndustries[0]} analyst` : 'analyst'),
             industries: targetIndustries.map(i => i.charAt(0).toUpperCase() + i.slice(1)),
             locations: userLocation ? [userLocation] : [],
-            company_size_preference: ['large', 'mid', 'startup'],
+            company_size_preference: companySizePref === 'startup' ? ['startup'] : companySizePref === 'midmarket' ? ['mid'] : companySizePref === 'enterprise' ? ['large'] : ['large', 'mid', 'startup'],
           },
         }),
         new Promise((_, r) => setTimeout(() => r(new Error('live_timeout')), 15000)),
