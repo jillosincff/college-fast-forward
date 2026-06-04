@@ -171,14 +171,14 @@ export default function DynamicActionPlan({ user }) {
               {firstName ? `${firstName}, you're` : "You're"} looking for {seekingLabel ? `a ${seekingLabel.toLowerCase()}` : 'your next opportunity'} and the traditional job hunt is a black hole. Tap below and I'll architect a step-by-step roadmap to get you in front of the right people.
             </p>
           )}
-          <a
-            href="/#/action-plan-architect"
+          <button
+            onClick={() => { window.location.hash = '/action-plan-architect'; }}
             className="mt-4 w-full text-sm font-bold text-white px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 hover:opacity-90 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', minHeight: 'auto', display: 'flex', boxShadow: '0 4px 14px rgba(99,102,241,0.4)' }}
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', minHeight: 'auto', boxShadow: '0 4px 14px rgba(99,102,241,0.4)' }}
           >
             <Sparkles className="w-4 h-4" />
             ✨ Generate My Action Plan
-          </a>
+          </button>
         </div>
       </div>
     );
