@@ -108,7 +108,9 @@ export default function DynamicActionPlan({ user }) {
       disorganized: "you're losing track of everything",
       interviews: "interviewing makes you nervous",
     };
-    const rawBlockers = user?.career_blockers || goals.blockers || [];
+    // Also check localStorage for users who onboarded before career_blockers was saved to the profile
+    const lsBlockers = (() => { try { return JSON.parse(localStorage.getItem('cff_blockers') || '[]'); } catch { return []; } })();
+    const rawBlockers = (user?.career_blockers?.length ? user.career_blockers : null) || goals.blockers || lsBlockers || [];
     const blockerLines = rawBlockers.slice(0, 2).map(k => BLOCKER_LABELS[k]).filter(Boolean);
 
     return (
@@ -150,7 +152,7 @@ export default function DynamicActionPlan({ user }) {
             </p>
           ) : (
             <p className="text-sm text-slate-600 leading-relaxed">
-              The traditional job hunt is a black hole. We're changing that — tap below and I'll architect a fully personalized, step-by-step roadmap to get you in front of the right people.
+              {firstName ? `${firstName}, the` : 'The'} traditional job hunt is a black hole. Tap below and I'll architect a fully personalized, step-by-step roadmap to get you in front of the right people.
             </p>
           )}
           <a
