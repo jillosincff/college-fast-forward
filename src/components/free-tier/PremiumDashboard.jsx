@@ -4,7 +4,7 @@ import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompa
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { CliffLogo } from '@/components/brand/CliffLogo';
 import PremiumPipeline from './PremiumPipeline';
-import CliffSprintTracker from './CliffSprintTracker';
+import DynamicActionPlan from '@/components/action-plan/DynamicActionPlan';
 import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
@@ -362,8 +362,8 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             {/* Application Pipeline (Active Tracking) */}
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
             
-            {/* 14-Day Sprint Tracker */}
-            <CliffSprintTracker currentDay={3} totalDays={14} />
+            {/* Dynamic Action Plan */}
+            <DynamicActionPlan user={user} />
           </div>
 
           {/* Right Column (Desktop Only) */}
