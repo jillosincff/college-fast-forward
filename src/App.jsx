@@ -183,6 +183,7 @@ const AuthenticatedApp = () => {
       <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
       <Route path="/paywall-analytics" element={<PaywallAnalyticsDashboard />} />
       <Route path="/cliff-scout" element={<CliffScout />} />
+      <Route path="/action-plan-architect" element={<ActionPlanArchitect />} />
       <Route path="/join" element={<JoinPage />} />
 
       {/* Main routes */}
