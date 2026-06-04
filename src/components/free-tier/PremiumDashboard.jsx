@@ -34,7 +34,7 @@ function PremiumNav({ user, onEditGoals, navRef }) {
   }, []);
 
   return (
-    <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+    <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <CliffLogo size="text-xl" />
@@ -120,12 +120,20 @@ function PremiumNav({ user, onEditGoals, navRef }) {
   );
 }
 
-function StatPill({ emoji, label, value, theme }) {
+function StatPill({ emoji, label, value, theme, isLoading }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '12px 18px', flex: '1 1 0', minWidth: 0 }}>
       <span style={{ fontSize: 22, flexShrink: 0 }}>{emoji}</span>
       <div style={{ minWidth: 0 }}>
-        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</p>
+        <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 900, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {isLoading ? (
+            <>
+              <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinStat 0.8s linear infinite' }} />
+              <style>{`@keyframes spinStat{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>Scouting...</span>
+            </>
+          ) : value}
+        </p>
         <p style={{ fontFamily: dm, fontSize: 10, color: 'rgba(255,255,255,0.55)', margin: 0, whiteSpace: 'nowrap' }}>{label}</p>
       </div>
     </div>
@@ -255,10 +263,11 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   }, []);
 
   const showParentStat = parentCount === null || parentCount >= 20;
+  const networkLoading = networkStats === null;
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'FULLY DEPLOYED' },
     { emoji: '🎯', label: 'Resume Match', value: '98% ATS Proof' },
-    { emoji: '🐊', label: 'Synced Network', value: `${shortName} Active` },
+    { emoji: '🐊', label: 'Synced Network', value: networkLoading ? 0 : `${networkStats.alumni + networkStats.parents}`, isLoading: networkLoading },
   ];
 
   return (
