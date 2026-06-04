@@ -23,7 +23,12 @@ function getStarterPrompts(user) {
   } else if (roles.length > 0) {
     prompts.push(`Any alumni working as ${roles[0]}?`);
   } else {
-    prompts.push("Who do we have at Spotify or Disney?");
+    const userTargets = user?.career_goals?.target_companies || [];
+    if (userTargets.length > 0) {
+      prompts.push(`Any alumni at ${userTargets[0]}${userTargets[1] ? ` or ${userTargets[1]}` : ''}?`);
+    } else {
+      prompts.push("Who do we have at my target companies?");
+    }
   }
 
   if (industries.length > 0) {
@@ -84,13 +89,16 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
         if (recap.actionItem && recap.actionItem.type === 'STALE_APPLICATION') {
           // Smart CRM nudge: stale application detected
           const daysStale = recap.actionItem.daysStale || 5;
-          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have ${pipelineCount} active opportunities tracked.\n\n⚠️ **Nudge Alert**: Your application for **${recap.actionItem.companyName}** has been sitting for ${daysStale} days without activity. Let's send an elegant check-in to bypass the cold portal.\n\nYour Sprint Objective Today: Deploy a scout to find backdoors for your top targets (Spotify, BuzzFeed, or Warner Bros Discovery), or tap below to draft a follow-up for ${recap.actionItem.companyName}.`;
+          const userTargets = user?.career_goals?.target_companies || [];
+          const targetText = userTargets.length > 0 ? userTargets.slice(0, 3).join(', ') : 'your top targets';
+          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have ${pipelineCount} active opportunities tracked.\n\n⚠️ **Nudge Alert**: Your application for **${recap.actionItem.companyName}** has been sitting for ${daysStale} days without activity. Let's send an elegant check-in to bypass the cold portal.\n\nYour Sprint Objective Today: Deploy a scout to find backdoors for **${targetText}**, or tap below to draft a follow-up for ${recap.actionItem.companyName}.`;
           setMessages([{ role: 'agent', text: greeting }]);
           setRecapAction(recap.actionItem);
         } else if (pipelineCount > 0) {
           // Active pipeline coaching
-          const targetCompanies = ['Spotify', 'BuzzFeed', 'Warner Bros Discovery'];
-          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have **${pipelineCount} active opportunities** saved.\n\nYour main sprint objective today is deploying a scout to find backdoors for **${targetCompanies.join(', ')}**, or ask me how to prep for an upcoming conversation!\n\nPick a target above, or tap below to draft outreach for your top priority.`;
+          const userTargets = user?.career_goals?.target_companies || [];
+          const targetText = userTargets.length > 0 ? userTargets.slice(0, 3).join(', ') : 'your target companies';
+          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have **${pipelineCount} active opportunities** saved.\n\nYour main sprint objective today is deploying a scout to find backdoors for **${targetText}**, or ask me how to prep for an upcoming conversation!\n\nPick a target above, or tap below to draft outreach for your top priority.`;
           setMessages([{ role: 'agent', text: greeting }]);
           setRecapAction({ type: 'PIPELINE_COACHING', pipelineCount });
         } else if (recap.actionItem) {
