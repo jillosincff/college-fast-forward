@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { maybeActivateTrial } from '@/utils/trialActivation';
 import { navigate } from '@/components/utils/navigation';
+import ColdInroadScout from '@/components/free-tier/ColdInroadScout';
 
 const CONTEXTS = [
   { id: 'alumni_search', label: 'Alumni Outreach', icon: '🔍', desc: 'Reaching out to a UF alumni you found' },
@@ -35,7 +36,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     const hash = window.location.hash;
     const paramStr = hash.includes('?') ? hash.split('?')[1] : '';
     const params = new URLSearchParams(paramStr);
-    if (params.get('context') === 'cold_outreach' && params.get('company')) return 'form';
+    if (params.get('context') === 'cold_outreach' && params.get('company')) return 'scout';
     if (params.get('contact') && params.get('company')) return 'form';
     return 'list';
   });
@@ -50,6 +51,10 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     conversationContext: '',
   });
   
+  // CLiFF Scout state for automated targeting
+  const [scoutPhase, setScoutPhase] = useState('analyzing'); // 'analyzing' | 'recommendation'
+  const [recommendedTarget, setRecommendedTarget] = useState(null);
+  
   // Handle pre-population from URL params (when coming from MatchDeepDiveModal or Pure Sourcing)
   useEffect(() => {
     const hash = window.location.hash;
@@ -62,17 +67,17 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     const context = params.get('context');
 
     if (context === 'cold_outreach' && company) {
-      // Pure Sourcing Play — pre-populate company/role, skip to form
+      // Pure Sourcing Play — pre-populate company/role, trigger CLiFF Scout
       setForm(prev => ({
         ...prev,
-        recipientName: '',
         recipientCompany: decodeURIComponent(company),
         recipientTitle: role ? decodeURIComponent(role) : '',
         jobTitle: role ? decodeURIComponent(role) : '',
         conversationContext: `Cold outreach for a role I found directly on ${decodeURIComponent(company)}'s careers page.`,
       }));
       setSelectedContext('cold_outreach');
-      setPhase('form');
+      setScoutPhase('analyzing');
+      setPhase('scout');
       window.history.replaceState({}, '', '#OutreachDrafts');
     } else if (contact && company) {
       setForm({
@@ -337,6 +342,35 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     setSelectedContext(null);
     setGeneratedMessage('');
     setEditedMessage('');
+  };
+
+  // CLiFF Scout handlers
+  const handleScoutAnalyze = async () => {
+    setGenerating(true);
+    try {
+      const res = await base44.functions.invoke('scoutCompanyTarget', {
+        company: form.recipientCompany,
+        role: form.recipientTitle || form.jobTitle,
+        jobDescription: form.conversationContext,
+      });
+      if (res?.data?.success) {
+        setRecommendedTarget(res.data);
+        setScoutPhase('recommendation');
+      }
+    } catch (e) {
+      console.error('Scout failed:', e);
+    }
+    setGenerating(false);
+  };
+
+  const handleTargetConfirmed = (target) => {
+    setForm(prev => ({
+      ...prev,
+      recipientName: target.name,
+      recipientTitle: target.title,
+      recipientLinkedinUrl: target.linkedinUrl || '',
+    }));
+    setPhase('form');
   };
 
   const inputStyle = {
