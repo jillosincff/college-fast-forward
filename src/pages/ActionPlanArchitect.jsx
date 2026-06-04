@@ -116,6 +116,12 @@ export default function ActionPlanArchitect() {
 
   const isLoading = messages.length > 0 && messages[messages.length - 1]?.role === 'user';
 
+  // Show the CTA chip after the agent's first welcome message (before plan is generated)
+  const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
+  const planAlreadyGenerated = parseActionPlanJson(messages) !== null;
+  const showGenerateCTA = lastAssistantMsg && !planAlreadyGenerated && !isLoading &&
+    (lastAssistantMsg.content?.includes('Generate My Action Plan') || lastAssistantMsg.content?.includes('custom path'));
+
   return (
     <div className="flex flex-col h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* Header */}
@@ -174,6 +180,20 @@ export default function ActionPlanArchitect() {
         {messages.map((msg, i) => (
           <MessageBubble key={i} message={msg} />
         ))}
+
+        {/* CTA chip after welcome message */}
+        {showGenerateCTA && (
+          <div className="flex justify-start pl-10">
+            <button
+              onClick={() => send('✨ Generate My Action Plan')}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', minHeight: 'auto', cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)' }}
+            >
+              <Sparkles className="w-4 h-4" />
+              ✨ Generate My Action Plan
+            </button>
+          </div>
+        )}
 
         {isLoading && (
           <div className="flex gap-3 justify-start">
