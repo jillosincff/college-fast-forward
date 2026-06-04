@@ -1,0 +1,75 @@
+{
+  "name": "UserDailyDrop",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user this daily drop belongs to"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email for quick lookup"
+    },
+    "drop_date": {
+      "type": "string",
+      "description": "Calendar date this drop was generated for (YYYY-MM-DD)"
+    },
+    "slots": {
+      "type": "array",
+      "description": "The 5 curated job slots for the day",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "actioned_keys": {
+      "type": "array",
+      "description": "Keys of slots the user has saved, dismissed, or added to pipeline",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this drop expires (4AM ET next day)"
+    }
+  },
+  "required": [
+    "user_id",
+    "drop_date"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
