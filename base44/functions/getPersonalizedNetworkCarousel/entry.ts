@@ -375,10 +375,60 @@ Deno.serve(async (req) => {
     // ─── Step 1: Build the job pool from target industries ──────────────────
     const SENIOR_FILTER = /\b(senior|sr\.|lead|principal|director|manager|head of|vp |vice president|staff engineer|architect|managing partner)\b/i;
 
+    // Stream A: curated static pool
     let jobPool = [];
     for (const ind of targetIndustries) {
       const pool = JOB_POOL[ind] || [];
       jobPool.push(...pool);
+    }
+
+    // Stream B: live web results via getLiveJobMatchesFn — appended after static entries
+    try {
+      const liveRes = await Promise.race([
+        base44.asServiceRole.functions.invoke('getLiveJobMatchesFn', {
+          career_goals: {
+            role: targetRole || (targetIndustries[0] ? `${targetIndustries[0]} analyst` : 'analyst'),
+            industries: targetIndustries.map(i => i.charAt(0).toUpperCase() + i.slice(1)),
+            locations: userLocation ? [userLocation] : [],
+            company_size_preference: ['large', 'mid', 'startup'],
+          },
+        }),
+        new Promise((_, r) => setTimeout(() => r(new Error('live_timeout')), 15000)),
+      ]);
+
+      const liveCompanies = liveRes?.companies || [];
+      console.log(`[getPersonalizedNetworkCarousel] 🌐 Live results: ${liveCompanies.length} companies`);
+
+      // Convert live company objects → job-pool-compatible entries
+      const liveJobEntries = liveCompanies.map(c => ({
+        company: c.name,
+        role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
+        description: c.hiring_description || `${c.name} is actively hiring — ${c.hiring_signal === 'hot' ? 'aggressively recruiting new grads right now' : 'selectively hiring for entry-level roles'}.`,
+        source: `${c.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
+        sourceCategory: 'B',
+        companyTier: c.size === 'startup' ? 3 : c.size === 'mid' ? 2 : 1,
+        isLiveResult: true,
+      }));
+
+      // Deduplicate against static pool using composite key: company+role (lowercase)
+      const staticKeys = new Set(jobPool.map(j => `${j.company.toLowerCase()}||${j.role.toLowerCase()}`));
+      const deduped = liveJobEntries.filter(j => {
+        const key = `${j.company.toLowerCase()}||${j.role.toLowerCase()}`;
+        // Also check company-only match to avoid same company with slightly different role wording
+        const companyKey = j.company.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const staticCompanyMatch = [...staticKeys].some(sk => {
+          const skCompany = sk.split('||')[0].replace(/[^a-z0-9]/g, '');
+          return skCompany.length >= 4 && companyKey.length >= 4 &&
+            (skCompany.includes(companyKey) || companyKey.includes(skCompany));
+        });
+        return !staticCompanyMatch;
+      });
+
+      // Append live results after static (static entries stay at the top for premium UX)
+      jobPool = [...jobPool, ...deduped];
+      console.log(`[getPersonalizedNetworkCarousel] Hybrid pool: ${jobPool.length} jobs (${jobPool.length - deduped.length} static + ${deduped.length} live)`);
+    } catch (liveErr) {
+      console.warn(`[getPersonalizedNetworkCarousel] Live fetch skipped (${liveErr.message}) — using static pool only`);
     }
 
     // Filter out senior roles
