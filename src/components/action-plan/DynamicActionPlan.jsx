@@ -98,6 +98,16 @@ export default function DynamicActionPlan({ user }) {
     const gradYear = user?.graduation_year;
     const timeline = gradYear ? `Class of ${gradYear}` : null;
 
+    const SEEKING_LABELS = {
+      internship: 'Internship',
+      fulltime: 'Full-time job',
+      both: 'Internships & full-time',
+      exploring: 'Exploring options',
+    };
+    const lsSeeking = (() => { try { return localStorage.getItem('cff_seeking') || ''; } catch { return ''; } })();
+    const seeking = user?.seeking || goals.seeking || lsSeeking;
+    const seekingLabel = SEEKING_LABELS[seeking] || null;
+
     // Map blocker keys to human-readable frustrations
     const BLOCKER_LABELS = {
       resume: "your resume isn't getting responses",
@@ -138,6 +148,12 @@ export default function DynamicActionPlan({ user }) {
               <span className="text-white/60 text-xs">🎯</span>
               <span className="text-white/90 text-xs font-medium">{targetRoles}</span>
             </div>
+            {seekingLabel && (
+              <div className="flex items-center gap-2">
+                <span className="text-white/60 text-xs">🔍</span>
+                <span className="text-white/90 text-xs font-medium">{seekingLabel}</span>
+              </div>
+            )}
           </div>
         </div>
 
