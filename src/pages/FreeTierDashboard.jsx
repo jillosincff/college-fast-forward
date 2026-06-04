@@ -9,7 +9,7 @@ import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
 import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
-import CliffPrioritizedFeed from '@/components/free-tier/CliffPrioritizedFeed';
+import CliffPrioritizedFeed from '@/components/free-tier/CliffPrioritizedFeed.jsx';
 import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
