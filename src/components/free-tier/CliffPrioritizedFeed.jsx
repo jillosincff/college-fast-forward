@@ -10,11 +10,10 @@ import { base44 } from '@/api/base44Client';
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
-  const { target_industries, target_role, target_roles, company_size_preference } = user?.career_goals || {};
+  const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
   const queryClient = useQueryClient();
 
-  // Fetch the daily drop (cached per user per day)
   const { data: dropData, isLoading, error } = useQuery({
     queryKey: ['dailyDrop', user?.id],
     queryFn: () => getDailyDrop({}),
@@ -29,7 +28,6 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const dropId = payload?.drop_id;
   const actionedKeys = new Set(payload?.actioned_keys || []);
 
-  // Action a slot — persist to backend
   const actionMutation = useMutation({
     mutationFn: async ({ key, dropId }) => {
       const drops = await base44.entities.UserDailyDrop.filter({ user_id: user.id, id: dropId });
@@ -72,8 +70,6 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
 
   return (
     <div className="w-full max-w-6xl mx-auto px-0 py-2 space-y-6">
-
-      {/* Header */}
       <div className="border-b border-gray-100 pb-4">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -94,19 +90,13 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
               {slots.map((s, i) => {
                 const key = `${s.company}||${s.role}`;
                 const done = actionedKeys.has(key);
-                return (
-                  <div
-                    key={i}
-                    className={`w-2 h-2 rounded-full transition-all ${done ? 'bg-green-400' : 'bg-gray-200'}`}
-                  />
-                );
+                return <div key={i} className={`w-2 h-2 rounded-full transition-all ${done ? 'bg-green-400' : 'bg-gray-200'}`} />;
               })}
             </div>
           )}
         </div>
       </div>
 
-      {/* No goals nudge */}
       {noGoals && !isLoading && (
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -123,13 +113,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
         </div>
       )}
 
-      {/* Main content */}
       <section className="space-y-3">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[1, 2, 3].map(n => (
-              <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
-            ))}
+            {[1, 2, 3].map(n => <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />)}
           </div>
         ) : allActioned ? (
           <AllCaughtUpCard dropDate={payload?.drop_date} />
@@ -139,27 +126,14 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
           </div>
         ) : visibleSlots.length > 0 ? (
           <>
-            {/* Slot type legend */}
             <div className="flex items-center gap-3 text-[10px] text-gray-400 font-medium uppercase tracking-wider">
-              {visibleSlots.some(s => s.slotType === 'live') && (
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse"></span>Live</span>
-              )}
-              {visibleSlots.some(s => s.slotType === 'curated') && (
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span>Curated</span>
-              )}
-              {visibleSlots.some(s => s.slotType === 'wildcard') && (
-                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block"></span>Wildcard</span>
-              )}
+              {visibleSlots.some(s => s.slotType === 'live') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse"></span>Live</span>}
+              {visibleSlots.some(s => s.slotType === 'curated') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span>Curated</span>}
+              {visibleSlots.some(s => s.slotType === 'wildcard') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block"></span>Wildcard</span>}
             </div>
-
-            {/* Mobile: swipe stack */}
             <div className="block md:hidden">
-              <MobileSwipeStack
-                leads={visibleSlots}
-                onAddToPipeline={handleAddToPipeline}
-              />
+              <MobileSwipeStack leads={visibleSlots} onAddToPipeline={handleAddToPipeline} />
             </div>
-            {/* Desktop: grid */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {visibleSlots.map((lead, idx) => (
                 <DiscoveryJobCard
@@ -181,11 +155,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
       </section>
 
       {selectedLead && (
-        <MatchDeepDiveModal
-          lead={selectedLead}
-          isOpen={!!selectedLead}
-          onClose={() => setSelectedLead(null)}
-        />
+        <MatchDeepDiveModal lead={selectedLead} isOpen={!!selectedLead} onClose={() => setSelectedLead(null)} />
       )}
     </div>
   );
