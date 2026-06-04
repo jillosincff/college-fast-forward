@@ -164,11 +164,11 @@ export default function DynamicActionPlan({ user }) {
               I can see {blockerLines.length === 1
                 ? blockerLines[0]
                 : `${blockerLines[0]} and ${blockerLines[1]}`
-              }. That's incredibly frustrating — and it's exactly what this plan is built to fix. Tap below and I'll unlock your custom roadmap.
+              }{seekingLabel ? ` — and you're hunting for a ${seekingLabel.toLowerCase()}` : ''}. That's exactly what this plan is built to fix. Tap below and I'll unlock your custom roadmap.
             </p>
           ) : (
             <p className="text-sm text-slate-600 leading-relaxed">
-              {firstName ? `${firstName}, the` : 'The'} traditional job hunt is a black hole. Tap below and I'll architect a fully personalized, step-by-step roadmap to get you in front of the right people.
+              {firstName ? `${firstName}, you're` : "You're"} looking for {seekingLabel ? `a ${seekingLabel.toLowerCase()}` : 'your next opportunity'} and the traditional job hunt is a black hole. Tap below and I'll architect a step-by-step roadmap to get you in front of the right people.
             </p>
           )}
           <a
