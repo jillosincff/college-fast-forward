@@ -266,6 +266,53 @@ const INDUSTRY_COMPANIES = {
     ],
   },
 
+  'Media & Entertainment': {
+    large: [
+      { name: 'Netflix', hiring_signal: 'hot', hiring_description: 'Content design and UX roles for the world\'s largest streaming platform.' },
+      { name: 'Disney', hiring_signal: 'warm', hiring_description: 'Content coordinator and marketing roles across Disney+, Hulu, and ESPN+.' },
+      { name: 'Warner Bros. Discovery', hiring_signal: 'warm', hiring_description: 'Social media and content roles across HBO Max, CNN, and DC properties.' },
+      { name: 'NBCUniversal', hiring_signal: 'warm', hiring_description: 'Content and production roles across NBC, Peacock, and Universal.' },
+      { name: 'Paramount', hiring_signal: 'warm', hiring_description: 'Entry-level roles in streaming, content, and marketing.' },
+    ],
+    mid: [
+      { name: 'Vox Media', hiring_signal: 'warm', hiring_description: 'Editorial and content roles at The Verge, Vox, and New York Magazine.' },
+      { name: 'Spotify', hiring_signal: 'warm', hiring_description: 'UX writing and content strategy roles at the world\'s largest audio platform.' },
+      { name: 'Hulu', hiring_signal: 'warm', hiring_description: 'Brand design and content coordinator roles for streaming.' },
+      { name: 'BuzzFeed', hiring_signal: 'warm', hiring_description: 'Content strategy and social media roles for digital-first media.' },
+      { name: 'Overtime', hiring_signal: 'warm', hiring_description: 'Social media and content roles at a Gen Z sports media brand.' },
+    ],
+    startup: [
+      { name: 'Puck News', hiring_signal: 'warm', hiring_description: 'Series A media startup — operations and editorial roles, team of 40.' },
+      { name: 'Substack', hiring_signal: 'warm', hiring_description: 'Newsletter publishing platform — design and content roles.' },
+      { name: 'Morning Brew', hiring_signal: 'hot', hiring_description: 'Independent media brand — editorial, marketing, and content strategy roles.' },
+      { name: 'The Hustle', hiring_signal: 'warm', hiring_description: 'Business media startup with content and growth roles.' },
+      { name: 'Workweek Media', hiring_signal: 'warm', hiring_description: 'Creator-first B2B media startup — content strategy and editorial roles.' },
+    ],
+  },
+  'Media and entertainment': {
+    large: [
+      { name: 'Netflix', hiring_signal: 'hot', hiring_description: 'Content design and UX roles for the world\'s largest streaming platform.' },
+      { name: 'Disney', hiring_signal: 'warm', hiring_description: 'Content coordinator roles across Disney+, Hulu, and ESPN+.' },
+      { name: 'Warner Bros. Discovery', hiring_signal: 'warm', hiring_description: 'Social media and content roles across flagship WBD properties.' },
+      { name: 'NBCUniversal', hiring_signal: 'warm', hiring_description: 'Content and production roles across NBC, Peacock, and Universal.' },
+      { name: 'Paramount', hiring_signal: 'warm', hiring_description: 'Entry-level roles in streaming, content, and marketing.' },
+    ],
+    mid: [
+      { name: 'Vox Media', hiring_signal: 'warm', hiring_description: 'Editorial and content roles at The Verge and New York Magazine.' },
+      { name: 'Spotify', hiring_signal: 'warm', hiring_description: 'UX writing and content strategy at the world\'s largest audio platform.' },
+      { name: 'BuzzFeed', hiring_signal: 'warm', hiring_description: 'Content strategy and social media roles for digital-first media.' },
+      { name: 'Overtime', hiring_signal: 'warm', hiring_description: 'Social media and content for a Gen Z sports media brand.' },
+      { name: 'Hulu', hiring_signal: 'warm', hiring_description: 'Brand design and content coordinator roles.' },
+    ],
+    startup: [
+      { name: 'Puck News', hiring_signal: 'warm', hiring_description: 'Series A media startup — operations and editorial roles, team of 40.' },
+      { name: 'Substack', hiring_signal: 'warm', hiring_description: 'Newsletter platform — design and content roles.' },
+      { name: 'Morning Brew', hiring_signal: 'hot', hiring_description: 'Independent media brand — editorial, content strategy, and growth roles.' },
+      { name: 'The Hustle', hiring_signal: 'warm', hiring_description: 'Business media startup with content and growth roles.' },
+      { name: 'Workweek Media', hiring_signal: 'warm', hiring_description: 'Creator-first B2B media startup — content and editorial roles.' },
+    ],
+  },
+
   'Construction & Agriculture': {
     large: [
       { name: 'Turner Construction', hiring_signal: 'hot', hiring_description: 'One of the largest construction firms in the US — hiring project managers and engineers nationwide.' },
@@ -401,7 +448,18 @@ Deno.serve(async (req) => {
       const inferred = inferIndustryFromRole(goals.role);
       if (inferred) industries = [inferred];
     }
-    const sizePreference = goals.company_size_preference || ['large', 'mid', 'startup'];
+    // Normalize size preference — may come as a string ('startup') or array (['startup'])
+    const rawSize = goals.company_size_preference;
+    let sizePreference;
+    if (!rawSize || rawSize === 'all') {
+      sizePreference = ['large', 'mid', 'startup'];
+    } else if (Array.isArray(rawSize)) {
+      sizePreference = rawSize;
+    } else {
+      // Single string like 'startup' → ordered preference list starting with that size
+      const sizeOrder = { startup: ['startup', 'mid', 'large'], midmarket: ['mid', 'startup', 'large'], mid: ['mid', 'startup', 'large'], enterprise: ['large', 'mid', 'startup'], large: ['large', 'mid', 'startup'] };
+      sizePreference = sizeOrder[rawSize] || ['large', 'mid', 'startup'];
+    }
     const excludeNames = (goals.target_companies || []).map(c => c.toLowerCase());
 
     // Try live LLM search first
@@ -424,8 +482,11 @@ Deno.serve(async (req) => {
         if (industryData) {
           companies = getCompaniesBySize(industryData, sizePreference);
         } else {
+          // Fuzzy match: check if any industry key contains the first word of the query (case-insensitive)
+          const primaryLower = primary.toLowerCase();
           for (const [key, data] of Object.entries(INDUSTRY_COMPANIES)) {
-            if (key.toLowerCase().includes(primary.toLowerCase().split(' ')[0])) {
+            const keyLower = key.toLowerCase();
+            if (keyLower.includes(primaryLower.split(' ')[0]) || primaryLower.includes(keyLower.split(' ')[0])) {
               companies = getCompaniesBySize(data, sizePreference);
               break;
             }
