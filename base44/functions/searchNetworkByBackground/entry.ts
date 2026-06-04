@@ -13,6 +13,15 @@ Deno.serve(async (req) => {
 
     const { query = '', persona_filter = 'all', limit = 10 } = await req.json();
 
+    // Company size filter derived from student's saved preference
+    const companySizePref = user?.career_goals?.company_size_preference || 'all';
+    const SIZE_KEYWORDS = {
+      startup: ['startup', 'early-stage', 'seed', 'series a', 'series b', 'co-founder', 'founding', '1-10', '11-20', '21-50'],
+      midmarket: ['series c', 'series d', 'growth', 'scale-up', 'mid-market', 'scaleup', '51-200', '201-500'],
+      enterprise: ['fortune 500', 'enterprise', 'global', 'publicly traded', 'corporate', 'multinational'],
+    };
+    const sizeFilterKws = SIZE_KEYWORDS[companySizePref] || [];
+
     if (!query.trim()) {
       return Response.json({ success: false, error: 'No search query provided', results: [] });
     }
@@ -65,6 +74,17 @@ Deno.serve(async (req) => {
       // Score: count how many keywords match
       const score = keywords.filter(kw => searchableText.includes(kw)).length;
       if (score === 0) continue;
+
+      // Company size filter: if user has a preference and it's not 'all', soft-deprioritize non-matching
+      if (sizeFilterKws.length > 0) {
+        const companySizeText = [u.company, u.current_company, u.bio, u.industry].filter(Boolean).join(' ').toLowerCase();
+        const sizeMatch = sizeFilterKws.some(kw => companySizeText.includes(kw));
+        if (!sizeMatch) {
+          // Still include but with reduced score (don't hard-exclude — size data is sparse)
+          matches.push({ score: score * 0.5, id: u.id, full_name: u.full_name, job_title: u.job_title || u.current_position || u.position || '', company: u.company || u.current_company || u.employer || '', industry: u.industry || '', persona: isParent ? 'parent' : 'alumni', linkedin_url: u.linkedin_url || '', profile_image_url: u.profile_image_url || '', intro_willingness: u.intro_willingness || u.open_to_intros || 'unknown', bio: u.bio || '' });
+          continue;
+        }
+      }
 
       matches.push({
         score,

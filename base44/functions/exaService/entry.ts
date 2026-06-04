@@ -182,10 +182,21 @@ Deno.serve(async (req) => {
 
       const excludeTerms = `NOT "director of athletics" NOT "assistant coach" NOT "staff" NOT "faculty" NOT "administrator" NOT "department of"`;
 
+      // Build company size keywords to inject into queries based on student's preference
+      const companySizePref = sessionUser?.career_goals?.company_size_preference || 'all';
+      const sizeKeywords = {
+        startup: '"early-stage" OR "seed" OR "series A" OR "series B" OR "co-founder" OR "founding team" OR "startup"',
+        midmarket: '"series C" OR "series D" OR "growth stage" OR "scale-up" OR "mid-market"',
+        enterprise: '"Fortune 500" OR "enterprise" OR "global" OR "publicly traded" OR "corporate"',
+        all: '',
+      };
+      const sizeClause = sizeKeywords[companySizePref] || '';
+      const sizeStr = sizeClause ? ` (${sizeClause})` : '';
+
       const queries = [
-        `${universityShortName} alumnus alumna graduate ${freeTextQuery} ${excludeTerms}`,
-        `studied at ${universityName} ${freeTextQuery} career ${excludeTerms}`,
-        `${universityName} graduate ${freeTextQuery} professional ${excludeTerms}`,
+        `${universityShortName} alumnus alumna graduate ${freeTextQuery}${sizeStr} ${excludeTerms}`,
+        `studied at ${universityName} ${freeTextQuery} career${sizeStr} ${excludeTerms}`,
+        `${universityName} graduate ${freeTextQuery} professional${sizeStr} ${excludeTerms}`,
       ];
 
       console.log('[Alumni Search] Queries:', queries);

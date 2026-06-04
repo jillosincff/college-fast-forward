@@ -309,7 +309,7 @@ Student career profile:
 - Target Job Functions: ${careerGoals.target_functions?.join(', ') || 'Not specified'}
 - Target Roles (specific titles): ${roles.join(', ') || 'Not specified'}
 - Location Preference: ${location || 'Open'}
-- Company Size: ${careerGoals.company_size_preference?.join(', ') || 'No preference'}
+- Company Size Preference: ${(() => { const p = careerGoals.company_size_preference; if (!p || p === 'all') return 'Open to all sizes'; if (p === 'startup') return 'Startups only (1-50 employees) — prioritize seed/Series A/B companies, co-founders, early-stage teams'; if (p === 'midmarket') return 'Mid-market (51-500 employees) — Series C/D, growth-stage companies'; if (p === 'enterprise') return 'Enterprise (500+ employees) — Fortune 500, global corporations, publicly traded companies'; return p; })()}
 - Graduation Year: ${careerGoals.graduation_year || 'Not specified'}
 
 Generate exactly 12 real, well-known companies that are strong matches for this student. Prioritize companies actively hiring entry-level candidates in their target functions.

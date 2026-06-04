@@ -19,6 +19,13 @@ const INDUSTRIES = [
   'Education', 'Government / Non-profit',
 ];
 
+const COMPANY_SIZE_OPTS = [
+  { key: 'startup', emoji: '🚀', label: 'Startup / Early Stage', sub: 'Fast-paced, high ownership, 1–50 team' },
+  { key: 'midmarket', emoji: '📈', label: 'Mid-Sized / Growth', sub: 'Established but scaling fast, 51–500 team' },
+  { key: 'enterprise', emoji: '🏢', label: 'Enterprise / Big Corporate', sub: 'Global brands, structured paths, 500+ team' },
+  { key: 'all', emoji: '💼', label: 'Show Me Everything', sub: "I'm open to all opportunities" },
+];
+
 const PRIORITIES = [
   'High salary / compensation',
   'Strong company culture / work-life balance',
@@ -69,6 +76,7 @@ export default function SetSearchGoals({ onGoalsSaved, onTabChange }) {
   const [seeking, setSeeking] = useState(cg.seeking || '');
   const [industries, setIndustries] = useState(cg.target_industries || []);
   const [industryOther, setIndustryOther] = useState(cg.industry_other || '');
+  const [companySize, setCompanySize] = useState(cg.company_size_preference || '');
   const [priorities, setPriorities] = useState(cg.priorities || []);
   const [freeText, setFreeText] = useState(cg.goals_free_text || '');
   const [saving, setSaving] = useState(false);
@@ -89,6 +97,7 @@ export default function SetSearchGoals({ onGoalsSaved, onTabChange }) {
           seeking,
           target_industries: finalIndustries,
           industry_other: industryOther,
+          company_size_preference: companySize || 'all',
           priorities,
           goals_free_text: freeText,
           saved_at: new Date().toISOString(),
@@ -183,9 +192,31 @@ export default function SetSearchGoals({ onGoalsSaved, onTabChange }) {
         </div>
         <div style={S.divider} />
 
-        {/* Section 3 */}
+        {/* Section 3 — Company Size */}
         <div style={S.section}>
           <span style={S.sectionLabel}>Section 3</span>
+          <p style={S.sectionTitle}>What type of company environment do you vibe with most?</p>
+          <p style={S.sectionSub}>This helps the Agent find the right alumni contacts and job leads.</p>
+          {COMPANY_SIZE_OPTS.map(opt => (
+            <button key={opt.key} onClick={() => setCompanySize(opt.key)} style={S.bigCard(companySize === opt.key)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>{opt.emoji}</span>
+                <div>
+                  <p style={{ fontFamily: dm, fontSize: 14, fontWeight: 600, color: companySize === opt.key ? '#E85D20' : '#1A1A1A', margin: 0 }}>{opt.label}</p>
+                  <p style={{ fontFamily: dm, fontSize: 12, color: '#999', margin: '2px 0 0' }}>{opt.sub}</p>
+                </div>
+                <div style={{ marginLeft: 'auto', width: 20, height: 20, borderRadius: '50%', border: `2px solid ${companySize === opt.key ? '#E85D20' : '#CCC'}`, background: companySize === opt.key ? '#E85D20' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#fff', fontWeight: 700 }}>
+                  {companySize === opt.key && '✓'}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <div style={S.divider} />
+
+        {/* Section 4 — Priorities */}
+        <div style={S.section}>
+          <span style={S.sectionLabel}>Section 4</span>
           <p style={S.sectionTitle}>What's most important to you right now?</p>
           <p style={S.sectionSub}>Select all that apply.</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -196,9 +227,9 @@ export default function SetSearchGoals({ onGoalsSaved, onTabChange }) {
         </div>
         <div style={S.divider} />
 
-        {/* Section 4 */}
+        {/* Section 5 */}
         <div style={S.section}>
-          <span style={S.sectionLabel}>Section 4 — Optional</span>
+          <span style={S.sectionLabel}>Section 5 — Optional</span>
           <p style={S.sectionTitle}>Anything else we should know?</p>
           <p style={S.sectionSub}>e.g. "I'm a junior CS major targeting big tech companies"</p>
           <textarea
