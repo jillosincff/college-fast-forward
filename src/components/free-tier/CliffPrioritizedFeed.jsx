@@ -21,12 +21,15 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
 
-  const { data: feedsData, isLoading } = useQuery({
-    queryKey: ['cliffPrioritizedFeed', target_industries, effectiveRole],
+  const { data: feedsData, isLoading, error } = useQuery({
+    queryKey: ['cliffPrioritizedFeed', user?.id, target_industries, effectiveRole],
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,
     }),
+    staleTime: 0,
+    retry: 2,
+    enabled: !!user?.id,
   });
 
   const payload = feedsData?.data || feedsData;
@@ -138,9 +141,13 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
               </button>
             )}
           </>
+        ) : error ? (
+          <div className="border border-dashed border-red-200 rounded-2xl p-8 text-center text-red-400 text-xs">
+            Failed to load jobs. Please refresh the page to try again.
+          </div>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
-            No matching industry vacancies found today. Adjust your target positions to broaden search.
+            No matching industry vacancies found today. Set your career goals to see personalized opportunities.
           </div>
         )}
       </section>
