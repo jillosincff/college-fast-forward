@@ -179,7 +179,11 @@ export default function ActionPlanArchitect() {
         {messages.map((msg, i) => {
           // Strip the JSON block from assistant messages before rendering
           const cleaned = msg.role === 'assistant' && msg.content
-            ? { ...msg, content: msg.content.replace(/```action_plan_json[\s\S]*?```/g, '').trim() }
+            ? { ...msg, content: msg.content
+                .replace(/```action_plan_json[\s\S]*?```/g, '')
+                .replace(/```json[\s\S]*?```/g, '')
+                .replace(/\{[\s\S]*"phases"[\s\S]*\}/g, '')
+                .trim() }
             : msg;
           return <MessageBubble key={i} message={cleaned} />;
         })}
