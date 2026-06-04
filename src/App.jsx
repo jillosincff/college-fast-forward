@@ -49,6 +49,7 @@ import AdminV2 from '@/pages/AdminV2';
 import EngagementAgentDashboard from '@/pages/EngagementAgentDashboard';
 
 import PaywallAnalyticsDashboard from '@/pages/PaywallAnalyticsDashboard';
+import CliffScout from '@/pages/CliffScout';
 import Unsubscribe from '@/pages/Unsubscribe';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -180,6 +181,7 @@ const AuthenticatedApp = () => {
       <Route path="/admin" element={<AdminV2 />} />
       <Route path="/engagement-agent" element={<EngagementAgentDashboard />} />
       <Route path="/paywall-analytics" element={<PaywallAnalyticsDashboard />} />
+      <Route path="/cliff-scout" element={<CliffScout />} />
       <Route path="/join" element={<JoinPage />} />
 
       {/* Main routes */}
