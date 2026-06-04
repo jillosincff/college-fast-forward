@@ -39,9 +39,9 @@ export default function ActionPlanArchitect() {
 
     // Build a rich profile summary from onboarding data to seed the conversation
     const goals = user.career_goals || {};
-    const roles = goals.target_roles?.join(', ') || '';
-    const industries = goals.target_industries?.join(', ') || '';
-    const companySize = goals.company_size_preference?.join(', ') || '';
+    const roles = Array.isArray(goals.target_roles) ? goals.target_roles.join(', ') : (goals.target_roles || '');
+    const industries = Array.isArray(goals.target_industries) ? goals.target_industries.join(', ') : (goals.target_industries || '');
+    const companySize = Array.isArray(goals.company_size_preference) ? goals.company_size_preference.join(', ') : (goals.company_size_preference || '');
     const location = goals.preferred_location || user.location || '';
 
     const profileLines = [
