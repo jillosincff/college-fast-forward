@@ -28,6 +28,11 @@ export default function CliffScout() {
     base44.agents.createConversation({
       agent_name: 'cliff_scout',
       metadata: { name: 'CLiFF Scout Session' },
+      variables: {
+        user: {
+          almaMater: user.school_name || user.school || user.schoolName || '',
+        },
+      },
     }).then(conv => {
       setConversation(conv);
     }).catch(console.error);
