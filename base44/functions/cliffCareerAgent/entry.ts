@@ -99,6 +99,67 @@ Deno.serve(async (req) => {
 
     // (Section 2 — field/persona lookups — now unified into Section 3 broad network intent below)
 
+    // ─── 3b. EXA LINKEDIN ALUMNI SEARCH — must run BEFORE the internal DB lookup ──
+    // Triggered when user asks to find alumni on LinkedIn or mentions location-based/open-web search
+    const exaAlumniPatterns = [
+      /find (?:me |us )?(?:uf |university of florida )?alumni (?:on linkedin|who work|in |at )/i,
+      /(?:search|look up|look for|find) (?:uf |university of florida )?alumni (?:on linkedin|in |at |who )/i,
+      /(?:uf |university of florida )?alumni (?:on linkedin|working at|in the|at |who work)/i,
+      /(?:any|show me|pull up|get me) (?:uf |university of florida )?alumni (?:on linkedin|in |at |who )/i,
+      /on linkedin/i, // any mention of LinkedIn = open-web search intent
+    ];
+
+    const wantsExaSearch = exaAlumniPatterns.some(p => p.test(message));
+
+    if (wantsExaSearch) {
+      const queryClean = message
+        .replace(/find (?:me |us )?(?:uf |university of florida )?alumni (?:on linkedin\s*)?(?:that |who )?/i, '')
+        .replace(/(?:search|look up|look for) (?:uf |university of florida )?alumni (?:on linkedin\s*)?(?:that |who )?/i, '')
+        .replace(/(?:any|show me|pull up|get me) (?:uf |university of florida )?alumni (?:on linkedin\s*)?(?:that |who )?/i, '')
+        .replace(/on linkedin/i, '')
+        .trim();
+
+      console.log('[CLIFF] Exa alumni search query:', queryClean);
+
+      try {
+        const exaRes = await base44.asServiceRole.functions.invoke('exaService', {
+          action: 'searchAlumni',
+          params: {
+            query: queryClean,
+            universityName: user.school_name || user.school || 'University of Florida',
+            maxResults: 6,
+          },
+        });
+
+        const profiles = exaRes?.profiles || [];
+
+        if (profiles.length === 0) {
+          return Response.json({
+            success: true,
+            response: `I searched LinkedIn for **${schoolAbbr} alumni** matching "${queryClean}" but didn't find strong matches right now.\n\nTry rephrasing — e.g. "find UF alumni who work at tech startups in NYC" or "find UF alumni in product management".`,
+            message_type: 'text',
+          });
+        }
+
+        const lines = profiles.map((p, i) => {
+          const headline = p.headline ? ` — ${p.headline}` : '';
+          const summary = p.summary ? `\n   _${p.summary.slice(0, 120).trim()}..._` : '';
+          const link = p.linkedin_url ? `\n   🔗 [LinkedIn](${p.linkedin_url})` : '';
+          return `${i + 1}. **${p.full_name}**${headline}${summary}${link}`;
+        }).join('\n\n');
+
+        return Response.json({
+          success: true,
+          response: `Found **${profiles.length} ${schoolAbbr} alumni** matching "${queryClean}" on LinkedIn:\n\n${lines}\n\nWant me to draft a personalized outreach message for any of them?`,
+          message_type: 'network_results',
+        });
+
+      } catch (exaErr) {
+        console.error('[CLIFF] Exa alumni search failed:', exaErr.message);
+        // Fall through to internal DB lookup
+      }
+    }
+
     // ─── 3. BROAD NETWORK / PEOPLE LOOKUP — catches any "find me a contact" intent ─
     // Covers: "UF parents in marketing", "alumni with finance background", "anyone in tech", etc.
     const networkIntentPatterns = [
@@ -176,67 +237,6 @@ Deno.serve(async (req) => {
           response: `Found **${totalCount} verified ${personaLabel}**${fieldLabel} in the CLiFF database:\n\n${lines.join('\n\n')}\n\nWant me to draft a personalized outreach message for any of them?`,
           message_type: 'network_results',
         });
-      }
-    }
-
-    // ─── 3b. EXA LINKEDIN ALUMNI SEARCH ────────────────────────────────────
-    // Triggered when user asks to "find alumni on LinkedIn" or broad open-web alumni discovery
-    const exaAlumniPatterns = [
-      /find (?:me |us )?(?:uf |university of florida |uf )?alumni (?:on linkedin|who work|in |at )/i,
-      /(?:search|look up|look for|find) (?:uf |university of florida )?alumni (?:on linkedin|in |at |who )/i,
-      /(?:uf |university of florida )?alumni (?:on linkedin|working at|in the|at |who work)/i,
-      /(?:any|show me|pull up|get me) (?:uf |university of florida )?alumni (?:on linkedin|in |at |who )/i,
-    ];
-
-    const wantsExaSearch = exaAlumniPatterns.some(p => p.test(message));
-
-    if (wantsExaSearch) {
-      // Strip out "find me UF alumni on LinkedIn" boilerplate — keep the meaningful query part
-      const queryClean = message
-        .replace(/find (?:me |us )?(?:uf |university of florida )?alumni (?:on linkedin\s*)?(?:that |who )?/i, '')
-        .replace(/(?:search|look up|look for) (?:uf |university of florida )?alumni (?:on linkedin\s*)?(?:that |who )?/i, '')
-        .replace(/(?:any|show me|pull up|get me) (?:uf |university of florida )?alumni (?:on linkedin\s*)?(?:that |who )?/i, '')
-        .replace(/on linkedin/i, '')
-        .trim();
-
-      console.log('[CLIFF] Exa alumni search query:', queryClean);
-
-      try {
-        const exaRes = await base44.asServiceRole.functions.invoke('exaService', {
-          action: 'searchAlumni',
-          params: {
-            query: queryClean,
-            universityName: user.school_name || user.school || 'University of Florida',
-            maxResults: 6,
-          },
-        });
-
-        const profiles = exaRes?.profiles || [];
-
-        if (profiles.length === 0) {
-          return Response.json({
-            success: true,
-            response: `I searched LinkedIn for **${schoolAbbr} alumni** matching "${queryClean}" but didn't find strong matches right now.\n\nTry rephrasing — e.g. "find UF alumni who work at tech startups in NYC" or "find UF alumni in product management".`,
-            message_type: 'text',
-          });
-        }
-
-        const lines = profiles.map((p, i) => {
-          const headline = p.headline ? ` — ${p.headline}` : '';
-          const summary = p.summary ? `\n   _${p.summary.slice(0, 120).trim()}..._` : '';
-          const link = p.linkedin_url ? `\n   🔗 [LinkedIn](${p.linkedin_url})` : '';
-          return `${i + 1}. **${p.full_name}**${headline}${summary}${link}`;
-        }).join('\n\n');
-
-        return Response.json({
-          success: true,
-          response: `Found **${profiles.length} ${schoolAbbr} alumni** matching "${queryClean}" on LinkedIn:\n\n${lines}\n\nWant me to draft a personalized outreach message for any of them?`,
-          message_type: 'network_results',
-        });
-
-      } catch (exaErr) {
-        console.error('[CLIFF] Exa alumni search failed:', exaErr.message);
-        // Fall through to general LLM response
       }
     }
 
