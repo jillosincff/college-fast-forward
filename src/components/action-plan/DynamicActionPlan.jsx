@@ -91,11 +91,25 @@ export default function DynamicActionPlan({ user }) {
 
   if (!plan || total === 0) {
     const goals = user?.career_goals || {};
+    const firstName = user?.full_name?.split(' ')[0] || null;
     const targetRoles = goals.target_roles?.slice(0, 2).join(' or ') || 'your target role';
     const major = user?.major || 'your major';
     const school = user?.school_name || user?.school || 'your school';
     const gradYear = user?.graduation_year;
     const timeline = gradYear ? `Class of ${gradYear}` : null;
+
+    // Map blocker keys to human-readable frustrations
+    const BLOCKER_LABELS = {
+      resume: "your resume isn't getting responses",
+      ghosted: "you're getting ghosted after applying",
+      no_direction: "you're not sure what direction to take yet",
+      which_jobs: "you don't know which jobs to apply for",
+      outreach: "you don't know how to reach the right people",
+      disorganized: "you're losing track of everything",
+      interviews: "interviewing makes you nervous",
+    };
+    const rawBlockers = user?.career_blockers || goals.blockers || [];
+    const blockerLines = rawBlockers.slice(0, 2).map(k => BLOCKER_LABELS[k]).filter(Boolean);
 
     return (
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
@@ -106,7 +120,7 @@ export default function DynamicActionPlan({ user }) {
             <p className="text-xs font-semibold text-white/80 uppercase tracking-wide">Action Plan Architect</p>
           </div>
           <p className="text-white font-bold text-sm leading-snug">
-            Hey! I've synced your profile. Here's what I'm tracking:
+            Hey{firstName ? ` ${firstName}` : ''}! I've synced your profile. Here's what I'm tracking:
           </p>
           <div className="mt-3 space-y-1.5">
             <div className="flex items-center gap-2">
@@ -127,9 +141,18 @@ export default function DynamicActionPlan({ user }) {
 
         {/* Body */}
         <div className="px-5 py-4">
-          <p className="text-sm text-slate-600 leading-relaxed">
-            The traditional job hunt is a black hole. We're changing that — tap below and I'll architect a fully personalized, step-by-step roadmap to get you in front of the right people.
-          </p>
+          {blockerLines.length > 0 ? (
+            <p className="text-sm text-slate-600 leading-relaxed">
+              I can see {blockerLines.length === 1
+                ? blockerLines[0]
+                : `${blockerLines[0]} and ${blockerLines[1]}`
+              }. That's incredibly frustrating — and it's exactly what this plan is built to fix. Tap below and I'll unlock your custom roadmap.
+            </p>
+          ) : (
+            <p className="text-sm text-slate-600 leading-relaxed">
+              The traditional job hunt is a black hole. We're changing that — tap below and I'll architect a fully personalized, step-by-step roadmap to get you in front of the right people.
+            </p>
+          )}
           <a
             href="/#/action-plan-architect"
             className="mt-4 w-full text-sm font-bold text-white px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 hover:opacity-90 active:scale-95"

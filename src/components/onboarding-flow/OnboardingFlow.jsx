@@ -515,12 +515,13 @@ CRITICAL RULES:
         const currentUser = await base44.auth.me();
         if (currentUser) {
           await base44.auth.updateMe({
-            persona: 'student',
-            roles: ['student'],
-            onboarding_completed: true,
-            school: college || '',
-            school_code: college ? college.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 10) : '',
-          });
+              persona: 'student',
+              roles: ['student'],
+              onboarding_completed: true,
+              school: college || '',
+              school_code: college ? college.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 10) : '',
+              career_blockers: blockers,
+            });
         }
       } catch (updateErr) {
         console.warn('Failed to update user persona during onboarding:', updateErr);
