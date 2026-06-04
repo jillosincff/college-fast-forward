@@ -189,13 +189,16 @@ export default function DynamicActionPlan({ user }) {
       {/* Header */}
       <div className="px-5 pt-5 pb-4 border-b border-slate-100">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Sparkles className="w-4 h-4 text-indigo-500" />
             <p className="font-bold text-slate-900 text-sm">Your Personalized Action Plan</p>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'linear-gradient(135deg, #ede9fe, #f0f9ff)', color: '#6d28d9', border: '1px solid #c4b5fd' }}>
+              🪄 Live Strategy
+            </span>
           </div>
           <a
             href="/#/action-plan-architect"
-            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-0.5"
+            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-0.5 shrink-0"
             style={{ minHeight: 'auto' }}
           >
             Rebuild <ChevronRight className="w-3 h-3" />
@@ -209,7 +212,7 @@ export default function DynamicActionPlan({ user }) {
               style={{ width: `${pct}%` }}
             />
           </div>
-          <span className="text-xs font-semibold text-slate-500 shrink-0">{done}/{total}</span>
+          <span className="text-xs font-semibold text-indigo-600 shrink-0">{pct}% Completed</span>
         </div>
       </div>
 

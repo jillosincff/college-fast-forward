@@ -5,11 +5,38 @@ import CliFFOutreachModal from './CliFFOutreachModal';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
-const STARTER_PROMPTS = [
-  "Who do we have at Spotify or Disney?",
-  "Any alumni with a marketing background?",
-  "How do I follow up after an interview without being annoying?",
-];
+function getStarterPrompts(user) {
+  const goals = user?.career_goals || {};
+  const roles = Array.isArray(goals.target_roles) ? goals.target_roles : [];
+  const industries = Array.isArray(goals.target_industries) ? goals.target_industries : [];
+  const location = goals.preferred_location || goals.location || '';
+  const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'UF';
+
+  // Build context-aware prompts from user's goals
+  const prompts = [];
+
+  if (location && (roles.length > 0 || industries.length > 0)) {
+    const role = roles[0] || industries[0] || 'roles';
+    prompts.push(`Find me ${schoolAbbr} alumni in ${role} jobs in ${location}`);
+  } else if (location) {
+    prompts.push(`Who do we have at companies in ${location}?`);
+  } else if (roles.length > 0) {
+    prompts.push(`Any alumni working as ${roles[0]}?`);
+  } else {
+    prompts.push("Who do we have at Spotify or Disney?");
+  }
+
+  if (industries.length > 0) {
+    prompts.push(`Find alumni in the ${industries[0]} industry`);
+  } else if (roles.length > 1) {
+    prompts.push(`Any alumni with a ${roles[1] || roles[0]} background?`);
+  } else {
+    prompts.push("Any alumni with a marketing background?");
+  }
+
+  prompts.push("How do I follow up after an interview without being annoying?");
+  return prompts;
+}
 
 export default function PremiumHiringChat({ user, selectedSignal, selectedJob }) {
   const firstName = user?.full_name?.split(' ')[0] || 'there';
@@ -588,7 +615,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
       {/* Starter prompts */}
       {messages.length <= 1 && (
         <div style={{ padding: '0 16px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {STARTER_PROMPTS.map((p, i) => (
+          {getStarterPrompts(user).map((p, i) => (
             <button
               key={i}
               onClick={() => sendMessage(p)}

@@ -99,17 +99,17 @@ export default function OrganizedFeeds({ user }) {
         <div className="grid grid-cols-3 divide-x divide-gray-100">
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Ecosystem</p>
-            <p className="text-lg font-black text-gray-800 mt-1">{isLoading ? '—' : uniqueCompaniesCount} Companies</p>
+            {isLoading ? <div className="h-6 bg-gray-200 rounded animate-pulse mt-1 mx-auto w-16" /> : <p className="text-lg font-black text-gray-800 mt-1">{uniqueCompaniesCount} Companies</p>}
             <p className="text-[11px] text-gray-500 mt-0.5">Actively tracked</p>
           </div>
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Verified Insiders</p>
-            <p className="text-lg font-black text-purple-700 mt-1">{isLoading ? '—' : totalNetworkCount}</p>
+            {isLoading ? <div className="h-6 bg-purple-100 rounded animate-pulse mt-1 mx-auto w-12" /> : <p className="text-lg font-black text-purple-700 mt-1">{totalNetworkCount}</p>}
             <p className="text-[11px] text-gray-500 mt-0.5">Alumni &amp; parent network</p>
           </div>
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Opportunities</p>
-            <p className="text-lg font-black text-orange-600 mt-1">{isLoading ? '—' : totalCount} Fresh</p>
+            {isLoading ? <div className="h-6 bg-orange-100 rounded animate-pulse mt-1 mx-auto w-14" /> : <p className="text-lg font-black text-orange-600 mt-1">{totalCount} Fresh</p>}
             <p className="text-[11px] text-gray-500 mt-0.5">Hand-picked for you</p>
           </div>
         </div>
