@@ -116,11 +116,10 @@ export default function ActionPlanArchitect() {
 
   const isLoading = messages.length > 0 && messages[messages.length - 1]?.role === 'user';
 
-  // Show the CTA chip after the agent's first welcome message (before plan is generated)
+  // Show the CTA chip after ANY assistant message as long as no plan has been generated yet
   const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
   const planAlreadyGenerated = parseActionPlanJson(messages) !== null;
-  const showGenerateCTA = lastAssistantMsg && !planAlreadyGenerated && !isLoading &&
-    (lastAssistantMsg.content?.includes('Generate My Action Plan') || lastAssistantMsg.content?.includes('custom path'));
+  const showGenerateCTA = !!lastAssistantMsg && !planAlreadyGenerated && !isLoading;
 
   return (
     <div className="flex flex-col h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}>
