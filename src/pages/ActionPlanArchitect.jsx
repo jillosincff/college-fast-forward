@@ -176,9 +176,13 @@ export default function ActionPlanArchitect() {
           </div>
         )}
 
-        {messages.map((msg, i) => (
-          <MessageBubble key={i} message={msg} />
-        ))}
+        {messages.map((msg, i) => {
+          // Strip the JSON block from assistant messages before rendering
+          const cleaned = msg.role === 'assistant' && msg.content
+            ? { ...msg, content: msg.content.replace(/```action_plan_json[\s\S]*?```/g, '').trim() }
+            : msg;
+          return <MessageBubble key={i} message={cleaned} />;
+        })}
 
         {/* CTA chip after welcome message */}
         {showGenerateCTA && (
