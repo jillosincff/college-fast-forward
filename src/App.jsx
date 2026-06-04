@@ -50,6 +50,7 @@ import EngagementAgentDashboard from '@/pages/EngagementAgentDashboard';
 
 import PaywallAnalyticsDashboard from '@/pages/PaywallAnalyticsDashboard';
 import CliffScout from '@/pages/CliffScout';
+import ActionPlanArchitect from '@/pages/ActionPlanArchitect';
 import Unsubscribe from '@/pages/Unsubscribe';
 
 const { Pages, Layout, mainPage } = pagesConfig;

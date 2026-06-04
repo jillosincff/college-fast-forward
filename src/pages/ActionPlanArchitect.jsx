@@ -1,0 +1,206 @@
+import { useState, useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Send, Sparkles, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import MessageBubble from '@/components/cliff-scout/MessageBubble';
+import { saveActionPlanFromChat } from '@/functions/saveActionPlanFromChat';
+
+const AGENT_NAME = 'action_plan_architect';
+
+function parseActionPlanJson(messages) {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const content = messages[i]?.content || '';
+    const match = content.match(/```action_plan_json\s*([\s\S]*?)```/);
+    if (match) {
+      try {
+        return JSON.parse(match[1].trim());
+      } catch {}
+    }
+  }
+  return null;
+}
+
+export default function ActionPlanArchitect() {
+  const [conversation, setConversation] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
+  const [user, setUser] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    base44.agents.createConversation({
+      agent_name: AGENT_NAME,
+      metadata: { name: 'Action Plan Session' },
+      variables: {
+        user: {
+          almaMater: user.school_name || user.school || '',
+          major: user.major || '',
+          graduation_year: user.graduation_year || '',
+        },
+      },
+    }).then(setConversation).catch(console.error);
+  }, [user]);
+
+  useEffect(() => {
+    if (!conversation?.id) return;
+    const unsub = base44.agents.subscribeToConversation(conversation.id, (data) => {
+      setMessages(data.messages || []);
+    });
+    return unsub;
+  }, [conversation?.id]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Auto-detect and save plan when agent outputs JSON
+  useEffect(() => {
+    if (messages.length === 0 || saving || saved) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role !== 'assistant') return;
+    const plan = parseActionPlanJson(messages);
+    if (!plan) return;
+    setSaving(true);
+    const allTasks = (plan.phases || []).flatMap(p => p.tasks || []);
+    saveActionPlanFromChat({ tasks: allTasks })
+      .then(() => setSaved(true))
+      .catch(console.error)
+      .finally(() => setSaving(false));
+  }, [messages]);
+
+  const send = async (text) => {
+    const msg = text || input.trim();
+    if (!msg || sending || !conversation) return;
+    setInput('');
+    setSending(true);
+    try {
+      await base44.agents.addMessage(conversation, { role: 'user', content: msg });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSending(false);
+      inputRef.current?.focus();
+    }
+  };
+
+  const handleKey = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  };
+
+  const isLoading = messages.length > 0 && messages[messages.length - 1]?.role === 'user';
+
+  return (
+    <div className="flex flex-col h-screen bg-slate-50" style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 shrink-0">
+        <button
+          onClick={() => window.history.back()}
+          className="text-slate-500 hover:text-slate-800 transition-colors"
+          style={{ minHeight: 'auto', minWidth: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-slate-900 leading-none">Action Plan Architect</p>
+            <p className="text-xs text-slate-500 mt-0.5">Your personalized career roadmap</p>
+          </div>
+        </div>
+        <div className="ml-auto flex items-center gap-1.5">
+          {saving && <span className="text-xs text-indigo-500 font-medium animate-pulse">Saving plan…</span>}
+          {saved && (
+            <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Plan saved to dashboard
+            </span>
+          )}
+          {!saving && !saved && (
+            <>
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs text-slate-500 font-medium">Active</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        {messages.length === 0 && !sending && (
+          <div className="flex flex-col items-center justify-center h-full gap-6 pb-8">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <Sparkles className="w-7 h-7 text-white" />
+            </div>
+            <div className="text-center max-w-xs">
+              <p className="text-base font-bold text-slate-900">Let's build your roadmap.</p>
+              <p className="text-sm text-slate-500 mt-1">Answer 4 quick questions and get a fully custom action plan on your dashboard in 60 seconds.</p>
+            </div>
+            <button
+              onClick={() => send("Let's build my action plan.")}
+              className="text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-xl transition-colors"
+              style={{ minHeight: 'auto', cursor: 'pointer' }}
+            >
+              Get Started →
+            </button>
+          </div>
+        )}
+
+        {messages.map((msg, i) => (
+          <MessageBubble key={i} message={msg} />
+        ))}
+
+        {isLoading && (
+          <div className="flex gap-3 justify-start">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mt-0.5 shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 flex gap-1 items-center">
+              {[0,1,2].map(n => (
+                <span key={n} className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: `${n * 0.15}s` }} />
+              ))}
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="bg-white border-t border-slate-200 px-4 py-3 shrink-0">
+        <div className="flex gap-2 items-end max-w-3xl mx-auto">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder="Tell the Architect about your goals…"
+            rows={1}
+            className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-400 focus:bg-white transition-all"
+            style={{ maxHeight: 120, fontSize: 14 }}
+            onInput={e => {
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+            }}
+          />
+          <button
+            onClick={() => send()}
+            disabled={!input.trim() || sending || !conversation}
+            className="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 flex items-center justify-center transition-colors shrink-0"
+            style={{ minHeight: 'auto', minWidth: 'auto', cursor: input.trim() && !sending ? 'pointer' : 'default' }}
+          >
+            <Send className="w-4 h-4 text-white" />
+          </button>
+        </div>
+        <p className="text-center text-xs text-slate-400 mt-2">Enter to send · Shift+Enter for new line</p>
+      </div>
+    </div>
+  );
+}
