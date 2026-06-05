@@ -55,8 +55,11 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
       <div>
         {/* Card Header */}
         <div className="flex justify-between items-start">
-          <h4 className="font-bold text-gray-900 leading-tight truncate max-w-[70%]">{lead.company}</h4>
-          <div className="flex items-center gap-1.5">
+          <div className="flex-1 min-w-0 mr-2">
+            <h4 className="font-extrabold text-gray-900 leading-tight text-base truncate" style={{ color: '#4f46e5' }}>{lead.company}</h4>
+            <p className="text-sm text-slate-500 mt-0.5 font-normal truncate">{lead.role}</p>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             {isPinned && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200" title="Saved — won't be rotated out">
                 📌 Saved
@@ -77,7 +80,6 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             )}
           </div>
         </div>
-        <p className="text-xs text-gray-500 mt-0.5 font-medium">{lead.role}</p>
         
         {/* Job Description - Truncated Preview */}
         {(() => {
@@ -154,7 +156,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
             style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
           >
-            ⚡ Generate Cold Inroad
+            ⚡ Find Backdoor & Draft
           </button>
         ) : (
           <button 

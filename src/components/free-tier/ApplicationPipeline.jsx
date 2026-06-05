@@ -291,14 +291,14 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         <div style={{ flex: 1, minWidth: 0, paddingRight: isMobile ? 24 : 0 }}>
           <p style={{ 
             fontFamily: dm, 
-            fontSize: isMobile ? 12 : 13, 
-            fontWeight: 700, 
-            color: '#1e293b', 
+            fontSize: isMobile ? 13 : 14, 
+            fontWeight: 800, 
+            color: '#4f46e5', 
             margin: '0 0 2px', 
             lineHeight: 1.3,
             wordBreak: 'break-word',
           }}>
-            {job.title}
+            {job.company}
           </p>
           <p style={{ 
             fontFamily: dm, 
@@ -307,7 +307,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
             margin: 0,
             wordBreak: 'break-word',
           }}>
-            {job.company} {job.location && `· ${job.location}`}
+            {job.title} {job.location && `· ${job.location}`}
           </p>
         </div>
         <button
@@ -699,7 +699,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
       <div style={{
         display: 'flex',
         gap: 0,
-        borderBottom: '1px solid #e5e7eb',
+        borderBottom: '1px solid #f3f4f6',
         overflowX: 'hidden',
         flexWrap: 'nowrap',
         justifyContent: isMobile ? 'space-between' : 'stretch',
