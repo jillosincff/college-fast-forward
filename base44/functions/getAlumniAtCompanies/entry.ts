@@ -62,8 +62,59 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Step 2: REMOVED — Exa/web-search fallback was returning unverified people.
-    // Only in-network verified members are surfaced. If a company has 0 matches, it returns empty.
+    // Step 2: Exa fallback — find real LinkedIn alumni profiles for companies with no network matches
+    const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
+    const companiesWithoutMatches = companies.filter(c => !networkMap[c] || networkMap[c].length === 0);
+    
+    if (EXA_API_KEY && companiesWithoutMatches.length > 0) {
+      const exaFetch = async (companyName) => {
+        const query = `${schoolName || schoolCode} alumnus alumna graduate "${companyName}" LinkedIn NOT "director of athletics" NOT "assistant coach" NOT "staff" NOT "faculty" NOT "administrator"`;
+        try {
+          const res = await fetch('https://api.exa.ai/search', {
+            method: 'POST',
+            headers: { 
+              'x-api-key': EXA_API_KEY, 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+              query,
+              type: 'auto',
+              category: 'people',
+              numResults: 3,
+              contents: { highlights: { maxCharacters: 500 } },
+            }),
+          });
+          return res.json();
+        } catch (e) {
+          console.warn(`[Exa] Failed to search ${companyName}:`, e.message);
+          return { results: [] };
+        }
+      };
+
+      const exaResults = await Promise.all(companiesWithoutMatches.map(c => exaFetch(c)));
+      
+      exaResults.forEach((data, idx) => {
+        const companyName = companiesWithoutMatches[idx];
+        const profiles = (data.results || []).map(r => {
+          const parts = (r.title || '').split(/[|\-·]/).map(s => s.trim()).filter(Boolean);
+          const full_name = parts[0]?.replace(/\s+ Bio$/i, '').trim() || 'Unknown';
+          const headline = parts.slice(1).join(' · ') || '';
+          return {
+            id: `exa-${r.url}`,
+            full_name,
+            job_title: headline,
+            persona: 'alumni',
+            linkedin_url: r.url,
+            profile_image_url: '',
+            intro_willingness: 'unknown',
+            source: 'exa',
+          };
+        }).filter(p => p.full_name !== 'Unknown' && p.full_name.length < 50 && p.linkedin_url?.includes('linkedin.com/in/'));
+        
+        if (!networkMap[companyName]) networkMap[companyName] = [];
+        networkMap[companyName].push(...profiles.slice(0, 3));
+      });
+    }
 
     // Build final results
     const results = companies.map(companyName => ({
