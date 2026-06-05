@@ -98,8 +98,8 @@ Deno.serve(async (req) => {
       console.log(`[scoutCompanyBackdoor] Found ${results.length} LinkedIn profiles via Exa`);
 
       if (results.length > 0) {
-        // Extract alumni info from search results
-        const newAlumni = results.slice(0, 5).map(result => {
+        // Extract alumni info from search results and attempt email lookup
+        const newAlumni = await Promise.all(results.slice(0, 5).map(async result => {
           // Extract name from URL or title
           const nameMatch = result.title?.match(/^(.+?)\s*[-|]/) || result.url?.match(/\/in\/([^/?]+)/);
           const name = nameMatch ? nameMatch[1].trim() : 'LinkedIn Professional';
@@ -108,6 +108,32 @@ Deno.serve(async (req) => {
           const titleParts = result.title?.split('-').map(s => s.trim());
           const jobTitle = titleParts?.length > 1 ? titleParts.slice(1).join(' - ') : 
                           result.text?.match(/([^|]+)\|/)?.[1]?.trim() || 'Professional';
+          
+          // Step 2b: Try to find email using Hunter API
+          let email = null;
+          let emailConfidence = null;
+          try {
+            const HUNTER_API_KEY = Deno.env.get('HUNTER_API_KEY');
+            if (HUNTER_API_KEY) {
+              // Extract domain from company name
+              const domain = companyName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9.]/g, '') + '.com';
+              const firstName = name.split(' ')[0].toLowerCase();
+              const lastName = name.split(' ').slice(-1)[0].toLowerCase();
+              
+              const hunterResponse = await fetch(
+                `https://api.hunter.io/v2/email-finder?domain=${domain}&first_name=${firstName}&last_name=${lastName}&api_key=${HUNTER_API_KEY}`
+              );
+              const hunterData = await hunterResponse.json();
+              
+              if (hunterData.data && hunterData.data.email) {
+                email = hunterData.data.email;
+                emailConfidence = hunterData.data.score;
+                console.log(`[scoutCompanyBackdoor] Hunter found email for ${name}: ${email} (${emailConfidence}% confidence)`);
+              }
+            }
+          } catch (hunterError) {
+            console.log(`[scoutCompanyBackdoor] Hunter API failed for ${name}:`, hunterError.message);
+          }
           
           return {
             school_code: userSchoolCode,
@@ -123,9 +149,11 @@ Deno.serve(async (req) => {
             company: companyName,
             location: 'Unknown',
             linkedin_url: result.url || '',
+            email: email,
+            email_confidence: emailConfidence,
             description: `Found via Exa search: ${result.text?.substring(0, 200) || ''}`
           };
-        });
+        }));
 
         console.log(`[scoutCompanyBackdoor] Saving ${newAlumni.length} alumni to DiscoveredAlumni entity`);
         await base44.asServiceRole.entities.DiscoveredAlumni.bulkCreate(newAlumni);
@@ -141,6 +169,8 @@ Deno.serve(async (req) => {
             role_title: a.role_title,
             company: a.company,
             linkedin_url: a.linkedin_url,
+            email: a.email,
+            email_confidence: a.email_confidence,
             persona: 'alumni'
           }))
         });
