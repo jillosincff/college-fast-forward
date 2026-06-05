@@ -125,10 +125,24 @@ const JOB_POOL = {
   'finance & insurance': [
     { company: 'JPMorgan', role: 'Financial Operations Specialist', companyTier: 1, description: 'Analyst roles in investment banking and corporate finance divisions.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
     { company: 'Goldman Sachs', role: 'Investment Banking Analyst', companyTier: 1, description: 'Summer and new associate programs across all divisions.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
+    { company: 'BlackRock', role: 'Investment Analyst', companyTier: 1, description: 'Portfolio analysis, risk assessment, and client reporting for the world\'s largest asset manager.', source: 'blackrock.com/careers', sourceCategory: 'C' },
+    { company: 'PwC', role: 'Assurance Associate', companyTier: 1, description: 'Financial statement audits and internal controls testing across US offices.', source: 'pwc.com/careers', sourceCategory: 'C' },
+    { company: 'Morgan Stanley', role: 'Financial Analyst', companyTier: 1, description: 'Support wealth management and capital markets teams with modeling and client presentations.', source: 'morganstanley.com/careers', sourceCategory: 'C' },
+    { company: 'Citigroup', role: 'Treasury Analyst', companyTier: 1, description: 'Liquidity reporting and regulatory compliance in Tampa, FL.', source: 'jobs.citi.com', sourceCategory: 'C' },
+    { company: 'Fidelity Investments', role: 'Financial Operations Analyst', companyTier: 1, description: 'Trade reconciliation and client reporting in Boston, MA.', source: 'jobs.fidelity.com', sourceCategory: 'C' },
     { company: 'Stripe', role: 'Financial Operations Specialist', companyTier: 2, description: 'Finance and strategy analyst roles at a leading fintech.', source: 'stripe.com/jobs', sourceCategory: 'B' },
+    { company: 'SoFi', role: 'Finance Analyst', companyTier: 2, description: 'Credit risk analysis and loan portfolio management at a fintech challenger bank.', source: 'sofi.com/careers', sourceCategory: 'B' },
     { company: 'Brex', role: 'Finance Operations Analyst', companyTier: 2, description: 'Fast-scaling corporate card startup with strong internal finance ownership.', source: 'brex.com/careers', sourceCategory: 'B' },
+    { company: 'Robinhood', role: 'Finance Operations Analyst', companyTier: 2, description: 'Brokerage operations, regulatory reporting, trade settlement at the commission-free investing platform.', source: 'careers.robinhood.com', sourceCategory: 'B' },
+    { company: 'Chime', role: 'Risk Analyst', companyTier: 2, description: 'Fraud detection and financial risk modeling at the leading neobank.', source: 'chime.com/careers', sourceCategory: 'B' },
+    { company: 'Plaid', role: 'Financial Analyst', companyTier: 2, description: 'FP&A support and data analysis at the fintech infrastructure leader.', source: 'plaid.com/careers', sourceCategory: 'B' },
     { company: 'Ramp', role: 'Finance & Strategy Analyst', companyTier: 3, description: 'Fast-growing Series C fintech with high-ownership finance roles.', source: 'ramp.com/careers', sourceCategory: 'B' },
+    { company: 'Jeeves', role: 'Finance Analyst', companyTier: 3, description: 'Series B global expense platform — FP&A support, revenue analysis, investor reporting.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
     { company: 'Finley Technologies', role: 'Credit Operations Analyst', companyTier: 3, description: 'YC-backed Series A startup — team of 30, direct founder access.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Carry', role: 'Operations Analyst', companyTier: 3, description: 'Series A retirement & tax planning platform. Team of 60. Customer onboarding and account operations.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Titan Invest', role: 'Finance Associate', companyTier: 3, description: 'Series B consumer investment platform. Portfolio operations and client reporting. Team of 80.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Compound Planning', role: 'Wealth Operations Analyst', companyTier: 3, description: 'Series A wealth management platform for tech employees. Equity compensation analysis and tax planning coordination.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Savvy Wealth', role: 'Financial Planning Associate', companyTier: 3, description: 'Seed-stage RIA platform modernizing wealth management. Team of 40.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'human resources': [
     // Tier 1
@@ -913,9 +927,9 @@ Deno.serve(async (req) => {
     const PAGE_SIZE = 6;
 
     const rotateCards = (cards, seed) => {
-      if (cards.length <= PAGE_SIZE) return cards; // pool too small to paginate — show all
+      if (cards.length === 0) return [];
+      // Always rotate — no early exit for small pools (that was the freeze bug)
       const offset = (seed * PAGE_SIZE) % cards.length;
-      // Wrap-around slice: take PAGE_SIZE cards starting at offset
       const end = offset + PAGE_SIZE;
       if (end <= cards.length) {
         return cards.slice(offset, end);
