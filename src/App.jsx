@@ -52,6 +52,7 @@ import PaywallAnalyticsDashboard from '@/pages/PaywallAnalyticsDashboard';
 import CliffScout from '@/pages/CliffScout';
 import ActionPlanArchitect from '@/pages/ActionPlanArchitect';
 import Unsubscribe from '@/pages/Unsubscribe';
+import JillOsinoffDashboard from '@/pages/JillOsinoffDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -185,6 +186,7 @@ const AuthenticatedApp = () => {
       <Route path="/cliff-scout" element={<CliffScout />} />
       <Route path="/action-plan-architect" element={<ActionPlanArchitect />} />
       <Route path="/join" element={<JoinPage />} />
+      <Route path="/jill-osinoff-dashboard" element={<JillOsinoffDashboard />} />
 
       {/* Main routes */}
       <Route path="/" element={<StudentLandingPage />} />
