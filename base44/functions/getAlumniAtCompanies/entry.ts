@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
         // Use full school name + LinkedIn-specific patterns for precise alumni matching
         const fullSchoolName = schoolName || 'University of Florida';
         // Query specifically targets LinkedIn profile pages with university + company co-occurrence
-        const query = `site:linkedin.com/in ("${fullSchoolName}" OR "University of Florida" OR "UF") ("${companyName}" OR "at ${companyName}") -"director of athletics" -"assistant coach" -"staff" -"faculty" -"administrator" -"coach" -"professor"`;
+        const query = `site:linkedin.com/in "${fullSchoolName}" "${companyName}" -coach -professor -faculty -staff -administrator`;
         
         try {
           const res = await fetch('https://api.exa.ai/search', {
