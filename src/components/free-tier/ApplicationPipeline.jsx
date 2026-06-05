@@ -545,8 +545,9 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
           });
           setJobs(prev => [...prev, {
             id: record.id,
-            title: role || 'Role',
-            company: `${contactFirstName || company}${company ? ` @ ${company}` : ''}`,
+            title: role || '',
+            company: company,
+            contact: contactFirstName || null,
             stage: 'applied',
             location: '',
             appliedDate: displayDate,
@@ -577,8 +578,8 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
     try {
       const record = await base44.entities.NetworkingPipeline.create({
         user_email: user.email,
-        alumni_name: newTitle,
-        alumni_role: '',
+        alumni_name: '',
+        alumni_role: newTitle,
         company: newCompany || '',
         status: 'identified',
         status_date: now,
@@ -586,8 +587,9 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
       });
       setJobs(prev => [...prev, {
         id: record.id,
-        title: '',
-        company: `${newTitle}${newCompany ? ` @ ${newCompany}` : ''}`,
+        title: newTitle,
+        company: newCompany || newTitle,
+        contact: null,
         stage: 'to_apply',
         location: newLocation,
         appliedDate: null,
@@ -769,7 +771,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         <div style={{ padding: isMobile ? '12px 16px' : '16px 22px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
           <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 10 : 10, marginBottom: 10 }}>
             <input
-              placeholder="Job title *"
+              placeholder="Position / Role *"
               value={newTitle}
               onChange={e => setNewTitle(e.target.value)}
               style={{ 
