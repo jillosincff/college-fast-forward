@@ -68,7 +68,11 @@ Deno.serve(async (req) => {
     
     if (EXA_API_KEY && companiesWithoutMatches.length > 0) {
       const exaFetch = async (companyName) => {
-        const query = `${schoolName || schoolCode} alumnus alumna graduate "${companyName}" LinkedIn NOT "director of athletics" NOT "assistant coach" NOT "staff" NOT "faculty" NOT "administrator"`;
+        // Use full school name + LinkedIn-specific patterns for precise alumni matching
+        const fullSchoolName = schoolName || 'University of Florida';
+        // Query specifically targets LinkedIn profile pages with university + company co-occurrence
+        const query = `site:linkedin.com/in ("${fullSchoolName}" OR "University of Florida" OR "UF") ("${companyName}" OR "at ${companyName}") -"director of athletics" -"assistant coach" -"staff" -"faculty" -"administrator" -"coach" -"professor"`;
+        
         try {
           const res = await fetch('https://api.exa.ai/search', {
             method: 'POST',
@@ -78,10 +82,10 @@ Deno.serve(async (req) => {
             },
             body: JSON.stringify({
               query,
-              type: 'auto',
+              type: 'keyword', // Use keyword search for more precise LinkedIn matching
               category: 'people',
-              numResults: 3,
-              contents: { highlights: { maxCharacters: 500 } },
+              numResults: 5,
+              contents: { highlights: { maxCharacters: 800 } },
             }),
           });
           return res.json();
@@ -95,24 +99,39 @@ Deno.serve(async (req) => {
       
       exaResults.forEach((data, idx) => {
         const companyName = companiesWithoutMatches[idx];
+        // Parse LinkedIn profile data from Exa results
         const profiles = (data.results || []).map(r => {
+          // Extract name from title (LinkedIn format: "Name - Title | Company")
           const parts = (r.title || '').split(/[|\-·]/).map(s => s.trim()).filter(Boolean);
-          const full_name = parts[0]?.replace(/\s+ Bio$/i, '').trim() || 'Unknown';
-          const headline = parts.slice(1).join(' · ') || '';
+          const full_name = parts[0]?.replace(/\s+Bio$/i, '').trim() || 'Unknown';
+          const headline = parts.slice(1).join(' · ') || (r.highlights || []).join(' ').slice(0, 200);
+          
           return {
             id: `exa-${r.url}`,
             full_name,
-            job_title: headline,
+            job_title: headline || 'Professional',
             persona: 'alumni',
             linkedin_url: r.url,
             profile_image_url: '',
             intro_willingness: 'unknown',
             source: 'exa',
+            verified: false, // Exa profiles are not verified CFF users
           };
-        }).filter(p => p.full_name !== 'Unknown' && p.full_name.length < 50 && p.linkedin_url?.includes('linkedin.com/in/'));
+        }).filter(p => {
+          // Strict filtering: must have LinkedIn URL, valid name, and be a profile page
+          if (!p.linkedin_url?.includes('linkedin.com/in/')) return false;
+          if (p.full_name === 'Unknown' || p.full_name.length < 2 || p.full_name.length > 50) return false;
+          // Exclude common non-alumni patterns
+          const excludePatterns = ['coach', 'professor', 'faculty', 'staff', 'administrator', 'director of'];
+          if (excludePatterns.some(pattern => p.headline?.toLowerCase().includes(pattern))) return false;
+          return true;
+        });
         
-        if (!networkMap[companyName]) networkMap[companyName] = [];
-        networkMap[companyName].push(...profiles.slice(0, 3));
+        if (profiles.length > 0) {
+          if (!networkMap[companyName]) networkMap[companyName] = [];
+          networkMap[companyName].push(...profiles.slice(0, 5));
+          console.log(`[getAlumniAtCompanies] Exa found ${profiles.length} alumni at ${companyName}`);
+        }
       });
     }
 
