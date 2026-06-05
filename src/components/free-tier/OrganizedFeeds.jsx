@@ -110,8 +110,22 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </div>
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Verified Insiders</p>
-            {isLoading ? <div className="h-6 bg-purple-100 rounded animate-pulse mt-1 mx-auto w-12" /> : <p className="text-lg font-black text-purple-700 mt-1">{Math.max(1, totalNetworkCount)}</p>}
-            <p className="text-[11px] text-gray-500 mt-0.5">Alumni &amp; parent network</p>
+            {isLoading ? (
+              <>
+                <p className="text-lg font-black text-purple-600 mt-1 animate-pulse">Scouting...</p>
+                <p className="text-[11px] text-purple-400 mt-0.5">CLiFF Scout is hunting backdoor channels</p>
+              </>
+            ) : rawNetworkCount === 0 ? (
+              <>
+                <p className="text-lg font-black text-amber-600 mt-1">Cold Inroads</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{totalCount} target stakeholders mapped</p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-black text-purple-700 mt-1">{rawNetworkCount}</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">Alumni &amp; parent network</p>
+              </>
+            )}
           </div>
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Opportunities</p>
