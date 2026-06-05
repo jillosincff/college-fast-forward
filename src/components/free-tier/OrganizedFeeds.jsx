@@ -57,10 +57,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,
-      refresh_seed: refreshKey, // tells backend to use a different shuffle
+      refresh_seed: refreshKey,
     }),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: refreshKey === 0 ? 5 * 60 * 1000 : 0, // never serve cache on manual refreshes
+    gcTime: 0, // don't keep old pages in cache
   });
 
   const handleManualRefresh = () => {
