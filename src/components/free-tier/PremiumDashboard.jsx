@@ -202,7 +202,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [isMobile, setIsMobile] = useState(false);
   const [signalAdditions, setSignalAdditions] = useState([]);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
-  const [networkStats, setNetworkStats] = useState(null);
+  const [networkStats, setNetworkStats] = useState({ companies: 1, alumni: 1, parents: 1 });
   const [showColdDiscovery, setShowColdDiscovery] = useState(false);
   const [warmCompanyNames, setWarmCompanyNames] = useState([]);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
@@ -271,13 +271,12 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   }, []);
 
   const showParentStat = parentCount === null || parentCount >= 20;
-  const networkLoading = networkStats === null;
-  // Ensure we never show 0 - use minimum of 1 even during loading
-  const networkCount = networkLoading ? 1 : `${Math.max(1, networkStats.alumni + networkStats.parents)}`;
+  // No loading state - always show at least 1 verified insider
+  const networkCount = `${Math.max(1, (networkStats?.alumni || 0) + (networkStats?.parents || 0))}`;
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'FULLY DEPLOYED' },
     { emoji: '🎯', label: 'Resume Match', value: '98% ATS Proof' },
-    { emoji: '🐊', label: 'Synced Network', value: networkCount, isLoading: false },
+    { emoji: '🐊', label: 'Synced Network', value: networkCount },
   ];
 
   return (
