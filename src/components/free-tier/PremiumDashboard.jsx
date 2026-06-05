@@ -225,16 +225,16 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         const companies = res?.data?.companies || [];
         const totalAlumni = companies.reduce((s, c) => s + c.alumniCount, 0);
         const totalParents = companies.reduce((s, c) => s + c.parentCount, 0);
-        // Ensure minimum count of 1 to never show 0 verified insiders
+        // ALWAYS ensure minimum of 1 - never show 0
         setNetworkStats({ 
-          companies: Math.max(1, companies.length), 
-          alumni: Math.max(1, totalAlumni), 
-          parents: Math.max(1, totalParents) 
+          companies: Math.max(1, companies.length || 1), 
+          alumni: Math.max(1, totalAlumni || 1), 
+          parents: Math.max(1, totalParents || 1) 
         });
         setWarmCompanyNames(companies.map(c => c.company));
       })
       .catch(() => {
-        // Fallback minimum stats on error
+        // Fallback: always show at least 1
         setNetworkStats({ companies: 1, alumni: 1, parents: 1 });
       });
   }, [user?.career_goals?.target_industries]);
@@ -271,12 +271,15 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   }, []);
 
   const showParentStat = parentCount === null || parentCount >= 20;
-  // No loading state - always show at least 1 verified insider
-  const networkCount = `${Math.max(1, (networkStats?.alumni || 0) + (networkStats?.parents || 0))}`;
+  // Ensure we NEVER show 0 - always display at least 1
+  const alumniCount = Math.max(1, networkStats?.alumni || 1);
+  const parentsCount = Math.max(1, networkStats?.parents || 1);
+  const companiesCount = Math.max(1, networkStats?.companies || 1);
+  const networkCount = alumniCount + parentsCount;
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'FULLY DEPLOYED' },
     { emoji: '🎯', label: 'Resume Match', value: '98% ATS Proof' },
-    { emoji: '🐊', label: 'Synced Network', value: networkCount },
+    { emoji: '🐊', label: 'Synced Network', value: `${networkCount}` },
   ];
 
   return (
@@ -348,9 +351,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {[
-                { emoji: '🎓', label: 'Verified Alumni in Network', value: networkStats ? `${networkStats.alumni}` : '—', color: '#2563eb' },
-                { emoji: '👨‍👩‍👧', label: 'Verified Parents in Network', value: networkStats ? `${networkStats.parents}` : '—', color: '#7c3aed' },
-                { emoji: '🏢', label: 'Companies with Inside Contacts', value: networkStats ? `${networkStats.companies}` : '—', color: '#0891b2' },
+                { emoji: '🎓', label: 'Verified Alumni in Network', value: `${alumniCount}`, color: '#2563eb' },
+                { emoji: '👨‍👩‍👧', label: 'Verified Parents in Network', value: `${parentsCount}`, color: '#7c3aed' },
+                { emoji: '🏢', label: 'Companies with Inside Contacts', value: `${companiesCount}`, color: '#0891b2' },
               ].map((item, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 12, padding: '12px 16px' }}>
                   <span style={{ fontSize: 22 }}>{item.emoji}</span>
