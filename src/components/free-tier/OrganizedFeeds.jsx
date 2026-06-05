@@ -29,16 +29,24 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }, [queryClient]);
 
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD — busts cache daily
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [lastRefreshed, setLastRefreshed] = useState(null);
 
-  const { data: feedsData, isLoading } = useQuery({
-    queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole, today],
+  const { data: feedsData, isLoading, isFetching } = useQuery({
+    queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole, today, refreshKey],
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,
+      refresh_seed: refreshKey, // tells backend to use a different shuffle
     }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
+
+  const handleManualRefresh = () => {
+    setRefreshKey(k => k + 1);
+    setLastRefreshed(new Date());
+  };
 
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
@@ -179,7 +187,26 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
               Scouting Connections
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium hidden sm:block">High-match roles found on company websites</span>
+          <div className="flex items-center gap-2">
+            {lastRefreshed && (
+              <span className="text-[11px] text-gray-400 hidden sm:block">
+                Refreshed {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+            <button
+              onClick={handleManualRefresh}
+              disabled={isFetching}
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                isFetching
+                  ? 'border-blue-200 bg-blue-50 text-blue-400 cursor-not-allowed'
+                  : 'border-blue-300 bg-white text-blue-600 hover:bg-blue-50 hover:border-blue-400'
+              }`}
+            >
+              <span className={isFetching ? 'animate-spin inline-block' : 'inline-block'}>↻</span>
+              {isFetching ? 'Loading...' : 'New Batch'}
+            </button>
+          </div>
         </div>
 
         {/* Three-tab filter pills */}

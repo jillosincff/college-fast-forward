@@ -452,12 +452,12 @@ Deno.serve(async (req) => {
     // Filter out senior roles
     jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
 
-    // ─── Daily rotation: shuffle pool using today's date as seed ─────────────
-    // This ensures users see a different ordering/subset each day without
-    // requiring external data — same user, same day = same order (stable UX),
-    // different day = fresh ordering.
+    // ─── Daily rotation + manual refresh shuffle ─────────────────────────────
+    // refresh_seed increments on each manual "New Batch" click, guaranteeing
+    // a different shuffle even within the same day.
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const seedStr = `${user.id}${today}`;
+    const refreshSeed = body.refresh_seed || 0;
+    const seedStr = `${user.id}${today}${refreshSeed}`;
     let seedHash = 0;
     for (let i = 0; i < seedStr.length; i++) {
       seedHash = ((seedHash << 5) - seedHash) + seedStr.charCodeAt(i);
