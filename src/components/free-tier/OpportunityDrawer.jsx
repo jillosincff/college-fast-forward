@@ -20,7 +20,11 @@ export default function OpportunityDrawer({ lead, onClose, onApplied, user, coll
   const [sortedAlumni, setSortedAlumni] = useState([]);
   const [tailoringStep, setTailoringStep] = useState(0);
 
-  const recruiterName = lead?.recruiter?.split(',')[0] || '[Name]';
+  // Fix #1: Smart greeting — use first name if it looks like a real name, else use "Company Team"
+  const rawRecruiter = lead?.recruiter || '';
+  const recruiterLooksLikeName = rawRecruiter && !rawRecruiter.toLowerCase().includes(lead?.role?.toLowerCase().split(' ').pop() || '___') && rawRecruiter.split(' ').length <= 3 && !rawRecruiter.includes(',');
+  const recruiterName = recruiterLooksLikeName ? rawRecruiter.split(' ')[0] : `${lead?.company} Team`;
+  const recruiterDisplayName = rawRecruiter.split(',')[0] || '[Contact]';
   const userFirstName = user?.full_name?.split(' ')[0] || '[Your Name]';
   const userMajor = user?.student_major || '[Your Major]';
   const targetIndustry = user?.target_industries?.[0] || lead?.industry || '[Target Industry]';
@@ -271,11 +275,33 @@ ${userFirstName}`;
                   <strong style={{ color: '#fff' }}>{lead.alumCount || 3} {shortName} grads</strong> work here — warm path exists
                 </p>
               </div>
+              {/* Fix #2: Clickable contact card with LinkedIn link */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 15 }}>🎯</span>
-                <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
-                  Internal Contact: <strong style={{ color: '#fff' }}>{lead.recruiter}</strong>
-                </p>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: dm, fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, lineHeight: 1.5 }}>
+                    Internal Contact: <strong style={{ color: '#fff' }}>{recruiterLooksLikeName ? rawRecruiter.split(',')[0] : `${lead?.alumCount || 3} ${shortName} Grads`}</strong>
+                  </p>
+                  {lead?.recruiterLinkedIn ? (
+                    <a
+                      href={lead.recruiterLinkedIn}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontFamily: dm, fontSize: 11, color: '#60a5fa', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 3 }}
+                    >
+                      🔗 View LinkedIn Profile
+                    </a>
+                  ) : (
+                    <a
+                      href={`https://www.linkedin.com/company/${encodeURIComponent(lead?.company?.toLowerCase().replace(/\s+/g, '-'))}/people/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontFamily: dm, fontSize: 11, color: '#60a5fa', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 3 }}
+                    >
+                      🔗 View {lead?.company} Team on LinkedIn
+                    </a>
+                  )}
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 15 }}>📋</span>
@@ -355,8 +381,14 @@ ${userFirstName}`;
                   <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
                   Deploying Agent...
                 </>
-              ) : '⚡ Auto-Apply & Route Profile'}
+              ) : `🚀 Route Profile to ${lead?.company} Insiders`}
             </button>
+            {/* Fix #4: transparent subtext explaining where the profile goes */}
+            {!applying && !applied && (
+              <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', textAlign: 'center', margin: '6px 0 0', lineHeight: 1.5 }}>
+                This drops your tailored resume directly into the referral inbox of our {lead?.alumCount || 3} registered {shortName} alumni at {lead?.company}.
+              </p>
+            )}
           </div>
 
           {/* ── Section 4: Network Outreach Tabs ── */}
@@ -435,16 +467,27 @@ ${userFirstName}`;
                         {alum.name} · {alum.title}
                         {alum.isTopMatch && <span style={{ color: '#dc2626', fontWeight: 600, marginLeft: 6 }}>(Top Match)</span>}
                       </p>
-                      <button
-                        onClick={() => {
-                          const script = generateAlumniScript(alum);
-                          navigator.clipboard.writeText(script);
-                          alert('Script copied! Ready to paste into LinkedIn.');
-                        }}
-                        style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: t.primary, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', textDecoration: 'underline', minHeight: 'auto' }}
-                      >
-                        📋 Copy Script
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+                        {/* Fix #2: LinkedIn link per alum */}
+                        <a
+                          href={alum.linkedinUrl || `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(alum.name + ' ' + lead?.company)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: '#2563eb', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}
+                        >
+                          🔗 View Profile
+                        </a>
+                        <button
+                          onClick={() => {
+                            const script = generateAlumniScript(alum);
+                            navigator.clipboard.writeText(script);
+                            alert('Script copied! Ready to paste into LinkedIn.');
+                          }}
+                          style={{ fontFamily: dm, fontSize: 10, fontWeight: 600, color: t.primary, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', minHeight: 'auto' }}
+                        >
+                          📋 Copy Script
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
