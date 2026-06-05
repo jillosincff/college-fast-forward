@@ -119,8 +119,8 @@ function LeadCard({ lead, onOpen, columnId, onTriggerNudge, onDelete, cardIndex,
           {lead.logo}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#0f172a', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.role}</p>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#64748b', margin: '2px 0 0' }}>{lead.company}</p>
+          <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 800, color: '#0f172a', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lead.company}</p>
+          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 500, color: '#64748b', margin: '2px 0 0' }}>{lead.role}</p>
         </div>
         <button
           onClick={handleDelete}
