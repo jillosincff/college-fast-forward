@@ -293,22 +293,35 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
             fontFamily: dm, 
             fontSize: isMobile ? 13 : 14, 
             fontWeight: 800, 
-            color: '#4f46e5', 
+            color: '#1e293b', 
             margin: '0 0 2px', 
             lineHeight: 1.3,
             wordBreak: 'break-word',
           }}>
             {job.company}
           </p>
-          <p style={{ 
-            fontFamily: dm, 
-            fontSize: isMobile ? 10 : 11, 
-            color: '#64748b', 
-            margin: 0,
-            wordBreak: 'break-word',
-          }}>
-            {job.title} {job.location && `· ${job.location}`}
-          </p>
+          {job.title && (
+            <p style={{ 
+              fontFamily: dm, 
+              fontSize: isMobile ? 10 : 11, 
+              color: '#64748b', 
+              margin: '0 0 1px',
+              wordBreak: 'break-word',
+            }}>
+              {job.title}{job.location && ` · ${job.location}`}
+            </p>
+          )}
+          {job.contact && (
+            <p style={{ 
+              fontFamily: dm, 
+              fontSize: isMobile ? 9 : 10, 
+              color: '#94a3b8', 
+              margin: 0,
+              wordBreak: 'break-word',
+            }}>
+              Contact: {job.contact}
+            </p>
+          )}
         </div>
         <button
           onClick={() => onRemove(job.id)}
@@ -456,8 +469,9 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
       .then(records => {
         const mapped = (records || []).map(r => ({
           id: r.id,
-          title: r.alumni_role || 'Role',
-          company: r.alumni_name ? `${r.alumni_name}${r.company ? ` @ ${r.company}` : ''}` : (r.company || 'Unknown'),
+          title: r.alumni_role || '',
+          company: r.company || r.alumni_name || 'Unknown',
+          contact: r.alumni_name || null,
           stage: STATUS_TO_STAGE[r.status] || 'to_apply',
           location: '',
           appliedDate: r.reached_out_date ? new Date(r.reached_out_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null,
