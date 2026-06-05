@@ -363,14 +363,41 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     setGenerating(false);
   };
 
-  const handleTargetConfirmed = (scoutResult) => {
+  const handleTargetConfirmed = async (scoutResult) => {
+    // Auto-populate form with target data
     setForm(prev => ({
       ...prev,
       recipientName: scoutResult.recommendedTarget?.name || '',
       recipientTitle: scoutResult.recommendedTarget?.title || '',
       recipientLinkedinUrl: scoutResult.recommendedTarget?.linkedinUrl || '',
     }));
-    setPhase('form');
+    
+    // Skip form entirely - go straight to message generation
+    setGenerating(true);
+    try {
+      const res = await base44.functions.invoke('generateOutreachMessage', {
+        context: 'cold_outreach',
+        recipientName: scoutResult.recommendedTarget?.name || '',
+        recipientTitle: scoutResult.recommendedTarget?.title || '',
+        recipientCompany: scoutResult.company || form.recipientCompany,
+        studentName: user?.full_name || firstName,
+        studentMajor: user?.major || '',
+        targetRole: user?.career_goals?.target_roles?.[0] || '',
+        targetIndustry: user?.career_goals?.target_industries?.[0] || '',
+        graduationYear: user?.career_goals?.graduation_year || '',
+        school: user?.school_name || 'University of Florida',
+        jobTitle: form.jobTitle || '',
+        jobUrl: form.jobUrl || '',
+        conversationContext: form.conversationContext || `Cold outreach for a role at ${scoutResult.company || form.recipientCompany}`,
+      });
+      const msg = res?.data?.message || '';
+      setGeneratedMessage(msg);
+      setEditedMessage(msg);
+      setPhase('compose');
+    } catch (e) {
+      console.error('Generation failed:', e);
+    }
+    setGenerating(false);
   };
 
   const inputStyle = {
@@ -705,13 +732,13 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     );
   }
 
-  // Phase: Scout — CLiFF automated targeting (cold outreach only)
+  // Phase: Scout — CLiFF automated targeting (cold outreach only) - auto-triggers analysis
   if (phase === 'scout' && selectedContext === 'cold_outreach') {
     return (
       <ColdInroadScout
         company={form.recipientCompany}
         role={form.recipientTitle || form.jobTitle}
-        onBack={() => setPhase('list')}
+        onBack={() => { setPhase('list'); setSelectedContext(null); }}
         onTargetConfirmed={handleTargetConfirmed}
       />
     );
