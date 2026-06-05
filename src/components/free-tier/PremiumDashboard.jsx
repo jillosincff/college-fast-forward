@@ -272,10 +272,12 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
   const showParentStat = parentCount === null || parentCount >= 20;
   const networkLoading = networkStats === null;
+  // Ensure we never show 0 - use minimum of 1 even during loading
+  const networkCount = networkLoading ? 1 : `${Math.max(1, networkStats.alumni + networkStats.parents)}`;
   const stats = [
     { emoji: '🤖', label: 'Agent Status', value: 'FULLY DEPLOYED' },
     { emoji: '🎯', label: 'Resume Match', value: '98% ATS Proof' },
-    { emoji: '🐊', label: 'Synced Network', value: networkLoading ? 0 : `${networkStats.alumni + networkStats.parents}`, isLoading: networkLoading },
+    { emoji: '🐊', label: 'Synced Network', value: networkCount, isLoading: false },
   ];
 
   return (
