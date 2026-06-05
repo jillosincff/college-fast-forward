@@ -89,9 +89,9 @@ export default function PipelineCard({ conn, index, onUpdateStage }) {
         }}>{initials}</div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#1a1a1a', marginBottom: 2 }}>{conn.alumni_name}</div>
-          <div style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 300, color: '#888', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {[conn.alumni_role, conn.company].filter(Boolean).join(' · ') || 'Connection'}
+          <div style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>{conn.company || conn.alumni_name}</div>
+          <div style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 400, color: '#888', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {conn.alumni_role || (conn.company ? conn.alumni_name : null) || 'Connection'}
           </div>
         </div>
 
