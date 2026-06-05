@@ -7,7 +7,7 @@ import { base44 } from '@/api/base44Client';
 
 const TABS = ['All', 'Network Backdoors', 'Hidden Discoveries'];
 
-export default function OrganizedFeeds({ user }) {
+export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [activeTab, setActiveTab] = useState('All');
   const queryClient = useQueryClient();
@@ -29,11 +29,13 @@ export default function OrganizedFeeds({ user }) {
   }, [queryClient]);
 
   const { data: feedsData, isLoading } = useQuery({
-    queryKey: ['organizedFeeds', target_industries, effectiveRole],
+    queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole],
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,
     }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000,
   });
 
   const payload = feedsData?.data || feedsData;
@@ -43,7 +45,11 @@ export default function OrganizedFeeds({ user }) {
   const targetOpportunities = [...priorityInsiders, ...targetedDiscoveries];
   const totalCount = targetOpportunities.length;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
-  const totalNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
+  const rawNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
+  // Use passed-in verified counts from the backend as a floor — never show 0
+  const totalNetworkCount = rawNetworkCount > 0
+    ? rawNetworkCount
+    : Math.max(1, (verifiedAlumniCount || 0) + (verifiedParentsCount || 0));
 
   // Tab filtering
   const filteredOpportunities = activeTab === 'Network Backdoors'
@@ -104,7 +110,7 @@ export default function OrganizedFeeds({ user }) {
           </div>
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Verified Insiders</p>
-            {isLoading ? <div className="h-6 bg-purple-100 rounded animate-pulse mt-1 mx-auto w-12" /> : <p className="text-lg font-black text-purple-700 mt-1">{totalNetworkCount}</p>}
+            {isLoading ? <div className="h-6 bg-purple-100 rounded animate-pulse mt-1 mx-auto w-12" /> : <p className="text-lg font-black text-purple-700 mt-1">{Math.max(1, totalNetworkCount)}</p>}
             <p className="text-[11px] text-gray-500 mt-0.5">Alumni &amp; parent network</p>
           </div>
           <div className="p-4 text-center">

@@ -371,7 +371,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
       {/* ── Three-Tier Organized Feeds ── */}
       <div style={{ background: '#f8f9fc', paddingTop: isMobile ? 8 : 16, paddingBottom: 4 }}>
-        <OrganizedFeeds user={user} />
+        <OrganizedFeeds user={user} verifiedAlumniCount={alumniCount} verifiedParentsCount={parentsCount} />
       </div>
 
       {/* ── Main Content ── */}
