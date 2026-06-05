@@ -407,12 +407,19 @@ const JOB_POOL = {
   ],
 };
 
+// Universal fallback — broad, recognizable companies that span any industry
 const FALLBACK_JOBS = [
-  { company: 'Deloitte', role: 'Business Analyst', description: 'Consulting and advisory associates across all US offices.', source: 'deloitte.com/careers', sourceCategory: 'C' },
-  { company: 'JPMorgan', role: 'Operations Analyst', description: 'Finance and operations roles nationwide.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
-  { company: 'Google', role: 'Associate Product Manager', description: 'Product and engineering roles across multiple teams.', source: 'careers.google.com', sourceCategory: 'C' },
-  { company: 'Salesforce', role: 'Associate', description: 'Rotational roles across sales, engineering, and marketing.', source: 'salesforce.com/careers', sourceCategory: 'C' },
-  { company: 'Procter & Gamble', role: 'Brand Management Associate', description: 'Consumer goods brand and operations roles.', source: 'pg.com/careers', sourceCategory: 'C' },
+  { company: 'Deloitte', role: 'Business Analyst', companyTier: 1, description: 'Consulting and advisory associates across all US offices.', source: 'deloitte.com/careers', sourceCategory: 'C' },
+  { company: 'JPMorgan', role: 'Operations Analyst', companyTier: 1, description: 'Finance and operations roles nationwide.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
+  { company: 'Google', role: 'Associate Product Manager', companyTier: 1, description: 'Product and engineering roles across multiple teams.', source: 'careers.google.com', sourceCategory: 'C' },
+  { company: 'Salesforce', role: 'Sales Development Representative', companyTier: 1, description: 'Rotational roles across sales, engineering, and marketing.', source: 'salesforce.com/careers', sourceCategory: 'C' },
+  { company: 'Procter & Gamble', role: 'Brand Management Associate', companyTier: 1, description: 'Consumer goods brand and operations roles.', source: 'pg.com/careers', sourceCategory: 'C' },
+  { company: 'Amazon', role: 'Operations Manager (New Grad)', companyTier: 1, description: 'Entry-level operations and supply chain leadership program.', source: 'amazon.jobs', sourceCategory: 'C' },
+  { company: 'Microsoft', role: 'Business Program Manager', companyTier: 1, description: 'Business and strategy roles across product and services divisions.', source: 'careers.microsoft.com', sourceCategory: 'C' },
+  { company: 'HubSpot', role: 'Sales Development Representative', companyTier: 2, description: 'Marketing and sales SaaS — strong new grad sales and marketing program.', source: 'hubspot.com/careers', sourceCategory: 'B' },
+  { company: 'Notion', role: 'Customer Success Associate', companyTier: 2, description: 'Productivity platform scaling globally — customer-facing roles with real ownership.', source: 'notion.com/careers', sourceCategory: 'B' },
+  { company: 'Ramp', role: 'Business Operations Analyst', companyTier: 3, description: 'Series D fintech — strategy and ops analyst roles with direct executive access.', source: 'ramp.com/careers', sourceCategory: 'B' },
+  { company: 'Lattice', role: 'Customer Success Manager', companyTier: 3, description: 'HR tech platform — client-facing and operations roles, remote-first.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
 ];
 
 function normalizeCompanyName(name) {
@@ -496,6 +503,23 @@ Deno.serve(async (req) => {
       'government & public sector': ['government'],
       'transportation & logistics': ['logistics'],
       'logistics': ['transportation & logistics'],
+      'real estate': ['construction & agriculture'],
+      'real_estate': ['real estate', 'construction & agriculture'],
+      'construction & agriculture': ['real_estate', 'real estate'],
+      'law': ['professional services', 'consulting'],
+      'legal': ['law', 'professional services'],
+      'sales': ['advertising & pr', 'marketing'],
+      'accounting': ['finance', 'finance & insurance'],
+      'retail': ['retail & consumer goods'],
+      'retail & consumer goods': ['retail', 'marketing'],
+      'sports': ['sports & entertainment', 'media and entertainment'],
+      'sports & entertainment': ['sports', 'media and entertainment'],
+      'entertainment': ['media and entertainment', 'media & entertainment'],
+      'ux design': ['content & ux design', 'creative'],
+      'content strategy': ['content & ux design', 'creative', 'advertising & pr'],
+      'creative direction': ['creative', 'advertising & pr'],
+      'entrepreneurship': ['entrepreneur'],
+      'entrepreneur': ['tech', 'consulting'],
     };
 
     // Stream A: curated static pool — primary + sibling industries for a larger rotation pool
@@ -515,8 +539,15 @@ Deno.serve(async (req) => {
       const allowedTiers = tierMap[companySizePref];
       if (allowedTiers) {
         const sizeFiltered = jobPool.filter(j => allowedTiers.includes(j.companyTier || 1));
-        // Only apply if it keeps at least 3 results — otherwise keep all to avoid empty feed
-        if (sizeFiltered.length >= 3) jobPool = sizeFiltered;
+        if (sizeFiltered.length >= 5) {
+          jobPool = sizeFiltered;
+        } else if (sizeFiltered.length > 0) {
+          // Not enough of the preferred size — expand to adjacent tiers (startup→mid, mid→startup+enterprise)
+          const expandedTiers = companySizePref === 'startup' ? [3, 2] : companySizePref === 'enterprise' ? [1, 2] : [2, 3, 1];
+          const expanded = jobPool.filter(j => expandedTiers.includes(j.companyTier || 1));
+          jobPool = expanded.length >= 5 ? expanded : jobPool;
+        }
+        // else: keep all — no matches at all for preferred size
       }
     }
 
@@ -625,9 +656,8 @@ Deno.serve(async (req) => {
 
     const allRoleKeywords = [...new Set([...roleKeywords, ...positionKeywords, ...industryRoleKeywords])];
 
-    // Role filter: only apply if it keeps at least 3 results to prevent sparse wipeout
-    // Use a SOFT role filter — only filter by actual role title keywords (not all industry keywords)
-    // to avoid over-filtering a small pool down to 4 identical results
+    // Role filter: soft-filter by role title keywords only — never wipe the pool.
+    // Only apply if result keeps at least 5 entries, otherwise skip to preserve variety.
     if (roleKeywords.length > 0 || positionKeywords.length > 0) {
       const softKeywords = [...new Set([...roleKeywords, ...positionKeywords])];
       const roleFiltered = jobPool.filter(j => {
@@ -635,7 +665,8 @@ Deno.serve(async (req) => {
         const descLower = j.description.toLowerCase();
         return softKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
       });
-      if (roleFiltered.length >= 3) jobPool = roleFiltered;
+      if (roleFiltered.length >= 5) jobPool = roleFiltered;
+      // else: skip the role filter — industry pool is more important than exact role match
     }
 
     // Deduplicate by company+role (allow same company with different roles)
@@ -675,18 +706,14 @@ Deno.serve(async (req) => {
       }
     }
 
-    // If still empty, use fallback but still try to role-filter it
-    if (!jobPool.length) {
-      let fallback = [...FALLBACK_JOBS].filter(j => !SENIOR_FILTER.test(j.role));
-      if (allRoleKeywords.length > 0) {
-        const roleFiltered = fallback.filter(j => {
-          const roleLower = j.role.toLowerCase();
-          const descLower = j.description.toLowerCase();
-          return allRoleKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
-        });
-        if (roleFiltered.length > 0) fallback = roleFiltered;
-      }
-      jobPool = fallback;
+    // If pool is still too small (< 5), pad it with fallback jobs
+    // This guarantees users with niche or unmapped industries always see something
+    if (jobPool.length < 5) {
+      const seenPoolKeys = new Set(jobPool.map(j => normalizeCompanyName(j.company)));
+      const fallbackFiltered = FALLBACK_JOBS.filter(j => 
+        !SENIOR_FILTER.test(j.role) && !seenPoolKeys.has(normalizeCompanyName(j.company))
+      );
+      jobPool = [...jobPool, ...fallbackFiltered];
     }
 
     // ─── Step 2: Load all network members (alumni + parents) + DiscoveredAlumni ──
