@@ -363,12 +363,12 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     setGenerating(false);
   };
 
-  const handleTargetConfirmed = (target) => {
+  const handleTargetConfirmed = (scoutResult) => {
     setForm(prev => ({
       ...prev,
-      recipientName: target.name,
-      recipientTitle: target.title,
-      recipientLinkedinUrl: target.linkedinUrl || '',
+      recipientName: scoutResult.recommendedTarget?.name || '',
+      recipientTitle: scoutResult.recommendedTarget?.title || '',
+      recipientLinkedinUrl: scoutResult.recommendedTarget?.linkedinUrl || '',
     }));
     setPhase('form');
   };
@@ -705,7 +705,19 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     );
   }
 
-  // Phase: Form — fill in recipient details
+  // Phase: Scout — CLiFF automated targeting (cold outreach only)
+  if (phase === 'scout' && selectedContext === 'cold_outreach') {
+    return (
+      <ColdInroadScout
+        company={form.recipientCompany}
+        role={form.recipientTitle || form.jobTitle}
+        onBack={() => setPhase('list')}
+        onTargetConfirmed={handleTargetConfirmed}
+      />
+    );
+  }
+
+  // Phase: Form — fill in recipient details (non-cold-outreach contexts)
   if (phase === 'form') {
     const ctx = CONTEXTS.find(c => c.id === selectedContext);
     return (
