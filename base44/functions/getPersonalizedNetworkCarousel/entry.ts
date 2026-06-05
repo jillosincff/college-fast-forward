@@ -99,14 +99,28 @@ const JOB_POOL = {
     { company: 'Goldman Sachs', role: 'Investment Banking Analyst', companyTier: 1, description: 'Location: New York, NY | On-site. Responsibilities: Build financial models, conduct industry research, prepare pitch books, support M&A transactions. Requirements: Top-tier university, Finance/Econ major, 3.7+ GPA, prior IB internship. Compensation: $110,000 base + $50-100K bonus, premium health benefits, relocation assistance.', source: 'goldmansachs.com/careers', sourceCategory: 'C' },
     { company: 'BlackRock', role: 'Investment Analyst', companyTier: 1, description: 'Location: New York, NY | Hybrid. Responsibilities: Portfolio analysis, risk assessment, market research, client reporting. Requirements: Finance/Econ/Math degree, 3.6+ GPA, Bloomberg certification, CFA Level 1 preferred. Compensation: $100,000 base + $30-50K bonus, comprehensive benefits, tuition reimbursement.', source: 'blackrock.com/careers', sourceCategory: 'C' },
     { company: 'PwC', role: 'Assurance Associate', companyTier: 1, description: 'Location: Multiple US cities | Hybrid. Responsibilities: Financial statement audits, internal controls testing, client communication, team collaboration. Requirements: Accounting degree, 150 credit hours, CPA eligibility. Compensation: $70,000-80,000 base + busy season bonus, CPA bonuses, career development.', source: 'pwc.com/careers', sourceCategory: 'C' },
+    { company: 'Morgan Stanley', role: 'Financial Analyst', companyTier: 1, description: 'Location: New York, NY | On-site. Responsibilities: Support wealth management and capital markets teams, build models, prepare client presentations. Requirements: Finance/Econ degree, strong quantitative skills, Series 7 preferred. Compensation: $90,000-110,000 + bonus.', source: 'morganstanley.com/careers', sourceCategory: 'C' },
+    { company: 'Citigroup', role: 'Treasury Analyst', companyTier: 1, description: 'Location: Tampa, FL | Hybrid. Responsibilities: Liquidity reporting, funds transfer pricing, regulatory compliance. Requirements: Finance/Accounting degree, Excel/SQL proficiency. Compensation: $75,000-90,000 + bonus, full benefits.', source: 'jobs.citi.com', sourceCategory: 'C' },
+    { company: 'Bank of America', role: 'Credit Analyst', companyTier: 1, description: 'Location: Multiple US cities | Hybrid. Responsibilities: Underwrite commercial loans, analyze financial statements, prepare credit memos. Requirements: Finance degree, analytical skills. Compensation: $75,000-85,000 + bonus.', source: 'bankofamerica.com/careers', sourceCategory: 'C' },
+    { company: 'Fidelity Investments', role: 'Financial Operations Analyst', companyTier: 1, description: 'Location: Boston, MA | Hybrid. Responsibilities: Trade reconciliation, client reporting, process improvement. Requirements: Finance/Business degree, strong attention to detail. Compensation: $70,000-85,000 + bonus, excellent benefits.', source: 'jobs.fidelity.com', sourceCategory: 'C' },
+    { company: 'Vanguard', role: 'Investment Analyst', companyTier: 1, description: 'Location: Malvern, PA | Hybrid. Responsibilities: Portfolio analytics, fund analysis, research support. Requirements: Finance/Economics degree, CFA track preferred. Compensation: $75,000-90,000 + profit sharing.', source: 'vanguardjobs.com', sourceCategory: 'C' },
+    { company: 'Charles Schwab', role: 'Financial Advisor Associate', companyTier: 1, description: 'Location: Multiple US cities | Hybrid. Responsibilities: Client portfolio management, financial planning support, investment recommendations. Requirements: Finance degree, Series 7/66 or willingness to obtain. Compensation: $65,000-80,000 + bonus.', source: 'schwab.com/careers', sourceCategory: 'C' },
     // Tier 2: Mid-Market
     { company: 'Stripe', role: 'Financial Operations Specialist', companyTier: 2, description: 'Location: Remote-friendly (US). Responsibilities: Manage payment operations, analyze transaction data, optimize financial workflows, partner with engineering teams. Requirements: Bachelor degree, 2+ years finance experience, SQL/Tableau skills, fintech interest. Compensation: $105,000 base + equity package, unlimited PTO, $3K learning stipend.', source: 'stripe.com/jobs', sourceCategory: 'B' },
     { company: 'SoFi', role: 'Finance Analyst', companyTier: 2, description: 'Location: Charlotte, NC | Remote options. Responsibilities: Credit risk analysis, loan portfolio management, financial modeling, regulatory compliance. Requirements: Bachelor in Finance, 1-3 years experience, Python/R skills. Compensation: $85,000-95,000 base + equity, 100% health premium coverage, parental leave.', source: 'sofi.com/careers', sourceCategory: 'B' },
     { company: 'Brex', role: 'Finance Operations Analyst', companyTier: 2, description: 'Location: Remote-friendly (US) | Hybrid. Responsibilities: Manage corporate card reconciliations, support month-end close, build financial dashboards, optimize spend workflows. Requirements: Bachelor in Finance/Accounting, SQL comfort, startup mindset. Compensation: $90,000-105,000 base + meaningful equity, full benefits, unlimited PTO.', source: 'brex.com/careers', sourceCategory: 'B' },
+    { company: 'Robinhood', role: 'Finance Operations Analyst', companyTier: 2, description: 'Location: Menlo Park, CA | Hybrid. Responsibilities: Brokerage operations, regulatory reporting, trade settlement. Requirements: Finance/Accounting degree, detail-oriented, process improvement mindset. Compensation: $90,000-110,000 + equity.', source: 'careers.robinhood.com', sourceCategory: 'B' },
+    { company: 'Chime', role: 'Risk Analyst', companyTier: 2, description: 'Location: San Francisco, CA | Remote-friendly. Responsibilities: Fraud detection, financial risk modeling, compliance monitoring. Requirements: Finance/Statistics degree, SQL skills. Compensation: $85,000-100,000 + equity.', source: 'chime.com/careers', sourceCategory: 'B' },
+    { company: 'Plaid', role: 'Financial Analyst', companyTier: 2, description: 'Location: Remote-first (US). Responsibilities: FP&A support, financial modeling, data analysis for fintech infrastructure company. Requirements: Finance/Econ degree, SQL and Excel proficiency. Compensation: $100,000-120,000 + equity.', source: 'plaid.com/careers', sourceCategory: 'B' },
+    { company: 'Affirm', role: 'Credit Risk Analyst', companyTier: 2, description: 'Location: Remote-friendly (US). Responsibilities: Underwriting model development, portfolio monitoring, credit policy analysis for BNPL leader. Requirements: Statistics/Finance degree, Python or R skills. Compensation: $95,000-115,000 + equity.', source: 'affirm.com/careers', sourceCategory: 'B' },
     // Tier 3: Startup
     { company: 'Ramp', role: 'Finance & Strategy Analyst', companyTier: 3, description: 'Location: New York, NY | Hybrid. Series C fintech redefining corporate finance. Responsibilities: Strategic planning, financial forecasting, business intelligence. Requirements: Top university, analytical mindset, Excel/SQL expertise. Compensation: $110,000 base + significant equity, unlimited PTO, home office budget.', source: 'ramp.com/careers', sourceCategory: 'B' },
     { company: 'Jeeves', role: 'Finance Analyst', companyTier: 3, description: 'Location: Remote (US) | Series B global expense platform. Responsibilities: FP&A support, revenue analysis, investor reporting, cross-functional projects. Requirements: Finance/Economics degree, strong modeling skills. Compensation: $85,000-100,000 + equity. Team of 200 — your work is seen immediately.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
     { company: 'Finley Technologies', role: 'Credit Operations Analyst', companyTier: 3, description: 'Location: Remote-first | Series A debt capital management startup backed by Y Combinator. Responsibilities: Manage borrower data, build credit reporting workflows, partner with engineering. Requirements: Finance/CS background, analytical mindset.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Carry', role: 'Operations Analyst', companyTier: 3, description: 'Location: Remote-first | Series A retirement & tax planning platform. Team of 60. Responsibilities: Customer onboarding, account operations, product feedback loop. Compensation: $70,000-85,000 + equity.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Titan Invest', role: 'Finance Associate', companyTier: 3, description: 'Location: New York, NY | Hybrid | Series B consumer investment platform. Responsibilities: Portfolio operations, client reporting, investment research support. Team of 80.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Savvy Wealth', role: 'Financial Planning Associate', companyTier: 3, description: 'Location: Remote-first | Seed-stage RIA platform modernizing wealth management. Team of 40. Responsibilities: Client financial plans, model portfolio management, advisor support.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+    { company: 'Compound Planning', role: 'Wealth Operations Analyst', companyTier: 3, description: 'Location: Remote-first | Series A wealth management platform for tech employees. Team of 50. Responsibilities: Equity compensation analysis, tax planning coordination, client operations.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
   ],
   'finance & insurance': [
     { company: 'JPMorgan', role: 'Financial Operations Specialist', companyTier: 1, description: 'Analyst roles in investment banking and corporate finance divisions.', source: 'jpmorgan.com/careers', sourceCategory: 'C' },
@@ -893,28 +907,27 @@ Deno.serve(async (req) => {
 
     console.log(`[getPersonalizedNetworkCarousel] 🔥 ${priorityInsiders.length} INSIDERS | ☀️ ${targetedDiscoveries.length} TARGETS`);
 
-    // ─── Paginate by refresh_seed so each "New Batch" shows genuinely different cards ──
+    // ─── Rotate by refresh_seed: each "New Batch" click shifts the window by PAGE_SIZE ──
+    // This guarantees genuinely different companies are shown on each click, even when
+    // the total pool is small (avoids the totalPages=1 → page always 0 trap).
     const PAGE_SIZE = 6;
 
-    // Rotate discovery cards
-    let slicedDiscoveries = targetedDiscoveries;
-    if (targetedDiscoveries.length > PAGE_SIZE) {
-      const totalPages = Math.ceil(targetedDiscoveries.length / PAGE_SIZE);
-      const page = refreshSeed % totalPages;
-      const start = page * PAGE_SIZE;
-      slicedDiscoveries = targetedDiscoveries.slice(start, start + PAGE_SIZE);
-      console.log(`[getPersonalizedNetworkCarousel] Discoveries page ${page + 1}/${totalPages} (seed=${refreshSeed})`);
-    }
+    const rotateCards = (cards, seed) => {
+      if (cards.length <= PAGE_SIZE) return cards; // pool too small to paginate — show all
+      const offset = (seed * PAGE_SIZE) % cards.length;
+      // Wrap-around slice: take PAGE_SIZE cards starting at offset
+      const end = offset + PAGE_SIZE;
+      if (end <= cards.length) {
+        return cards.slice(offset, end);
+      }
+      // Wrap around end of array
+      return [...cards.slice(offset), ...cards.slice(0, end - cards.length)];
+    };
 
-    // Rotate insider cards too — slice a different window each batch
-    let slicedInsiders = priorityInsiders;
-    if (priorityInsiders.length > PAGE_SIZE) {
-      const totalPages = Math.ceil(priorityInsiders.length / PAGE_SIZE);
-      const page = refreshSeed % totalPages;
-      const start = page * PAGE_SIZE;
-      slicedInsiders = priorityInsiders.slice(start, start + PAGE_SIZE);
-      console.log(`[getPersonalizedNetworkCarousel] Insiders page ${page + 1}/${totalPages} (seed=${refreshSeed})`);
-    }
+    const slicedDiscoveries = rotateCards(targetedDiscoveries, refreshSeed);
+    const slicedInsiders = rotateCards(priorityInsiders, refreshSeed);
+
+    console.log(`[getPersonalizedNetworkCarousel] seed=${refreshSeed} | Insiders: ${slicedInsiders.length}/${priorityInsiders.length} | Discoveries: ${slicedDiscoveries.length}/${targetedDiscoveries.length}`);
 
     return Response.json({
       success: true,
