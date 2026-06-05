@@ -853,11 +853,25 @@ Deno.serve(async (req) => {
     }
 
     console.log(`[getPersonalizedNetworkCarousel] 🔥 ${priorityInsiders.length} INSIDERS | ☀️ ${targetedDiscoveries.length} TARGETS`);
-    console.log(`[getPersonalizedNetworkCarousel] Sample insider:`, priorityInsiders[0]?.company, priorityInsiders[0]?.alumniCount, priorityInsiders[0]?.jobDescription?.substring(0, 50));
+
+    // ─── Paginate by refresh_seed so each "New Batch" shows genuinely different cards ──
+    // Insider cards are precious (real alumni) — show all of them always.
+    // Discovery cards are rotated: split into pages of 6, pick the page based on seed.
+    const DISCOVERY_PAGE_SIZE = 6;
+    const totalDiscoveries = targetedDiscoveries.length;
+    let slicedDiscoveries = targetedDiscoveries;
+    if (totalDiscoveries > DISCOVERY_PAGE_SIZE) {
+      const totalPages = Math.ceil(totalDiscoveries / DISCOVERY_PAGE_SIZE);
+      const page = refreshSeed % totalPages; // cycle through pages on each click
+      const start = page * DISCOVERY_PAGE_SIZE;
+      slicedDiscoveries = targetedDiscoveries.slice(start, start + DISCOVERY_PAGE_SIZE);
+      console.log(`[getPersonalizedNetworkCarousel] Discovery page ${page + 1}/${totalPages} (seed=${refreshSeed}, items ${start}-${start + DISCOVERY_PAGE_SIZE})`);
+    }
+
     return Response.json({
       success: true,
       priorityInsiders: priorityInsiders.slice(0, 12),
-      targetedDiscoveries: targetedDiscoveries.slice(0, 20),
+      targetedDiscoveries: slicedDiscoveries,
       wasFiltered: targetIndustries.length > 0,
       targetIndustries,
     });
