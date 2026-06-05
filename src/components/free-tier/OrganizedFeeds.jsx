@@ -28,8 +28,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     return () => window.removeEventListener('cff:pipeline-changed', handler);
   }, [queryClient]);
 
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD — busts cache daily
+
   const { data: feedsData, isLoading } = useQuery({
-    queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole],
+    queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole, today],
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,

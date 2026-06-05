@@ -451,6 +451,28 @@ Deno.serve(async (req) => {
 
     // Filter out senior roles
     jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
+
+    // ─── Daily rotation: shuffle pool using today's date as seed ─────────────
+    // This ensures users see a different ordering/subset each day without
+    // requiring external data — same user, same day = same order (stable UX),
+    // different day = fresh ordering.
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const seedStr = `${user.id}${today}`;
+    let seedHash = 0;
+    for (let i = 0; i < seedStr.length; i++) {
+      seedHash = ((seedHash << 5) - seedHash) + seedStr.charCodeAt(i);
+      seedHash |= 0;
+    }
+    const seededRandom = (n) => {
+      seedHash = ((seedHash << 5) - seedHash) + n;
+      seedHash |= 0;
+      return Math.abs(seedHash) / 2147483647;
+    };
+    // Fisher-Yates shuffle with seeded random
+    for (let i = jobPool.length - 1; i > 0; i--) {
+      const j = Math.floor(seededRandom(i) * (i + 1));
+      [jobPool[i], jobPool[j]] = [jobPool[j], jobPool[i]];
+    }
     
     // Location filter: only apply if relocation is NOT ok AND user has a specific city (not just a state)
     // Skip location filtering if user only has a state/country preference — too aggressive
