@@ -23,6 +23,24 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // The pinned cards themselves (full lead objects), stable across batches
   const [pinnedLeads, setPinnedLeads] = useState([]);
 
+  // Track ALL companies the user has ever seen in the current session so "New Batch"
+  // never serves the same company twice until the pool is fully exhausted
+  const [seenCompanyKeys, setSeenCompanyKeys] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem(`cff_seen_companies_${user?.id}`);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  });
+
+  const addSeenKeys = (leads) => {
+    setSeenCompanyKeys(prev => {
+      const next = new Set(prev);
+      leads.forEach(l => { const k = l.company || l.companyName; if (k) next.add(k); });
+      try { sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
+
   const persistSavedKey = (companyKey) => {
     setSavedCompanyKeys(prev => {
       const next = new Set(prev);
@@ -52,27 +70,34 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const [refreshKey, setRefreshKey] = useState(0);
   const [lastRefreshed, setLastRefreshed] = useState(null);
 
+  // Seen companies for current session (excluding pinned/saved ones which are intentionally shown)
+  const seenForExclusion = Array.from(seenCompanyKeys).filter(k => !savedCompanyKeys.has(k));
+
   const { data: feedsData, isLoading, isFetching } = useQuery({
     queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole, today, refreshKey],
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,
       refresh_seed: refreshKey,
+      // Pass seen companies so backend can exclude them — forces genuinely new results
+      seen_companies: refreshKey > 0 ? seenForExclusion : [],
     }),
-    staleTime: refreshKey === 0 ? 5 * 60 * 1000 : 0, // never serve cache on manual refreshes
-    gcTime: 0, // don't keep old pages in cache
+    staleTime: 0,   // always re-fetch — never serve cached results
+    gcTime: 0,      // don't store old pages at all
   });
-
-  const handleManualRefresh = () => {
-    setRefreshKey(k => k + 1);
-    setLastRefreshed(new Date());
-  };
 
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
 
   const allFetched = [...priorityInsiders, ...targetedDiscoveries];
+
+  const handleManualRefresh = () => {
+    // Mark current visible cards as seen before fetching next batch
+    addSeenKeys(allFetched);
+    setRefreshKey(k => k + 1);
+    setLastRefreshed(new Date());
+  };
 
   // Update pinned leads whenever new data arrives — keep pinned cards fresh with latest data
   // but never let a batch rotation remove them

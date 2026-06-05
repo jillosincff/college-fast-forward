@@ -360,6 +360,10 @@ Deno.serve(async (req) => {
 
     const targetRole = body.target_role || user.career_goals?.role || user.target_role || '';
     const companySizePref = body.company_size_preference || user.career_goals?.company_size_preference || 'all';
+    // Companies the user has already seen — exclude them from this batch
+    const seenCompanies = new Set(
+      (body.seen_companies || []).map(c => normalizeCompanyName(c))
+    );
     // target_positions is an array of role-type selections from onboarding (e.g. ["UX Design", "Content Strategy"])
     const targetPositions = (
       body.target_positions
@@ -382,9 +386,36 @@ Deno.serve(async (req) => {
     // ─── Step 1: Build the job pool from target industries ──────────────────
     const SENIOR_FILTER = /\b(senior|sr\.|lead|principal|director|manager|head of|vp |vice president|staff engineer|architect|managing partner)\b/i;
 
-    // Stream A: curated static pool
+    // Sibling industry groups — pull related pools to keep the rotation pool large enough
+    const INDUSTRY_SIBLINGS = {
+      'finance': ['finance & insurance', 'consulting'],
+      'finance & insurance': ['finance', 'consulting'],
+      'tech': ['technology, information & media'],
+      'technology, information & media': ['tech'],
+      'media and entertainment': ['media & entertainment'],
+      'media & entertainment': ['media and entertainment'],
+      'creative': ['advertising & pr', 'content & ux design'],
+      'advertising & pr': ['creative', 'marketing'],
+      'marketing': ['advertising & pr'],
+      'healthcare': ['healthcare & pharmaceuticals'],
+      'healthcare & pharmaceuticals': ['healthcare'],
+      'education': ['education & training'],
+      'education & training': ['education'],
+      'consulting': ['professional services'],
+      'professional services': ['consulting'],
+      'government': ['government & public sector'],
+      'government & public sector': ['government'],
+      'transportation & logistics': ['logistics'],
+      'logistics': ['transportation & logistics'],
+    };
+
+    // Stream A: curated static pool — primary + sibling industries for a larger rotation pool
     let jobPool = [];
+    const industriesToPull = new Set(targetIndustries);
     for (const ind of targetIndustries) {
+      (INDUSTRY_SIBLINGS[ind] || []).forEach(s => industriesToPull.add(s));
+    }
+    for (const ind of industriesToPull) {
       const pool = JOB_POOL[ind] || [];
       jobPool.push(...pool);
     }
@@ -523,6 +554,14 @@ Deno.serve(async (req) => {
       seen.add(key);
       return true;
     });
+
+    // Exclude companies the user has already seen (only when they have seen jobs)
+    // If exclusion would wipe the pool entirely, reset and show everything (pool exhausted)
+    if (seenCompanies.size > 0) {
+      const excluded = jobPool.filter(j => !seenCompanies.has(normalizeCompanyName(j.company)));
+      if (excluded.length >= 3) jobPool = excluded;
+      // else: pool exhausted — serve full pool so user always sees something
+    }
 
     // ─── Balanced Feed Mix: Enforce ≥30% mid-market/startup (Tier 2/3) ─────
     // Prevents the feed from being all enterprise brands
