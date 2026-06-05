@@ -921,32 +921,16 @@ Deno.serve(async (req) => {
 
     console.log(`[getPersonalizedNetworkCarousel] 🔥 ${priorityInsiders.length} INSIDERS | ☀️ ${targetedDiscoveries.length} TARGETS`);
 
-    // ─── Rotate by refresh_seed: each "New Batch" click shifts the window by PAGE_SIZE ──
-    // This guarantees genuinely different companies are shown on each click, even when
-    // the total pool is small (avoids the totalPages=1 → page always 0 trap).
-    const PAGE_SIZE = 6;
-
-    const rotateCards = (cards, seed) => {
-      if (cards.length === 0) return [];
-      // Always rotate — no early exit for small pools (that was the freeze bug)
-      const offset = (seed * PAGE_SIZE) % cards.length;
-      const end = offset + PAGE_SIZE;
-      if (end <= cards.length) {
-        return cards.slice(offset, end);
-      }
-      // Wrap around end of array
-      return [...cards.slice(offset), ...cards.slice(0, end - cards.length)];
-    };
-
-    const slicedDiscoveries = rotateCards(targetedDiscoveries, refreshSeed);
-    const slicedInsiders = rotateCards(priorityInsiders, refreshSeed);
-
-    console.log(`[getPersonalizedNetworkCarousel] seed=${refreshSeed} | Insiders: ${slicedInsiders.length}/${priorityInsiders.length} | Discoveries: ${slicedDiscoveries.length}/${targetedDiscoveries.length}`);
+    // The shuffle (Fisher-Yates above) is already seeded by user.id + today + refreshSeed,
+    // so every "New Batch" click produces a genuinely different order.
+    // Return the full shuffled+filtered pool — no slicing here.
+    // The frontend renders whatever it receives, so the user always sees fresh results.
+    console.log(`[getPersonalizedNetworkCarousel] seed=${refreshSeed} | Insiders: ${priorityInsiders.length} | Discoveries: ${targetedDiscoveries.length}`);
 
     return Response.json({
       success: true,
-      priorityInsiders: slicedInsiders,
-      targetedDiscoveries: slicedDiscoveries,
+      priorityInsiders,
+      targetedDiscoveries,
       wasFiltered: targetIndustries.length > 0,
       targetIndustries,
     });
