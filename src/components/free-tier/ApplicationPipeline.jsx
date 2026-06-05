@@ -256,7 +256,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
     <div
       style={{
         background: '#fff',
-        border: pulseActive ? '2px solid #f59e0b' : '2px solid #e2e8f0',
+        border: pulseActive ? '2px solid #f59e0b' : '1px solid #f3f4f6',
         borderRadius: isMobile ? 12 : 14,
         padding: isMobile ? '12px' : '14px 16px',
         marginBottom: isMobile ? 10 : 12,
