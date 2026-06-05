@@ -12,6 +12,26 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const [activeTab, setActiveTab] = useState('All');
   const queryClient = useQueryClient();
 
+  // Track companies the user has explicitly saved (pipeline add or cold inroad click)
+  // These are pinned to the feed and never rotated out
+  const [savedCompanyKeys, setSavedCompanyKeys] = useState(() => {
+    try {
+      const stored = localStorage.getItem(`cff_saved_companies_${user?.id}`);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  });
+  // The pinned cards themselves (full lead objects), stable across batches
+  const [pinnedLeads, setPinnedLeads] = useState([]);
+
+  const persistSavedKey = (companyKey) => {
+    setSavedCompanyKeys(prev => {
+      const next = new Set(prev);
+      next.add(companyKey);
+      try { localStorage.setItem(`cff_saved_companies_${user?.id}`, JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
+
   // Dynamic school state with fallback
   const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'Network';
   const schoolName = user?.school_name || user?.schoolName || `${schoolAbbr} Network`;
@@ -52,7 +72,28 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
 
-  const targetOpportunities = [...priorityInsiders, ...targetedDiscoveries];
+  const allFetched = [...priorityInsiders, ...targetedDiscoveries];
+
+  // Update pinned leads whenever new data arrives — keep pinned cards fresh with latest data
+  // but never let a batch rotation remove them
+  useEffect(() => {
+    if (!allFetched.length) return;
+    setPinnedLeads(prev => {
+      const freshPinned = prev.map(pinned => {
+        const updated = allFetched.find(l => (l.company || l.companyName) === (pinned.company || pinned.companyName));
+        return updated || pinned;
+      });
+      return freshPinned;
+    });
+  }, [feedsData]); // eslint-disable-line
+
+  // Rotate feed = pinned cards + fresh un-saved cards (saved ones never appear twice)
+  const pinnedKeys = new Set(pinnedLeads.map(l => l.company || l.companyName));
+  const freshCards = allFetched.filter(l => {
+    const key = l.company || l.companyName;
+    return !pinnedKeys.has(key) && !savedCompanyKeys.has(key);
+  });
+  const targetOpportunities = [...pinnedLeads, ...freshCards];
   const totalCount = targetOpportunities.length;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
   const rawNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
@@ -68,9 +109,20 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     ? targetOpportunities.filter(l => (l.alumniCount || 0) === 0 && (l.parentCount || 0) === 0)
     : targetOpportunities;
 
+  const pinLead = (lead) => {
+    const key = lead.company || lead.companyName;
+    if (!key) return;
+    persistSavedKey(key);
+    setPinnedLeads(prev => {
+      if (prev.find(l => (l.company || l.companyName) === key)) return prev;
+      return [...prev, lead];
+    });
+  };
+
   const handleAddToPipeline = async (lead) => {
     const company = lead.company || lead.companyName || 'Unknown';
     const role = lead.role || lead.title || 'Position';
+    pinLead(lead); // lock this card in place before the next batch
     try {
       await base44.entities.NetworkingPipeline.create({
         user_email: user?.email,
@@ -85,6 +137,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     } catch (error) {
       console.error('Failed to add to pipeline:', error);
     }
+  };
+
+  const handleColdInroad = (lead) => {
+    pinLead(lead); // lock card before navigating away
+    const company = lead.company || lead.companyName || '';
+    const role = lead.role || lead.title || '';
+    window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`;
   };
 
   const noGoals = !target_industries?.length && !effectiveRole;
@@ -238,11 +297,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredOpportunities.map((lead, idx) => (
               <DiscoveryJobCard
-                key={idx}
+                key={lead.company || lead.companyName || idx}
                 lead={lead}
                 onAddToPipeline={handleAddToPipeline}
+                onColdInroad={handleColdInroad}
                 onSelect={setSelectedLead}
                 schoolAbbr={schoolAbbr}
+                isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
                 onDismiss={() => {}}
               />
             ))}

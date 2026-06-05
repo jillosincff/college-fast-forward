@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, schoolAbbr, onDismiss }) {
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned }) {
   const [isScouting, setIsScouting] = useState(false);
   const [scoutDeployed, setScoutDeployed] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
@@ -57,17 +57,24 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
         <div className="flex justify-between items-start">
           <h4 className="font-bold text-gray-900 leading-tight truncate max-w-[70%]">{lead.company}</h4>
           <div className="flex items-center gap-1.5">
+            {isPinned && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200" title="Saved — won't be rotated out">
+                📌 Saved
+              </span>
+            )}
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>
               {tierBadge.label}
             </span>
-            <button
-              onClick={handleDismiss}
-              className="text-gray-300 hover:text-gray-500 transition text-sm leading-none"
-              title="Not interested"
-              style={{ minHeight: 'auto', minWidth: 'auto' }}
-            >
-              ✕
-            </button>
+            {!isPinned && (
+              <button
+                onClick={handleDismiss}
+                className="text-gray-300 hover:text-gray-500 transition text-sm leading-none"
+                title="Not interested"
+                style={{ minHeight: 'auto', minWidth: 'auto' }}
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-0.5 font-medium">{lead.role}</p>
@@ -143,9 +150,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onSelect, scho
         
         {insiderCount === 0 ? (
           <button 
-            onClick={() => {
-              window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(lead.company)}&role=${encodeURIComponent(lead.role)}`;
-            }}
+            onClick={() => onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(lead.company)}&role=${encodeURIComponent(lead.role)}`)}
             className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
             style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
           >
