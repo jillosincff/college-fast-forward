@@ -4,6 +4,7 @@ import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useRef } from 'react';
 
 const TABS = ['All', 'Network Backdoors', 'Hidden Discoveries'];
 
@@ -70,8 +71,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const [refreshKey, setRefreshKey] = useState(0);
   const [lastRefreshed, setLastRefreshed] = useState(null);
 
-  // Seen companies for current session (excluding pinned/saved ones which are intentionally shown)
-  const seenForExclusion = Array.from(seenCompanyKeys).filter(k => !savedCompanyKeys.has(k));
+  // Use a ref so the queryFn always reads the latest seen companies synchronously
+  // (useState is async — by the time the query fires, the state hasn't updated yet)
+  const seenForExclusionRef = useRef([]);
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
     queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole, today, refreshKey],
@@ -79,11 +81,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       target_industries: target_industries || [],
       target_role: effectiveRole,
       refresh_seed: refreshKey,
-      // Pass seen companies so backend can exclude them — forces genuinely new results
-      seen_companies: refreshKey > 0 ? seenForExclusion : [],
+      seen_companies: seenForExclusionRef.current,
     }),
-    staleTime: 0,   // always re-fetch — never serve cached results
-    gcTime: 0,      // don't store old pages at all
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const payload = feedsData?.data || feedsData;
@@ -93,8 +94,15 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const allFetched = [...priorityInsiders, ...targetedDiscoveries];
 
   const handleManualRefresh = () => {
-    // Mark current visible cards as seen before fetching next batch
-    addSeenKeys(allFetched);
+    // Compute seen companies synchronously and write to ref BEFORE triggering the query
+    const currentSeen = new Set(seenCompanyKeys);
+    allFetched.forEach(l => { const k = l.company || l.companyName; if (k) currentSeen.add(k); });
+    // Persist to sessionStorage
+    try { sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify([...currentSeen])); } catch {}
+    // Write to ref synchronously — queryFn will read this immediately when refreshKey changes
+    seenForExclusionRef.current = Array.from(currentSeen).filter(k => !savedCompanyKeys.has(k));
+    // Now update state (async, just for UI consistency) and trigger the query
+    setSeenCompanyKeys(currentSeen);
     setRefreshKey(k => k + 1);
     setLastRefreshed(new Date());
   };
