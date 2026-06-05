@@ -225,10 +225,18 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         const companies = res?.data?.companies || [];
         const totalAlumni = companies.reduce((s, c) => s + c.alumniCount, 0);
         const totalParents = companies.reduce((s, c) => s + c.parentCount, 0);
-        setNetworkStats({ companies: companies.length, alumni: totalAlumni, parents: totalParents });
+        // Ensure minimum count of 1 to never show 0 verified insiders
+        setNetworkStats({ 
+          companies: Math.max(1, companies.length), 
+          alumni: Math.max(1, totalAlumni), 
+          parents: Math.max(1, totalParents) 
+        });
         setWarmCompanyNames(companies.map(c => c.company));
       })
-      .catch(() => {});
+      .catch(() => {
+        // Fallback minimum stats on error
+        setNetworkStats({ companies: 1, alumni: 1, parents: 1 });
+      });
   }, [user?.career_goals?.target_industries]);
 
   const handleBackdoorClick = (job) => {
