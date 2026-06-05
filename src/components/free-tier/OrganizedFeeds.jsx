@@ -74,7 +74,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // Use a ref so the queryFn always reads the latest seen companies synchronously
   // (useState is async — by the time the query fires, the state hasn't updated yet)
   // Initialize from sessionStorage so returning users don't re-see excluded companies
-  const seenForExclusionRef = useRef(() => {
+  const seenForExclusionRef = useRef((() => {
     try {
       const stored = sessionStorage.getItem(`cff_seen_companies_${user?.id}`);
       if (!stored) return [];
@@ -84,7 +84,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       })();
       return all.filter(k => !savedKeys.has(k));
     } catch { return []; }
-  })();
+  })());
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
     queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole, today, refreshKey],
