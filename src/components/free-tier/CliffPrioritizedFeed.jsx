@@ -6,13 +6,27 @@ import MobileSwipeStack from './MobileSwipeStack';
 import AllCaughtUpCard from './AllCaughtUpCard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { RefreshCw } from 'lucide-react';
 
 export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp }) {
   const [selectedLead, setSelectedLead] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
   const schoolAbbr = schoolAbbrProp || user?.school_code?.toUpperCase() || 'UF';
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
   const queryClient = useQueryClient();
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await base44.functions.invoke('refreshDailyDrop', {});
+      queryClient.invalidateQueries({ queryKey: ['dailyDrop', user?.id] });
+    } catch (err) {
+      console.error('Failed to refresh daily drop:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const { data: dropData, isLoading, error } = useQuery({
     queryKey: ['dailyDrop', user?.id],
@@ -85,15 +99,26 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
               }
             </p>
           </div>
-          {!isLoading && slots.length > 0 && !allActioned && (
-            <div className="flex gap-1.5 items-center shrink-0 mt-1">
-              {slots.map((s, i) => {
-                const key = `${s.company}||${s.role}`;
-                const done = actionedKeys.has(key);
-                return <div key={i} className={`w-2 h-2 rounded-full transition-all ${done ? 'bg-green-400' : 'bg-gray-200'}`} />;
-              })}
-            </div>
-          )}
+          <div className="flex items-center gap-2 shrink-0 mt-1">
+            {!isLoading && slots.length > 0 && !allActioned && (
+              <div className="flex gap-1.5 items-center">
+                {slots.map((s, i) => {
+                  const key = `${s.company}||${s.role}`;
+                  const done = actionedKeys.has(key);
+                  return <div key={i} className={`w-2 h-2 rounded-full transition-all ${done ? 'bg-green-400' : 'bg-gray-200'}`} />;
+                })}
+              </div>
+            )}
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || isLoading}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              title="Refresh your Daily Drop with updated career goals"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+            >
+              <RefreshCw className={`w-4 h-4 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
       </div>
 
