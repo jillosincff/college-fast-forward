@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
+import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -108,6 +109,20 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     gcTime: 0,
     cacheTime: 0,
   });
+
+  // Dual-constraint engine: alumni-verified companies with active job listings
+  const { data: dualData, isLoading: dualLoading } = useQuery({
+    queryKey: ['dualConstraintLeads', effectiveRole, JSON.stringify(target_industries), effectiveSize],
+    queryFn: () => getDualConstraintLeads({
+      explicit_target_role: effectiveRole,
+      explicit_target_industries: target_industries || [],
+    }),
+    enabled: !!(effectiveRole || target_industries?.length),
+    staleTime: 10 * 60 * 1000, // 10min — slower-moving data
+    gcTime: 15 * 60 * 1000,
+  });
+  const dualLeads = Array.isArray(dualData?.data?.leads) ? dualData.data.leads
+                  : Array.isArray(dualData?.leads) ? dualData.leads : [];
 
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
@@ -286,6 +301,108 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             Set Goals →
           </button>
         </div>
+      )}
+
+      {/* ── DUAL CONSTRAINT: Alumni-Verified + Active Jobs ── */}
+      {(dualLoading || dualLeads.length > 0) && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🏅</span>
+            <h3 className="text-base font-bold text-gray-900 tracking-tight">
+              Alumni-Verified Opportunities
+            </h3>
+            <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-200">
+              ✦ CLiFF Gold
+            </span>
+            {dualLoading && (
+              <span className="text-[11px] text-gray-400 animate-pulse">Scanning alumni network...</span>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 -mt-1">
+            Companies where <span className="font-semibold text-purple-700">{schoolAbbr} alumni already work</span> — cross-referenced with active openings for your target role.
+          </p>
+
+          {dualLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[1, 2].map(n => (
+                <div key={n} className="h-28 bg-amber-50 rounded-2xl animate-pulse border border-amber-100" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {dualLeads.map((lead, idx) => (
+                <div
+                  key={lead.company || idx}
+                  className={`rounded-2xl border p-4 space-y-2.5 cursor-pointer hover:shadow-md transition-all ${
+                    lead.signalTier === 'gold'
+                      ? 'border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50'
+                      : 'border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50'
+                  }`}
+                  onClick={() => setSelectedLead({ ...lead, role: lead.role || effectiveRole, alumniCount: lead.alumniCount })}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-black text-gray-900 text-sm">{lead.company}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">{lead.role || effectiveRole}</p>
+                    </div>
+                    <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      lead.signalTier === 'gold'
+                        ? 'bg-amber-200 text-amber-800'
+                        : 'bg-purple-100 text-purple-700'
+                    }`}>
+                      {lead.signalTier === 'gold' ? '🏅 ACTIVE + ALUMNI' : '🎓 ALUMNI EDGE'}
+                    </span>
+                  </div>
+
+                  {/* Alumni proof */}
+                  <div className="flex items-center gap-1.5 text-xs text-purple-700 font-semibold">
+                    <span>🎓</span>
+                    <span>{lead.alumniCount} {schoolAbbr} alumni at this company</span>
+                  </div>
+
+                  {/* Active job proof */}
+                  {lead.hasActiveJobs && lead.activeJobs?.length > 0 && (
+                    <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5">
+                      <span>✅</span>
+                      <span>Active opening: {lead.activeJobs[0].title}</span>
+                    </div>
+                  )}
+
+                  {/* Insider names if available */}
+                  {lead.insiders?.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {lead.insiders.slice(0, 2).map((insider, i) => (
+                        <span key={i} className="text-[10px] bg-white/70 border border-purple-200 text-purple-600 px-2 py-0.5 rounded-full truncate max-w-[140px]">
+                          {insider.name?.split(/[|\-·]/)[0]?.trim() || 'Alumni'}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* CTAs */}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={e => { e.stopPropagation(); handleAddToPipeline({ ...lead, role: lead.role || effectiveRole }); }}
+                      className="flex-1 text-[11px] font-bold py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
+                      style={{ minHeight: 'auto' }}
+                    >
+                      + Pipeline
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); handleColdInroad({ ...lead, role: lead.role || effectiveRole }); }}
+                      className={`flex-1 text-[11px] font-bold py-1.5 rounded-lg text-white transition ${
+                        lead.signalTier === 'gold' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-purple-600 hover:bg-purple-700'
+                      }`}
+                      style={{ minHeight: 'auto' }}
+                    >
+                      ⚡ Generate Message
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {/* ── UNIFIED Target-Matched Opportunities Feed ── */}
