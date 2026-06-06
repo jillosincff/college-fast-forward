@@ -61,6 +61,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
           target_roles: finalRoles,
           target_industries: finalIndustries,
           company_size_preference: companySize,
+          location_preference: location.trim() || undefined,
           saved_at: new Date().toISOString()
         }
       });

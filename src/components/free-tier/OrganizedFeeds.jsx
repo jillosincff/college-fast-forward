@@ -60,7 +60,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const { target_industries, target_role, target_roles, company_size_preference, location_preference } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
   const effectiveSize = company_size_preference || 'all';
-  const effectiveLocation = location_preference || user?.location || '';
+  const effectiveLocation = location_preference || user?.career_goals?.location_preference || user?.location || '';
 
   useEffect(() => {
     const handler = () => {
