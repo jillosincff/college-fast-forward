@@ -4,7 +4,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
  * getSocialDiscoveries — Compliant Real-Time LinkedIn Pipeline
  *
  * Exa semantic search over LinkedIn's public index.
- * - 14-day recency enforced at the source via Exa startCrawlDate
+ * - 14-day recency enforced at the source via Exa startPublishedDate
  * - Public People Search for alumni mapping (public index only)
  * - No account-dependent scraping, no automated browser, no LinkedIn API
  *
@@ -50,7 +50,12 @@ Deno.serve(async (req) => {
     console.log(`[getSocialDiscoveries] Query: ${query}`);
 
     // Push the 14-day window down to Exa so we don't burn results on stale posts.
-    const startCrawlDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    // IMPORTANT: use startPublishedDate, not startCrawlDate — Exa's crawlDate is
+    // when Exa fetched the page, which can be days after the post was actually
+    // written; startPublishedDate is the post's own date. Using crawlDate let
+    // through old posts that happened to be re-crawled recently (14→1 attrition
+    // in the post-fetch filter; see logs from previous deploy).
+    const startPublishedDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
     // URL allowlist — keep only social-content URLs. Rejects /jobs/ (the
     // "no longer accepting applications" listings that were leaking through),
@@ -76,7 +81,7 @@ Deno.serve(async (req) => {
           query,
           numResults: 100,
           includeDomains: ['linkedin.com'],
-          startCrawlDate,
+          startPublishedDate,
           type: 'neural',
           contents: { text: { maxCharacters: 800 } },
         }),
@@ -112,7 +117,7 @@ Deno.serve(async (req) => {
 
     console.log(`[getSocialDiscoveries] Total raw posts: ${rawPosts.length}`);
 
-    // Enforce 14-day recency filter (defense-in-depth: Exa's startCrawlDate
+    // Enforce 14-day recency filter (defense-in-depth: Exa's startPublishedDate
     // already handles this at the source, but some results lack a date).
     rawPosts = rawPosts.filter(p => {
       if (!p.publishedDate) return true;
@@ -134,18 +139,51 @@ Deno.serve(async (req) => {
       console.log(`[getSocialDiscoveries] First surviving post text:`, (rawPosts[0].text || '').slice(0, 200));
     }
 
-    // Location filter (single pass, no hardcoded cities): if the user set a
-    // location, the post text must mention either the full string ("New York, NY")
-    // or the city portion ("New York"). Apply once — the previous duplicate
-    // pass was redundant and the NYC fallback terms biased non-NYC users.
+    // Location filter — only reject posts that explicitly name a DIFFERENT
+    // identifiable city. Posts with no city mention (e.g. "we're hiring
+    // marketing interns") are location-neutral and pass through. Mirrors
+    // the carousel's passesLocation pattern so a Toronto post can be
+    // correctly rejected for an NY user while still keeping any post
+    // that doesn't tip its hand on location.
     if (targetLocation) {
       const fullLoc = targetLocation.trim().toLowerCase();
       const cityOnly = targetLocation.split(',')[0].trim().toLowerCase();
-      const locationTerms = [fullLoc, cityOnly].filter(Boolean);
+
+      // Common aliases for major US cities (extend as needed).
+      const CITY_ALIASES = {
+        'new york': ['new york', 'new york, ny', 'new york city', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx'],
+        'san francisco': ['san francisco', 'san francisco, ca', 'sf', 'sf bay area', 'bay area'],
+        'los angeles': ['los angeles', 'los angeles, ca', 'la,', 'l.a.'],
+        'washington': ['washington', 'washington, dc', 'washington dc', 'dc,'],
+      };
+      const userAliases = CITY_ALIASES[cityOnly] || [fullLoc, cityOnly].filter(Boolean);
+
+      // Cities we recognize as "a specific other place." Posts mentioning one
+      // of these (and NOT the user's city) get rejected. Anything not on this
+      // list is treated as ambiguous → keep.
+      const KNOWN_CITIES = [
+        'new york', 'new york, ny', 'nyc', 'manhattan', 'brooklyn',
+        'san francisco', 'san francisco, ca', 'sf bay area',
+        'los angeles', 'la,', 'seattle', 'chicago', 'boston', 'austin',
+        'atlanta', 'miami', 'denver', 'dallas', 'houston', 'phoenix',
+        'philadelphia', 'pittsburgh', 'charlotte', 'nashville', 'portland',
+        'san diego', 'minneapolis', 'orlando', 'tampa', 'gainesville',
+        'cincinnati', 'cleveland', 'detroit', 'washington, dc', 'washington dc',
+        'mountain view', 'menlo park', 'cupertino', 'palo alto', 'redmond',
+        // International — common rejection targets for US-based searches
+        'toronto', 'vancouver', 'montreal', 'london', 'dublin', 'berlin',
+        'amsterdam', 'paris', 'tokyo', 'singapore', 'sydney', 'tel aviv',
+      ];
+
       const beforeCount = rawPosts.length;
       rawPosts = rawPosts.filter(p => {
         const text = (p.text || p.caption || '').toLowerCase();
-        return locationTerms.some(term => text.includes(term));
+        // KEEP if post mentions any user-city alias.
+        if (userAliases.some(a => text.includes(a))) return true;
+        // REJECT if post mentions a different identifiable city.
+        if (KNOWN_CITIES.some(c => !userAliases.includes(c) && text.includes(c))) return false;
+        // Otherwise location-neutral — keep.
+        return true;
       });
       console.log(`[getSocialDiscoveries] After location filter: ${rawPosts.length} (was ${beforeCount})`);
     }
