@@ -1,15 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { ApifyClient } from 'npm:apify-client@2.4.0';
 
 /**
- * getSocialDiscoveries — Compliant Public X-Ray Pipeline
+ * getSocialDiscoveries — Compliant Real-Time Hashtag Pipeline
  * 
- * Uses Exa AI as a public X-ray search engine to query LinkedIn's 
- * publicly indexed posts on the open web. Zero login requirements,
- * zero account-dependent scraping, 100% compliant with data safety.
+ * Uses Apify's LinkedIn Hashtag Scraper to track live hashtag posts.
+ * Zero login requirements, zero automated interactions.
  * 
- * Queries: site:linkedin.com/posts/ "[role]" ("#internship" OR "intern") ("location" OR "USA")
- * Recency: Strict 14-day crawl window via startCrawlDate
- * Alumni Check: Separate Exa People Search on company domain (public index only)
+ * Target hashtags: #internship, #entrylevel, #hiring intersected with target_role
+ * Recency: Strict 14-day filter on publishedDate
+ * Alumni Check: Exa People Search on verified company domain (public index only)
  */
 
 Deno.serve(async (req) => {
