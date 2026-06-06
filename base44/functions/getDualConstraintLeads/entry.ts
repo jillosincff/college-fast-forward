@@ -199,37 +199,61 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, leads: [], reason: 'No companies extracted from alumni profiles' });
     }
 
-    // ── STEP 2: Search for active job listings at each alumni company directly ──
+    // ── STEP 2: Resolve each company's actual career page domain, then search within it ──
+    // This prevents cross-company contamination (e.g. McKinsey results showing McKesson jobs)
     const SENIOR_PATTERN = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff)\b/i;
-    const ATS_DOMAINS = [
-      'jobs.lever.co', 'boards.greenhouse.io', 'jobs.ashbyhq.com',
-      'apply.workable.com', 'myworkdayjobs.com', 'jobs.smartrecruiters.com',
-    ];
 
     const topCompanies = rankedCompanies.slice(0, 8);
-    console.log(`[DualConstraint] Step 2: Searching jobs at: ${topCompanies.map(c => c.name).join(', ')}`);
+    console.log(`[DualConstraint] Step 2: Resolving career domains for: ${topCompanies.map(c => c.name).join(', ')}`);
 
-    // For each company, do a targeted ATS search by company name + role
-    // Use neural type for better ATS board matching; broader query without quotes for flexibility
+    // Step 2a: For each company, find their specific ATS/careers URL via Exa
+    // We search for their careers page and extract the exact domain — this is the "domain lock"
+    const companyDomains = await Promise.all(
+      topCompanies.map(async company => {
+        try {
+          const res = await exaFetch('search', {
+            query: `${company.name} official careers jobs apply`,
+            type: 'neural',
+            numResults: 3,
+            contents: { text: false },
+          });
+          const results = res.results || [];
+          // Pick the first result whose URL contains a recognizable ATS or career path
+          const atsPatterns = /lever\.co|greenhouse\.io|ashbyhq\.com|workable\.com|workday|smartrecruiters|taleo|icims|careers\.|jobs\./i;
+          const best = results.find(r => atsPatterns.test(r.url)) || results[0];
+          if (!best?.url) return { company: company.name, domain: null };
+          // Extract hostname as the domain lock
+          const domain = new URL(best.url).hostname.replace(/^www\./, '');
+          return { company: company.name, domain, careerUrl: best.url };
+        } catch {
+          return { company: company.name, domain: null };
+        }
+      })
+    );
+
+    console.log(`[DualConstraint] Resolved domains: ${companyDomains.map(c => `${c.company}→${c.domain || 'none'}`).join(', ')}`);
+
+    // Step 2b: For each company, search for jobs restricted to their resolved domain
     const perCompanyJobResults = await Promise.all(
-      topCompanies.map(company =>
-        exaFetch('search', {
-          query: `${company.name} ${roleQuery} entry level job apply`,
+      companyDomains.map(({ company, domain, careerUrl }) => {
+        if (!domain) return Promise.resolve({ company, results: [] });
+        return exaFetch('search', {
+          query: `${roleQuery} entry level job opening`,
           type: 'neural',
-          numResults: 5,
-          includeDomains: ATS_DOMAINS,
+          numResults: 4,
+          includeDomains: [domain],
           contents: {
             highlights: { maxCharacters: 500, numSentences: 4 },
             text: { maxCharacters: 1000 },
           },
-        }).then(d => ({ company: company.name, results: d.results || [] }))
-          .catch(() => ({ company: company.name, results: [] }))
-      )
+        }).then(d => ({ company, domain, results: d.results || [] }))
+          .catch(() => ({ company, domain, results: [] }));
+      })
     );
 
-    // Build jobsByCompany map from per-company results — no fuzzy matching needed
+    // Build jobsByCompany map — results are already domain-locked, no fuzzy matching needed
     const jobsByCompany = new Map();
-    perCompanyJobResults.forEach(({ company, results }) => {
+    perCompanyJobResults.forEach(({ company, domain, results }) => {
       const jobs = results
         .filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title))
         .map(r => {
@@ -237,19 +261,15 @@ Deno.serve(async (req) => {
           const highlightSnippet = (r.highlights || []).filter(h => typeof h === 'string').join(' ').trim();
           const textSnippet = typeof r.text === 'string' ? r.text.slice(0, 800) : '';
           const rawDescription = highlightSnippet || textSnippet;
-          // Strip HTML, collapse whitespace, cap length
-          const cleaned = rawDescription
-            .replace(/<[^>]+>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-          // Reject binary/garbage content: if >15% chars are non-ASCII, skip it
+          const cleaned = rawDescription.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          // Reject binary/garbage: >15% non-ASCII chars
           const nonAscii = (cleaned.match(/[^\x20-\x7E]/g) || []).length;
           const description = cleaned.length > 0 && nonAscii / cleaned.length < 0.15
-            ? cleaned.slice(0, 320)
-            : null;
+            ? cleaned.slice(0, 320) : null;
           return {
             title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
             url: r.url,
+            company_domain: domain,
             publishedDate: r.publishedDate || null,
             description,
           };
@@ -265,8 +285,10 @@ Deno.serve(async (req) => {
     const leads = rankedCompanies
       .map(company => {
         const jobs = jobsByCompany.get(company.name) || [];
+        const companyDomain = companyDomains.find(d => d.company === company.name)?.domain || null;
         return {
           company: company.name,
+          company_domain: companyDomain,
           role: roleQuery,
           alumniCount: company.alumniCount,
           insiders: company.insiders.slice(0, 3),
