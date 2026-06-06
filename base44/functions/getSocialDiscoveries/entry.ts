@@ -67,61 +67,50 @@ Deno.serve(async (req) => {
       return Response.json({ discoveries: [], source: 'linkedin_hashtag' });
     }
 
-    // Step 2: Extract company name from each post title/text
+    // Step 2: Extract company name from each post title/text — lenient, never blocks
     const extractCompany = (post) => {
-      const text = `${post.title || ''} ${post.text || ''}`;
-      // Common patterns: "at CompanyName", "join CompanyName", "CompanyName is hiring"
-      const atMatch = text.match(/\bat\s+([A-Z][A-Za-z0-9& ]{2,30}?)(?:\s*[,.|!?\n]|$)/);
-      const joinMatch = text.match(/join\s+([A-Z][A-Za-z0-9& ]{2,30}?)(?:\s*[,.|!?\n]|$)/);
-      const hiringMatch = text.match(/([A-Z][A-Za-z0-9& ]{2,30}?)\s+is\s+hiring/i);
-      const company = (atMatch?.[1] || joinMatch?.[1] || hiringMatch?.[1] || '').trim();
-      return company.length > 2 ? company : null;
-    };
+      const title = post.title || '';
+      const text = post.text || '';
+      const combined = `${title} ${text}`;
 
-    // Step 3: For each post with a detected company, domain-lock + alumni lookup
-    const discoveries = [];
-    const processedCompanies = new Set();
+      // Try title patterns first (most reliable)
+      const patterns = [
+        /\bat\s+([A-Z][A-Za-z0-9&.,\- ]{1,40}?)(?:\s*[|!?\n]|$)/,
+        /join\s+(?:the\s+)?([A-Z][A-Za-z0-9&.,\- ]{1,40}?)(?:\s+team|\s*[,|!?\n]|$)/i,
+        /([A-Z][A-Za-z0-9&.,\- ]{1,40}?)\s+is\s+hiring/i,
+        /([A-Z][A-Za-z0-9&.,\- ]{1,40}?)\s+(?:is\s+)?looking\s+for/i,
+        /^([A-Z][A-Za-z0-9&.,\- ]{1,40}?)[\s|·\-]/,
+      ];
 
-    for (const post of rawPosts.slice(0, 10)) {
-      const company = extractCompany(post);
-      if (!company || processedCompanies.has(company.toLowerCase())) continue;
-      processedCompanies.add(company.toLowerCase());
-
-      // Domain-lock: resolve exact corporate career domain
-      let companyDomain = null;
-      try {
-        const domainQuery = `${company} official careers jobs site`;
-        const domainRes = await fetch('https://api.exa.ai/search', {
-          method: 'POST',
-          headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: domainQuery,
-            numResults: 1,
-            type: 'neural',
-            contents: { text: { maxCharacters: 100 } },
-          }),
-        });
-        if (domainRes.ok) {
-          const domainData = await domainRes.json();
-          const domainUrl = domainData.results?.[0]?.url || '';
-          if (domainUrl) {
-            try {
-              const parsed = new URL(domainUrl);
-              companyDomain = parsed.hostname.replace('www.', '');
-            } catch {}
-          }
-        }
-      } catch (e) {
-        console.warn(`[getSocialDiscoveries] Domain lookup failed for ${company}: ${e.message}`);
+      for (const pattern of patterns) {
+        const m = combined.match(pattern);
+        const candidate = m?.[1]?.trim();
+        if (candidate && candidate.length > 2 && candidate.length < 50) return candidate;
       }
 
-      // Alumni lookup via Exa People Search using domain-locked constraint
+      // Fallback: use the author/profile name extracted from LinkedIn URL slug
+      if (post.url) {
+        try {
+          const urlSlug = new URL(post.url).pathname.split('/').filter(Boolean).pop() || '';
+          if (urlSlug && urlSlug.length > 2) {
+            return urlSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).slice(0, 40);
+          }
+        } catch {}
+      }
+
+      // Last resort: use first meaningful words from title
+      const titleWords = title.replace(/[#@]/g, '').trim().split(/\s+/).slice(0, 4).join(' ');
+      return titleWords.length > 2 ? titleWords : 'Unknown Company';
+    };
+
+    // Step 3: Process all posts in parallel — alumni lookup is a ranking signal, never a filter
+    const processPost = async (post) => {
+      const company = extractCompany(post);
+
+      // Alumni lookup — runs in parallel with other posts, times out gracefully
       let insiders = [];
       try {
-        const alumniQuery = companyDomain
-          ? `Professionals who graduated from ${schoolName} and currently work at ${companyDomain}`
-          : `${schoolCode} alumni working at ${company}`;
-
+        const alumniQuery = `${schoolCode} alumni OR "${schoolName}" graduate working at ${company}`;
         const alumniRes = await fetch('https://api.exa.ai/search', {
           method: 'POST',
           headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
@@ -130,7 +119,7 @@ Deno.serve(async (req) => {
             numResults: 3,
             includeDomains: ['linkedin.com'],
             type: 'neural',
-            contents: { text: { maxCharacters: 300 } },
+            contents: { text: { maxCharacters: 200 } },
           }),
         });
         if (alumniRes.ok) {
@@ -142,20 +131,17 @@ Deno.serve(async (req) => {
           })).filter(a => a.name.length > 1);
         }
       } catch (e) {
-        console.warn(`[getSocialDiscoveries] Alumni lookup failed for ${company}: ${e.message}`);
+        // Alumni lookup failure never blocks the card from appearing
       }
 
-      // Extract role from post text
       const roleMatch = (post.title || '').match(/(?:hiring|role|position|opening)[:\s]+([^|.\n]{3,60})/i);
       const role = roleMatch?.[1]?.trim() || targetRole || 'Open Role';
-
-      // Alumni check is a RANKING factor, NOT a filter — always include the post
       const alumniMatched = insiders.length > 0;
 
-      discoveries.push({
+      return {
         company,
         role,
-        company_domain: companyDomain,
+        company_domain: null,
         opportunity_url: post.url,
         post_title: post.title || '',
         post_snippet: (post.text || '').slice(0, 400),
@@ -168,8 +154,10 @@ Deno.serve(async (req) => {
           ? '🎯 Network Match | Alumni found at this company'
           : '🔥 Direct Manager Access | Live hiring post — pitch the publisher directly',
         hashtags: ['#internship', '#entrylevel', '#hiring'],
-      });
-    }
+      };
+    };
+
+    const discoveries = await Promise.all(rawPosts.slice(0, 8).map(processPost));
 
     console.log(`[getSocialDiscoveries] Final discoveries: ${discoveries.length}`);
 
