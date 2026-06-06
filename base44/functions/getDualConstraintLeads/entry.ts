@@ -251,6 +251,24 @@ Deno.serve(async (req) => {
       })
     );
 
+    // Sanitize Exa description text into a clean, human-readable snippet
+    const cleanDescription = (raw) => {
+      if (!raw || typeof raw !== 'string') return null;
+      let text = raw
+        .replace(/<[^>]+>/g, ' ')           // strip HTML tags
+        .replace(/\[\.{2,3}\]/g, '')         // remove "[...]" truncation markers
+        .replace(/\[…\]/g, '')               // remove "[…]"
+        .replace(/#+\s*/g, '')               // strip markdown headings (#, ##, ###)
+        .replace(/^(Date|Location[s]?|Company|Job ID|Req ID|Requisition)[^\n]*\n?/gim, '') // strip metadata lines
+        .replace(/\n{2,}/g, ' ')             // collapse newlines
+        .replace(/\s{2,}/g, ' ')             // collapse whitespace
+        .trim();
+      // Reject if >15% non-ASCII (binary/garbage content)
+      const nonAscii = (text.match(/[^\x20-\x7E]/g) || []).length;
+      if (text.length === 0 || nonAscii / text.length >= 0.15) return null;
+      return text.slice(0, 320);
+    };
+
     // Build jobsByCompany map — results are already domain-locked, no fuzzy matching needed
     const jobsByCompany = new Map();
     perCompanyJobResults.forEach(({ company, domain, results }) => {
@@ -258,14 +276,9 @@ Deno.serve(async (req) => {
         .filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title))
         .map(r => {
           // Prefer highlights (Exa-extracted key sentences) over raw text
-          const highlightSnippet = (r.highlights || []).filter(h => typeof h === 'string').join(' ').trim();
+          const highlightSnippet = (r.highlights || []).filter(h => typeof h === 'string').join(' ');
           const textSnippet = typeof r.text === 'string' ? r.text.slice(0, 800) : '';
-          const rawDescription = highlightSnippet || textSnippet;
-          const cleaned = rawDescription.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-          // Reject binary/garbage: >15% non-ASCII chars
-          const nonAscii = (cleaned.match(/[^\x20-\x7E]/g) || []).length;
-          const description = cleaned.length > 0 && nonAscii / cleaned.length < 0.15
-            ? cleaned.slice(0, 320) : null;
+          const description = cleanDescription(highlightSnippet) || cleanDescription(textSnippet);
           return {
             title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
             url: r.url,
