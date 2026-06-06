@@ -104,8 +104,9 @@ Deno.serve(async (req) => {
       
       const roleWords = /\b(analyst|manager|engineer|director|associate|intern|coordinator|specialist|developer|designer|consultant|researcher|writer|advisor|representative|assistant|strategist|president|officer|founder|lead|head|ceo|cfo|cto|vp|svp|evp)\b/i;
       
-      // Strategy 1: "at Company" pattern in title or highlights (most reliable)
-      const atMatch = fullText.match(/\bat\s+([A-Z][A-Za-z0-9\s&.,'\-]{2,45}?)(?:\s*[|·]|\s*\n|\s*$)/);
+      // Strategy 1: "at Company" pattern — must be preceded by a role/title word to avoid matching "at" in person names
+      // e.g. "Marketing Analyst at Nike" → Nike ✓  | "Macarena Gonzalez at Cabanellas" → skip ✗
+      const atMatch = fullText.match(/\b(?:analyst|manager|engineer|director|associate|intern|coordinator|specialist|developer|designer|consultant|researcher|writer|advisor|representative|assistant|strategist|president|officer|founder|lead|head|ceo|cfo|cto|vp|svp|evp)[^|·\n]{0,40}\bat\s+([A-Z][A-Za-z0-9\s&.,'\-]{2,45}?)(?:\s*[|·]|\s*\n|\s*$)/i);
       
       // Strategy 2: "Title | Company" — second segment after pipe/bullet if it doesn't look like a role
       const pipeParts = title.split(/[|·]/).map(s => s.trim()).filter(Boolean);
@@ -127,9 +128,12 @@ Deno.serve(async (req) => {
       if (companyName && companyName.length > 1 && companyName.length < 60) {
         const lower = companyName.toLowerCase();
         if (lower.includes(shortSchool.toLowerCase()) || lower.includes('university') || lower.includes('college') || lower === 'linkedin') return;
-        // Skip if it looks like a person name (only 2 words, both capitalized, no role indicators)
+        // Skip if it looks like a person name:
+        // - single word, all title-case, no digits (e.g. "Cabanellas")
+        // - two words, both title-case (e.g. "John Smith")
         const words = companyName.trim().split(/\s+/);
-        const looksLikePerson = words.length === 2 && words.every(w => /^[A-Z][a-z]+$/.test(w));
+        const allTitleCase = words.every(w => /^[A-Z][a-z]+$/.test(w));
+        const looksLikePerson = allTitleCase && words.length <= 3 && !/\d/.test(companyName);
         if (looksLikePerson) return;
         
         if (!companyMap.has(companyName)) {
