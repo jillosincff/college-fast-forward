@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
-const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
-
 export default function PostTrialUpgradePrompt({ message }) {
   const [loading, setLoading] = useState(false);
-  const foundingActive = new Date() < FOUNDING_DEADLINE;
 
   const handleUpgrade = async () => {
     setLoading(true);
     try {
       const res = await createCheckoutSession({
-        plan: foundingActive ? 'founding_monthly' : 'monthly',
+        plan: 'pro_monthly',
         success_url: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
         cancel_url: window.location.href,
       });

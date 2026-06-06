@@ -14,17 +14,12 @@ const FEATURES = [
   'Job search tracking and follow-up alerts',
 ];
 
-const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
-
 export default function FastIQUpgradeModal({ user, onClose }) {
   const [showParentInvite, setShowParentInvite] = useState(false);
   const [parentEmail, setParentEmail] = useState('');
   const [inviteSent, setInviteSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [upgrading, setUpgrading] = useState(false);
-
-  const foundingOfferActive = new Date() < FOUNDING_DEADLINE;
-  const daysLeft = Math.ceil((FOUNDING_DEADLINE - new Date()) / (1000 * 60 * 60 * 24));
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
@@ -120,19 +115,16 @@ export default function FastIQUpgradeModal({ user, onClose }) {
 
           <div className="bg-[#0A0A0A] rounded-lg p-4 mb-6">
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-             $29/month or $249/year
+             $19.96/month ($4.99/week)
            </p>
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
-             Start free for 5 days — then $29/month. Cancel anytime.
+             Cancel anytime.
            </p>
           </div>
 
           <div className="space-y-3">
-            <button onClick={() => handleUpgrade('fastiq_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-              {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : isParent ? 'Activate FastIQ for My Student →' : 'Start Free Trial →'}
-            </button>
-            <button onClick={() => handleUpgrade('fastiq_annual')} disabled={upgrading} className="w-full border border-[#E85D20] text-[#E85D20] py-3 rounded-full font-semibold hover:bg-[#E85D20]/10 transition-colors disabled:opacity-50" style={{ minHeight: 'auto' }}>
-              Annual — $249/year (save $99)
+            <button onClick={() => handleUpgrade('pro_monthly')} disabled={upgrading} className="w-full bg-[#E85D20] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#d44e14] transition-colors disabled:opacity-50" style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              {upgrading ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : isParent ? 'Activate for My Student →' : 'Start Now →'}
             </button>
           </div>
 
@@ -158,7 +150,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 16, textAlign: 'center' }}>
-            Start free for 5 days — then $29/month. Cancel anytime.
+            $19.96/month ($4.99/week). Cancel anytime.
           </p>
         </div>
       </DialogContent>

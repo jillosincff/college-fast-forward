@@ -1,16 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const PRICES = {
-  pro_monthly:             'price_1TZyJ8873TV7WMcTiMisnPsg',  // $19.96/month ($4.99/week × 4)
-  pro_monthly_founding:    'price_1TZyqK873TV7WMcTuQVvrYcG',  // $9.96/month (50% off — founding/downsell)
-  fastiq_monthly:          'price_1T7pOU873TV7WMcTbbBXguCb',  // $29/month
-  fastiq_annual:           'price_1T7pQp873TV7WMcTdp7SsboC',  // $249/year
-  fastiq_founding_monthly: 'price_1TFPPy873TV7WMcTSw0rKVfj',  // $14.50/month
-  fastiq_founding_annual:  'price_1TFPQq873TV7WMcTaE82WeKy',  // $124.50/year
-  career_archetype:        'price_1TFKl2873TV7WMcTTHDGZHk6',  // $49 one-time
+  pro_monthly: 'price_1TZyJ8873TV7WMcTiMisnPsg',  // $19.96/month ($4.99/week × 4)
 };
-
-const FOUNDING_OFFER_DEADLINE = new Date('2026-04-30T23:59:59');
 
 Deno.serve(async (req) => {
   try {
@@ -35,35 +27,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Auto-apply founding rate if within deadline and plan is not already founding (fastiq plans only)
-    const now = new Date();
-    if (now <= FOUNDING_OFFER_DEADLINE && !plan?.includes('founding') && plan?.startsWith('fastiq')) {
-      plan = plan.replace('fastiq_', 'fastiq_founding_');
-    }
-
     if (!PRICES[plan]) {
       return Response.json({ success: false, error: `Unknown plan: ${plan}` }, { status: 400 });
     }
 
-    const isSubscription = plan !== 'career_archetype';
-    const isFoundingPlan = plan.includes('founding');
-
-    // Only fastiq founding plans are deadline-gated; pro_monthly_founding is a permanent downsell price
-    if (isFoundingPlan && plan !== 'pro_monthly_founding' && new Date() > FOUNDING_OFFER_DEADLINE) {
-      return Response.json({
-        success: false,
-        error: 'The founding member offer has expired.',
-        offer_expired: true,
-      }, { status: 400 });
-    }
+    const isSubscription = true;
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
 
-    const subscriptionTier = plan.includes('fastiq') ? 'fastiq' : 'cff';
-    const isFoundingMember = isFoundingPlan;
-
     const body = new URLSearchParams({
-      mode: isSubscription ? 'subscription' : 'payment',
+      mode: 'subscription',
       'line_items[0][price]': PRICES[plan],
       'line_items[0][quantity]': '1',
       success_url: successUrl || 'https://collegefastforward.com/#Dashboard?upgrade=success',
@@ -72,21 +45,17 @@ Deno.serve(async (req) => {
       'metadata[user_id]': clientUser.id,
       'metadata[user_email]': clientUser.email,
       'metadata[plan]': plan,
-      'metadata[subscription_tier]': subscriptionTier,
-      'metadata[is_founding_member]': String(isFoundingMember),
+      'metadata[subscription_tier]': 'cff',
     });
 
-    if (isSubscription) {
-      // Hard paywall — no trial, charge immediately at signup.
-      body.append('payment_method_collection', 'always');
-      body.append('subscription_data[metadata][user_id]', clientUser.id);
-      body.append('subscription_data[metadata][plan]', plan);
-      body.append('subscription_data[metadata][subscription_tier]', subscriptionTier);
-      body.append('subscription_data[metadata][is_founding_member]', String(isFoundingMember));
-      if (clientUser.family_id) {
-        body.append('subscription_data[metadata][family_id]', clientUser.family_id);
-        body.append('metadata[family_id]', clientUser.family_id);
-      }
+    // Hard paywall — no trial, charge immediately at signup.
+    body.append('payment_method_collection', 'always');
+    body.append('subscription_data[metadata][user_id]', clientUser.id);
+    body.append('subscription_data[metadata][plan]', plan);
+    body.append('subscription_data[metadata][subscription_tier]', 'cff');
+    if (clientUser.family_id) {
+      body.append('subscription_data[metadata][family_id]', clientUser.family_id);
+      body.append('metadata[family_id]', clientUser.family_id);
     }
 
     if (clientUser.email) {
