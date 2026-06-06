@@ -149,6 +149,9 @@ Deno.serve(async (req) => {
       const roleMatch = (post.title || '').match(/(?:hiring|role|position|opening)[:\s]+([^|.\n]{3,60})/i);
       const role = roleMatch?.[1]?.trim() || targetRole || 'Open Role';
 
+      // Alumni check is a RANKING factor, NOT a filter — always include the post
+      const alumniMatched = insiders.length > 0;
+
       discoveries.push({
         company,
         role,
@@ -159,8 +162,11 @@ Deno.serve(async (req) => {
         published_date: post.publishedDate || null,
         insiders,
         alumni_count: insiders.length,
+        alumni_matched: alumniMatched,
         source_type: 'social_scout',
-        source_label: '📣 Social Scout Discovery | Sourced from hiring post on LinkedIn (#internship)',
+        source_label: alumniMatched
+          ? '🎯 Network Match | Alumni found at this company'
+          : '🔥 Direct Manager Access | Live hiring post — pitch the publisher directly',
         hashtags: ['#internship', '#entrylevel', '#hiring'],
       });
     }

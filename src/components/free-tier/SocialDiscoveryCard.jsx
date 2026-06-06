@@ -8,24 +8,31 @@ export default function SocialDiscoveryCard({ discovery, onAddToPipeline, onGene
     role,
     company_domain,
     opportunity_url,
-    post_title,
     post_snippet,
     published_date,
     insiders = [],
     alumni_count = 0,
-    source_label,
+    alumni_matched = false,
   } = discovery;
 
   const daysSince = published_date
     ? Math.floor((Date.now() - new Date(published_date).getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
+  const headerBg = alumni_matched
+    ? 'bg-gradient-to-r from-purple-600 to-indigo-600'
+    : 'bg-gradient-to-r from-orange-500 to-red-500';
+
+  const headerLabel = alumni_matched
+    ? `🎯 Network Match · ${alumni_count} ${schoolAbbr || ''} Alumni Found`
+    : '🔥 Direct Manager Access · Live Hiring Post';
+
   return (
-    <div className="bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
-      {/* Scout Badge Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 flex items-center gap-2">
-        <span className="text-[10px] font-bold text-white/90 flex-1 truncate">
-          📣 Social Scout Discovery | LinkedIn (#internship)
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden">
+      {/* Tier Badge Header */}
+      <div className={`${headerBg} px-4 py-2 flex items-center gap-2`}>
+        <span className="text-[10px] font-bold text-white/95 flex-1 truncate">
+          {headerLabel}
         </span>
         {daysSince !== null && (
           <span className="text-[10px] text-white/70 shrink-0">
@@ -40,7 +47,7 @@ export default function SocialDiscoveryCard({ discovery, onAddToPipeline, onGene
           <p className="font-black text-gray-900 text-sm leading-tight">{company}</p>
           <p className="text-xs text-gray-500 mt-0.5">{role}</p>
           {company_domain && (
-            <p className="text-[10px] text-blue-500 mt-0.5 font-medium">🔒 Domain-locked: {company_domain}</p>
+            <p className="text-[10px] text-blue-500 mt-0.5 font-medium">🔒 {company_domain}</p>
           )}
         </div>
 
@@ -62,11 +69,11 @@ export default function SocialDiscoveryCard({ discovery, onAddToPipeline, onGene
           </div>
         )}
 
-        {/* Alumni insiders */}
-        {alumni_count > 0 && (
+        {/* Alumni insiders (Tier 1 only) */}
+        {alumni_matched && insiders.length > 0 && (
           <div className="bg-purple-50 border border-purple-100 rounded-xl p-2.5 space-y-1.5">
             <p className="text-[10px] font-bold text-purple-700 uppercase tracking-wide">
-              🎓 {alumni_count} {schoolAbbr} Alumni Found
+              🎓 {alumni_count} {schoolAbbr} Alumni at this company
             </p>
             <div className="flex flex-wrap gap-1">
               {insiders.slice(0, 3).map((ins, i) => (
@@ -78,9 +85,20 @@ export default function SocialDiscoveryCard({ discovery, onAddToPipeline, onGene
           </div>
         )}
 
+        {/* Tier 2: Direct access callout */}
+        {!alumni_matched && (
+          <div className="bg-orange-50 border border-orange-100 rounded-xl p-2.5">
+            <p className="text-[10px] font-bold text-orange-700 uppercase tracking-wide mb-0.5">
+              🔥 Direct Manager Access
+            </p>
+            <p className="text-[10px] text-orange-600 leading-relaxed">
+              No alumni mapped yet — but you have a <span className="font-bold">direct line</span> to the person who posted this role. CLiFF will write the exact message.
+            </p>
+          </div>
+        )}
+
         {/* Action buttons */}
         <div className="flex gap-2 pt-1">
-          {/* View LinkedIn post */}
           <a
             href={opportunity_url}
             target="_blank"
@@ -88,7 +106,7 @@ export default function SocialDiscoveryCard({ discovery, onAddToPipeline, onGene
             className="flex-1 text-center text-[11px] font-bold py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition"
             style={{ minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
           >
-            🔗 View LinkedIn Post
+            🔗 View Post
           </a>
           <button
             onClick={() => onAddToPipeline?.(discovery)}
@@ -99,15 +117,18 @@ export default function SocialDiscoveryCard({ discovery, onAddToPipeline, onGene
           </button>
         </div>
 
-        {alumni_count > 0 && (
-          <button
-            onClick={() => onGenerateMessage?.(discovery)}
-            className="w-full text-[11px] font-bold py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white transition"
-            style={{ minHeight: 'auto' }}
-          >
-            ⚡ Generate Message to Insider
-          </button>
-        )}
+        {/* Message CTA — adapts to tier */}
+        <button
+          onClick={() => onGenerateMessage?.(discovery)}
+          className={`w-full text-[11px] font-bold py-2 rounded-lg text-white transition ${
+            alumni_matched
+              ? 'bg-purple-600 hover:bg-purple-700'
+              : 'bg-orange-500 hover:bg-orange-600'
+          }`}
+          style={{ minHeight: 'auto' }}
+        >
+          {alumni_matched ? '⚡ Generate Alumni Intro Message' : '⚡ Generate Direct Manager Pitch'}
+        </button>
       </div>
     </div>
   );
