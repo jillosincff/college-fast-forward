@@ -92,6 +92,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), refreshKey],
     queryFn: () => {
       return getPersonalizedNetworkCarousel({
+        // CRITICAL: Pass explicit parameters to bypass backend DB race condition
+        explicit_target_role: effectiveRole,
+        explicit_target_industries: target_industries || [],
         target_industries: target_industries || [],
         target_role: effectiveRole,
         refresh_seed: refreshKey,

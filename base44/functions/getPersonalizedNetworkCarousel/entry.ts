@@ -439,8 +439,12 @@ Deno.serve(async (req) => {
     const unlockedJobIds = new Set(unlocks.map(u => u.job_id));
 
     const body = await req.json().catch(() => ({}));
+    
+    // CRITICAL: Prioritize explicit payload parameters over DB to bypass race conditions
+    // When frontend passes explicit_target_role, use it immediately instead of DB lookup
     let targetIndustries = (
       body.target_industries
+      || body.explicit_target_industries
       || user.career_goals?.target_industries
       || user.industries_interested
       || user.industries_of_interest
@@ -452,7 +456,7 @@ Deno.serve(async (req) => {
       targetIndustries = ['tech']; // Default fallback
     }
 
-    const targetRole = body.target_role || user.career_goals?.role || user.target_role || '';
+    const targetRole = body.explicit_target_role || body.target_role || user.career_goals?.role || user.target_role || '';
     const companySizePref = body.company_size_preference || user.career_goals?.company_size_preference || 'all';
     // Companies the user has already seen — exclude them from this batch
     const seenCompanies = new Set(
