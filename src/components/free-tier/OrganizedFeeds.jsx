@@ -101,6 +101,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     enabled: !!effectiveRole || !!target_industries?.length,
     staleTime: 0,
     gcTime: 0,
+    cacheTime: 0,
   });
 
   const payload = feedsData?.data || feedsData;
