@@ -16,18 +16,6 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const effectiveRole = target_role || target_roles?.[0] || '';
   const queryClient = useQueryClient();
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await base44.functions.invoke('refreshDailyDrop', {});
-      queryClient.invalidateQueries({ queryKey: ['dailyDrop', user?.id] });
-    } catch (err) {
-      console.error('Failed to refresh daily drop:', err);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   const { data: dropData, isLoading, error } = useQuery({
     queryKey: ['dailyDrop', user?.id],
     queryFn: () => getDailyDrop({}),
@@ -78,6 +66,18 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
 
   const handleDismiss = (lead) => handleAction(lead);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await base44.functions.invoke('refreshDailyDrop', {});
+      queryClient.invalidateQueries({ queryKey: ['dailyDrop', user?.id] });
+    } catch (err) {
+      console.error('Failed to refresh:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const visibleSlots = slots.filter(s => !actionedKeys.has(`${s.company}||${s.role}`));
   const allActioned = slots.length > 0 && visibleSlots.length === 0;
   const noGoals = !target_industries?.length && !effectiveRole;
@@ -113,7 +113,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
               onClick={handleRefresh}
               disabled={refreshing || isLoading}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-              title="Refresh your Daily Drop with updated career goals"
+              title="Generate new batch with your latest career goals"
               style={{ minHeight: 'auto', minWidth: 'auto' }}
             >
               <RefreshCw className={`w-4 h-4 text-gray-600 ${refreshing ? 'animate-spin' : ''}`} />
