@@ -233,14 +233,26 @@ Deno.serve(async (req) => {
 
     console.log(`[DualConstraint] Resolved domains: ${companyDomains.map(c => `${c.company}→${c.domain || 'none'}`).join(', ')}`);
 
+    // Build a location qualifier for the job search query
+    // e.g. "New York, NY" → "New York" | "Remote" → "remote"
+    const locationCity = userLocation
+      ? userLocation.split(',')[0].trim()
+      : '';
+    const locationQuery = locationCity
+      ? `${locationCity} OR remote`
+      : '';
+
     // Step 2b: For each company, search for jobs restricted to their resolved domain
     const perCompanyJobResults = await Promise.all(
       companyDomains.map(({ company, domain, careerUrl }) => {
         if (!domain) return Promise.resolve({ company, results: [] });
+        const jobQuery = locationQuery
+          ? `${roleQuery} entry level ${locationQuery} job opening`
+          : `${roleQuery} entry level job opening`;
         return exaFetch('search', {
-          query: `${roleQuery} entry level job opening`,
+          query: jobQuery,
           type: 'neural',
-          numResults: 4,
+          numResults: 5,
           includeDomains: [domain],
           contents: {
             highlights: { maxCharacters: 500, numSentences: 4 },
@@ -269,11 +281,28 @@ Deno.serve(async (req) => {
       return text.slice(0, 320);
     };
 
+    // Location filter: if user has a specific city, reject jobs that mention a different US city
+    const US_CITIES = /\b(Austin|San Francisco|Seattle|Chicago|Los Angeles|Boston|Atlanta|Denver|Dallas|Houston|Miami|Phoenix|Portland|San Diego|Minneapolis|Detroit|Philadelphia|Pittsburgh|Charlotte|Nashville|Raleigh|Salt Lake City|Las Vegas|Tampa|Orlando|San Jose|San Antonio|Columbus|Kansas City|Indianapolis|St\. Louis|Cincinnati|Cleveland|Memphis|Richmond|Sacramento|Baltimore)\b/i;
+    const userCity = locationCity ? locationCity.toLowerCase() : '';
+    const isLocationMatch = (text) => {
+      if (!userCity || userCity === 'remote') return true; // no filter
+      const lowerText = text.toLowerCase();
+      // Always allow if "remote" is mentioned
+      if (lowerText.includes('remote')) return true;
+      // Allow if user's city is mentioned
+      if (lowerText.includes(userCity)) return true;
+      // Reject if another specific US city is explicitly mentioned
+      const otherCityMatch = text.match(US_CITIES);
+      if (otherCityMatch && otherCityMatch[0].toLowerCase() !== userCity) return false;
+      return true; // allow if no city info at all
+    };
+
     // Build jobsByCompany map — results are already domain-locked, no fuzzy matching needed
     const jobsByCompany = new Map();
     perCompanyJobResults.forEach(({ company, domain, results }) => {
       const jobs = results
         .filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title))
+        .filter(r => isLocationMatch((r.title || '') + ' ' + (r.highlights || []).join(' ') + ' ' + (r.text || '').slice(0, 400)))
         .map(r => {
           // Prefer highlights (Exa-extracted key sentences) over raw text
           const highlightSnippet = (r.highlights || []).filter(h => typeof h === 'string').join(' ');

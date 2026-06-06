@@ -391,18 +391,20 @@ async function getLiveJobMatches(base44, goals, industries, sizePreference) {
   const size = sizePreference[0] || 'any size';
 
   const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `Search the web RIGHT NOW for companies actively hiring ${role}s specifically in ${location} in 2025. Location is critical — only return companies with offices or positions available in ${location}.
+    prompt: `Search the web RIGHT NOW for companies actively hiring ${role}s in or near ${location} in 2025.
+
+STRICT LOCATION RULE: Only return companies with confirmed job openings IN ${location} or offering remote positions open to candidates in ${location}. Do NOT return companies whose only openings are in other cities (e.g. if user wants New York, do not return Austin TX or San Francisco CA companies unless they have NY offices or are remote).
 
 Focus on ${size} companies in ${industry}.
 
-Return exactly 5 companies that have open ${role} positions in ${location} right now.
+Return exactly 5 companies matching this criteria.
 For each company:
-- Real company name (must have presence in ${location})
+- Real company name (must have a job opening in ${location} OR be remote-friendly)
 - One sentence describing the specific ${role} openings in ${location}
 - Hiring signal: hot (aggressively hiring), warm (selectively hiring), or cool (limited)
 - Company size: startup (<100), mid (100-999), or large (1000+)
 
-Do NOT return national defaults like HCA, Mayo Clinic, CVS unless they have specific openings in ${location}. Return locally relevant employers.`,
+Prioritize companies headquartered in or with major offices in ${location}. Remote-friendly companies are acceptable as a secondary option.`,
     add_context_from_internet: true,
     model: 'gemini_3_flash',
     response_json_schema: {
