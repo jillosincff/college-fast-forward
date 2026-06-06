@@ -473,9 +473,11 @@ Deno.serve(async (req) => {
     const schoolCode = (user.school_code || '').toLowerCase();
     const schoolName = (user.school_name || user.school || user.university || '').toLowerCase();
     
-    // Get user's location preferences
-    const userLocation = (user.location_preference || user.preferred_location || user.location || '').toLowerCase();
-    const userCity = (user.location_city || user.city || '').toLowerCase();
+    // Get user's location preferences — payload.target_location takes priority (sent by OrganizedFeeds)
+    const rawLocation = body.target_location || user.career_goals?.location_preference || user.location_preference || user.preferred_location || user.location || '';
+    const userLocation = rawLocation.toLowerCase();
+    // Extract city: "New York, NY" → "new york"
+    const userCity = rawLocation ? rawLocation.split(',')[0].trim().toLowerCase() : (user.location_city || user.city || '').toLowerCase();
     const userState = (user.location_state || user.state || '').toLowerCase();
     const relocationOk = user.relocation_ok === true;
     const userSchoolCode = (user.school_code || '').toLowerCase();
@@ -628,17 +630,22 @@ Deno.serve(async (req) => {
       [jobPool[i], jobPool[j]] = [jobPool[j], jobPool[i]];
     }
     
-    // Location filter: only apply if relocation is NOT ok AND user has a specific city (not just a state)
-    // Skip location filtering if user only has a state/country preference — too aggressive
-    if (!relocationOk && userCity) {
-      const locationKeywords = [userCity].filter(Boolean);
+    // Location filter: if the user has a target city, reject jobs that explicitly name a DIFFERENT city.
+    // Allow: remote, "multiple US cities", no city mentioned, or the user's own city.
+    if (userCity) {
+      const OTHER_US_CITIES = /\b(Austin|San Francisco|Seattle|Chicago|Los Angeles|Boston|Atlanta|Denver|Dallas|Houston|Miami|Phoenix|Portland|San Diego|Minneapolis|Detroit|Philadelphia|Pittsburgh|Charlotte|Nashville|Raleigh|Salt Lake City|Las Vegas|Tampa|Orlando|San Jose|San Antonio|Columbus|Kansas City|Indianapolis|New York|Brooklyn|Manhattan|Menlo Park|Cupertino|Redwood City|Mountain View|Palo Alto|Burbank|Santa Monica|Los Gatos|Beverly Hills|Malvern|Cincinnati|Pittsburgh|Beaverton|Bristol|Pittsburgh|Richmond|Sacramento|Baltimore|St\. Louis|Cleveland|Memphis|Bellevue|Kirkland|Bothell|Herndon|Tysons)\b/i;
       const locationFiltered = jobPool.filter(j => {
         const jobDesc = (j.description || '').toLowerCase();
-        const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home') || jobDesc.includes('remote-friendly');
-        const matchesLocation = locationKeywords.some(loc => jobDesc.includes(loc));
-        return isRemote || matchesLocation;
+        const jobText = (j.description || '');
+        const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home') || jobDesc.includes('remote-friendly') || jobDesc.includes('remote-first');
+        const isMultiCity = jobDesc.includes('multiple us cities') || jobDesc.includes('multiple cities');
+        if (isRemote || isMultiCity) return true;
+        // Check if a different specific city is mentioned
+        const cityMatch = jobText.match(OTHER_US_CITIES);
+        if (cityMatch && !jobDesc.includes(userCity)) return false;
+        return true;
       });
-      // Only apply if it keeps at least 4 results
+      // Only apply if it keeps at least 4 results (safety net for small pools)
       if (locationFiltered.length >= 4) jobPool = locationFiltered;
     }
 
