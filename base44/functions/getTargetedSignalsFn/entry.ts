@@ -113,7 +113,10 @@ Deno.serve(async (req) => {
       .filter(Boolean);
     const roleQuery = allRoleTerms.slice(0, 4).map(t => `"${t}"`).join(' OR ') || '"analyst" OR "coordinator" OR "associate"';
     const levelQuery = levelTerms.map(t => `"${t}"`).join(' OR ');
-    const locationStr = location ? ` ${location}` : '';
+
+    // Extract city from location preference (e.g. "New York, NY" → "New York")
+    const locationCity = location ? location.split(',')[0].trim() : '';
+    const locationStr = locationCity ? ` "${locationCity}" OR "remote"` : '';
     const query = `(${roleQuery}) (${levelQuery})${locationStr}`;
 
     console.log(`[getTargetedSignalsFn] Searching Exa: "${query}"`);
@@ -156,6 +159,19 @@ Deno.serve(async (req) => {
     // Filter and map to signal objects — check URL contains any ATS domain
     const isATSUrl = (url) => ATS_DOMAINS.some(d => url && url.includes(d));
 
+    // Location post-filter: if user has a city, reject jobs explicitly listing another US city
+    const US_CITIES = /\b(Austin|San Francisco|Seattle|Chicago|Los Angeles|Boston|Atlanta|Denver|Dallas|Houston|Miami|Phoenix|Portland|San Diego|Minneapolis|Detroit|Philadelphia|Pittsburgh|Charlotte|Nashville|Raleigh|Salt Lake City|Las Vegas|Tampa|Orlando|San Jose|San Antonio|Columbus|Kansas City|Indianapolis|St\. Louis|Cincinnati|Cleveland|Memphis|Richmond|Sacramento|Baltimore)\b/i;
+    const userCity = locationCity.toLowerCase();
+    const isLocationOk = (text) => {
+      if (!userCity) return true;
+      const lower = text.toLowerCase();
+      if (lower.includes('remote')) return true;
+      if (lower.includes(userCity)) return true;
+      const cityMatch = text.match(US_CITIES);
+      if (cityMatch && cityMatch[0].toLowerCase() !== userCity) return false;
+      return true;
+    };
+
     // Professional role whitelist — title must contain at least one of these to be relevant
     const ROLE_WHITELIST = /\b(engineer|analyst|associate|intern|coordinator|specialist|developer|designer|consultant|researcher|scientist|writer|advisor|strategist|accountant|producer|planner|buyer|manager|recruiter|marketer|marketing|sales|operations|finance|data|software|product|ux|ui|legal|communications|pr|account|media|content|brand|project|program|policy|clinical|research|business|financial|investment|hr|talent|supply chain|logistics|procurement|public relations|social media|growth|customer success|technical|implementation|solution|architect|devops|security|quality|audit|compliance|editorial|creative|digital|event|field|community|partnerships|revenue|insights|reporting|visualization|machine learning|ai|nlp|computer vision|mobile|frontend|backend|full.?stack|infrastructure|platform|api|cloud|embedded|firmware|hardware|electrical|mechanical|civil|biomedical|chemical|industrial|environmental|aerospace|manufacturing)\b/i;
 
@@ -166,6 +182,9 @@ Deno.serve(async (req) => {
         if (SENIOR_FILTER.test(r.title)) return false;
         // Must look like a real professional/white-collar role
         if (!ROLE_WHITELIST.test(r.title)) return false;
+        // Location filter: reject if snippet/title mentions a different city
+        const snippetText = (r.highlights || []).join(' ');
+        if (!isLocationOk(r.title + ' ' + snippetText)) return false;
         return true;
       })
       .map(r => {
