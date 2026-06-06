@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useQueryClient } from '@tanstack/react-query';
 
 export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFresh, openedFromNudge = false }) {
+  const queryClient = useQueryClient();
   // Use goals prop if provided, otherwise fall back to user.career_goals
   const effectiveGoals = goals || user?.career_goals;
   const [roles, setRoles] = useState(effectiveGoals?.target_roles || []);
@@ -62,6 +64,10 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
       });
       // Refresh user data so the dashboard shows updated goals
       const refreshedUser = await base44.auth.me();
+      // Invalidate React Query caches to force feeds to refetch with new goals
+      queryClient.invalidateQueries({ queryKey: ['organizedFeeds'] });
+      queryClient.invalidateQueries({ queryKey: ['dailyDrop'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       onSave({ target_roles: finalRoles, target_industries: finalIndustries, company_size_preference: companySize }, refreshedUser);
     } catch (e) {
       console.error('Save failed:', e);
