@@ -3,8 +3,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 /**
  * getSocialDiscoveries — Dual-Engine Pipeline
  *
- * INGESTION LAYER:  Proxycurl LinkedIn Posts API  → real-time, fresh hiring posts
- * ENRICHMENT LAYER: Exa AI (category: "people")   → alumni graph matching by company domain
+ * LAYER 1 (INGESTION):  Proxycurl or Exa → fresh LinkedIn hiring posts
+ * LAYER 2 (ENRICHMENT): Exa AI category:"people" → alumni graph matching
  */
 
 Deno.serve(async (req) => {
@@ -22,56 +22,55 @@ Deno.serve(async (req) => {
     const PROXYCURL_KEY = Deno.env.get('PROXYCURL_API_KEY');
     const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
 
-    if (!PROXYCURL_KEY) return Response.json({ error: 'PROXYCURL_API_KEY not set' }, { status: 500 });
     if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
 
-    // ─────────────────────────────────────────────────────────────
-    // LAYER 1: INGESTION — Proxycurl Live LinkedIn Post Search
-    // Proxycurl's /linkedin/post/search endpoint returns real-time
-    // posts by keyword, bypassing Exa's crawl-delay limitation.
-    // ─────────────────────────────────────────────────────────────
-    const keywords = [
-      `hiring ${targetRole} internship`,
-      `entry level ${targetRole} ${targetLocation}`,
-      `#internship #entrylevel ${targetRole}`,
-    ];
-
-    // Try multiple keyword combos in parallel to maximize post volume
-    const postFetchPromises = keywords.map(async (kw) => {
-      const params = new URLSearchParams({
-        keyword: kw,
-        ...(targetLocation ? { geo_urn: '' } : {}), // geo enrichment optional
-        sort_by: 'date',
-        count: '10',
-      });
-
-      const res = await fetch(`https://nubela.co/proxycurl/api/v2/linkedin/post/search?${params}`, {
-        headers: { Authorization: `Bearer ${PROXYCURL_KEY}` },
-      });
-
-      if (!res.ok) return [];
-      const data = await res.json();
-      return data.items || data.posts || [];
-    });
-
-    const postBatches = await Promise.allSettled(postFetchPromises);
-    let rawPosts = postBatches
-      .filter(r => r.status === 'fulfilled')
-      .flatMap(r => r.value);
-
-    console.log(`[getSocialDiscoveries] Proxycurl raw posts: ${rawPosts.length}`);
+    let rawPosts = [];
 
     // ─────────────────────────────────────────────────────────────
-    // FALLBACK: If Proxycurl returns 0 posts (endpoint unavailable
-    // or rate-limited), fall back to Exa for post ingestion.
-    // This ensures the feed never goes dark.
+    // LAYER 1: INGESTION — Try Proxycurl first (real-time), fallback to Exa
     // ─────────────────────────────────────────────────────────────
+    if (PROXYCURL_KEY) {
+      try {
+        const keywords = [
+          `hiring ${targetRole} internship ${targetLocation}`,
+          `entry level ${targetRole} ${targetLocation}`,
+          `#internship #entrylevel ${targetRole}`,
+        ];
+
+        const postPromises = keywords.map(async (kw) => {
+          const params = new URLSearchParams({
+            keyword: kw,
+            sort_by: 'date',
+            count: '8',
+          });
+
+          const res = await fetch(`https://nubela.co/proxycurl/api/linkedin/post/search?${params}`, {
+            headers: { Authorization: `Bearer ${PROXYCURL_KEY}` },
+          });
+
+          if (!res.ok) return [];
+          const data = await res.json();
+          return (data.items || data.posts || []).map(p => ({
+            url: p.post_url || p.url,
+            title: p.text?.slice(0, 120) || p.title || '',
+            text: p.text || p.body || '',
+            publishedDate: p.published_at || p.date,
+            _source: 'proxycurl',
+          }));
+        });
+
+        const batches = await Promise.allSettled(postPromises);
+        rawPosts = batches.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
+        console.log(`[getSocialDiscoveries] Proxycurl posts: ${rawPosts.length}`);
+      } catch (e) {
+        console.warn('[getSocialDiscoveries] Proxycurl failed:', e.message);
+      }
+    }
+
+    // Fallback to Exa if Proxycurl returned 0 posts
     if (!rawPosts.length) {
-      console.log('[getSocialDiscoveries] Proxycurl returned 0 — falling back to Exa ingestion');
-
-      const locationFilter = targetLocation
-        ? ` AND ("${targetLocation}" OR "United States")`
-        : ' AND ("United States")';
+      console.log('[getSocialDiscoveries] Using Exa fallback for post ingestion');
+      const locationFilter = targetLocation ? ` AND ("${targetLocation}" OR "United States")` : '';
       const query = `hiring "${targetRole}" ("#internship" OR "entry level" OR "intern" OR "junior")${locationFilter}`;
 
       const exaRes = await fetch('https://api.exa.ai/search', {
@@ -88,16 +87,13 @@ Deno.serve(async (req) => {
 
       if (exaRes.ok) {
         const exaData = await exaRes.json();
-        // Normalize Exa results to match the shape we expect below
         rawPosts = (exaData.results || [])
           .filter(r => r.url && r.title)
           .map(r => ({
             url: r.url,
-            text: r.title || '',
-            body: r.text || '',
-            author_name: null,
-            author_profile_url: null,
-            published_at: r.publishedDate || null,
+            title: r.title,
+            text: r.text || r.title,
+            publishedDate: r.publishedDate,
             _source: 'exa_fallback',
           }));
       }
@@ -109,17 +105,12 @@ Deno.serve(async (req) => {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Extract company name from a post object
-    // Proxycurl posts have richer structure; Exa fallback uses text
+    // Extract company name from post
     // ─────────────────────────────────────────────────────────────
     const extractCompany = (post) => {
-      // Proxycurl posts may have author_company or company fields
-      if (post.company_name) return post.company_name;
-      if (post.author_company) return post.author_company;
-
-      const title = post.title || post.text || '';
-      const body = post.body || post.snippet || '';
-      const combined = `${title} ${body}`;
+      const title = post.title || '';
+      const text = post.text || '';
+      const combined = `${title} ${text}`;
 
       const patterns = [
         /\bat\s+([A-Z][A-Za-z0-9&.,\- ]{1,40}?)(?:\s*[|!?\n,]|$)/,
@@ -134,23 +125,23 @@ Deno.serve(async (req) => {
         if (candidate && candidate.length > 2 && candidate.length < 50) return candidate;
       }
 
-      // Fallback: parse LinkedIn company URL if available
-      if (post.company_url || post.author_profile_url) {
-        try {
-          const slug = new URL(post.company_url || post.author_profile_url)
-            .pathname.split('/').filter(Boolean).pop() || '';
-          if (slug && slug.length > 2) {
-            return slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).slice(0, 40);
+      // LinkedIn job URL parsing
+      if (post.url && post.url.includes('/jobs/view/')) {
+        const jobText = title.replace(/-\s*$/, '').trim();
+        const parts = jobText.split(/\s*[-–—]\s*/);
+        if (parts.length >= 2) {
+          const companyCandidate = parts[parts.length - 1].trim();
+          if (companyCandidate.length > 2 && companyCandidate.length < 50) {
+            return companyCandidate;
           }
-        } catch {}
+        }
       }
 
-      // Last resort: first words of title
       const titleWords = title.replace(/[#@]/g, '').trim().split(/\s+/).slice(0, 4).join(' ');
       return titleWords.length > 2 ? titleWords : null;
     };
 
-    // Deduplicate by company name
+    // Deduplicate by company
     const seenCompanies = new Set();
     const uniquePosts = [];
     for (const post of rawPosts) {
@@ -163,17 +154,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    console.log(`[getSocialDiscoveries] Unique companies: ${uniquePosts.length}`);
+
     // ─────────────────────────────────────────────────────────────
-    // LAYER 2: ENRICHMENT — Exa AI People Search (alumni matching)
-    // For each unique company, query Exa's category:"people" index
-    // with a domain-aware school alumni query.
+    // LAYER 2: ENRICHMENT — Exa People Search (category: "people")
     // ─────────────────────────────────────────────────────────────
     const enrichPost = async (post) => {
       const company = post._company;
 
       let insiders = [];
       try {
-        // Use Exa's category: "people" for maximum profile coverage
         const alumniRes = await fetch('https://api.exa.ai/search', {
           method: 'POST',
           headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
@@ -197,32 +187,34 @@ Deno.serve(async (req) => {
             }))
             .filter(a => a.name.length > 1);
         }
-      } catch (_) {
-        // Alumni failure never blocks the card
-      }
+      } catch (_) {}
 
-      const postText = post.text || post.body || post.title || '';
+      const postText = post.text || post.title || '';
       const roleMatch = postText.match(/(?:hiring|role|position|opening)[:\s]+([^|.\n]{3,60})/i);
       const role = roleMatch?.[1]?.trim() || targetRole || 'Open Role';
       const alumniMatched = insiders.length > 0;
 
+      let companyDomain = null;
+      try {
+        if (post.url) {
+          const url = new URL(post.url);
+          companyDomain = url.hostname.replace('www.', '');
+        }
+      } catch {}
+
       return {
         company,
         role,
-        company_domain: post.company_url ? (() => {
-          try { return new URL(post.company_url).hostname.replace('www.', ''); } catch { return null; }
-        })() : null,
-        opportunity_url: post.url || post.post_url || null,
+        company_domain: companyDomain,
+        opportunity_url: post.url || null,
         post_title: post.title || post.text?.slice(0, 100) || company,
         post_snippet: postText.slice(0, 400),
-        published_date: post.published_at || post.publishedDate || null,
-        author_name: post.author_name || null,
-        author_profile_url: post.author_profile_url || null,
+        published_date: post.publishedDate || null,
         insiders,
         alumni_count: insiders.length,
         alumni_matched: alumniMatched,
         source_type: 'social_scout',
-        source: post._source === 'exa_fallback' ? 'exa_fallback' : 'proxycurl',
+        source: post._source,
         source_label: alumniMatched
           ? '🎯 Network Match | Alumni found at this company'
           : '🔥 Direct Manager Access | Live hiring post — pitch the publisher directly',
@@ -230,7 +222,7 @@ Deno.serve(async (req) => {
       };
     };
 
-    const discoveries = await Promise.all(uniquePosts.slice(0, 8).map(enrichPost));
+    const discoveries = await Promise.all(uniquePosts.slice(0, 10).map(enrichPost));
 
     console.log(`[getSocialDiscoveries] Final discoveries: ${discoveries.length}`);
 
