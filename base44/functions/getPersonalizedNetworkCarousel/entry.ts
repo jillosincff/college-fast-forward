@@ -630,22 +630,33 @@ Deno.serve(async (req) => {
       [jobPool[i], jobPool[j]] = [jobPool[j], jobPool[i]];
     }
     
-    // Location filter: if the user has a target city, reject jobs that explicitly name a DIFFERENT city.
-    // Allow: remote, "multiple US cities", no city mentioned, or the user's own city.
+    // Location filter: if the user has a target city, reject jobs that name a DIFFERENT specific city.
+    // Allow: remote variants, "multiple US cities", no specific city, or matching the user's city.
     if (userCity) {
-      const OTHER_US_CITIES = /\b(Austin|San Francisco|Seattle|Chicago|Los Angeles|Boston|Atlanta|Denver|Dallas|Houston|Miami|Phoenix|Portland|San Diego|Minneapolis|Detroit|Philadelphia|Pittsburgh|Charlotte|Nashville|Raleigh|Salt Lake City|Las Vegas|Tampa|Orlando|San Jose|San Antonio|Columbus|Kansas City|Indianapolis|New York|Brooklyn|Manhattan|Menlo Park|Cupertino|Redwood City|Mountain View|Palo Alto|Burbank|Santa Monica|Los Gatos|Beverly Hills|Malvern|Cincinnati|Pittsburgh|Beaverton|Bristol|Pittsburgh|Richmond|Sacramento|Baltimore|St\. Louis|Cleveland|Memphis|Bellevue|Kirkland|Bothell|Herndon|Tysons)\b/i;
+      const US_CITIES = [
+        'austin', 'san francisco', 'seattle', 'chicago', 'los angeles', 'boston', 'atlanta',
+        'denver', 'dallas', 'houston', 'miami', 'phoenix', 'portland', 'san diego', 'minneapolis',
+        'detroit', 'philadelphia', 'pittsburgh', 'charlotte', 'nashville', 'raleigh', 'salt lake city',
+        'las vegas', 'tampa', 'orlando', 'san jose', 'san antonio', 'columbus', 'kansas city',
+        'indianapolis', 'new york', 'brooklyn', 'manhattan', 'menlo park', 'cupertino', 'redwood city',
+        'mountain view', 'palo alto', 'burbank', 'santa monica', 'los gatos', 'beverly hills',
+        'malvern', 'cincinnati', 'beaverton', 'bristol', 'richmond', 'sacramento', 'baltimore',
+        'st. louis', 'cleveland', 'memphis', 'bellevue', 'herndon', 'dc', 'washington dc',
+        'washington, dc', 'pittsburgh, pa', 'new york, ny', 'gainesville',
+      ];
+
       const locationFiltered = jobPool.filter(j => {
         const jobDesc = (j.description || '').toLowerCase();
-        const jobText = (j.description || '');
         const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home') || jobDesc.includes('remote-friendly') || jobDesc.includes('remote-first');
         const isMultiCity = jobDesc.includes('multiple us cities') || jobDesc.includes('multiple cities');
         if (isRemote || isMultiCity) return true;
-        // Check if a different specific city is mentioned
-        const cityMatch = jobText.match(OTHER_US_CITIES);
-        if (cityMatch && !jobDesc.includes(userCity)) return false;
+        // Check if any known city is mentioned in the description
+        const mentionedCity = US_CITIES.find(c => jobDesc.includes(c));
+        // If a specific city is mentioned and it's NOT the user's city, reject it
+        if (mentionedCity && !mentionedCity.includes(userCity) && !userCity.includes(mentionedCity)) return false;
         return true;
       });
-      // Only apply if it keeps at least 4 results (safety net for small pools)
+      // Only apply filter if it keeps at least 4 results
       if (locationFiltered.length >= 4) jobPool = locationFiltered;
     }
 
