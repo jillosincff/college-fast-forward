@@ -379,13 +379,13 @@ function getCompaniesBySize(industryData, sizePreference) {
 
 async function getLiveJobMatches(base44, goals, industries, sizePreference) {
   console.log('🔍 getLiveJobMatches called with:', {
-    role: goals.role,
+    role: goals.target_roles?.[0] || goals.role,
     industries,
     locations: goals.locations,
     size: sizePreference,
   });
   console.log('🌐 Calling InvokeLLM with response_json_schema...');
-  const role = goals.role || 'entry level';
+  const role = goals.target_roles?.[0] || goals.role || 'entry level';
   const location = goals.locations?.[0] || 'United States';
   const industry = industries[0] || 'general business';
   const size = sizePreference[0] || 'any size';
