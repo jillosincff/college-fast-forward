@@ -210,19 +210,18 @@ Deno.serve(async (req) => {
     console.log(`[DualConstraint] Step 2: Searching jobs at: ${topCompanies.map(c => c.name).join(', ')}`);
 
     // For each company, do a targeted ATS search by company name + role
-    // This is far more reliable than one big generic search
+    // Use neural type for better ATS board matching; broader query without quotes for flexibility
     const perCompanyJobResults = await Promise.all(
       topCompanies.map(company =>
         exaFetch('search', {
-          query: `"${company.name}" ${roleQuery} job opening hiring`,
-          type: 'keyword',
+          query: `${company.name} ${roleQuery} entry level job apply`,
+          type: 'neural',
           numResults: 5,
           includeDomains: ATS_DOMAINS,
           contents: {
-            highlights: { maxCharacters: 400, numSentences: 3 },
-            text: { maxCharacters: 800 },
+            highlights: { maxCharacters: 500, numSentences: 4 },
+            text: { maxCharacters: 1000 },
           },
-          startPublishedDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
         }).then(d => ({ company: company.name, results: d.results || [] }))
           .catch(() => ({ company: company.name, results: [] }))
       )
@@ -234,21 +233,25 @@ Deno.serve(async (req) => {
       const jobs = results
         .filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title))
         .map(r => {
-          // Build a readable description snippet from highlights or text
-          const highlightSnippet = (r.highlights || []).join(' ').trim();
-          const textSnippet = (r.text || '').slice(0, 500).trim();
+          // Prefer highlights (Exa-extracted key sentences) over raw text
+          const highlightSnippet = (r.highlights || []).filter(h => typeof h === 'string').join(' ').trim();
+          const textSnippet = typeof r.text === 'string' ? r.text.slice(0, 800) : '';
           const rawDescription = highlightSnippet || textSnippet;
-          // Clean up: strip HTML tags, collapse whitespace, cap at ~300 chars
-          const description = rawDescription
+          // Strip HTML, collapse whitespace, cap length
+          const cleaned = rawDescription
             .replace(/<[^>]+>/g, ' ')
             .replace(/\s+/g, ' ')
-            .trim()
-            .slice(0, 300);
+            .trim();
+          // Reject binary/garbage content: if >15% chars are non-ASCII, skip it
+          const nonAscii = (cleaned.match(/[^\x20-\x7E]/g) || []).length;
+          const description = cleaned.length > 0 && nonAscii / cleaned.length < 0.15
+            ? cleaned.slice(0, 320)
+            : null;
           return {
             title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
             url: r.url,
             publishedDate: r.publishedDate || null,
-            description: description || null,
+            description,
           };
         });
       if (jobs.length > 0) {
