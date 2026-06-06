@@ -376,11 +376,26 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                     <span>{lead.alumniCount} {schoolAbbr} alumni at this company</span>
                   </div>
 
-                  {/* Active job proof */}
+                  {/* Active job proof + description */}
                   {lead.hasActiveJobs && lead.activeJobs?.length > 0 && (
-                    <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5">
-                      <span>✅</span>
-                      <span>Active opening: {lead.activeJobs[0].title}</span>
+                    <div className="space-y-1">
+                      <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5">
+                        <span>✅</span>
+                        <a
+                          href={lead.activeJobs[0].url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="hover:underline"
+                        >
+                          {lead.activeJobs[0].title}
+                        </a>
+                      </div>
+                      {lead.activeJobs[0].description && (
+                        <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3 pl-5">
+                          {lead.activeJobs[0].description}
+                        </p>
+                      )}
                     </div>
                   )}
 

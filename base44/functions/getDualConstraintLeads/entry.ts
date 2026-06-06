@@ -218,7 +218,10 @@ Deno.serve(async (req) => {
           type: 'keyword',
           numResults: 5,
           includeDomains: ATS_DOMAINS,
-          contents: { highlights: { maxCharacters: 300 } },
+          contents: {
+            highlights: { maxCharacters: 400, numSentences: 3 },
+            text: { maxCharacters: 800 },
+          },
           startPublishedDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
         }).then(d => ({ company: company.name, results: d.results || [] }))
           .catch(() => ({ company: company.name, results: [] }))
@@ -230,11 +233,24 @@ Deno.serve(async (req) => {
     perCompanyJobResults.forEach(({ company, results }) => {
       const jobs = results
         .filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title))
-        .map(r => ({
-          title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
-          url: r.url,
-          publishedDate: r.publishedDate || null,
-        }));
+        .map(r => {
+          // Build a readable description snippet from highlights or text
+          const highlightSnippet = (r.highlights || []).join(' ').trim();
+          const textSnippet = (r.text || '').slice(0, 500).trim();
+          const rawDescription = highlightSnippet || textSnippet;
+          // Clean up: strip HTML tags, collapse whitespace, cap at ~300 chars
+          const description = rawDescription
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 300);
+          return {
+            title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
+            url: r.url,
+            publishedDate: r.publishedDate || null,
+            description: description || null,
+          };
+        });
       if (jobs.length > 0) {
         jobsByCompany.set(company, jobs);
       }
