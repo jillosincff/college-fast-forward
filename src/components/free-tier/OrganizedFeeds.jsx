@@ -57,9 +57,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const schoolName = user?.school_name || user?.schoolName || `${schoolAbbr} Network`;
 
   // Extract career goals DIRECTLY from user prop for query key - ensures instant cache bust
-  const { target_industries, target_role, target_roles, company_size_preference } = user?.career_goals || {};
+  const { target_industries, target_role, target_roles, company_size_preference, location_preference } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
   const effectiveSize = company_size_preference || 'all';
+  const effectiveLocation = location_preference || user?.location || '';
 
   useEffect(() => {
     const handler = () => {
@@ -91,7 +92,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
     // CRITICAL: Include career goals directly in queryKey for instant cache bust
-    queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), effectiveSize, refreshKey],
+    queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation, refreshKey],
     queryFn: () => {
       return getPersonalizedNetworkCarousel({
         // CRITICAL: Pass explicit parameters to bypass backend DB race condition
@@ -100,6 +101,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         target_industries: target_industries || [],
         target_role: effectiveRole,
         company_size_preference: effectiveSize,
+        target_location: effectiveLocation,
         refresh_seed: refreshKey,
         seen_companies: seenForExclusionRef.current,
       });
@@ -112,10 +114,11 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
 
   // Dual-constraint engine: alumni-verified companies with active job listings
   const { data: dualData, isLoading: dualLoading } = useQuery({
-    queryKey: ['dualConstraintLeads', effectiveRole, JSON.stringify(target_industries), effectiveSize],
+    queryKey: ['dualConstraintLeads', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation],
     queryFn: () => getDualConstraintLeads({
       explicit_target_role: effectiveRole,
       explicit_target_industries: target_industries || [],
+      target_location: effectiveLocation,
     }),
     enabled: !!(effectiveRole || target_industries?.length),
     staleTime: 10 * 60 * 1000, // 10min — slower-moving data

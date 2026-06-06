@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       || user.target_industries
       || [];
     const universityName = user.school_name || user.school || user.university || 'University of Florida';
-    const userLocation = user.location || '';
+    const userLocation = payload.target_location || user.career_goals?.location_preference || user.location || '';
 
     if (!targetRole && targetIndustries.length === 0) {
       return Response.json({ success: true, leads: [], reason: 'No career goals set' });
@@ -238,8 +238,9 @@ Deno.serve(async (req) => {
     const locationCity = userLocation
       ? userLocation.split(',')[0].trim()
       : '';
+    // Hard constraint: embed city directly in the query phrase so Exa treats it as required
     const locationQuery = locationCity
-      ? `${locationCity} OR remote`
+      ? `"${locationCity}" OR "remote"`
       : '';
 
     // Step 2b: For each company, search for jobs restricted to their resolved domain
@@ -247,8 +248,8 @@ Deno.serve(async (req) => {
       companyDomains.map(({ company, domain, careerUrl }) => {
         if (!domain) return Promise.resolve({ company, results: [] });
         const jobQuery = locationQuery
-          ? `${roleQuery} entry level ${locationQuery} job opening`
-          : `${roleQuery} entry level job opening`;
+          ? `"${roleQuery}" entry level (${locationQuery}) job opening`
+          : `"${roleQuery}" entry level job opening`;
         return exaFetch('search', {
           query: jobQuery,
           type: 'neural',
