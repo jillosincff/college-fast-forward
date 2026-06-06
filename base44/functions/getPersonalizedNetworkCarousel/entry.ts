@@ -661,6 +661,9 @@ Deno.serve(async (req) => {
 
     // Role filter: soft-filter by role title keywords only — never wipe the pool.
     // Only apply if result keeps at least 5 entries, otherwise skip to preserve variety.
+    // IMPORTANT: If the role filter doesn't match (e.g. "Business Analyst" against a tech pool),
+    // we still use the full industry pool but override the displayed role title with the user's target role.
+    let roleOverride = null;
     if (roleKeywords.length > 0 || positionKeywords.length > 0) {
       const softKeywords = [...new Set([...roleKeywords, ...positionKeywords])];
       const roleFiltered = jobPool.filter(j => {
@@ -668,8 +671,13 @@ Deno.serve(async (req) => {
         const descLower = j.description.toLowerCase();
         return softKeywords.some(kw => roleLower.includes(kw) || descLower.includes(kw));
       });
-      if (roleFiltered.length >= 5) jobPool = roleFiltered;
-      // else: skip the role filter — industry pool is more important than exact role match
+      if (roleFiltered.length >= 5) {
+        jobPool = roleFiltered;
+      } else {
+        // Not enough exact matches — keep full industry pool but override role display
+        // so the user sees their actual target role, not the static pool's role names
+        roleOverride = targetRole || null;
+      }
     }
 
     // Deduplicate by company+role (allow same company with different roles)
@@ -947,7 +955,7 @@ Deno.serve(async (req) => {
 
         priorityInsiders.push({
           company: job.company,
-          role: job.role,
+          role: roleOverride || job.role,
           jobDescription: job.description,
           jobSource: job.source || null,
           jobSourceCategory: effectiveCategory,
@@ -975,7 +983,7 @@ Deno.serve(async (req) => {
       else {
         targetedDiscoveries.push({
           company: job.company,
-          role: job.role,
+          role: roleOverride || job.role,
           jobDescription: job.description,
           jobSource: job.source || null,
           jobSourceCategory: job.sourceCategory || 'C',
@@ -997,7 +1005,7 @@ Deno.serve(async (req) => {
       jobPool.slice(0, 20).forEach(job => {
         targetedDiscoveries.push({
           company: job.company,
-          role: job.role,
+          role: roleOverride || job.role,
           jobDescription: job.description,
           jobSource: job.source || null,
           jobSourceCategory: job.sourceCategory || 'C',
