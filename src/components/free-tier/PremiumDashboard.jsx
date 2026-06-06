@@ -12,6 +12,7 @@ import MobileBottomNav from './PremiumMobileNav';
 import MatchFlashCarousel from './MatchFlashCarousel';
 import ColdDiscoverySection from './ColdDiscoverySection';
 import OrganizedFeeds from './OrganizedFeeds';
+import CliffPrioritizedFeed from './CliffPrioritizedFeed';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import EditGoalsModal from './EditGoalsModal';
@@ -368,6 +369,11 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           </div>
         </div>
       )}
+
+      {/* ── Your Daily Drop ── */}
+      <div style={{ background: '#f8f9fc', paddingTop: isMobile ? 8 : 16, paddingBottom: 16 }}>
+        <CliffPrioritizedFeed user={user} />
+      </div>
 
       {/* ── Three-Tier Organized Feeds ── */}
       <div style={{ background: '#f8f9fc', paddingTop: isMobile ? 8 : 16, paddingBottom: 4 }}>
