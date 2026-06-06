@@ -37,16 +37,34 @@ Deno.serve(async (req) => {
     console.log('[getSocialDiscoveries] Querying Exa for LinkedIn posts...');
 
     // Build the query without hardcoding a city. The user's own location
-    // (if any) is the only city we should bias on.
+    // (if any) is the only city we should bias on. Bias the search toward
+    // LinkedIn POSTS specifically — not job listings, profiles, or company
+    // pages — by adding a site: clause for /posts/.
     const locationQuery = targetLocation ? `"${targetLocation}"` : '';
     const hashtagPhrase = '("#internship" OR "#hiringinterns" OR "#entryleveljob" OR "#hiring")';
     const rolePhrase = `("${targetRole} intern" OR "${targetRole} internship" OR "hiring ${targetRole}" OR "${targetRole} summer intern" OR "${targetRole} new grad")`;
+    const sitePrefix = 'site:linkedin.com/posts/';
     const query = locationQuery
-      ? `${rolePhrase} ${hashtagPhrase} ${locationQuery}`
-      : `${rolePhrase} ${hashtagPhrase}`;
+      ? `${sitePrefix} ${rolePhrase} ${hashtagPhrase} ${locationQuery}`
+      : `${sitePrefix} ${rolePhrase} ${hashtagPhrase}`;
 
     // Push the 14-day window down to Exa so we don't burn results on stale posts.
     const startCrawlDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Hard URL allowlist — keep only actual social posts. Rejects /jobs/
+    // (the "no longer accepting applications" job listings that were
+    // leaking through), /in/ (profiles), /company/ (company pages),
+    // /pulse/ (long-form articles), and any other LinkedIn surface.
+    const isPostUrl = (url) => {
+      if (!url) return false;
+      try {
+        const u = new URL(url);
+        if (!u.hostname.endsWith('linkedin.com')) return false;
+        return /^\/(posts|feed\/update)\//i.test(u.pathname);
+      } catch {
+        return false;
+      }
+    };
 
     try {
       const exaRes = await fetch('https://api.exa.ai/search', {
@@ -64,7 +82,12 @@ Deno.serve(async (req) => {
 
       if (exaRes.ok) {
         const exaData = await exaRes.json();
-        rawPosts = (exaData.results || []).map(r => ({
+        const allResults = exaData.results || [];
+        const postResults = allResults.filter(r => isPostUrl(r.url));
+        if (allResults.length !== postResults.length) {
+          console.log(`[getSocialDiscoveries] Dropped ${allResults.length - postResults.length} non-post LinkedIn URLs (jobs/profiles/company pages)`);
+        }
+        rawPosts = postResults.map(r => ({
           text: r.text || r.title || '',
           postUrl: r.url,
           // Use Exa's real date when available; fall back to crawl date.
@@ -72,7 +95,7 @@ Deno.serve(async (req) => {
           authorName: r.author || 'Hiring Manager',
           caption: r.text || r.title || '',
         }));
-        console.log(`[getSocialDiscoveries] Exa returned ${rawPosts.length} LinkedIn posts`);
+        console.log(`[getSocialDiscoveries] Exa returned ${rawPosts.length} LinkedIn posts (from ${allResults.length} total results)`);
       } else {
         const errText = await exaRes.text().catch(() => 'unknown error');
         console.warn(`[getSocialDiscoveries] Exa returned ${exaRes.status}: ${errText.slice(0, 200)}`);
