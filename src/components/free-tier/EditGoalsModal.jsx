@@ -64,9 +64,11 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
       });
       // Refresh user data so the dashboard shows updated goals
       const refreshedUser = await base44.auth.me();
+      // Actually delete the cached daily drop so a fresh one is generated with new goals
+      await base44.functions.invoke('refreshDailyDrop', {});
       // Invalidate React Query caches to force feeds to refetch with new goals
-      queryClient.invalidateQueries({ queryKey: ['organizedFeeds'] });
-      queryClient.invalidateQueries({ queryKey: ['dailyDrop'] });
+      queryClient.removeQueries({ queryKey: ['dailyDrop', refreshedUser?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organizedFeeds', refreshedUser?.id] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       onSave({ target_roles: finalRoles, target_industries: finalIndustries, company_size_preference: companySize }, refreshedUser);
     } catch (e) {
