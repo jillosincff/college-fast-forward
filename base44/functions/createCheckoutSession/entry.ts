@@ -26,12 +26,13 @@ Deno.serve(async (req) => {
       console.error('[Security] Checkout ownership mismatch', { clientUserId: clientUser.id, currentUserId: currentUser.id });
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
+    
+    // Force plan to pro_monthly to ensure only one price is used.
+    plan = 'pro_monthly';
 
     if (!PRICES[plan]) {
       return Response.json({ success: false, error: `Unknown plan: ${plan}` }, { status: 400 });
     }
-
-    const isSubscription = true;
 
     const STRIPE_SECRET = Deno.env.get('STRIPE_SECRET_KEY');
 
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
       body.append('subscription_data[metadata][family_id]', clientUser.family_id);
       body.append('metadata[family_id]', clientUser.family_id);
     }
-
+    
     if (clientUser.email) {
       body.append('customer_email', clientUser.email);
     }
