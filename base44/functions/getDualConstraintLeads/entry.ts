@@ -149,10 +149,46 @@ Deno.serve(async (req) => {
       }
     });
 
-    console.log('[DualConstraint] Company map:', [...companyMap.entries()].map(([k,v]) => `${k}(${v.count})`).join(', '));
+    console.log('[DualConstraint] Company map (pre-merge):', [...companyMap.entries()].map(([k,v]) => `${k}(${v.count})`).join(', '));
+
+    // ── Merge duplicate company entries ────────────────────────────────
+    // e.g. "McKinsey" and "McKinsey & Company" should be one card
+    // Strategy: group by first significant word (4+ chars), keep the most common name as canonical
+    const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const companyEntries = [...companyMap.entries()]; // [name, {count, profiles}]
+
+    const merged = new Map(); // canonical name → {count, profiles}
+    companyEntries.forEach(([name, data]) => {
+      const normName = normalize(name);
+      // Find first existing canonical that shares a 5+ char prefix
+      const firstWord = normName.length >= 5 ? normName.slice(0, 6) : normName;
+      let canonicalKey = null;
+      for (const [key] of merged) {
+        const keyNorm = normalize(key);
+        if (keyNorm.startsWith(firstWord) || normName.startsWith(normalize(key).slice(0, 6))) {
+          canonicalKey = key;
+          break;
+        }
+      }
+      if (canonicalKey) {
+        // Merge into existing — pick the longer/more complete name as canonical
+        const existing = merged.get(canonicalKey);
+        existing.count += data.count;
+        existing.profiles.push(...data.profiles);
+        // If this name is longer (more descriptive), use it as the new key
+        if (name.length > canonicalKey.length) {
+          merged.set(name, existing);
+          merged.delete(canonicalKey);
+        }
+      } else {
+        merged.set(name, { count: data.count, profiles: [...data.profiles] });
+      }
+    });
+
+    console.log('[DualConstraint] Company map (post-merge):', [...merged.entries()].map(([k,v]) => `${k}(${v.count})`).join(', '));
 
     // Sort by alumni count — companies with most alumni first
-    const rankedCompanies = [...companyMap.entries()]
+    const rankedCompanies = [...merged.entries()]
       .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 12)
       .map(([name, data]) => ({ name, alumniCount: data.count, insiders: data.profiles }));
@@ -245,7 +281,6 @@ Deno.serve(async (req) => {
       const companySlug = atsMatch ? atsMatch[1].replace(/-/g, ' ') : '';
 
       // Require company name to appear in the ATS URL slug or job title — strict match only
-      const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
       const matchedCompany = rankedCompanies.find(c => {
         const cNorm = normalize(c.name);
         const slugNorm = normalize(companySlug);
@@ -272,7 +307,6 @@ Deno.serve(async (req) => {
       if (!r.url || !r.title) return;
       if (SENIOR_PATTERN.test(r.title)) return;
       if (!isJobUrl(r.url)) return;
-      const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
       rankedCompanies.forEach(c => {
         // Skip if already matched
         if (jobsByCompany.has(c.name) && jobsByCompany.get(c.name).length > 0) return;
