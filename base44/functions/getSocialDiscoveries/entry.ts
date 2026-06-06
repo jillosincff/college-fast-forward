@@ -1,12 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * getSocialDiscoveries — Compliant Real-Time Hashtag Pipeline
+ * getSocialDiscoveries — Compliant Real-Time LinkedIn Pipeline
  * 
- * Uses Apify's LinkedIn Hashtag Scraper API (HTTP) to track live hashtag posts.
- * Zero login requirements, zero automated interactions.
+ * PRIMARY: Exa semantic search for LinkedIn posts (fast, reliable)
+ * SECONDARY: Apify hashtag scraper (fallback for more volume)
  * 
- * Target hashtags: #internship, #entrylevel, #hiring intersected with target_role
  * Recency: Strict 14-day filter on publishedDate
  * Alumni Check: Exa People Search on verified company domain (public index only)
  */
@@ -26,96 +25,133 @@ Deno.serve(async (req) => {
     const APIFY_API_KEY = Deno.env.get('APIFY_API_KEY');
     const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
     
-    if (!APIFY_API_KEY) return Response.json({ error: 'APIFY_API_KEY not set' }, { status: 500 });
     if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
 
-    console.log('[getSocialDiscoveries] Starting Apify hashtag scraping pipeline...');
+    console.log('[getSocialDiscoveries] Starting social discoveries pipeline...');
 
-    // Target hashtags intersected with role keyword
-    const hashtags = ['#internship', '#entrylevel', '#hiring'];
-    const searchQueries = hashtags.map(tag => `${tag} ${targetRole}`);
+    let rawPosts = [];
 
-    // Run Apify LinkedIn hashtag scraper via HTTP API
-    const runActor = async (searchQuery) => {
-      try {
-        const hashtag = searchQuery.replace('#', '').trim();
-        
-        console.log(`[getSocialDiscoveries] Running Apify for hashtag: ${hashtag}`);
-        
-        // Start Apify actor run
-        const runRes = await fetch(`https://api.apify.com/v2/acts/sasky~linkedin-hashtag-posts-urls-scraper/runs?token=${APIFY_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            hashtag: hashtag,
-            maxPosts: 25,
-          }),
-        });
+    // PRIMARY: Exa semantic search for LinkedIn posts
+    console.log('[getSocialDiscoveries] Using Exa semantic search for LinkedIn posts...');
+    
+    try {
+      const exaRes = await fetch('https://api.exa.ai/search', {
+        method: 'POST',
+        headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `${targetRole} internship OR "entry level" OR hiring ${targetLocation ? `in ${targetLocation}` : ''}`,
+          numResults: 20,
+          includeDomains: ['linkedin.com'],
+          type: 'neural',
+          contents: { text: { maxCharacters: 500 } },
+        }),
+      });
 
-        if (!runRes.ok) {
-          const errorText = await runRes.text().catch(() => 'unknown error');
-          console.warn(`[getSocialDiscoveries] Apify run failed for ${hashtag}: ${runRes.status} - ${errorText}`);
-          return [];
-        }
-
-        const runData = await runRes.json();
-        const runId = runData.data?.id;
-        
-        if (!runId) {
-          console.warn(`[getSocialDiscoveries] No run ID returned for ${hashtag}`);
-          return [];
-        }
-
-        console.log(`[getSocialDiscoveries] Apify run started: ${runId}`);
-
-        // Wait for run to complete (poll every 2s, max 40s)
-        let completed = false;
-        for (let i = 0; i < 20; i++) {
-          await new Promise(r => setTimeout(r, 2000));
-          const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_API_KEY}`);
-          if (!statusRes.ok) continue;
-          const statusData = await statusRes.json();
-          const status = statusData.data?.status;
-          if (status === 'SUCCEEDED') {
-            completed = true;
-            console.log(`[getSocialDiscoveries] Apify run completed: ${runId}`);
-            break;
-          }
-          if (status === 'FAILED') {
-            console.warn(`[getSocialDiscoveries] Apify run failed: ${runId}`);
-            break;
-          }
-        }
-
-        if (!completed) {
-          console.warn(`[getSocialDiscoveries] Apify run timeout for ${hashtag}`);
-          return [];
-        }
-
-        // Fetch results from dataset
-        const datasetRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset?token=${APIFY_API_KEY}`);
-        if (!datasetRes.ok) {
-          console.warn(`[getSocialDiscoveries] Dataset fetch failed: ${datasetRes.status}`);
-          return [];
-        }
-        
-        const items = await datasetRes.json();
-        const results = items.data || [];
-        console.log(`[getSocialDiscoveries] Retrieved ${results.length} posts for ${hashtag}`);
-        return results;
-      } catch (error) {
-        console.warn(`[getSocialDiscoveries] Apify query failed: ${searchQuery}`, error.message);
-        return [];
+      if (exaRes.ok) {
+        const exaData = await exaRes.json();
+        rawPosts = (exaData.results || []).map(r => ({
+          text: r.text || r.title || '',
+          postUrl: r.url,
+          publishedDate: new Date().toISOString(),
+          authorName: 'Hiring Manager',
+          caption: r.text || r.title || '',
+        }));
+        console.log(`[getSocialDiscoveries] Exa returned ${rawPosts.length} LinkedIn posts`);
       }
-    };
+    } catch (exaError) {
+      console.warn('[getSocialDiscoveries] Exa search failed:', exaError.message);
+    }
 
-    // Fetch posts from all hashtag queries in parallel
-    const postBatches = await Promise.allSettled(searchQueries.map(runActor));
-    let rawPosts = postBatches
-      .filter(r => r.status === 'fulfilled')
-      .flatMap(r => r.value);
+    // SECONDARY: Apify hashtag scraper (fallback if Exa returns < 5 results)
+    if (rawPosts.length < 5 && APIFY_API_KEY) {
+      console.log('[getSocialDiscoveries] Exa returned few results, trying Apify hashtag scraper...');
+      
+      const hashtags = ['#internship', '#entrylevel', '#hiring'];
+      const roleKeyword = targetRole.toLowerCase().includes('marketing') ? 'marketing' : targetRole;
+      const searchQueries = hashtags.map(tag => `${tag} ${roleKeyword}`);
+      
+      console.log(`[getSocialDiscoveries] Apify queries: ${searchQueries.join(', ')}`);
 
-    console.log(`[getSocialDiscoveries] Raw posts from Apify: ${rawPosts.length}`);
+      const runActor = async (searchQuery) => {
+        try {
+          const hashtag = searchQuery.replace('#', '').trim();
+          console.log(`[getSocialDiscoveries] Running Apify for hashtag: ${hashtag}`);
+          
+          const runRes = await fetch(`https://api.apify.com/v2/acts/sasky~linkedin-hashtag-posts-urls-scraper/runs?token=${APIFY_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              hashtag: hashtag,
+              maxPosts: 15,
+            }),
+          });
+
+          if (!runRes.ok) {
+            const errorText = await runRes.text().catch(() => 'unknown error');
+            console.warn(`[getSocialDiscoveries] Apify run failed for ${hashtag}: ${runRes.status} - ${errorText}`);
+            return [];
+          }
+
+          const runData = await runRes.json();
+          const runId = runData.data?.id;
+          
+          if (!runId) {
+            console.warn(`[getSocialDiscoveries] No run ID returned for ${hashtag}`);
+            return [];
+          }
+
+          console.log(`[getSocialDiscoveries] Apify run started: ${runId}`);
+
+          // Wait for run to complete (poll every 3s, max 60s)
+          let completed = false;
+          for (let i = 0; i < 20; i++) {
+            await new Promise(r => setTimeout(r, 3000));
+            const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_API_KEY}`);
+            if (!statusRes.ok) continue;
+            const statusData = await statusRes.json();
+            const status = statusData.data?.status;
+            if (status === 'SUCCEEDED') {
+              completed = true;
+              console.log(`[getSocialDiscoveries] Apify run completed: ${runId}`);
+              break;
+            }
+            if (status === 'FAILED') {
+              console.warn(`[getSocialDiscoveries] Apify run failed: ${runId}`);
+              break;
+            }
+          }
+
+          if (!completed) {
+            console.warn(`[getSocialDiscoveries] Apify run timeout for ${hashtag}`);
+            return [];
+          }
+
+          const datasetRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset?token=${APIFY_API_KEY}`);
+          if (!datasetRes.ok) {
+            console.warn(`[getSocialDiscoveries] Dataset fetch failed: ${datasetRes.status}`);
+            return [];
+          }
+          
+          const items = await datasetRes.json();
+          const results = items.data || [];
+          console.log(`[getSocialDiscoveries] Retrieved ${results.length} posts for ${hashtag}`);
+          return results;
+        } catch (error) {
+          console.warn(`[getSocialDiscoveries] Apify query failed: ${searchQuery}`, error.message);
+          return [];
+        }
+      };
+
+      const postBatches = await Promise.allSettled(searchQueries.map(runActor));
+      const apifyPosts = postBatches
+        .filter(r => r.status === 'fulfilled')
+        .flatMap(r => r.value);
+
+      console.log(`[getSocialDiscoveries] Apify returned ${apifyPosts.length} posts`);
+      rawPosts = [...rawPosts, ...apifyPosts];
+    }
+
+    console.log(`[getSocialDiscoveries] Total raw posts: ${rawPosts.length}`);
 
     // Enforce 14-day recency filter
     const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
@@ -154,9 +190,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ─────────────────────────────────────────────────────────────
     // Extract company name from post
-    // ─────────────────────────────────────────────────────────────
     const extractCompany = (post) => {
       const text = post.text || post.caption || '';
       const patterns = [
@@ -191,13 +225,10 @@ Deno.serve(async (req) => {
 
     console.log(`[getSocialDiscoveries] Unique companies: ${uniquePosts.length}`);
 
-    // ─────────────────────────────────────────────────────────────
     // ENRICHMENT: Domain resolution + Exa People Search for alumni
-    // ─────────────────────────────────────────────────────────────
     const enrichPost = async (post) => {
       const company = post._company;
 
-      // Resolve company domain using simple heuristic
       let companyDomain = null;
       try {
         if (post.postUrl) {
@@ -252,7 +283,6 @@ Deno.serve(async (req) => {
 
       const alumniMatched = insiders.length > 0;
 
-      // Clean snippet
       let cleanSnippet = postText
         .replace(/\[Skip to.*?\]/g, '')
         .replace(/!\[.*?\]\(.*?\)/g, '')
@@ -273,11 +303,11 @@ Deno.serve(async (req) => {
         insiders,
         alumni_count: insiders.length,
         alumni_matched: alumniMatched,
-        source_type: 'linkedin_hashtag_post',
+        source_type: 'linkedin_post',
         source_label: alumniMatched
           ? '🎯 Network Match | Alumni found at this company'
           : '🔥 Direct Manager Access | No internal alumni mapped, but you have a direct line to the public creator of this post',
-        hashtags: hashtags,
+        hashtags: ['#internship', '#entrylevel', '#hiring'],
       };
     };
 
@@ -288,7 +318,7 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       discoveries,
-      source: 'linkedin_hashtag_posts',
+      source: 'linkedin_posts',
       count: discoveries.length,
     });
 
