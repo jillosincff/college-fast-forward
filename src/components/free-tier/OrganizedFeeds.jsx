@@ -338,7 +338,21 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                       ? 'border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50'
                       : 'border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50'
                   }`}
-                  onClick={() => setSelectedLead({ ...lead, role: lead.role || effectiveRole, alumniCount: lead.alumniCount })}
+                  onClick={() => setSelectedLead({
+                    ...lead,
+                    role: lead.role || effectiveRole,
+                    alumniCount: lead.alumniCount,
+                    // Map insiders → alumni shape expected by MatchDeepDiveModal
+                    alumni: (lead.insiders || []).map(ins => ({
+                      name: (ins.name || ins.headline || '').split(/[|\-·]/)[0].trim(),
+                      role_title: (ins.headline || '').split(/[|\-·]/).slice(1).join(' ').trim() || 'Professional',
+                      linkedin_url: ins.url || ins.linkedin_url || null,
+                    })).filter(a => a.name && a.name.length > 1),
+                    // Map first active job → jobDescription
+                    jobDescription: lead.activeJobs?.[0]
+                      ? `${lead.activeJobs[0].title} — active opening found via job board`
+                      : (lead.hasActiveJobs ? `Active ${lead.role || effectiveRole} opening confirmed` : `${lead.alumniCount} ${schoolAbbr} alumni work here. No active listing confirmed yet — reach out directly for referral.`),
+                  })}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -389,7 +403,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                       + Pipeline
                     </button>
                     <button
-                      onClick={e => { e.stopPropagation(); handleColdInroad({ ...lead, role: lead.role || effectiveRole }); }}
+                      onClick={e => { e.stopPropagation(); handleColdInroad({ ...lead, role: lead.role || effectiveRole, company: lead.company }); }}
                       className={`flex-1 text-[11px] font-bold py-1.5 rounded-lg text-white transition ${
                         lead.signalTier === 'gold' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-purple-600 hover:bg-purple-700'
                       }`}
