@@ -55,21 +55,23 @@ Deno.serve(async (req) => {
     const roleQuery = targetRole || targetIndustries.slice(0, 2).join(' or ');
 
     // ── STEP 1: Find alumni working in target role ──────────────────────
+    // Use neural search WITH text content so we get rich snippets to extract company names from
     console.log(`[DualConstraint] Step 1: Finding ${shortSchool} alumni in "${roleQuery}"`);
 
     const peopleQueries = [
-      `${shortSchool} alumnus graduate currently works as ${roleQuery}`,
-      `studied at ${universityName} now ${roleQuery} professional`,
+      `${shortSchool} alumnus alumna ${roleQuery} at company LinkedIn`,
+      `"University of Florida" OR "UF" graduate ${roleQuery} works at`,
+      `${universityName} alumni ${roleQuery} professional career`,
     ];
 
     const peopleResults = await Promise.all(
       peopleQueries.map(q =>
         exaFetch('search', {
           query: q,
-          type: 'auto',
+          type: 'neural',
           category: 'people',
-          numResults: 10,
-          contents: { highlights: { maxCharacters: 400 } },
+          numResults: 8,
+          contents: { text: { maxCharacters: 600 } },
         }).catch(() => ({ results: [] }))
       )
     );
@@ -91,19 +93,44 @@ Deno.serve(async (req) => {
     const companyMap = new Map(); // company -> { count, profiles[] }
 
     profiles.forEach(p => {
-      const text = `${p.title || ''} ${(p.highlights || []).join(' ')}`;
+      const title = p.title || '';
+      const highlights = (p.highlights || []).join(' ');
+      const text = p.text || '';
+      const fullText = title + ' ' + highlights + ' ' + text;
+
+      // Exa people profiles typically look like:
+      // Title: "Jane Smith - Marketing Analyst at Nike | LinkedIn"
+      // Or highlights mention "works at Nike" / "Nike | Marketing Analyst"
       
-      // Try to extract "at Company" patterns
-      const atMatch = text.match(/\bat\s+([A-Z][A-Za-z0-9\s&.,'-]{2,40}?)(?:\s*[|·\-]|\s*$)/);
-      // Also try "Company | Title" or title parts after last dash
-      const pipeMatch = p.title?.match(/[|\-·]\s*([A-Z][A-Za-z0-9\s&.,'-]{2,40})\s*$/);
+      const roleWords = /\b(analyst|manager|engineer|director|associate|intern|coordinator|specialist|developer|designer|consultant|researcher|writer|advisor|representative|assistant|strategist|president|officer|founder|lead|head|ceo|cfo|cto|vp|svp|evp)\b/i;
       
-      const companyName = atMatch?.[1]?.trim() || pipeMatch?.[1]?.trim();
+      // Strategy 1: "at Company" pattern in title or highlights (most reliable)
+      const atMatch = fullText.match(/\bat\s+([A-Z][A-Za-z0-9\s&.,'\-]{2,45}?)(?:\s*[|·]|\s*\n|\s*$)/);
       
-      if (companyName && companyName.length > 2 && companyName.length < 50) {
-        // Filter out university names
+      // Strategy 2: "Title | Company" — second segment after pipe/bullet if it doesn't look like a role
+      const pipeParts = title.split(/[|·]/).map(s => s.trim()).filter(Boolean);
+      // person name is usually first; company might be last part after their role
+      const companyFromPipe = pipeParts.length >= 3
+        ? pipeParts[pipeParts.length - 1]  // "Name | Role | Company"
+        : pipeParts.length === 2 && !roleWords.test(pipeParts[1])
+          ? pipeParts[1]  // "Name | Company" (no role in between)
+          : null;
+
+      // Strategy 3: highlights often say "works at X" or "employed by X"
+      const worksAtMatch = highlights.match(/(?:works at|employed (?:by|at)|position at|role at)\s+([A-Z][A-Za-z0-9\s&.,'\-]{2,40}?)(?:[.,\n]|$)/i);
+
+      const companyName = atMatch?.[1]?.trim()
+        || worksAtMatch?.[1]?.trim()
+        || (companyFromPipe && !companyFromPipe.toLowerCase().includes('linkedin') ? companyFromPipe : null);
+
+      // Validate: must exist, not be a person name (no role words needed but must have 2+ words or be known brand)
+      if (companyName && companyName.length > 1 && companyName.length < 60) {
         const lower = companyName.toLowerCase();
-        if (lower.includes(shortSchool.toLowerCase()) || lower.includes('university') || lower.includes('college')) return;
+        if (lower.includes(shortSchool.toLowerCase()) || lower.includes('university') || lower.includes('college') || lower === 'linkedin') return;
+        // Skip if it looks like a person name (only 2 words, both capitalized, no role indicators)
+        const words = companyName.trim().split(/\s+/);
+        const looksLikePerson = words.length === 2 && words.every(w => /^[A-Z][a-z]+$/.test(w));
+        if (looksLikePerson) return;
         
         if (!companyMap.has(companyName)) {
           companyMap.set(companyName, { count: 0, profiles: [] });
@@ -111,12 +138,14 @@ Deno.serve(async (req) => {
         const entry = companyMap.get(companyName);
         entry.count++;
         entry.profiles.push({
-          name: (p.title || '').split(/[|\-·]/)[0].trim(),
+          name: pipeParts[0] || title.split(/[|\-·]/)[0].trim(),
           url: p.url,
-          headline: p.title || '',
+          headline: title,
         });
       }
     });
+
+    console.log('[DualConstraint] Company map:', [...companyMap.entries()].map(([k,v]) => `${k}(${v.count})`).join(', '));
 
     // Sort by alumni count — companies with most alumni first
     const rankedCompanies = [...companyMap.entries()]
@@ -134,15 +163,14 @@ Deno.serve(async (req) => {
     const companyNames = rankedCompanies.map(c => c.name);
     const locationStr = userLocation ? ` ${userLocation}` : '';
 
-    // Build a targeted query: role + scoped to those specific company domains
-    const companyDomainGuesses = companyNames.slice(0, 8).map(n =>
-      n.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com'
-    );
-
-    // Also search ATS boards scoped to these companies
     const jobQuery = `${roleQuery} (entry level OR junior OR associate OR new grad)${locationStr}`;
 
-    console.log(`[DualConstraint] Step 3: Checking active jobs at: ${companyNames.slice(0, 6).join(', ')}`);
+    // Also build a company-specific query targeting each alumni company directly
+    const topCompanyNames = companyNames.slice(0, 6);
+    const companyOrQuery = topCompanyNames.map(n => `"${n}"`).join(' OR ');
+    const companyJobQuery = `(${companyOrQuery}) ${roleQuery} hiring job`;
+
+    console.log(`[DualConstraint] Step 3: Checking active jobs at: ${topCompanyNames.join(', ')}`);
 
     const ATS_DOMAINS = [
       'jobs.lever.co',
@@ -151,50 +179,76 @@ Deno.serve(async (req) => {
       'apply.workable.com',
     ];
 
-    // Run two parallel checks: ATS boards + company career pages
-    const [atsJobData, careerPageData] = await Promise.all([
+    // Run three parallel checks for maximum coverage
+    const [atsJobData, companyJobData, careerPageData] = await Promise.all([
       exaFetch('search', {
         query: jobQuery,
         type: 'keyword',
         numResults: 20,
         includeDomains: ATS_DOMAINS,
         contents: { highlights: { maxCharacters: 400 } },
-        startPublishedDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+        startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       }).catch(() => ({ results: [] })),
+      // Direct company-targeted job search on ATS boards
       exaFetch('search', {
-        query: `${jobQuery} site:careers OR site:jobs`,
-        type: 'keyword',
+        query: companyJobQuery,
+        type: 'neural',
         numResults: 15,
-        includeDomains: companyDomainGuesses,
+        includeDomains: ATS_DOMAINS,
         contents: { highlights: { maxCharacters: 400 } },
-        startPublishedDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+        startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      }).catch(() => ({ results: [] })),
+      // Broader web search for job openings at these companies
+      exaFetch('search', {
+        query: `${companyJobQuery} careers apply`,
+        type: 'neural',
+        numResults: 10,
+        contents: { highlights: { maxCharacters: 400 } },
+        startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       }).catch(() => ({ results: [] })),
     ]);
 
-    const allJobResults = [...(atsJobData.results || []), ...(careerPageData.results || [])];
+    const allJobResults = [
+      ...(atsJobData.results || []),
+      ...(companyJobData.results || []),
+      ...(careerPageData.results || []),
+    ];
 
     console.log(`[DualConstraint] Found ${allJobResults.length} potential job listings`);
 
     // Match job results back to alumni companies
     const SENIOR_PATTERN = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff)\b/i;
 
+    // Only trust known job board / ATS domains
+    const TRUSTED_JOB_DOMAINS = [
+      'jobs.lever.co', 'boards.greenhouse.io', 'jobs.ashbyhq.com', 'apply.workable.com',
+      'linkedin.com/jobs', 'indeed.com', 'glassdoor.com', 'myworkdayjobs.com',
+      'jobs.smartrecruiters.com',
+    ];
+    const isJobUrl = (url) => {
+      const u = (url || '').toLowerCase();
+      return TRUSTED_JOB_DOMAINS.some(d => u.includes(d));
+    };
+
     const jobsByCompany = new Map();
     allJobResults.forEach(r => {
       if (!r.url || !r.title) return;
       if (SENIOR_PATTERN.test(r.title)) return;
+      if (!isJobUrl(r.url)) return; // skip spam / non-job-board results
 
       // Extract company slug from ATS URL
       const atsMatch = r.url.match(/(?:jobs\.lever\.co|boards\.greenhouse\.io|jobs\.ashbyhq\.com|apply\.workable\.com)\/([^/]+)/);
       const companySlug = atsMatch ? atsMatch[1].replace(/-/g, ' ') : '';
 
-      // Try to match to one of our alumni companies
+      // Require company name to appear in the ATS URL slug or job title — strict match only
+      const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
       const matchedCompany = rankedCompanies.find(c => {
-        const cLower = c.name.toLowerCase();
-        const slugLower = companySlug.toLowerCase();
-        const domainLower = r.url.toLowerCase();
-        return slugLower.includes(cLower.split(' ')[0]) ||
-               cLower.includes(slugLower.split(' ')[0]) ||
-               domainLower.includes(cLower.replace(/\s+/g, ''));
+        const cNorm = normalize(c.name);
+        const slugNorm = normalize(companySlug);
+        const titleNorm = normalize(r.title || '');
+        // First word of company (4+ chars) must appear in slug or title
+        const firstWord = cNorm.replace(/\s+/g, ' ').split(' ').find(w => w.length >= 4) || cNorm;
+        return slugNorm.includes(firstWord) || titleNorm.includes(firstWord);
       });
 
       if (matchedCompany) {
@@ -207,6 +261,31 @@ Deno.serve(async (req) => {
           publishedDate: r.publishedDate || null,
         });
       }
+    });
+
+    // Also try matching unmatched jobs to companies by title keyword scan
+    allJobResults.forEach(r => {
+      if (!r.url || !r.title) return;
+      if (SENIOR_PATTERN.test(r.title)) return;
+      if (!isJobUrl(r.url)) return;
+      const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+      rankedCompanies.forEach(c => {
+        // Skip if already matched
+        if (jobsByCompany.has(c.name) && jobsByCompany.get(c.name).length > 0) return;
+        const cNorm = normalize(c.name);
+        const titleNorm = normalize(r.title || '');
+        const urlNorm = normalize(r.url || '');
+        const snippetNorm = normalize((r.highlights || []).join(' '));
+        const firstWord = cNorm.replace(/\s+/g, '').length >= 4 ? cNorm.split('').slice(0,8).join('') : cNorm;
+      if (titleNorm.includes(firstWord) || urlNorm.includes(firstWord)) {
+          if (!jobsByCompany.has(c.name)) jobsByCompany.set(c.name, []);
+          jobsByCompany.get(c.name).push({
+            title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
+            url: r.url,
+            publishedDate: r.publishedDate || null,
+          });
+        }
+      });
     });
 
     // ── BUILD FINAL HIGH-SIGNAL LEAD CARDS ─────────────────────────────

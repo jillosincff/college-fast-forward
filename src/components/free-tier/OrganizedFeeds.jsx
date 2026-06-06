@@ -349,9 +349,11 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                       linkedin_url: ins.url || ins.linkedin_url || null,
                     })).filter(a => a.name && a.name.length > 1),
                     // Map first active job → jobDescription
-                    jobDescription: lead.activeJobs?.[0]
-                      ? `${lead.activeJobs[0].title} — active opening found via job board`
-                      : (lead.hasActiveJobs ? `Active ${lead.role || effectiveRole} opening confirmed` : `${lead.alumniCount} ${schoolAbbr} alumni work here. No active listing confirmed yet — reach out directly for referral.`),
+                    jobDescription: lead.activeJobs?.[0]?.title && !lead.activeJobs[0].title.startsWith('**')
+                      ? `Active opening: ${lead.activeJobs[0].title}`
+                      : lead.hasActiveJobs
+                        ? `Active ${lead.role || effectiveRole} opening found — reach out to your ${schoolAbbr} insider for a referral.`
+                        : `${lead.alumniCount} ${schoolAbbr} alumni work here. Message them directly to get a referral before the role posts publicly.`,
                   })}
                 >
                   <div className="flex items-start justify-between gap-2">
