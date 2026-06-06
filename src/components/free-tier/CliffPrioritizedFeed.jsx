@@ -70,7 +70,8 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
     setRefreshing(true);
     try {
       await base44.functions.invoke('refreshDailyDrop', {});
-      queryClient.invalidateQueries({ queryKey: ['dailyDrop', user?.id] });
+      queryClient.removeQueries({ queryKey: ['dailyDrop', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['dailyDrop', user?.id] }, { throwOnError: true });
     } catch (err) {
       console.error('Failed to refresh:', err);
     } finally {
