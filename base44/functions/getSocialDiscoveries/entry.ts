@@ -27,32 +27,41 @@ Deno.serve(async (req) => {
     const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
     if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
 
-    // Build multiple query variations to catch different post styles
-    const locationClause = targetLocation 
-      ? `("${targetLocation}" OR "${targetLocation.split(',')[0]}" OR "NYC" OR "New York")`
-      : '("United States" OR "remote" OR "NYC" OR "SF" OR "Boston")';
+    // Build hashtag-focused queries for LinkedIn mentions
+    const locationHashtag = targetLocation 
+      ? `#${targetLocation.replace(/[^a-zA-Z]/g, '')}`
+      : '#USA';
+    
+    const locationPlain = targetLocation 
+      ? `"${targetLocation}" OR "${targetLocation.split(',')[0].trim()}"`
+      : '"United States" OR "remote"';
 
+    // Hashtag-first queries — optimized for casual hiring mentions
     const postQueries = [
-      // Direct hiring posts
-      `"looking for" intern ${targetRole} ${locationClause} site:linkedin.com/posts`,
-      `"hiring" intern ${targetRole} ${locationClause} site:linkedin.com/posts`,
-      `"seeking" intern ${targetRole} ${locationClause} site:linkedin.com/posts`,
+      // Pure hashtag combinations (most common format)
+      `#intern #hiring ${locationHashtag} site:linkedin.com/posts`,
+      `#intern #summer site:linkedin.com/posts`,
+      `#internship #entrylevel site:linkedin.com/posts`,
+      `#hiring #students site:linkedin.com/posts`,
+      `#intern #opportunity site:linkedin.com/posts`,
       
-      // Hashtag-heavy posts
-      `#intern #summer ${targetRole} ${locationClause} site:linkedin.com/posts`,
-      `#internship #entrylevel ${targetRole} ${locationClause} site:linkedin.com/posts`,
-      `#hiring #intern ${locationClause} site:linkedin.com/posts`,
+      // Hashtag + role specific
+      `#intern "${targetRole}" ${locationPlain} site:linkedin.com/posts`,
+      `#internship "${targetRole}" site:linkedin.com/posts`,
       
-      // Team/join language
-      `"join our team" intern ${locationClause} site:linkedin.com/posts`,
-      `"join the team" ${targetRole} ${locationClause} site:linkedin.com/posts`,
+      // Hashtag + action words
+      `#intern "looking for" site:linkedin.com/posts`,
+      `#hiring "intern" site:linkedin.com/posts`,
+      `#internship "join our team" site:linkedin.com/posts`,
       
-      // Opportunity/role language
-      `"opportunity for" intern ${targetRole} ${locationClause} site:linkedin.com/posts`,
-      `"role for" intern ${targetRole} ${locationClause} site:linkedin.com/posts`,
+      // Major city hashtags
+      `#intern #NYC site:linkedin.com/posts`,
+      `#intern #NewYork site:linkedin.com/posts`,
+      `#intern #SanFrancisco site:linkedin.com/posts`,
+      `#intern #Boston site:linkedin.com/posts`,
     ];
 
-    console.log('[getSocialDiscoveries] Fetching LinkedIn posts with hiring intent...');
+    console.log('[getSocialDiscoveries] Scraping LinkedIn hashtag mentions...');
 
     // Fetch posts from all queries in parallel
     const fetchPosts = async (query) => {
@@ -85,11 +94,13 @@ Deno.serve(async (req) => {
         const data = await res.json();
         return (data.results || [])
           .filter(r => {
-            // Filter to only LinkedIn post URLs (not jobs, not profiles)
+            // Must be LinkedIn post URL
             if (!r.url || !r.url.includes('linkedin.com/posts')) return false;
-            // Must have some text content
+            // Must have text content
             if (!r.text || r.text.length < 50) return false;
-            return true;
+            // Bonus: prioritize posts with hashtags in the text
+            const hasHashtags = /#[a-zA-Z]/.test(r.text);
+            return hasHashtags;
           })
           .map(r => ({ ...r, _query: query }));
       } catch (error) {
