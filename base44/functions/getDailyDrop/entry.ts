@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
 
     const goals = user.career_goals || {};
     const targetIndustries = (goals.target_industries || goals.industries || []).map(i => i.toLowerCase());
-    const targetRole = goals.target_roles?.[0] || goals.role || goals.target_role || '';
+    const targetRole = goals.target_roles?.[0] || goals.role || '';
     const sizePref = goals.company_size_preference || 'all';
     const location = user.location_preference || user.location || '';
 
