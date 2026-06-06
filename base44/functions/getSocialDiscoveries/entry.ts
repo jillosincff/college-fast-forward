@@ -3,10 +3,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 /**
  * getSocialDiscoveries — Trending LinkedIn hashtag feed
  *
- * Returns recent (last 14 days) LinkedIn posts containing internship /
- * hiring hashtags from the user's target city. Uses Exa's public LinkedIn
+ * Returns recent (last 14 days) LinkedIn posts containing internship
+ * hashtags from the user's target city. Uses Exa's public LinkedIn
  * index. Intentionally simple: no role/company extraction, no alumni
  * lookup, no body-text keyword filtering — just hashtag + city + recency.
+ *
+ * Hashtags are intern-specific (#internship / #interns / #hiringinterns /
+ * #summerinterns). #hiring is intentionally NOT included because it
+ * pulls in too many senior-level roles.
  */
 
 Deno.serve(async (req) => {
@@ -30,7 +34,7 @@ Deno.serve(async (req) => {
     // hardcoded NYC fallback, no body keyword requirements.
     const cityOnly = targetLocation.split(',')[0].trim(); // "New York, NY" → "New York"
     const cityPart = cityOnly ? ` "${cityOnly}"` : '';
-    const hashtagPart = '("#internship" OR "#hiringinterns" OR "#entryleveljob" OR "#hiring")';
+    const hashtagPart = '("#internship" OR "#interns" OR "#hiringinterns" OR "#summerinterns")';
     const query = `${hashtagPart}${cityPart}`;
     console.log(`[getSocialDiscoveries] Query: ${query}`);
 
@@ -114,7 +118,7 @@ Deno.serve(async (req) => {
     // Fall back to a generic label if the post doesn't quote a hashtag explicitly.
     const findHashtag = (text) => {
       const m = (text || '').match(/#\w+/);
-      return m ? m[0] : '#hiring';
+      return m ? m[0] : '#internship';
     };
 
     const cleanSnippet = (text) => (text || '')
@@ -145,7 +149,7 @@ Deno.serve(async (req) => {
         alumni_matched: false,
         source_type: 'linkedin_hashtag',
         source_label: '🏷️ Trending LinkedIn Hashtag',
-        hashtags: ['#internship', '#hiringinterns', '#entryleveljob', '#hiring'],
+        hashtags: ['#internship', '#interns', '#hiringinterns', '#summerinterns'],
       };
     });
 
