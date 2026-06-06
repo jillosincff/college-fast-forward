@@ -412,8 +412,11 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           goals={user?.career_goals}
           user={user}
           onClose={() => setShowGoalsModal(false)}
-          onSave={(_, refreshedUser) => {
-            if (refreshedUser) setUser(refreshedUser);
+          onSave={async (_, refreshedUser) => {
+            // Fetch FRESH user data to ensure career_goals are updated
+            const freshUser = await base44.auth.me();
+            if (freshUser) setUser(freshUser);
+            else if (refreshedUser) setUser(refreshedUser);
             setShowGoalsModal(false);
           }}
         />
