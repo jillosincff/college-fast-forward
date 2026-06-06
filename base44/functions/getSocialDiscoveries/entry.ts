@@ -37,30 +37,32 @@ Deno.serve(async (req) => {
     console.log('[getSocialDiscoveries] Querying Exa for LinkedIn posts...');
 
     // Build the query without hardcoding a city. The user's own location
-    // (if any) is the only city we should bias on. Bias the search toward
-    // LinkedIn POSTS specifically — not job listings, profiles, or company
-    // pages — by adding a site: clause for /posts/.
+    // (if any) is the only city we should bias on. We rely on includeDomains
+    // for the LinkedIn restriction and the URL allowlist below for the post
+    // restriction — adding a Google-style site: operator confused Exa's
+    // neural search and zeroed out results.
     const locationQuery = targetLocation ? `"${targetLocation}"` : '';
     const hashtagPhrase = '("#internship" OR "#hiringinterns" OR "#entryleveljob" OR "#hiring")';
     const rolePhrase = `("${targetRole} intern" OR "${targetRole} internship" OR "hiring ${targetRole}" OR "${targetRole} summer intern" OR "${targetRole} new grad")`;
-    const sitePrefix = 'site:linkedin.com/posts/';
     const query = locationQuery
-      ? `${sitePrefix} ${rolePhrase} ${hashtagPhrase} ${locationQuery}`
-      : `${sitePrefix} ${rolePhrase} ${hashtagPhrase}`;
+      ? `${rolePhrase} ${hashtagPhrase} ${locationQuery}`
+      : `${rolePhrase} ${hashtagPhrase}`;
+    console.log(`[getSocialDiscoveries] Query: ${query}`);
 
     // Push the 14-day window down to Exa so we don't burn results on stale posts.
     const startCrawlDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Hard URL allowlist — keep only actual social posts. Rejects /jobs/
-    // (the "no longer accepting applications" job listings that were
-    // leaking through), /in/ (profiles), /company/ (company pages),
-    // /pulse/ (long-form articles), and any other LinkedIn surface.
+    // URL allowlist — keep only social-content URLs. Rejects /jobs/ (the
+    // "no longer accepting applications" listings that were leaking through),
+    // /in/ (profiles), /company/ (company pages). Accepts /posts/ and
+    // /feed/update/ (actual posts) plus /pulse/ (LinkedIn articles —
+    // hiring managers sometimes use these for announcements).
     const isPostUrl = (url) => {
       if (!url) return false;
       try {
         const u = new URL(url);
         if (!u.hostname.endsWith('linkedin.com')) return false;
-        return /^\/(posts|feed\/update)\//i.test(u.pathname);
+        return /^\/(posts|feed\/update|pulse)\//i.test(u.pathname);
       } catch {
         return false;
       }
@@ -83,14 +85,18 @@ Deno.serve(async (req) => {
       if (exaRes.ok) {
         const exaData = await exaRes.json();
         const allResults = exaData.results || [];
+        // Sample what Exa returned so we can see the URL shapes we're working with.
+        console.log(`[getSocialDiscoveries] Sample Exa URLs:`, allResults.slice(0, 5).map(r => r.url).join(' | '));
+
         const postResults = allResults.filter(r => isPostUrl(r.url));
-        if (allResults.length !== postResults.length) {
-          console.log(`[getSocialDiscoveries] Dropped ${allResults.length - postResults.length} non-post LinkedIn URLs (jobs/profiles/company pages)`);
+        const dropped = allResults.filter(r => !isPostUrl(r.url));
+        if (dropped.length) {
+          console.log(`[getSocialDiscoveries] Dropped ${dropped.length} non-post URLs. Sample:`, dropped.slice(0, 5).map(r => r.url).join(' | '));
         }
+
         rawPosts = postResults.map(r => ({
           text: r.text || r.title || '',
           postUrl: r.url,
-          // Use Exa's real date when available; fall back to crawl date.
           publishedDate: r.publishedDate || r.crawlDate || null,
           authorName: r.author || 'Hiring Manager',
           caption: r.text || r.title || '',
@@ -118,12 +124,15 @@ Deno.serve(async (req) => {
 
     // Filter: must contain internship/hiring keywords in text.
     const internshipKeywords = ['intern', 'internship', 'hiring', 'joining', 'excited to announce', 'summer 2026', 'fall 2026'];
+    const beforeKeyword = rawPosts.length;
     rawPosts = rawPosts.filter(p => {
       const text = (p.text || p.caption || '').toLowerCase();
       return internshipKeywords.some(keyword => text.includes(keyword));
     });
-
-    console.log(`[getSocialDiscoveries] After keyword filter: ${rawPosts.length}`);
+    console.log(`[getSocialDiscoveries] After keyword filter: ${rawPosts.length} (was ${beforeKeyword})`);
+    if (rawPosts[0]) {
+      console.log(`[getSocialDiscoveries] First surviving post text:`, (rawPosts[0].text || '').slice(0, 200));
+    }
 
     // Location filter (single pass, no hardcoded cities): if the user set a
     // location, the post text must mention either the full string ("New York, NY")
