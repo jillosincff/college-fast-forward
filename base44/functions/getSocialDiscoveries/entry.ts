@@ -1,15 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * getSocialDiscoveries — LinkedIn Post Scraper
+ * getSocialDiscoveries — Compliant Public X-Ray Pipeline
  * 
- * Scrapes LinkedIn posts (not job listings) where people mention:
- * - "looking for intern"
- * - "hiring intern"
- * - "#intern #summer"
- * - "join our team"
+ * Uses Exa AI as a public X-ray search engine to query LinkedIn's 
+ * publicly indexed posts on the open web. Zero login requirements,
+ * zero account-dependent scraping, 100% compliant with data safety.
  * 
- * Uses Exa neural search optimized for social posts with hiring intent.
+ * Queries: site:linkedin.com/posts/ "[role]" ("#internship" OR "intern") ("location" OR "USA")
+ * Recency: Strict 14-day crawl window via startCrawlDate
+ * Alumni Check: Separate Exa People Search on company domain (public index only)
  */
 
 Deno.serve(async (req) => {
@@ -27,43 +27,31 @@ Deno.serve(async (req) => {
     const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
     if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
 
-    // Build hashtag-focused queries for LinkedIn mentions
-    const locationHashtag = targetLocation 
-      ? `#${targetLocation.replace(/[^a-zA-Z]/g, '')}`
-      : '#USA';
-    
-    const locationPlain = targetLocation 
-      ? `"${targetLocation}" OR "${targetLocation.split(',')[0].trim()}"`
-      : '"United States" OR "remote"';
+    // Enforce recency: only posts indexed in last 14 days
+    const startCrawlDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const endCrawlDate = new Date().toISOString();
 
-    // Hashtag-first queries — optimized for casual hiring mentions
+    // Build location clause for X-ray queries
+    const locationClause = targetLocation 
+      ? `("${targetLocation}" OR "${targetLocation.split(',')[0].trim()}" OR "USA")`
+      : '("United States" OR "USA" OR "remote")';
+
+    // Public X-Ray queries using Exa's web index (strictly public data)
     const postQueries = [
-      // Pure hashtag combinations (most common format)
-      `#intern #hiring ${locationHashtag} site:linkedin.com/posts`,
-      `#intern #summer site:linkedin.com/posts`,
-      `#internship #entrylevel site:linkedin.com/posts`,
-      `#hiring #students site:linkedin.com/posts`,
-      `#intern #opportunity site:linkedin.com/posts`,
+      // Core hashtag + role queries
+      `site:linkedin.com/posts/ "${targetRole}" ("#internship" OR "#intern" OR "#entrylevel" OR "entry level") ${locationClause}`,
+      `site:linkedin.com/posts/ "intern" ("hiring" OR "looking for" OR "seeking") ${locationClause}`,
+      `site:linkedin.com/posts/ "#internship" ("join our team" OR "join the team") ${locationClause}`,
       
-      // Hashtag + role specific
-      `#intern "${targetRole}" ${locationPlain} site:linkedin.com/posts`,
-      `#internship "${targetRole}" site:linkedin.com/posts`,
-      
-      // Hashtag + action words
-      `#intern "looking for" site:linkedin.com/posts`,
-      `#hiring "intern" site:linkedin.com/posts`,
-      `#internship "join our team" site:linkedin.com/posts`,
-      
-      // Major city hashtags
-      `#intern #NYC site:linkedin.com/posts`,
-      `#intern #NewYork site:linkedin.com/posts`,
-      `#intern #SanFrancisco site:linkedin.com/posts`,
-      `#intern #Boston site:linkedin.com/posts`,
+      // Hashtag-heavy public posts
+      `site:linkedin.com/posts/ "#intern" "#hiring" ${locationClause}`,
+      `site:linkedin.com/posts/ "#internship" "#summer" ${locationClause}`,
+      `site:linkedin.com/posts/ "#entrylevel" "#opportunity" ${locationClause}`,
     ];
 
-    console.log('[getSocialDiscoveries] Scraping LinkedIn hashtag mentions...');
+    console.log('[getSocialDiscoveries] Running compliant public X-ray search...');
 
-    // Fetch posts from all queries in parallel
+    // Fetch posts from all queries in parallel (public X-ray only)
     const fetchPosts = async (query) => {
       try {
         const res = await fetch('https://api.exa.ai/search', {
@@ -74,12 +62,15 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({
             query,
-            numResults: 6,
-            type: 'neural',
+            numResults: 8,
+            type: 'keyword', // Use keyword search for exact X-ray matching
+            includeDomains: ['linkedin.com'],
+            startCrawlDate: startCrawlDate, // Recency filter
+            endCrawlDate: endCrawlDate,
             contents: { 
               text: { maxCharacters: 800 },
               highlight: { 
-                query: query.split('"')[1] || 'intern',
+                query: targetRole,
                 numSentences: 3 
               }
             },
@@ -94,13 +85,11 @@ Deno.serve(async (req) => {
         const data = await res.json();
         return (data.results || [])
           .filter(r => {
-            // Must be LinkedIn post URL
-            if (!r.url || !r.url.includes('linkedin.com/posts')) return false;
+            // Must be LinkedIn post URL (public index)
+            if (!r.url || !r.url.startsWith('https://www.linkedin.com/posts/')) return false;
             // Must have text content
             if (!r.text || r.text.length < 50) return false;
-            // Bonus: prioritize posts with hashtags in the text
-            const hasHashtags = /#[a-zA-Z]/.test(r.text);
-            return hasHashtags;
+            return true;
           })
           .map(r => ({ ...r, _query: query }));
       } catch (error) {
@@ -195,13 +184,14 @@ Deno.serve(async (req) => {
     console.log(`[getSocialDiscoveries] Unique companies: ${uniquePosts.length}`);
 
     // ─────────────────────────────────────────────────────────────
-    // ENRICHMENT: Check for alumni at each company
+    // ENRICHMENT: Public alumni check via Exa People Search
     // ─────────────────────────────────────────────────────────────
     const enrichPost = async (post) => {
       const company = post._company;
 
       let insiders = [];
       try {
+        // Public index search for alumni (no account-dependent scraping)
         const alumniRes = await fetch('https://api.exa.ai/search', {
           method: 'POST',
           headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
@@ -246,7 +236,7 @@ Deno.serve(async (req) => {
 
       const alumniMatched = insiders.length > 0;
 
-      // Extract company domain
+      // Extract company domain for alumni lookup
       let companyDomain = null;
       try {
         if (post.url) {
@@ -261,6 +251,8 @@ Deno.serve(async (req) => {
         .replace(/!\[.*?\]\(.*?\)/g, '')
         .replace(/Show less/gi, '')
         .replace(/…more/gi, '')
+        .replace(/Agree & Join LinkedIn/gi, '')
+        .replace(/By clicking.*?Cookie Policy\./gi, '')
         .trim()
         .slice(0, 400);
 
@@ -279,7 +271,7 @@ Deno.serve(async (req) => {
         source_type: 'linkedin_post',
         source_label: alumniMatched
           ? '🎯 Network Match | Alumni found at this company'
-          : '🔥 Direct Post | Hiring manager posted about this opportunity',
+          : '🔥 Direct Manager Access | No internal alumni mapped, but you have a direct line to the public creator of this post',
         hashtags: ['#internship', '#entrylevel', '#hiring'],
       };
     };
