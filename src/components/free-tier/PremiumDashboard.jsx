@@ -194,13 +194,6 @@ function PremiumActiveProfilePill({ user, onPillClick }) {
 export default function PremiumDashboard({ user: userProp, parentCount, college, theme }) {
   const [user, setUser] = useState(userProp);
   
-  // Sync user state when parent component passes updated user prop
-  useEffect(() => {
-    if (userProp?.career_goals !== user?.career_goals) {
-      setUser(userProp);
-    }
-  }, [userProp?.career_goals]);
-  
   const t = theme || getThemeForSchool(college || 'UF');
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';

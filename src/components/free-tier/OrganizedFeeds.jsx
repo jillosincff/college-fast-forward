@@ -55,7 +55,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'Network';
   const schoolName = user?.school_name || user?.schoolName || `${schoolAbbr} Network`;
 
-  // Extract career goals for use in both queryFn and component logic
+  // Extract career goals DIRECTLY from user prop for query key - ensures instant cache bust
   const { target_industries, target_role, target_roles } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
 
@@ -88,18 +88,17 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   })());
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
-    queryKey: ['organizedFeeds', user?.id, JSON.stringify(user?.career_goals), today, refreshKey],
+    // CRITICAL: Include career goals directly in queryKey for instant cache bust
+    queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), refreshKey],
     queryFn: () => {
-      // Read career goals INSIDE queryFn to ensure fresh data from latest user prop
-      const { target_industries: freshIndustries, target_role: freshRole, target_roles: freshRoles } = user?.career_goals || {};
-      const freshEffectiveRole = freshRole || freshRoles?.[0] || '';
       return getPersonalizedNetworkCarousel({
-        target_industries: freshIndustries || [],
-        target_role: freshEffectiveRole,
+        target_industries: target_industries || [],
+        target_role: effectiveRole,
         refresh_seed: refreshKey,
         seen_companies: seenForExclusionRef.current,
       });
     },
+    enabled: !!effectiveRole || !!target_industries?.length,
     staleTime: 0,
     gcTime: 0,
   });
