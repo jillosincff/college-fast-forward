@@ -56,8 +56,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const schoolName = user?.school_name || user?.schoolName || `${schoolAbbr} Network`;
 
   // Extract career goals DIRECTLY from user prop for query key - ensures instant cache bust
-  const { target_industries, target_role, target_roles } = user?.career_goals || {};
+  const { target_industries, target_role, target_roles, company_size_preference } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
+  const effectiveSize = company_size_preference || 'all';
 
   useEffect(() => {
     const handler = () => {
@@ -89,7 +90,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
     // CRITICAL: Include career goals directly in queryKey for instant cache bust
-    queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), refreshKey],
+    queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), effectiveSize, refreshKey],
     queryFn: () => {
       return getPersonalizedNetworkCarousel({
         // CRITICAL: Pass explicit parameters to bypass backend DB race condition
@@ -97,6 +98,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         explicit_target_industries: target_industries || [],
         target_industries: target_industries || [],
         target_role: effectiveRole,
+        company_size_preference: effectiveSize,
         refresh_seed: refreshKey,
         seen_companies: seenForExclusionRef.current,
       });

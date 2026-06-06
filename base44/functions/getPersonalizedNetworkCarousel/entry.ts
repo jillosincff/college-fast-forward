@@ -457,7 +457,7 @@ Deno.serve(async (req) => {
     }
 
     const targetRole = body.explicit_target_role || body.target_role || user.career_goals?.role || user.target_role || '';
-    const companySizePref = body.company_size_preference || user.career_goals?.company_size_preference || 'all';
+    const companySizePref = body.explicit_company_size_preference || body.company_size_preference || user.career_goals?.company_size_preference || 'all';
     // Companies the user has already seen — exclude them from this batch
     const seenCompanies = new Set(
       (body.seen_companies || []).map(c => normalizeCompanyName(c))
