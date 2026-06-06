@@ -476,10 +476,12 @@ Deno.serve(async (req) => {
     // Get user's location preferences — payload.target_location takes priority (sent by OrganizedFeeds)
     const rawLocation = body.target_location || user.career_goals?.location_preference || user.location_preference || user.preferred_location || user.location || '';
     const userLocation = rawLocation.toLowerCase();
-    // Extract city: "New York, NY" → "new york"
-    const userCity = rawLocation ? rawLocation.split(',')[0].trim().toLowerCase() : (user.location_city || user.city || '').toLowerCase();
+    // "Remote" / "Anywhere" preference is an intent, not a city — don't try to match it against city names.
+    const remoteIntent = /^(remote|anywhere|flexible|open to relocation)$/i.test(rawLocation.trim());
+    // Extract city: "New York, NY" → "new york". Blank for remote-intent so the city filter doesn't reject everything.
+    const userCity = remoteIntent ? '' : (rawLocation ? rawLocation.split(',')[0].trim().toLowerCase() : (user.location_city || user.city || '').toLowerCase());
     const userState = (user.location_state || user.state || '').toLowerCase();
-    const relocationOk = user.relocation_ok === true;
+    const relocationOk = user.relocation_ok === true || remoteIntent;
     const userSchoolCode = (user.school_code || '').toLowerCase();
     const userSchool = (user.school_name || user.school || user.university || '').toLowerCase();
 
@@ -630,34 +632,39 @@ Deno.serve(async (req) => {
       [jobPool[i], jobPool[j]] = [jobPool[j], jobPool[i]];
     }
     
-    // Location filter: if the user has a target city, reject jobs that name a DIFFERENT specific city.
-    // Allow: remote variants, "multiple US cities", no specific city, or matching the user's city.
-    if (userCity) {
-      const US_CITIES = [
-        'austin', 'san francisco', 'seattle', 'chicago', 'los angeles', 'boston', 'atlanta',
-        'denver', 'dallas', 'houston', 'miami', 'phoenix', 'portland', 'san diego', 'minneapolis',
-        'detroit', 'philadelphia', 'pittsburgh', 'charlotte', 'nashville', 'raleigh', 'salt lake city',
-        'las vegas', 'tampa', 'orlando', 'san jose', 'san antonio', 'columbus', 'kansas city',
-        'indianapolis', 'new york', 'brooklyn', 'manhattan', 'menlo park', 'cupertino', 'redwood city',
-        'mountain view', 'palo alto', 'burbank', 'santa monica', 'los gatos', 'beverly hills',
-        'malvern', 'cincinnati', 'beaverton', 'bristol', 'richmond', 'sacramento', 'baltimore',
-        'st. louis', 'cleveland', 'memphis', 'bellevue', 'herndon', 'dc', 'washington dc',
-        'washington, dc', 'pittsburgh, pa', 'new york, ny', 'gainesville',
-      ];
+    // Location gate — also reused by the post-filter padding steps below so injected
+    // cross-tier and fallback jobs can't bypass it.
+    const US_CITIES = [
+      'austin', 'san francisco', 'seattle', 'chicago', 'los angeles', 'boston', 'atlanta',
+      'denver', 'dallas', 'houston', 'miami', 'phoenix', 'portland', 'san diego', 'minneapolis',
+      'detroit', 'philadelphia', 'pittsburgh', 'charlotte', 'nashville', 'raleigh', 'salt lake city',
+      'las vegas', 'tampa', 'orlando', 'san jose', 'san antonio', 'columbus', 'kansas city',
+      'indianapolis', 'new york', 'brooklyn', 'manhattan', 'menlo park', 'cupertino', 'redwood city',
+      'mountain view', 'palo alto', 'burbank', 'santa monica', 'los gatos', 'beverly hills',
+      'malvern', 'cincinnati', 'beaverton', 'bristol', 'richmond', 'sacramento', 'baltimore',
+      'st. louis', 'cleveland', 'memphis', 'bellevue', 'herndon', 'dc', 'washington dc',
+      'washington, dc', 'pittsburgh, pa', 'new york, ny', 'gainesville',
+    ];
+    const passesLocation = (j) => {
+      const desc = (j.description || '').toLowerCase();
+      const isRemote = desc.includes('remote') || desc.includes('work from home') || desc.includes('remote-friendly') || desc.includes('remote-first');
+      const isMultiCity = desc.includes('multiple us cities') || desc.includes('multiple cities');
+      if (isRemote || isMultiCity) return true;
+      // "Remote" / "Anywhere" intent: only remote-friendly jobs survive — already returned above.
+      if (remoteIntent) return false;
+      // No city preference at all: nothing to gate on.
+      if (!userCity) return true;
+      // Reject any specific-city job that doesn't match the user's city.
+      const mentionedCity = US_CITIES.find(c => desc.includes(c));
+      if (mentionedCity && !mentionedCity.includes(userCity) && !userCity.includes(mentionedCity)) return false;
+      return true;
+    };
 
-      const locationFiltered = jobPool.filter(j => {
-        const jobDesc = (j.description || '').toLowerCase();
-        const isRemote = jobDesc.includes('remote') || jobDesc.includes('work from home') || jobDesc.includes('remote-friendly') || jobDesc.includes('remote-first');
-        const isMultiCity = jobDesc.includes('multiple us cities') || jobDesc.includes('multiple cities');
-        if (isRemote || isMultiCity) return true;
-        // Check if any known city is mentioned in the description
-        const mentionedCity = US_CITIES.find(c => jobDesc.includes(c));
-        // If a specific city is mentioned and it's NOT the user's city, reject it
-        if (mentionedCity && !mentionedCity.includes(userCity) && !userCity.includes(mentionedCity)) return false;
-        return true;
-      });
-      // Only apply filter if it keeps at least 4 results
-      if (locationFiltered.length >= 4) jobPool = locationFiltered;
+    // Apply the gate. Never revert to the unfiltered pool — the role filter and
+    // padding steps below will refill the pool if the result is small, but
+    // rejected city-mismatched jobs must NOT resurrect.
+    if (userCity || remoteIntent) {
+      jobPool = jobPool.filter(passesLocation);
     }
 
     // Build role keyword list from target_role, target_positions, AND industry-derived keywords
@@ -729,6 +736,7 @@ Deno.serve(async (req) => {
         { company: 'Vercel', role: 'Solutions Engineer', companyTier: 3, description: 'Location: Remote-first | Series C developer platform scaling rapidly.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
       ].filter(j => !SENIOR_FILTER.test(j.role));
       for (const j of crossTier23) {
+        if (!passesLocation(j)) continue;
         const key = `${j.company}||${j.role}`;
         if (!seen.has(key)) { seen.add(key); jobPool.push(j); }
         if (jobPool.filter(x => (x.companyTier || 1) >= 2).length / jobPool.length >= 0.3) break;
@@ -739,8 +747,8 @@ Deno.serve(async (req) => {
     // This guarantees users with niche or unmapped industries always see something
     if (jobPool.length < 5) {
       const seenPoolKeys = new Set(jobPool.map(j => normalizeCompanyName(j.company)));
-      const fallbackFiltered = FALLBACK_JOBS.filter(j => 
-        !SENIOR_FILTER.test(j.role) && !seenPoolKeys.has(normalizeCompanyName(j.company))
+      const fallbackFiltered = FALLBACK_JOBS.filter(j =>
+        !SENIOR_FILTER.test(j.role) && !seenPoolKeys.has(normalizeCompanyName(j.company)) && passesLocation(j)
       );
       jobPool = [...jobPool, ...fallbackFiltered];
     }
