@@ -3,14 +3,18 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 /**
  * getSocialDiscoveries — Trending LinkedIn hashtag feed
  *
- * Returns recent (last 14 days) LinkedIn posts containing internship
- * hashtags from the user's target city. Uses Exa's public LinkedIn
- * index. Intentionally simple: no role/company extraction, no alumni
- * lookup, no body-text keyword filtering — just hashtag + city + recency.
+ * Returns recent (last 14 days) LinkedIn posts containing the
+ * intent-appropriate hashtags from the user's target city. Uses Exa's
+ * public LinkedIn index. Intentionally simple: no role/company extraction,
+ * no alumni lookup, no body-text keyword filtering — just hashtag + city
+ * + recency.
  *
- * Hashtags are intern-specific (#internship / #interns / #hiringinterns /
- * #summerinterns). #hiring is intentionally NOT included because it
- * pulls in too many senior-level roles.
+ * Hashtag set picks itself based on the user's seeking / job_type:
+ *   - Internship seeker → #internship / #interns / #hiringinterns / #summerinterns
+ *   - Full-time seeker  → #entrylevel / #entryleveljobs
+ *   - Both / unset      → union of the two sets
+ *
+ * #hiring is intentionally excluded — it pulls in too many senior-level roles.
  */
 
 Deno.serve(async (req) => {
@@ -25,16 +29,36 @@ Deno.serve(async (req) => {
       || user.location
       || '';
 
+    // What's the user actually looking for? Accept any of the
+    // historical field names; tolerate both 'fulltime' (onboarding) and
+    // 'full_time' (Goals tab) shapes.
+    const rawSeeking = (body.target_seeking
+      || user.career_goals?.job_type
+      || user.career_goals?.seeking
+      || ''
+    ).toLowerCase().trim();
+    const isIntern = /intern/.test(rawSeeking);
+    const isFulltime = /full[_-]?time|new[_-]?grad|entry[_-]?level/.test(rawSeeking);
+    const isBoth = rawSeeking === 'both' || (!isIntern && !isFulltime);
+
+    const INTERN_HASHTAGS = ['#internship', '#interns', '#hiringinterns', '#summerinterns'];
+    const FULLTIME_HASHTAGS = ['#entrylevel', '#entryleveljobs'];
+    const activeHashtags = isBoth
+      ? [...INTERN_HASHTAGS, ...FULLTIME_HASHTAGS]
+      : isIntern
+        ? INTERN_HASHTAGS
+        : FULLTIME_HASHTAGS;
+
     const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
     if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
 
-    console.log('[getSocialDiscoveries] Starting hashtag feed pipeline...');
+    console.log(`[getSocialDiscoveries] Seeking="${rawSeeking}", hashtags=${activeHashtags.join(',')}`);
 
     // Just the hashtags + the user's city portion. No role phrase, no
-    // hardcoded NYC fallback, no body keyword requirements.
+    // hardcoded city fallback, no body keyword requirements.
     const cityOnly = targetLocation.split(',')[0].trim(); // "New York, NY" → "New York"
     const cityPart = cityOnly ? ` "${cityOnly}"` : '';
-    const hashtagPart = '("#internship" OR "#interns" OR "#hiringinterns" OR "#summerinterns")';
+    const hashtagPart = '(' + activeHashtags.map(h => `"${h}"`).join(' OR ') + ')';
     const query = `${hashtagPart}${cityPart}`;
     console.log(`[getSocialDiscoveries] Query: ${query}`);
 
@@ -114,11 +138,12 @@ Deno.serve(async (req) => {
       return r.author || 'LinkedIn user';
     };
 
-    // Show the first hashtag actually present in the post body (e.g. #internship).
-    // Fall back to a generic label if the post doesn't quote a hashtag explicitly.
+    // Show the first hashtag in the post body; fall back to the first
+    // active hashtag (matches the user's intent — intern vs full-time).
+    const fallbackHashtag = activeHashtags[0] || '#internship';
     const findHashtag = (text) => {
       const m = (text || '').match(/#\w+/);
-      return m ? m[0] : '#internship';
+      return m ? m[0] : fallbackHashtag;
     };
 
     const cleanSnippet = (text) => (text || '')
@@ -149,7 +174,7 @@ Deno.serve(async (req) => {
         alumni_matched: false,
         source_type: 'linkedin_hashtag',
         source_label: '🏷️ Trending LinkedIn Hashtag',
-        hashtags: ['#internship', '#interns', '#hiringinterns', '#summerinterns'],
+        hashtags: activeHashtags,
       };
     });
 
