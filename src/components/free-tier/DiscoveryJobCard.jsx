@@ -156,7 +156,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
             style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
           >
-            ⚡ Find Backdoor & Draft
+            ⚡ Generate Message
           </button>
         ) : (
           <button 

@@ -167,10 +167,10 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect, onDismiss
               ? 'bg-gray-100 text-gray-500 border border-gray-200 cursor-not-allowed'
               : isScouting 
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-                : 'bg-orange-500 hover:bg-orange-600 text-white'
+                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
           }`}
         >
-          {isScouting ? 'Searching...' : scoutDeployed ? '✅ Monitoring' : '🔍 Find an Insider'}
+          {isScouting ? '⚡ CLiFF Agent Mapping...' : scoutDeployed ? '✅ Message Ready' : '⚡ Generate Message'}
         </button>
       </div>
     </div>
