@@ -2,12 +2,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
  * getSocialDiscoveries — Compliant Real-Time LinkedIn Pipeline
- * 
- * PRIMARY: Exa semantic search for LinkedIn posts (fast, reliable)
- * SECONDARY: Apify hashtag scraper (fallback for more volume)
- * 
- * Recency: Strict 14-day filter on publishedDate
- * Alumni Check: Exa People Search on verified company domain (public index only)
+ *
+ * Exa semantic search over LinkedIn's public index.
+ * - 14-day recency enforced at the source via Exa startCrawlDate
+ * - Public People Search for alumni mapping (public index only)
+ * - No account-dependent scraping, no automated browser, no LinkedIn API
+ *
+ * The earlier Apify hashtag-URL fallback was removed: it returned URLs
+ * only (no post bodies), so the downstream keyword + company-extraction
+ * filters wiped every Apify result. The architecture is also out of
+ * scope of the compliant-public-data design doc.
  */
 
 Deno.serve(async (req) => {
@@ -22,29 +26,39 @@ Deno.serve(async (req) => {
     const schoolName = user.school_name || user.school || 'University of Florida';
     const schoolCode = (user.school_code || 'UF').toUpperCase();
 
-    const APIFY_API_KEY = Deno.env.get('APIFY_API_KEY');
     const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
-    
     if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
 
     console.log('[getSocialDiscoveries] Starting social discoveries pipeline...');
 
     let rawPosts = [];
 
-    // PRIMARY: Exa semantic search for LinkedIn posts
-    console.log('[getSocialDiscoveries] Using Exa semantic search for LinkedIn posts...');
-    
+    // Exa semantic search over LinkedIn's public index.
+    console.log('[getSocialDiscoveries] Querying Exa for LinkedIn posts...');
+
+    // Build the query without hardcoding a city. The user's own location
+    // (if any) is the only city we should bias on.
+    const locationQuery = targetLocation ? `"${targetLocation}"` : '';
+    const hashtagPhrase = '("#internship" OR "#hiringinterns" OR "#entryleveljob" OR "#hiring")';
+    const rolePhrase = `("${targetRole} intern" OR "${targetRole} internship" OR "hiring ${targetRole}" OR "${targetRole} summer intern" OR "${targetRole} new grad")`;
+    const query = locationQuery
+      ? `${rolePhrase} ${hashtagPhrase} ${locationQuery}`
+      : `${rolePhrase} ${hashtagPhrase}`;
+
+    // Push the 14-day window down to Exa so we don't burn results on stale posts.
+    const startCrawlDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
     try {
-      const locationQuery = targetLocation ? `(${targetLocation} OR "New York City" OR NYC OR "New York, NY")` : '';
       const exaRes = await fetch('https://api.exa.ai/search', {
         method: 'POST',
         headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          query: `("${targetRole} intern" OR "${targetRole} internship" OR "hiring ${targetRole}" OR "${targetRole} summer intern") ${locationQuery}`,
-          numResults: 40,
+          query,
+          numResults: 100,
           includeDomains: ['linkedin.com'],
+          startCrawlDate,
           type: 'neural',
-          contents: { text: { maxCharacters: 500 } },
+          contents: { text: { maxCharacters: 800 } },
         }),
       });
 
@@ -53,109 +67,24 @@ Deno.serve(async (req) => {
         rawPosts = (exaData.results || []).map(r => ({
           text: r.text || r.title || '',
           postUrl: r.url,
-          publishedDate: new Date().toISOString(),
-          authorName: 'Hiring Manager',
+          // Use Exa's real date when available; fall back to crawl date.
+          publishedDate: r.publishedDate || r.crawlDate || null,
+          authorName: r.author || 'Hiring Manager',
           caption: r.text || r.title || '',
         }));
         console.log(`[getSocialDiscoveries] Exa returned ${rawPosts.length} LinkedIn posts`);
+      } else {
+        const errText = await exaRes.text().catch(() => 'unknown error');
+        console.warn(`[getSocialDiscoveries] Exa returned ${exaRes.status}: ${errText.slice(0, 200)}`);
       }
     } catch (exaError) {
       console.warn('[getSocialDiscoveries] Exa search failed:', exaError.message);
     }
 
-    // SECONDARY: Apify hashtag scraper (fallback if Exa returns < 5 results)
-    if (rawPosts.length < 5 && APIFY_API_KEY) {
-      console.log('[getSocialDiscoveries] Exa returned few results, trying Apify hashtag scraper...');
-      
-      const hashtags = ['#internship', '#entrylevel', '#hiring'];
-      const roleKeyword = targetRole.toLowerCase().includes('marketing') ? 'marketing' : targetRole;
-      const searchQueries = hashtags.map(tag => `${tag} ${roleKeyword}`);
-      
-      console.log(`[getSocialDiscoveries] Apify queries: ${searchQueries.join(', ')}`);
-
-      const runActor = async (searchQuery) => {
-        try {
-          const hashtag = searchQuery.replace('#', '').trim();
-          console.log(`[getSocialDiscoveries] Running Apify for hashtag: ${hashtag}`);
-          
-          const runRes = await fetch(`https://api.apify.com/v2/acts/sasky~linkedin-hashtag-posts-urls-scraper/runs?token=${APIFY_API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              hashtag: hashtag,
-              maxPosts: 15,
-            }),
-          });
-
-          if (!runRes.ok) {
-            const errorText = await runRes.text().catch(() => 'unknown error');
-            console.warn(`[getSocialDiscoveries] Apify run failed for ${hashtag}: ${runRes.status} - ${errorText}`);
-            return [];
-          }
-
-          const runData = await runRes.json();
-          const runId = runData.data?.id;
-          
-          if (!runId) {
-            console.warn(`[getSocialDiscoveries] No run ID returned for ${hashtag}`);
-            return [];
-          }
-
-          console.log(`[getSocialDiscoveries] Apify run started: ${runId}`);
-
-          // Wait for run to complete (poll every 3s, max 60s)
-          let completed = false;
-          for (let i = 0; i < 20; i++) {
-            await new Promise(r => setTimeout(r, 3000));
-            const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_API_KEY}`);
-            if (!statusRes.ok) continue;
-            const statusData = await statusRes.json();
-            const status = statusData.data?.status;
-            if (status === 'SUCCEEDED') {
-              completed = true;
-              console.log(`[getSocialDiscoveries] Apify run completed: ${runId}`);
-              break;
-            }
-            if (status === 'FAILED') {
-              console.warn(`[getSocialDiscoveries] Apify run failed: ${runId}`);
-              break;
-            }
-          }
-
-          if (!completed) {
-            console.warn(`[getSocialDiscoveries] Apify run timeout for ${hashtag}`);
-            return [];
-          }
-
-          const datasetRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset?token=${APIFY_API_KEY}`);
-          if (!datasetRes.ok) {
-            console.warn(`[getSocialDiscoveries] Dataset fetch failed: ${datasetRes.status}`);
-            return [];
-          }
-          
-          const items = await datasetRes.json();
-          const results = items.data || [];
-          console.log(`[getSocialDiscoveries] Retrieved ${results.length} posts for ${hashtag}`);
-          return results;
-        } catch (error) {
-          console.warn(`[getSocialDiscoveries] Apify query failed: ${searchQuery}`, error.message);
-          return [];
-        }
-      };
-
-      const postBatches = await Promise.allSettled(searchQueries.map(runActor));
-      const apifyPosts = postBatches
-        .filter(r => r.status === 'fulfilled')
-        .flatMap(r => r.value);
-
-      console.log(`[getSocialDiscoveries] Apify returned ${apifyPosts.length} posts`);
-      rawPosts = [...rawPosts, ...apifyPosts];
-    }
-
     console.log(`[getSocialDiscoveries] Total raw posts: ${rawPosts.length}`);
 
-    // Enforce 14-day recency filter
-    const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
+    // Enforce 14-day recency filter (defense-in-depth: Exa's startCrawlDate
+    // already handles this at the source, but some results lack a date).
     rawPosts = rawPosts.filter(p => {
       if (!p.publishedDate) return true;
       const postAge = Date.now() - new Date(p.publishedDate).getTime();
@@ -164,7 +93,7 @@ Deno.serve(async (req) => {
 
     console.log(`[getSocialDiscoveries] After 14-day filter: ${rawPosts.length}`);
 
-    // Filter: Must contain internship/hiring keywords in text
+    // Filter: must contain internship/hiring keywords in text.
     const internshipKeywords = ['intern', 'internship', 'hiring', 'joining', 'excited to announce', 'summer 2026', 'fall 2026'];
     rawPosts = rawPosts.filter(p => {
       const text = (p.text || p.caption || '').toLowerCase();
@@ -173,39 +102,20 @@ Deno.serve(async (req) => {
 
     console.log(`[getSocialDiscoveries] After keyword filter: ${rawPosts.length}`);
 
-    // STRICT location filter - only if user specified location
+    // Location filter (single pass, no hardcoded cities): if the user set a
+    // location, the post text must mention either the full string ("New York, NY")
+    // or the city portion ("New York"). Apply once — the previous duplicate
+    // pass was redundant and the NYC fallback terms biased non-NYC users.
     if (targetLocation) {
-      const locationTerms = [
-        targetLocation.toLowerCase(),
-        targetLocation.split(',')[0].trim().toLowerCase(),
-        'new york city',
-        'nyc',
-        'new york, ny',
-        'manhattan',
-        'brooklyn'
-      ].filter(Boolean);
-      
+      const fullLoc = targetLocation.trim().toLowerCase();
+      const cityOnly = targetLocation.split(',')[0].trim().toLowerCase();
+      const locationTerms = [fullLoc, cityOnly].filter(Boolean);
       const beforeCount = rawPosts.length;
       rawPosts = rawPosts.filter(p => {
         const text = (p.text || p.caption || '').toLowerCase();
-        const hasLocation = locationTerms.some(term => text.includes(term));
-        if (!hasLocation) {
-          console.log(`[getSocialDiscoveries] Filtering out post - no location match. Text preview: ${(p.text || '').slice(0, 100)}`);
-        }
-        return hasLocation;
+        return locationTerms.some(term => text.includes(term));
       });
-      
-      console.log(`[getSocialDiscoveries] After STRICT location filter: ${rawPosts.length} (was ${beforeCount})`);
-    }
-
-    // Deduplicate by URL
-    if (targetLocation) {
-      const locationTerms = [targetLocation, targetLocation.split(',')[0].trim()].filter(Boolean);
-      rawPosts = rawPosts.filter(p => {
-        const text = (p.text || p.caption || '').toLowerCase();
-        return locationTerms.some(term => text.includes(term.toLowerCase()));
-      });
-      console.log(`[getSocialDiscoveries] After location filter: ${rawPosts.length}`);
+      console.log(`[getSocialDiscoveries] After location filter: ${rawPosts.length} (was ${beforeCount})`);
     }
 
     // Deduplicate by URL
