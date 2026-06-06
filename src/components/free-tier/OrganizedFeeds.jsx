@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
-import { getSocialDiscoveries } from '@/functions/getSocialDiscoveries';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
-import SocialDiscoveryCard from './SocialDiscoveryCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useRef } from 'react';
@@ -14,8 +12,6 @@ const TABS = ['All', 'Network Backdoors', 'Hidden Discoveries'];
 export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [activeTab, setActiveTab] = useState('All');
-  // Top-level feed source toggle: 'website' = Direct Website Feed, 'social' = Social Discoveries
-  const [activeFeedTab, setActiveFeedTab] = useState('website');
   const queryClient = useQueryClient();
 
   // Track companies the user has explicitly saved (pipeline add or cold inroad click)
@@ -130,21 +126,6 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   });
   const dualLeads = Array.isArray(dualData?.data?.leads) ? dualData.data.leads
                   : Array.isArray(dualData?.leads) ? dualData.leads : [];
-
-  // Social Discoveries feed — only fetches when tab is active to avoid unnecessary API calls
-  const { data: socialData, isLoading: socialLoading } = useQuery({
-    queryKey: ['socialDiscoveries', effectiveRole, JSON.stringify(target_industries), effectiveLocation],
-    queryFn: () => getSocialDiscoveries({
-      target_role: effectiveRole,
-      target_industries: target_industries || [],
-      target_location: effectiveLocation,
-    }),
-    enabled: activeFeedTab === 'social' && !!(effectiveRole || target_industries?.length),
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
-  });
-  const socialDiscoveries = Array.isArray(socialData?.data?.discoveries) ? socialData.data.discoveries
-    : Array.isArray(socialData?.discoveries) ? socialData.discoveries : [];
 
   const payload = feedsData?.data || feedsData;
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
@@ -325,83 +306,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         </div>
       )}
 
-      {/* ── Feed Source Toggle: Direct Website / Social Discoveries ── */}
-      <div className="flex items-center gap-2 p-1 bg-gray-100 rounded-2xl w-fit">
-        <button
-          onClick={() => setActiveFeedTab('website')}
-          style={{ minHeight: 'auto', minWidth: 'auto' }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeFeedTab === 'website'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          🌐 Direct Website
-        </button>
-        <button
-          onClick={() => setActiveFeedTab('social')}
-          style={{ minHeight: 'auto', minWidth: 'auto' }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeFeedTab === 'social'
-              ? 'bg-white text-gray-900 shadow-sm'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          📣 Social Discoveries
-        </button>
-      </div>
-
-      {/* ── SOCIAL DISCOVERIES FEED ── */}
-      {activeFeedTab === 'social' && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">📣</span>
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">
-              Social Scout Discoveries
-            </h3>
-            <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-blue-100">
-              LinkedIn Hashtag Engine
-            </span>
-          </div>
-          <p className="text-xs text-gray-500 -mt-1">
-            Hiring posts from LinkedIn tracked in the last <span className="font-semibold text-blue-600">14 days</span> — manager-advertised roles with{' '}
-            <span className="font-semibold text-purple-700">alumni contact matching</span>.
-          </p>
-
-          {socialLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3].map(n => (
-                <div key={n} className="h-52 bg-blue-50 rounded-2xl animate-pulse border border-blue-100" />
-              ))}
-            </div>
-          ) : socialDiscoveries.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {socialDiscoveries.map((disc, idx) => (
-                <SocialDiscoveryCard
-                  key={disc.company || idx}
-                  discovery={disc}
-                  schoolAbbr={schoolAbbr}
-                  onAddToPipeline={handleAddToPipeline}
-                  onGenerateMessage={(disc) => {
-                    const company = disc.company;
-                    const role = disc.role;
-                    window.location.hash = `#OutreachDrafts?context=social_scout&company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`;
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="border border-dashed border-blue-200 rounded-2xl p-8 text-center text-gray-400 text-xs bg-blue-50/30">
-              {noGoals
-                ? 'Set your career goals above to activate the Social Scout Engine.'
-                : 'No recent LinkedIn hiring posts found for your target role. Try adjusting your career goals.'}
-            </div>
-          )}
-        </section>
-      )}
 
       {/* ── DUAL CONSTRAINT: Alumni-Verified + Active Jobs ── */}
-      {activeFeedTab === 'website' && (dualLoading || dualLeads.length > 0) && (
+      {(dualLoading || dualLeads.length > 0) && (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">🏅</span>
@@ -534,7 +441,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       )}
 
       {/* ── UNIFIED Target-Matched Opportunities Feed (Direct Website only) ── */}
-      {activeFeedTab === 'website' && <section className="space-y-4">
+      <section className="space-y-4">
         {/* Section title row */}
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -615,7 +522,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
               : `No ${activeTab === 'Network Backdoors' ? 'network-connected' : 'hidden discovery'} roles found in your current feed.`}
           </div>
         )}
-      </section>}
+      </section>
 
       {selectedLead && (
         <MatchDeepDiveModal
