@@ -17,10 +17,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const queryClient = useQueryClient();
 
   const { data: dropData, isLoading, error } = useQuery({
-    queryKey: ['dailyDrop', user?.id],
+    queryKey: ['dailyDrop', user?.id, JSON.stringify(user?.career_goals)],
     queryFn: () => getDailyDrop({}),
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 60,
+    staleTime: 0,
+    gcTime: 0,
     retry: 1,
     enabled: !!user?.id,
   });

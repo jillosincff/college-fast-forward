@@ -87,7 +87,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   })());
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
-    queryKey: ['organizedFeeds', JSON.stringify(target_industries), effectiveRole, today, refreshKey],
+    queryKey: ['organizedFeeds', user?.id, JSON.stringify(user?.career_goals), today, refreshKey],
     queryFn: () => getPersonalizedNetworkCarousel({
       target_industries: target_industries || [],
       target_role: effectiveRole,
