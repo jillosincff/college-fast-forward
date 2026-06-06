@@ -199,132 +199,48 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, leads: [], reason: 'No companies extracted from alumni profiles' });
     }
 
-    // ── STEP 2: Check active job listings at alumni-verified companies ──
-    const companyNames = rankedCompanies.map(c => c.name);
-    const locationStr = userLocation ? ` ${userLocation}` : '';
-
-    const jobQuery = `${roleQuery} (entry level OR junior OR associate OR new grad)${locationStr}`;
-
-    // Also build a company-specific query targeting each alumni company directly
-    const topCompanyNames = companyNames.slice(0, 6);
-    const companyOrQuery = topCompanyNames.map(n => `"${n}"`).join(' OR ');
-    const companyJobQuery = `(${companyOrQuery}) ${roleQuery} hiring job`;
-
-    console.log(`[DualConstraint] Step 3: Checking active jobs at: ${topCompanyNames.join(', ')}`);
-
-    const ATS_DOMAINS = [
-      'jobs.lever.co',
-      'boards.greenhouse.io',
-      'jobs.ashbyhq.com',
-      'apply.workable.com',
-    ];
-
-    // Run three parallel checks for maximum coverage
-    const [atsJobData, companyJobData, careerPageData] = await Promise.all([
-      exaFetch('search', {
-        query: jobQuery,
-        type: 'keyword',
-        numResults: 20,
-        includeDomains: ATS_DOMAINS,
-        contents: { highlights: { maxCharacters: 400 } },
-        startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      }).catch(() => ({ results: [] })),
-      // Direct company-targeted job search on ATS boards
-      exaFetch('search', {
-        query: companyJobQuery,
-        type: 'neural',
-        numResults: 15,
-        includeDomains: ATS_DOMAINS,
-        contents: { highlights: { maxCharacters: 400 } },
-        startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      }).catch(() => ({ results: [] })),
-      // Broader web search for job openings at these companies
-      exaFetch('search', {
-        query: `${companyJobQuery} careers apply`,
-        type: 'neural',
-        numResults: 10,
-        contents: { highlights: { maxCharacters: 400 } },
-        startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      }).catch(() => ({ results: [] })),
-    ]);
-
-    const allJobResults = [
-      ...(atsJobData.results || []),
-      ...(companyJobData.results || []),
-      ...(careerPageData.results || []),
-    ];
-
-    console.log(`[DualConstraint] Found ${allJobResults.length} potential job listings`);
-
-    // Match job results back to alumni companies
+    // ── STEP 2: Search for active job listings at each alumni company directly ──
     const SENIOR_PATTERN = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff)\b/i;
-
-    // Only trust known job board / ATS domains
-    const TRUSTED_JOB_DOMAINS = [
-      'jobs.lever.co', 'boards.greenhouse.io', 'jobs.ashbyhq.com', 'apply.workable.com',
-      'linkedin.com/jobs', 'indeed.com', 'glassdoor.com', 'myworkdayjobs.com',
-      'jobs.smartrecruiters.com',
+    const ATS_DOMAINS = [
+      'jobs.lever.co', 'boards.greenhouse.io', 'jobs.ashbyhq.com',
+      'apply.workable.com', 'myworkdayjobs.com', 'jobs.smartrecruiters.com',
     ];
-    const isJobUrl = (url) => {
-      const u = (url || '').toLowerCase();
-      return TRUSTED_JOB_DOMAINS.some(d => u.includes(d));
-    };
 
+    const topCompanies = rankedCompanies.slice(0, 8);
+    console.log(`[DualConstraint] Step 2: Searching jobs at: ${topCompanies.map(c => c.name).join(', ')}`);
+
+    // For each company, do a targeted ATS search by company name + role
+    // This is far more reliable than one big generic search
+    const perCompanyJobResults = await Promise.all(
+      topCompanies.map(company =>
+        exaFetch('search', {
+          query: `"${company.name}" ${roleQuery} job opening hiring`,
+          type: 'keyword',
+          numResults: 5,
+          includeDomains: ATS_DOMAINS,
+          contents: { highlights: { maxCharacters: 300 } },
+          startPublishedDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+        }).then(d => ({ company: company.name, results: d.results || [] }))
+          .catch(() => ({ company: company.name, results: [] }))
+      )
+    );
+
+    // Build jobsByCompany map from per-company results — no fuzzy matching needed
     const jobsByCompany = new Map();
-    allJobResults.forEach(r => {
-      if (!r.url || !r.title) return;
-      if (SENIOR_PATTERN.test(r.title)) return;
-      if (!isJobUrl(r.url)) return; // skip spam / non-job-board results
-
-      // Extract company slug from ATS URL
-      const atsMatch = r.url.match(/(?:jobs\.lever\.co|boards\.greenhouse\.io|jobs\.ashbyhq\.com|apply\.workable\.com)\/([^/]+)/);
-      const companySlug = atsMatch ? atsMatch[1].replace(/-/g, ' ') : '';
-
-      // Require company name to appear in the ATS URL slug or job title — strict match only
-      const matchedCompany = rankedCompanies.find(c => {
-        const cNorm = normalize(c.name);
-        const slugNorm = normalize(companySlug);
-        const titleNorm = normalize(r.title || '');
-        // First word of company (4+ chars) must appear in slug or title
-        const firstWord = cNorm.replace(/\s+/g, ' ').split(' ').find(w => w.length >= 4) || cNorm;
-        return slugNorm.includes(firstWord) || titleNorm.includes(firstWord);
-      });
-
-      if (matchedCompany) {
-        if (!jobsByCompany.has(matchedCompany.name)) {
-          jobsByCompany.set(matchedCompany.name, []);
-        }
-        jobsByCompany.get(matchedCompany.name).push({
+    perCompanyJobResults.forEach(({ company, results }) => {
+      const jobs = results
+        .filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title))
+        .map(r => ({
           title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
           url: r.url,
           publishedDate: r.publishedDate || null,
-        });
+        }));
+      if (jobs.length > 0) {
+        jobsByCompany.set(company, jobs);
       }
     });
 
-    // Also try matching unmatched jobs to companies by title keyword scan
-    allJobResults.forEach(r => {
-      if (!r.url || !r.title) return;
-      if (SENIOR_PATTERN.test(r.title)) return;
-      if (!isJobUrl(r.url)) return;
-      rankedCompanies.forEach(c => {
-        // Skip if already matched
-        if (jobsByCompany.has(c.name) && jobsByCompany.get(c.name).length > 0) return;
-        const cNorm = normalize(c.name);
-        const titleNorm = normalize(r.title || '');
-        const urlNorm = normalize(r.url || '');
-        const snippetNorm = normalize((r.highlights || []).join(' '));
-        const firstWord = cNorm.replace(/\s+/g, '').length >= 4 ? cNorm.split('').slice(0,8).join('') : cNorm;
-      if (titleNorm.includes(firstWord) || urlNorm.includes(firstWord)) {
-          if (!jobsByCompany.has(c.name)) jobsByCompany.set(c.name, []);
-          jobsByCompany.get(c.name).push({
-            title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
-            url: r.url,
-            publishedDate: r.publishedDate || null,
-          });
-        }
-      });
-    });
+    console.log(`[DualConstraint] Companies with active jobs: ${[...jobsByCompany.keys()].join(', ') || 'none'}`);
 
     // ── BUILD FINAL HIGH-SIGNAL LEAD CARDS ─────────────────────────────
     const leads = rankedCompanies
