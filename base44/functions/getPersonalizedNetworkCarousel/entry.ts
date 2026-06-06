@@ -416,7 +416,7 @@ const FALLBACK_JOBS = [
   { company: 'Amazon', role: 'Operations Manager (New Grad)', companyTier: 1, description: 'Location: Multiple US cities. Responsibilities: Manage warehouse operations, lead teams, optimize processes. Requirements: Bachelor degree, leadership skills. Compensation: $70,000-85,000 base + sign-on.', source: 'amazon.jobs', sourceCategory: 'C' },
   { company: 'Microsoft', role: 'Business Program Manager', companyTier: 1, description: 'Location: Redmond, WA | Hybrid. Responsibilities: Coordinate cross-functional projects, track deliverables. Requirements: Bachelor in Business/Engineering. Compensation: $95,000-115,000 base + stock.', source: 'careers.microsoft.com', sourceCategory: 'C' },
   { company: 'HubSpot', role: 'Sales Development Representative', companyTier: 2, description: 'Location: Remote-friendly (US). Responsibilities: Generate leads, qualify prospects. Requirements: Bachelor degree. Compensation: $60,000-75,000 base + commission + equity.', source: 'hubspot.com/careers', sourceCategory: 'B' },
-  { company: 'Notion', role: 'Customer Success Associate', companyTier: 2, description: 'Location: Remote-friendly (US). Responsibilities: Onboard customers, drive adoption, gather feedback. Requirements: Bachelor degree. Compensation: $70,000-85,000 base + equity.', source: 'notion.com/careers', sourceCategory: 'B' },
+  { company: 'HubSpot', role: 'Customer Success Associate', companyTier: 2, description: 'Location: Remote-friendly (US). Responsibilities: Onboard customers, drive product adoption, gather feedback. Requirements: Bachelor degree. Compensation: $70,000-85,000 base + equity.', source: 'hubspot.com/careers', sourceCategory: 'B' },
   { company: 'Ramp', role: 'Business Operations Analyst', companyTier: 3, description: 'Location: New York, NY | Hybrid. Series D. Responsibilities: Strategic planning, financial analysis. Requirements: Top university. Compensation: $100,000-120,000 base + equity.', source: 'ramp.com/careers', sourceCategory: 'B' },
   { company: 'Lattice', role: 'Customer Success Manager', companyTier: 3, description: 'Location: Remote-first. Responsibilities: Manage client relationships, drive adoption. Requirements: 2+ years CS experience. Compensation: $75,000-95,000 base + equity.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
 ];
@@ -688,12 +688,11 @@ Deno.serve(async (req) => {
       return true;
     };
 
-    // Apply the gate. Never revert to the unfiltered pool — the role filter and
-    // padding steps below will refill the pool if the result is small, but
-    // rejected city-mismatched jobs must NOT resurrect.
-    if (userCity || remoteIntent) {
-      jobPool = jobPool.filter(passesLocation);
-    }
+    // Apply the gate unconditionally — if userCity is empty and not remote intent,
+    // passesLocation returns true for everything (no city to gate on), so this is safe.
+    // Previously gating only when userCity was truthy allowed the entire filter to be
+    // skipped when a user had no location set, letting SF-HQ static entries leak through.
+    jobPool = jobPool.filter(passesLocation);
 
     // Build role keyword list from target_role, target_positions, AND industry-derived keywords
     // This is the "double-lock": industry must match AND role title must match
@@ -759,9 +758,9 @@ Deno.serve(async (req) => {
     if (tier23Ratio < 0.3 && tier23.length < 3) {
       // Pull in cross-industry Tier 2/3 starters to pad the feed
       const crossTier23 = [
-        { company: 'Retool', role: 'Implementation Engineer', companyTier: 3, description: 'Location: San Francisco/Remote | Series C internal tools platform. Team of 200. Responsibilities: Implement Retool for enterprise clients, build custom dashboards, ensure successful deployments. Requirements: Technical background, client-facing skills. Compensation: $110,000-140,000 + equity.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
-        { company: 'Notion', role: 'Customer Success Manager', companyTier: 2, description: 'Location: Remote-friendly | Productivity platform with 30M+ users. Responsibilities: Onboard enterprise clients, drive adoption, gather product feedback. Compensation: $90,000-110,000 + equity.', source: 'notion.com/careers', sourceCategory: 'B' },
-        { company: 'Vercel', role: 'Solutions Engineer', companyTier: 3, description: 'Location: Remote-first | Series C developer platform scaling rapidly.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
+        { company: 'Twilio', role: 'Customer Success Manager', companyTier: 2, description: 'Location: Remote-first (US). Responsibilities: Onboard enterprise clients, drive product adoption, manage renewals. Requirements: 2+ years CS experience, strong communication. Compensation: $90,000-110,000 base + equity.', source: 'twilio.com/en-us/company/jobs', sourceCategory: 'B' },
+        { company: 'HubSpot', role: 'Business Operations Analyst', companyTier: 2, description: 'Location: Remote-friendly (US). Responsibilities: Support revenue operations, analyze business metrics, improve cross-functional processes. Requirements: Bachelor degree, SQL skills. Compensation: $80,000-100,000 base + equity.', source: 'hubspot.com/careers', sourceCategory: 'B' },
+        { company: 'Lattice', role: 'Customer Success Manager', companyTier: 3, description: 'Location: Remote-first (US). Responsibilities: Manage client relationships, drive platform adoption, gather product feedback. Requirements: 2+ years CS experience. Compensation: $75,000-95,000 base + equity.', source: 'wellfound.com/jobs', sourceCategory: 'E', nichePlatform: 'wellfound' },
       ].filter(j => !SENIOR_FILTER.test(j.role));
       for (const j of crossTier23) {
         if (!passesLocation(j)) continue;
