@@ -38,15 +38,16 @@ Deno.serve(async (req) => {
 
     // Public X-Ray queries using Exa's web index (strictly public data)
     const postQueries = [
-      // Core hashtag + role queries
-      `site:linkedin.com/posts/ "${targetRole}" ("#internship" OR "#intern" OR "#entrylevel" OR "entry level") ${locationClause}`,
-      `site:linkedin.com/posts/ "intern" ("hiring" OR "looking for" OR "seeking") ${locationClause}`,
-      `site:linkedin.com/posts/ "#internship" ("join our team" OR "join the team") ${locationClause}`,
+      // Core hashtag + role queries (broader matching)
+      `site:linkedin.com/posts/ ("#intern" OR "#internship" OR "internship" OR "intern") "${targetRole}" ${locationClause}`,
+      `site:linkedin.com/posts/ ("hiring" OR "looking for" OR "seeking") "intern" ${locationClause}`,
+      `site:linkedin.com/posts/ ("#intern" OR "#internship") ("join our team" OR "join the team") ${locationClause}`,
       
-      // Hashtag-heavy public posts
-      `site:linkedin.com/posts/ "#intern" "#hiring" ${locationClause}`,
-      `site:linkedin.com/posts/ "#internship" "#summer" ${locationClause}`,
-      `site:linkedin.com/posts/ "#entrylevel" "#opportunity" ${locationClause}`,
+      // Pure hashtag posts (high volume)
+      `site:linkedin.com/posts/ "#intern" "#hiring"`,
+      `site:linkedin.com/posts/ "#internship" "#summer"`,
+      `site:linkedin.com/posts/ "#intern" "#opportunity"`,
+      `site:linkedin.com/posts/ "#entrylevel" "#hiring"`,
     ];
 
     console.log('[getSocialDiscoveries] Running compliant public X-ray search...');
@@ -83,12 +84,18 @@ Deno.serve(async (req) => {
         }
 
         const data = await res.json();
+        const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
         return (data.results || [])
           .filter(r => {
             // Must be LinkedIn post URL (public index)
             if (!r.url || !r.url.startsWith('https://www.linkedin.com/posts/')) return false;
             // Must have text content
             if (!r.text || r.text.length < 50) return false;
+            // CRITICAL: Reject posts older than 14 days by published date
+            if (r.publishedDate) {
+              const postAge = Date.now() - new Date(r.publishedDate).getTime();
+              if (postAge > 14 * 24 * 60 * 60 * 1000) return false;
+            }
             return true;
           })
           .map(r => ({ ...r, _query: query }));
@@ -104,6 +111,16 @@ Deno.serve(async (req) => {
       .flatMap(r => r.value);
 
     console.log(`[getSocialDiscoveries] Raw posts fetched: ${rawPosts.length}`);
+
+    // Secondary date filter: remove any posts older than 14 days
+    const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000);
+    rawPosts = rawPosts.filter(p => {
+      if (!p.publishedDate) return true; // Keep if no date (assume recent)
+      const postAge = Date.now() - new Date(p.publishedDate).getTime();
+      return postAge <= 14 * 24 * 60 * 60 * 1000;
+    });
+
+    console.log(`[getSocialDiscoveries] After date filter: ${rawPosts.length}`);
 
     // Deduplicate by URL
     const seenUrls = new Set();
