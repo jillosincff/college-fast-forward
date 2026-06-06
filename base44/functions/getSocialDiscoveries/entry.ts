@@ -35,12 +35,13 @@ Deno.serve(async (req) => {
     console.log('[getSocialDiscoveries] Using Exa semantic search for LinkedIn posts...');
     
     try {
+      const locationQuery = targetLocation ? `(${targetLocation} OR "New York City" OR NYC OR "New York, NY")` : '';
       const exaRes = await fetch('https://api.exa.ai/search', {
         method: 'POST',
         headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          query: `${targetRole} internship OR "entry level" OR hiring ${targetLocation ? `in ${targetLocation}` : ''}`,
-          numResults: 20,
+          query: `("${targetRole} intern" OR "${targetRole} internship" OR "hiring ${targetRole}" OR "${targetRole} summer intern") ${locationQuery}`,
+          numResults: 40,
           includeDomains: ['linkedin.com'],
           type: 'neural',
           contents: { text: { maxCharacters: 500 } },
@@ -163,7 +164,41 @@ Deno.serve(async (req) => {
 
     console.log(`[getSocialDiscoveries] After 14-day filter: ${rawPosts.length}`);
 
-    // Filter by location match in post text
+    // Filter: Must contain internship/hiring keywords in text
+    const internshipKeywords = ['intern', 'internship', 'hiring', 'joining', 'excited to announce', 'summer 2026', 'fall 2026'];
+    rawPosts = rawPosts.filter(p => {
+      const text = (p.text || p.caption || '').toLowerCase();
+      return internshipKeywords.some(keyword => text.includes(keyword));
+    });
+
+    console.log(`[getSocialDiscoveries] After keyword filter: ${rawPosts.length}`);
+
+    // STRICT location filter - only if user specified location
+    if (targetLocation) {
+      const locationTerms = [
+        targetLocation.toLowerCase(),
+        targetLocation.split(',')[0].trim().toLowerCase(),
+        'new york city',
+        'nyc',
+        'new york, ny',
+        'manhattan',
+        'brooklyn'
+      ].filter(Boolean);
+      
+      const beforeCount = rawPosts.length;
+      rawPosts = rawPosts.filter(p => {
+        const text = (p.text || p.caption || '').toLowerCase();
+        const hasLocation = locationTerms.some(term => text.includes(term));
+        if (!hasLocation) {
+          console.log(`[getSocialDiscoveries] Filtering out post - no location match. Text preview: ${(p.text || '').slice(0, 100)}`);
+        }
+        return hasLocation;
+      });
+      
+      console.log(`[getSocialDiscoveries] After STRICT location filter: ${rawPosts.length} (was ${beforeCount})`);
+    }
+
+    // Deduplicate by URL
     if (targetLocation) {
       const locationTerms = [targetLocation, targetLocation.split(',')[0].trim()].filter(Boolean);
       rawPosts = rawPosts.filter(p => {
