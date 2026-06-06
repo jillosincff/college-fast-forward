@@ -66,8 +66,8 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
       const refreshedUser = await base44.auth.me();
       // Actually delete the cached daily drop so a fresh one is generated with new goals
       await base44.functions.invoke('refreshDailyDrop', {});
-      // Dispatch event to tell CliffPrioritizedFeed to refetch immediately
-      window.dispatchEvent(new CustomEvent('cff:refresh-daily-drop'));
+      // Dispatch event to tell CliffPrioritizedFeed to refetch immediately with force_refresh
+      window.dispatchEvent(new CustomEvent('cff:refresh-daily-drop', { detail: { force_refresh: true } }));
       // Invalidate React Query caches to force feeds to refetch with new goals
       queryClient.removeQueries({ queryKey: ['dailyDrop', refreshedUser?.id] });
       queryClient.invalidateQueries({ queryKey: ['organizedFeeds', refreshedUser?.id] });

@@ -28,29 +28,37 @@ function getNextResetTime() {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    // Fetch FRESH user data to ensure we have latest career_goals
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
     const dropDate = getDailyDropDate();
 
-    // ── 1. Check for a valid cached drop ──────────────────────────────────
-    const existing = await base44.entities.UserDailyDrop.filter({
-      user_id: user.id,
-      drop_date: dropDate,
-    });
+    // Force refresh if requested via query param
+    const forceRefresh = body.force_refresh === true;
 
-    if (existing && existing.length > 0) {
-      const drop = existing[0];
-      console.log(`[getDailyDrop] Cache hit for ${user.email} on ${dropDate}`);
-      return Response.json({
-        success: true,
-        slots: drop.slots || [],
-        actioned_keys: drop.actioned_keys || [],
+    // ── 1. Check for a valid cached drop (skip if force refresh) ─────────
+    if (!forceRefresh) {
+      const existing = await base44.entities.UserDailyDrop.filter({
+        user_id: user.id,
         drop_date: dropDate,
-        drop_id: drop.id,
-        from_cache: true,
       });
+
+      if (existing && existing.length > 0) {
+        const drop = existing[0];
+        console.log(`[getDailyDrop] Cache hit for ${user.email} on ${dropDate}`);
+        return Response.json({
+          success: true,
+          slots: drop.slots || [],
+          actioned_keys: drop.actioned_keys || [],
+          drop_date: dropDate,
+          drop_id: drop.id,
+          from_cache: true,
+        });
+      }
+    } else {
+      console.log(`[getDailyDrop] Force refresh requested for ${user.email}`);
     }
 
     // ── 2. Generate a fresh daily drop ────────────────────────────────────

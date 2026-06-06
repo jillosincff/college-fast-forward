@@ -27,7 +27,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
 
   // Listen for manual refresh requests from parent
   useEffect(() => {
-    const handler = () => refetch();
+    const handler = (event) => {
+      console.log('[CliffPrioritizedFeed] Refreshing with force_refresh:', event?.detail?.force_refresh);
+      refetch();
+    };
     window.addEventListener('cff:refresh-daily-drop', handler);
     return () => window.removeEventListener('cff:refresh-daily-drop', handler);
   }, [refetch]);
