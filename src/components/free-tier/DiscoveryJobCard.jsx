@@ -116,9 +116,9 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           <div className="mt-5 rounded-xl p-3 border flex items-start gap-2.5" style={{ background: 'linear-gradient(135deg, #faf5ff, #f0f9ff)', borderColor: '#e9d5ff' }}>
             <span className="text-base">🔍</span>
             <div>
-              <p className="text-xs font-bold" style={{ color: '#6b21a8', margin: 0 }}>Hidden Role Discovery</p>
+              <p className="text-xs font-bold" style={{ color: '#6b21a8', margin: 0 }}>Direct Website Discovery</p>
               <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: '#7c3aed', margin: 0 }}>
-                Found on company sites or niche job boards. CLiFF is mapping the team leadership now.
+                Verified source: {lead.company_domain || 'Verified corporate career page'}
               </p>
             </div>
           </div>

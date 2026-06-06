@@ -134,7 +134,7 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect, onDismiss
             </div>
           </div>
         ) : (
-          <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
+          <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-start gap-2.5">
             <span className="text-base">🤖</span>
             <div>
               <p className="text-xs font-bold text-gray-800">
@@ -142,8 +142,13 @@ export default function ColdJobCard({ lead, onAddToPipeline, onSelect, onDismiss
                   ? `CLiFF found ${lead.alumniCount} alumni who work here`
                   : (lead.parentCount || 0) > 0
                   ? `CLiFF found ${lead.parentCount} parent connections here`
-                  : `CLiFF is scanning for insiders at ${company}`}
+                  : 'Direct Website Discovery'}
               </p>
+              {(lead.alumniCount || 0) === 0 && (lead.parentCount || 0) === 0 && (
+                <p className="text-[10px] text-gray-500 mt-0.5">
+                  Verified source: {lead.company_domain || 'Verified corporate career page'}
+                </p>
+              )}
             </div>
           </div>
         )}
