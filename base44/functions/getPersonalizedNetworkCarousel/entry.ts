@@ -645,6 +645,29 @@ Deno.serve(async (req) => {
       'st. louis', 'cleveland', 'memphis', 'bellevue', 'herndon', 'dc', 'washington dc',
       'washington, dc', 'pittsburgh, pa', 'new york, ny', 'gainesville',
     ];
+    // Fallback city for companies whose static-pool descriptions omit a "Location:" line.
+    // Without this, single-line entries like "Productivity startup scaling globally" pass
+    // the gate (no city to find in description) and leak through to non-HQ users.
+    // Only include companies whose roles are genuinely HQ-centric — multi-city giants
+    // (Google, Microsoft, Amazon, etc.) are intentionally left out so their generic
+    // "we hire across X teams" entries still show everywhere.
+    const COMPANY_HQ_CITY = {
+      'notion': 'san francisco',
+      'airtable': 'san francisco',
+      'datadog': 'new york',
+      'retool': 'san francisco',
+      'descript': 'san francisco',
+      'loom': 'san francisco',
+      'resend': 'san francisco',
+      'vercel': 'san francisco',
+      'figma': 'san francisco',
+      'linear': 'san francisco',
+      'lattice': 'san francisco',
+      'ramp': 'new york',
+      'meta': 'menlo park',
+      'apple': 'cupertino',
+      'netflix': 'los gatos',
+    };
     const passesLocation = (j) => {
       const desc = (j.description || '').toLowerCase();
       const isRemote = desc.includes('remote') || desc.includes('work from home') || desc.includes('remote-friendly') || desc.includes('remote-first');
@@ -654,8 +677,13 @@ Deno.serve(async (req) => {
       if (remoteIntent) return false;
       // No city preference at all: nothing to gate on.
       if (!userCity) return true;
-      // Reject any specific-city job that doesn't match the user's city.
-      const mentionedCity = US_CITIES.find(c => desc.includes(c));
+      // Try to find a city mentioned in the description; if the description is silent,
+      // fall back to the company's HQ. Both let us reject city-mismatched entries.
+      let mentionedCity = US_CITIES.find(c => desc.includes(c));
+      if (!mentionedCity) {
+        const companyKey = (j.company || '').toLowerCase().trim();
+        mentionedCity = COMPANY_HQ_CITY[companyKey];
+      }
       if (mentionedCity && !mentionedCity.includes(userCity) && !userCity.includes(mentionedCity)) return false;
       return true;
     };
