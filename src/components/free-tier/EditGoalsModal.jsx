@@ -9,6 +9,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
   const [roles, setRoles] = useState(effectiveGoals?.target_roles || []);
   const [industries, setIndustries] = useState(effectiveGoals?.target_industries || []);
   const [companySize, setCompanySize] = useState(effectiveGoals?.company_size_preference || 'all');
+  const [location, setLocation] = useState(user?.location || '');
   const [roleInput, setRoleInput] = useState('');
   const [industryInput, setIndustryInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -54,6 +55,7 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
     setSaving(true);
     try {
       await base44.auth.updateMe({
+        location: location.trim() || undefined,
         career_goals: {
           ...effectiveGoals,
           target_roles: finalRoles,
@@ -185,6 +187,18 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
               onChange={e => setIndustryInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddIndustry(industryInput); } }}
               placeholder="Add an industry and press Enter..."
+              style={{ width: '100%', padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, fontSize: 14, fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
+            />
+          </div>
+
+          {/* Location */}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#1A1A1A', display: 'block', marginBottom: 8 }}>📍 PREFERRED LOCATION</label>
+            <input
+              type="text"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+              placeholder="e.g. New York, NY · Remote · Open to Relocation"
               style={{ width: '100%', padding: '10px 14px', border: '1px solid #E0E0E0', borderRadius: 8, fontSize: 14, fontFamily: "'DM Sans', sans-serif", boxSizing: 'border-box' }}
             />
           </div>
