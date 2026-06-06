@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getDailyDrop } from '@/functions/getDailyDrop';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
@@ -16,7 +16,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const effectiveRole = target_role || target_roles?.[0] || '';
   const queryClient = useQueryClient();
 
-  const { data: dropData, isLoading, error } = useQuery({
+  const { data: dropData, isLoading, error, refetch } = useQuery({
     queryKey: ['dailyDrop', user?.id, JSON.stringify(user?.career_goals)],
     queryFn: () => getDailyDrop({}),
     staleTime: 0,
@@ -24,6 +24,13 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
     retry: 1,
     enabled: !!user?.id,
   });
+
+  // Listen for manual refresh requests from parent
+  useEffect(() => {
+    const handler = () => refetch();
+    window.addEventListener('cff:refresh-daily-drop', handler);
+    return () => window.removeEventListener('cff:refresh-daily-drop', handler);
+  }, [refetch]);
 
   const payload = dropData?.data || dropData;
   const slots = Array.isArray(payload?.slots) ? payload.slots : [];

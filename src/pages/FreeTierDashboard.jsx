@@ -612,9 +612,11 @@ export default function FreeTierDashboard() {
           goals={user?.career_goals}
           user={user}
           onClose={() => setShowGoalsModal(false)}
-          onSave={(_, refreshedUser) => {
+          onSave={(updatedGoals, refreshedUser) => {
             if (refreshedUser) setUser(refreshedUser);
             setShowGoalsModal(false);
+            // Force reload of user data immediately
+            base44.auth.me().then(u => setUser(u));
           }}
         />
       )}
