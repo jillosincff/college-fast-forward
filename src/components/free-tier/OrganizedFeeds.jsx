@@ -348,11 +348,11 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                       role_title: (ins.headline || '').split(/[|\-·]/).slice(1).join(' ').trim() || 'Professional',
                       linkedin_url: ins.url || ins.linkedin_url || null,
                     })).filter(a => a.name && a.name.length > 1),
-                    // Map first active job → jobDescription
-                    jobDescription: lead.activeJobs?.[0]?.title && !lead.activeJobs[0].title.startsWith('**')
-                      ? `Active opening: ${lead.activeJobs[0].title}`
-                      : lead.hasActiveJobs
-                        ? `Active ${lead.role || effectiveRole} opening found — reach out to your ${schoolAbbr} insider for a referral.`
+                    // Map first active job → jobDescription (prefer actual description, fallback to title)
+                    jobDescription: lead.activeJobs?.[0]?.description
+                      ? lead.activeJobs[0].description
+                      : lead.activeJobs?.[0]?.title
+                        ? `${lead.activeJobs[0].title}${lead.hasActiveJobs ? ' — reach out to your insider for the full details and a referral.' : ''}`
                         : `${lead.alumniCount} ${schoolAbbr} alumni work here. Message them directly to get a referral before the role posts publicly.`,
                   })}
                 >
