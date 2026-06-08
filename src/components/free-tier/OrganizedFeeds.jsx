@@ -221,17 +221,30 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     }));
   const priorityInsiders = [];
 
+  // Deep structural validation on backend dual constraint leads
+  const validatedDualLeads = dualLeads
+    .map(l => {
+      // Extract target string regardless of which variant key the backend returns
+      const extractedCompany = l.company || l.companyName || l.company_name || '';
+      return {
+        ...l,
+        // Normalize fields for strict UI alignment
+        company: extractedCompany,
+        companyName: extractedCompany,
+        job_title: l.job_title || l.role || l.title || 'Entry Level Role'
+      };
+    })
+    .filter(l => isValidCompanyName(l.company));
+
   // Merge dual (alumni-verified) leads into the main pool with an insider pill, deduplicated
   const mergedSeen = new Set();
   const allFetched = [];
-  const validatedDualLeads = dualLeads.filter(l => isValidCompanyName(l.company || l.companyName));
-  
   for (const lead of [
     ...validatedDualLeads.map(l => ({ ...l, _insiderPill: `🎓 ${l.alumniCount || ''} Alumni`.trim() })),
     ...priorityInsiders,
     ...targetedDiscoveries,
   ]) {
-    const key = (lead.company || lead.companyName || '').toLowerCase();
+    const key = (lead.company || lead.companyName || '').toLowerCase().trim();
     if (!key || mergedSeen.has(key)) continue;
     mergedSeen.add(key);
     allFetched.push(lead);
