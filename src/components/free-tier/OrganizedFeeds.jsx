@@ -289,15 +289,47 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // Merge dual (alumni-verified) leads into the main pool with an insider pill, deduplicated
   const mergedSeen = new Set();
   const allFetched = [];
-  for (const lead of [
+  
+  const rawUnifiedPool = [
     ...validatedDualLeads.map(l => ({ ...l, _insiderPill: `🎓 ${l.alumniCount || ''} Alumni`.trim() })),
     ...priorityInsiders,
     ...targetedDiscoveries,
-  ]) {
-    const key = (lead.company || lead.companyName || '').toLowerCase().trim();
-    if (!key || mergedSeen.has(key)) continue;
-    mergedSeen.add(key);
-    allFetched.push(lead);
+  ];
+
+  for (const lead of rawUnifiedPool) {
+    // 1. Unify company and title tracking across both api response structures
+    const companyName = (lead.company || lead.companyName || lead.name || '').trim();
+    const jobTitle = (lead.job_title || lead.role || lead.title || '').trim();
+
+    // 2. ABSOLUTE FILTER: Drop if company name is completely missing 
+    if (!companyName) continue;
+
+    // 3. ABSOLUTE FILTER: Drop if it's missing a real job title or using the fallback default
+    if (!jobTitle || jobTitle === 'Entry Level Role') {
+      continue;
+    }
+
+    // 4. ABSOLUTE FILTER: If the company name matches the job title strings, skip it
+    const cleanCo = companyName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanTi = jobTitle.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanCo === cleanTi) continue;
+
+    // 5. Run the normalized company name through the validation keywords engine
+    if (!isValidCompanyName(companyName)) continue;
+
+    // 6. Deduplicate and commit cleanly to the display array
+    const lookupKey = companyName.toLowerCase();
+    if (mergedSeen.has(lookupKey)) continue;
+    
+    mergedSeen.add(lookupKey);
+    
+    // Push a perfectly structured object down to DiscoveryJobCard
+    allFetched.push({
+      ...lead,
+      company: companyName,
+      companyName: companyName,
+      job_title: jobTitle
+    });
   }
 
   const handleManualRefresh = async () => {
