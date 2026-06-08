@@ -106,15 +106,43 @@ Be specific and realistic. Only include real companies actually known to hire fo
     });
 
     // Filter out any job titles that slipped through - server-side validation
-    const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account'];
+    const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'trainer', 'trainee'];
     const isValidCompany = (name) => {
-      if (!name || typeof name !== 'string' || name.length < 3) return false;
-      const lower = name.toLowerCase();
-      const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'institute', 'foundation'];
-      if (companySuffixes.some(s => lower.includes(s))) return true;
-      if (jobTitleKeywords.some(k => lower === k || lower.endsWith(` ${k}`) || lower.startsWith(`${k} `))) return false;
-      const jobPatterns = [/public relations\s+(junior|senior)/i, /marketing\s+(intern|manager)/i, /software\s+(engineer|developer)/i, /data\s+(analyst|scientist)/i, /product\s+(manager|designer)/i, /account\s+(executive|manager)/i];
-      if (jobPatterns.some(p => p.test(name))) return false;
+      if (!name || typeof name !== 'string' || name.trim().length < 3) return false;
+      const lower = name.toLowerCase().trim();
+      
+      // Must have a real company indicator
+      const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'institute', 'foundation', 'organization', 'network', 'global', 'international'];
+      const hasCompanySuffix = companySuffixes.some(s => lower.includes(s));
+      
+      // Reject if it contains ANY job title keyword
+      const hasJobKeyword = jobTitleKeywords.some(k => {
+        const wordBoundary = `\\b${k}\\b`;
+        return new RegExp(wordBoundary, 'i').test(lower);
+      });
+      
+      if (hasJobKeyword) return false;
+      
+      // Additional job title patterns
+      const jobPatterns = [
+        /public relations/i,
+        /marketing\s+(intern|manager|coordinator)/i,
+        /software\s+(engineer|developer)/i,
+        /data\s+(analyst|scientist)/i,
+        /product\s+(manager|designer)/i,
+        /account\s+(executive|manager)/i,
+        /business\s+(analyst|manager)/i,
+        /sales\s+(representative|manager|rep)/i,
+        /customer\s+(service|support)/i,
+        /human\s+resources?/i,
+        /financial\s+(analyst|advisor)/i,
+      ];
+      
+      if (jobPatterns.some(p => p.test(lower))) return false;
+      
+      // If no company suffix found AND contains job-like words, reject
+      if (!hasCompanySuffix && /^[a-z\s]+$/.test(lower)) return false;
+      
       return true;
     };
     
