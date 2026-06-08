@@ -9,6 +9,39 @@ import { base44 } from '@/api/base44Client';
 
 const TABS = ['All', 'Network Backdoors', 'Hidden Discoveries'];
 
+function JobDescription({ description, url }) {
+  const [expanded, setExpanded] = useState(false);
+  const SHORT_LIMIT = 180;
+  const isLong = description.length > SHORT_LIMIT;
+  return (
+    <div className="text-[11px] text-gray-600 leading-relaxed bg-white/60 rounded-lg p-2 border border-purple-100">
+      <p>{expanded || !isLong ? description : description.slice(0, SHORT_LIMIT).trimEnd() + '…'}</p>
+      <div className="flex items-center gap-3 mt-1.5">
+        {isLong && (
+          <button
+            onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
+            className="text-purple-600 font-bold hover:underline"
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
+          >
+            {expanded ? 'Show less ↑' : 'Read more ↓'}
+          </button>
+        )}
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="text-blue-600 font-bold hover:underline"
+          >
+            View full posting →
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function DualLeadCard({ lead, schoolAbbr, effectiveRole, onAddToPipeline, onColdInroad, onSelect }) {
   const [alumni, setAlumni] = useState(null); // null = not searched, [] = none, [...] = found
   const [searching, setSearching] = useState(false);
@@ -41,18 +74,27 @@ function DualLeadCard({ lead, schoolAbbr, effectiveRole, onAddToPipeline, onCold
         </span>
       </div>
 
-      {/* Active job */}
+      {/* Active job with full description */}
       {lead.activeJobs?.[0] && (
-        <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5">
-          <a
-            href={lead.activeJobs[0].url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            className="hover:underline truncate"
-          >
-            {lead.activeJobs[0].title}
-          </a>
+        <div className="space-y-1.5">
+          <div className="text-xs text-green-700 font-bold flex items-center gap-1.5">
+            <span>✅</span>
+            <span>{lead.activeJobs[0].title}</span>
+          </div>
+          {lead.activeJobs[0].description && (
+            <JobDescription description={lead.activeJobs[0].description} url={lead.activeJobs[0].url} />
+          )}
+          {!lead.activeJobs[0].description && lead.activeJobs[0].url && (
+            <a
+              href={lead.activeJobs[0].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="text-[11px] text-blue-600 font-semibold hover:underline"
+            >
+              View Full Job Posting →
+            </a>
+          )}
         </div>
       )}
 

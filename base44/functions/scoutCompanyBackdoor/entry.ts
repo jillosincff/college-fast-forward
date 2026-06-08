@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
     }
 
     try {
-      // Neural people search — Exa understands natural language queries for finding alumni
-      const searchQuery = `${userSchool} alumni that works at ${companyName}`;
+      // Neural people search — quotes around school name to prevent matching FSU, UNF, etc.
+      const searchQuery = `"${userSchool}" alumni working at ${companyName}`;
       
       const exaResponse = await fetch('https://api.exa.ai/search', {
         method: 'POST',
