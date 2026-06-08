@@ -8,10 +8,9 @@ Deno.serve(async (req) => {
 
     const { force } = await req.json().catch(() => ({}));
 
-    // Get user profile
-    const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email });
-    const profile = profiles[0];
-    if (!profile) return Response.json({ error: 'No FASTIQ profile found' }, { status: 404 });
+    // Get user profile (optional — action plan can be generated from career_goals alone)
+    const profiles = await base44.entities.FastTrackProProfile.filter({ user_email: user.email }).catch(() => []);
+    const profile = profiles[0] || null;
 
     // Check existing plan
     const existingPlans = await base44.entities.ActionPlan.filter({ student_email: user.email });
@@ -30,25 +29,35 @@ Deno.serve(async (req) => {
       { student_email: user.email }, '-created_date', 20
     );
 
-    const gradYear = user.graduation_year || profile.graduation_year || new Date().getFullYear() + 1;
+    const gradYear = user.graduation_year || profile?.graduation_year || new Date().getFullYear() + 1;
     const gradDate = new Date(gradYear, 4, 15); // May 15
     const weeksUntilGrad = Math.max(1, Math.round((gradDate - Date.now()) / (7 * 24 * 60 * 60 * 1000)));
-    const path = user.fastiq_mode || profile.path || 'focused';
-    const targets = (profile.target_companies || []).join(', ') || 'Not set';
+    const path = user.fastiq_mode || profile?.path || 'focused';
+    const targets = (profile?.target_companies || []).join(', ') || 'Not set';
+
+    // Pull career goals from both the user profile (updated via EditGoalsModal) and FastTrackProProfile
+    const careerGoals = user.career_goals || {};
+    const targetRoles = (careerGoals.target_roles || []).join(', ') || user.target_role || 'Not set';
+    const targetIndustries = (careerGoals.target_industries || []).join(', ') || 'Not set';
+    const locationPref = careerGoals.location_preference || user.location || 'Not set';
+    const companySizePref = careerGoals.company_size_preference || 'all';
 
     const activitySummary = recentActivity.slice(0, 10).map(a =>
       `${a.type}: ${a.company_name || ''} ${a.contact_name || ''} (${new Date(a.created_date).toLocaleDateString()})`
     ).join('\n') || 'No recent activity';
 
-    const prompt = `You are FASTIQ, an AI career advisor for UF students.
+    const prompt = `You are FASTIQ, an AI career advisor for students.
 
 Generate a personalized action plan for this student:
 Name: ${user.full_name || 'Student'}
 Major: ${user.major || 'Not set'}
 Graduation: ${gradYear}
 Path: ${path}
+Target roles: ${targetRoles}
+Target industries: ${targetIndustries}
+Preferred location: ${locationPref}
+Company size preference: ${companySizePref}
 Target companies: ${targets}
-Exploration interest: ${user.fastiq_exploration_interest || 'Not set'}
 Weeks until graduation: ${weeksUntilGrad}
 Recent activity:
 ${activitySummary}

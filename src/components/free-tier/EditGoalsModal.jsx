@@ -67,13 +67,18 @@ export default function EditGoalsModal({ goals, user, onClose, onSave, onStartFr
       });
       // Refresh user data so the dashboard shows updated goals
       const refreshedUser = await base44.auth.me();
-      // Actually delete the cached daily drop so a fresh one is generated with new goals
-      await base44.functions.invoke('refreshDailyDrop', {});
-      // Dispatch event to tell CliffPrioritizedFeed to refetch immediately with force_refresh
+      // Delete cached daily drop so a fresh one is generated with new goals
+      await base44.functions.invoke('refreshDailyDrop', {}).catch(() => {});
+      // Regenerate action plan with new goals (fire-and-forget)
+      base44.functions.invoke('generateActionPlan', { force: true }).catch(() => {});
+      // Dispatch event to tell feeds to refetch immediately
       window.dispatchEvent(new CustomEvent('cff:refresh-daily-drop', { detail: { force_refresh: true } }));
-      // Invalidate React Query caches to force feeds to refetch with new goals
+      window.dispatchEvent(new CustomEvent('cff:goals-updated'));
+      // Invalidate ALL career-goal-dependent React Query caches
       queryClient.removeQueries({ queryKey: ['dailyDrop', refreshedUser?.id] });
-      queryClient.invalidateQueries({ queryKey: ['organizedFeeds', refreshedUser?.id] });
+      queryClient.invalidateQueries({ queryKey: ['organizedFeeds'] });
+      queryClient.invalidateQueries({ queryKey: ['personalizedNetworkCarousel'] });
+      queryClient.invalidateQueries({ queryKey: ['dualConstraintLeads'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       onSave({ target_roles: finalRoles, target_industries: finalIndustries, company_size_preference: companySize }, refreshedUser);
     } catch (e) {
