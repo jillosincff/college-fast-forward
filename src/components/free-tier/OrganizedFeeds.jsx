@@ -1,192 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
-import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-const TABS = ['All', 'Network Backdoors', 'Hidden Discoveries'];
-
-function JobDescription({ description, url }) {
-  const [expanded, setExpanded] = useState(false);
-  const SHORT_LIMIT = 180;
-  const isLong = description.length > SHORT_LIMIT;
-  return (
-    <div className="text-[11px] text-gray-600 leading-relaxed bg-white/60 rounded-lg p-2 border border-purple-100">
-      <p>{expanded || !isLong ? description : description.slice(0, SHORT_LIMIT).trimEnd() + '…'}</p>
-      <div className="flex items-center gap-3 mt-1.5">
-        {isLong && (
-          <button
-            onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
-            className="text-purple-600 font-bold hover:underline"
-            style={{ minHeight: 'auto', minWidth: 'auto' }}
-          >
-            {expanded ? 'Show less ↑' : 'Read more ↓'}
-          </button>
-        )}
-        {url && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            className="text-blue-600 font-bold hover:underline"
-          >
-            View full posting →
-          </a>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function DualLeadCard({ lead, schoolAbbr, effectiveRole, onAddToPipeline, onColdInroad, onSelect }) {
-  const [alumni, setAlumni] = useState(null); // null = not searched, [] = none, [...] = found
-  const [searching, setSearching] = useState(false);
-
-  const handleFindAlumni = async (e) => {
-    e.stopPropagation();
-    setSearching(true);
-    try {
-      const res = await scoutCompanyBackdoor({ jobId: lead.company, companyName: lead.company });
-      const data = res?.data || res;
-      setAlumni(data?.alumni || []);
-    } catch {
-      setAlumni([]);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  return (
-    <div
-      className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-4 space-y-2.5 hover:shadow-md transition-all"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="font-black text-gray-900 text-sm">{lead.company}</p>
-          <p className="text-xs text-gray-600 mt-0.5">{lead.role || effectiveRole}</p>
-        </div>
-        <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-          ✅ Active Jobs
-        </span>
-      </div>
-
-      {/* Active job with full description */}
-      {lead.activeJobs?.[0] && (
-        <div className="space-y-1.5">
-          <div className="text-xs text-green-700 font-bold flex items-center gap-1.5">
-            <span>✅</span>
-            <span>{lead.activeJobs[0].title}</span>
-          </div>
-          {lead.activeJobs[0].description && (
-            <JobDescription description={lead.activeJobs[0].description} url={lead.activeJobs[0].url} />
-          )}
-          {!lead.activeJobs[0].description && lead.activeJobs[0].url && (
-            <a
-              href={lead.activeJobs[0].url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={e => e.stopPropagation()}
-              className="text-[11px] text-blue-600 font-semibold hover:underline"
-            >
-              View Full Job Posting →
-            </a>
-          )}
-        </div>
-      )}
-
-      {/* Alumni section */}
-      {alumni === null ? (
-        <button
-          onClick={handleFindAlumni}
-          disabled={searching}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-dashed border-purple-300 text-purple-700 bg-white/60 hover:bg-purple-50 text-xs font-bold transition-colors"
-          style={{ minHeight: 'auto' }}
-        >
-          {searching ? <><span className="animate-spin inline-block">⟳</span> Searching {schoolAbbr} alumni…</> : `🎓 Find ${schoolAbbr} Alumni Here`}
-        </button>
-      ) : alumni.length > 0 ? (
-        <div className="space-y-1">
-          <p className="text-xs font-bold text-purple-800">🎓 Found {alumni.length} {schoolAbbr} alumni!</p>
-          {alumni.slice(0, 3).map((a, i) => (
-            <a
-              key={i}
-              href={a.linkedin_url || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-white border border-purple-100 rounded-lg px-2.5 py-1.5 hover:border-blue-300 transition-colors"
-              style={{ minHeight: 'auto', textDecoration: 'none' }}
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="w-5 h-5 rounded bg-[#0077b5] flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-[9px]">in</span>
-              </div>
-              <span className="text-xs font-semibold text-gray-900 truncate">{a.name}</span>
-              {a.role_title && <span className="text-[10px] text-gray-400 truncate">{a.role_title}</span>}
-            </a>
-          ))}
-        </div>
-      ) : (
-        <p className="text-xs text-gray-400 text-center py-1">No {schoolAbbr} alumni found here yet.</p>
-      )}
-
-      {/* CTAs */}
-      <div className="flex gap-2 pt-1">
-        <button
-          onClick={e => { e.stopPropagation(); onAddToPipeline({ ...lead, role: lead.role || effectiveRole }); }}
-          className="flex-1 text-[11px] font-bold py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
-          style={{ minHeight: 'auto' }}
-        >
-          + Pipeline
-        </button>
-        <button
-          onClick={e => { e.stopPropagation(); onColdInroad({ ...lead, role: lead.role || effectiveRole, company: lead.company }); }}
-          className="flex-1 text-[11px] font-bold py-1.5 rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition"
-          style={{ minHeight: 'auto' }}
-        >
-          ⚡ Generate Message
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount }) {
   const [selectedLead, setSelectedLead] = useState(null);
-  const [activeTab, setActiveTab] = useState('All');
   const queryClient = useQueryClient();
 
-  // Track companies the user has explicitly saved (pipeline add or cold inroad click)
-  // These are pinned to the feed and never rotated out
   const [savedCompanyKeys, setSavedCompanyKeys] = useState(() => {
     try {
       const stored = localStorage.getItem(`cff_saved_companies_${user?.id}`);
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch { return new Set(); }
   });
-  // The pinned cards themselves (full lead objects), stable across batches
   const [pinnedLeads, setPinnedLeads] = useState([]);
 
-  // Track ALL companies the user has ever seen in the current session so "New Batch"
-  // never serves the same company twice until the pool is fully exhausted
   const [seenCompanyKeys, setSeenCompanyKeys] = useState(() => {
     try {
       const stored = sessionStorage.getItem(`cff_seen_companies_${user?.id}`);
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch { return new Set(); }
   });
-
-  const addSeenKeys = (leads) => {
-    setSeenCompanyKeys(prev => {
-      const next = new Set(prev);
-      leads.forEach(l => { const k = l.company || l.companyName; if (k) next.add(k); });
-      try { sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify([...next])); } catch {}
-      return next;
-    });
-  };
 
   const persistSavedKey = (companyKey) => {
     setSavedCompanyKeys(prev => {
@@ -197,11 +34,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     });
   };
 
-  // Dynamic school state with fallback
   const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'Network';
-  const schoolName = user?.school_name || user?.schoolName || `${schoolAbbr} Network`;
 
-  // Extract career goals DIRECTLY from user prop for query key - ensures instant cache bust
   const { target_industries, target_role, target_roles, company_size_preference, location_preference } = user?.career_goals || {};
   const effectiveRole = target_role || target_roles?.[0] || '';
   const effectiveSize = company_size_preference || 'all';
@@ -216,13 +50,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     return () => window.removeEventListener('cff:pipeline-changed', handler);
   }, [queryClient]);
 
-  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD — busts cache daily
   const [refreshKey, setRefreshKey] = useState(0);
   const [lastRefreshed, setLastRefreshed] = useState(null);
 
-  // Use a ref so the queryFn always reads the latest seen companies synchronously
-  // (useState is async — by the time the query fires, the state hasn't updated yet)
-  // Initialize from sessionStorage so returning users don't re-see excluded companies
   const seenForExclusionRef = useRef((() => {
     try {
       const stored = sessionStorage.getItem(`cff_seen_companies_${user?.id}`);
@@ -236,28 +66,23 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   })());
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
-    // CRITICAL: Include career goals directly in queryKey for instant cache bust
     queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation, refreshKey],
-    queryFn: () => {
-      return getPersonalizedNetworkCarousel({
-        // CRITICAL: Pass explicit parameters to bypass backend DB race condition
-        explicit_target_role: effectiveRole,
-        explicit_target_industries: target_industries || [],
-        target_industries: target_industries || [],
-        target_role: effectiveRole,
-        company_size_preference: effectiveSize,
-        target_location: effectiveLocation,
-        refresh_seed: refreshKey,
-        seen_companies: seenForExclusionRef.current,
-      });
-    },
+    queryFn: () => getPersonalizedNetworkCarousel({
+      explicit_target_role: effectiveRole,
+      explicit_target_industries: target_industries || [],
+      target_industries: target_industries || [],
+      target_role: effectiveRole,
+      company_size_preference: effectiveSize,
+      target_location: effectiveLocation,
+      refresh_seed: refreshKey,
+      seen_companies: seenForExclusionRef.current,
+    }),
     enabled: !!effectiveRole || !!target_industries?.length,
     staleTime: 0,
     gcTime: 0,
     cacheTime: 0,
   });
 
-  // Dual-constraint engine: alumni-verified companies with active job listings
   const { data: dualData, isLoading: dualLoading } = useQuery({
     queryKey: ['dualConstraintLeads', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation],
     queryFn: () => getDualConstraintLeads({
@@ -266,9 +91,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       target_location: effectiveLocation,
     }),
     enabled: !!(effectiveRole || target_industries?.length),
-    staleTime: 10 * 60 * 1000, // 10min — slower-moving data
+    staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
   });
+
   const dualLeads = Array.isArray(dualData?.data?.leads) ? dualData.data.leads
                   : Array.isArray(dualData?.leads) ? dualData.leads : [];
 
@@ -276,45 +102,42 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
   const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
 
-  const allFetched = [...priorityInsiders, ...targetedDiscoveries];
+  // Merge dual (alumni-verified) leads into the main pool with an insider pill, deduplicated
+  const mergedSeen = new Set();
+  const allFetched = [];
+  for (const lead of [
+    ...dualLeads.map(l => ({ ...l, _insiderPill: `🎓 ${l.alumniCount || ''} Alumni`.trim() })),
+    ...priorityInsiders,
+    ...targetedDiscoveries,
+  ]) {
+    const key = (lead.company || lead.companyName || '').toLowerCase();
+    if (!key || mergedSeen.has(key)) continue;
+    mergedSeen.add(key);
+    allFetched.push(lead);
+  }
 
   const handleManualRefresh = () => {
-    // Compute seen companies synchronously and write to ref BEFORE triggering the query
     const currentSeen = new Set(seenCompanyKeys);
     allFetched.forEach(l => { const k = l.company || l.companyName; if (k) currentSeen.add(k); });
-    // Persist to sessionStorage
     try { sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify([...currentSeen])); } catch {}
-    // Write to ref synchronously — queryFn will read this immediately when refreshKey changes
     seenForExclusionRef.current = Array.from(currentSeen).filter(k => !savedCompanyKeys.has(k));
-    // Now update state (async, just for UI consistency) and trigger the query
     setSeenCompanyKeys(currentSeen);
     setRefreshKey(k => k + 1);
     setLastRefreshed(new Date());
   };
 
-  // When career goals change (location / role / industries), clear the pinned
-  // leads from the previous criteria. Otherwise jobs the user pinned for an
-  // earlier location (e.g. NYC) stay rendered on top of the new feed (e.g.
-  // after switching to Miami). User-saved companies in savedCompanyKeys are
-  // intentionally kept — those are explicit saves, not session pins.
   useEffect(() => {
     setPinnedLeads([]);
   }, [effectiveLocation, effectiveRole, JSON.stringify(target_industries)]);
 
-  // Update pinned leads whenever new data arrives — keep pinned cards fresh with latest data
-  // but never let a batch rotation remove them
   useEffect(() => {
     if (!allFetched.length) return;
-    setPinnedLeads(prev => {
-      const freshPinned = prev.map(pinned => {
-        const updated = allFetched.find(l => (l.company || l.companyName) === (pinned.company || pinned.companyName));
-        return updated || pinned;
-      });
-      return freshPinned;
-    });
+    setPinnedLeads(prev => prev.map(pinned => {
+      const updated = allFetched.find(l => (l.company || l.companyName) === (pinned.company || pinned.companyName));
+      return updated || pinned;
+    }));
   }, [feedsData]); // eslint-disable-line
 
-  // Rotate feed = pinned cards + fresh un-saved cards (saved ones never appear twice)
   const pinnedKeys = new Set(pinnedLeads.map(l => l.company || l.companyName));
   const freshCards = allFetched.filter(l => {
     const key = l.company || l.companyName;
@@ -324,17 +147,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const totalCount = targetOpportunities.length;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
   const rawNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
-  // Use passed-in verified counts from the backend as a floor — never show 0
   const totalNetworkCount = rawNetworkCount > 0
     ? rawNetworkCount
     : Math.max(1, (verifiedAlumniCount || 0) + (verifiedParentsCount || 0));
-
-  // Tab filtering
-  const filteredOpportunities = activeTab === 'Network Backdoors'
-    ? targetOpportunities.filter(l => (l.alumniCount || 0) + (l.parentCount || 0) > 0)
-    : activeTab === 'Hidden Discoveries'
-    ? targetOpportunities.filter(l => (l.alumniCount || 0) === 0 && (l.parentCount || 0) === 0)
-    : targetOpportunities;
 
   const pinLead = (lead) => {
     const key = lead.company || lead.companyName;
@@ -349,7 +164,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const handleAddToPipeline = async (lead) => {
     const company = lead.company || lead.companyName || 'Unknown';
     const role = lead.role || lead.title || 'Position';
-    pinLead(lead); // lock this card in place before the next batch
+    pinLead(lead);
     try {
       await base44.entities.NetworkingPipeline.create({
         user_email: user?.email,
@@ -367,19 +182,14 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   };
 
   const handleColdInroad = (lead) => {
-    pinLead(lead); // lock card before navigating away
+    pinLead(lead);
     const company = lead.company || lead.companyName || '';
     const role = lead.role || lead.title || '';
     window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`;
   };
 
   const noGoals = !target_industries?.length && !effectiveRole;
-
-  const tabDefs = [
-    { key: 'All', label: 'All' },
-    { key: 'Network Backdoors', label: `🤝 ${schoolAbbr} Network Backdoors` },
-    { key: 'Hidden Discoveries', label: '🕵️‍♂️ Hidden Discoveries' },
-  ];
+  const anyLoading = isLoading || dualLoading;
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-6">
@@ -401,12 +211,12 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         <div className="grid grid-cols-3 divide-x divide-gray-100">
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Ecosystem</p>
-            {isLoading ? <div className="h-6 bg-gray-200 rounded animate-pulse mt-1 mx-auto w-16" /> : <p className="text-lg font-black text-gray-800 mt-1">{uniqueCompaniesCount} Companies</p>}
+            {anyLoading ? <div className="h-6 bg-gray-200 rounded animate-pulse mt-1 mx-auto w-16" /> : <p className="text-lg font-black text-gray-800 mt-1">{uniqueCompaniesCount} Companies</p>}
             <p className="text-[11px] text-gray-500 mt-0.5">Actively tracked</p>
           </div>
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Verified Insiders</p>
-            {isLoading ? (
+            {anyLoading ? (
               <>
                 <p className="text-lg font-black text-purple-600 mt-1 animate-pulse">Scouting...</p>
                 <p className="text-[11px] text-purple-400 mt-0.5">CLiFF Scout is hunting backdoor channels</p>
@@ -425,7 +235,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </div>
           <div className="p-4 text-center">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Opportunities</p>
-            {isLoading ? <div className="h-6 bg-orange-100 rounded animate-pulse mt-1 mx-auto w-14" /> : <p className="text-lg font-black text-orange-600 mt-1">{totalCount} Fresh</p>}
+            {anyLoading ? <div className="h-6 bg-orange-100 rounded animate-pulse mt-1 mx-auto w-14" /> : <p className="text-lg font-black text-orange-600 mt-1">{totalCount} Fresh</p>}
             <p className="text-[11px] text-gray-500 mt-0.5">Hand-picked for you</p>
           </div>
         </div>
@@ -439,12 +249,12 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         </div>
         <p className="text-xs text-gray-500 mt-1">
           Your personalized feed of{' '}
-          <span className="font-bold text-purple-600">{isLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
+          <span className="font-bold text-purple-600">{anyLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
         </p>
       </div>
 
       {/* No goals nudge */}
-      {noGoals && !isLoading && (
+      {noGoals && !anyLoading && (
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p className="text-sm font-bold text-blue-900">🎯 Add your career goals for a personalized feed</p>
@@ -460,62 +270,14 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         </div>
       )}
 
-
-      {/* ── DUAL CONSTRAINT: Alumni-Verified + Active Jobs ── */}
-      {(dualLoading || dualLeads.length > 0) && (
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🏅</span>
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">
-              Alumni-Verified Opportunities
-            </h3>
-            <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-amber-200">
-              ✦ CLiFF Gold
-            </span>
-            {dualLoading && (
-              <span className="text-[11px] text-gray-400 animate-pulse">Scanning alumni network...</span>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 -mt-1">
-            Companies where <span className="font-semibold text-purple-700">{schoolAbbr} alumni already work</span> — cross-referenced with active openings for your target role.
-          </p>
-
-          {dualLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {[1, 2].map(n => (
-                <div key={n} className="h-28 bg-amber-50 rounded-2xl animate-pulse border border-amber-100" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {dualLeads.map((lead, idx) => (
-                <DualLeadCard
-                  key={lead.company || idx}
-                  lead={lead}
-                  schoolAbbr={schoolAbbr}
-                  effectiveRole={effectiveRole}
-                  onAddToPipeline={handleAddToPipeline}
-                  onColdInroad={handleColdInroad}
-                  onSelect={setSelectedLead}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* ── UNIFIED Target-Matched Opportunities Feed (Direct Website only) ── */}
+      {/* ── Single unified feed ── */}
       <section className="space-y-4">
-        {/* Section title row */}
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xl">🛰️</span>
             <h3 className="text-base font-bold text-gray-900 tracking-tight">
-              Target-Matched Opportunities ({isLoading ? '…' : totalCount})
+              Target-Matched Opportunities ({anyLoading ? '…' : totalCount})
             </h3>
-            <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-              Scouting Connections
-            </span>
           </div>
           <div className="flex items-center gap-2">
             {lastRefreshed && (
@@ -539,34 +301,15 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </div>
         </div>
 
-        {/* Three-tab filter pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {tabDefs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{ minHeight: 'auto', minWidth: 'auto' }}
-              className={`px-3 py-1.5 rounded-full text-[12px] font-bold border transition-all ${
-                activeTab === tab.key
-                  ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
-                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Cards grid */}
-        {isLoading ? (
+        {anyLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[1, 2, 3].map(n => (
               <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
             ))}
           </div>
-        ) : filteredOpportunities.length > 0 ? (
+        ) : targetOpportunities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredOpportunities.map((lead, idx) => (
+            {targetOpportunities.map((lead, idx) => (
               <DiscoveryJobCard
                 key={lead.company || lead.companyName || idx}
                 lead={lead}
@@ -576,14 +319,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                 schoolAbbr={schoolAbbr}
                 isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
                 onDismiss={() => {}}
+                insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
               />
             ))}
           </div>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
-            {activeTab === 'All'
-              ? 'No matching industry vacancies found today. Adjust your target positions to broaden search.'
-              : `No ${activeTab === 'Network Backdoors' ? 'network-connected' : 'hidden discovery'} roles found in your current feed.`}
+            No matching opportunities found today. Adjust your career goals to broaden the search.
           </div>
         )}
       </section>
