@@ -98,17 +98,19 @@ Deno.serve(async (req) => {
 
       const exaData = await exaResponse.json();
 
-      // Filter: must be a LinkedIn /in/ profile AND educationHistory must contain the exact school
+      // Filter: must be a LinkedIn /in/ profile AND educationHistory must EXPLICITLY confirm the exact school
+      // Never keep ambiguous results — only include if entity data confirms the correct school
+      const schoolLower = userSchool.toLowerCase();
       const results = (exaData.results || []).filter(r => {
         if (!/linkedin\.com\/in\/[^/?]+/.test(r.url || '')) return false;
         const person = (r.entities || []).find(e => e.type === 'person');
-        if (!person) return true; // no entity data — keep and rely on query relevance
+        if (!person) return false; // no entity data — discard, not worth the risk
         const edu = person.properties?.educationHistory || [];
-        if (edu.length === 0) return true; // no edu data — keep
-        // Verify at least one education entry matches our school
+        if (edu.length === 0) return false; // no edu data — discard
+        // Must explicitly match our school name
         return edu.some(e => {
           const inst = (e.institution?.name || '').toLowerCase();
-          return inst.includes(userSchool.toLowerCase()) || inst.includes(userSchoolCode.toLowerCase());
+          return inst.includes(schoolLower);
         });
       });
 
