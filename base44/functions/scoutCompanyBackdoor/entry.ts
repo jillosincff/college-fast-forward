@@ -97,8 +97,28 @@ Deno.serve(async (req) => {
 
       const exaData = await exaResponse.json();
       // Only keep actual LinkedIn profile URLs (/in/ paths), not company pages or other linkedin pages
-      const results = (exaData.results || []).filter(r => /linkedin\.com\/in\/[^/?]+/.test(r.url || ''));
-      console.log(`[scoutCompanyBackdoor] Found ${results.length} LinkedIn profiles via Exa`);
+      // Only keep actual LinkedIn profile URLs (/in/ paths) AND filter to those whose
+      // snippet/text mentions the user's school — this prevents false positives
+      const ufKeywords = [
+        userSchool.toLowerCase(),
+        userSchoolCode.toLowerCase(),
+        // common abbreviations for major schools
+        'university of florida', 'uf gator', 'go gators', 'florida state', 'fsu',
+        'ohio state', 'osu', 'university of michigan', 'umich', 'penn state', 'psu',
+        'university of southern california', 'usc', 'tulane', 'university of delaware',
+        'university of georgia', 'uga', 'university of maryland', 'umd', 'university of central florida', 'ucf',
+      ];
+      const schoolKeyword = userSchool.toLowerCase();
+      const schoolCode = userSchoolCode.toLowerCase();
+
+      const results = (exaData.results || []).filter(r => {
+        if (!/linkedin\.com\/in\/[^/?]+/.test(r.url || '')) return false;
+        // Check if the snippet/text actually mentions the user's school
+        const snippet = ((r.text || '') + ' ' + (r.title || '') + ' ' + (r.author || '')).toLowerCase();
+        return snippet.includes(schoolKeyword) || snippet.includes(schoolCode);
+      });
+
+      console.log(`[scoutCompanyBackdoor] Found ${results.length} verified LinkedIn profiles via Exa`);
 
       if (results.length > 0) {
         // Extract alumni info from search results and attempt email lookup
@@ -110,8 +130,10 @@ Deno.serve(async (req) => {
             ? titleRaw
             : (urlSlugMatch ? urlSlugMatch[1].replace(/-\d+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'LinkedIn Professional');
 
-          // Role title not available from Exa LinkedIn results — leave null
-          const jobTitle = null;
+          // Try to extract role title from the snippet text
+          const snippet = result.text || '';
+          const roleMatch = snippet.match(/(?:is a|works as a?|title[:\s]+|position[:\s]+)([^.,\n]{5,60})/i);
+          const jobTitle = roleMatch ? roleMatch[1].trim() : null;
           
           // Step 2b: Try to find email using Hunter API
           let email = null;
