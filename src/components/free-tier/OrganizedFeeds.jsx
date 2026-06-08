@@ -254,27 +254,35 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // Deep structural validation on backend dual constraint leads
   const validatedDualLeads = dualLeads
     .map(l => {
+      // 1. Extract the company name across all potential keys
       const extractedCompany = (l.company || l.companyName || l.company_name || '').trim();
+      
+      // 2. Extract the actual job title from the backend payload
+      // If the backend sent 'Marketing Manager Trainee' in l.role, this catches it
       const extractedTitle = (l.job_title || l.role || l.title || '').trim();
+
       return {
         ...l,
         company: extractedCompany,
         companyName: extractedCompany,
-        job_title: extractedTitle
+        // Map it explicitly to job_title so DiscoveryJobCard reads it perfectly
+        job_title: extractedTitle 
       };
     })
     .filter(l => {
-      // HARD LOCK 1: Discard if the company name is missing
+      // HARD LOCK 1: If there's no company name, drop it
       if (!l.company) return false;
 
-      // HARD LOCK 2: Clean the strings for a deep comparative check
+      // HARD LOCK 2: If there is no job title returned from the backend, 
+      // drop it entirely instead of letting it render an empty card
+      if (!l.job_title) return false;
+
+      // HARD LOCK 3: Deep comparative check to kill mirrored titles
       const cleanCompany = l.company.toLowerCase().replace(/[^a-z0-9]/g, '');
       const cleanTitle = l.job_title.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-      // If company field matches the job title field, or if the title field is empty 
-      // and the company field triggers our job filters, throw it away.
       if (cleanCompany === cleanTitle) return false;
       
+      // 4. Run the company name through your standard validation filters
       return isValidCompanyName(l.company);
     });
 
