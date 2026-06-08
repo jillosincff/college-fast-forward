@@ -85,7 +85,9 @@ Deno.serve(async (req) => {
           type: 'neural',
           numResults: 15,
           includeDomains: ['linkedin.com'],
-          text: true
+          contents: {
+            text: { maxCharacters: 500 }
+          }
         })
       });
 
@@ -101,9 +103,8 @@ Deno.serve(async (req) => {
       if (results.length > 0) {
         // Extract alumni info from search results and attempt email lookup
         const newAlumni = await Promise.all(results.slice(0, 5).map(async result => {
-          // Title format from LinkedIn neural results: "Name - Title at Company | LinkedIn"
+          // Title format from LinkedIn neural results: "Name" (name only) or "Name - Title | LinkedIn"
           const titleRaw = result.title || '';
-          console.log(`[scoutCompanyBackdoor] RAW title: "${titleRaw}" | text snippet: "${result.text?.substring(0, 100)}"`);
 
           // Split on " | " first to strip "LinkedIn" suffix, then split on " - "
           const titleWithoutSuffix = titleRaw.replace(/\s*\|\s*LinkedIn\s*$/i, '').trim();
