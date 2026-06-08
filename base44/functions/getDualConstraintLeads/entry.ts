@@ -51,10 +51,14 @@ Deno.serve(async (req) => {
       contents: { text: { maxCharacters: 400 } },
     });
 
+    const JOB_BOARD_PATTERN = /indeed|linkedin|glassdoor|ziprecruiter|builtin|jobsearcher|jobright|monster|simplyhired|careerbuilder|snagajob|handshake|wayup|internships\.com|jobot|talentcom|joblist|jobcase/i;
+
     const jobResults = (jobData.results || []).filter(r =>
       r.url && r.title &&
       !/virginia tech|alumni association|university career/i.test(r.title) &&
-      !/\.edu\//i.test(r.url)
+      !/\.edu\//i.test(r.url) &&
+      !JOB_BOARD_PATTERN.test(r.url) &&
+      !JOB_BOARD_PATTERN.test(r.title)
     );
 
     console.log(`[DualConstraint] Found ${jobResults.length} job listings`);
@@ -79,7 +83,7 @@ Deno.serve(async (req) => {
       } catch {}
 
       const company = atMatch?.[1]?.trim() || dashMatch?.[1]?.trim() || hostCompany;
-      if (company && company.length > 1 && !companySet.has(company)) {
+      if (company && company.length > 1 && !companySet.has(company) && !JOB_BOARD_PATTERN.test(company)) {
         companySet.set(company, {
           title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
           url: r.url,
