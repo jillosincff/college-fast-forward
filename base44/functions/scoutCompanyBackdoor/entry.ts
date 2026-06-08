@@ -103,22 +103,15 @@ Deno.serve(async (req) => {
       if (results.length > 0) {
         // Extract alumni info from search results and attempt email lookup
         const newAlumni = await Promise.all(results.slice(0, 5).map(async result => {
-          // Title format from LinkedIn neural results: "Name" (name only) or "Name - Title | LinkedIn"
-          const titleRaw = result.title || '';
-
-          // Split on " | " first to strip "LinkedIn" suffix, then split on " - "
-          const titleWithoutSuffix = titleRaw.replace(/\s*\|\s*LinkedIn\s*$/i, '').trim();
-          const parts = titleWithoutSuffix.split(/\s*-\s*/);
-          const namePart = parts[0]?.trim() || '';
+          // Exa neural LinkedIn results: title is just the person's name (no role data available)
+          const titleRaw = (result.title || '').replace(/^#+\s*/, '').trim();
           const urlSlugMatch = result.url?.match(/\/in\/([^/?]+)/);
-          const name = namePart && namePart.length > 2 ? namePart :
-            (urlSlugMatch ? urlSlugMatch[1].replace(/-\d+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'LinkedIn Professional');
+          const name = (titleRaw && titleRaw.length > 2)
+            ? titleRaw
+            : (urlSlugMatch ? urlSlugMatch[1].replace(/-\d+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'LinkedIn Professional');
 
-          // Job title is everything after the first " - ", cleaned up
-          const rawJobTitle = parts.slice(1).join(' - ').trim();
-          const jobTitle = rawJobTitle
-            .replace(/\s*at\s+.+$/i, '') // strip "at Company Name" if present
-            .trim() || result.text?.split('\n')[0]?.replace(/^\d+\.\s*/, '').trim().slice(0, 80) || 'Professional';
+          // Role title not available from Exa LinkedIn results — leave null
+          const jobTitle = null;
           
           // Step 2b: Try to find email using Hunter API
           let email = null;
@@ -162,7 +155,7 @@ Deno.serve(async (req) => {
             linkedin_url: result.url || '',
             email: email,
             email_confidence: emailConfidence,
-            description: `Found via Exa search: ${result.text?.substring(0, 200) || ''}`
+            description: `Found via Exa search`
           };
         }));
 
