@@ -4,7 +4,6 @@ import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompa
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { CliffLogo } from '@/components/brand/CliffLogo';
 import PremiumPipeline from './PremiumPipeline';
-import DynamicActionPlan from '@/components/action-plan/DynamicActionPlan';
 import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
@@ -388,9 +387,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Application Pipeline (Active Tracking) */}
             <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
-            
-            {/* Dynamic Action Plan */}
-            <DynamicActionPlan user={user} />
           </div>
 
           {/* Right Column (Desktop Only) */}
