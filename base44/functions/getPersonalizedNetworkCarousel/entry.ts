@@ -127,27 +127,90 @@ Deno.serve(async (req) => {
     console.log(`[getPersonalizedNetworkCarousel] Live companies: ${liveCompanies.map(c => c.name).join(', ') || 'none'}`);
 
     if (liveCompanies.length === 0) {
-      // Fallback: use LLM to generate company list directly
+    // Fallback: use LLM to generate real job listings with full descriptions
+    try {
+      const fallback = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt: `Generate 10 realistic, detailed entry-level job listings for a "${targetRole || (targetIndustries[0] || 'Business') + ' Analyst'}" role at real companies actively hiring in ${rawLocation || 'the United States'} in 2025.
+
+    For each listing, write a REAL job description (150-250 words) that includes:
+    - 3-4 specific responsibilities (what they'll actually do day-to-day)
+    - 3-4 required qualifications (degree requirements, skills, tools)
+    - 1-2 nice-to-have skills
+    - Compensation range if available
+
+    Make the descriptions sound like actual job postings, not marketing copy. Use concrete, specific language about real tools and technologies relevant to the role and industry.
+
+    Return 10 companies with real, substantive job descriptions. Mix large enterprises and mid-size companies.`,
+        add_context_from_internet: true,
+        model: 'gemini_3_flash',
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            companies: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  job_description: { type: 'string' },
+                  size: { type: 'string', enum: ['startup', 'mid', 'large'] }
+                },
+                required: ['name', 'job_description']
+              }
+            }
+          }
+        }
+      });
+      liveCompanies = (fallback?.companies || []).map(c => ({
+        name: c.name,
+        hiring_signal: 'warm',
+        hiring_description: c.job_description || `${c.name} is hiring entry-level ${targetRole || 'professionals'}.`,
+        size: c.size || 'mid',
+      }));
+    } catch (e) {
+      console.warn('[getPersonalizedNetworkCarousel] Fallback LLM also failed:', e.message);
+    }
+    }
+
+    // If live companies have only vague blurbs, enrich with real job descriptions
+    const needsEnrichment = liveCompanies.length > 0 && liveCompanies.every(c => (c.hiring_description || '').length < 120);
+    if (needsEnrichment) {
       try {
-        const fallback = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `List 10 real companies actively hiring entry-level ${targetRole || targetIndustries[0] + ' professionals'} in ${rawLocation || 'the US'} in 2025. Return only company names, one per line.`,
-          add_context_from_internet: true,
+        const enriched = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: `Write realistic, detailed entry-level job descriptions for a "${targetRole || (targetIndustries[0] || 'Business') + ' Analyst'}" role at each of these companies: ${liveCompanies.map(c => c.name).join(', ')}.
+
+For each company, write a real job description (150-200 words) with:
+- Specific day-to-day responsibilities relevant to that company's business
+- Required qualifications (education, tools, skills)
+- Nice-to-have skills
+
+Use concrete, specific language that sounds like an actual job posting.`,
           model: 'gemini_3_flash',
           response_json_schema: {
             type: 'object',
             properties: {
-              companies: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, size: { type: 'string', enum: ['startup', 'mid', 'large'] } }, required: ['name'] } }
+              listings: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    company: { type: 'string' },
+                    description: { type: 'string' }
+                  },
+                  required: ['company', 'description']
+                }
+              }
             }
           }
         });
-        liveCompanies = (fallback?.companies || []).map(c => ({
-          name: c.name,
-          hiring_signal: 'warm',
-          hiring_description: c.description || `${c.name} is hiring entry-level ${targetRole || 'professionals'}.`,
-          size: c.size || 'mid',
+        const descMap = {};
+        (enriched?.listings || []).forEach(l => { descMap[l.company?.toLowerCase()] = l.description; });
+        liveCompanies = liveCompanies.map(c => ({
+          ...c,
+          hiring_description: descMap[c.name?.toLowerCase()] || c.hiring_description,
         }));
       } catch (e) {
-        console.warn('[getPersonalizedNetworkCarousel] Fallback LLM also failed:', e.message);
+        console.warn('[getPersonalizedNetworkCarousel] Description enrichment failed:', e.message);
       }
     }
 
