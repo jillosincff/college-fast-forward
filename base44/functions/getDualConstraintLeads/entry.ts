@@ -239,13 +239,14 @@ Deno.serve(async (req) => {
       ? userLocation.split(',')[0].trim()
       : '';
     const remoteIntent = /^(remote|anywhere|flexible|open to relocation)$/i.test(userLocation.trim());
-    // For city-specific users, drop the "OR remote" — burning result slots on
-    // remote postings that the filter below will reject anyway. For remote-
-    // preference users, search only remote terms.
+    // Cast a wider net at the Exa layer so the two-tier filter below has
+    // material to work with — city-specific users want their city when
+    // available but will fall back to remote/ambiguous posts if the city
+    // is sparse (e.g. Miami at most alumni-verified companies).
     const locationQuery = remoteIntent
       ? `"remote" OR "remote-friendly" OR "remote-first"`
       : locationCity
-      ? `"${locationCity}"`
+      ? `"${locationCity}" OR "remote"`
       : '';
 
     // Step 2b: For each company, search for jobs restricted to their resolved domain
@@ -287,44 +288,51 @@ Deno.serve(async (req) => {
       return text.slice(0, 320);
     };
 
-    // Three-mode location filter (mirrors passesLocation in getPersonalizedNetworkCarousel):
-    //   Mode 1 — user picked a specific city: strict match. The text must name
-    //     that city. Remote-only, multi-city, ambiguous all reject. If a user
-    //     wants remote jobs they set their preference to "Remote" / "Anywhere".
-    //   Mode 2 — user picked "Remote" / "Anywhere": keep remote-friendly or
-    //     multi-city only.
-    //   Mode 3 — no location preference: keep everything.
+    // Two-tier location matching (mirrors getPersonalizedNetworkCarousel):
+    //   strict:   text explicitly names the user's city
+    //   loose:    text does NOT explicitly name a different city (ambiguous /
+    //             remote / multi-city posts pass)
+    // Always reject posts that explicitly name a different identifiable city.
+    // After scoring, prefer strict matches; fall back to loose when strict is
+    // sparse so a user in a city with few hits (e.g. Miami at alumni-verified
+    // companies) still sees something useful instead of an empty feed.
     const US_CITIES = /\b(Austin|San Francisco|Seattle|Chicago|Los Angeles|Boston|Atlanta|Denver|Dallas|Houston|Miami|Phoenix|Portland|San Diego|Minneapolis|Detroit|Philadelphia|Pittsburgh|Charlotte|Nashville|Raleigh|Salt Lake City|Las Vegas|Tampa|Orlando|San Jose|San Antonio|Columbus|Kansas City|Indianapolis|St\. Louis|Cincinnati|Cleveland|Memphis|Richmond|Sacramento|Baltimore|New York|Brooklyn|Manhattan|Mountain View|Menlo Park|Cupertino|Palo Alto|Redmond|Burbank|Santa Monica)\b/i;
     const userCityForMatch = remoteIntent ? '' : (locationCity ? locationCity.toLowerCase() : '');
-    const isLocationMatch = (text) => {
+    const cityInText = (text) => {
+      const m = text.match(US_CITIES);
+      return m ? m[0].toLowerCase() : '';
+    };
+    const isStrictCityMatch = (text) => {
+      if (!userCityForMatch) return false;
+      const mc = cityInText(text);
+      return !!mc && (mc === userCityForMatch || mc.includes(userCityForMatch) || userCityForMatch.includes(mc));
+    };
+    const isLooseCompatible = (text) => {
       const lowerText = text.toLowerCase();
-      const isRemote = lowerText.includes('remote') || lowerText.includes('work from home') || lowerText.includes('remote-friendly') || lowerText.includes('remote-first');
-      const isMultiCity = lowerText.includes('multiple us cities') || lowerText.includes('multiple cities');
-
-      const otherCityMatch = text.match(US_CITIES);
-      const mentionedCity = otherCityMatch ? otherCityMatch[0].toLowerCase() : '';
-
-      // Mode 1 — specific city: strict match required.
-      if (userCityForMatch) {
-        if (!mentionedCity) return false;
-        return mentionedCity === userCityForMatch
-          || mentionedCity.includes(userCityForMatch)
-          || userCityForMatch.includes(mentionedCity);
+      if (remoteIntent) {
+        return lowerText.includes('remote') || lowerText.includes('multiple cities') || lowerText.includes('multiple us cities');
       }
-
-      // Mode 2 — Remote / Anywhere intent.
-      if (remoteIntent) return isRemote || isMultiCity;
-
-      // Mode 3 — no preference.
-      return true;
+      if (!userCityForMatch) return true; // no preference → keep
+      const mc = cityInText(text);
+      if (!mc) return true; // ambiguous → keep
+      return mc === userCityForMatch || mc.includes(userCityForMatch) || userCityForMatch.includes(mc);
     };
 
-    // Build jobsByCompany map — results are already domain-locked, no fuzzy matching needed
+    // Build jobsByCompany map — results are already domain-locked, no fuzzy matching needed.
+    // Two-tier location selection per company: prefer strict-city-match jobs; fall back
+    // to loose-compatible ones when strict is sparse.
+    const STRICT_CITY_THRESHOLD = 1;
     const jobsByCompany = new Map();
     perCompanyJobResults.forEach(({ company, domain, results }) => {
-      const jobs = results
-        .filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title))
-        .filter(r => isLocationMatch((r.title || '') + ' ' + (r.highlights || []).join(' ') + ' ' + (r.text || '').slice(0, 400)))
+      const haystack = (r) => (r.title || '') + ' ' + (r.highlights || []).join(' ') + ' ' + (r.text || '').slice(0, 400);
+      const preFiltered = results.filter(r => r.url && r.title && !SENIOR_PATTERN.test(r.title));
+      // Strict pool: posts that explicitly name the user's city.
+      const strict = userCityForMatch ? preFiltered.filter(r => isStrictCityMatch(haystack(r))) : [];
+      // Loose pool: posts that don't explicitly name a different city.
+      const loose = preFiltered.filter(r => isLooseCompatible(haystack(r)));
+      // Prefer strict; otherwise loose (which is a superset of strict).
+      const selected = strict.length >= STRICT_CITY_THRESHOLD ? strict : loose;
+      const jobs = selected
         .map(r => {
           // Prefer highlights (Exa-extracted key sentences) over raw text
           const highlightSnippet = (r.highlights || []).filter(h => typeof h === 'string').join(' ');
