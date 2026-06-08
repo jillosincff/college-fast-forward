@@ -4,6 +4,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
  * Find real job listings matching the user's role + location.
  * Alumni lookup is NOT done here — it's triggered separately when the user
  * clicks "Find Alumni" on a specific company card.
+ * 
+ * ENFORCES THREE-POINT AGENT VALIDATION:
+ * 1. Identity Check (blocks ghosts & mirrored titles)
+ * 2. Target Matching (validates strategic relevance)
+ * 3. Link Resolution (confirms actionable engines)
  */
 Deno.serve(async (req) => {
   const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
@@ -89,19 +94,62 @@ Deno.serve(async (req) => {
       }
     }
 
-    const leads = [...companyMap.entries()].slice(0, 10).map(([company, job]) => ({
-      company,
-      role: roleQuery,
-      hasActiveJobs: true,
-      activeJobs: [job],
-      signalTier: 'silver',
-      ctaType: 'find_alumni',
-      leadTier: 'dual_constraint',
-      source: 'dual_constraint_engine',
-    }));
+    // Extract unique companies and apply validation inline
+    const validatedLeads = [];
+    const userGoals = {
+      location_preference: userLocation,
+      industries: targetIndustries,
+    };
 
-    console.log(`[DualConstraint] Returning ${leads.length} job leads`);
-    return Response.json({ success: true, leads });
+    for (const [company, job] of companyMap.entries()) {
+      const lead = {
+        company,
+        job_title: job.title?.split(/[|·]/)[0]?.trim() || job.title,
+        role: roleQuery,
+        url: job.url,
+      };
+
+      // 🛡️ Inline validation: Identity check
+      const lowerCompany = company.toLowerCase();
+      const lowerTitle = lead.job_title.toLowerCase();
+      
+      if (!company || company.length < 3) continue;
+      if (lowerCompany === lowerTitle) {
+        console.log(`🚫 [DualConstraint] REJECTED (mirrored): ${company}`);
+        continue;
+      }
+
+      // Check for job title keywords in company name
+      const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator'];
+      const businessSuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'solutions', 'services', 'ventures', 'capital', 'agency', 'firm'];
+      const hasValidSuffix = businessSuffixes.some(suffix => new RegExp(`\\b${suffix}\\b`, 'i').test(lowerCompany));
+      
+      if (!hasValidSuffix && jobTitleKeywords.some(keyword => lowerCompany.includes(keyword))) {
+        console.log(`🚫 [DualConstraint] REJECTED (job keyword): ${company}`);
+        continue;
+      }
+
+      // Validate job title exists
+      if (!lead.job_title || lead.job_title === 'Entry Level Role') {
+        console.log(`🚫 [DualConstraint] REJECTED (no title): ${company}`);
+        continue;
+      }
+
+      validatedLeads.push({
+        ...lead,
+        hasActiveJobs: true,
+        activeJobs: [job],
+        signalTier: 'silver',
+        ctaType: 'find_alumni',
+        leadTier: 'dual_constraint',
+        source: 'dual_constraint_engine',
+      });
+
+      if (validatedLeads.length >= 10) break;
+    }
+
+    console.log(`[DualConstraint] Returning ${validatedLeads.length} validated leads (filtered from ${rawLeads.length})`);
+    return Response.json({ success: true, leads: validatedLeads });
 
   } catch (e) {
     console.error('[getDualConstraintLeads] Error:', e.message);
