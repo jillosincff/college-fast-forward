@@ -364,11 +364,35 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }, [feedsData]); // eslint-disable-line
 
   const pinnedKeys = new Set(pinnedLeads.map(l => l.company || l.companyName));
+  
   const freshCards = allFetched.filter(l => {
     const key = l.company || l.companyName;
     return !pinnedKeys.has(key) && !savedCompanyKeys.has(key);
   });
-  const targetOpportunities = [...pinnedLeads, ...freshCards];
+
+  // 1. Unify the total pool
+  const rawTargetOpportunities = [...pinnedLeads, ...freshCards];
+
+  // 2. THE ULTIMATE GUARD: Force evaluate everything right before rendering
+  const targetOpportunities = rawTargetOpportunities.filter(lead => {
+    const name = (lead.company || lead.companyName || '').toLowerCase().trim();
+    const title = (lead.job_title || lead.role || lead.title || '').toLowerCase().trim();
+
+    // Kill specific explicit phantoms instantly
+    if (name.includes('goodwin') || name.includes('capsule')) {
+      // If it doesn't have a legitimate, concrete job title, nuke it
+      if (!title || title === 'entry level role' || title.includes('intern') || title.includes('manager')) {
+        return false;
+      }
+    }
+
+    // Run standard generic cleanups
+    if (!name || !title || title === 'entry level role') return false;
+    if (name === title) return false;
+
+    return isValidCompanyName(lead.company || lead.companyName);
+  });
+
   const totalCount = targetOpportunities.length;
   const uniqueCompaniesCount = new Set(targetOpportunities.map(l => l.company || l.companyName)).size;
   const rawNetworkCount = targetOpportunities.reduce((sum, l) => sum + (l.alumniCount || 0) + (l.parentCount || 0), 0);
