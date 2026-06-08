@@ -89,10 +89,15 @@ function jobsToCompanies(jobs, targetRole, industries) {
   const seen = new Set();
   const companies = [];
 
+  // Employment agency keywords to screen out
+  const AGENCY_KEYWORDS = /\b(staffing|recruiting|recruitment|talent solutions|talent group|search group|executive search|search firm|placement|manpower|adecco|randstad|kelly services|robert half|hays|kforce|insight global|beacon hill|creative circle|aquent|vitamin t|workbridge|cybercoders|mondo|hired|iqvia|modis|infosys bpo|wipro|cognizant|tata consultancy)\b/i;
+
   for (const job of jobs) {
     // Fantastic.jobs: org name is in job.organization (string)
     const orgName = job.organization || '';
     if (!orgName || seen.has(orgName.toLowerCase())) continue;
+    // Skip employment agencies
+    if (AGENCY_KEYWORDS.test(orgName)) continue;
     seen.add(orgName.toLowerCase());
 
     // Count openings at this company — more = hotter signal

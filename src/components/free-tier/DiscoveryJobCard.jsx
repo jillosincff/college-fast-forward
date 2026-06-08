@@ -63,8 +63,10 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
         {/* Card Header */}
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0 mr-2">
-            <h4 className="font-extrabold text-gray-900 leading-tight text-base truncate" style={{ color: '#4f46e5' }}>{lead.company}</h4>
-            <p className="text-sm text-slate-500 mt-0.5 font-normal truncate">{lead.role}</p>
+            <h4 className="font-extrabold leading-tight text-base truncate" style={{ color: '#4f46e5' }}>{lead.company}</h4>
+            {(lead.job_title || lead.role) && (
+              <p className="text-xs text-slate-500 mt-0.5 font-medium truncate">{lead.job_title || lead.role}</p>
+            )}
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {isPinned && (
