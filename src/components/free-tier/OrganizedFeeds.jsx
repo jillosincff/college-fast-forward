@@ -1,13 +1,116 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
+import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { useRef } from 'react';
 
 const TABS = ['All', 'Network Backdoors', 'Hidden Discoveries'];
+
+function DualLeadCard({ lead, schoolAbbr, effectiveRole, onAddToPipeline, onColdInroad, onSelect }) {
+  const [alumni, setAlumni] = useState(null); // null = not searched, [] = none, [...] = found
+  const [searching, setSearching] = useState(false);
+
+  const handleFindAlumni = async (e) => {
+    e.stopPropagation();
+    setSearching(true);
+    try {
+      const res = await scoutCompanyBackdoor({ jobId: lead.company, companyName: lead.company });
+      const data = res?.data || res;
+      setAlumni(data?.alumni || []);
+    } catch {
+      setAlumni([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  return (
+    <div
+      className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-4 space-y-2.5 hover:shadow-md transition-all"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="font-black text-gray-900 text-sm">{lead.company}</p>
+          <p className="text-xs text-gray-600 mt-0.5">{lead.role || effectiveRole}</p>
+        </div>
+        <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+          ✅ Active Jobs
+        </span>
+      </div>
+
+      {/* Active job */}
+      {lead.activeJobs?.[0] && (
+        <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5">
+          <a
+            href={lead.activeJobs[0].url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="hover:underline truncate"
+          >
+            {lead.activeJobs[0].title}
+          </a>
+        </div>
+      )}
+
+      {/* Alumni section */}
+      {alumni === null ? (
+        <button
+          onClick={handleFindAlumni}
+          disabled={searching}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-dashed border-purple-300 text-purple-700 bg-white/60 hover:bg-purple-50 text-xs font-bold transition-colors"
+          style={{ minHeight: 'auto' }}
+        >
+          {searching ? <><span className="animate-spin inline-block">⟳</span> Searching {schoolAbbr} alumni…</> : `🎓 Find ${schoolAbbr} Alumni Here`}
+        </button>
+      ) : alumni.length > 0 ? (
+        <div className="space-y-1">
+          <p className="text-xs font-bold text-purple-800">🎓 Found {alumni.length} {schoolAbbr} alumni!</p>
+          {alumni.slice(0, 3).map((a, i) => (
+            <a
+              key={i}
+              href={a.linkedin_url || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-white border border-purple-100 rounded-lg px-2.5 py-1.5 hover:border-blue-300 transition-colors"
+              style={{ minHeight: 'auto', textDecoration: 'none' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-5 h-5 rounded bg-[#0077b5] flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-[9px]">in</span>
+              </div>
+              <span className="text-xs font-semibold text-gray-900 truncate">{a.name}</span>
+              {a.role_title && <span className="text-[10px] text-gray-400 truncate">{a.role_title}</span>}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-gray-400 text-center py-1">No {schoolAbbr} alumni found here yet.</p>
+      )}
+
+      {/* CTAs */}
+      <div className="flex gap-2 pt-1">
+        <button
+          onClick={e => { e.stopPropagation(); onAddToPipeline({ ...lead, role: lead.role || effectiveRole }); }}
+          className="flex-1 text-[11px] font-bold py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
+          style={{ minHeight: 'auto' }}
+        >
+          + Pipeline
+        </button>
+        <button
+          onClick={e => { e.stopPropagation(); onColdInroad({ ...lead, role: lead.role || effectiveRole, company: lead.company }); }}
+          className="flex-1 text-[11px] font-bold py-1.5 rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition"
+          style={{ minHeight: 'auto' }}
+        >
+          ⚡ Generate Message
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount }) {
   const [selectedLead, setSelectedLead] = useState(null);
@@ -344,105 +447,15 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {dualLeads.map((lead, idx) => (
-                <div
+                <DualLeadCard
                   key={lead.company || idx}
-                  className={`rounded-2xl border p-4 space-y-2.5 cursor-pointer hover:shadow-md transition-all ${
-                    lead.signalTier === 'gold'
-                      ? 'border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50'
-                      : 'border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50'
-                  }`}
-                  onClick={() => setSelectedLead({
-                    ...lead,
-                    role: lead.role || effectiveRole,
-                    alumniCount: lead.alumniCount,
-                    // Map insiders → alumni shape expected by MatchDeepDiveModal
-                    alumni: (lead.insiders || []).map(ins => ({
-                      name: (ins.name || ins.headline || '').split(/[|\-·]/)[0].trim(),
-                      role_title: (ins.headline || '').split(/[|\-·]/).slice(1).join(' ').trim() || 'Professional',
-                      linkedin_url: ins.url || ins.linkedin_url || null,
-                    })).filter(a => a.name && a.name.length > 1),
-                    // Map first active job → jobDescription (prefer actual description, fallback to title)
-                    jobDescription: lead.activeJobs?.[0]?.description
-                      ? lead.activeJobs[0].description
-                      : lead.activeJobs?.[0]?.title
-                        ? `${lead.activeJobs[0].title}${lead.hasActiveJobs ? ' — reach out to your insider for the full details and a referral.' : ''}`
-                        : `${lead.alumniCount} ${schoolAbbr} alumni work here. Message them directly to get a referral before the role posts publicly.`,
-                  })}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-black text-gray-900 text-sm">{lead.company}</p>
-                      <p className="text-xs text-gray-600 mt-0.5">{lead.role || effectiveRole}</p>
-                    </div>
-                    <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      lead.signalTier === 'gold'
-                        ? 'bg-amber-200 text-amber-800'
-                        : 'bg-purple-100 text-purple-700'
-                    }`}>
-                      {lead.signalTier === 'gold' ? '🏅 ACTIVE + ALUMNI' : '🎓 ALUMNI EDGE'}
-                    </span>
-                  </div>
-
-                  {/* Alumni proof */}
-                  <div className="flex items-center gap-1.5 text-xs text-purple-700 font-semibold">
-                    <span>🎓</span>
-                    <span>{lead.alumniCount} {schoolAbbr} alumni at this company</span>
-                  </div>
-
-                  {/* Active job proof + description */}
-                  {lead.hasActiveJobs && lead.activeJobs?.length > 0 && (
-                    <div className="space-y-1">
-                      <div className="text-xs text-green-700 font-semibold flex items-center gap-1.5">
-                        <span>✅</span>
-                        <a
-                          href={lead.activeJobs[0].url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="hover:underline"
-                        >
-                          {lead.activeJobs[0].title}
-                        </a>
-                      </div>
-                      {lead.activeJobs[0].description && (
-                        <p className="text-[11px] text-gray-600 leading-relaxed line-clamp-3 pl-5">
-                          {lead.activeJobs[0].description}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Insider names if available */}
-                  {lead.insiders?.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {lead.insiders.slice(0, 2).map((insider, i) => (
-                        <span key={i} className="text-[10px] bg-white/70 border border-purple-200 text-purple-600 px-2 py-0.5 rounded-full truncate max-w-[140px]">
-                          {insider.name?.split(/[|\-·]/)[0]?.trim() || 'Alumni'}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* CTAs */}
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={e => { e.stopPropagation(); handleAddToPipeline({ ...lead, role: lead.role || effectiveRole }); }}
-                      className="flex-1 text-[11px] font-bold py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
-                      style={{ minHeight: 'auto' }}
-                    >
-                      + Pipeline
-                    </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); handleColdInroad({ ...lead, role: lead.role || effectiveRole, company: lead.company }); }}
-                      className={`flex-1 text-[11px] font-bold py-1.5 rounded-lg text-white transition ${
-                        lead.signalTier === 'gold' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-purple-600 hover:bg-purple-700'
-                      }`}
-                      style={{ minHeight: 'auto' }}
-                    >
-                      ⚡ Generate Message
-                    </button>
-                  </div>
-                </div>
+                  lead={lead}
+                  schoolAbbr={schoolAbbr}
+                  effectiveRole={effectiveRole}
+                  onAddToPipeline={handleAddToPipeline}
+                  onColdInroad={handleColdInroad}
+                  onSelect={setSelectedLead}
+                />
               ))}
             </div>
           )}
