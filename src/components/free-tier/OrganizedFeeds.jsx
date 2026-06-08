@@ -162,8 +162,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // Merge dual (alumni-verified) leads into the main pool with an insider pill, deduplicated
   const mergedSeen = new Set();
   const allFetched = [];
+  const validatedDualLeads = dualLeads.filter(l => isValidCompanyName(l.company || l.companyName));
+  
   for (const lead of [
-    ...dualLeads.map(l => ({ ...l, _insiderPill: `🎓 ${l.alumniCount || ''} Alumni`.trim() })),
+    ...validatedDualLeads.map(l => ({ ...l, _insiderPill: `🎓 ${l.alumniCount || ''} Alumni`.trim() })),
     ...priorityInsiders,
     ...targetedDiscoveries,
   ]) {
