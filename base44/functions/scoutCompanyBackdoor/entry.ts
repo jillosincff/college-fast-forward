@@ -100,14 +100,22 @@ Deno.serve(async (req) => {
       if (results.length > 0) {
         // Extract alumni info from search results and attempt email lookup
         const newAlumni = await Promise.all(results.slice(0, 5).map(async result => {
-          // Extract name from URL or title
-          const nameMatch = result.title?.match(/^(.+?)\s*[-|]/) || result.url?.match(/\/in\/([^/?]+)/);
-          const name = nameMatch ? nameMatch[1].trim() : 'LinkedIn Professional';
-          
-          // Extract job title from the title (after the name) or from snippet
-          const titleParts = result.title?.split('-').map(s => s.trim());
-          const jobTitle = titleParts?.length > 1 ? titleParts.slice(1).join(' - ') : 
-                          result.text?.match(/([^|]+)\|/)?.[1]?.trim() || 'Professional';
+          // Extract name from title (format: "Name - Title at Company | LinkedIn") or URL slug
+          const titleRaw = result.title || '';
+          const namePart = titleRaw.split(/\s*[-|]\s*/)[0]?.trim() || '';
+          const urlSlugMatch = result.url?.match(/\/in\/([^/?]+)/);
+          const name = namePart && namePart.length > 2 ? namePart : 
+            (urlSlugMatch ? urlSlugMatch[1].replace(/-\d+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'LinkedIn Professional');
+
+          // Extract job title — look for "Title at Company" pattern, strip " - LinkedIn" suffixes
+          const titleMatch = titleRaw.match(/[-|]\s*(.+?)\s*(?:at\s+.+?)?(?:\s*[-|]\s*LinkedIn)?$/i);
+          const rawJobTitle = titleMatch ? titleMatch[1].trim() : '';
+          // Clean up: remove "LinkedIn", "- LinkedIn", company name echoes
+          const jobTitle = rawJobTitle
+            .replace(/\s*[-|]\s*LinkedIn\s*$/i, '')
+            .replace(/\s*[-|]\s*LinkedIn Profile\s*$/i, '')
+            .replace(new RegExp(`\\s*[-|]?\\s*${companyName}\\s*[-|]?\\s*`, 'gi'), '')
+            .trim() || result.text?.split('\n')[0]?.trim().slice(0, 80) || 'Professional';
           
           // Step 2b: Try to find email using Hunter API
           let email = null;

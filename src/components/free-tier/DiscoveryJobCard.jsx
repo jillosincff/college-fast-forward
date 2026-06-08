@@ -132,25 +132,26 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             </button>
           ) : foundAlumni && foundAlumni.length > 0 ? (
             <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-2">
-              <p className="text-xs font-bold text-purple-800">{mascot} Found {foundAlumni.length} {school} alumni!</p>
+              <p className="text-xs font-bold text-purple-800">{mascot} Found {foundAlumni.length} {school} alumni at {lead.company}!</p>
               {foundAlumni.slice(0, 3).map((a, i) => (
-                <div key={i} className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-gray-800 truncate">{a.name}</p>
+                <a
+                  key={i}
+                  href={a.linkedin_url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 bg-white border border-purple-100 rounded-lg px-3 py-2 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
+                  style={{ minHeight: 'auto', textDecoration: 'none' }}
+                >
+                  {/* LinkedIn icon */}
+                  <div className="w-6 h-6 rounded bg-[#0077b5] flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-[10px]">in</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-blue-700">{a.name}</p>
                     <p className="text-[10px] text-gray-500 truncate">{a.role_title || 'Professional'}</p>
                   </div>
-                  {a.linkedin_url && (
-                    <a
-                      href={a.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] text-blue-600 font-bold shrink-0 hover:underline"
-                      style={{ minHeight: 'auto', minWidth: 'auto' }}
-                    >
-                      LinkedIn →
-                    </a>
-                  )}
-                </div>
+                  <span className="text-[10px] text-blue-500 font-semibold shrink-0 group-hover:text-blue-700">View →</span>
+                </a>
               ))}
             </div>
           ) : (
