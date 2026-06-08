@@ -95,6 +95,33 @@ export function verifyAlumnusIntegrity(profile, targetSchoolCode, targetCompany)
     return { verified: false, failures, details };
   }
 
+  // 🚨 HIGHER-ED GUARDRAIL: Filter out internal university employees
+  // Prevents campus staff (professors, IT, admissions) from appearing as corporate alumni
+  const isUniversityEmployee = currentJobs.some(job => {
+    const currentCompanyName = (job.company || job.company_name || '').toLowerCase();
+    const companyLinkedinId = job.company_linkedin_id || job.company_id;
+    
+    // Explicitly target university employment strings
+    const worksAtUniversity = 
+      currentCompanyName.includes('university of') || 
+      currentCompanyName.includes('u of f') || 
+      currentCompanyName.includes(normalizedSchool) ||
+      companyLinkedinId === '13606'; // UF LinkedIn ID
+    
+    return worksAtUniversity;
+  });
+
+  // If alumni works for the university AND student is looking at external company → REJECT
+  const lookingAtUniversityAsCompany = 
+    normalizedCompany.includes('university of') || 
+    normalizedCompany.includes(normalizedSchool);
+  
+  if (isUniversityEmployee && !lookingAtUniversityAsCompany) {
+    failures.push('Internal university employee (not corporate insider)');
+    return { verified: false, failures, details };
+  }
+
+  // --- 3. PROCEED TO TARGET COMPANY MATCHING ---
   const worksAtTargetCompany = currentJobs.some(job => {
     const companyName = (job.company || job.company_name || '').toLowerCase().trim();
     const companyLinkedinId = job.company_linkedin_id || job.company_id;
