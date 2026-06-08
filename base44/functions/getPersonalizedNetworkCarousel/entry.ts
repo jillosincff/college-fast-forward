@@ -673,9 +673,6 @@ Deno.serve(async (req) => {
       const isRemote = desc.includes('remote') || desc.includes('work from home') || desc.includes('remote-friendly') || desc.includes('remote-first');
       const isMultiCity = desc.includes('multiple us cities') || desc.includes('multiple cities');
 
-      // "Multiple cities" is always location-neutral — keep.
-      if (isMultiCity) return true;
-
       // Identify the post's city. Body text wins; if silent, fall back to
       // the company's HQ (covers entries like Notion "Productivity startup
       // scaling globally" with no Location: line).
@@ -685,24 +682,21 @@ Deno.serve(async (req) => {
         mentionedCity = COMPANY_HQ_CITY[companyKey];
       }
 
-      // If the user picked a specific city, the post must match it. A
-      // "remote" mention does NOT override a specific-city mismatch — a
-      // "Location: San Francisco, CA | Hybrid (remote-friendly)" post is
-      // really an SF job; a Miami user who didn't pick Remote shouldn't
-      // see it. Users who want remote jobs set their preference to
-      // "Remote" / "Anywhere", which takes the remoteIntent branch below.
+      // Mode 1 — user picked a SPECIFIC city: strict match. The post must
+      // name that city (in body text or via HQ map). Remote-only,
+      // multi-city, and ambiguous posts ALL reject. "Twilio · Remote-first
+      // USA" is not a Miami job; if a Miami user wants remote jobs they
+      // set their preference to "Remote" / "Anywhere" and take Mode 2.
       if (userCity) {
-        if (!mentionedCity) {
-          // No identifiable city in the post → fall back to the remote signal.
-          return isRemote;
-        }
+        if (!mentionedCity) return false;
         return mentionedCity.includes(userCity) || userCity.includes(mentionedCity);
       }
 
-      // "Remote" / "Anywhere" intent: only remote-friendly posts survive.
-      if (remoteIntent) return isRemote;
+      // Mode 2 — user picked "Remote" / "Anywhere": keep remote-friendly
+      // or multi-city posts; reject single-city ones.
+      if (remoteIntent) return isRemote || isMultiCity;
 
-      // No city preference at all: nothing to gate on.
+      // Mode 3 — no location preference: nothing to gate on.
       return true;
     };
 
