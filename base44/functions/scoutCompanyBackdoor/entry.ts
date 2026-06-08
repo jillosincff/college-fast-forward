@@ -71,8 +71,9 @@ Deno.serve(async (req) => {
     }
 
     try {
-      // Neural people search — quotes around school name to prevent matching FSU, UNF, etc.
-      const searchQuery = `"${userSchool}" alumni working at ${companyName}`;
+      // Use Exa People Search (category: "people") which returns structured educationHistory
+      // This lets us verify the exact school — eliminating FIU, FSU, UCF false positives
+      const searchQuery = `${userSchool} alumni at ${companyName}`;
       
       const exaResponse = await fetch('https://api.exa.ai/search', {
         method: 'POST',
@@ -82,11 +83,11 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           query: searchQuery,
-          type: 'neural',
-          numResults: 10,
-          includeDomains: ['linkedin.com'],
+          category: 'people',
+          type: 'auto',
+          numResults: 15,
           contents: {
-            text: { maxCharacters: 800 }
+            text: { maxCharacters: 400 }
           }
         })
       });
@@ -96,28 +97,45 @@ Deno.serve(async (req) => {
       }
 
       const exaData = await exaResponse.json();
-      // Only keep actual LinkedIn profile URLs (/in/ paths), not company or jobs pages
-      // Trust the quoted school name in the query — don't filter on snippet content
-      const results = (exaData.results || []).filter(r =>
-        /linkedin\.com\/in\/[^/?]+/.test(r.url || '')
-      );
+
+      // Filter: must be a LinkedIn /in/ profile AND educationHistory must contain the exact school
+      const results = (exaData.results || []).filter(r => {
+        if (!/linkedin\.com\/in\/[^/?]+/.test(r.url || '')) return false;
+        const person = (r.entities || []).find(e => e.type === 'person');
+        if (!person) return true; // no entity data — keep and rely on query relevance
+        const edu = person.properties?.educationHistory || [];
+        if (edu.length === 0) return true; // no edu data — keep
+        // Verify at least one education entry matches our school
+        return edu.some(e => {
+          const inst = (e.institution?.name || '').toLowerCase();
+          return inst.includes(userSchool.toLowerCase()) || inst.includes(userSchoolCode.toLowerCase());
+        });
+      });
 
       console.log(`[scoutCompanyBackdoor] Found ${results.length} verified LinkedIn profiles via Exa`);
 
       if (results.length > 0) {
         // Extract alumni info from search results and attempt email lookup
         const newAlumni = await Promise.all(results.slice(0, 5).map(async result => {
-          // Exa neural LinkedIn results: title is just the person's name (no role data available)
+          // Use structured entity data if available, fall back to title/URL parsing
+          const person = (result.entities || []).find(e => e.type === 'person');
+          const props = person?.properties || {};
+
           const titleRaw = (result.title || '').replace(/^#+\s*/, '').trim();
           const urlSlugMatch = result.url?.match(/\/in\/([^/?]+)/);
-          const name = (titleRaw && titleRaw.length > 2)
-            ? titleRaw
-            : (urlSlugMatch ? urlSlugMatch[1].replace(/-\d+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'LinkedIn Professional');
+          const name = props.name
+            || (titleRaw && titleRaw.length > 2 ? titleRaw : null)
+            || (urlSlugMatch ? urlSlugMatch[1].replace(/-\d+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'LinkedIn Professional');
 
-          // Try to extract role title from the snippet text
-          const snippet = result.text || '';
-          const roleMatch = snippet.match(/(?:is a|works as a?|title[:\s]+|position[:\s]+)([^.,\n]{5,60})/i);
-          const jobTitle = roleMatch ? roleMatch[1].trim() : null;
+          // Get current job title from workHistory (first entry = current role)
+          const currentWork = (props.workHistory || []).find(w => !w.dates?.to);
+          const jobTitle = currentWork?.title || null;
+
+          // Get degree info from educationHistory
+          const ufEdu = (props.educationHistory || []).find(e =>
+            (e.institution?.name || '').toLowerCase().includes(userSchool.toLowerCase())
+          );
+          const degreeInfo = ufEdu ? [ufEdu.degree, ufEdu.institution?.name].filter(Boolean).join(', ') : userSchool;
           
           // Step 2b: Try to find email using Hunter API
           let email = null;
@@ -154,7 +172,7 @@ Deno.serve(async (req) => {
             verified_by: null,
             expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             name: name,
-            degree_info: userSchool,
+            degree_info: degreeInfo,
             greek_organization: null,
             company: companyName,
             location: 'Unknown',
