@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import BackdoorOpportunityCard from './BackdoorOpportunityCard';
 import ATSScoreRing from './ATSScoreRing';
@@ -203,28 +203,10 @@ function ComparisonTable() {
 
 export default function PlanScreen({ resumeData, college, seeking, blockers = [], frustration, locationPref, locationCity, quickRole, selectedIndustries = [], targetRoles = [], onBack, saveAndAuth }) {
   const [showPaywall, setShowPaywall] = useState(false);
-  const [isDownsell, setIsDownsell] = useState(false);
   const [commitment, setCommitment] = useState(null);
   const [showCommitmentRequired, setShowCommitmentRequired] = useState(false);
-  const [parentBoosterDone, setParentBoosterDone] = useState(false);
-  const exitIntentFired = useRef(false);
 
-  // ── Exit-intent: desktop mouse leaves top of viewport ──
-  useEffect(() => {
-    const handleMouseLeave = (e) => {
-      if (e.clientY < 20 && !exitIntentFired.current && !showPaywall) {
-        exitIntentFired.current = true;
-        try { base44.entities.AnalyticsEvent.create({ event_name: 'exit_intent_triggered', user_id: 'anon', properties: { source: 'mouse_top' } }); } catch {}
-        setIsDownsell(true);
-        setShowPaywall(true);
-      }
-    };
-    document.addEventListener('mouseleave', handleMouseLeave);
-    return () => document.removeEventListener('mouseleave', handleMouseLeave);
-  }, [showPaywall]);
-
-  const openPaywall = (downsell = false) => {
-    setIsDownsell(downsell);
+  const openPaywall = () => {
     setShowPaywall(true);
   };
 
@@ -251,7 +233,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
       }
       // Already authenticated — call checkout directly
       const res = await createCheckoutSession({
-        plan: isDownsell ? 'pro_monthly_founding' : 'pro_monthly',
+        plan: 'pro_monthly',
         user: { id: user.id, email: user.email, family_id: user.family_id },
         successUrl: window.location.origin + '/#FreeTierDashboard?upgrade=success',
         cancelUrl: window.location.href,
@@ -269,14 +251,8 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
     }
   };
 
-  // Intercept ← Back on mobile as exit-intent
   const handleBack = () => {
-    if (!exitIntentFired.current) {
-      exitIntentFired.current = true;
-      openPaywall(true);
-    } else {
-      onBack?.();
-    }
+    onBack?.();
   };
 
   const firstName = resumeData?.original?.name?.split(' ')[0] || null;
@@ -619,7 +595,7 @@ export default function PlanScreen({ resumeData, college, seeking, blockers = []
         <PremiumPaywallModal
           firstName={firstName}
           schoolName={schoolName}
-          isDownsell={isDownsell}
+          isDownsell={false}
           onClose={() => setShowPaywall(false)}
           onPay={launchCheckout}
         />
