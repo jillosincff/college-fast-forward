@@ -1,283 +1,143 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// Map app industry names → Fantastic.jobs ai_taxonomies_a values
-function mapIndustryToTaxonomy(industry) {
-  const i = (industry || '').toLowerCase();
-  if (i.includes('tech') || i.includes('software') || i.includes('information')) return 'Technology';
-  if (i.includes('health') || i.includes('pharma') || i.includes('medical')) return 'Healthcare';
-  if (i.includes('finance') || i.includes('insurance') || i.includes('banking')) return 'Finance & Accounting';
-  if (i.includes('marketing') || i.includes('advertising') || i.includes('pr')) return 'Marketing';
-  if (i.includes('sales')) return 'Sales';
-  if (i.includes('consult') || i.includes('professional services')) return 'Management & Leadership';
-  if (i.includes('education') || i.includes('training')) return 'Education & Training';
-  if (i.includes('retail') || i.includes('consumer')) return 'Retail';
-  if (i.includes('sports') || i.includes('entertainment') || i.includes('media')) return 'Media & Entertainment';
-  if (i.includes('logistics') || i.includes('transport') || i.includes('supply chain')) return 'Transportation';
-  if (i.includes('construction') || i.includes('real estate')) return 'Construction';
-  return null;
-}
+/**
+ * Live job matches using Exa keyword search against real ATS job boards.
+ * Replaces Fantastic.jobs (out of credits) with direct Exa search.
+ * Returns real job URLs, titles, and company names from Lever/Greenhouse/Ashby/Workable.
+ */
 
-// Headcount bounds per size preference
-function sizeToHeadcount(primary) {
-  if (primary === 'startup') return { lt: 200 };
-  if (primary === 'mid' || primary === 'midmarket') return { gte: 200, lt: 5000 };
-  if (primary === 'large' || primary === 'enterprise') return { gte: 5000 };
-  return null;
-}
+const ATS_DOMAINS = [
+  'jobs.lever.co',
+  'boards.greenhouse.io',
+  'jobs.ashbyhq.com',
+  'apply.workable.com',
+];
 
-async function fetchFantasticJobs({ role, location, industries, sizePreference, employmentTypes }) {
-  const apiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
-  if (!apiKey) throw new Error('FANTASTIC_JOBS_API_KEY not set');
+const ATS_SOURCE_LABELS = {
+  'jobs.lever.co': 'Lever',
+  'boards.greenhouse.io': 'Greenhouse',
+  'jobs.ashbyhq.com': 'Ashby',
+  'apply.workable.com': 'Workable',
+};
 
-  const params = new URLSearchParams();
-  // Use 24h window for freshest results
-  params.set('time_frame', '24h');
-  params.set('limit', '100');
-  params.set('include_basic_organization_details', 'true');
-  params.set('description_format', 'text');
+const SENIOR_FILTER = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff engineer|architect|managing partner)\b/i;
 
-  // Employment types — passed as repeated params
-  for (const et of employmentTypes) {
-    params.append('ai_employment_type', et);
-  }
+const ATS_URL_PATTERNS = [
+  /^https:\/\/jobs\.lever\.co\//,
+  /^https:\/\/boards\.greenhouse\.io\//,
+  /^https:\/\/jobs\.ashbyhq\.com\//,
+  /^https:\/\/apply\.workable\.com\//,
+];
 
-  // Title search — use the full role as-is, don't strip keywords
-  // Use title_advanced for better Boolean matching
-  if (role) {
-    // Build a broad title search: e.g. "Marketing" | "marketing intern" | "marketing analyst"
-    const baseRole = role.replace(/\b(intern(ship)?|entry.?level|junior|new.?grad)\b/gi, '').trim();
-    if (baseRole) {
-      // Search for the base role keyword in title
-      params.set('title', baseRole);
-    }
-  }
-
-  // Location — Fantastic.jobs requires full names: "New York, United States" or "New York, New York, United States"
-  if (location && !/^(remote|anywhere|flexible|open)/i.test(location.trim())) {
-    const STATE_ABBR = { 'NY': 'New York', 'CA': 'California', 'TX': 'Texas', 'FL': 'Florida', 'IL': 'Illinois', 'WA': 'Washington', 'MA': 'Massachusetts', 'GA': 'Georgia', 'NC': 'North Carolina', 'OH': 'Ohio', 'PA': 'Pennsylvania', 'AZ': 'Arizona', 'CO': 'Colorado', 'NJ': 'New Jersey', 'VA': 'Virginia', 'MI': 'Michigan', 'MN': 'Minnesota', 'TN': 'Tennessee', 'MO': 'Missouri', 'MD': 'Maryland', 'IN': 'Indiana', 'WI': 'Wisconsin', 'OR': 'Oregon', 'CT': 'Connecticut', 'UT': 'Utah', 'NV': 'Nevada', 'DC': 'District of Columbia' };
-    const parts = location.split(',').map(p => p.trim());
-    const city = parts[0];
-    // Expand state abbreviations
-    const stateRaw = parts[1] || '';
-    const state = STATE_ABBR[stateRaw.toUpperCase()] || stateRaw;
-    const locationStr = state ? `${city}, ${state}, United States` : `${city}, United States`;
-    params.set('location', locationStr);
-  }
-
-  // Company size via headcount
-  const primary = Array.isArray(sizePreference) ? sizePreference[0] : sizePreference;
-  if (primary === 'startup') {
-    params.set('organization_headcount_lt', '500');
-  } else if (primary === 'mid' || primary === 'midmarket') {
-    params.set('organization_headcount_gte', '200');
-    params.set('organization_headcount_lt', '5000');
-  }
-
-  const url = `https://data.fantastic.jobs/v1/active-ats?${params.toString()}`;
-  console.log('[getLiveJobMatchesFn] Fantastic.jobs query:', url);
-
-  const res = await fetch(url, {
-    headers: { 'Authorization': `Bearer ${apiKey}` },
-  });
-
-  if (!res.ok) {
-    const err = await res.text().catch(() => '');
-    throw new Error(`Fantastic.jobs ${res.status}: ${err.slice(0, 300)}`);
-  }
-
-  const text = await res.text();
-  let data;
-  try { data = JSON.parse(text); } catch { return []; }
-
-  // API returns an array directly (not wrapped in {jobs:[]})
-  if (Array.isArray(data)) return data;
-  return data.jobs || data.data || data.results || [];
-}
-
-function jobsToCompanies(jobs, targetRole, industries) {
-  const seen = new Set();
-  const companies = [];
-
-  // Employment agency keywords to screen out
-  const AGENCY_KEYWORDS = /\b(staffing|recruiting|recruitment|talent solutions|talent group|search group|executive search|search firm|placement|manpower|adecco|randstad|kelly services|robert half|hays|kforce|insight global|beacon hill|creative circle|aquent|vitamin t|workbridge|cybercoders|mondo|hired|iqvia|modis|infosys bpo|wipro|cognizant|tata consultancy)\b/i;
-
-  for (const job of jobs) {
-    // Fantastic.jobs: org name is in job.organization (string)
-    const orgName = job.organization || '';
-    if (!orgName || seen.has(orgName.toLowerCase())) continue;
-    // Skip employment agencies
-    if (AGENCY_KEYWORDS.test(orgName)) continue;
-    // Skip recruitment agency derived flag from LinkedIn enrichment
-    if (job.org_linkedin_recruitment_agency_derived === true) continue;
-    seen.add(orgName.toLowerCase());
-
-    // Count openings at this company — more = hotter signal
-    const openings = jobs.filter(j => (j.organization || '').toLowerCase() === orgName.toLowerCase()).length;
-    const hiringSignal = openings >= 3 ? 'hot' : 'warm';
-
-    // Size from org_linkedin_headcount (present when include_basic_organization_details=true)
-    const headcount = job.org_linkedin_headcount || 0;
-    const size = headcount >= 5000 ? 'large' : headcount >= 200 ? 'mid' : headcount > 0 ? 'startup' : 'mid';
-
-    // Domain for alumni search
-    const domain = job.domain_derived || job.org_linkedin_website || '';
-
-    // Full description from the API (included because description_format=text is set)
-    const rawDesc = job.description || '';
-    const hiring_description = rawDesc.length > 20
-      ? rawDesc
-      : `${orgName} is hiring for ${job.title || targetRole || 'this role'}.`;
-
-    // Location string
-    const locationStr = (job.locations_alt?.[0] || job.locations_derived?.[0] || '').split(',').slice(0, 2).join(',').trim();
-
-    companies.push({
-      name: orgName,
-      domain,
-      industry: job.org_linkedin_industry || industries[0] || '',
-      hiring_signal: hiringSignal,
-      hiring_description,
-      size,
-      job_title: job.title || '',
-      job_url: job.url || '',
-      location: locationStr,
-      date_posted: job.date_posted || job.date_created || '',
-      has_web_result: true,
-    });
-
-    if (companies.length >= 15) break;
-  }
-
-  return companies;
-}
+const ROLE_WORD = /\b(engineer|analyst|associate|intern|coordinator|specialist|manager|developer|designer|consultant|researcher|scientist|writer|advisor|representative|assistant|strategist|accountant)\b/i;
 
 Deno.serve(async (req) => {
+  const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
+  if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
+
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json().catch(() => ({}));
-    const goals = body.career_goals || {};
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const role = goals.target_roles?.[0] || goals.role || '';
-    const location = goals.locations?.[0] || '';
+    const { career_goals = {} } = await req.json().catch(() => ({}));
 
-    let industries = goals.industries?.length > 0 ? goals.industries : [];
+    const role = career_goals.role
+      || (Array.isArray(career_goals.target_roles) ? career_goals.target_roles[0] : null)
+      || user.career_goals?.target_roles?.[0]
+      || 'entry level';
 
-    // Normalize size preference
-    const rawSize = goals.company_size_preference;
-    let sizePreference;
-    if (!rawSize || rawSize === 'all') {
-      sizePreference = ['large', 'mid', 'startup'];
-    } else if (Array.isArray(rawSize)) {
-      sizePreference = rawSize;
-    } else {
-      const sizeOrder = {
-        startup: ['startup', 'mid', 'large'],
-        midmarket: ['mid', 'startup', 'large'],
-        mid: ['mid', 'startup', 'large'],
-        enterprise: ['large', 'mid', 'startup'],
-        large: ['large', 'mid', 'startup'],
-      };
-      sizePreference = sizeOrder[rawSize] || ['large', 'mid', 'startup'];
-    }
+    const location = career_goals.locations?.[0]
+      || career_goals.location_preference
+      || user.career_goals?.location_preference
+      || '';
 
-    const excludeNames = (goals.target_companies || []).map(c => c.toLowerCase());
+    const locationStr = location ? ` ${location.split(',')[0].trim()}` : '';
 
-    // ── Step 1: Fantastic.jobs — internships first, then entry-level full-time ──
-    let companies = [];
-    try {
-      const [internJobs, ftJobs] = await Promise.allSettled([
-        fetchFantasticJobs({ role, location, industries, sizePreference, employmentTypes: ['INTERN'] }),
-        fetchFantasticJobs({ role, location, industries, sizePreference, employmentTypes: ['FULL_TIME'] }),
-      ]);
+    // Run intern + full-time searches in parallel
+    const searchQuery = (type) =>
+      `"${role}" ${type}${locationStr} (entry level OR junior OR associate OR new grad)`;
 
-      const internResults  = internJobs.status === 'fulfilled' ? internJobs.value : [];
-      const ftResults      = ftJobs.status  === 'fulfilled' ? ftJobs.value  : [];
+    const exaSearch = async (query) => {
+      const res = await fetch('https://api.exa.ai/search', {
+        method: 'POST',
+        headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          type: 'keyword',
+          numResults: 15,
+          includeDomains: ATS_DOMAINS,
+          contents: { highlights: { maxCharacters: 600 } },
+          startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }),
+      });
+      if (!res.ok) throw new Error(`Exa search failed: ${res.status}`);
+      return res.json();
+    };
 
-      // Merge: interns first, then fill with entry-level full-time
-      const merged = [...internResults, ...ftResults];
-      companies = jobsToCompanies(merged, role, industries);
+    const [internData, ftData] = await Promise.all([
+      exaSearch(searchQuery('internship')),
+      exaSearch(searchQuery('job')),
+    ]);
 
-      console.log(`[getLiveJobMatchesFn] Fantastic.jobs: ${internResults.length} intern + ${ftResults.length} FT jobs → ${companies.length} unique companies`);
-    } catch (err) {
-      console.warn('[getLiveJobMatchesFn] Fantastic.jobs failed:', err.message);
-    }
+    console.log(`[getLiveJobMatchesFn] Exa intern results: ${internData.results?.length || 0}, FT results: ${ftData.results?.length || 0}`);
 
-    // ── Step 2: LLM web-search fallback ──
-    if (companies.length < 3) {
-      console.log('[getLiveJobMatchesFn] Falling back to LLM web search');
-      try {
-        const today = new Date().toISOString().slice(0, 10);
-        const industry = industries[0] || 'general business';
-        const size = sizePreference[0] || 'any size';
+    const allResults = [...(internData.results || []), ...(ftData.results || [])];
 
-        const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-          prompt: `Today is ${today}. Search the web for companies that posted internship or entry-level ${role || industry} job openings in the last 14 days in or near ${location || 'United States'}.
+    // Deduplicate by URL
+    const seen = new Set();
+    const jobs = allResults
+      .filter(r => {
+        if (!r.url || !r.title) return false;
+        if (seen.has(r.url)) return false;
+        seen.add(r.url);
+        if (SENIOR_FILTER.test(r.title)) return false;
+        return ATS_URL_PATTERNS.some(p => p.test(r.url));
+      })
+      .map(r => {
+        // Extract company from ATS URL slug
+        const urlMatch = r.url.match(/(?:jobs\.lever\.co|boards\.greenhouse\.io|jobs\.ashbyhq\.com|apply\.workable\.com)\/([^/]+)/);
+        const companySlug = urlMatch?.[1] || '';
+        const companyName = companySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-Focus on ${size} companies in ${industry}. Return exactly 5 companies with verified, active openings.
+        // Extract job title — prefer snippet header (## Title), then parse page title
+        const snippetText = (r.highlights || []).join(' ');
+        const snippetHeaderMatch = snippetText.match(/##\s*([^\n\[]{3,80})/);
+        // Page title format varies: "Job Title @ Company - Jobs" or "Company | Job Title"
+        const rawTitle = (r.title || '').replace(/ - (Jobs|Careers|Lever|Greenhouse|Ashby|Workable)$/i, '').trim();
+        const titleParts = rawTitle.split(/[@|·\-–]/).map(s => s.trim()).filter(Boolean);
+        const titleCandidate = titleParts.find(p => ROLE_WORD.test(p)) || titleParts[0];
+        const jobTitle = snippetHeaderMatch?.[1]?.trim() || titleCandidate || rawTitle;
 
-For each: real company name, one sentence describing the specific openings, hiring signal (hot/warm/cool), company size (startup/mid/large).`,
-          add_context_from_internet: true,
-          model: 'gemini_3_flash',
-          response_json_schema: {
-            type: 'object',
-            properties: {
-              companies: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    name: { type: 'string' },
-                    description: { type: 'string' },
-                    hiring_signal: { type: 'string', enum: ['hot', 'warm', 'cool'] },
-                    size: { type: 'string', enum: ['startup', 'mid', 'large'] },
-                  },
-                  required: ['name', 'description', 'hiring_signal', 'size'],
-                },
-              },
-            },
-          },
-        });
+        // Freshness
+        const publishedDate = r.publishedDate ? new Date(r.publishedDate) : null;
+        const daysLive = publishedDate
+          ? Math.max(0, Math.floor((Date.now() - publishedDate.getTime()) / (1000 * 60 * 60 * 24)))
+          : null;
 
-        const llmCompanies = (result?.companies || []).map(c => ({
-          name: c.name,
-          industry: industries[0] || '',
-          hiring_signal: c.hiring_signal,
-          hiring_description: c.description,
-          size: c.size,
+        const matchedDomain = ATS_DOMAINS.find(d => r.url.includes(d));
+
+        return {
+          name: companyName,
+          job_title: jobTitle,
+          job_url: r.url,
+          source: matchedDomain ? (ATS_SOURCE_LABELS[matchedDomain] || matchedDomain) : 'ATS',
+          hiring_description: (r.highlights || [])[0] || '',
+          hiring_signal: daysLive !== null && daysLive <= 3 ? 'hot' : 'warm',
+          days_live: daysLive,
+          industry: career_goals.industries?.[0] || '',
           has_web_result: true,
-        }));
+        };
+      })
+      .filter(j => j.name && j.job_title)
+      .slice(0, 10);
 
-        // Merge with any Fantastic results
-        const existingNames = new Set(companies.map(c => c.name.toLowerCase()));
-        for (const c of llmCompanies) {
-          if (!existingNames.has(c.name.toLowerCase())) companies.push(c);
-          if (companies.length >= 10) break;
-        }
-      } catch (llmErr) {
-        console.warn('[getLiveJobMatchesFn] LLM fallback failed:', llmErr.message);
-      }
-    }
+    console.log(`[getLiveJobMatchesFn] Returning ${jobs.length} real ATS job leads`);
 
-    // Apply exclude filter
-    companies = companies.filter(c => !excludeNames.includes(c.name.toLowerCase()));
-
-    const result = companies.slice(0, 5).map(c => ({
-      name: c.name,
-      domain: c.domain || '',
-      industry: c.industry || industries[0] || '',
-      size: c.size || 'large',
-      hiring_signal: c.hiring_signal,
-      hiring_description: c.hiring_description,
-      job_title: c.job_title || '',
-      job_url: c.job_url || '',
-      has_web_result: true,
-    }));
-
-    console.log(`[getLiveJobMatchesFn] ✅ ${result.length} companies: ${result.map(c => c.name).join(', ')}`);
-    return Response.json({ companies: result });
+    return Response.json({ companies: jobs });
 
   } catch (error) {
     console.error('[getLiveJobMatchesFn] Error:', error.message);
-    return Response.json({ error: error.message, companies: [] }, { status: 500 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 });
