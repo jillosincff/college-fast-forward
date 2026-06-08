@@ -100,16 +100,18 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const payload = feedsData?.data || feedsData;
   // getLiveJobMatchesFn returns { companies: [...] }
   const liveCompanies = Array.isArray(payload?.companies) ? payload.companies : [];
-  // map to the shape DiscoveryJobCard expects
-  const targetedDiscoveries = liveCompanies.map(c => ({
-    company: c.name,
-    companyName: c.name,
-    job_title: c.job_title,
-    hiring_description: c.hiring_description,
-    job_url: c.job_url,
-    hiring_signal: c.hiring_signal,
-    industry: c.industry,
-  }));
+  // map to the shape DiscoveryJobCard expects — ensure company name is always valid
+  const targetedDiscoveries = liveCompanies
+    .filter(c => c.name && c.name.length > 2)
+    .map(c => ({
+      company: c.name,
+      companyName: c.name,
+      job_title: c.job_title || 'Entry Level Role',
+      hiring_description: c.hiring_description || 'Join our team in this exciting opportunity.',
+      job_url: c.job_url || '',
+      hiring_signal: c.hiring_signal || 'warm',
+      industry: c.industry || '',
+    }));
   const priorityInsiders = [];
 
   // Merge dual (alumni-verified) leads into the main pool with an insider pill, deduplicated

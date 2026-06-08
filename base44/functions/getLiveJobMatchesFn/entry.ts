@@ -66,17 +66,22 @@ Student's career goals:
 - Location: ${locationDesc}
 - Company size preference: ${sizeDesc}
 
-Find 8 real companies that are actively hiring for entry-level or internship positions matching these goals RIGHT NOW. Use your knowledge of current hiring trends and company career pages.
+Find 8 real COMPANIES (not job titles) that are actively hiring for entry-level or internship positions matching these goals RIGHT NOW.
+
+CRITICAL: 
+- "name" must be the COMPANY NAME (e.g. "Google", "Nike", "Miami HEAT") — NEVER a job title
+- "job_title" is the specific role they're hiring for (e.g. "Marketing Intern", "Software Engineer I")
+- Only include well-known, established companies
 
 For each company return:
-- name: Company name
-- job_title: Most relevant entry-level or intern job title they're likely hiring for
-- hiring_description: 1-2 sentences describing the role and why it's a good fit (be specific, not generic)
+- name: COMPANY NAME ONLY (e.g. "Apple", "Tesla", "Publicis Groupe")
+- job_title: Most relevant entry-level or intern job title
+- hiring_description: 1-2 sentences describing the role and why it's a good fit
 - hiring_signal: "hot" if very actively hiring, "warm" if hiring, "cool" if uncertain
-- job_url: Direct URL to their careers page or a specific job posting if you know it (e.g. company.com/careers or jobs.lever.co/company/...)
+- job_url: Direct URL to their careers page
 - industry: Specific industry
 
-Be specific and realistic. Only include companies actually known to hire for these types of roles.`,
+Be specific and realistic. Only include real companies actually known to hire for these types of roles.`,
       add_context_from_internet: true,
       response_json_schema: {
         type: 'object',
@@ -86,13 +91,14 @@ Be specific and realistic. Only include companies actually known to hire for the
             items: {
               type: 'object',
               properties: {
-                name: { type: 'string' },
+                name: { type: 'string', description: 'COMPANY NAME ONLY, not a job title' },
                 job_title: { type: 'string' },
                 hiring_description: { type: 'string' },
                 hiring_signal: { type: 'string' },
                 job_url: { type: 'string' },
                 industry: { type: 'string' },
-              }
+              },
+              required: ['name', 'job_title', 'hiring_description']
             }
           }
         }
