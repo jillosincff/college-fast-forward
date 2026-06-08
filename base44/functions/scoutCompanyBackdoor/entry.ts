@@ -96,18 +96,11 @@ Deno.serve(async (req) => {
       }
 
       const exaData = await exaResponse.json();
-      // Only keep actual LinkedIn profile URLs (/in/ paths), not company pages
-      // AND verify the snippet actually mentions the school to avoid FSU/UNF/etc false positives
-      const schoolVariants = [
-        userSchool.toLowerCase(),                          // "university of florida"
-        userSchoolCode.toLowerCase(),                       // "uf"
-        'gator', 'gainesville'                             // UF-specific keywords
-      ];
-      const results = (exaData.results || []).filter(r => {
-        if (!/linkedin\.com\/in\/[^/?]+/.test(r.url || '')) return false;
-        const snippet = ((r.text || '') + ' ' + (r.title || '')).toLowerCase();
-        return schoolVariants.some(v => snippet.includes(v));
-      });
+      // Only keep actual LinkedIn profile URLs (/in/ paths), not company or jobs pages
+      // Trust the quoted school name in the query — don't filter on snippet content
+      const results = (exaData.results || []).filter(r =>
+        /linkedin\.com\/in\/[^/?]+/.test(r.url || '')
+      );
 
       console.log(`[scoutCompanyBackdoor] Found ${results.length} verified LinkedIn profiles via Exa`);
 
