@@ -1,48 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * Agent Guardrail Validation - Inline
- * Enforces Identity, Target Matching, and Link Resolution rules
- */
-function validateAgentLeadIntegrity(lead, userGoals = {}) {
-  const company = (lead.company || lead.companyName || lead.company_name || '').trim();
-  const jobTitle = (lead.job_title || lead.role || lead.title || '').trim();
-  const location = (lead.location || lead.job_location || '').toLowerCase();
-  const linkedinUrl = lead.linkedin_url || lead.company_linkedin || '';
-  const companyDomain = lead.domain || lead.company_domain || '';
-
-  const lowerCompany = company.toLowerCase();
-  const lowerTitle = jobTitle.toLowerCase();
-
-  // Identity Check
-  if (!company || company.length < 3) return false;
-  if (lowerCompany === lowerTitle) return false;
-
-  const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'scout', 'talent', 'recruiter', 'partner', 'strategist', 'operator', 'fellow', 'researcher', 'scientist', 'advisor'];
-  const businessSuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'solutions', 'systems', 'services', 'ventures', 'capital', 'agency', 'firm'];
-  const hasValidSuffix = businessSuffixes.some(suffix => new RegExp(`\\b${suffix}\\b`, 'i').test(lowerCompany));
-  if (!hasValidSuffix && jobTitleKeywords.some(keyword => lowerCompany.includes(keyword))) return false;
-
-  // Ghost patterns
-  const ghostPatterns = ['capsule', 'goodwin', 'goodwin recruiting'];
-  if (ghostPatterns.some(pattern => lowerCompany.includes(pattern))) return false;
-
-  // Target Matching
-  const placeholderTitles = ['entry level role', 'join our team', 'job opportunity', 'open position', 'hiring now', 'career opportunity', 'apply now', 'multiple positions', 'various roles'];
-  if (!jobTitle || placeholderTitles.some(pt => lowerTitle.includes(pt))) return false;
-
-  if (userGoals?.location_preference) {
-    const targetLoc = userGoals.location_preference.toLowerCase().trim();
-    if (location && !location.includes(targetLoc) && !targetLoc.includes(location)) return false;
-  }
-
-  // Link Resolution
-  if (!linkedinUrl && !companyDomain) return false;
-
-  return true;
-}
-
-/**
  * Returns personalized job leads for a student.
  * Uses LLM with internet context for relevance, cached 24h per user.
  * Falls back to fresh generation if cache is stale or goals changed.
@@ -153,30 +111,56 @@ Be specific and realistic. Only include real companies actually known to hire fo
     });
 
     // 🛡️ AGENT GUARDRAIL: Apply three-point validation to all leads
-    const userGoals = {
-      location_preference: location,
-      industries: industries,
-    };
-
     const rawCompanies = result?.companies || [];
-    const validatedCompanies = rawCompanies.filter(c => {
-      const lead = {
-        company: c.name,
+    const validatedCompanies = [];
+
+    for (const c of rawCompanies) {
+      const company = c.name || '';
+      const jobTitle = c.job_title || '';
+      const lowerCompany = company.toLowerCase();
+      const lowerTitle = jobTitle.toLowerCase();
+
+      // Debug log raw payload
+      console.log('🔍 [getLiveJobMatchesFn] Raw LLM Result:', JSON.stringify({
+        name: c.name,
         job_title: c.job_title,
-        location: location,
-        linkedin_url: c.linkedin_url || '',
-        domain: c.domain || '',
-      };
-      
-      const isValid = validateAgentLeadIntegrity(lead, userGoals);
-      if (!isValid) {
-        console.log(`🚫 [getLiveJobMatchesFn] REJECTED: ${c.name} - failed guardrail validation`);
+        industry: c.industry,
+        hiring_signal: c.hiring_signal,
+      }, null, 2));
+
+      // Identity check
+      if (!company || company.length < 3) {
+        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (empty): "${company}"`);
+        continue;
       }
-      return isValid;
-    }).map(c => ({
-      ...c,
-      has_web_result: true,
-    }));
+      if (lowerCompany === lowerTitle) {
+        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (mirrored): ${company} === ${jobTitle}`);
+        continue;
+      }
+
+      // Job title keyword check
+      const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator'];
+      const businessSuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'solutions', 'services', 'ventures', 'capital', 'agency', 'firm'];
+      const hasValidSuffix = businessSuffixes.some(suffix => new RegExp(`\\b${suffix}\\b`, 'i').test(lowerCompany));
+      
+      if (!hasValidSuffix && jobTitleKeywords.some(keyword => lowerCompany.includes(keyword))) {
+        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (job keyword): ${company}`);
+        continue;
+      }
+
+      // Validate job title
+      if (!jobTitle || jobTitle === 'Entry Level Role') {
+        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (no title): ${company}`);
+        continue;
+      }
+
+      validatedCompanies.push({
+        ...c,
+        has_web_result: true,
+      });
+    }
+
+    console.log(`[getLiveJobMatchesFn] Validated: ${validatedCompanies.length} / ${rawCompanies.length} companies passed guardrails`);
 
     const companies = validatedCompanies;
 

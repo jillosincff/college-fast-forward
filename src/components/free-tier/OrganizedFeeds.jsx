@@ -146,11 +146,28 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
 
   const { data: dualData, isLoading: dualLoading } = useQuery({
     queryKey: ['dualConstraintLeads', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation],
-    queryFn: () => getDualConstraintLeads({
-      explicit_target_role: effectiveRole,
-      explicit_target_industries: target_industries || [],
-      target_location: effectiveLocation,
-    }),
+    queryFn: async () => {
+      const result = await getDualConstraintLeads({
+        explicit_target_role: effectiveRole,
+        explicit_target_industries: target_industries || [],
+        target_location: effectiveLocation,
+      });
+      
+      // 🔍 DEBUG: Log raw payload structure from backend
+      console.log('🔍 [OrganizedFeeds] Raw Dual Constraint Payload:', JSON.stringify(result, null, 2));
+      const leads = result?.leads || [];
+      leads.forEach((lead, idx) => {
+        console.log(`🔍 [OrganizedFeeds] Dual Lead #${idx}:`, {
+          company: lead.company,
+          job_title: lead.job_title,
+          role: lead.role,
+          signalTier: lead.signalTier,
+          all_keys: Object.keys(lead),
+        });
+      });
+      
+      return result;
+    },
     enabled: !!(effectiveRole || target_industries?.length),
     staleTime: 10 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
