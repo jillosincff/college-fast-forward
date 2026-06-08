@@ -105,12 +105,27 @@ Be specific and realistic. Only include real companies actually known to hire fo
       }
     });
 
-    const companies = (result?.companies || []).map(c => ({
-      ...c,
-      has_web_result: true,
-    }));
+    // Filter out any job titles that slipped through - server-side validation
+    const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account'];
+    const isValidCompany = (name) => {
+      if (!name || typeof name !== 'string' || name.length < 3) return false;
+      const lower = name.toLowerCase();
+      const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'institute', 'foundation'];
+      if (companySuffixes.some(s => lower.includes(s))) return true;
+      if (jobTitleKeywords.some(k => lower === k || lower.endsWith(` ${k}`) || lower.startsWith(`${k} `))) return false;
+      const jobPatterns = [/public relations\s+(junior|senior)/i, /marketing\s+(intern|manager)/i, /software\s+(engineer|developer)/i, /data\s+(analyst|scientist)/i, /product\s+(manager|designer)/i, /account\s+(executive|manager)/i];
+      if (jobPatterns.some(p => p.test(name))) return false;
+      return true;
+    };
+    
+    const companies = (result?.companies || [])
+      .filter(c => isValidCompany(c.name))
+      .map(c => ({
+        ...c,
+        has_web_result: true,
+      }));
 
-    console.log(`[getLiveJobMatchesFn] Generated ${companies.length} fresh leads`);
+    console.log(`[getLiveJobMatchesFn] Generated ${companies.length} fresh leads (filtered from ${result?.companies?.length || 0})`);
 
     // Cache results on user record
     await base44.asServiceRole.entities.User.update(user.id, {
