@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
     }
 
     try {
-      // Search for LinkedIn profiles of university alumni at the target company
-      const searchQuery = `"${userSchool}" "${companyName}" site:linkedin.com/in`;
+      // Neural search — mirrors what works manually in Exa: "UF alumni who work at Company"
+      const searchQuery = `${userSchool} alumni who work at ${companyName}`;
       
       const exaResponse = await fetch('https://api.exa.ai/search', {
         method: 'POST',
@@ -82,8 +82,8 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           query: searchQuery,
-          type: 'keyword',
-          numResults: 10,
+          type: 'neural',
+          numResults: 15,
           includeDomains: ['linkedin.com'],
           text: true
         })
@@ -94,28 +94,28 @@ Deno.serve(async (req) => {
       }
 
       const exaData = await exaResponse.json();
-      const results = exaData.results || [];
+      // Only keep actual LinkedIn profile URLs (/in/ paths), not company pages or other linkedin pages
+      const results = (exaData.results || []).filter(r => /linkedin\.com\/in\/[^/?]+/.test(r.url || ''));
       console.log(`[scoutCompanyBackdoor] Found ${results.length} LinkedIn profiles via Exa`);
 
       if (results.length > 0) {
         // Extract alumni info from search results and attempt email lookup
         const newAlumni = await Promise.all(results.slice(0, 5).map(async result => {
-          // Extract name from title (format: "Name - Title at Company | LinkedIn") or URL slug
+          // Title format from LinkedIn neural results: "Name - Title at Company | LinkedIn"
           const titleRaw = result.title || '';
-          const namePart = titleRaw.split(/\s*[-|]\s*/)[0]?.trim() || '';
+          // Split on " | " first to strip "LinkedIn" suffix, then split on " - "
+          const titleWithoutSuffix = titleRaw.replace(/\s*\|\s*LinkedIn\s*$/i, '').trim();
+          const parts = titleWithoutSuffix.split(/\s*-\s*/);
+          const namePart = parts[0]?.trim() || '';
           const urlSlugMatch = result.url?.match(/\/in\/([^/?]+)/);
-          const name = namePart && namePart.length > 2 ? namePart : 
+          const name = namePart && namePart.length > 2 ? namePart :
             (urlSlugMatch ? urlSlugMatch[1].replace(/-\d+$/, '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'LinkedIn Professional');
 
-          // Extract job title — look for "Title at Company" pattern, strip " - LinkedIn" suffixes
-          const titleMatch = titleRaw.match(/[-|]\s*(.+?)\s*(?:at\s+.+?)?(?:\s*[-|]\s*LinkedIn)?$/i);
-          const rawJobTitle = titleMatch ? titleMatch[1].trim() : '';
-          // Clean up: remove "LinkedIn", "- LinkedIn", company name echoes
+          // Job title is everything after the first " - ", cleaned up
+          const rawJobTitle = parts.slice(1).join(' - ').trim();
           const jobTitle = rawJobTitle
-            .replace(/\s*[-|]\s*LinkedIn\s*$/i, '')
-            .replace(/\s*[-|]\s*LinkedIn Profile\s*$/i, '')
-            .replace(new RegExp(`\\s*[-|]?\\s*${companyName}\\s*[-|]?\\s*`, 'gi'), '')
-            .trim() || result.text?.split('\n')[0]?.trim().slice(0, 80) || 'Professional';
+            .replace(/\s*at\s+.+$/i, '') // strip "at Company Name" if present
+            .trim() || result.text?.split('\n')[0]?.replace(/^\d+\.\s*/, '').trim().slice(0, 80) || 'Professional';
           
           // Step 2b: Try to find email using Hunter API
           let email = null;
