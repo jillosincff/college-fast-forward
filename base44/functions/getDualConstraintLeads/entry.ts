@@ -238,9 +238,14 @@ Deno.serve(async (req) => {
     const locationCity = userLocation
       ? userLocation.split(',')[0].trim()
       : '';
-    // Hard constraint: embed city directly in the query phrase so Exa treats it as required
-    const locationQuery = locationCity
-      ? `"${locationCity}" OR "remote"`
+    const remoteIntent = /^(remote|anywhere|flexible|open to relocation)$/i.test(userLocation.trim());
+    // For city-specific users, drop the "OR remote" — burning result slots on
+    // remote postings that the filter below will reject anyway. For remote-
+    // preference users, search only remote terms.
+    const locationQuery = remoteIntent
+      ? `"remote" OR "remote-friendly" OR "remote-first"`
+      : locationCity
+      ? `"${locationCity}"`
       : '';
 
     // Step 2b: For each company, search for jobs restricted to their resolved domain
@@ -282,20 +287,36 @@ Deno.serve(async (req) => {
       return text.slice(0, 320);
     };
 
-    // Location filter: if user has a specific city, reject jobs that mention a different US city
-    const US_CITIES = /\b(Austin|San Francisco|Seattle|Chicago|Los Angeles|Boston|Atlanta|Denver|Dallas|Houston|Miami|Phoenix|Portland|San Diego|Minneapolis|Detroit|Philadelphia|Pittsburgh|Charlotte|Nashville|Raleigh|Salt Lake City|Las Vegas|Tampa|Orlando|San Jose|San Antonio|Columbus|Kansas City|Indianapolis|St\. Louis|Cincinnati|Cleveland|Memphis|Richmond|Sacramento|Baltimore)\b/i;
-    const userCity = locationCity ? locationCity.toLowerCase() : '';
+    // Three-mode location filter (mirrors passesLocation in getPersonalizedNetworkCarousel):
+    //   Mode 1 — user picked a specific city: strict match. The text must name
+    //     that city. Remote-only, multi-city, ambiguous all reject. If a user
+    //     wants remote jobs they set their preference to "Remote" / "Anywhere".
+    //   Mode 2 — user picked "Remote" / "Anywhere": keep remote-friendly or
+    //     multi-city only.
+    //   Mode 3 — no location preference: keep everything.
+    const US_CITIES = /\b(Austin|San Francisco|Seattle|Chicago|Los Angeles|Boston|Atlanta|Denver|Dallas|Houston|Miami|Phoenix|Portland|San Diego|Minneapolis|Detroit|Philadelphia|Pittsburgh|Charlotte|Nashville|Raleigh|Salt Lake City|Las Vegas|Tampa|Orlando|San Jose|San Antonio|Columbus|Kansas City|Indianapolis|St\. Louis|Cincinnati|Cleveland|Memphis|Richmond|Sacramento|Baltimore|New York|Brooklyn|Manhattan|Mountain View|Menlo Park|Cupertino|Palo Alto|Redmond|Burbank|Santa Monica)\b/i;
+    const userCityForMatch = remoteIntent ? '' : (locationCity ? locationCity.toLowerCase() : '');
     const isLocationMatch = (text) => {
-      if (!userCity || userCity === 'remote') return true; // no filter
       const lowerText = text.toLowerCase();
-      // Always allow if "remote" is mentioned
-      if (lowerText.includes('remote')) return true;
-      // Allow if user's city is mentioned
-      if (lowerText.includes(userCity)) return true;
-      // Reject if another specific US city is explicitly mentioned
+      const isRemote = lowerText.includes('remote') || lowerText.includes('work from home') || lowerText.includes('remote-friendly') || lowerText.includes('remote-first');
+      const isMultiCity = lowerText.includes('multiple us cities') || lowerText.includes('multiple cities');
+
       const otherCityMatch = text.match(US_CITIES);
-      if (otherCityMatch && otherCityMatch[0].toLowerCase() !== userCity) return false;
-      return true; // allow if no city info at all
+      const mentionedCity = otherCityMatch ? otherCityMatch[0].toLowerCase() : '';
+
+      // Mode 1 — specific city: strict match required.
+      if (userCityForMatch) {
+        if (!mentionedCity) return false;
+        return mentionedCity === userCityForMatch
+          || mentionedCity.includes(userCityForMatch)
+          || userCityForMatch.includes(mentionedCity);
+      }
+
+      // Mode 2 — Remote / Anywhere intent.
+      if (remoteIntent) return isRemote || isMultiCity;
+
+      // Mode 3 — no preference.
+      return true;
     };
 
     // Build jobsByCompany map — results are already domain-locked, no fuzzy matching needed
