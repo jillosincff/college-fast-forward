@@ -668,43 +668,58 @@ Deno.serve(async (req) => {
       'apple': 'cupertino',
       'netflix': 'los gatos',
     };
-    const passesLocation = (j) => {
+    // Identify the post's city (body text wins; HQ map fills in entries
+    // with no Location: line like Notion's "Productivity startup scaling
+    // globally").
+    const cityOfPost = (j) => {
       const desc = (j.description || '').toLowerCase();
-      const isRemote = desc.includes('remote') || desc.includes('work from home') || desc.includes('remote-friendly') || desc.includes('remote-first');
-      const isMultiCity = desc.includes('multiple us cities') || desc.includes('multiple cities');
-
-      // Identify the post's city. Body text wins; if silent, fall back to
-      // the company's HQ (covers entries like Notion "Productivity startup
-      // scaling globally" with no Location: line).
-      let mentionedCity = US_CITIES.find(c => desc.includes(c));
-      if (!mentionedCity) {
-        const companyKey = (j.company || '').toLowerCase().trim();
-        mentionedCity = COMPANY_HQ_CITY[companyKey];
-      }
-
-      // Mode 1 — user picked a SPECIFIC city: strict match. The post must
-      // name that city (in body text or via HQ map). Remote-only,
-      // multi-city, and ambiguous posts ALL reject. "Twilio · Remote-first
-      // USA" is not a Miami job; if a Miami user wants remote jobs they
-      // set their preference to "Remote" / "Anywhere" and take Mode 2.
-      if (userCity) {
-        if (!mentionedCity) return false;
-        return mentionedCity.includes(userCity) || userCity.includes(mentionedCity);
-      }
-
-      // Mode 2 — user picked "Remote" / "Anywhere": keep remote-friendly
-      // or multi-city posts; reject single-city ones.
-      if (remoteIntent) return isRemote || isMultiCity;
-
-      // Mode 3 — no location preference: nothing to gate on.
-      return true;
+      const fromDesc = US_CITIES.find(c => desc.includes(c));
+      if (fromDesc) return fromDesc;
+      return COMPANY_HQ_CITY[(j.company || '').toLowerCase().trim()] || '';
+    };
+    const isRemotePost = (j) => {
+      const d = (j.description || '').toLowerCase();
+      return d.includes('remote') || d.includes('work from home') || d.includes('remote-friendly') || d.includes('remote-first');
+    };
+    const isMultiCityPost = (j) => {
+      const d = (j.description || '').toLowerCase();
+      return d.includes('multiple us cities') || d.includes('multiple cities');
     };
 
-    // Apply the gate unconditionally — if userCity is empty and not remote intent,
-    // passesLocation returns true for everything (no city to gate on), so this is safe.
-    // Previously gating only when userCity was truthy allowed the entire filter to be
-    // skipped when a user had no location set, letting SF-HQ static entries leak through.
-    jobPool = jobPool.filter(passesLocation);
+    // Two-tier location matching for city-specific users.
+    //   strict: post explicitly names the user's city.
+    //   loose:  post doesn't EXPLICITLY name a different city (ambiguous /
+    //           remote / multi-city posts pass).
+    // Always reject posts that name a different identifiable city.
+    const isStrictCityMatch = (j) => {
+      if (!userCity) return false;
+      const mc = cityOfPost(j);
+      return !!mc && (mc.includes(userCity) || userCity.includes(mc));
+    };
+    const isLooseCompatible = (j) => {
+      if (!userCity) return true;
+      const mc = cityOfPost(j);
+      if (!mc) return true; // no city identified → ambiguous, allow
+      return mc.includes(userCity) || userCity.includes(mc);
+    };
+
+    if (userCity) {
+      // Prefer strict matches. Fall back to looser pool if strict is sparse so
+      // a user in a city with few static-pool entries (e.g. Miami: 0) still
+      // sees something useful instead of an empty feed — but never see
+      // posts that explicitly name a different city.
+      const STRICT_THRESHOLD = 3;
+      const strict = jobPool.filter(isStrictCityMatch);
+      jobPool = strict.length >= STRICT_THRESHOLD ? strict : jobPool.filter(isLooseCompatible);
+    } else if (remoteIntent) {
+      // "Remote" / "Anywhere": only remote-friendly or multi-city posts.
+      jobPool = jobPool.filter(j => isRemotePost(j) || isMultiCityPost(j));
+    }
+    // No location preference: no gate.
+
+    // Helper for the padding steps below — passes if the user has no city
+    // preference or the post is loose-compatible.
+    const passesLocation = (j) => userCity ? isLooseCompatible(j) : remoteIntent ? (isRemotePost(j) || isMultiCityPost(j)) : true;
 
     // Build role keyword list from target_role, target_positions, AND industry-derived keywords
     // This is the "double-lock": industry must match AND role title must match
