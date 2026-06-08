@@ -82,6 +82,12 @@ console.log('🔍 [OrganizedFeeds] Company #0:', {
 });
 ```
 
+**Database Writes (Optimized):**
+- ✅ Systemic issues: corrupt schemas, API failures, missing critical fields
+- ❌ Routine rejections: education/company mismatches (console only)
+
+This prevents write amplification when parsing hundreds of payloads per session.
+
 This allows you to trace:
 - Exact key names from backend APIs
 - Nested structure issues (e.g., `organization.name` vs `company`)
@@ -116,6 +122,32 @@ This allows you to trace:
 🚫 [AgentGuardrail] REJECTED: Capsule - failed guardrail validation
 🚫 [AgentGuardrail] REJECTED (mirrored): Marketing Manager === Marketing Manager
 🔍 [OrganizedFeeds] Company #0: { name: undefined, job_title: "Entry Level Role" }
+```
+
+### ⚠️ Testing with Mock Data
+
+**Token Expiration Warning:**
+When testing `verifyAlumniBatch` with saved mock JSON profiles:
+- Check `ends_at` fields - stale data may have hardcoded past years
+- If `ends_at: "2023"` or similar, the job will fail `is_current` check
+- Update mock data timestamps or use `ends_at: null` / `ends_at: "Present"`
+- Otherwise valid test cases will fail due to expired employment dates
+
+**Example Fix:**
+```javascript
+// ❌ Stale mock data (will fail)
+{
+  company: "Google",
+  title: "Engineer",
+  ends_at: "2023-12"  // ← Past date = not current
+}
+
+// ✅ Valid mock data
+{
+  company: "Google",
+  title: "Engineer",
+  ends_at: null  // ← Currently employed
+}
 ```
 
 ### Emergency Cleanup

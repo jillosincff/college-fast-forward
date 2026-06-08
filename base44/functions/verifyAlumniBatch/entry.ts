@@ -201,20 +201,37 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create debug log entries for rejections
-    for (const rejectedItem of rejected) {
+    // 🛡️ OPTIMIZED LOGGING: Only log systemic issues to DB, not routine rejections
+    // Routine rejections (education/company mismatch) are logged to console only
+    // DB writes reserved for: corrupt schemas, missing critical fields, API failures
+    const systemicIssues = rejected.filter(r => 
+      r.failures.some(f => 
+        f.includes('corrupt') || 
+        f.includes('missing critical') ||
+        f.includes('API') ||
+        f.includes('null or undefined')
+      )
+    );
+
+    for (const rejectedItem of systemicIssues) {
       try {
         await base44.asServiceRole.entities.DebugLogs.create({
-          event: 'ALUMNI_FILTER_REJECTION',
+          event: 'ALUMNI_FILTER_SYSTEMIC_ISSUE',
           reason: rejectedItem.failures.join('; '),
           profile_url: rejectedItem.profile.linkedin_url || 'unknown',
           school_code,
           company,
+          severity: 'high',
           timestamp: new Date().toISOString(),
         }).catch(() => {});
       } catch (logError) {
         console.warn('[verifyAlumniBatch] Failed to create debug log:', logError.message);
       }
+    }
+
+    // Log routine rejections to console only (no DB write amplification)
+    if (rejected.length > 0) {
+      console.log(`[verifyAlumniBatch] Routine rejections: ${rejected.length} (logged to console only)`);
     }
 
     const passRate = profiles.length > 0 ? (verified.length / profiles.length * 100).toFixed(1) : 0;
