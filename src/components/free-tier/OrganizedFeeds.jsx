@@ -72,6 +72,28 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   useEffect(() => {
     const cleanupBadCache = async () => {
       try {
+        // Clear localStorage bad keys
+        const savedKey = `cff_saved_companies_${user?.id}`;
+        const seenKey = `cff_seen_companies_${user?.id}`;
+        const jobKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'public relations', 'marketing', 'operations', 'content', 'social', 'media', 'coordinator', 'strategist', 'lead', 'head of', 'vp', 'chief', 'officer', 'partner'];
+        
+        // Clean saved companies
+        const saved = localStorage.getItem(savedKey);
+        if (saved) {
+          const keys = JSON.parse(saved);
+          const valid = keys.filter(k => k && k.length >= 3 && !jobKeywords.some(j => k.toLowerCase().includes(j)));
+          if (valid.length !== keys.length) localStorage.setItem(savedKey, JSON.stringify(valid));
+        }
+        
+        // Clean seen companies
+        const seen = sessionStorage.getItem(seenKey);
+        if (seen) {
+          const keys = JSON.parse(seen);
+          const valid = keys.filter(k => k && k.length >= 3 && !jobKeywords.some(j => k.toLowerCase().includes(j)));
+          if (valid.length !== keys.length) sessionStorage.setItem(seenKey, JSON.stringify(valid));
+        }
+        
+        // Clear backend cache
         await fetch('/api/functions/clearJobLeadsCache', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -80,7 +102,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       } catch (err) { console.error('Cache cleanup failed:', err); }
     };
     cleanupBadCache();
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     const handler = () => {
@@ -142,7 +164,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const liveCompanies = Array.isArray(payload?.companies) ? payload.companies : [];
   
   // Job title keywords that should NOT appear in company names
-  const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician'];
+  const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'scout', 'talent', 'recruiter', 'partner', 'strategist', 'operator', 'fellow', 'researcher', 'scientist', 'advisor', 'counsel', 'attorney', 'lawyer', 'agent', 'broker', 'realtor', 'contractor', 'freelancer'];
   
   // Filter out invalid company names (job titles masquerading as companies)
   const isValidCompanyName = (name) => {
@@ -150,11 +172,11 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     const lower = name.toLowerCase();
     
     // Company suffixes that indicate a real business
-    const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'laboratories', 'institute', 'foundation', 'organization', 'society', 'club', 'team', 'network'];
+    const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'laboratories', 'institute', 'foundation', 'organization', 'society', 'club', 'team', 'network', 'collective', 'media', 'press', 'publishing', 'broadcasting', 'entertainment', 'productions', 'pictures', 'films', 'records', 'music', 'digital', 'interactive', 'online', 'software', 'hardware', 'computers', 'electronics', 'robotics', 'aerospace', 'automotive', 'biotech', 'pharma', 'healthcare', 'medical', 'hospital', 'clinic', 'university', 'college', 'school', 'academy', 'institute', 'restaurant', 'cafe', 'hotel', 'resort', 'retail', 'store', 'shop', 'market', 'ecommerce'];
     if (companySuffixes.some(suffix => lower.includes(suffix))) return true;
     
-    // Reject if it's primarily a job title
-    if (jobTitleKeywords.some(keyword => lower === keyword || lower.endsWith(` ${keyword}`) || lower.startsWith(`${keyword} `))) {
+    // BLOCK: Any job title keyword anywhere in the name
+    if (jobTitleKeywords.some(keyword => lower.includes(keyword))) {
       return false;
     }
     
@@ -405,6 +427,17 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             >
               <span className={isFetching ? 'animate-spin inline-block' : 'inline-block'}>↻</span>
               {isFetching ? 'Loading...' : 'New Batch'}
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem(`cff_saved_companies_${user?.id}`);
+                sessionStorage.removeItem(`cff_seen_companies_${user?.id}`);
+                window.location.reload();
+              }}
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-300 bg-white text-red-600 hover:bg-red-50 hover:border-red-400 transition-all"
+            >
+              🗑️ Clear Cache
             </button>
           </div>
         </div>
