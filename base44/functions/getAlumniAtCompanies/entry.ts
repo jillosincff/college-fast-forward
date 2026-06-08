@@ -69,7 +69,8 @@ Deno.serve(async (req) => {
     if (EXA_API_KEY && companiesWithoutMatches.length > 0) {
       const exaFetch = async (companyName) => {
         // Use full school name + LinkedIn-specific patterns for precise alumni matching
-        const fullSchoolName = schoolName || 'University of Florida';
+        const fullSchoolName = schoolName;
+        if (!fullSchoolName) return { results: [] };
         // Query specifically targets LinkedIn profile pages with university + company co-occurrence
         const query = `site:linkedin.com/in "${fullSchoolName}" "${companyName}" -coach -professor -faculty -staff -administrator`;
         
@@ -96,16 +97,45 @@ Deno.serve(async (req) => {
       };
 
       const exaResults = await Promise.all(companiesWithoutMatches.map(c => exaFetch(c)));
-      
+
+      // Verify that an Exa result represents a person who actually attended
+      // the user's school. Prefer structured educationHistory; fall back to
+      // title/text substring. Substring rejects "University of North Florida"
+      // when matching "University of Florida" — different contiguous strings.
+      const codeRe = schoolCode && schoolCode.length >= 2
+        ? new RegExp(`\\b${schoolCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+        : null;
+      const matchesUserSchool = (r) => {
+        const matchesString = (str) => {
+          if (!str) return false;
+          if (schoolName && str.toLowerCase().includes(schoolName.toLowerCase())) return true;
+          if (codeRe && codeRe.test(str)) return true;
+          return false;
+        };
+        const person = (r.entities || []).find(e => e.type === 'person');
+        const eduHistory = person?.properties?.educationHistory || [];
+        if (eduHistory.length > 0) {
+          return eduHistory.some(e => matchesString(e.institution?.name));
+        }
+        const haystack = [r.title || '', r.text || '', ...(r.highlights || [])].join(' ');
+        return matchesString(haystack);
+      };
+
       exaResults.forEach((data, idx) => {
         const companyName = companiesWithoutMatches[idx];
-        // Parse LinkedIn profile data from Exa results
-        const profiles = (data.results || []).map(r => {
+        // Verify school BEFORE parsing — drops UNF / USF / UCF / FSU
+        // false-positives that Exa's neural search routinely returns.
+        const verifiedResults = (data.results || []).filter(matchesUserSchool);
+        const dropped = (data.results || []).length - verifiedResults.length;
+        if (dropped > 0) {
+          console.log(`[getAlumniAtCompanies] ${companyName}: rejected ${dropped} results for wrong school`);
+        }
+        const profiles = verifiedResults.map(r => {
           // Extract name from title (LinkedIn format: "Name - Title | Company")
           const parts = (r.title || '').split(/[|\-·]/).map(s => s.trim()).filter(Boolean);
           const full_name = parts[0]?.replace(/\s+Bio$/i, '').trim() || 'Unknown';
           const headline = parts.slice(1).join(' · ') || (r.highlights || []).join(' ').slice(0, 200);
-          
+
           return {
             id: `exa-${r.url}`,
             full_name,

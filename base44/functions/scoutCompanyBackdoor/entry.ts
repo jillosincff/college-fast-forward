@@ -1,5 +1,51 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
+/**
+ * Verify that an Exa people-search result represents someone who actually
+ * attended the user's school. Exa's neural search is approximate and
+ * will return "University of North Florida" / "University of South Florida"
+ * for a "University of Florida" query — we MUST post-filter or these
+ * leak through as false-positive alumni.
+ *
+ * Order of evidence:
+ *   1. Structured educationHistory from Exa's entity extraction (most reliable)
+ *   2. Fall back to substring check across title/text/highlights
+ * Returns false if neither source confirms the school.
+ */
+function schoolMatchesResult(result, userSchool, userSchoolCode) {
+  const schoolLower = (userSchool || '').toLowerCase().trim();
+  const codeLower = (userSchoolCode || '').toLowerCase().trim();
+  if (!schoolLower && !codeLower) return false;
+
+  const matchesString = (str) => {
+    if (!str) return false;
+    const lower = str.toLowerCase();
+    // Substring match on the full school name. Critically rejects
+    // "university of north florida" when matching "university of florida"
+    // because the contiguous substring isn't present there.
+    if (schoolLower && lower.includes(schoolLower)) return true;
+    // Word-boundary match on the school code (e.g. "UF" must be standalone —
+    // "STUFF" must not match).
+    if (codeLower.length >= 2 && new RegExp(`\\b${codeLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(str)) return true;
+    return false;
+  };
+
+  // 1. Structured education from Exa entities (preferred)
+  const person = (result.entities || []).find(e => e.type === 'person');
+  const eduHistory = person?.properties?.educationHistory || [];
+  if (eduHistory.length > 0) {
+    return eduHistory.some(e => matchesString(e.institution?.name));
+  }
+
+  // 2. Fallback: title / text / highlights string search.
+  const haystack = [
+    result.title || '',
+    result.text || '',
+    ...(result.highlights || []),
+  ].join(' ');
+  return matchesString(haystack);
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -24,9 +70,23 @@ Deno.serve(async (req) => {
     // Clean company name for robust regex matching
     const cleanJobCompany = companyName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
 
-    // Get user's school for targeted search
-    const userSchool = user.data?.school || user.data?.school_name || 'University of Florida';
-    const userSchoolCode = user.data?.school_code || 'UF';
+    // Get user's school for targeted search. Read from both top-level and
+    // .data.* shapes — the codebase isn't consistent. Don't default to UF;
+    // a missing school means we can't verify alumni anyway.
+    const userSchool = user.school_name || user.school || user.university
+      || user.data?.school || user.data?.school_name || '';
+    const userSchoolCode = user.school_code || user.data?.school_code || '';
+
+    if (!userSchool && !userSchoolCode) {
+      console.warn('[scoutCompanyBackdoor] User has no school set; cannot verify alumni');
+      return Response.json({
+        success: true,
+        insiderFound: false,
+        message: 'Set your school in your profile to find alumni.',
+        connectionsCount: 0,
+        alumni: []
+      });
+    }
 
     // Step 1: Check existing DiscoveredAlumni database — MUST match both company AND school_code
     const networkContacts = await base44.asServiceRole.entities.DiscoveredAlumni.filter({ school_code: userSchoolCode });
@@ -97,13 +157,21 @@ Deno.serve(async (req) => {
       }
 
       const exaData = await exaResponse.json();
-
-      // Trust Exa's People Search results directly — no post-filtering
-      const results = (exaData.results || []).filter(r =>
+      const rawResults = (exaData.results || []).filter(r =>
         /linkedin\.com\/in\/[^/?]+/.test(r.url || '')
       );
 
-      console.log(`[scoutCompanyBackdoor] Found ${results.length} verified LinkedIn profiles via Exa`);
+      // CRITICAL: Exa's neural search is approximate. "University of Florida"
+      // query routinely returns "University of North Florida", "USF", "UCF",
+      // and "Florida State" profiles. Filter against structured
+      // educationHistory (Exa's entity extraction) before treating any of
+      // these as alumni.
+      const results = rawResults.filter(r => schoolMatchesResult(r, userSchool, userSchoolCode));
+      const droppedForSchoolMismatch = rawResults.length - results.length;
+      if (droppedForSchoolMismatch > 0) {
+        console.log(`[scoutCompanyBackdoor] Rejected ${droppedForSchoolMismatch} LinkedIn results — wrong school per educationHistory`);
+      }
+      console.log(`[scoutCompanyBackdoor] Found ${results.length} verified ${userSchoolCode || userSchool} profiles via Exa (from ${rawResults.length} raw)`);
 
       if (results.length > 0) {
         // Extract alumni info from search results and attempt email lookup
@@ -122,11 +190,17 @@ Deno.serve(async (req) => {
           const currentWork = (props.workHistory || []).find(w => !w.dates?.to);
           const jobTitle = currentWork?.title || null;
 
-          // Get degree info from educationHistory
-          const ufEdu = (props.educationHistory || []).find(e =>
-            (e.institution?.name || '').toLowerCase().includes(userSchool.toLowerCase())
-          );
-          const degreeInfo = ufEdu ? [ufEdu.degree, ufEdu.institution?.name].filter(Boolean).join(', ') : userSchool;
+          // Display only what we actually have from educationHistory. If
+          // Exa didn't surface a matching school entry, leave degree_info
+          // blank rather than fabricating "University of Florida" — the
+          // school filter above already verified this person attended.
+          const matchingEdu = (props.educationHistory || []).find(e => {
+            const inst = (e.institution?.name || '').toLowerCase();
+            return inst && (inst.includes(userSchool.toLowerCase()) || (userSchoolCode && new RegExp(`\\b${userSchoolCode.toLowerCase()}\\b`, 'i').test(e.institution.name)));
+          });
+          const degreeInfo = matchingEdu
+            ? [matchingEdu.degree, matchingEdu.institution?.name].filter(Boolean).join(', ')
+            : '';
           
           // Step 2b: Try to find email using Hunter API
           let email = null;
