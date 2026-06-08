@@ -14,7 +14,20 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const [savedCompanyKeys, setSavedCompanyKeys] = useState(() => {
     try {
       const stored = localStorage.getItem(`cff_saved_companies_${user?.id}`);
-      return stored ? new Set(JSON.parse(stored)) : new Set();
+      if (!stored) return new Set();
+      const keys = JSON.parse(stored);
+      // Filter out any job-title-like keys that were saved before the fix
+      const validKeys = keys.filter(k => {
+        if (!k || k.length < 3) return false;
+        const lower = k.toLowerCase();
+        const jobKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'public relations', 'marketing'];
+        return !jobKeywords.some(j => lower.includes(j));
+      });
+      // Update localStorage with cleaned keys
+      if (validKeys.length !== keys.length) {
+        localStorage.setItem(`cff_saved_companies_${user?.id}`, JSON.stringify(validKeys));
+      }
+      return new Set(validKeys);
     } catch { return new Set(); }
   });
   const [pinnedLeads, setPinnedLeads] = useState([]);
@@ -22,7 +35,20 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const [seenCompanyKeys, setSeenCompanyKeys] = useState(() => {
     try {
       const stored = sessionStorage.getItem(`cff_seen_companies_${user?.id}`);
-      return stored ? new Set(JSON.parse(stored)) : new Set();
+      if (!stored) return new Set();
+      const keys = JSON.parse(stored);
+      // Filter out any job-title-like keys
+      const validKeys = keys.filter(k => {
+        if (!k || k.length < 3) return false;
+        const lower = k.toLowerCase();
+        const jobKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'public relations', 'marketing'];
+        return !jobKeywords.some(j => lower.includes(j));
+      });
+      // Update sessionStorage with cleaned keys
+      if (validKeys.length !== keys.length) {
+        sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify(validKeys));
+      }
+      return new Set(validKeys);
     } catch { return new Set(); }
   });
 
@@ -41,6 +67,20 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const effectiveRole = target_role || target_roles?.[0] || '';
   const effectiveSize = company_size_preference || 'all';
   const effectiveLocation = location_preference || user?.career_goals?.location_preference || user?.location || '';
+
+  // One-time cleanup of bad cached data on mount
+  useEffect(() => {
+    const cleanupBadCache = async () => {
+      try {
+        await fetch('/api/functions/clearJobLeadsCache', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+      } catch (err) { console.error('Cache cleanup failed:', err); }
+    };
+    cleanupBadCache();
+  }, []);
 
   useEffect(() => {
     const handler = () => {
