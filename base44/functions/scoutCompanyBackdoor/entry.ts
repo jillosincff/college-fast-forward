@@ -28,8 +28,8 @@ Deno.serve(async (req) => {
     const userSchool = user.data?.school || user.data?.school_name || 'University of Florida';
     const userSchoolCode = user.data?.school_code || 'UF';
 
-    // Step 1: Check existing DiscoveredAlumni database
-    const networkContacts = await base44.asServiceRole.entities.DiscoveredAlumni.list();
+    // Step 1: Check existing DiscoveredAlumni database — MUST match both company AND school_code
+    const networkContacts = await base44.asServiceRole.entities.DiscoveredAlumni.filter({ school_code: userSchoolCode });
     const foundInsiders = networkContacts.filter(contact => {
       const contactCompany = (contact.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       return contactCompany.includes(cleanJobCompany) || cleanJobCompany.includes(contactCompany);
@@ -97,9 +97,17 @@ Deno.serve(async (req) => {
 
       const exaData = await exaResponse.json();
       // Only keep actual LinkedIn profile URLs (/in/ paths), not company pages
-      const results = (exaData.results || []).filter(r =>
-        /linkedin\.com\/in\/[^/?]+/.test(r.url || '')
-      );
+      // AND verify the snippet actually mentions the school to avoid FSU/UNF/etc false positives
+      const schoolVariants = [
+        userSchool.toLowerCase(),                          // "university of florida"
+        userSchoolCode.toLowerCase(),                       // "uf"
+        'gator', 'gainesville'                             // UF-specific keywords
+      ];
+      const results = (exaData.results || []).filter(r => {
+        if (!/linkedin\.com\/in\/[^/?]+/.test(r.url || '')) return false;
+        const snippet = ((r.text || '') + ' ' + (r.title || '')).toLowerCase();
+        return schoolVariants.some(v => snippet.includes(v));
+      });
 
       console.log(`[scoutCompanyBackdoor] Found ${results.length} verified LinkedIn profiles via Exa`);
 
