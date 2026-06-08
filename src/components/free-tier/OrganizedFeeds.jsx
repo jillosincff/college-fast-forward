@@ -100,9 +100,54 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const payload = feedsData?.data || feedsData;
   // getLiveJobMatchesFn returns { companies: [...] }
   const liveCompanies = Array.isArray(payload?.companies) ? payload.companies : [];
+  
+  // Job title keywords that should NOT appear in company names
+  const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician'];
+  
+  // Filter out invalid company names (job titles masquerading as companies)
+  const isValidCompanyName = (name) => {
+    if (!name || typeof name !== 'string' || name.length < 3) return false;
+    const lower = name.toLowerCase();
+    
+    // Company suffixes that indicate a real business
+    const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'laboratories', 'institute', 'foundation', 'organization', 'society', 'club', 'team', 'network'];
+    if (companySuffixes.some(suffix => lower.includes(suffix))) return true;
+    
+    // Reject if it's primarily a job title
+    if (jobTitleKeywords.some(keyword => lower === keyword || lower.endsWith(` ${keyword}`) || lower.startsWith(`${keyword} `))) {
+      return false;
+    }
+    
+    // Reject common job title patterns
+    const jobPatterns = [
+      /public relations\s+(junior|senior|assistant)/i,
+      /marketing\s+(intern|manager|coordinator)/i,
+      /software\s+(engineer|developer)/i,
+      /data\s+(analyst|scientist)/i,
+      /product\s+(manager|designer)/i,
+      /project\s+(manager|coordinator)/i,
+      /sales\s+(representative|associate|manager)/i,
+      /customer\s+(service|support|representative)/i,
+      /human\s+resources?\s+(manager|coordinator|specialist)/i,
+      /financial\s+(analyst|advisor)/i,
+      /business\s+(analyst|manager|associate)/i,
+      /operations\s+(manager|coordinator|specialist)/i,
+      /content\s+(writer|creator|manager)/i,
+      /social\s+media\s+(manager|coordinator|specialist)/i,
+      /graphic\s+designer/i,
+      /ux\s+(designer|researcher)/i,
+      /ui\s+(designer|developer)/i,
+      /account\s+(executive|manager|representative)/i,
+    ];
+    
+    if (jobPatterns.some(pattern => pattern.test(name))) return false;
+    
+    return true;
+  };
+  
   // map to the shape DiscoveryJobCard expects — ensure company name is always valid
   const targetedDiscoveries = liveCompanies
-    .filter(c => c.name && c.name.length > 2)
+    .filter(c => isValidCompanyName(c.name))
     .map(c => ({
       company: c.name,
       companyName: c.name,
