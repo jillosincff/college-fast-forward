@@ -672,19 +672,37 @@ Deno.serve(async (req) => {
       const desc = (j.description || '').toLowerCase();
       const isRemote = desc.includes('remote') || desc.includes('work from home') || desc.includes('remote-friendly') || desc.includes('remote-first');
       const isMultiCity = desc.includes('multiple us cities') || desc.includes('multiple cities');
-      if (isRemote || isMultiCity) return true;
-      // "Remote" / "Anywhere" intent: only remote-friendly jobs survive — already returned above.
-      if (remoteIntent) return false;
-      // No city preference at all: nothing to gate on.
-      if (!userCity) return true;
-      // Try to find a city mentioned in the description; if the description is silent,
-      // fall back to the company's HQ. Both let us reject city-mismatched entries.
+
+      // "Multiple cities" is always location-neutral — keep.
+      if (isMultiCity) return true;
+
+      // Identify the post's city. Body text wins; if silent, fall back to
+      // the company's HQ (covers entries like Notion "Productivity startup
+      // scaling globally" with no Location: line).
       let mentionedCity = US_CITIES.find(c => desc.includes(c));
       if (!mentionedCity) {
         const companyKey = (j.company || '').toLowerCase().trim();
         mentionedCity = COMPANY_HQ_CITY[companyKey];
       }
-      if (mentionedCity && !mentionedCity.includes(userCity) && !userCity.includes(mentionedCity)) return false;
+
+      // If the user picked a specific city, the post must match it. A
+      // "remote" mention does NOT override a specific-city mismatch — a
+      // "Location: San Francisco, CA | Hybrid (remote-friendly)" post is
+      // really an SF job; a Miami user who didn't pick Remote shouldn't
+      // see it. Users who want remote jobs set their preference to
+      // "Remote" / "Anywhere", which takes the remoteIntent branch below.
+      if (userCity) {
+        if (!mentionedCity) {
+          // No identifiable city in the post → fall back to the remote signal.
+          return isRemote;
+        }
+        return mentionedCity.includes(userCity) || userCity.includes(mentionedCity);
+      }
+
+      // "Remote" / "Anywhere" intent: only remote-friendly posts survive.
+      if (remoteIntent) return isRemote;
+
+      // No city preference at all: nothing to gate on.
       return true;
     };
 
