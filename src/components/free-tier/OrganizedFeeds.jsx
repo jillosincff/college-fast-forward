@@ -169,7 +169,37 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // Filter out invalid company names (job titles masquerading as companies)
   const isValidCompanyName = (name) => {
     if (!name || typeof name !== 'string' || name.length < 3) return false;
-    const lower = name.toLowerCase();
+    const lower = name.toLowerCase().trim();
+    
+    // ABSOLUTE BLOCK: If the "company name" contains any of these sequences, destroy it
+    const absoluteJobPhrases = [
+      'marketing intern', 
+      'marketing manager', 
+      'public relations', 
+      'account executive',
+      'junior account',
+      'manager trainee',
+      'operations manager',
+      'content creator',
+      'social media',
+      'business analyst',
+      'financial analyst',
+      'data analyst',
+      'software engineer',
+      'product manager',
+      'project manager',
+      'sales representative',
+      'customer service',
+      'human resources',
+      'graphic designer',
+      'ux designer',
+      'ui designer',
+      'account manager'
+    ];
+    
+    if (absoluteJobPhrases.some(phrase => lower.includes(phrase))) {
+      return false;
+    }
     
     // Company suffixes that indicate a real business
     const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'laboratories', 'institute', 'foundation', 'organization', 'society', 'club', 'team', 'network', 'collective', 'media', 'press', 'publishing', 'broadcasting', 'entertainment', 'productions', 'pictures', 'films', 'records', 'music', 'digital', 'interactive', 'online', 'software', 'hardware', 'computers', 'electronics', 'robotics', 'aerospace', 'automotive', 'biotech', 'pharma', 'healthcare', 'medical', 'hospital', 'clinic', 'university', 'college', 'school', 'academy', 'institute', 'restaurant', 'cafe', 'hotel', 'resort', 'retail', 'store', 'shop', 'market', 'ecommerce'];
@@ -224,10 +254,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // Deep structural validation on backend dual constraint leads
   const validatedDualLeads = dualLeads
     .map(l => {
-      // 1. Look across all common API key naming conventions
       const extractedCompany = (l.company || l.companyName || l.company_name || '').trim();
       const extractedTitle = (l.job_title || l.role || l.title || '').trim();
-
       return {
         ...l,
         company: extractedCompany,
@@ -236,12 +264,17 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       };
     })
     .filter(l => {
-      // 2. HARD LOCK: If company name matches the job title or is blank, trash it immediately
-      if (!l.company || l.company.toLowerCase() === l.job_title.toLowerCase()) {
-        return false;
-      }
+      // HARD LOCK 1: Discard if the company name is missing
+      if (!l.company) return false;
+
+      // HARD LOCK 2: Clean the strings for a deep comparative check
+      const cleanCompany = l.company.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanTitle = l.job_title.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      // If company field matches the job title field, or if the title field is empty 
+      // and the company field triggers our job filters, throw it away.
+      if (cleanCompany === cleanTitle) return false;
       
-      // 3. Run it through your aggressive keyword filters
       return isValidCompanyName(l.company);
     });
 
@@ -452,8 +485,20 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             </button>
             <button
               onClick={() => {
-                localStorage.removeItem(`cff_saved_companies_${user?.id}`);
-                sessionStorage.removeItem(`cff_seen_companies_${user?.id}`);
+                // Nuclear clear: remove ALL cff_ prefixed storage
+                Object.keys(localStorage).forEach(key => {
+                  if (key.startsWith('cff_')) localStorage.removeItem(key);
+                });
+                Object.keys(sessionStorage).forEach(key => {
+                  if (key.startsWith('cff_')) sessionStorage.removeItem(key);
+                });
+                // Clear backend cache
+                fetch('/api/functions/clearJobLeadsCache', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                }).catch(() => {});
+                // Hard reload
                 window.location.reload();
               }}
               style={{ minHeight: 'auto', minWidth: 'auto' }}
