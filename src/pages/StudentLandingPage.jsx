@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { base44 } from '@/api/base44Client';
 import CampusVaultWidget from '@/components/landing/CampusVaultWidget';
 import AppShowcase from '@/components/landing/AppShowcase';
+import LiveJobsSection from '@/components/landing/LiveJobsSection';
 
 // ── Design Tokens — Light Mode / Gen Z ─────────────────────────
 const SF = "'Satoshi', 'Inter', system-ui, sans-serif";
@@ -441,6 +442,9 @@ export default function StudentLandingPage({ onParentClick }) {
           ))}
         </div>
       </div>
+
+      {/* ── LIVE JOBS ── */}
+      <LiveJobsSection go={go} />
 
       {/* ── HONEST SECTION ── */}
       <div style={{ padding: 'clamp(56px, 12vw, 96px) clamp(20px, 5vw, 40px)', background: BG }}>
