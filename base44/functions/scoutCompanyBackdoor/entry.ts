@@ -103,6 +103,8 @@ Deno.serve(async (req) => {
         const newAlumni = await Promise.all(results.slice(0, 5).map(async result => {
           // Title format from LinkedIn neural results: "Name - Title at Company | LinkedIn"
           const titleRaw = result.title || '';
+          console.log(`[scoutCompanyBackdoor] RAW title: "${titleRaw}" | text snippet: "${result.text?.substring(0, 100)}"`);
+
           // Split on " | " first to strip "LinkedIn" suffix, then split on " - "
           const titleWithoutSuffix = titleRaw.replace(/\s*\|\s*LinkedIn\s*$/i, '').trim();
           const parts = titleWithoutSuffix.split(/\s*-\s*/);
