@@ -581,19 +581,28 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           </div>
         ) : targetOpportunities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {targetOpportunities.map((lead, idx) => (
-              <DiscoveryJobCard
-                key={lead.company || lead.companyName || idx}
-                lead={lead}
-                onAddToPipeline={handleAddToPipeline}
-                onColdInroad={handleColdInroad}
-                onSelect={setSelectedLead}
-                schoolAbbr={schoolAbbr}
-                isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
-                onDismiss={() => {}}
-                insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
-              />
-            ))}
+            {targetOpportunities.map((lead, idx) => {
+              const currentCompany = (lead.company || lead.companyName || '').toLowerCase().trim();
+              
+              // 🚨 ABSOLUTE HARD KILL: If it matches these two phantoms, vanish them from the DOM completely
+              if (currentCompany.includes('capsule') || currentCompany.includes('goodwin')) {
+                return null;
+              }
+
+              return (
+                <DiscoveryJobCard
+                  key={lead.company || lead.companyName || idx}
+                  lead={lead}
+                  onAddToPipeline={handleAddToPipeline}
+                  onColdInroad={handleColdInroad}
+                  onSelect={setSelectedLead}
+                  schoolAbbr={schoolAbbr}
+                  isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
+                  onDismiss={() => {}}
+                  insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
