@@ -147,6 +147,15 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     setLastRefreshed(new Date());
   };
 
+  // When career goals change (location / role / industries), clear the pinned
+  // leads from the previous criteria. Otherwise jobs the user pinned for an
+  // earlier location (e.g. NYC) stay rendered on top of the new feed (e.g.
+  // after switching to Miami). User-saved companies in savedCompanyKeys are
+  // intentionally kept — those are explicit saves, not session pins.
+  useEffect(() => {
+    setPinnedLeads([]);
+  }, [effectiveLocation, effectiveRole, JSON.stringify(target_industries)]);
+
   // Update pinned leads whenever new data arrives — keep pinned cards fresh with latest data
   // but never let a batch rotation remove them
   useEffect(() => {
