@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
     }
 
     try {
-      // Neural search — mirrors what works manually in Exa: "UF alumni who work at Company"
-      const searchQuery = `${userSchool} alumni who work at ${companyName}`;
+      // Keyword search — requires both the school name AND company name to appear on the page
+      const searchQuery = `"${userSchool}" "${companyName}"`;
       
       const exaResponse = await fetch('https://api.exa.ai/search', {
         method: 'POST',
@@ -82,11 +82,11 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           query: searchQuery,
-          type: 'neural',
+          type: 'keyword',
           numResults: 15,
           includeDomains: ['linkedin.com'],
           contents: {
-            text: { maxCharacters: 500 }
+            text: { maxCharacters: 800 }
           }
         })
       });
@@ -113,9 +113,11 @@ Deno.serve(async (req) => {
 
       const results = (exaData.results || []).filter(r => {
         if (!/linkedin\.com\/in\/[^/?]+/.test(r.url || '')) return false;
-        // Check if the snippet/text actually mentions the user's school
+        // Require both the school AND the company to appear in the page text
         const snippet = ((r.text || '') + ' ' + (r.title || '') + ' ' + (r.author || '')).toLowerCase();
-        return snippet.includes(schoolKeyword) || snippet.includes(schoolCode);
+        const hasSchool = snippet.includes(schoolKeyword) || snippet.includes(schoolCode);
+        const hasCompany = snippet.includes(companyName.toLowerCase());
+        return hasSchool && hasCompany;
       });
 
       console.log(`[scoutCompanyBackdoor] Found ${results.length} verified LinkedIn profiles via Exa`);
