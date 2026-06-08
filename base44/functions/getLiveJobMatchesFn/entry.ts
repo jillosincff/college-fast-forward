@@ -1,140 +1,119 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * Live job matches using Exa keyword search against real ATS job boards.
- * Replaces Fantastic.jobs (out of credits) with direct Exa search.
- * Returns real job URLs, titles, and company names from Lever/Greenhouse/Ashby/Workable.
+ * Returns personalized job leads for a student.
+ * Uses LLM with internet context for relevance, cached 24h per user.
+ * Falls back to fresh generation if cache is stale or goals changed.
  */
 
-const ATS_DOMAINS = [
-  'jobs.lever.co',
-  'boards.greenhouse.io',
-  'jobs.ashbyhq.com',
-  'apply.workable.com',
-];
-
-const ATS_SOURCE_LABELS = {
-  'jobs.lever.co': 'Lever',
-  'boards.greenhouse.io': 'Greenhouse',
-  'jobs.ashbyhq.com': 'Ashby',
-  'apply.workable.com': 'Workable',
-};
-
-const SENIOR_FILTER = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff engineer|architect|managing partner)\b/i;
-
-const ATS_URL_PATTERNS = [
-  /^https:\/\/jobs\.lever\.co\//,
-  /^https:\/\/boards\.greenhouse\.io\//,
-  /^https:\/\/jobs\.ashbyhq\.com\//,
-  /^https:\/\/apply\.workable\.com\//,
-];
-
-const ROLE_WORD = /\b(engineer|analyst|associate|intern|coordinator|specialist|manager|developer|designer|consultant|researcher|scientist|writer|advisor|representative|assistant|strategist|accountant)\b/i;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 Deno.serve(async (req) => {
-  const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
-  if (!EXA_API_KEY) return Response.json({ error: 'EXA_API_KEY not set' }, { status: 500 });
-
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { career_goals = {} } = await req.json().catch(() => ({}));
+    const { career_goals = {}, force_refresh = false } = await req.json().catch(() => ({}));
 
     const role = career_goals.role
-      || (Array.isArray(career_goals.target_roles) ? career_goals.target_roles[0] : null)
       || user.career_goals?.target_roles?.[0]
-      || 'entry level';
-
+      || '';
+    const industries = career_goals.industries
+      || user.career_goals?.target_industries
+      || [];
     const location = career_goals.locations?.[0]
-      || career_goals.location_preference
       || user.career_goals?.location_preference
       || '';
+    const companySizes = career_goals.company_size_preference
+      || user.career_goals?.company_size_preference
+      || [];
 
-    const locationStr = location ? ` ${location.split(',')[0].trim()}` : '';
+    if (!role && industries.length === 0) {
+      return Response.json({ companies: [] });
+    }
 
-    // Run intern + full-time searches in parallel
-    const searchQuery = (type) =>
-      `"${role}" ${type}${locationStr} (entry level OR junior OR associate OR new grad)`;
+    // Cache key: hash of goals so stale cache is busted when goals change
+    const goalKey = `${role}|${industries.join(',')}|${location}|${companySizes}`;
+    const cached = user.job_leads_cache;
+    const cachedAt = user.job_leads_cached_at;
+    const cachedKey = user.job_leads_cache_key;
+    const cacheAge = cachedAt ? Date.now() - new Date(cachedAt).getTime() : Infinity;
+    const cacheValid = !force_refresh && cacheAge < CACHE_TTL_MS && cachedKey === goalKey && cached?.length > 0;
 
-    const exaSearch = async (query) => {
-      const res = await fetch('https://api.exa.ai/search', {
-        method: 'POST',
-        headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query,
-          type: 'keyword',
-          numResults: 15,
-          includeDomains: ATS_DOMAINS,
-          contents: { highlights: { maxCharacters: 600 } },
-          startPublishedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        }),
-      });
-      if (!res.ok) throw new Error(`Exa search failed: ${res.status}`);
-      return res.json();
-    };
+    if (cacheValid) {
+      console.log(`[getLiveJobMatchesFn] Returning ${cached.length} cached leads (${Math.round(cacheAge / 60000)}m old)`);
+      return Response.json({ companies: cached, from_cache: true });
+    }
 
-    const [internData, ftData] = await Promise.all([
-      exaSearch(searchQuery('internship')),
-      exaSearch(searchQuery('job')),
-    ]);
+    // Build size preference description
+    const sizeDesc = Array.isArray(companySizes) && companySizes.length > 0
+      ? companySizes.join(', ')
+      : 'any size';
 
-    console.log(`[getLiveJobMatchesFn] Exa intern results: ${internData.results?.length || 0}, FT results: ${ftData.results?.length || 0}`);
+    const locationDesc = location || 'anywhere in the US';
+    const industryDesc = industries.length > 0 ? industries.join(', ') : 'any industry';
+    const roleDesc = role || industries[0] || 'entry level';
 
-    const allResults = [...(internData.results || []), ...(ftData.results || [])];
+    console.log(`[getLiveJobMatchesFn] Generating fresh leads for: ${roleDesc} in ${locationDesc}`);
 
-    // Deduplicate by URL
-    const seen = new Set();
-    const jobs = allResults
-      .filter(r => {
-        if (!r.url || !r.title) return false;
-        if (seen.has(r.url)) return false;
-        seen.add(r.url);
-        if (SENIOR_FILTER.test(r.title)) return false;
-        return ATS_URL_PATTERNS.some(p => p.test(r.url));
-      })
-      .map(r => {
-        // Extract company from ATS URL slug
-        const urlMatch = r.url.match(/(?:jobs\.lever\.co|boards\.greenhouse\.io|jobs\.ashbyhq\.com|apply\.workable\.com)\/([^/]+)/);
-        const companySlug = urlMatch?.[1] || '';
-        const companyName = companySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: `You are a job search assistant helping a college student find real, currently hiring companies.
 
-        // Extract job title — prefer snippet header (## Title), then parse page title
-        const snippetText = (r.highlights || []).join(' ');
-        const snippetHeaderMatch = snippetText.match(/##\s*([^\n\[]{3,80})/);
-        // Page title format varies: "Job Title @ Company - Jobs" or "Company | Job Title"
-        const rawTitle = (r.title || '').replace(/ - (Jobs|Careers|Lever|Greenhouse|Ashby|Workable)$/i, '').trim();
-        const titleParts = rawTitle.split(/[@|·\-–]/).map(s => s.trim()).filter(Boolean);
-        const titleCandidate = titleParts.find(p => ROLE_WORD.test(p)) || titleParts[0];
-        const jobTitle = snippetHeaderMatch?.[1]?.trim() || titleCandidate || rawTitle;
+Student's career goals:
+- Target role: ${roleDesc}
+- Industries: ${industryDesc}
+- Location: ${locationDesc}
+- Company size preference: ${sizeDesc}
 
-        // Freshness
-        const publishedDate = r.publishedDate ? new Date(r.publishedDate) : null;
-        const daysLive = publishedDate
-          ? Math.max(0, Math.floor((Date.now() - publishedDate.getTime()) / (1000 * 60 * 60 * 24)))
-          : null;
+Find 8 real companies that are actively hiring for entry-level or internship positions matching these goals RIGHT NOW. Use your knowledge of current hiring trends and company career pages.
 
-        const matchedDomain = ATS_DOMAINS.find(d => r.url.includes(d));
+For each company return:
+- name: Company name
+- job_title: Most relevant entry-level or intern job title they're likely hiring for
+- hiring_description: 1-2 sentences describing the role and why it's a good fit (be specific, not generic)
+- hiring_signal: "hot" if very actively hiring, "warm" if hiring, "cool" if uncertain
+- job_url: Direct URL to their careers page or a specific job posting if you know it (e.g. company.com/careers or jobs.lever.co/company/...)
+- industry: Specific industry
 
-        return {
-          name: companyName,
-          job_title: jobTitle,
-          job_url: r.url,
-          source: matchedDomain ? (ATS_SOURCE_LABELS[matchedDomain] || matchedDomain) : 'ATS',
-          hiring_description: (r.highlights || [])[0] || '',
-          hiring_signal: daysLive !== null && daysLive <= 3 ? 'hot' : 'warm',
-          days_live: daysLive,
-          industry: career_goals.industries?.[0] || '',
-          has_web_result: true,
-        };
-      })
-      .filter(j => j.name && j.job_title)
-      .slice(0, 10);
+Be specific and realistic. Only include companies actually known to hire for these types of roles.`,
+      add_context_from_internet: true,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          companies: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                job_title: { type: 'string' },
+                hiring_description: { type: 'string' },
+                hiring_signal: { type: 'string' },
+                job_url: { type: 'string' },
+                industry: { type: 'string' },
+              }
+            }
+          }
+        }
+      }
+    });
 
-    console.log(`[getLiveJobMatchesFn] Returning ${jobs.length} real ATS job leads`);
+    const companies = (result?.companies || []).map(c => ({
+      ...c,
+      has_web_result: true,
+    }));
 
-    return Response.json({ companies: jobs });
+    console.log(`[getLiveJobMatchesFn] Generated ${companies.length} fresh leads`);
+
+    // Cache results on user record
+    await base44.asServiceRole.entities.User.update(user.id, {
+      job_leads_cache: companies,
+      job_leads_cached_at: new Date().toISOString(),
+      job_leads_cache_key: goalKey,
+    });
+
+    return Response.json({ companies, from_cache: false });
 
   } catch (error) {
     console.error('[getLiveJobMatchesFn] Error:', error.message);
