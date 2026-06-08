@@ -132,7 +132,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             </button>
           ) : foundAlumni && foundAlumni.length > 0 ? (
             <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-2">
-              <p className="text-xs font-bold text-purple-800">{mascot} Found {foundAlumni.length} {school} alumni at {lead.company}!</p>
+              <p className="text-xs font-bold text-purple-800">{mascot} Found {school} alumni at {lead.company}!</p>
               {foundAlumni.slice(0, 3).map((a, i) => (
                 <a
                   key={i}
@@ -148,7 +148,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-blue-700">{a.name}</p>
-                    <p className="text-[10px] text-gray-500 truncate">{a.role_title || 'Professional'}</p>
+                                    {a.role_title && <p className="text-[10px] text-gray-500 truncate">{a.role_title}</p>}
                   </div>
                   <span className="text-[10px] text-blue-500 font-semibold shrink-0 group-hover:text-blue-700">View →</span>
                 </a>
