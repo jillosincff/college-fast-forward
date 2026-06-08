@@ -224,17 +224,26 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // Deep structural validation on backend dual constraint leads
   const validatedDualLeads = dualLeads
     .map(l => {
-      // Extract target string regardless of which variant key the backend returns
-      const extractedCompany = l.company || l.companyName || l.company_name || '';
+      // 1. Look across all common API key naming conventions
+      const extractedCompany = (l.company || l.companyName || l.company_name || '').trim();
+      const extractedTitle = (l.job_title || l.role || l.title || '').trim();
+
       return {
         ...l,
-        // Normalize fields for strict UI alignment
         company: extractedCompany,
         companyName: extractedCompany,
-        job_title: l.job_title || l.role || l.title || 'Entry Level Role'
+        job_title: extractedTitle
       };
     })
-    .filter(l => isValidCompanyName(l.company));
+    .filter(l => {
+      // 2. HARD LOCK: If company name matches the job title or is blank, trash it immediately
+      if (!l.company || l.company.toLowerCase() === l.job_title.toLowerCase()) {
+        return false;
+      }
+      
+      // 3. Run it through your aggressive keyword filters
+      return isValidCompanyName(l.company);
+    });
 
   // Merge dual (alumni-verified) leads into the main pool with an insider pill, deduplicated
   const mergedSeen = new Set();
