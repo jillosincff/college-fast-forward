@@ -549,12 +549,12 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             </button>
             <button
               onClick={() => {
-                // Nuclear clear: remove ALL cff_ prefixed storage
+                // NUCLEAR PURGE: Remove ALL storage keys (not just cff_)
                 Object.keys(localStorage).forEach(key => {
-                  if (key.startsWith('cff_')) localStorage.removeItem(key);
+                  try { localStorage.removeItem(key); } catch (e) {}
                 });
                 Object.keys(sessionStorage).forEach(key => {
-                  if (key.startsWith('cff_')) sessionStorage.removeItem(key);
+                  try { sessionStorage.removeItem(key); } catch (e) {}
                 });
                 // Clear backend cache
                 fetch('/api/functions/clearJobLeadsCache', {
@@ -562,13 +562,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                   headers: { 'Content-Type': 'application/json' },
                   credentials: 'include',
                 }).catch(() => {});
-                // Hard reload
-                window.location.reload();
+                // Force hard reload with cache bypass
+                window.location.href = window.location.origin + '/#FreeTierDashboard?t=' + Date.now();
               }}
               style={{ minHeight: 'auto', minWidth: 'auto' }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-300 bg-white text-red-600 hover:bg-red-50 hover:border-red-400 transition-all"
             >
-              🗑️ Clear Cache
+              🗑️ Nuke Everything
             </button>
           </div>
         </div>
