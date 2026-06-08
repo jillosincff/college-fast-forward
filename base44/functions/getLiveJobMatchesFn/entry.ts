@@ -30,31 +30,41 @@ async function fetchFantasticJobs({ role, location, industries, sizePreference, 
   if (!apiKey) throw new Error('FANTASTIC_JOBS_API_KEY not set');
 
   const params = new URLSearchParams();
-  // Use 7d (7-day window) — freshest batch that covers ~14 days of postings
-  params.set('time_frame', '7d');
-  params.set('limit', '50');
+  // Use 24h window for freshest results
+  params.set('time_frame', '24h');
+  params.set('limit', '100');
   params.set('include_basic_organization_details', 'true');
   params.set('description_format', 'text');
 
-  // Employment types (ai_employment_type is the AI-classified field)
+  // Employment types — passed as repeated params
   for (const et of employmentTypes) {
     params.append('ai_employment_type', et);
   }
 
-  // Role keyword search: strip employment-type words since ai_employment_type handles them
-  const cleanRole = role.replace(/\b(intern(ship)?|entry.?level|junior)\b/gi, '').trim();
-  if (cleanRole) params.set('title', cleanRole);
-
-  // Location — use full name format required by Fantastic.jobs
-  if (location && !/^(remote|anywhere|flexible|open)/i.test(location.trim())) {
-    const city = location.split(',')[0].trim();
-    params.set('location', `${city}, United States`);
+  // Title search — use the full role as-is, don't strip keywords
+  // Use title_advanced for better Boolean matching
+  if (role) {
+    // Build a broad title search: e.g. "Marketing" | "marketing intern" | "marketing analyst"
+    const baseRole = role.replace(/\b(intern(ship)?|entry.?level|junior|new.?grad)\b/gi, '').trim();
+    if (baseRole) {
+      // Search for the base role keyword in title
+      params.set('title', baseRole);
+    }
   }
 
-  // NOTE: ai_taxonomies_a is intentionally omitted — it's too restrictive and filters out
-  // many valid jobs. Role + employment type filters are sufficient.
+  // Location — Fantastic.jobs requires full names: "New York, United States" or "New York, New York, United States"
+  if (location && !/^(remote|anywhere|flexible|open)/i.test(location.trim())) {
+    const STATE_ABBR = { 'NY': 'New York', 'CA': 'California', 'TX': 'Texas', 'FL': 'Florida', 'IL': 'Illinois', 'WA': 'Washington', 'MA': 'Massachusetts', 'GA': 'Georgia', 'NC': 'North Carolina', 'OH': 'Ohio', 'PA': 'Pennsylvania', 'AZ': 'Arizona', 'CO': 'Colorado', 'NJ': 'New Jersey', 'VA': 'Virginia', 'MI': 'Michigan', 'MN': 'Minnesota', 'TN': 'Tennessee', 'MO': 'Missouri', 'MD': 'Maryland', 'IN': 'Indiana', 'WI': 'Wisconsin', 'OR': 'Oregon', 'CT': 'Connecticut', 'UT': 'Utah', 'NV': 'Nevada', 'DC': 'District of Columbia' };
+    const parts = location.split(',').map(p => p.trim());
+    const city = parts[0];
+    // Expand state abbreviations
+    const stateRaw = parts[1] || '';
+    const state = STATE_ABBR[stateRaw.toUpperCase()] || stateRaw;
+    const locationStr = state ? `${city}, ${state}, United States` : `${city}, United States`;
+    params.set('location', locationStr);
+  }
 
-  // Company size via headcount — only apply for startup/mid
+  // Company size via headcount
   const primary = Array.isArray(sizePreference) ? sizePreference[0] : sizePreference;
   if (primary === 'startup') {
     params.set('organization_headcount_lt', '500');
@@ -62,7 +72,6 @@ async function fetchFantasticJobs({ role, location, industries, sizePreference, 
     params.set('organization_headcount_gte', '200');
     params.set('organization_headcount_lt', '5000');
   }
-  // 'large' / 'all' — no headcount filter
 
   const url = `https://data.fantastic.jobs/v1/active-ats?${params.toString()}`;
   console.log('[getLiveJobMatchesFn] Fantastic.jobs query:', url);
@@ -98,6 +107,8 @@ function jobsToCompanies(jobs, targetRole, industries) {
     if (!orgName || seen.has(orgName.toLowerCase())) continue;
     // Skip employment agencies
     if (AGENCY_KEYWORDS.test(orgName)) continue;
+    // Skip recruitment agency derived flag from LinkedIn enrichment
+    if (job.org_linkedin_recruitment_agency_derived === true) continue;
     seen.add(orgName.toLowerCase());
 
     // Count openings at this company — more = hotter signal
@@ -111,27 +122,30 @@ function jobsToCompanies(jobs, targetRole, industries) {
     // Domain for alumni search
     const domain = job.domain_derived || job.org_linkedin_website || '';
 
+    // Full description from the API (included because description_format=text is set)
     const rawDesc = job.description || '';
-    const shortDesc = rawDesc.length > 300
-      ? rawDesc.slice(0, 300) + '…'
-      : rawDesc.length > 20
-        ? rawDesc
-        : `${orgName} is hiring for ${job.title || targetRole || 'interns'}.`;
+    const hiring_description = rawDesc.length > 20
+      ? rawDesc
+      : `${orgName} is hiring for ${job.title || targetRole || 'this role'}.`;
+
+    // Location string
+    const locationStr = (job.locations_alt?.[0] || job.locations_derived?.[0] || '').split(',').slice(0, 2).join(',').trim();
 
     companies.push({
       name: orgName,
       domain,
       industry: job.org_linkedin_industry || industries[0] || '',
       hiring_signal: hiringSignal,
-      hiring_description: shortDesc,
+      hiring_description,
       size,
       job_title: job.title || '',
       job_url: job.url || '',
+      location: locationStr,
       date_posted: job.date_posted || job.date_created || '',
       has_web_result: true,
     });
 
-    if (companies.length >= 10) break;
+    if (companies.length >= 15) break;
   }
 
   return companies;
