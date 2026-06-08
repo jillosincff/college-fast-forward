@@ -71,8 +71,8 @@ Deno.serve(async (req) => {
     }
 
     try {
-      // Keyword search — requires both the school name AND company name to appear on the page
-      const searchQuery = `"${userSchool}" "${companyName}"`;
+      // Neural people search — Exa understands natural language queries for finding alumni
+      const searchQuery = `${userSchool} alumni that works at ${companyName}`;
       
       const exaResponse = await fetch('https://api.exa.ai/search', {
         method: 'POST',
@@ -82,8 +82,8 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           query: searchQuery,
-          type: 'keyword',
-          numResults: 15,
+          type: 'neural',
+          numResults: 10,
           includeDomains: ['linkedin.com'],
           contents: {
             text: { maxCharacters: 800 }
@@ -96,29 +96,10 @@ Deno.serve(async (req) => {
       }
 
       const exaData = await exaResponse.json();
-      // Only keep actual LinkedIn profile URLs (/in/ paths), not company pages or other linkedin pages
-      // Only keep actual LinkedIn profile URLs (/in/ paths) AND filter to those whose
-      // snippet/text mentions the user's school — this prevents false positives
-      const ufKeywords = [
-        userSchool.toLowerCase(),
-        userSchoolCode.toLowerCase(),
-        // common abbreviations for major schools
-        'university of florida', 'uf gator', 'go gators', 'florida state', 'fsu',
-        'ohio state', 'osu', 'university of michigan', 'umich', 'penn state', 'psu',
-        'university of southern california', 'usc', 'tulane', 'university of delaware',
-        'university of georgia', 'uga', 'university of maryland', 'umd', 'university of central florida', 'ucf',
-      ];
-      const schoolKeyword = userSchool.toLowerCase();
-      const schoolCode = userSchoolCode.toLowerCase();
-
-      const results = (exaData.results || []).filter(r => {
-        if (!/linkedin\.com\/in\/[^/?]+/.test(r.url || '')) return false;
-        // Require both the school AND the company to appear in the page text
-        const snippet = ((r.text || '') + ' ' + (r.title || '') + ' ' + (r.author || '')).toLowerCase();
-        const hasSchool = snippet.includes(schoolKeyword) || snippet.includes(schoolCode);
-        const hasCompany = snippet.includes(companyName.toLowerCase());
-        return hasSchool && hasCompany;
-      });
+      // Only keep actual LinkedIn profile URLs (/in/ paths), not company pages
+      const results = (exaData.results || []).filter(r =>
+        /linkedin\.com\/in\/[^/?]+/.test(r.url || '')
+      );
 
       console.log(`[scoutCompanyBackdoor] Found ${results.length} verified LinkedIn profiles via Exa`);
 
