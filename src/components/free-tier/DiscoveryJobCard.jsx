@@ -1,13 +1,28 @@
 import { useState } from 'react';
+import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
 export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned }) {
-  const [isScouting, setIsScouting] = useState(false);
-  const [scoutDeployed, setScoutDeployed] = useState(false);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [added, setAdded] = useState(false);
+
+  // Alumni search state
+  const [alumniSearched, setAlumniSearched] = useState(false);
+  const [alumniSearching, setAlumniSearching] = useState(false);
+  const [foundAlumni, setFoundAlumni] = useState(null); // null = not searched, [] = none found, [...] = results
+
+  const school = schoolAbbr || lead.schoolAbbr || 'UF';
+  const mascot = MASCOT[school] || '🎓';
+  const companyTier = lead?.companyTier || 1;
+  const TIER_BADGE = {
+    1: { label: 'Enterprise', color: 'bg-slate-100 text-slate-600' },
+    2: { label: 'Mid-Market', color: 'bg-blue-50 text-blue-600' },
+    3: { label: '🚀 Startup', color: 'bg-purple-50 text-purple-700' },
+  };
+  const tierBadge = TIER_BADGE[companyTier] || TIER_BADGE[1];
+  const jobDesc = lead.jobDescription || lead.description || lead.hiring_description || '';
 
   const handleAddToPipeline = () => {
     if (!onAddToPipeline) return;
@@ -21,37 +36,29 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
     onDismiss?.();
   };
 
-  if (dismissed) return null;
-  const school = schoolAbbr || lead.schoolAbbr || 'UF';
-  const mascot = MASCOT[school] || '🎓';
-  const insiderCount = (lead.alumniCount || 0) + (lead.parentCount || 0);
-  const companyTier = lead?.companyTier || 1;
-  const TIER_BADGE = {
-    1: { label: 'Enterprise', color: 'bg-slate-100 text-slate-600' },
-    2: { label: 'Mid-Market', color: 'bg-blue-50 text-blue-600' },
-    3: { label: '🚀 Startup', color: 'bg-purple-50 text-purple-700' },
-  };
-  const tierBadge = TIER_BADGE[companyTier] || TIER_BADGE[1];
-
-
-
-  const handleScoutDeployment = async () => {
-    setIsScouting(true);
+  const handleSearchAlumni = async () => {
+    setAlumniSearching(true);
     try {
-      if (onSelect) {
-        await onSelect(lead);
-      }
-      setScoutDeployed(true);
-      window.dispatchEvent(new CustomEvent('cff:refresh-feed'));
-    } catch (error) {
-      console.error('Scout failed:', error);
+      const res = await scoutCompanyBackdoor({
+        jobId: lead.company, // use company as jobId since we don't have a real jobId
+        companyName: lead.company,
+      });
+      const data = res?.data || res;
+      setFoundAlumni(data?.alumni || []);
+      setAlumniSearched(true);
+    } catch (err) {
+      console.error('Alumni search failed:', err);
+      setFoundAlumni([]);
+      setAlumniSearched(true);
     } finally {
-      setIsScouting(false);
+      setAlumniSearching(false);
     }
   };
 
+  if (dismissed) return null;
+
   return (
-    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between min-h-[380px] hover:border-gray-300 transition-all relative" data-component="DiscoveryJobCard-v2">
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between min-h-[380px] hover:border-gray-300 transition-all relative">
       <div>
         {/* Card Header */}
         <div className="flex justify-between items-start">
@@ -61,7 +68,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {isPinned && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200" title="Saved — won't be rotated out">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">
                 📌 Saved
               </span>
             )}
@@ -80,55 +87,84 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             )}
           </div>
         </div>
-        
-        {/* Job Description - Truncated Preview */}
-        {(() => {
-          const fullDesc = lead.jobDescription || lead.description || '';
-          const LIMIT = 180;
-          const isTruncated = fullDesc.length > LIMIT;
-          const preview = isTruncated ? fullDesc.slice(0, LIMIT).trimEnd() + '…' : fullDesc;
-          return (
-            <div className="mt-4 text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-200">
+
+        {/* Job Description */}
+        <div className="mt-4 text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-200">
+          {jobDesc ? (
+            <>
               <p className="leading-relaxed text-sm">
-                {preview || "No description preview available."}
+                {jobDesc.length > 200 ? jobDesc.slice(0, 200).trimEnd() + '…' : jobDesc}
               </p>
-              {isTruncated && (
+              {jobDesc.length > 200 && (
                 <button
                   onClick={() => setShowFullDesc(true)}
                   className="text-[11px] text-purple-600 font-bold hover:text-purple-700 mt-2 block underline cursor-pointer"
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
                 >
                   Read Full Description →
                 </button>
               )}
+            </>
+          ) : (
+            <p className="leading-relaxed text-sm text-gray-400 italic">Tap "Generate Message" to learn more about this role.</p>
+          )}
+        </div>
+
+        {/* Alumni Search Section */}
+        <div className="mt-4">
+          {!alumniSearched ? (
+            <button
+              onClick={handleSearchAlumni}
+              disabled={alumniSearching}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100 text-xs font-bold transition-colors"
+              style={{ minHeight: 'auto', cursor: alumniSearching ? 'not-allowed' : 'pointer' }}
+            >
+              {alumniSearching ? (
+                <>
+                  <span className="inline-block animate-spin">⟳</span>
+                  Searching {school} alumni at {lead.company}…
+                </>
+              ) : (
+                <>
+                  {mascot} Search for {school} Alumni at {lead.company}
+                </>
+              )}
+            </button>
+          ) : foundAlumni && foundAlumni.length > 0 ? (
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-2">
+              <p className="text-xs font-bold text-purple-800">{mascot} Found {foundAlumni.length} {school} alumni!</p>
+              {foundAlumni.slice(0, 3).map((a, i) => (
+                <div key={i} className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-gray-800 truncate">{a.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{a.role_title || 'Professional'}</p>
+                  </div>
+                  {a.linkedin_url && (
+                    <a
+                      href={a.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-blue-600 font-bold shrink-0 hover:underline"
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                    >
+                      LinkedIn →
+                    </a>
+                  )}
+                </div>
+              ))}
             </div>
-          );
-        })()}
-        
-        {/* Insider footer — STATE A / STATE B */}
-        {insiderCount > 0 ? (
-          <div className="mt-5 bg-gray-50 rounded-xl p-3 border border-gray-200 flex items-center gap-2.5">
-            <span className="text-base">🤖</span>
-            <p className="text-xs font-bold text-gray-800">
-              CLiFF found {insiderCount} {school} alumni who work here 🌐
-            </p>
-          </div>
-        ) : (
-          <div className="mt-5 rounded-xl p-3 border flex items-start gap-2.5" style={{ background: 'linear-gradient(135deg, #faf5ff, #f0f9ff)', borderColor: '#e9d5ff' }}>
-            <span className="text-base">🔍</span>
-            <div>
-              <p className="text-xs font-bold" style={{ color: '#6b21a8', margin: 0 }}>Direct Website Discovery</p>
-              <p className="text-[10px] mt-0.5 leading-relaxed" style={{ color: '#7c3aed', margin: 0 }}>
-                Verified source: {lead.company_domain || 'Verified corporate career page'}
-              </p>
+          ) : (
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
+              <p className="text-xs text-gray-500">No {school} alumni found at {lead.company} yet.</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Card Action Footer */}
       <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
         <div className="relative group">
-          <button 
+          <button
             onClick={handleAddToPipeline}
             disabled={added}
             className={`p-2 border rounded-xl transition cursor-pointer ${added ? 'border-green-400 bg-green-50 text-green-600' : 'border-gray-200 hover:bg-gray-50 text-gray-400 hover:text-gray-600'}`}
@@ -139,76 +175,48 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           {!added && (
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[11px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               Add to Pipeline
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
-            </div>
-          )}
-          {added && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-green-600 text-white text-[11px] font-semibold rounded-lg whitespace-nowrap pointer-events-none shadow-lg">
-              ✅ Added to Pipeline!
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-green-600" />
             </div>
           )}
         </div>
-        
-        {insiderCount === 0 ? (
-          <button 
-            onClick={() => onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(lead.company)}&role=${encodeURIComponent(lead.role)}`)}
-            className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
-          >
-            ⚡ Generate Message
-          </button>
-        ) : (
-          <button 
-            onClick={scoutDeployed ? () => onSelect && onSelect(lead) : handleScoutDeployment}
-            disabled={isScouting}
-            className={`px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer ${
-              isScouting 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-                : scoutDeployed
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-orange-500 hover:bg-orange-600 text-white'
-            }`}
-          >
-            {isScouting ? 'Searching...' : scoutDeployed ? '✅ View Insiders' : '🔍 Find an Insider'}
-          </button>
-        )}
+
+        <button
+          onClick={() => onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(lead.company)}&role=${encodeURIComponent(lead.role)}`)}
+          className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
+          style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', minHeight: 'auto' }}
+        >
+          ⚡ Generate Message
+        </button>
       </div>
 
-      {/* Simple Overlaid Full Description Modal */}
+      {/* Full Description Modal */}
       {showFullDesc && (
-        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" style={{ animation: 'fadeIn 0.2s ease-out' }}>
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] flex flex-col p-6 shadow-2xl border border-gray-100">
             <div className="flex justify-between items-center border-b border-gray-100 pb-3">
               <div>
                 <h3 className="font-bold text-gray-900 text-base">{lead.role}</h3>
                 <p className="text-xs text-gray-500 font-medium">{lead.company} — Job Details</p>
               </div>
-              <button 
+              <button
                 onClick={() => setShowFullDesc(false)}
                 className="text-gray-400 hover:text-gray-600 text-sm font-bold p-1 cursor-pointer"
+                style={{ minHeight: 'auto', minWidth: 'auto' }}
               >
                 ✕
               </button>
             </div>
-            
-            <div className="flex-1 overflow-y-auto my-4 pr-1 text-xs text-gray-700 space-y-3 leading-relaxed font-sans">
-              {(() => {
-                const fullDesc = lead.fullDescription || lead.jobDescription || lead.description || '';
-                // Split by paragraphs/newlines for better readability
-                const paragraphs = fullDesc.split(/\n\n+|\n+/).filter(p => p.trim());
-                return paragraphs.map((para, idx) => (
-                  <p key={idx} className="text-sm">{para.trim()}</p>
-                ));
-              })()}
+            <div className="flex-1 overflow-y-auto my-4 pr-1 text-sm text-gray-700 space-y-3 leading-relaxed">
+              {(jobDesc || '').split(/\n\n+|\n+/).filter(p => p.trim()).map((para, idx) => (
+                <p key={idx}>{para.trim()}</p>
+              ))}
             </div>
-
             <div className="border-t border-gray-100 pt-3 flex justify-end">
-              <button 
+              <button
                 onClick={() => setShowFullDesc(false)}
                 className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                style={{ minHeight: 'auto', minWidth: 'auto' }}
               >
-                Close Details
+                Close
               </button>
             </div>
           </div>

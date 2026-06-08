@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
     let jobPool = liveCompanies.map(c => ({
       company: c.name,
       role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
-      description: c.hiring_description || `${c.name} is actively hiring entry-level ${targetRole || 'professionals'}.`,
+      description: c.hiring_description || c.description || `${c.name} is actively hiring entry-level ${targetRole || 'professionals'}.`,
       source: `${(c.name || '').toLowerCase().replace(/\s+/g, '')}.com/careers`,
       sourceCategory: 'B',
       companyTier: c.size === 'startup' ? 3 : c.size === 'mid' ? 2 : 1,
@@ -344,7 +344,7 @@ Deno.serve(async (req) => {
         priorityInsiders.push({
           company: job.company,
           role: job.role,
-          jobDescription: job.description,
+          jobDescription: job.description || job.hiring_description || '',
           jobSource: job.source || null,
           jobSourceCategory: job.sourceCategory || 'B',
           targetIndustry: targetIndustries[0] || '',
@@ -364,7 +364,7 @@ Deno.serve(async (req) => {
         targetedDiscoveries.push({
           company: job.company,
           role: job.role,
-          jobDescription: job.description,
+          jobDescription: job.description || job.hiring_description || '',
           jobSource: job.source || null,
           jobSourceCategory: job.sourceCategory || 'B',
           targetIndustry: targetIndustries[0] || '',
