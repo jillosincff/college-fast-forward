@@ -390,21 +390,22 @@ async function getLiveJobMatches(base44, goals, industries, sizePreference) {
   const industry = industries[0] || 'general business';
   const size = sizePreference[0] || 'any size';
 
+  const today = new Date().toISOString().slice(0, 10);
   const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt: `Search the web RIGHT NOW for companies actively hiring ${role}s in or near ${location} in 2025.
+    prompt: `Today is ${today}. Search the web for companies that have posted entry-level ${role} job openings in the last 14 days in or near ${location}.
 
-STRICT LOCATION RULE: Only return companies with confirmed job openings IN ${location} or offering remote positions open to candidates in ${location}. Do NOT return companies whose only openings are in other cities (e.g. if user wants New York, do not return Austin TX or San Francisco CA companies unless they have NY offices or are remote).
+STRICT FRESHNESS RULE: Only return companies with job postings confirmed on their own careers page or a major job board within the last 14 days. Do NOT return companies unless you can verify a recent, active posting.
+
+STRICT LOCATION RULE: Only return companies with confirmed job openings IN ${location} or offering remote positions open to candidates in ${location}.
 
 Focus on ${size} companies in ${industry}.
 
 Return exactly 5 companies matching this criteria.
 For each company:
-- Real company name (must have a job opening in ${location} OR be remote-friendly)
-- One sentence describing the specific ${role} openings in ${location}
+- Real company name (must have a verified recent job opening)
+- One sentence describing the specific ${role} openings and where you found them
 - Hiring signal: hot (aggressively hiring), warm (selectively hiring), or cool (limited)
-- Company size: startup (<100), mid (100-999), or large (1000+)
-
-Prioritize companies headquartered in or with major offices in ${location}. Remote-friendly companies are acceptable as a secondary option.`,
+- Company size: startup (<100), mid (100-999), or large (1000+)`,
     add_context_from_internet: true,
     model: 'gemini_3_flash',
     response_json_schema: {

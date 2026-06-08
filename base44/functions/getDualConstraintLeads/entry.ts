@@ -35,6 +35,9 @@ Deno.serve(async (req) => {
 
     console.log(`[DualConstraint] Searching jobs: "${jobSearchQuery}"`);
 
+    // Only return jobs posted within the last 14 days
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
     const res = await fetch('https://api.exa.ai/search', {
       method: 'POST',
       headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
@@ -42,6 +45,7 @@ Deno.serve(async (req) => {
         query: jobSearchQuery,
         type: 'neural',
         numResults: 20,
+        startPublishedDate: fourteenDaysAgo,
         contents: { text: { maxCharacters: 400 } },
       }),
     });
