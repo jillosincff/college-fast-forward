@@ -54,27 +54,18 @@ Deno.serve(async (req) => {
 
     const roleQuery = targetRole || targetIndustries.slice(0, 2).join(' or ');
 
-    // ── STEP 1: Find alumni working in target role ──────────────────────
-    // Use neural search WITH text content so we get rich snippets to extract company names from
+    // ── STEP 1: Single people search — Exa neural understands this phrasing well ──
     console.log(`[DualConstraint] Step 1: Finding ${shortSchool} alumni in "${roleQuery}"`);
 
-    const peopleQueries = [
-      `${shortSchool} alumnus alumna ${roleQuery} at company LinkedIn`,
-      `"University of Florida" OR "UF" graduate ${roleQuery} works at`,
-      `${universityName} alumni ${roleQuery} professional career`,
-    ];
-
-    const peopleResults = await Promise.all(
-      peopleQueries.map(q =>
-        exaFetch('search', {
-          query: q,
-          type: 'neural',
-          category: 'people',
-          numResults: 8,
-          contents: { text: { maxCharacters: 600 } },
-        }).catch(() => ({ results: [] }))
-      )
-    );
+    const peopleResults = await Promise.all([
+      exaFetch('search', {
+        query: `${universityName} alumni ${roleQuery}`,
+        type: 'neural',
+        category: 'people',
+        numResults: 15,
+        contents: { text: { maxCharacters: 500 } },
+      }).catch(() => ({ results: [] }))
+    ]);
 
     // Deduplicate profiles and extract company names
     const seenUrls = new Set();
@@ -199,76 +190,39 @@ Deno.serve(async (req) => {
       return Response.json({ success: true, leads: [], reason: 'No companies extracted from alumni profiles' });
     }
 
-    // ── STEP 2: Resolve each company's actual career page domain, then search within it ──
-    // This prevents cross-company contamination (e.g. McKinsey results showing McKesson jobs)
+    // ── STEP 2: Single job search across all top companies ──────────────
     const SENIOR_PATTERN = /\b(senior|sr\b|lead|principal|director|manager|head of|vp\b|vice president|staff)\b/i;
 
-    const topCompanies = rankedCompanies.slice(0, 8);
-    console.log(`[DualConstraint] Step 2: Resolving career domains for: ${topCompanies.map(c => c.name).join(', ')}`);
+    const topCompanies = rankedCompanies.slice(0, 6);
+    console.log(`[DualConstraint] Step 2: Searching jobs at: ${topCompanies.map(c => c.name).join(', ')}`);
 
-    // Step 2a: For each company, find their specific ATS/careers URL via Exa
-    // We search for their careers page and extract the exact domain — this is the "domain lock"
-    const companyDomains = await Promise.all(
-      topCompanies.map(async company => {
-        try {
-          const res = await exaFetch('search', {
-            query: `${company.name} official careers jobs apply`,
-            type: 'neural',
-            numResults: 3,
-            contents: { text: false },
-          });
-          const results = res.results || [];
-          // Pick the first result whose URL contains a recognizable ATS or career path
-          const atsPatterns = /lever\.co|greenhouse\.io|ashbyhq\.com|workable\.com|workday|smartrecruiters|taleo|icims|careers\.|jobs\./i;
-          const best = results.find(r => atsPatterns.test(r.url)) || results[0];
-          if (!best?.url) return { company: company.name, domain: null };
-          // Extract hostname as the domain lock
-          const domain = new URL(best.url).hostname.replace(/^www\./, '');
-          return { company: company.name, domain, careerUrl: best.url };
-        } catch {
-          return { company: company.name, domain: null };
-        }
-      })
-    );
+    const locationCity = userLocation ? userLocation.split(',')[0].trim() : '';
+    const remoteIntent = /^(remote|anywhere|flexible|open to relocation)$/i.test((userLocation || '').trim());
+    const companyList = topCompanies.map(c => `"${c.name}"`).join(' OR ');
+    const locationSuffix = remoteIntent ? ' remote' : locationCity ? ` ${locationCity}` : '';
+    const jobQuery = `${roleQuery} entry level job opening (${companyList})${locationSuffix}`;
 
-    console.log(`[DualConstraint] Resolved domains: ${companyDomains.map(c => `${c.company}→${c.domain || 'none'}`).join(', ')}`);
+    const jobSearchResult = await exaFetch('search', {
+      query: jobQuery,
+      type: 'neural',
+      numResults: 12,
+      contents: {
+        highlights: { maxCharacters: 400, numSentences: 3 },
+        text: { maxCharacters: 600 },
+      },
+    }).catch(() => ({ results: [] }));
 
-    // Build a location qualifier for the job search query
-    // e.g. "New York, NY" → "New York" | "Remote" → "remote"
-    const locationCity = userLocation
-      ? userLocation.split(',')[0].trim()
-      : '';
-    const remoteIntent = /^(remote|anywhere|flexible|open to relocation)$/i.test(userLocation.trim());
-    // Cast a wider net at the Exa layer so the two-tier filter below has
-    // material to work with — city-specific users want their city when
-    // available but will fall back to remote/ambiguous posts if the city
-    // is sparse (e.g. Miami at most alumni-verified companies).
-    const locationQuery = remoteIntent
-      ? `"remote" OR "remote-friendly" OR "remote-first"`
-      : locationCity
-      ? `"${locationCity}" OR "remote"`
-      : '';
-
-    // Step 2b: For each company, search for jobs restricted to their resolved domain
-    const perCompanyJobResults = await Promise.all(
-      companyDomains.map(({ company, domain, careerUrl }) => {
-        if (!domain) return Promise.resolve({ company, results: [] });
-        const jobQuery = locationQuery
-          ? `"${roleQuery}" entry level (${locationQuery}) job opening`
-          : `"${roleQuery}" entry level job opening`;
-        return exaFetch('search', {
-          query: jobQuery,
-          type: 'neural',
-          numResults: 5,
-          includeDomains: [domain],
-          contents: {
-            highlights: { maxCharacters: 500, numSentences: 4 },
-            text: { maxCharacters: 1000 },
-          },
-        }).then(d => ({ company, domain, results: d.results || [] }))
-          .catch(() => ({ company, domain, results: [] }));
-      })
-    );
+    // Map job results back to companies by checking which company name appears in the URL/title
+    const companyDomains = topCompanies.map(c => ({ company: c.name, domain: null }));
+    const perCompanyJobResults = topCompanies.map(company => {
+      const matches = (jobSearchResult.results || []).filter(r => {
+        const haystack = ((r.url || '') + ' ' + (r.title || '')).toLowerCase();
+        const compNorm = company.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const firstWord = compNorm.slice(0, Math.min(6, compNorm.length));
+        return haystack.includes(firstWord) || haystack.includes(company.name.toLowerCase().split(' ')[0].toLowerCase());
+      });
+      return { company: company.name, domain: null, results: matches };
+    });
 
     // Sanitize Exa description text into a clean, human-readable snippet
     const cleanDescription = (raw) => {
