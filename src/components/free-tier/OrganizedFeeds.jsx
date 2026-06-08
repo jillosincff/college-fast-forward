@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
+import { getLiveJobMatchesFn } from '@/functions/getLiveJobMatchesFn';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -66,21 +67,19 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   })());
 
   const { data: feedsData, isLoading, isFetching } = useQuery({
-    queryKey: ['personalizedNetworkCarousel', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation, refreshKey],
-    queryFn: () => getPersonalizedNetworkCarousel({
-      explicit_target_role: effectiveRole,
-      explicit_target_industries: target_industries || [],
-      target_industries: target_industries || [],
-      target_role: effectiveRole,
-      company_size_preference: effectiveSize,
-      target_location: effectiveLocation,
-      refresh_seed: refreshKey,
-      seen_companies: seenForExclusionRef.current,
+    queryKey: ['liveJobMatches', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation, refreshKey],
+    queryFn: () => getLiveJobMatchesFn({
+      career_goals: {
+        role: effectiveRole,
+        industries: target_industries || [],
+        locations: effectiveLocation ? [effectiveLocation] : [],
+        company_size_preference: effectiveSize && effectiveSize !== 'all' ? [effectiveSize] : [],
+      },
+      force_refresh: refreshKey > 0,
     }),
     enabled: !!effectiveRole || !!target_industries?.length,
-    staleTime: 0,
-    gcTime: 0,
-    cacheTime: 0,
+    staleTime: 20 * 60 * 1000,  // 20 min in-memory cache
+    gcTime: 30 * 60 * 1000,
   });
 
   const { data: dualData, isLoading: dualLoading } = useQuery({
@@ -99,8 +98,19 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                   : Array.isArray(dualData?.leads) ? dualData.leads : [];
 
   const payload = feedsData?.data || feedsData;
-  const priorityInsiders    = Array.isArray(payload?.priorityInsiders)    ? payload.priorityInsiders    : [];
-  const targetedDiscoveries = Array.isArray(payload?.targetedDiscoveries) ? payload.targetedDiscoveries : [];
+  // getLiveJobMatchesFn returns { companies: [...] }
+  const liveCompanies = Array.isArray(payload?.companies) ? payload.companies : [];
+  // map to the shape DiscoveryJobCard expects
+  const targetedDiscoveries = liveCompanies.map(c => ({
+    company: c.name,
+    companyName: c.name,
+    job_title: c.job_title,
+    hiring_description: c.hiring_description,
+    job_url: c.job_url,
+    hiring_signal: c.hiring_signal,
+    industry: c.industry,
+  }));
+  const priorityInsiders = [];
 
   // Merge dual (alumni-verified) leads into the main pool with an insider pill, deduplicated
   const mergedSeen = new Set();
