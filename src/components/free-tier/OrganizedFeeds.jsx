@@ -173,7 +173,16 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     allFetched.push(lead);
   }
 
-  const handleManualRefresh = () => {
+  const handleManualRefresh = async () => {
+    // Clear backend cache first
+    try {
+      await fetch('/api/functions/clearJobLeadsCache', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+    } catch (err) { console.error('Cache clear failed:', err); }
+    
     const currentSeen = new Set(seenCompanyKeys);
     allFetched.forEach(l => { const k = l.company || l.companyName; if (k) currentSeen.add(k); });
     try { sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify([...currentSeen])); } catch {}
