@@ -1,22 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * Step 1: Find real job listings matching the user's role + location
- * Step 2: For each company found, search for alumni from the user's school
+ * Find real job listings matching the user's role + location.
+ * Alumni lookup is NOT done here — it's triggered separately when the user
+ * clicks "Find Alumni" on a specific company card.
  */
 Deno.serve(async (req) => {
   const EXA_API_KEY = Deno.env.get('EXA_API_KEY');
   if (!EXA_API_KEY) return Response.json({ success: false, error: 'EXA_API_KEY not set' }, { status: 500 });
 
-  const exaFetch = async (body) => {
-    const res = await fetch('https://api.exa.ai/search', {
-      method: 'POST',
-      headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`Exa search failed: ${res.status}`);
-    return res.json();
-  };
+  const JOB_BOARD_PATTERN = /indeed|linkedin|glassdoor|ziprecruiter|builtin|jobsearcher|jobright|monster|simplyhired|careerbuilder|snagajob|handshake|wayup|internships\.com|jobot|talentcom|joblist|jobcase/i;
 
   try {
     const base44 = createClientFromRequest(req);
@@ -27,7 +20,6 @@ Deno.serve(async (req) => {
 
     const targetRole = payload.explicit_target_role || user.career_goals?.target_roles?.[0] || user.target_roles?.[0] || '';
     const targetIndustries = payload.explicit_target_industries || user.career_goals?.target_industries || user.target_industries || [];
-    const universityName = user.school_name || user.school || user.university || 'University of Florida';
     const userLocation = payload.target_location || user.career_goals?.location_preference || user.location || '';
 
     if (!targetRole && targetIndustries.length === 0) {
@@ -37,21 +29,24 @@ Deno.serve(async (req) => {
     const roleQuery = targetRole || targetIndustries.slice(0, 2).join(' ');
     const locationCity = userLocation ? userLocation.split(',')[0].trim() : '';
 
-    // ── STEP 1: Find actual job listings ──────────────────────────────────
     const jobSearchQuery = locationCity
       ? `${roleQuery} entry level junior jobs hiring ${locationCity}`
       : `${roleQuery} entry level junior jobs hiring`;
 
     console.log(`[DualConstraint] Searching jobs: "${jobSearchQuery}"`);
 
-    const jobData = await exaFetch({
-      query: jobSearchQuery,
-      type: 'neural',
-      numResults: 15,
-      contents: { text: { maxCharacters: 400 } },
+    const res = await fetch('https://api.exa.ai/search', {
+      method: 'POST',
+      headers: { 'x-api-key': EXA_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: jobSearchQuery,
+        type: 'neural',
+        numResults: 20,
+        contents: { text: { maxCharacters: 400 } },
+      }),
     });
-
-    const JOB_BOARD_PATTERN = /indeed|linkedin|glassdoor|ziprecruiter|builtin|jobsearcher|jobright|monster|simplyhired|careerbuilder|snagajob|handshake|wayup|internships\.com|jobot|talentcom|joblist|jobcase/i;
+    if (!res.ok) throw new Error(`Exa search failed: ${res.status}`);
+    const jobData = await res.json();
 
     const jobResults = (jobData.results || []).filter(r =>
       r.url && r.title &&
@@ -61,99 +56,47 @@ Deno.serve(async (req) => {
       !JOB_BOARD_PATTERN.test(r.title)
     );
 
-    console.log(`[DualConstraint] Found ${jobResults.length} job listings`);
+    console.log(`[DualConstraint] Found ${jobResults.length} job listings after filtering`);
 
     if (jobResults.length === 0) {
       return Response.json({ success: true, leads: [], reason: 'No job listings found' });
     }
 
-    // Extract unique company names from job results
-    const companySet = new Map(); // companyName → job
-    jobResults.forEach(r => {
-      // Title often looks like "Marketing Coordinator at Nike | LinkedIn" or "Nike - Marketing Analyst"
+    // Extract unique companies from job results
+    const companyMap = new Map(); // companyName → job
+    for (const r of jobResults) {
       const atMatch = r.title?.match(/\bat\s+([A-Z][A-Za-z0-9\s&.,'\-]{2,40}?)(?:\s*[|·\-]|\s*$)/);
       const dashMatch = r.title?.match(/^([A-Z][A-Za-z0-9\s&.,'\-]{2,40}?)\s*[-–|]/);
-      // Also try extracting from URL hostname
       let hostCompany = null;
       try {
         const host = new URL(r.url).hostname.replace(/^www\./, '').split('.')[0];
-        if (host && host.length > 2 && !/lever|greenhouse|workday|indeed|linkedin|glassdoor|ziprecruiter|builtin/i.test(host)) {
+        if (host && host.length > 2 && !JOB_BOARD_PATTERN.test(host)) {
           hostCompany = host.charAt(0).toUpperCase() + host.slice(1);
         }
       } catch {}
 
       const company = atMatch?.[1]?.trim() || dashMatch?.[1]?.trim() || hostCompany;
-      if (company && company.length > 1 && !companySet.has(company) && !JOB_BOARD_PATTERN.test(company)) {
-        companySet.set(company, {
+      if (company && company.length > 1 && !companyMap.has(company) && !JOB_BOARD_PATTERN.test(company)) {
+        companyMap.set(company, {
           title: r.title?.split(/[|·]/)[0]?.trim() || r.title,
           url: r.url,
           description: (r.text || '').slice(0, 300),
         });
       }
-    });
+    }
 
-    const companies = [...companySet.entries()].slice(0, 8); // top 8 companies
-    console.log(`[DualConstraint] Extracted companies: ${companies.map(([c]) => c).join(', ')}`);
+    const leads = [...companyMap.entries()].slice(0, 10).map(([company, job]) => ({
+      company,
+      role: roleQuery,
+      hasActiveJobs: true,
+      activeJobs: [job],
+      signalTier: 'silver',
+      ctaType: 'find_alumni',
+      leadTier: 'dual_constraint',
+      source: 'dual_constraint_engine',
+    }));
 
-    // ── STEP 2: For each company, find alumni from user's school ──────────
-    const alumniResults = await Promise.all(
-      companies.map(async ([companyName, job]) => {
-        try {
-          const alumniData = await exaFetch({
-            query: `${universityName} alumni that works at ${companyName}`,
-            type: 'neural',
-            numResults: 5,
-            includeDomains: ['linkedin.com'],
-            contents: { text: { maxCharacters: 300 } },
-          });
-
-          const profiles = (alumniData.results || []).filter(r =>
-            /linkedin\.com\/in\/[^/?]+/.test(r.url || '')
-          );
-
-          const insiders = profiles.slice(0, 3).map(p => {
-            const namePart = (p.title || '').split(/[|\-·]/)[0].trim();
-            return {
-              name: namePart || 'Alumni',
-              url: p.url,
-              headline: p.title || '',
-            };
-          });
-
-          return {
-            company: companyName,
-            job,
-            alumniCount: profiles.length,
-            insiders,
-            hasAlumni: profiles.length > 0,
-          };
-        } catch {
-          return { company: companyName, job, alumniCount: 0, insiders: [], hasAlumni: false };
-        }
-      })
-    );
-
-    // Sort: companies with alumni first, then by alumni count
-    const leads = alumniResults
-      .sort((a, b) => {
-        if (a.hasAlumni && !b.hasAlumni) return -1;
-        if (!a.hasAlumni && b.hasAlumni) return 1;
-        return b.alumniCount - a.alumniCount;
-      })
-      .map(r => ({
-        company: r.company,
-        role: roleQuery,
-        alumniCount: r.alumniCount,
-        insiders: r.insiders,
-        hasActiveJobs: true,
-        activeJobs: [r.job],
-        signalTier: r.hasAlumni ? 'gold' : 'silver',
-        ctaType: 'add_to_pipeline',
-        leadTier: 'dual_constraint',
-        source: 'dual_constraint_engine',
-      }));
-
-    console.log(`[DualConstraint] Returning ${leads.length} leads (${leads.filter(l => l.alumniCount > 0).length} with alumni)`);
+    console.log(`[DualConstraint] Returning ${leads.length} job leads`);
     return Response.json({ success: true, leads });
 
   } catch (e) {
