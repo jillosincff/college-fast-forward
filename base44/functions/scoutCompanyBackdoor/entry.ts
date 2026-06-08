@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
       const exaResponse = await fetch('https://api.exa.ai/search', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${EXA_API_KEY}`,
+          'x-api-key': EXA_API_KEY,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
