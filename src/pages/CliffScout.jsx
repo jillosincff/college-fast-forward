@@ -171,11 +171,16 @@ export default function CliffScout() {
   useEffect(() => {
     if (!conversation?.id) return;
     const unsub = base44.agents.subscribeToConversation(conversation.id, (data) => {
-      // Skip the agent's auto-generated opening assistant message (index 0) — we render our own greeting
       const allMsgs = data.messages || [];
+      // Only show messages from the first user message onward — suppresses any agent auto-open
       const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
-      const filtered = firstUserIdx === -1 ? [] : allMsgs.slice(firstUserIdx);
-      setMessages(filtered);
+      if (firstUserIdx === -1) {
+        // No user message yet — show nothing, keep greeting visible
+        setMessages([]);
+        return;
+      }
+      // Slice from first user message and drop any leading assistant messages before it
+      setMessages(allMsgs.slice(firstUserIdx));
     });
     return unsub;
   }, [conversation?.id]);
