@@ -400,69 +400,82 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
 
             {/* Detail body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-5">
-              {/* Alumni contact card */}
-              <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-xl p-4">
-                <div className="w-11 h-11 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900">{selectedJob.alumni_name || '—'}</p>
-                  <p className="text-sm text-gray-600 mt-0.5">{selectedJob.role || 'Role unknown'} · {selectedJob.company}</p>
-                  {selectedJob.alumni_source && (
-                    <Badge variant="secondary" className="text-[10px] mt-2 bg-purple-100 text-purple-700 border-purple-200 capitalize">
-                      🎓 {selectedJob.alumni_source.replace(/_/g, ' ')}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Status + current stage */}
-              <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Current Stage</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-sm font-semibold capitalize">
+              {/* Company + Status header */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 rounded-xl p-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Company</p>
+                <p className="font-bold text-gray-900 text-lg">{selectedJob.company}</p>
+                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 bg-white text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-sm font-semibold capitalize shadow-sm">
                     {selectedJob.status?.replace(/_/g, ' ')}
                   </span>
                   {selectedJob.follow_up_count > 0 && (
-                    <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-600 border border-orange-200 rounded-full px-3 py-1 text-xs font-semibold">
-                      🔁 {selectedJob.follow_up_count} follow-up{selectedJob.follow_up_count > 1 ? 's' : ''} sent
+                    <span className="inline-flex items-center gap-1 bg-white text-orange-600 border border-orange-200 rounded-full px-3 py-1 text-xs font-semibold shadow-sm">
+                      🔁 {selectedJob.follow_up_count} follow-up{selectedJob.follow_up_count > 1 ? 's' : ''}
                     </span>
                   )}
                 </div>
               </div>
 
+              {/* Contact info */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contact</p>
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900">{selectedJob.alumni_name && selectedJob.alumni_name !== 'Position' ? selectedJob.alumni_name : 'No contact name'}</p>
+                      <p className="text-sm text-gray-600 mt-0.5">{selectedJob.role && selectedJob.role !== 'Position' ? selectedJob.role : 'Role not specified'}</p>
+                      {selectedJob.alumni_source && (
+                        <Badge variant="secondary" className="text-[10px] mt-2 bg-purple-50 text-purple-700 border-purple-200 capitalize">
+                          Source: {selectedJob.alumni_source.replace(/_/g, ' ')}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Timeline */}
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Activity Timeline</p>
-                <div className="space-y-2">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Timeline</p>
+                <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
                   {[
                     { label: 'Identified', date: selectedJob.identified_date, color: 'gray' },
                     { label: 'Reached out', date: selectedJob.reached_out_date, color: 'blue' },
-                    { label: 'Follow-up sent', date: selectedJob.follow_up_date, color: 'orange' },
+                    { label: 'Follow-up', date: selectedJob.follow_up_date, color: 'orange' },
                     { label: 'Replied', date: selectedJob.replied_date, color: 'green' },
                     { label: 'Interview', date: selectedJob.interview_date, color: 'purple' },
                     { label: 'Offer', date: selectedJob.offer_date, color: 'emerald' },
                   ].filter(e => e.date).map((event, i) => (
                     <div key={i} className="flex items-center gap-3 text-sm">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 bg-${event.color}-400`} />
-                      <span className="text-gray-500 w-28 flex-shrink-0">{event.label}</span>
-                      <span className="text-gray-800 font-medium">
+                      <div className={`w-2 h-2 rounded-full bg-${event.color}-500`} />
+                      <span className="text-gray-600 w-24">{event.label}</span>
+                      <span className="text-gray-900 font-medium">
                         {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
                   ))}
-                  {!selectedJob.identified_date && !selectedJob.reached_out_date && !selectedJob.replied_date && (
-                    <p className="text-xs text-gray-400 italic">No dates recorded yet.</p>
+                  {!selectedJob.identified_date && !selectedJob.reached_out_date && !selectedJob.replied_date && !selectedJob.interview_date && !selectedJob.offer_date && (
+                    <p className="text-xs text-gray-400 italic">No timeline dates recorded yet.</p>
                   )}
                 </div>
               </div>
 
               {/* Notes */}
-              {selectedJob.notes && (
+              {selectedJob.notes && selectedJob.notes.trim() !== '' ? (
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
-                  <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <p className="text-sm text-gray-700 leading-relaxed bg-white border border-gray-200 rounded-xl p-4">
                     {selectedJob.notes}
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+                  <p className="text-sm text-gray-400 italic bg-gray-50 rounded-xl p-4 border border-dashed border-gray-200">
+                    No notes added yet.
                   </p>
                 </div>
               )}
