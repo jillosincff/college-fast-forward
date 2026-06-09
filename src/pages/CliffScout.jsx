@@ -169,18 +169,28 @@ export default function CliffScout() {
     try {
       // Create the conversation on first send only — never before
       if (!conversationRef.current) {
-        if (!firstSentMsgRef.current) firstSentMsgRef.current = msg;
+        firstSentMsgRef.current = msg;
         const u = userRef.current;
+        const activityCtx = ctxRef.current || 'Pipeline is empty — student is just getting started.';
 
-        // Create conversation with NO variables — variables trigger the platform
-        // to generate an auto-opener which we can't suppress reliably.
         const conv = await base44.agents.createConversation({
           agent_name: 'cliff_scout',
-          metadata: { name: 'CLiFF Scout Session' },
+          metadata: {
+            name: 'CLiFF Scout Session',
+            system_context: activityCtx,
+          },
+          variables: {
+            user: {
+              almaMater: u?.school_name || u?.school || u?.schoolName || 'University of Florida',
+              firstName: u?.full_name?.split(' ')[0] || '',
+              activityContext: activityCtx,
+            },
+          },
         });
         conversationRef.current = conv;
 
-        // Subscribe BEFORE adding any messages. Anchor on first user message by content.
+        // Subscribe and anchor strictly to the first user message content.
+        // Any platform-generated opener (assistant role) before this will be skipped.
         subscriptionRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
           const allMsgs = data.messages || [];
           const anchorIdx = allMsgs.findIndex(
@@ -189,17 +199,6 @@ export default function CliffScout() {
           if (anchorIdx === -1) return;
           setMessages(allMsgs.slice(anchorIdx));
         });
-
-        // Inject context as the very first user message (hidden from UI via anchor)
-        // This ensures the agent has full context without triggering a greeting.
-        const contextPreamble = [
-          `[SYSTEM CONTEXT — do not acknowledge or repeat this]`,
-          `Student name: ${u?.full_name?.split(' ')[0] || 'Student'}`,
-          `Alma mater: ${u?.school_name || u?.school || u?.schoolName || 'University of Florida'}`,
-          ctxRef.current || 'Pipeline is empty — student is just getting started.',
-        ].join('\n');
-
-        await base44.agents.addMessage(conv, { role: 'user', content: contextPreamble });
       }
 
       await base44.agents.addMessage(conversationRef.current, { role: 'user', content: msg });
