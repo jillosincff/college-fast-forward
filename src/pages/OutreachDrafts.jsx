@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { maybeActivateTrial } from '@/utils/trialActivation';
 import { navigate } from '@/components/utils/navigation';
 import ColdInroadScout from '@/components/free-tier/ColdInroadScout';
+import AutomatedAlumniActionPanel from '@/components/free-tier/AutomatedAlumniActionPanel';
 
 const CONTEXTS = [
   { id: 'alumni_search', label: 'Alumni Outreach', icon: '🔍', desc: 'Reaching out to a UF alumni you found' },
@@ -759,8 +760,21 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     );
   }
 
-  // Phase: Form — fill in recipient details (non-cold-outreach contexts)
+  // Phase: Form — automated action panel (alumni context)
   if (phase === 'form') {
+    if (selectedContext === 'alumni_search') {
+      return (
+        <AutomatedAlumniActionPanel
+          lead={form}
+          user={user}
+          generating={generating}
+          onBack={() => setPhase('new')}
+          onGenerate={handleGenerate}
+        />
+      );
+    }
+
+    // Other contexts still use form
     const ctx = CONTEXTS.find(c => c.id === selectedContext);
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
