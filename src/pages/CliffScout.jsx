@@ -99,18 +99,19 @@ export default function CliffScout() {
       let activityContext = '';
       if (ctx) {
         if (ctx.pipelineEmpty) {
-          activityContext = 'The student has NO contacts in their networking pipeline yet — they are just getting started.';
+          activityContext = 'The student has NO contacts in their networking pipeline yet — they are just getting started. Do NOT mention any saved jobs, opportunities, or pipeline stats.';
         } else {
           const lines = [
-            `Pipeline summary: ${ctx.totalContacts} total contacts tracked.`,
-            ctx.identified > 0 && `${ctx.identified} identified (not yet reached out).`,
-            ctx.matched > 0 && `${ctx.matched} matched (ready to contact).`,
-            ctx.reachedOut > 0 && `${ctx.reachedOut} already messaged.`,
-            ctx.replies > 0 && `${ctx.replies} have replied.`,
-            ctx.interviews > 0 && `${ctx.interviews} interview(s) scheduled.`,
-            ctx.offers > 0 && `${ctx.offers} offer(s) received.`,
-            ctx.topCompanies.length > 0 && `Target companies: ${ctx.topCompanies.join(', ')}.`,
-            ctx.staleSummary && `⚠️ Follow-up needed: ${ctx.staleSummary}.`,
+            `Networking pipeline: ${ctx.totalContacts} total contacts tracked (these are people/alumni contacts, NOT job listings or opportunities).`,
+            ctx.identified > 0 ? `${ctx.identified} contacts identified (not yet reached out).` : null,
+            ctx.matched > 0 ? `${ctx.matched} contacts matched (ready to contact).` : null,
+            ctx.reachedOut > 0 ? `${ctx.reachedOut} contacts already messaged.` : null,
+            ctx.replies > 0 ? `${ctx.replies} contacts have replied.` : null,
+            ctx.interviews > 0 ? `${ctx.interviews} interview(s) scheduled.` : null,
+            ctx.offers > 0 ? `${ctx.offers} offer(s) received.` : null,
+            ctx.topCompanies.length > 0 ? `Target companies in pipeline: ${ctx.topCompanies.join(', ')}.` : null,
+            ctx.staleSummary ? `⚠️ Follow-up needed: ${ctx.staleSummary}.` : null,
+            'IMPORTANT: Do NOT fabricate or guess any numbers. Only reference the exact numbers above. Do NOT mention "active opportunities saved" or "sprint objective" — use plain direct language.',
           ].filter(Boolean);
           activityContext = lines.join(' ');
         }
