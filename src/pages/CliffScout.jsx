@@ -243,8 +243,18 @@ export default function CliffScout() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && !sending && !conversationStarted && (
           <div className="flex flex-col h-full gap-4 pt-2">
-            {/* Hardcoded greeting built from real pipeline data */}
-            {greeting && (
+            {/* Greeting: skeleton while loading, dynamic content once ready */}
+            {!greeting ? (
+              <div className="flex gap-3 justify-start">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center mt-0.5 shrink-0">
+                  <Zap className="w-3.5 h-3.5 text-white" />
+                </div>
+                <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 max-w-sm space-y-2">
+                  <div className="h-3 bg-slate-200 rounded animate-pulse w-48" />
+                  <div className="h-3 bg-slate-200 rounded animate-pulse w-36" />
+                </div>
+              </div>
+            ) : (
               <div className="flex gap-3 justify-start">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center mt-0.5 shrink-0">
                   <Zap className="w-3.5 h-3.5 text-white" />
