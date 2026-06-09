@@ -58,7 +58,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const [scoutPhase, setScoutPhase] = useState('analyzing'); // 'analyzing' | 'recommendation'
   const [recommendedTarget, setRecommendedTarget] = useState(null);
   
-  // Handle pre-population from URL params (when coming from MatchDeepDiveModal or Pure Sourcing)
+  // Handle pre-population from URL params (when coming from MatchDeepDiveModal or Pure Sourcing or Kanban)
   useEffect(() => {
     const hash = window.location.hash;
     const hashParamsPart = hash.includes('?') ? hash.split('?')[1] : '';
@@ -68,6 +68,10 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     const role = params.get('role');
     const tab = params.get('tab');
     const context = params.get('context');
+    const alumniName = params.get('alumniName');
+    const alumniRole = params.get('alumniRole');
+    const alumniLinkedin = params.get('alumniLinkedin');
+    const jobTitle = params.get('jobTitle');
 
     if (context === 'cold_outreach' && company) {
       // Pure Sourcing Play — pre-populate company/role, trigger CLiFF Scout
@@ -81,6 +85,20 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       setSelectedContext('cold_outreach');
       setScoutPhase('analyzing');
       setPhase('scout');
+      window.history.replaceState({}, '', '#OutreachDrafts');
+    } else if (alumniName && company) {
+      // From Kanban modal alumni selection
+      setForm({
+        recipientName: decodeURIComponent(alumniName),
+        recipientCompany: decodeURIComponent(company),
+        recipientTitle: alumniRole ? decodeURIComponent(alumniRole) : '',
+        recipientLinkedinUrl: alumniLinkedin ? decodeURIComponent(alumniLinkedin) : '',
+        jobTitle: jobTitle ? decodeURIComponent(jobTitle) : '',
+        jobUrl: '',
+        conversationContext: '',
+      });
+      setSelectedContext('alumni_search');
+      setPhase('form');
       window.history.replaceState({}, '', '#OutreachDrafts');
     } else if (contact && company) {
       setForm({

@@ -267,17 +267,6 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
       if (data && data.length > 0) {
         // Store all found alumni in state for display
         setFoundAlumni(data);
-        
-        // Update the pipeline record with the first alumni found
-        const firstAlumni = data[0];
-        await base44.entities.NetworkingPipeline.update(selectedJob.id, {
-          alumni_name: firstAlumni.name || '',
-          alumni_role: firstAlumni.role_title || '',
-          alumni_linkedin: firstAlumni.linkedin_url || '',
-          alumni_source: 'fastiq',
-        });
-        
-        loadPipeline();
       } else {
         alert(`🔍 No alumni found at ${companyName}. The agent will continue searching.`);
       }
@@ -285,6 +274,32 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
       console.error('Failed to deploy alumni agent:', error);
       const errorMsg = error?.response?.data?.error || error?.message || 'Unknown error';
       alert(`⚠️ Failed to search for alumni: ${errorMsg}`);
+    }
+  };
+
+  const handleSelectAlumni = async (alumni) => {
+    try {
+      // Update the pipeline record with the selected alumni
+      await base44.entities.NetworkingPipeline.update(selectedJob.id, {
+        alumni_name: alumni.name || '',
+        alumni_role: alumni.role_title || '',
+        alumni_linkedin: alumni.linkedin_url || '',
+        alumni_source: 'fastiq',
+      });
+      
+      // Refresh the pipeline data
+      loadPipeline();
+      
+      // Close the modal
+      onClose();
+      
+      // Navigate to the outreach draft page with the selected alumni info
+      setTimeout(() => {
+        window.location.hash = `#OutreachDrafts?context=alumni_search&company=${encodeURIComponent(selectedJob.company)}&jobTitle=${encodeURIComponent(selectedJob.job_title || '')}&alumniName=${encodeURIComponent(alumni.name || '')}&alumniRole=${encodeURIComponent(alumni.role_title || '')}&alumniLinkedin=${encodeURIComponent(alumni.linkedin_url || '')}`;
+      }, 100);
+    } catch (error) {
+      console.error('Failed to select alumni:', error);
+      alert(`⚠️ Failed to select alumni: ${error.message}`);
     }
   };
 
@@ -554,17 +569,25 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                                <p className="text-xs text-gray-500 mt-1 line-clamp-2">{alumni.description}</p>
                              )}
                            </div>
-                           {alumni.linkedin_url && (
-                             <a
-                               href={alumni.linkedin_url}
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               className="text-blue-600 hover:text-blue-700 flex-shrink-0"
-                               title="View LinkedIn"
+                           <div className="flex items-center gap-2 flex-shrink-0">
+                             {alumni.linkedin_url && (
+                               <a
+                                 href={alumni.linkedin_url}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="text-blue-600 hover:text-blue-700"
+                                 title="View LinkedIn"
+                               >
+                                 🔗
+                               </a>
+                             )}
+                             <button
+                               onClick={() => handleSelectAlumni(alumni)}
+                               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-xs font-semibold transition-colors"
                              >
-                               🔗
-                             </a>
-                           )}
+                               Select
+                             </button>
+                           </div>
                          </div>
                        </div>
                      ))}
