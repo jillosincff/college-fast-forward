@@ -45,9 +45,11 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     recipientName: '',
     recipientTitle: '',
     recipientCompany: '',
+    recipientEmail: '',
     recipientLinkedinUrl: '',
     jobTitle: '',
     jobUrl: '',
+    jobDescription: '',
     conversationContext: '',
   });
   
@@ -136,6 +138,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         recipientName: form.recipientName,
         recipientTitle: form.recipientTitle,
         recipientCompany: form.recipientCompany,
+        recipientEmail: form.recipientEmail,
+        recipientLinkedinUrl: form.recipientLinkedinUrl,
         studentName: user?.full_name || firstName,
         studentMajor: user?.major || '',
         targetRole: user?.career_goals?.target_roles?.[0] || '',
@@ -144,6 +148,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         school: user?.school_name || 'University of Florida',
         jobTitle: form.jobTitle,
         jobUrl: form.jobUrl,
+        jobDescription: form.jobDescription,
         conversationContext: form.conversationContext,
       });
       const msg = res?.data?.message || '';
@@ -205,7 +210,12 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               user_email: currentUser.email,
               alumni_name: form.recipientName,
               alumni_role: form.recipientTitle || '',
+              alumni_email: form.recipientEmail || '',
+              alumni_linkedin: form.recipientLinkedinUrl || '',
               company: form.recipientCompany || '',
+              job_title: form.jobTitle || '',
+              job_description: form.conversationContext || '',
+              job_url: form.jobUrl || '',
               status: 'reached_out',
               reached_out_date: now,
               status_date: now,
@@ -266,7 +276,12 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               user_email: user.email,
               alumni_name: draft.recipient_name,
               alumni_role: draft.recipient_title || '',
+              alumni_email: draft.recipient_email || '',
+              alumni_linkedin: draft.recipient_linkedin_url || '',
               company: draft.recipient_company || '',
+              job_title: draft.job_title || '',
+              job_description: draft.message || '',
+              job_url: draft.job_url || '',
               status: 'reached_out',
               reached_out_date: now,
               status_date: now,
@@ -796,6 +811,16 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           </div>
 
           <div>
+            <label style={labelStyle}>Their Email (optional)</label>
+            <input
+              value={form.recipientEmail}
+              onChange={e => setForm(p => ({ ...p, recipientEmail: e.target.value }))}
+              placeholder="e.g. name@company.com"
+              style={inputStyle}
+            />
+          </div>
+
+          <div>
             <label style={labelStyle}>Their LinkedIn URL (optional)</label>
             <input
               value={form.recipientLinkedinUrl}
@@ -806,16 +831,38 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           </div>
 
           {selectedContext === 'job_application' && (
-            <div>
-              <label style={labelStyle}>Job Title You Applied For</label>
-              <input
-                value={form.jobTitle}
-                onChange={e => setForm(p => ({ ...p, jobTitle: e.target.value }))}
-                placeholder="e.g. Marketing Coordinator"
-                style={inputStyle}
-              />
-            </div>
+            <>
+              <div>
+                <label style={labelStyle}>Job Title You Applied For</label>
+                <input
+                  value={form.jobTitle}
+                  onChange={e => setForm(p => ({ ...p, jobTitle: e.target.value }))}
+                  placeholder="e.g. Marketing Coordinator"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Job URL</label>
+                <input
+                  value={form.jobUrl}
+                  onChange={e => setForm(p => ({ ...p, jobUrl: e.target.value }))}
+                  placeholder="https://..."
+                  style={inputStyle}
+                />
+              </div>
+            </>
           )}
+
+          <div>
+            <label style={labelStyle}>Job Description / Context</label>
+            <textarea
+              value={form.jobDescription}
+              onChange={e => setForm(p => ({ ...p, jobDescription: e.target.value }))}
+              placeholder="Paste the job description or add context about the role..."
+              rows={4}
+              style={{ ...inputStyle, resize: 'vertical' }}
+            />
+          </div>
 
           {selectedContext === 'thank_you' && (
             <div>
