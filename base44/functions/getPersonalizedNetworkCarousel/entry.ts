@@ -453,8 +453,8 @@ Use concrete, specific language that sounds like an actual job posting.`,
 
     return Response.json({
       success: true,
-      priorityInsiders,
-      targetedDiscoveries,
+      cards: priorityInsiders,
+      coldOpportunities: targetedDiscoveries,
       wasFiltered: targetIndustries.length > 0,
       targetIndustries,
     });
