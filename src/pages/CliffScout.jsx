@@ -181,6 +181,10 @@ export default function CliffScout() {
   }, [conversation?.id]);
 
   useEffect(() => {
+    if (messages.length > 0) setConversationStarted(true);
+  }, [messages]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
