@@ -1,0 +1,319 @@
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+
+const COLUMNS = [
+  { 
+    id: 'identified', 
+    title: 'Identified', 
+    status: 'identified',
+    color: '#6b7280',
+    bg: '#f3f4f6',
+    border: '#e5e7eb',
+    icon: Target,
+    description: 'Leads to pursue'
+  },
+  { 
+    id: 'draft_ready', 
+    title: 'Draft Ready', 
+    status: 'draft_ready',
+    color: '#2563eb',
+    bg: '#eff6ff',
+    border: '#bfdbfe',
+    icon: Plus,
+    description: 'Outreach prepared'
+  },
+  { 
+    id: 'contacted', 
+    title: 'Contacted', 
+    status: 'contacted',
+    color: '#7c3aed',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
+    icon: Send,
+    description: 'Awaiting response'
+  },
+  { 
+    id: 'secured', 
+    title: 'Inroad Secured', 
+    status: 'secured',
+    color: '#16a34a',
+    bg: '#f0fdf4',
+    border: '#bbf7d0',
+    icon: CheckCircle,
+    description: 'Interview or referral'
+  },
+];
+
+function PipelineCard({ job, index, onOpenDetail }) {
+  const company = job.company || job.alumni_name || 'Unknown Company';
+  const role = job.alumni_role || job.title || 'Position';
+  const statusDate = job.status_date ? new Date(job.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+  
+  return (
+    <Draggable draggableId={job.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className={`bg-white border rounded-xl p-3 mb-2 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+            snapshot.isDragging ? 'shadow-lg rotate-2' : 'border-gray-200'
+          }`}
+          onClick={() => onOpenDetail(job)}
+        >
+          <div className="flex items-start gap-2">
+            <div {...provided.dragHandleProps} className="mt-1 text-gray-300 hover:text-gray-500">
+              <GripVertical className="w-4 h-4" />
+            </div>
+            
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-900 text-sm truncate">{company}</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">{role}</p>
+              
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 h-auto bg-purple-50 text-purple-700 border-purple-200">
+                  🎓 Network
+                </Badge>
+                
+                {statusDate && (
+                  <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                    <Clock className="w-3 h-3" />
+                    <span>{statusDate}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </Draggable>
+  );
+}
+
+function EmptyColumnState({ column }) {
+  return (
+    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
+      <column.icon className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+      <p className="text-xs font-semibold text-gray-500 mb-1">No {column.title.toLowerCase()} yet</p>
+      <p className="text-[10px] text-gray-400">Drop a lead here to start tracking!</p>
+    </div>
+  );
+}
+
+export default function PipelineKanbanModal({ isOpen, onClose, user }) {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState(null);
+
+  const loadPipeline = () => {
+    if (!user?.email) {
+      setLoading(false);
+      return;
+    }
+    
+    base44.entities.NetworkingPipeline.list('-created_date', 200)
+      .then(records => {
+        const mapped = (records || []).map(r => ({
+          id: r.id,
+          company: r.company || r.alumni_name || 'Unknown',
+          role: r.alumni_role || '',
+          status: r.status || 'identified',
+          status_date: r.status_date,
+          alumni_name: r.alumni_name,
+          alumni_role: r.alumni_role,
+          notes: r.notes,
+        }));
+        setJobs(mapped);
+      })
+      .catch(() => setJobs([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      loadPipeline();
+    }
+  }, [isOpen, user?.email]);
+
+  useEffect(() => {
+    const handler = () => loadPipeline();
+    window.addEventListener('cliff:pipeline-refresh', handler);
+    window.addEventListener('cff:pipeline-changed', handler);
+    return () => {
+      window.removeEventListener('cliff:pipeline-refresh', handler);
+      window.removeEventListener('cff:pipeline-changed', handler);
+    };
+  }, [user?.email]);
+
+  const onDragEnd = async (result) => {
+    if (!result.destination) return;
+    
+    const sourceColumnId = result.source.droppableId;
+    const destColumnId = result.destination.droppableId;
+    
+    if (sourceColumnId === destColumnId) return;
+    
+    const jobId = result.draggableId;
+    const newStatus = COLUMNS.find(c => c.id === destColumnId)?.status;
+    
+    if (!newStatus) return;
+    
+    // Optimistic update
+    setJobs(prev => prev.map(j => 
+      j.id === jobId ? { ...j, status: newStatus, status_date: new Date().toISOString() } : j
+    ));
+    
+    // Backend update
+    try {
+      await base44.entities.NetworkingPipeline.update(jobId, {
+        status: newStatus,
+        status_date: new Date().toISOString(),
+      });
+      
+      window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
+    } catch (error) {
+      console.error('Failed to update pipeline status:', error);
+      loadPipeline(); // Revert on error
+    }
+  };
+
+  const getColumnJobs = (columnId) => {
+    return jobs.filter(job => {
+      const statusMap = {
+        'identified': ['identified', 'matched', 'manual'],
+        'draft_ready': ['draft_ready'],
+        'contacted': ['contacted', 'reached_out', 'messaged', 'replied'],
+        'secured': ['secured', 'interview', 'offer', 'coffee_chat', 'intro_made'],
+      };
+      const statuses = statusMap[columnId] || [columnId];
+      return statuses.includes(job.status);
+    });
+  };
+
+  const handleOpenDetail = (job) => {
+    setSelectedJob(job);
+    // Open outreach drafts with context
+    window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(job.company)}&role=${encodeURIComponent(job.role)}&pipeline_id=${job.id}`;
+  };
+
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        if (!open) onClose();
+      }}>
+        <DialogContent className="max-w-6xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 bg-transparent border-0 shadow-2xl">
+          {/* Custom backdrop with blur */}
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+          
+          {/* Modal content */}
+          <div className="relative bg-white rounded-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700">
+              <div>
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  📊 Application Pipeline
+                </h2>
+                <p className="text-blue-100 text-sm mt-1">
+                  Drag cards between columns to track your progress
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Stats bar */}
+            <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b">
+              {COLUMNS.map(col => {
+                const count = getColumnJobs(col.id).length;
+                return (
+                  <div key={col.id} className="text-center">
+                    <p className="text-2xl font-bold" style={{ color: col.color }}>{count}</p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">{col.title}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Kanban board */}
+            <div className="flex-1 overflow-x-auto overflow-y-hidden">
+              <DragDropContext onDragEnd={onDragEnd}>
+                <div className="flex gap-4 p-6 h-full min-w-max">
+                  {COLUMNS.map((column) => {
+                    const columnJobs = getColumnJobs(column.id);
+                    const Icon = column.icon;
+                    
+                    return (
+                      <div
+                        key={column.id}
+                        className="w-72 flex-shrink-0 flex flex-col"
+                      >
+                        {/* Column header */}
+                        <div className="flex items-center gap-2 mb-3 pb-3 border-b" style={{ borderColor: column.border }}>
+                          <div 
+                            className="w-8 h-8 rounded-lg flex items-center justify-center"
+                            style={{ background: column.bg }}
+                          >
+                            <Icon className="w-4 h-4" style={{ color: column.color }} />
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm" style={{ color: column.color }}>{column.title}</p>
+                            <p className="text-[10px] text-gray-400">{column.description}</p>
+                          </div>
+                          <Badge variant="secondary" className="ml-auto text-xs" style={{ background: column.bg, color: column.color }}>
+                            {columnJobs.length}
+                          </Badge>
+                        </div>
+
+                        {/* Droppable area */}
+                        <Droppable droppableId={column.id}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={`flex-1 overflow-y-auto pr-2 min-h-[200px] rounded-xl transition-colors ${
+                                snapshot.isDraggingOver ? 'bg-blue-50/50' : 'bg-transparent'
+                              }`}
+                            >
+                              {columnJobs.length === 0 ? (
+                                <EmptyColumnState column={column} />
+                              ) : (
+                                columnJobs.map((job, index) => (
+                                  <PipelineCard
+                                    key={job.id}
+                                    job={job}
+                                    index={index}
+                                    onOpenDetail={handleOpenDetail}
+                                  />
+                                ))
+                              )}
+                              {provided.placeholder}
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    );
+                  })}
+                </div>
+              </DragDropContext>
+            </div>
+
+            {/* Footer hint */}
+            <div className="p-4 border-t bg-gray-50 text-center">
+              <p className="text-xs text-gray-500">
+                💡 Tip: Click "Generate Message" on any job card to move it to Draft Ready
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
