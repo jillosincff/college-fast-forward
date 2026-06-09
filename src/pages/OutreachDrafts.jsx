@@ -914,6 +914,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   if (phase === 'compose') {
     const ctx = CONTEXTS.find(c => c.id === selectedContext);
     const isLinkedIn = selectedContext === 'alumni_search';
+    const hasEmail = !!form.recipientEmail; // Only enforce limit if no email found
     
     // Parse the JSON output from LLM
     let draftSubject = '';
@@ -928,9 +929,10 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       draftBody = editedMessage;
     }
 
-    // Calculate character count for LinkedIn (subject + body)
+    // Calculate character count - only enforce 300 limit for LinkedIn without email
     const totalCharCount = (draftSubject + draftBody).length;
-    const exceedsLimit = isLinkedIn && totalCharCount > 300;
+    const enforceLimit = isLinkedIn && !hasEmail;
+    const exceedsLimit = enforceLimit && totalCharCount > 300;
 
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
@@ -951,7 +953,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           {ctx?.icon} {ctx?.label} · Edit freely before sending
         </p>
 
-        {isLinkedIn && (
+        {enforceLimit && (
           <div style={{
             background: exceedsLimit ? '#FEE2E2' : '#E8F4FD',
             border: `1px solid ${exceedsLimit ? '#FCA5A5' : '#B3D9FF'}`,
@@ -969,6 +971,20 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
             }}>
               {totalCharCount}/300
             </span>
+          </div>
+        )}
+
+        {hasEmail && (
+          <div style={{
+            background: '#F0F7FF',
+            border: '1px solid #B3D9FF',
+            borderRadius: 8, padding: '10px 14px', marginBottom: 16,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <span style={{ fontSize: 14 }}>✓</span>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#0057B8', margin: 0 }}>
+              Email verified — message can be longer for direct email outreach
+            </p>
           </div>
         )}
 
@@ -999,7 +1015,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         <textarea
           value={draftBody}
           onChange={e => {
-            const newBody = isLinkedIn && e.target.value.length > 300
+            const newBody = enforceLimit && e.target.value.length > 300
               ? e.target.value.substring(0, 300)
               : e.target.value;
             const updatedMsg = JSON.stringify({
