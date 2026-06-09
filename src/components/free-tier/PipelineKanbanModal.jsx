@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target, Trash2 } from 'lucide-react';
+import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const COLUMNS = [
@@ -117,6 +117,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [deleteStatus, setDeleteStatus] = useState(null);
 
   const loadPipeline = () => {
     if (!user?.email) {
@@ -210,23 +211,22 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
   };
 
   const handleDelete = async (job) => {
-    console.log('Delete clicked for job:', job);
     if (!confirm(`Are you sure you want to delete "${job.company}" from your pipeline?`)) {
       return;
     }
     
-    console.log('Deleting job with ID:', job.id);
     try {
-      const result = await base44.entities.NetworkingPipeline.delete(job.id);
-      console.log('Delete result:', result);
+      await base44.entities.NetworkingPipeline.delete(job.id);
       setJobs(prev => prev.filter(j => j.id !== job.id));
       window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
       window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
+      // Show success toast
+      setDeleteStatus('success');
+      setTimeout(() => setDeleteStatus(null), 3000);
     } catch (error) {
       console.error('Failed to delete opportunity:', error);
-      console.error('Error details:', error.message);
-      console.error('Error stack:', error.stack);
-      alert('Failed to delete opportunity: ' + (error.message || 'Unknown error'));
+      setDeleteStatus('error');
+      setTimeout(() => setDeleteStatus(null), 3000);
     }
   };
 
@@ -234,6 +234,22 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Success/Error Toast */}
+      {deleteStatus && (
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300 ${
+          deleteStatus === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+        }`}>
+          {deleteStatus === 'success' ? (
+            <CheckCircle2 className="w-5 h-5" />
+          ) : (
+            <AlertCircle className="w-5 h-5" />
+          )}
+          <span className="font-semibold text-sm">
+            {deleteStatus === 'success' ? 'Opportunity deleted!' : 'Failed to delete'}
+          </span>
+        </div>
+      )}
+      
       {/* Backdrop with blur */}
       <div 
         className="fixed inset-0 bg-black/40 backdrop-blur-md" 
