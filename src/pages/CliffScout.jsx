@@ -123,8 +123,9 @@ export default function CliffScout() {
   // Deferred conversation — only created on first send
   const conversationRef = useRef(null);
   const subscriptionRef = useRef(null);
-  const ctxRef = useRef(null);       // holds activityContext string for conversation creation
-  const userRef = useRef(null);      // holds user object for conversation creation
+  const ctxRef = useRef(null);
+  const userRef = useRef(null);
+  const firstSentMsgRef = useRef(null); // exact content of the first user message sent
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -168,6 +169,7 @@ export default function CliffScout() {
     try {
       // Create the conversation on first send only — never before
       if (!conversationRef.current) {
+        if (!firstSentMsgRef.current) firstSentMsgRef.current = msg;
         const u = userRef.current;
         const conv = await base44.agents.createConversation({
           agent_name: 'cliff_scout',
@@ -182,13 +184,17 @@ export default function CliffScout() {
         });
         conversationRef.current = conv;
 
-        // Subscribe AFTER creation, but filter to only messages after our first user message
+        // Subscribe after creation. Only render messages starting from the
+        // first user message we sent — anything before it is the agent's
+        // platform-generated opener which we never want to show.
         subscriptionRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
           const allMsgs = data.messages || [];
-          // Find the first user message (the one we just sent)
-          const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
-          if (firstUserIdx === -1) return;
-          setMessages(allMsgs.slice(firstUserIdx));
+          // Find our exact first sent message by content match
+          const anchorIdx = allMsgs.findIndex(
+            m => m.role === 'user' && m.content === firstSentMsgRef.current
+          );
+          if (anchorIdx === -1) return; // user message not yet in stream, wait
+          setMessages(allMsgs.slice(anchorIdx));
         });
       }
 
