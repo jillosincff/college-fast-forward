@@ -255,16 +255,17 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
 
   const handleDeployAlumniAgent = async (companyName) => {
     try {
-      // Trigger the scoutCompanyBackdoor function to find alumni
-      const { scoutCompanyBackdoor } = await import('@/functions/scoutCompanyBackdoor');
-      const result = await scoutCompanyBackdoor({ jobId: companyName, companyName });
+      // Call the backend function directly via base44.functions.invoke
+      const result = await base44.functions.invoke('scoutCompanyBackdoor', { 
+        jobId: companyName, 
+        companyName: companyName 
+      });
       
-      const data = result?.data || result;
-      const alumni = data?.alumni || [];
+      const data = result?.data?.alumni || result?.alumni || [];
       
-      if (alumni.length > 0) {
+      if (data && data.length > 0) {
         // Update the pipeline record with the first alumni found
-        const firstAlumni = alumni[0];
+        const firstAlumni = data[0];
         await base44.entities.NetworkingPipeline.update(selectedJob.id, {
           alumni_name: firstAlumni.name || '',
           alumni_role: firstAlumni.role_title || '',
@@ -272,7 +273,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
           alumni_source: 'fastiq',
         });
         
-        alert(`✅ Found ${alumni.length} alumni at ${companyName}! Updated with ${firstAlumni.name}.`);
+        alert(`✅ Found ${data.length} alumni at ${companyName}! Updated with ${firstAlumni.name}.`);
         loadPipeline();
         handleCloseDetail();
       } else {
@@ -280,7 +281,8 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
       }
     } catch (error) {
       console.error('Failed to deploy alumni agent:', error);
-      alert('⚠️ Failed to search for alumni. Please try again.');
+      const errorMsg = error?.response?.data?.error || error?.message || 'Unknown error';
+      alert(`⚠️ Failed to search for alumni: ${errorMsg}`);
     }
   };
 
