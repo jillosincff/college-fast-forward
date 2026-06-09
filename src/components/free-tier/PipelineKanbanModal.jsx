@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target } from 'lucide-react';
+import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target, Trash2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const COLUMNS = [
@@ -48,7 +48,7 @@ const COLUMNS = [
   },
 ];
 
-function PipelineCard({ job, index, onOpenDetail }) {
+function PipelineCard({ job, index, onOpenDetail, onDelete }) {
   const company = job.company || job.alumni_name || 'Unknown Company';
   const role = job.alumni_role || job.title || 'Position';
   const statusDate = job.status_date ? new Date(job.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
@@ -59,17 +59,16 @@ function PipelineCard({ job, index, onOpenDetail }) {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`bg-white border rounded-xl p-3 mb-2 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+          className={`bg-white border rounded-xl p-3 mb-2 shadow-sm hover:shadow-md transition-all ${
             snapshot.isDragging ? 'shadow-lg rotate-2' : 'border-gray-200'
           }`}
-          onClick={() => onOpenDetail(job)}
         >
           <div className="flex items-start gap-2">
             <div {...provided.dragHandleProps} className="mt-1 text-gray-300 hover:text-gray-500">
               <GripVertical className="w-4 h-4" />
             </div>
             
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0" onClick={() => onOpenDetail(job)}>
               <p className="font-bold text-gray-900 text-sm truncate">{company}</p>
               <p className="text-xs text-gray-500 truncate mt-0.5">{role}</p>
               
@@ -86,6 +85,17 @@ function PipelineCard({ job, index, onOpenDetail }) {
                 )}
               </div>
             </div>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(job);
+              }}
+              className="text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg p-1.5 transition-colors"
+              title="Delete opportunity"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
@@ -199,6 +209,21 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
     window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(job.company)}&role=${encodeURIComponent(job.role)}&pipeline_id=${job.id}`;
   };
 
+  const handleDelete = async (job) => {
+    if (!confirm(`Are you sure you want to delete "${job.company}" from your pipeline?`)) {
+      return;
+    }
+    
+    try {
+      await base44.entities.NetworkingPipeline.delete(job.id);
+      setJobs(prev => prev.filter(j => j.id !== job.id));
+      window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
+    } catch (error) {
+      console.error('Failed to delete opportunity:', error);
+      alert('Failed to delete opportunity. Please try again.');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -291,6 +316,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                                 job={job}
                                 index={index}
                                 onOpenDetail={handleOpenDetail}
+                                onDelete={handleDelete}
                               />
                             ))
                           )}
