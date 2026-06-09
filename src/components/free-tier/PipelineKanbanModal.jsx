@@ -49,8 +49,8 @@ const COLUMNS = [
 ];
 
 function PipelineCard({ job, index, onOpenDetail, onDelete }) {
-  const company = job.company || job.alumni_name || 'Unknown Company';
-  const role = job.alumni_role || job.title || 'Position';
+  const company = job.company || 'Unknown Company';
+  const jobTitle = job.job_title || job.alumni_role || 'Position';
   const statusDate = job.status_date ? new Date(job.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
   
   return (
@@ -70,7 +70,7 @@ function PipelineCard({ job, index, onOpenDetail, onDelete }) {
             
             <div className="flex-1 min-w-0" onClick={() => onOpenDetail(job)}>
               <p className="font-bold text-gray-900 text-sm truncate">{company}</p>
-              <p className="text-xs text-gray-500 truncate mt-0.5">{role}</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">{jobTitle}</p>
               
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 h-auto bg-purple-50 text-purple-700 border-purple-200">
@@ -130,11 +130,18 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
         const mapped = (records || []).map(r => ({
           id: r.id,
           company: r.company || 'Unknown',
-          role: r.alumni_role || '',
+          job_title: r.job_title || '',
+          job_description: r.job_description || '',
+          job_url: r.job_url || '',
+          salary_range: r.salary_range || '',
+          location: r.location || '',
+          posted_date: r.posted_date,
           status: r.status || 'identified',
           status_date: r.status_date,
           alumni_name: r.alumni_name,
           alumni_role: r.alumni_role,
+          alumni_email: r.alumni_email || '',
+          alumni_linkedin: r.alumni_linkedin || '',
           alumni_source: r.alumni_source,
           notes: r.notes,
           identified_date: r.identified_date || r.created_date,
@@ -404,6 +411,12 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 rounded-xl p-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Company</p>
                 <p className="font-bold text-gray-900 text-lg">{selectedJob.company}</p>
+                {selectedJob.role && (
+                  <>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-3 mb-1">Role / Position</p>
+                    <p className="font-medium text-gray-700">{selectedJob.role}</p>
+                  </>
+                )}
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 bg-white text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-sm font-semibold capitalize shadow-sm">
                     {selectedJob.status?.replace(/_/g, ' ')}
@@ -418,15 +431,17 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
 
               {/* Contact info */}
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contact</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alumni Contact</p>
                 <div className="bg-white border border-gray-200 rounded-xl p-4">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                       <User className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900">{selectedJob.alumni_name && selectedJob.alumni_name !== 'Position' ? selectedJob.alumni_name : 'No contact name'}</p>
-                      <p className="text-sm text-gray-600 mt-0.5">{selectedJob.role && selectedJob.role !== 'Position' ? selectedJob.role : 'Role not specified'}</p>
+                      <p className="font-semibold text-gray-900">{selectedJob.alumni_name || 'No contact name'}</p>
+                      {selectedJob.alumni_role && (
+                        <p className="text-sm text-gray-600 mt-0.5">{selectedJob.alumni_role}</p>
+                      )}
                       {selectedJob.alumni_source && (
                         <Badge variant="secondary" className="text-[10px] mt-2 bg-purple-50 text-purple-700 border-purple-200 capitalize">
                           Source: {selectedJob.alumni_source.replace(/_/g, ' ')}

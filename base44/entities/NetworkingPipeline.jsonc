@@ -10,6 +10,18 @@
       "type": "string",
       "description": "Company name"
     },
+    "job_title": {
+      "type": "string",
+      "description": "Job title/position name"
+    },
+    "job_description": {
+      "type": "string",
+      "description": "Full job description text"
+    },
+    "job_url": {
+      "type": "string",
+      "description": "URL to the job posting"
+    },
     "alumni_name": {
       "type": "string",
       "description": "Full name of the alumni contact"
@@ -17,6 +29,14 @@
     "alumni_role": {
       "type": "string",
       "description": "Job title of the alumni"
+    },
+    "alumni_email": {
+      "type": "string",
+      "description": "Email address of the alumni contact"
+    },
+    "alumni_linkedin": {
+      "type": "string",
+      "description": "LinkedIn profile URL of the alumni"
     },
     "alumni_source": {
       "type": "string",
@@ -94,12 +114,24 @@
     "notes": {
       "type": "string",
       "description": "Free-form notes about this contact"
+    },
+    "salary_range": {
+      "type": "string",
+      "description": "Salary range if available (e.g. '$70K-$90K')"
+    },
+    "location": {
+      "type": "string",
+      "description": "Job location (e.g. 'New York, NY' or 'Remote')"
+    },
+    "posted_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the job was posted"
     }
   },
   "required": [
     "user_email",
-    "company",
-    "alumni_name"
+    "company"
   ],
   "rls": {
     "read": {
