@@ -109,6 +109,7 @@ export default function CliffScout() {
   const [user, setUser] = useState(null);
   const [jobSearchCtx, setJobSearchCtx] = useState(null);
   const [greeting, setGreeting] = useState(null);
+  const [conversationStarted, setConversationStarted] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -188,6 +189,7 @@ export default function CliffScout() {
     if (!msg || sending || !conversation) return;
     setInput('');
     setSending(true);
+    setConversationStarted(true);
     try {
       await base44.agents.addMessage(conversation, { role: 'user', content: msg });
     } catch (err) {
@@ -235,7 +237,7 @@ export default function CliffScout() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.length === 0 && !sending && (
+        {messages.length === 0 && !sending && !conversationStarted && (
           <div className="flex flex-col h-full gap-4 pt-2">
             {/* Hardcoded greeting built from real pipeline data */}
             {greeting && (
