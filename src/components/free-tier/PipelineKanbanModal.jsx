@@ -129,13 +129,21 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
       .then(records => {
         const mapped = (records || []).map(r => ({
           id: r.id,
-          company: r.company || r.alumni_name || 'Unknown',
+          company: r.company || 'Unknown',
           role: r.alumni_role || '',
           status: r.status || 'identified',
           status_date: r.status_date,
           alumni_name: r.alumni_name,
           alumni_role: r.alumni_role,
+          alumni_source: r.alumni_source,
           notes: r.notes,
+          identified_date: r.identified_date || r.created_date,
+          reached_out_date: r.reached_out_date,
+          replied_date: r.replied_date,
+          interview_date: r.interview_date,
+          offer_date: r.offer_date,
+          follow_up_count: r.follow_up_count || 0,
+          follow_up_date: r.follow_up_date,
         }));
         setJobs(mapped);
       })
@@ -391,41 +399,63 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
             </div>
 
             {/* Detail body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Status */}
-              <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Status</p>
-                <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-sm font-semibold capitalize">
-                  {selectedJob.status?.replace(/_/g, ' ')}
-                </span>
-                {selectedJob.status_date && (
-                  <span className="ml-2 text-xs text-gray-400">
-                    Updated {new Date(selectedJob.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                )}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              {/* Alumni contact card */}
+              <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-xl p-4">
+                <div className="w-11 h-11 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-purple-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-900">{selectedJob.alumni_name || '—'}</p>
+                  <p className="text-sm text-gray-600 mt-0.5">{selectedJob.role || 'Role unknown'} · {selectedJob.company}</p>
+                  {selectedJob.alumni_source && (
+                    <Badge variant="secondary" className="text-[10px] mt-2 bg-purple-100 text-purple-700 border-purple-200 capitalize">
+                      🎓 {selectedJob.alumni_source.replace(/_/g, ' ')}
+                    </Badge>
+                  )}
+                </div>
               </div>
 
-              {/* Alumni contact */}
-              {selectedJob.alumni_name && (
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Alumni Contact</p>
-                  <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-xl p-4">
-                    <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
-                      <User className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 text-sm">{selectedJob.alumni_name}</p>
-                      {selectedJob.alumni_role && (
-                        <p className="text-xs text-gray-500 mt-0.5">{selectedJob.alumni_role}</p>
-                      )}
-                      <p className="text-xs text-gray-400 mt-0.5">{selectedJob.company}</p>
-                      <Badge variant="secondary" className="text-[10px] mt-2 bg-purple-100 text-purple-700 border-purple-200">
-                        🎓 Network Contact
-                      </Badge>
-                    </div>
-                  </div>
+              {/* Status + current stage */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Current Stage</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-sm font-semibold capitalize">
+                    {selectedJob.status?.replace(/_/g, ' ')}
+                  </span>
+                  {selectedJob.follow_up_count > 0 && (
+                    <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-600 border border-orange-200 rounded-full px-3 py-1 text-xs font-semibold">
+                      🔁 {selectedJob.follow_up_count} follow-up{selectedJob.follow_up_count > 1 ? 's' : ''} sent
+                    </span>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Timeline */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Activity Timeline</p>
+                <div className="space-y-2">
+                  {[
+                    { label: 'Identified', date: selectedJob.identified_date, color: 'gray' },
+                    { label: 'Reached out', date: selectedJob.reached_out_date, color: 'blue' },
+                    { label: 'Follow-up sent', date: selectedJob.follow_up_date, color: 'orange' },
+                    { label: 'Replied', date: selectedJob.replied_date, color: 'green' },
+                    { label: 'Interview', date: selectedJob.interview_date, color: 'purple' },
+                    { label: 'Offer', date: selectedJob.offer_date, color: 'emerald' },
+                  ].filter(e => e.date).map((event, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm">
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 bg-${event.color}-400`} />
+                      <span className="text-gray-500 w-28 flex-shrink-0">{event.label}</span>
+                      <span className="text-gray-800 font-medium">
+                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+                  ))}
+                  {!selectedJob.identified_date && !selectedJob.reached_out_date && !selectedJob.replied_date && (
+                    <p className="text-xs text-gray-400 italic">No dates recorded yet.</p>
+                  )}
+                </div>
+              </div>
 
               {/* Notes */}
               {selectedJob.notes && (
@@ -434,14 +464,6 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                   <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-100">
                     {selectedJob.notes}
                   </p>
-                </div>
-              )}
-
-              {/* No additional info */}
-              {!selectedJob.alumni_name && !selectedJob.notes && (
-                <div className="text-center py-8 text-gray-400">
-                  <User className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">No alumni contact on file for this opportunity.</p>
                 </div>
               )}
             </div>
