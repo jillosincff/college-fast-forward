@@ -55,6 +55,33 @@ async function fetchJobSearchContext(userEmail) {
   }
 }
 
+function buildGreeting(firstName, ctx) {
+  const name = firstName ? `Hey ${firstName}!` : 'Hey!';
+  if (!ctx || ctx.pipelineEmpty) {
+    return `${name} I'm CLiFF Scout — your UF alumni network agent. You're starting fresh. Tell me a target company, role, or industry and I'll find your warm path in.`;
+  }
+  if (ctx.offers > 0) {
+    return `${name} You've got ${ctx.offers} offer${ctx.offers > 1 ? 's' : ''} in your pipeline — congrats! Want to talk negotiation strategy or compare options?`;
+  }
+  if (ctx.interviews > 0) {
+    return `${name} You have ${ctx.interviews} interview${ctx.interviews > 1 ? 's' : ''} scheduled. Need prep help, salary intel, or a thank-you note draft?`;
+  }
+  if (ctx.staleSummary) {
+    return `${name} ${ctx.staleSummary.replace(/^\d+ contact/, (m) => `You have ${m}`).replace('contact(s)', `contact${ctx.stale > 1 ? 's' : ''}`)} — want me to draft quick follow-up messages?`;
+  }
+  if (ctx.replies > 0) {
+    return `${name} Nice — you have ${ctx.replies} repl${ctx.replies > 1 ? 'ies' : 'y'} in your pipeline. Want to keep the momentum? I can help schedule coffee chats or draft next steps.`;
+  }
+  if (ctx.reachedOut > 0) {
+    return `${name} You've messaged ${ctx.reachedOut} contact${ctx.reachedOut > 1 ? 's' : ''} so far. Want to find more leads or draft follow-ups for anyone who hasn't responded?`;
+  }
+  if (ctx.identified > 0 || ctx.matched > 0) {
+    const count = ctx.identified + ctx.matched;
+    return `${name} You have ${count} contact${count > 1 ? 's' : ''} ready to go but haven't reached out yet. Want me to draft the first message?`;
+  }
+  return `${name} I'm CLiFF Scout — your UF alumni network agent. Tell me a target company, role, or industry and I'll find your warm path in.`;
+}
+
 function getSuggestedPrompts(ctx) {
   if (!ctx || ctx.pipelineEmpty) {
     return [
@@ -81,6 +108,7 @@ export default function CliffScout() {
   const [sending, setSending] = useState(false);
   const [user, setUser] = useState(null);
   const [jobSearchCtx, setJobSearchCtx] = useState(null);
+  const [greeting, setGreeting] = useState(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -94,6 +122,7 @@ export default function CliffScout() {
     const initConversation = async () => {
       const ctx = await fetchJobSearchContext(user.email);
       setJobSearchCtx(ctx);
+      setGreeting(buildGreeting(user.full_name?.split(' ')[0] || '', ctx));
 
       // Build a dynamic context summary for the agent
       let activityContext = '';
@@ -141,7 +170,11 @@ export default function CliffScout() {
   useEffect(() => {
     if (!conversation?.id) return;
     const unsub = base44.agents.subscribeToConversation(conversation.id, (data) => {
-      setMessages(data.messages || []);
+      // Skip the agent's auto-generated opening assistant message (index 0) — we render our own greeting
+      const allMsgs = data.messages || [];
+      const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
+      const filtered = firstUserIdx === -1 ? [] : allMsgs.slice(firstUserIdx);
+      setMessages(filtered);
     });
     return unsub;
   }, [conversation?.id]);
@@ -203,15 +236,19 @@ export default function CliffScout() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && !sending && (
-          <div className="flex flex-col items-center justify-center h-full gap-6 pb-8">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg">
-              <Zap className="w-7 h-7 text-white" />
-            </div>
-            <div className="text-center max-w-xs">
-              <p className="text-base font-bold text-slate-900">CLiFF Scout is ready.</p>
-              <p className="text-sm text-slate-500 mt-1">Tell me a target company, role, or industry — I'll find your warm path in.</p>
-            </div>
-            <div className="flex flex-col gap-2 w-full max-w-sm">
+          <div className="flex flex-col h-full gap-4 pt-2">
+            {/* Hardcoded greeting built from real pipeline data */}
+            {greeting && (
+              <div className="flex gap-3 justify-start">
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center mt-0.5 shrink-0">
+                  <Zap className="w-3.5 h-3.5 text-white" />
+                </div>
+                <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-800 max-w-sm">
+                  {greeting}
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col gap-2 mt-2">
               {getSuggestedPrompts(jobSearchCtx).map((p, i) => (
                 <button
                   key={i}
