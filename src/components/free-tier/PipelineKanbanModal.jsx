@@ -7,8 +7,8 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const COLUMNS = [
   { 
-    id: 'identified', 
-    title: 'Identified', 
+    id: 'opportunities', 
+    title: 'Opportunities', 
     status: 'identified',
     color: '#6b7280',
     bg: '#f3f4f6',
@@ -17,34 +17,34 @@ const COLUMNS = [
     description: 'Leads to pursue'
   },
   { 
-    id: 'draft_ready', 
-    title: 'Draft Ready', 
-    status: 'draft_ready',
+    id: 'reached_out', 
+    title: 'Reached Out', 
+    status: 'reached_out',
     color: '#2563eb',
     bg: '#eff6ff',
     border: '#bfdbfe',
-    icon: Plus,
-    description: 'Outreach prepared'
-  },
-  { 
-    id: 'contacted', 
-    title: 'Contacted', 
-    status: 'contacted',
-    color: '#7c3aed',
-    bg: '#f5f3ff',
-    border: '#ddd6fe',
     icon: Send,
     description: 'Awaiting response'
   },
   { 
-    id: 'secured', 
-    title: 'Inroad Secured', 
-    status: 'secured',
+    id: 'interviews', 
+    title: 'Interviews', 
+    status: 'interview',
+    color: '#7c3aed',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
+    icon: CheckCircle,
+    description: 'In the conversation'
+  },
+  { 
+    id: 'offers', 
+    title: 'Offers', 
+    status: 'offer',
     color: '#16a34a',
     bg: '#f0fdf4',
     border: '#bbf7d0',
     icon: CheckCircle,
-    description: 'Interview or referral'
+    description: 'Offer received'
   },
 ];
 
@@ -168,7 +168,13 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
     if (sourceColumnId === destColumnId) return;
     
     const jobId = result.draggableId;
-    const newStatus = COLUMNS.find(c => c.id === destColumnId)?.status;
+    const statusMap = {
+      'opportunities': 'identified',
+      'reached_out': 'reached_out',
+      'interviews': 'interview',
+      'offers': 'offer',
+    };
+    const newStatus = statusMap[destColumnId];
     
     if (!newStatus) return;
     
@@ -194,10 +200,10 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
   const getColumnJobs = (columnId) => {
     return jobs.filter(job => {
       const statusMap = {
-        'identified': ['identified', 'matched', 'manual'],
-        'draft_ready': ['draft_ready'],
-        'contacted': ['contacted', 'reached_out', 'messaged', 'replied'],
-        'secured': ['secured', 'interview', 'offer', 'coffee_chat', 'intro_made'],
+        'opportunities': ['identified', 'matched', 'manual', 'draft_ready', 'coffee_chat', 'intro_made'],
+        'reached_out': ['reached_out', 'messaged', 'replied', 'contacted', 'secured'],
+        'interviews': ['interview'],
+        'offers': ['offer'],
       };
       const statuses = statusMap[columnId] || [columnId];
       return statuses.includes(job.status);
