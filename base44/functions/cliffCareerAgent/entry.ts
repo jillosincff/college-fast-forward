@@ -241,7 +241,38 @@ Deno.serve(async (req) => {
     }
 
     // ─── 4. GENERAL CAREER Q&A — LLM WITH HARD GUARDRAILS ──────────────────
+
+    // Fetch real pipeline data so the LLM never fabricates stats
+    let pipelineSummary = 'No networking pipeline data yet.';
+    try {
+      const pipeline = await base44.asServiceRole.entities.NetworkingPipeline.filter({ user_email: user.email }, '-status_date', 50);
+      if (pipeline.length > 0) {
+        const statusCounts = pipeline.reduce((acc, p) => { acc[p.status] = (acc[p.status] || 0) + 1; return acc; }, {});
+        const topCompanies = [...new Set(pipeline.map(p => p.company).filter(Boolean))].slice(0, 5);
+        const stale = pipeline.filter(p =>
+          ['identified', 'matched', 'reached_out'].includes(p.status) &&
+          p.status_date && (Date.now() - new Date(p.status_date).getTime()) > 7 * 24 * 60 * 60 * 1000
+        ).length;
+        pipelineSummary = [
+          `Total contacts tracked: ${pipeline.length}`,
+          statusCounts.identified ? `${statusCounts.identified} identified (not yet messaged)` : null,
+          statusCounts.matched ? `${statusCounts.matched} matched` : null,
+          (statusCounts.reached_out || 0) + (statusCounts.messaged || 0) > 0 ? `${(statusCounts.reached_out || 0) + (statusCounts.messaged || 0)} messaged` : null,
+          statusCounts.replied ? `${statusCounts.replied} replied` : null,
+          statusCounts.interview ? `${statusCounts.interview} interview(s)` : null,
+          statusCounts.offer ? `${statusCounts.offer} offer(s)` : null,
+          topCompanies.length ? `Target companies: ${topCompanies.join(', ')}` : null,
+          stale > 0 ? `${stale} contact(s) overdue for follow-up (7+ days since last status)` : null,
+        ].filter(Boolean).join('. ');
+      }
+    } catch (e) {
+      console.warn('[CLIFF] Could not fetch pipeline:', e.message);
+    }
+
     const systemPrompt = `You are CLiFF, an elite career agent embedded inside the CLiFF platform for ${schoolAbbr} students. You are the DIRECT INTERFACE to the CLiFF proprietary network database.
+
+STUDENT'S REAL JOB SEARCH DATA (use this — never invent numbers):
+${pipelineSummary}
 
 HARD RULES — never break these:
 1. NEVER tell users to log into external platforms (LinkedIn, Handshake, GatorLink, Gator CareerLink, etc.) to find contacts. CLiFF IS the tool.
@@ -249,6 +280,7 @@ HARD RULES — never break these:
 3. If the user asks for specific people, contacts, alumni, or parents — you MUST query the CLiFF database (the backend already handles this before reaching you, so redirect them to ask more specifically: "Try asking: 'Any alumni in marketing?' or 'Who do we have at Nike?'")
 4. Be direct, specific, and actionable. Under 200 words unless user asks for detail.
 5. No corporate buzzwords. No generic career center advice.
+6. NEVER invent or guess job search stats (saved jobs, opportunities, contacts). Only reference numbers from the STUDENT'S REAL JOB SEARCH DATA above.
 
 You help with: networking strategy, outreach scripts, interview prep, salary negotiation, resume tailoring, job search tactics — all powered by CLiFF's internal data and AI.`;
 
