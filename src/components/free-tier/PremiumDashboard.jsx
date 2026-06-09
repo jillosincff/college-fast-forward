@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { getVerifiedNetworkCompanies } from '@/functions/getVerifiedNetworkCompanies';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { CliffLogo } from '@/components/brand/CliffLogo';
-import PremiumPipeline from './PremiumPipeline';
 import PremiumCareerAssetsCard from './PremiumCareerAssetsCard';
 import PremiumParentNetworkWidget from './PremiumParentNetworkWidget';
 import PremiumHiringChat from './PremiumHiringChat';
@@ -196,7 +195,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const t = theme || getThemeForSchool(college || 'UF');
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const shortName = t.shortName || college || 'your university';
-  const [selectedLead, setSelectedLead] = useState(null);
   const [selectedSignal, setSelectedSignal] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -385,8 +383,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Application Pipeline (Active Tracking) */}
-            <PremiumPipeline theme={t} onLeadSelect={setSelectedLead} user={user} college={college} parentCount={parentCount} signalAdditions={signalAdditions} />
+            {/* Pipeline removed — accessible via Kanban modal only */}
           </div>
 
           {/* Right Column (Desktop Only) */}
