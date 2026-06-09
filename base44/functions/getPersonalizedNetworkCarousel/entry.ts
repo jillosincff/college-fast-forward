@@ -328,23 +328,25 @@ Use concrete, specific language that sounds like an actual job posting.`,
       if (alumniByCompany[normalizedKey] !== undefined) continue;
       const jobNorm = normalizeForMatch(job.company);
 
-      // Registered members - only count CURRENT employees (companyNetworkMap already filtered by is_current)
+      // Registered members - only count CURRENT employees with EXACT company match
       let count = 0;
       for (const [key, val] of Object.entries(companyNetworkMap)) {
         const netKey = normalizeForMatch(key.replace(/[^a-z0-9\s]/g, ''));
         
-        // Use strict word-based matching
+        // STRICT matching: require exact match or one company contains the other as a complete word
         const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
         const netWords = netKey.split(/\s+/).filter(w => w.length > 2);
-        const overlappingWords = jobWords.filter(w => netWords.some(nw => nw.includes(w) || w.includes(nw)));
-        const overlapRatio = overlappingWords.length / Math.max(jobWords.length, netWords.length);
         
-        if (jobNorm.length >= 4 && netKey.length >= 4 && overlapRatio >= 0.5) {
+        // Check for exact word match (not partial substring)
+        const hasExactWordMatch = jobWords.some(jw => netWords.some(nw => jw === nw));
+        const hasContainment = (jobWords.length === 1 && netWords.length === 1 && (jobWords[0].includes(netWords[0]) || netWords[0].includes(jobWords[0])));
+        
+        if (jobNorm.length >= 4 && netKey.length >= 4 && (hasExactWordMatch || hasContainment)) {
           // Only count alumni/parents that passed the is_current filter
           count += val.alumni.length + val.parents.length;
         }
       }
-      // DiscoveredAlumni - use strict matching and current employment check
+      // DiscoveredAlumni - use STRICT matching and current employment check
       const discovered = (discoveredAlumni || []).filter(a => {
         const aNorm = normalizeForMatch(a.company || '');
         if (aNorm.length < 4 || jobNorm.length < 4) return false;
@@ -352,13 +354,15 @@ Use concrete, specific language that sounds like an actual job posting.`,
         // Only include alumni who CURRENTLY work at this company
         if (a.is_current === false) return false;
         
-        // Use word-based matching instead of simple substring
+        // STRICT word-based matching - no false positives
         const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
         const alumWords = aNorm.split(/\s+/).filter(w => w.length > 2);
-        const overlappingWords = jobWords.filter(w => alumWords.some(aw => aw.includes(w) || w.includes(aw)));
-        const overlapRatio = overlappingWords.length / Math.max(jobWords.length, alumWords.length);
         
-        return overlapRatio >= 0.5;
+        // Require exact word match or single-word containment
+        const hasExactWordMatch = jobWords.some(jw => alumWords.some(aw => jw === aw));
+        const hasContainment = (jobWords.length === 1 && alumWords.length === 1 && (jobWords[0].includes(alumWords[0]) || alumWords[0].includes(jobWords[0])));
+        
+        return hasExactWordMatch || hasContainment;
       });
       alumniByCompany[normalizedKey] = count + discovered.length;
     }
@@ -385,20 +389,19 @@ Use concrete, specific language that sounds like an actual job posting.`,
       const normalizedJobCompany = normalizeCompanyName(job.company);
       const jobNorm = normalizeForMatch(job.company);
 
-      // Find network entry - use strict matching to avoid false positives
+      // Find network entry - use STRICT matching to avoid false positives like Endeavor/Enterprise
       let networkEntry = companyNetworkMap[normalizedJobCompany];
       if (!networkEntry) {
         for (const [key, val] of Object.entries(companyNetworkMap)) {
           const netKey = normalizeForMatch(key);
-          // Require strong similarity - not just substring matches
           const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
           const netWords = netKey.split(/\s+/).filter(w => w.length > 2);
           
-          // Check for significant word overlap (at least 50% of words match)
-          const overlappingWords = jobWords.filter(w => netWords.some(nw => nw.includes(w) || w.includes(nw)));
-          const overlapRatio = overlappingWords.length / Math.max(jobWords.length, netWords.length);
+          // STRICT: require exact word match or single-word containment
+          const hasExactWordMatch = jobWords.some(jw => netWords.some(nw => jw === nw));
+          const hasContainment = (jobWords.length === 1 && netWords.length === 1 && (jobWords[0].includes(netWords[0]) || netWords[0].includes(jobWords[0])));
           
-          if (jobNorm.length >= 4 && netKey.length >= 4 && overlapRatio >= 0.5) {
+          if (jobNorm.length >= 4 && netKey.length >= 4 && (hasExactWordMatch || hasContainment)) {
             networkEntry = val;
             break;
           }
