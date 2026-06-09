@@ -108,6 +108,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         // Trigger auto-generation
         setTimeout(async () => {
           try {
+            const isLinkedInRoute = !formData.recipientEmail;
             const res = await base44.functions.invoke('generateOutreachMessage', {
               context: 'alumni_search',
               recipientName: formData.recipientName,
@@ -115,6 +116,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               recipientCompany: formData.recipientCompany,
               recipientEmail: formData.recipientEmail,
               recipientLinkedinUrl: formData.recipientLinkedinUrl,
+              isLinkedInRoute: isLinkedInRoute, // Dynamic constraint flag
               studentName: user?.full_name || firstName,
               studentMajor: user?.major || '',
               targetRole: user?.career_goals?.target_roles?.[0] || '',
@@ -190,6 +192,9 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
+      // Determine if this is LinkedIn-only route (no email found)
+      const isLinkedInRoute = selectedContext === 'alumni_search' && !form.recipientEmail;
+      
       const res = await base44.functions.invoke('generateOutreachMessage', {
         context: selectedContext,
         recipientName: form.recipientName,
@@ -197,6 +202,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         recipientCompany: form.recipientCompany,
         recipientEmail: form.recipientEmail,
         recipientLinkedinUrl: form.recipientLinkedinUrl,
+        isLinkedInRoute: isLinkedInRoute, // Dynamic constraint flag
         studentName: user?.full_name || firstName,
         studentMajor: user?.major || '',
         targetRole: user?.career_goals?.target_roles?.[0] || '',
@@ -972,6 +978,9 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     const isLinkedIn = selectedContext === 'alumni_search';
     const hasEmail = !!form.recipientEmail; // Only enforce limit if no email found
     
+    // Determine if this is LinkedIn-only route (no email)
+    const isLinkedInRoute = selectedContext === 'alumni_search' && !form.recipientEmail;
+    
     // Parse the JSON output from LLM
     let draftSubject = '';
     let draftBody = '';
@@ -985,10 +994,11 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       draftBody = editedMessage;
     }
 
-    // Calculate character count - only enforce 300 limit for LinkedIn without email
-    const totalCharCount = (draftSubject + draftBody).length;
-    const enforceLimit = isLinkedIn && !hasEmail;
-    const exceedsLimit = enforceLimit && totalCharCount > 300;
+    // For LinkedIn route, only count body (no subject)
+    // For email route, count both subject and body
+    const messageLength = isLinkedInRoute ? draftBody.length : (draftSubject + draftBody).length;
+    const enforceLimit = isLinkedInRoute;
+    const exceedsLimit = enforceLimit && messageLength > 300;
 
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
@@ -1059,12 +1069,12 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               color: exceedsLimit ? '#EF4444' : '#0057B8',
               marginLeft: 'auto', flexShrink: 0,
             }}>
-              {totalCharCount}/300
+              {messageLength}/300
             </span>
           </div>
         )}
 
-        {hasEmail && (
+        {form.recipientEmail && (
           <div style={{
             background: '#F0F7FF',
             border: '1px solid #B3D9FF',
@@ -1078,8 +1088,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           </div>
         )}
 
-        {/* Subject field */}
-        {draftSubject && (
+        {/* Subject field — hidden for LinkedIn-only route */}
+        {draftSubject && !isLinkedInRoute && (
           <div style={{ marginBottom: 20 }}>
             <label style={{ ...labelStyle, marginBottom: 8 }}>Subject:</label>
             <input
@@ -1105,7 +1115,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         <textarea
           value={draftBody}
           onChange={e => {
-            const newBody = enforceLimit && e.target.value.length > 300
+            const newBody = isLinkedInRoute && e.target.value.length > 300
               ? e.target.value.substring(0, 300)
               : e.target.value;
             const updatedMsg = JSON.stringify({
