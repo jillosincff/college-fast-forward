@@ -109,7 +109,6 @@ export default function CliffScout() {
   const [user, setUser] = useState(null);
   const [jobSearchCtx, setJobSearchCtx] = useState(null);
   const [greeting, setGreeting] = useState(null);
-  const [conversationStarted, setConversationStarted] = useState(false);
   // Timestamp set when user first sends — we ignore all messages before this
   const userSentAtRef = useRef(null);
   const bottomRef = useRef(null);
@@ -191,10 +190,6 @@ export default function CliffScout() {
   }, [conversation?.id]);
 
   useEffect(() => {
-    if (messages.length > 0) setConversationStarted(true);
-  }, [messages]);
-
-  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -203,7 +198,6 @@ export default function CliffScout() {
     if (!msg || sending || !conversation) return;
     setInput('');
     setSending(true);
-    setConversationStarted(true);
     userSentAtRef.current = Date.now(); // unlock the subscription gate
     try {
       await base44.agents.addMessage(conversation, { role: 'user', content: msg });
@@ -252,7 +246,7 @@ export default function CliffScout() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.length === 0 && !sending && !conversationStarted && (
+        {messages.length === 0 && !sending && (
           <div className="flex flex-col h-full gap-4 pt-2">
             {/* Greeting: skeleton while loading, dynamic content once ready */}
             {!greeting ? (
