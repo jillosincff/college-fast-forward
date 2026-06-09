@@ -10,6 +10,7 @@ import MobileBottomNav from './PremiumMobileNav';
 import MatchFlashCarousel from './MatchFlashCarousel';
 import ColdDiscoverySection from './ColdDiscoverySection';
 import OrganizedFeeds from './OrganizedFeeds';
+import PipelineKanbanModal from './PipelineKanbanModal';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import EditGoalsModal from './EditGoalsModal';
@@ -204,6 +205,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [showColdDiscovery, setShowColdDiscovery] = useState(false);
   const [warmCompanyNames, setWarmCompanyNames] = useState([]);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
+  const [showKanbanModal, setShowKanbanModal] = useState(false);
   const navRef = useRef(null);
 
   // Listen for goals modal open event from child components
