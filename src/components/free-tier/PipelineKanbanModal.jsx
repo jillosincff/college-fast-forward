@@ -386,81 +386,159 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
         )}
 
         {/* Detail panel — overlays the modal when a card is clicked */}
-        {selectedJob && (
-          <div className="absolute inset-0 bg-white rounded-2xl flex flex-col z-10 animate-in slide-in-from-right-4 duration-200">
-            {/* Detail header */}
-            <div className="flex items-center gap-3 p-5 border-b">
-              <button
-                onClick={handleCloseDetail}
-                className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full p-1.5 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-gray-900 text-lg truncate">{selectedJob.company}</h3>
-              </div>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-700 rounded-full p-1.5">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+         {selectedJob && (
+           <div className="absolute inset-0 bg-white rounded-2xl flex flex-col z-10 animate-in slide-in-from-right-4 duration-200">
+             {/* Detail header with company name and view posting button */}
+             <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 border-b flex items-center justify-between">
+               <button
+                 onClick={handleCloseDetail}
+                 className="text-white hover:bg-blue-800 rounded-full p-1.5 transition-colors"
+               >
+                 <ArrowLeft className="w-5 h-5" />
+               </button>
+               <h3 className="font-bold text-white text-lg flex-1 text-center">{selectedJob.company}</h3>
+               <button onClick={onClose} className="text-white hover:bg-blue-800 rounded-full p-1.5">
+                 <X className="w-5 h-5" />
+               </button>
+             </div>
 
-            {/* Detail body */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4">
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Company</p>
-                  <p className="font-bold text-gray-900 text-xl">{selectedJob.company}</p>
-                </div>
-                
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Position</p>
-                  <p className="text-sm font-medium text-gray-700">{selectedJob.job_title || selectedJob.role || 'Not specified'}</p>
-                </div>
-                
-                <div className="flex items-center gap-2 flex-wrap pt-2">
-                  <Badge variant="secondary" className="text-xs px-2 py-1 h-auto bg-purple-50 text-purple-700 border-purple-200">
-                    🎓 Network
-                  </Badge>
-                  <span className="inline-flex items-center gap-1.5 bg-white text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-semibold capitalize shadow-sm">
-                    {selectedJob.status?.replace(/_/g, ' ')}
-                  </span>
-                  {selectedJob.follow_up_count > 0 && (
-                    <span className="inline-flex items-center gap-1 bg-white text-orange-600 border border-orange-200 rounded-full px-3 py-1 text-xs font-semibold shadow-sm">
-                      🔁 {selectedJob.follow_up_count} follow-up{selectedJob.follow_up_count > 1 ? 's' : ''}
-                    </span>
-                  )}
-                </div>
-                
-                {selectedJob.status_date && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500 pt-2 border-t">
-                    <Clock className="w-4 h-4" />
-                    <span>Updated {new Date(selectedJob.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                  </div>
-                )}
-                
-                {selectedJob.notes && selectedJob.notes.trim() !== '' && (
-                  <div className="pt-4 border-t">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
-                    <p className="text-sm text-gray-700 leading-relaxed">{selectedJob.notes}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+             {/* Detail body */}
+             <div className="flex-1 overflow-y-auto p-6 space-y-5">
+               {/* Company & Job Title Section */}
+               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                 <div className="space-y-4">
+                   <div>
+                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Company</p>
+                     <p className="font-bold text-gray-900 text-2xl">{selectedJob.company}</p>
+                   </div>
 
-            {/* Detail actions */}
-            <div className="p-5 border-t bg-gray-50 flex gap-3">
-              <button
-                onClick={() => {
-                  handleCloseDetail();
-                  window.location.hash = `#OutreachDrafts?contact=${encodeURIComponent(selectedJob.alumni_name || '')}&company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.job_title || '')}`;
-                }}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl py-2.5 px-4 transition-colors"
-              >
-                ✉️ Draft Outreach Message
-              </button>
-            </div>
-          </div>
-        )}
+                   <div>
+                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Position</p>
+                     <p className="text-lg font-semibold text-gray-800">{selectedJob.job_title || 'Not specified'}</p>
+                   </div>
+
+                   {selectedJob.job_url && (
+                     <a
+                       href={selectedJob.job_url}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-sm mt-2"
+                     >
+                       <ExternalLink className="w-4 h-4" />
+                       View Original Posting →
+                     </a>
+                   )}
+                 </div>
+               </div>
+
+               {/* Job Description Section */}
+               {selectedJob.job_description && (
+                 <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Job Details</p>
+                   <div className="max-h-48 overflow-y-auto pr-2 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                     {selectedJob.job_description}
+                   </div>
+                 </div>
+               )}
+
+               {/* Verified Alumni Contact Section */}
+               {selectedJob.alumni_name ? (
+                 <div className="bg-orange-50 rounded-xl p-5 border-2 border-orange-200">
+                   <p className="text-xs font-bold text-orange-700 uppercase tracking-wider mb-3">🔥 Verified School Insider Backdoor</p>
+                   <div className="space-y-3">
+                     <div>
+                       <p className="text-xs text-orange-600 font-semibold mb-1">Contact Name</p>
+                       <p className="text-sm font-bold text-gray-900">{selectedJob.alumni_name}</p>
+                       {selectedJob.alumni_role && (
+                         <p className="text-xs text-gray-600 mt-1">{selectedJob.alumni_role}</p>
+                       )}
+                     </div>
+
+                     {selectedJob.alumni_linkedin && (
+                       <a
+                         href={selectedJob.alumni_linkedin}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-xs mt-2"
+                       >
+                         🔗 View LinkedIn Profile
+                       </a>
+                     )}
+
+                     {selectedJob.alumni_email && (
+                       <div className="flex items-center gap-2 bg-white rounded-lg p-3 border border-orange-100 mt-2">
+                         <input
+                           type="text"
+                           value={selectedJob.alumni_email}
+                           readOnly
+                           className="flex-1 text-xs text-gray-600 bg-transparent border-none outline-none"
+                         />
+                         <button
+                           onClick={() => {
+                             navigator.clipboard.writeText(selectedJob.alumni_email);
+                             alert('Email copied!');
+                           }}
+                           className="text-orange-600 hover:text-orange-700 font-bold text-xs whitespace-nowrap"
+                         >
+                           📋 Copy
+                         </button>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+               ) : (
+                 <button
+                   className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-blue-400 hover:bg-blue-50 transition-colors text-center"
+                 >
+                   <p className="text-sm font-semibold text-gray-600">🔍 Deploy Agent to Find {selectedJob.company} Alumni</p>
+                   <p className="text-xs text-gray-500 mt-1">No verified insiders yet</p>
+                 </button>
+               )}
+
+               {/* Additional Metadata */}
+               <div className="flex items-center gap-2 flex-wrap pt-2">
+                 <Badge variant="secondary" className="text-xs px-2 py-1 h-auto bg-purple-50 text-purple-700 border-purple-200">
+                   🎓 Network
+                 </Badge>
+                 <span className="inline-flex items-center gap-1.5 bg-white text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-semibold capitalize shadow-sm">
+                   {selectedJob.status?.replace(/_/g, ' ')}
+                 </span>
+                 {selectedJob.follow_up_count > 0 && (
+                   <span className="inline-flex items-center gap-1 bg-white text-orange-600 border border-orange-200 rounded-full px-3 py-1 text-xs font-semibold shadow-sm">
+                     🔁 {selectedJob.follow_up_count} follow-up{selectedJob.follow_up_count > 1 ? 's' : ''}
+                   </span>
+                 )}
+               </div>
+
+               {selectedJob.status_date && (
+                 <div className="flex items-center gap-2 text-sm text-gray-500 pt-2 border-t">
+                   <Clock className="w-4 h-4" />
+                   <span>Updated {new Date(selectedJob.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                 </div>
+               )}
+
+               {selectedJob.notes && selectedJob.notes.trim() !== '' && (
+                 <div className="pt-4 border-t">
+                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+                   <p className="text-sm text-gray-700 leading-relaxed">{selectedJob.notes}</p>
+                 </div>
+               )}
+             </div>
+
+             {/* Detail actions */}
+             <div className="p-5 border-t bg-gray-50 flex gap-3">
+               <button
+                 onClick={() => {
+                   handleCloseDetail();
+                   window.location.hash = `#OutreachDrafts?contact=${encodeURIComponent(selectedJob.alumni_name || '')}&company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.job_title || '')}`;
+                 }}
+                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl py-2.5 px-4 transition-colors"
+               >
+                 ✉️ Draft Outreach Message
+               </button>
+             </div>
+           </div>
+         )}
       </div>
     </div>
   );
