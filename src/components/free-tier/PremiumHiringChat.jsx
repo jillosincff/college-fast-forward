@@ -87,20 +87,10 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
         const schoolAbbr = recap.schoolAbbreviation || schoolAbbr;
 
         if (recap.actionItem && recap.actionItem.type === 'STALE_APPLICATION') {
-          // Smart CRM nudge: stale application detected
           const daysStale = recap.actionItem.daysStale || 5;
-          const userTargets = user?.career_goals?.target_companies || [];
-          const targetText = userTargets.length > 0 ? userTargets.slice(0, 3).join(', ') : 'your top targets';
-          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have ${pipelineCount} active opportunities tracked.\n\n⚠️ **Nudge Alert**: Your application for **${recap.actionItem.companyName}** has been sitting for ${daysStale} days without activity. Let's send an elegant check-in to bypass the cold portal.\n\nYour Sprint Objective Today: Deploy a scout to find backdoors for **${targetText}**, or tap below to draft a follow-up for ${recap.actionItem.companyName}.`;
+          const greeting = `Hey ${firstName}! ⚠️ Your application to **${recap.actionItem.companyName}** has been sitting for ${daysStale} days. Want me to draft a follow-up?`;
           setMessages([{ role: 'agent', text: greeting }]);
           setRecapAction(recap.actionItem);
-        } else if (pipelineCount > 0) {
-          // Active pipeline coaching
-          const userTargets = user?.career_goals?.target_companies || [];
-          const targetText = userTargets.length > 0 ? userTargets.slice(0, 3).join(', ') : 'your target companies';
-          const greeting = `Hey ${firstName}! 📎 I'm monitoring your pipeline — you have **${pipelineCount} active opportunities** saved.\n\nYour main sprint objective today is deploying a scout to find backdoors for **${targetText}**, or ask me how to prep for an upcoming conversation!\n\nPick a target above, or tap below to draft outreach for your top priority.`;
-          setMessages([{ role: 'agent', text: greeting }]);
-          setRecapAction({ type: 'PIPELINE_COACHING', pipelineCount });
         } else if (recap.actionItem) {
           // Fallback to original recap logic
           const companyText = recap.actionItem.companyName || 'your top target';
