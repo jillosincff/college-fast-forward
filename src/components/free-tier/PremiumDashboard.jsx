@@ -407,7 +407,16 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <MobileBottomNav dm={dm} />
+      <MobileBottomNav user={user} onOpenPipeline={() => setShowKanbanModal(true)} />
+
+      {/* Pipeline Kanban Modal */}
+      {showKanbanModal && (
+        <PipelineKanbanModal
+          isOpen={showKanbanModal}
+          onClose={() => setShowKanbanModal(false)}
+          user={user}
+        />
+      )}
 
       {showGoalsModal && (
         <EditGoalsModal
