@@ -687,27 +687,45 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               }
             </p>
           </div>
-          <button
-            onClick={() => {
-              if (atLimit) {
-                onUpgrade('Unlimited Tracking');
-              } else {
-                setShowAdd(true);
-              }
-            }}
-            style={{
-              fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 700,
-              color: atLimit ? '#fff' : BLUE,
-              background: atLimit ? 'linear-gradient(135deg, #ef4444, #dc2626)' : BLUE_LIGHT,
-              border: `1px solid ${atLimit ? '#dc2626' : BLUE_BORDER}`,
-              borderRadius: 10, padding: isMobile ? '8px 14px' : '9px 16px',
-              cursor: 'pointer', minHeight: 'auto',
-              boxShadow: atLimit ? '0 4px 12px rgba(239,68,68,0.3)' : 'none',
-              width: isMobile ? '100%' : 'auto',
-            }}
-          >
-            {atLimit ? '⚡ Unlock Unlimited' : '+ Add Job'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('cff:open-pipeline-modal'))}
+              style={{
+                fontFamily: dm, fontSize: isMobile ? 11 : 12, fontWeight: 700,
+                color: '#fff',
+                background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                border: 'none',
+                borderRadius: 10, padding: isMobile ? '8px 14px' : '9px 16px',
+                cursor: 'pointer', minHeight: 'auto',
+                boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
+                width: isMobile ? '100%' : 'auto',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}
+            >
+              📊 View Kanban
+            </button>
+            <button
+              onClick={() => {
+                if (atLimit) {
+                  onUpgrade('Unlimited Tracking');
+                } else {
+                  setShowAdd(true);
+                }
+              }}
+              style={{
+                fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 700,
+                color: atLimit ? '#fff' : BLUE,
+                background: atLimit ? 'linear-gradient(135deg, #ef4444, #dc2626)' : BLUE_LIGHT,
+                border: `1px solid ${atLimit ? '#dc2626' : BLUE_BORDER}`,
+                borderRadius: 10, padding: isMobile ? '8px 14px' : '9px 16px',
+                cursor: 'pointer', minHeight: 'auto',
+                boxShadow: atLimit ? '0 4px 12px rgba(239,68,68,0.3)' : 'none',
+                width: isMobile ? '100%' : 'auto',
+              }}
+            >
+              {atLimit ? '⚡ Unlock Unlimited' : '+ Add Job'}
+            </button>
+          </div>
         </div>
       </div>
 

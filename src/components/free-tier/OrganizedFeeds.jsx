@@ -5,11 +5,13 @@ import { getLiveJobMatchesFn } from '@/functions/getLiveJobMatchesFn';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import ApplicationPipeline from './ApplicationPipeline';
+import PipelineKanbanModal from './PipelineKanbanModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount }) {
   const [selectedLead, setSelectedLead] = useState(null);
+  const [isKanbanOpen, setIsKanbanOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const [savedCompanyKeys, setSavedCompanyKeys] = useState(() => {
@@ -113,6 +115,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     window.addEventListener('cff:pipeline-changed', handler);
     return () => window.removeEventListener('cff:pipeline-changed', handler);
   }, [queryClient]);
+
+  // Listen for Kanban modal open event
+  useEffect(() => {
+    const openKanbanHandler = () => setIsKanbanOpen(true);
+    window.addEventListener('cff:open-pipeline-modal', openKanbanHandler);
+    return () => window.removeEventListener('cff:open-pipeline-modal', openKanbanHandler);
+  }, []);
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [lastRefreshed, setLastRefreshed] = useState(null);
@@ -606,6 +615,13 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
           user={user}
         />
       )}
+
+      {/* Kanban Modal - Only opens on explicit trigger */}
+      <PipelineKanbanModal
+        isOpen={isKanbanOpen}
+        onClose={() => setIsKanbanOpen(false)}
+        user={user}
+      />
     </div>
   );
 }

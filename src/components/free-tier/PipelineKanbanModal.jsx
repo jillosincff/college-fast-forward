@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target } from 'lucide-react';
@@ -200,120 +199,119 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
     window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(job.company)}&role=${encodeURIComponent(job.role)}&pipeline_id=${job.id}`;
   };
 
-  return (
-    <>
-      <Dialog open={isOpen} onOpenChange={(open) => {
-        if (!open) onClose();
-      }}>
-        <DialogContent className="max-w-6xl w-full max-h-[90vh] overflow-hidden p-0 gap-0 bg-transparent border-0 shadow-2xl">
-          {/* Custom backdrop with blur */}
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-          
-          {/* Modal content */}
-          <div className="relative bg-white rounded-2xl overflow-hidden flex flex-col max-h-[85vh]">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700">
-              <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  📊 Application Pipeline
-                </h2>
-                <p className="text-blue-100 text-sm mt-1">
-                  Drag cards between columns to track your progress
-                </p>
-              </div>
-              <button
-                onClick={onClose}
-                className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+  if (!isOpen) return null;
 
-            {/* Stats bar */}
-            <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b">
-              {COLUMNS.map(col => {
-                const count = getColumnJobs(col.id).length;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop with blur */}
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-md" 
+        onClick={onClose}
+      />
+      
+      {/* Modal container with slide-up animation */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[85vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700">
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              📊 Application Pipeline
+            </h2>
+            <p className="text-blue-100 text-sm mt-1">
+              Drag cards between columns to track your progress
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Stats bar */}
+        <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b">
+          {COLUMNS.map(col => {
+            const count = getColumnJobs(col.id).length;
+            return (
+              <div key={col.id} className="text-center">
+                <p className="text-2xl font-bold" style={{ color: col.color }}>{count}</p>
+                <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">{col.title}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Kanban board */}
+        <div className="flex-1 overflow-x-auto overflow-y-hidden">
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div className="flex gap-4 p-6 h-full min-w-max">
+              {COLUMNS.map((column) => {
+                const columnJobs = getColumnJobs(column.id);
+                const Icon = column.icon;
+                
                 return (
-                  <div key={col.id} className="text-center">
-                    <p className="text-2xl font-bold" style={{ color: col.color }}>{count}</p>
-                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">{col.title}</p>
+                  <div
+                    key={column.id}
+                    className="w-72 flex-shrink-0 flex flex-col"
+                  >
+                    {/* Column header */}
+                    <div className="flex items-center gap-2 mb-3 pb-3 border-b" style={{ borderColor: column.border }}>
+                      <div 
+                        className="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style={{ background: column.bg }}
+                      >
+                        <Icon className="w-4 h-4" style={{ color: column.color }} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm" style={{ color: column.color }}>{column.title}</p>
+                        <p className="text-[10px] text-gray-400">{column.description}</p>
+                      </div>
+                      <Badge variant="secondary" className="ml-auto text-xs" style={{ background: column.bg, color: column.color }}>
+                        {columnJobs.length}
+                      </Badge>
+                    </div>
+
+                    {/* Droppable area */}
+                    <Droppable droppableId={column.id}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`flex-1 overflow-y-auto pr-2 min-h-[200px] rounded-xl transition-colors ${
+                            snapshot.isDraggingOver ? 'bg-blue-50/50' : 'bg-transparent'
+                          }`}
+                        >
+                          {columnJobs.length === 0 ? (
+                            <EmptyColumnState column={column} />
+                          ) : (
+                            columnJobs.map((job, index) => (
+                              <PipelineCard
+                                key={job.id}
+                                job={job}
+                                index={index}
+                                onOpenDetail={handleOpenDetail}
+                              />
+                            ))
+                          )}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
                   </div>
                 );
               })}
             </div>
+          </DragDropContext>
+        </div>
 
-            {/* Kanban board */}
-            <div className="flex-1 overflow-x-auto overflow-y-hidden">
-              <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex gap-4 p-6 h-full min-w-max">
-                  {COLUMNS.map((column) => {
-                    const columnJobs = getColumnJobs(column.id);
-                    const Icon = column.icon;
-                    
-                    return (
-                      <div
-                        key={column.id}
-                        className="w-72 flex-shrink-0 flex flex-col"
-                      >
-                        {/* Column header */}
-                        <div className="flex items-center gap-2 mb-3 pb-3 border-b" style={{ borderColor: column.border }}>
-                          <div 
-                            className="w-8 h-8 rounded-lg flex items-center justify-center"
-                            style={{ background: column.bg }}
-                          >
-                            <Icon className="w-4 h-4" style={{ color: column.color }} />
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm" style={{ color: column.color }}>{column.title}</p>
-                            <p className="text-[10px] text-gray-400">{column.description}</p>
-                          </div>
-                          <Badge variant="secondary" className="ml-auto text-xs" style={{ background: column.bg, color: column.color }}>
-                            {columnJobs.length}
-                          </Badge>
-                        </div>
-
-                        {/* Droppable area */}
-                        <Droppable droppableId={column.id}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.droppableProps}
-                              className={`flex-1 overflow-y-auto pr-2 min-h-[200px] rounded-xl transition-colors ${
-                                snapshot.isDraggingOver ? 'bg-blue-50/50' : 'bg-transparent'
-                              }`}
-                            >
-                              {columnJobs.length === 0 ? (
-                                <EmptyColumnState column={column} />
-                              ) : (
-                                columnJobs.map((job, index) => (
-                                  <PipelineCard
-                                    key={job.id}
-                                    job={job}
-                                    index={index}
-                                    onOpenDetail={handleOpenDetail}
-                                  />
-                                ))
-                              )}
-                              {provided.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
-                      </div>
-                    );
-                  })}
-                </div>
-              </DragDropContext>
-            </div>
-
-            {/* Footer hint */}
-            <div className="p-4 border-t bg-gray-50 text-center">
-              <p className="text-xs text-gray-500">
-                💡 Tip: Click "Generate Message" on any job card to move it to Draft Ready
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+        {/* Footer hint */}
+        <div className="p-4 border-t bg-gray-50 text-center">
+          <p className="text-xs text-gray-500">
+            💡 Tip: Click "Generate Message" on any job card to move it to Draft Ready
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
