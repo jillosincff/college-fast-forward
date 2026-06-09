@@ -4,6 +4,7 @@ import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
 import { getLiveJobMatchesFn } from '@/functions/getLiveJobMatchesFn';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
+import ApplicationPipeline from './ApplicationPipeline';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
@@ -458,175 +459,140 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const anyLoading = isLoading || dualLoading;
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-6">
-
-      {/* ── Global Sync Bar ── */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2.5 flex items-center justify-between">
-          <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
-            🤝 {schoolAbbr} Network connections ready
-          </span>
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('cff:open-network-modal'))}
-            className="text-[11px] text-blue-100 font-semibold hover:text-white transition"
-            style={{ minHeight: 'auto', minWidth: 'auto' }}
-          >
-            Tap to view →
-          </button>
-        </div>
-        <div className="grid grid-cols-3 divide-x divide-gray-100">
-          <div className="p-4 text-center">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Ecosystem</p>
-            {anyLoading ? <div className="h-6 bg-gray-200 rounded animate-pulse mt-1 mx-auto w-16" /> : <p className="text-lg font-black text-gray-800 mt-1">{uniqueCompaniesCount} Companies</p>}
-            <p className="text-[11px] text-gray-500 mt-0.5">Actively tracked</p>
-          </div>
-          <div className="p-4 text-center">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Verified Insiders</p>
-            {anyLoading ? (
-              <>
-                <p className="text-lg font-black text-purple-600 mt-1 animate-pulse">Scouting...</p>
-                <p className="text-[11px] text-purple-400 mt-0.5">CLiFF Scout is hunting backdoor channels</p>
-              </>
-            ) : rawNetworkCount === 0 ? (
-              <>
-                <p className="text-lg font-black text-amber-600 mt-1">Cold Inroads</p>
-                <p className="text-[11px] text-gray-500 mt-0.5">{totalCount} target stakeholders mapped</p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg font-black text-purple-700 mt-1">{rawNetworkCount}</p>
-                <p className="text-[11px] text-gray-500 mt-0.5">Alumni &amp; parent network</p>
-              </>
-            )}
-          </div>
-          <div className="p-4 text-center">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Opportunities</p>
-            {anyLoading ? <div className="h-6 bg-orange-100 rounded animate-pulse mt-1 mx-auto w-14" /> : <p className="text-lg font-black text-orange-600 mt-1">{totalCount} Fresh</p>}
-            <p className="text-[11px] text-gray-500 mt-0.5">Hand-picked for you</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🚀</span>
-          <h2 className="text-xl font-bold text-gray-900 tracking-tight">CLiFF's Live Target Matches</h2>
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Your personalized feed of{' '}
-          <span className="font-bold text-purple-600">{anyLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
-        </p>
-      </div>
-
-      {/* No goals nudge */}
-      {noGoals && !anyLoading && (
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6">
+      {/* ── 70/30 Split Layout ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+        
+        {/* ── LEFT COLUMN (70%): Feed ── */}
+        <div className="lg:col-span-7 space-y-6">
+          
+          {/* Header */}
           <div>
-            <p className="text-sm font-bold text-blue-900">🎯 Add your career goals for a personalized feed</p>
-            <p className="text-xs text-blue-700 mt-1">CLiFF will surface Company Insiders and Targeted Hidden Leads based on your target roles and industries.</p>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🚀</span>
+              <h2 className="text-xl font-bold text-gray-900 tracking-tight">CLiFF's Live Target Matches</h2>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Your personalized feed of{' '}
+              <span className="font-bold text-purple-600">{anyLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
+            </p>
           </div>
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2 rounded-xl transition-colors shrink-0"
-            style={{ minHeight: 'auto', cursor: 'pointer' }}
-          >
-            Set Goals →
-          </button>
-        </div>
-      )}
 
-      {/* ── Single unified feed ── */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🛰️</span>
-            <h3 className="text-base font-bold text-gray-900 tracking-tight">
-              Target-Matched Opportunities ({anyLoading ? '…' : totalCount})
-            </h3>
-          </div>
-          <div className="flex items-center gap-2">
-            {lastRefreshed && (
-              <span className="text-[11px] text-gray-400 hidden sm:block">
-                Refreshed {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
+          {/* No goals nudge */}
+          {noGoals && !anyLoading && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-sm font-bold text-blue-900">🎯 Add your career goals for a personalized feed</p>
+                <p className="text-xs text-blue-700 mt-1">CLiFF will surface Company Insiders and Targeted Hidden Leads based on your target roles and industries.</p>
+              </div>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('cff:open-goals-modal'))}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-2 rounded-xl transition-colors shrink-0"
+                style={{ minHeight: 'auto', cursor: 'pointer' }}
+              >
+                Set Goals →
+              </button>
+            </div>
+          )}
+
+          {/* ── Target-Matched Opportunities Grid ── */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🛰️</span>
+                <h3 className="text-base font-bold text-gray-900 tracking-tight">
+                  Target-Matched Opportunities ({anyLoading ? '…' : totalCount})
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {lastRefreshed && (
+                  <span className="text-[11px] text-gray-400 hidden sm:block">
+                    Refreshed {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+                <button
+                  onClick={handleManualRefresh}
+                  disabled={isFetching}
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                    isFetching
+                      ? 'border-blue-200 bg-blue-50 text-blue-400 cursor-not-allowed'
+                      : 'border-blue-300 bg-white text-blue-600 hover:bg-blue-50 hover:border-blue-400'
+                  }`}
+                >
+                  <span className={isFetching ? 'animate-spin inline-block' : 'inline-block'}>↻</span>
+                  {isFetching ? 'Loading...' : 'New Batch'}
+                </button>
+                <button
+                  onClick={() => {
+                    Object.keys(localStorage).forEach(key => { try { localStorage.removeItem(key); } catch (e) {} });
+                    Object.keys(sessionStorage).forEach(key => { try { sessionStorage.removeItem(key); } catch (e) {} });
+                    fetch('/api/functions/clearJobLeadsCache', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                    }).catch(() => {});
+                    window.location.href = window.location.origin + '/#FreeTierDashboard?t=' + Date.now();
+                  }}
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-300 bg-white text-red-600 hover:bg-red-50 hover:border-red-400 transition-all"
+                >
+                  🗑️ Nuke Everything
+                </button>
+              </div>
+            </div>
+
+            {anyLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+                {[1, 2, 3, 4].map(n => (
+                  <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
+                ))}
+              </div>
+            ) : targetOpportunities.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+                {targetOpportunities.map((lead, idx) => {
+                  const currentCompany = (lead.company || lead.companyName || '').toLowerCase().trim();
+                  
+                  if (currentCompany.includes('capsule') || currentCompany.includes('goodwin')) {
+                    return null;
+                  }
+
+                  return (
+                    <DiscoveryJobCard
+                      key={lead.company || lead.companyName || idx}
+                      lead={lead}
+                      onAddToPipeline={handleAddToPipeline}
+                      onColdInroad={handleColdInroad}
+                      onSelect={setSelectedLead}
+                      schoolAbbr={schoolAbbr}
+                      isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
+                      onDismiss={() => {}}
+                      insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
+                No matching opportunities found today. Adjust your career goals to broaden the search.
+              </div>
             )}
-            <button
-              onClick={handleManualRefresh}
-              disabled={isFetching}
-              style={{ minHeight: 'auto', minWidth: 'auto' }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                isFetching
-                  ? 'border-blue-200 bg-blue-50 text-blue-400 cursor-not-allowed'
-                  : 'border-blue-300 bg-white text-blue-600 hover:bg-blue-50 hover:border-blue-400'
-              }`}
-            >
-              <span className={isFetching ? 'animate-spin inline-block' : 'inline-block'}>↻</span>
-              {isFetching ? 'Loading...' : 'New Batch'}
-            </button>
-            <button
-              onClick={() => {
-                // NUCLEAR PURGE: Remove ALL storage keys (not just cff_)
-                Object.keys(localStorage).forEach(key => {
-                  try { localStorage.removeItem(key); } catch (e) {}
-                });
-                Object.keys(sessionStorage).forEach(key => {
-                  try { sessionStorage.removeItem(key); } catch (e) {}
-                });
-                // Clear backend cache
-                fetch('/api/functions/clearJobLeadsCache', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                }).catch(() => {});
-                // Force hard reload with cache bypass
-                window.location.href = window.location.origin + '/#FreeTierDashboard?t=' + Date.now();
-              }}
-              style={{ minHeight: 'auto', minWidth: 'auto' }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-300 bg-white text-red-600 hover:bg-red-50 hover:border-red-400 transition-all"
-            >
-              🗑️ Nuke Everything
-            </button>
-          </div>
+          </section>
         </div>
 
-        {anyLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[1, 2, 3].map(n => (
-              <div key={n} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
-            ))}
+        {/* ── RIGHT COLUMN (30%): Sticky Sidebar Pipeline ── */}
+        <div className="lg:col-span-3">
+          <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-theme(spacing.24))] overflow-y-auto">
+            <ApplicationPipeline
+              userSchool={user?.school_name || 'University of Florida'}
+              alumniCount={verifiedAlumniCount || 0}
+              onUpgrade={(feature) => {
+                console.log('Upgrade clicked:', feature);
+              }}
+            />
           </div>
-        ) : targetOpportunities.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {targetOpportunities.map((lead, idx) => {
-              const currentCompany = (lead.company || lead.companyName || '').toLowerCase().trim();
-              
-              // 🚨 ABSOLUTE HARD KILL: If it matches these two phantoms, vanish them from the DOM completely
-              if (currentCompany.includes('capsule') || currentCompany.includes('goodwin')) {
-                return null;
-              }
-
-              return (
-                <DiscoveryJobCard
-                  key={lead.company || lead.companyName || idx}
-                  lead={lead}
-                  onAddToPipeline={handleAddToPipeline}
-                  onColdInroad={handleColdInroad}
-                  onSelect={setSelectedLead}
-                  schoolAbbr={schoolAbbr}
-                  isPinned={savedCompanyKeys.has(lead.company || lead.companyName)}
-                  onDismiss={() => {}}
-                  insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
-            No matching opportunities found today. Adjust your career goals to broaden the search.
-          </div>
-        )}
-      </section>
+        </div>
+      </div>
 
       {selectedLead && (
         <MatchDeepDiveModal
