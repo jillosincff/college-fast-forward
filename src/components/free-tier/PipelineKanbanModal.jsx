@@ -253,6 +253,37 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
     }
   };
 
+  const handleDeployAlumniAgent = async (companyName) => {
+    try {
+      // Trigger the scoutCompanyBackdoor function to find alumni
+      const { scoutCompanyBackdoor } = await import('@/functions/scoutCompanyBackdoor');
+      const result = await scoutCompanyBackdoor({ jobId: companyName, companyName });
+      
+      const data = result?.data || result;
+      const alumni = data?.alumni || [];
+      
+      if (alumni.length > 0) {
+        // Update the pipeline record with the first alumni found
+        const firstAlumni = alumni[0];
+        await base44.entities.NetworkingPipeline.update(selectedJob.id, {
+          alumni_name: firstAlumni.name || '',
+          alumni_role: firstAlumni.role_title || '',
+          alumni_linkedin: firstAlumni.linkedin_url || '',
+          alumni_source: 'fastiq',
+        });
+        
+        alert(`✅ Found ${alumni.length} alumni at ${companyName}! Updated with ${firstAlumni.name}.`);
+        loadPipeline();
+        handleCloseDetail();
+      } else {
+        alert(`🔍 No alumni found at ${companyName}. The agent will continue searching.`);
+      }
+    } catch (error) {
+      console.error('Failed to deploy alumni agent:', error);
+      alert('⚠️ Failed to search for alumni. Please try again.');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -488,7 +519,8 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                  </div>
                ) : (
                  <button
-                   className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-blue-400 hover:bg-blue-50 transition-colors text-center"
+                   onClick={() => handleDeployAlumniAgent(selectedJob.company)}
+                   className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-blue-400 hover:bg-blue-50 transition-colors text-center cursor-pointer"
                  >
                    <p className="text-sm font-semibold text-gray-600">🔍 Deploy Agent to Find {selectedJob.company} Alumni</p>
                    <p className="text-xs text-gray-500 mt-1">No verified insiders yet</p>
