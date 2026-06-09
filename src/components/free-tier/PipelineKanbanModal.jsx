@@ -293,9 +293,10 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
       // Close the modal
       onClose();
       
-      // Navigate to the outreach draft page with the selected alumni info
+      // Navigate directly to compose phase, skipping intermediate page
+      // Add skipForm=1 flag to bypass the intermediate AutomatedAlumniActionPanel
       setTimeout(() => {
-        window.location.hash = `#OutreachDrafts?context=alumni_search&company=${encodeURIComponent(selectedJob.company)}&jobTitle=${encodeURIComponent(selectedJob.job_title || '')}&alumniName=${encodeURIComponent(alumni.name || '')}&alumniRole=${encodeURIComponent(alumni.role_title || '')}&alumniLinkedin=${encodeURIComponent(alumni.linkedin_url || '')}`;
+        window.location.hash = `#OutreachDrafts?context=alumni_search&company=${encodeURIComponent(selectedJob.company)}&jobTitle=${encodeURIComponent(selectedJob.job_title || '')}&alumniName=${encodeURIComponent(alumni.name || '')}&alumniRole=${encodeURIComponent(alumni.role_title || '')}&alumniLinkedin=${encodeURIComponent(alumni.linkedin_url || '')}&skipForm=1`;
       }, 100);
     } catch (error) {
       console.error('Failed to select alumni:', error);

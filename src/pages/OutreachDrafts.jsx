@@ -38,6 +38,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     const paramStr = hash.includes('?') ? hash.split('?')[1] : '';
     const params = new URLSearchParams(paramStr);
     if (params.get('context') === 'cold_outreach' && params.get('company')) return 'scout';
+    if (params.get('skipForm') === '1') return 'compose';
     if (params.get('contact') && params.get('company')) return 'form';
     return 'list';
   });
@@ -88,7 +89,8 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
       window.history.replaceState({}, '', '#OutreachDrafts');
     } else if (alumniName && company) {
       // From Kanban modal alumni selection
-      setForm({
+      const skipForm = params.get('skipForm') === '1';
+      const formData = {
         recipientName: decodeURIComponent(alumniName),
         recipientCompany: decodeURIComponent(company),
         recipientTitle: alumniRole ? decodeURIComponent(alumniRole) : '',
@@ -96,10 +98,46 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         jobTitle: jobTitle ? decodeURIComponent(jobTitle) : '',
         jobUrl: '',
         conversationContext: '',
-      });
+      };
+      setForm(formData);
       setSelectedContext('alumni_search');
-      setPhase('form');
-      window.history.replaceState({}, '', '#OutreachDrafts');
+      
+      // If skipForm=1, auto-generate the message and go straight to compose
+      if (skipForm) {
+        window.history.replaceState({}, '', '#OutreachDrafts');
+        // Trigger auto-generation
+        setTimeout(async () => {
+          try {
+            const res = await base44.functions.invoke('generateOutreachMessage', {
+              context: 'alumni_search',
+              recipientName: formData.recipientName,
+              recipientTitle: formData.recipientTitle,
+              recipientCompany: formData.recipientCompany,
+              recipientEmail: formData.recipientEmail,
+              recipientLinkedinUrl: formData.recipientLinkedinUrl,
+              studentName: user?.full_name || firstName,
+              studentMajor: user?.major || '',
+              targetRole: user?.career_goals?.target_roles?.[0] || '',
+              targetIndustry: user?.career_goals?.target_industries?.[0] || '',
+              graduationYear: user?.career_goals?.graduation_year || '',
+              school: user?.school_name || 'University of Florida',
+              jobTitle: formData.jobTitle,
+              jobUrl: formData.jobUrl,
+              jobDescription: formData.jobDescription,
+              conversationContext: formData.conversationContext,
+            });
+            const msg = res?.data?.message || '';
+            setGeneratedMessage(msg);
+            setEditedMessage(msg);
+            setPhase('compose');
+          } catch (e) {
+            console.error('Auto-generation failed:', e);
+            setPhase('form');
+          }
+        }, 100);
+      } else {
+        setPhase('form');
+      }
     } else if (contact && company) {
       setForm({
         recipientName: decodeURIComponent(contact),
@@ -967,9 +1005,43 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
           To {form.recipientName}
         </h1>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 24px' }}>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#888', margin: '0 0 8px' }}>
           {ctx?.icon} {ctx?.label} · Edit freely before sending
         </p>
+
+        {/* Inline destination status badge */}
+        {selectedContext === 'alumni_search' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 500, color: '#666' }}>Destination:</span>
+            {form.recipientEmail ? (
+              <span style={{
+                padding: '5px 10px',
+                background: '#DCFCE7',
+                color: '#166534',
+                fontSize: 12,
+                fontWeight: 600,
+                borderRadius: 6,
+                border: '1px solid #86EFAC',
+                fontFamily: "'DM Sans', sans-serif",
+              }}>
+                📧 Email verified
+              </span>
+            ) : (
+              <span style={{
+                padding: '5px 10px',
+                background: '#FEF3C7',
+                color: '#92400E',
+                fontSize: 12,
+                fontWeight: 600,
+                borderRadius: 6,
+                border: '1px solid #FCD34D',
+                fontFamily: "'DM Sans', sans-serif",
+              }}>
+                💼 LinkedIn InMail
+              </span>
+            )}
+          </div>
+        )}
 
         {enforceLimit && (
           <div style={{
