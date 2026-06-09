@@ -210,17 +210,23 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
   };
 
   const handleDelete = async (job) => {
+    console.log('Delete clicked for job:', job);
     if (!confirm(`Are you sure you want to delete "${job.company}" from your pipeline?`)) {
       return;
     }
     
+    console.log('Deleting job with ID:', job.id);
     try {
-      await base44.entities.NetworkingPipeline.delete(job.id);
+      const result = await base44.entities.NetworkingPipeline.delete(job.id);
+      console.log('Delete result:', result);
       setJobs(prev => prev.filter(j => j.id !== job.id));
       window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
+      window.dispatchEvent(new CustomEvent('cff:pipeline-changed'));
     } catch (error) {
       console.error('Failed to delete opportunity:', error);
-      alert('Failed to delete opportunity. Please try again.');
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+      alert('Failed to delete opportunity: ' + (error.message || 'Unknown error'));
     }
   };
 
