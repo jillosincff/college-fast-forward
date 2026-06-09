@@ -24,7 +24,6 @@ async function fetchJobSearchContext(userEmail) {
     const matched = statusCounts['matched'] || 0;
 
     const topCompanies = [...new Set(pipeline.map(p => p.company).filter(Boolean))].slice(0, 5);
-
     const recentActivity = activityLog.slice(0, 5).map(a => a.type).filter(Boolean);
 
     const stale = pipeline.filter(p =>
@@ -34,20 +33,12 @@ async function fetchJobSearchContext(userEmail) {
     );
 
     const staleSummary = stale.length > 0
-      ? `${stale.length} contact(s) haven't been followed up on in over 7 days (e.g. ${stale.slice(0, 2).map(s => `${s.alumni_name} at ${s.company}`).join(', ')})`
+      ? `${stale.length} contact(s) haven't been followed up in over 7 days (e.g. ${stale.slice(0, 2).map(s => `${s.alumni_name} at ${s.company}`).join(', ')})`
       : null;
 
     return {
-      totalContacts,
-      identified,
-      matched,
-      reachedOut,
-      replies,
-      interviews,
-      offers,
-      topCompanies,
-      recentActivity,
-      staleSummary,
+      totalContacts, identified, matched, reachedOut, replies,
+      interviews, offers, topCompanies, recentActivity, staleSummary,
       pipelineEmpty: totalContacts === 0,
     };
   } catch {
@@ -58,7 +49,7 @@ async function fetchJobSearchContext(userEmail) {
 function buildGreeting(firstName, ctx) {
   const name = firstName ? `Hey ${firstName}!` : 'Hey!';
   if (!ctx || ctx.pipelineEmpty) {
-    return `${name} I'm CLiFF Scout — your UF alumni network agent. You're starting fresh. Tell me a target company, role, or industry and I'll find your warm path in.`;
+    return `${name} I'm CLiFF Scout — your alumni network agent. You're starting fresh. Tell me a target company, role, or industry and I'll find your warm path in.`;
   }
   if (ctx.offers > 0) {
     return `${name} You've got ${ctx.offers} offer${ctx.offers > 1 ? 's' : ''} in your pipeline — congrats! Want to talk negotiation strategy or compare options?`;
@@ -67,7 +58,8 @@ function buildGreeting(firstName, ctx) {
     return `${name} You have ${ctx.interviews} interview${ctx.interviews > 1 ? 's' : ''} scheduled. Need prep help, salary intel, or a thank-you note draft?`;
   }
   if (ctx.staleSummary) {
-    return `${name} ${ctx.staleSummary.replace(/^\d+ contact/, (m) => `You have ${m}`).replace('contact(s)', `contact${ctx.stale > 1 ? 's' : ''}`)} — want me to draft quick follow-up messages?`;
+    const count = ctx.staleSummary.match(/^(\d+)/)?.[1] || '';
+    return `${name} You have ${count} contact${Number(count) > 1 ? 's' : ''} that haven't been followed up in over 7 days. Want me to draft quick follow-up messages?`;
   }
   if (ctx.replies > 0) {
     return `${name} Nice — you have ${ctx.replies} repl${ctx.replies > 1 ? 'ies' : 'y'} in your pipeline. Want to keep the momentum? I can help schedule coffee chats or draft next steps.`;
@@ -79,7 +71,7 @@ function buildGreeting(firstName, ctx) {
     const count = ctx.identified + ctx.matched;
     return `${name} You have ${count} contact${count > 1 ? 's' : ''} ready to go but haven't reached out yet. Want me to draft the first message?`;
   }
-  return `${name} I'm CLiFF Scout — your UF alumni network agent. Tell me a target company, role, or industry and I'll find your warm path in.`;
+  return `${name} I'm CLiFF Scout — your alumni network agent. Tell me a target company, role, or industry and I'll find your warm path in.`;
 }
 
 function getSuggestedPrompts(ctx) {
@@ -101,113 +93,109 @@ function getSuggestedPrompts(ctx) {
   return prompts.slice(0, 4);
 }
 
+function buildActivityContext(ctx) {
+  if (!ctx) return '';
+  if (ctx.pipelineEmpty) {
+    return 'The student has NO contacts in their networking pipeline yet — they are just getting started. Do NOT mention any saved jobs, opportunities, or pipeline stats.';
+  }
+  return [
+    `Networking pipeline: ${ctx.totalContacts} total contacts tracked (these are people/alumni contacts, NOT job listings).`,
+    ctx.identified > 0 ? `${ctx.identified} contacts identified (not yet reached out).` : null,
+    ctx.matched > 0 ? `${ctx.matched} contacts matched (ready to contact).` : null,
+    ctx.reachedOut > 0 ? `${ctx.reachedOut} contacts already messaged.` : null,
+    ctx.replies > 0 ? `${ctx.replies} contacts have replied.` : null,
+    ctx.interviews > 0 ? `${ctx.interviews} interview(s) scheduled.` : null,
+    ctx.offers > 0 ? `${ctx.offers} offer(s) received.` : null,
+    ctx.topCompanies.length > 0 ? `Target companies: ${ctx.topCompanies.join(', ')}.` : null,
+    ctx.staleSummary ? `Follow-up needed: ${ctx.staleSummary}.` : null,
+    'Do NOT fabricate numbers. Only reference the exact numbers above. Do NOT mention "active opportunities saved".',
+  ].filter(Boolean).join(' ');
+}
+
 export default function CliffScout() {
-  const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [user, setUser] = useState(null);
   const [jobSearchCtx, setJobSearchCtx] = useState(null);
   const [greeting, setGreeting] = useState(null);
+
+  // Deferred conversation — only created on first send
+  const conversationRef = useRef(null);
   const subscriptionRef = useRef(null);
+  const ctxRef = useRef(null);       // holds activityContext string for conversation creation
+  const userRef = useRef(null);      // holds user object for conversation creation
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(u => {
+      setUser(u);
+      userRef.current = u;
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (!user) return;
-
-    const initConversation = async () => {
+    const init = async () => {
       const ctx = await fetchJobSearchContext(user.email);
       setJobSearchCtx(ctx);
       setGreeting(buildGreeting(user.full_name?.split(' ')[0] || '', ctx));
-
-      // Build a dynamic context summary for the agent
-      let activityContext = '';
-      if (ctx) {
-        if (ctx.pipelineEmpty) {
-          activityContext = 'The student has NO contacts in their networking pipeline yet — they are just getting started. Do NOT mention any saved jobs, opportunities, or pipeline stats.';
-        } else {
-          const lines = [
-            `Networking pipeline: ${ctx.totalContacts} total contacts tracked (these are people/alumni contacts, NOT job listings or opportunities).`,
-            ctx.identified > 0 ? `${ctx.identified} contacts identified (not yet reached out).` : null,
-            ctx.matched > 0 ? `${ctx.matched} contacts matched (ready to contact).` : null,
-            ctx.reachedOut > 0 ? `${ctx.reachedOut} contacts already messaged.` : null,
-            ctx.replies > 0 ? `${ctx.replies} contacts have replied.` : null,
-            ctx.interviews > 0 ? `${ctx.interviews} interview(s) scheduled.` : null,
-            ctx.offers > 0 ? `${ctx.offers} offer(s) received.` : null,
-            ctx.topCompanies.length > 0 ? `Target companies in pipeline: ${ctx.topCompanies.join(', ')}.` : null,
-            ctx.staleSummary ? `⚠️ Follow-up needed: ${ctx.staleSummary}.` : null,
-            'IMPORTANT: Do NOT fabricate or guess any numbers. Only reference the exact numbers above. Do NOT mention "active opportunities saved" or "sprint objective" — use plain direct language.',
-          ].filter(Boolean);
-          activityContext = lines.join(' ');
-        }
-      }
-
-      try {
-        const conv = await base44.agents.createConversation({
-          agent_name: 'cliff_scout',
-          metadata: { name: 'CLiFF Scout Session' },
-          variables: {
-            user: {
-              almaMater: user.school_name || user.school || user.schoolName || '',
-              firstName: user.full_name?.split(' ')[0] || '',
-              activityContext,
-            },
-          },
-        });
-        // Strip any platform-generated opening messages from the conversation object
-        // so they never reach our UI even if the subscription fires immediately
-        if (conv.messages) conv.messages = [];
-        setConversation(conv);
-      } catch (err) {
-        console.error(err);
-      }
+      ctxRef.current = buildActivityContext(ctx);
     };
-
-    initConversation();
+    init();
   }, [user]);
-
-  // Subscription is set up lazily on first send — not on conversation create
-  // This prevents the agent's auto-opening message from ever reaching the UI
-  useEffect(() => {
-    return () => {
-      // Cleanup subscription on unmount
-      if (subscriptionRef.current) subscriptionRef.current();
-    };
-  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    return () => {
+      if (subscriptionRef.current) subscriptionRef.current();
+    };
+  }, []);
+
   const send = async (text) => {
-    const msg = text || input.trim();
-    if (!msg || sending || !conversation) return;
+    const msg = (text || input).trim();
+    if (!msg || sending) return;
     setInput('');
     setSending(true);
 
-    // Set up subscription on first send only — avoids catching agent's auto-open message
-    if (!subscriptionRef.current) {
-      subscriptionRef.current = base44.agents.subscribeToConversation(conversation.id, (data) => {
-        const allMsgs = data.messages || [];
-        // Only show messages that start from the first user message
-        const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
-        if (firstUserIdx === -1) return; // no user message yet, show nothing
-        const relevant = allMsgs.slice(firstUserIdx);
-        // Extra safety: never show a lone assistant message with no preceding user message
-        if (relevant[0]?.role === 'assistant') return;
-        setMessages(relevant);
-      });
-    }
+    // Optimistically show the user message immediately
+    setMessages(prev => [...prev, { role: 'user', content: msg }]);
 
     try {
-      await base44.agents.addMessage(conversation, { role: 'user', content: msg });
+      // Create the conversation on first send only — never before
+      if (!conversationRef.current) {
+        const u = userRef.current;
+        const conv = await base44.agents.createConversation({
+          agent_name: 'cliff_scout',
+          metadata: { name: 'CLiFF Scout Session' },
+          variables: {
+            user: {
+              almaMater: u?.school_name || u?.school || u?.schoolName || '',
+              firstName: u?.full_name?.split(' ')[0] || '',
+              activityContext: ctxRef.current || '',
+            },
+          },
+        });
+        conversationRef.current = conv;
+
+        // Subscribe AFTER creation, but filter to only messages after our first user message
+        subscriptionRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
+          const allMsgs = data.messages || [];
+          // Find the first user message (the one we just sent)
+          const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
+          if (firstUserIdx === -1) return;
+          setMessages(allMsgs.slice(firstUserIdx));
+        });
+      }
+
+      await base44.agents.addMessage(conversationRef.current, { role: 'user', content: msg });
     } catch (err) {
       console.error('Send failed:', err);
+      setSending(false);
     } finally {
       setSending(false);
       inputRef.current?.focus();
@@ -253,7 +241,7 @@ export default function CliffScout() {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && !sending && (
           <div className="flex flex-col h-full gap-4 pt-2">
-            {/* Greeting: skeleton while loading, dynamic content once ready */}
+            {/* Greeting */}
             {!greeting ? (
               <div className="flex gap-3 justify-start">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center mt-0.5 shrink-0">
@@ -328,11 +316,11 @@ export default function CliffScout() {
           />
           <button
             onClick={() => send()}
-            disabled={!input.trim() || sending || !conversation}
+            disabled={!input.trim() || sending}
             className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 flex items-center justify-center transition-colors shrink-0"
             style={{ minHeight: 'auto', minWidth: 'auto', cursor: input.trim() && !sending ? 'pointer' : 'default' }}
           >
-            <Send className="w-4 h-4 text-white disabled:text-slate-400" />
+            <Send className="w-4 h-4 text-white" />
           </button>
         </div>
         <p className="text-center text-xs text-slate-400 mt-2">Enter to send · Shift+Enter for new line</p>
