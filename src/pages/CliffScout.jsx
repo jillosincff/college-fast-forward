@@ -110,6 +110,8 @@ export default function CliffScout() {
   const [jobSearchCtx, setJobSearchCtx] = useState(null);
   const [greeting, setGreeting] = useState(null);
   const [conversationStarted, setConversationStarted] = useState(false);
+  // Timestamp set when user first sends — we ignore all messages before this
+  const userSentAtRef = useRef(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -171,15 +173,18 @@ export default function CliffScout() {
   useEffect(() => {
     if (!conversation?.id) return;
     const unsub = base44.agents.subscribeToConversation(conversation.id, (data) => {
-      const allMsgs = data.messages || [];
-      // Only show messages from the first user message onward — suppresses any agent auto-open
-      const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
-      if (firstUserIdx === -1) {
-        // No user message yet — show nothing, keep greeting visible
+      // Hard gate: only show messages if the user has actually sent something
+      if (!userSentAtRef.current) {
         setMessages([]);
         return;
       }
-      // Slice from first user message and drop any leading assistant messages before it
+      const allMsgs = data.messages || [];
+      // Only surface messages from the first user message onward
+      const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
+      if (firstUserIdx === -1) {
+        setMessages([]);
+        return;
+      }
       setMessages(allMsgs.slice(firstUserIdx));
     });
     return unsub;
@@ -199,6 +204,7 @@ export default function CliffScout() {
     setInput('');
     setSending(true);
     setConversationStarted(true);
+    userSentAtRef.current = Date.now(); // unlock the subscription gate
     try {
       await base44.agents.addMessage(conversation, { role: 'user', content: msg });
     } catch (err) {
