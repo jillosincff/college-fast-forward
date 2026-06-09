@@ -118,6 +118,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [deleteStatus, setDeleteStatus] = useState(null);
+  const [foundAlumni, setFoundAlumni] = useState([]);
 
   const loadPipeline = () => {
     if (!user?.email) {
@@ -264,6 +265,9 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
       const data = result?.data?.alumni || result?.alumni || [];
       
       if (data && data.length > 0) {
+        // Store all found alumni in state for display
+        setFoundAlumni(data);
+        
         // Update the pipeline record with the first alumni found
         const firstAlumni = data[0];
         await base44.entities.NetworkingPipeline.update(selectedJob.id, {
@@ -273,9 +277,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
           alumni_source: 'fastiq',
         });
         
-        alert(`✅ Found ${data.length} alumni at ${companyName}! Updated with ${firstAlumni.name}.`);
         loadPipeline();
-        handleCloseDetail();
       } else {
         alert(`🔍 No alumni found at ${companyName}. The agent will continue searching.`);
       }
@@ -331,6 +333,18 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Alumni search results banner */}
+        {selectedJob && selectedJob.foundAlumniCount > 0 && (
+          <div className="bg-green-50 border-b border-green-200 p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <p className="font-semibold text-green-800 text-sm">
+                Found {selectedJob.foundAlumniCount} alumni at {selectedJob.company}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Stats bar */}
         <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b">
@@ -475,9 +489,9 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                )}
 
                {/* Verified Alumni Contact Section */}
-               {selectedJob.alumni_name ? (
+               {selectedJob.alumni_name && (
                  <div className="bg-orange-50 rounded-xl p-5 border-2 border-orange-200">
-                   <p className="text-xs font-bold text-orange-700 uppercase tracking-wider mb-3">🔥 Verified School Insider Backdoor</p>
+                   <p className="text-xs font-bold text-orange-700 uppercase tracking-wider mb-3">🔥 Primary Contact</p>
                    <div className="space-y-3">
                      <div>
                        <p className="text-xs text-orange-600 font-semibold mb-1">Contact Name</p>
@@ -519,7 +533,47 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                      )}
                    </div>
                  </div>
-               ) : (
+               )}
+
+               {/* All Found Alumni Section */}
+               {foundAlumni.length > 0 && (
+                 <div className="bg-blue-50 rounded-xl p-5 border-2 border-blue-200">
+                   <p className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-3">
+                     🎓 All {foundAlumni.length} Alumni at {selectedJob.company}
+                   </p>
+                   <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+                     {foundAlumni.map((alumni, idx) => (
+                       <div key={idx} className="bg-white rounded-lg p-3 border border-blue-100">
+                         <div className="flex items-start justify-between gap-2">
+                           <div className="flex-1 min-w-0">
+                             <p className="text-sm font-bold text-gray-900 truncate">{alumni.name || 'Unknown'}</p>
+                             {alumni.role_title && (
+                               <p className="text-xs text-gray-600 mt-0.5">{alumni.role_title}</p>
+                             )}
+                             {alumni.description && (
+                               <p className="text-xs text-gray-500 mt-1 line-clamp-2">{alumni.description}</p>
+                             )}
+                           </div>
+                           {alumni.linkedin_url && (
+                             <a
+                               href={alumni.linkedin_url}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="text-blue-600 hover:text-blue-700 flex-shrink-0"
+                               title="View LinkedIn"
+                             >
+                               🔗
+                             </a>
+                           )}
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 </div>
+               )}
+
+               {/* Deploy Agent Button (only if no alumni found yet) */}
+               {!selectedJob.alumni_name && foundAlumni.length === 0 && (
                  <button
                    onClick={() => handleDeployAlumniAgent(selectedJob.company)}
                    className="w-full border-2 border-dashed border-gray-300 rounded-xl p-5 hover:border-blue-400 hover:bg-blue-50 transition-colors text-center cursor-pointer"
