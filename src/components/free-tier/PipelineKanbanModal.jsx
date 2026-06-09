@@ -398,7 +398,6 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
               </button>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-gray-900 text-lg truncate">{selectedJob.company}</h3>
-                {selectedJob.role && <p className="text-sm text-gray-500 truncate">{selectedJob.role}</p>}
               </div>
               <button onClick={onClose} className="text-gray-400 hover:text-gray-700 rounded-full p-1.5">
                 <X className="w-5 h-5" />
@@ -407,17 +406,10 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
 
             {/* Detail body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-5">
-              {/* Company + Status header */}
+              {/* Company + Status */}
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 rounded-xl p-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Company</p>
-                <p className="font-bold text-gray-900 text-lg">{selectedJob.company}</p>
-                {selectedJob.role && (
-                  <>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-3 mb-1">Role / Position</p>
-                    <p className="font-medium text-gray-700">{selectedJob.role}</p>
-                  </>
-                )}
-                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Status</p>
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 bg-white text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-sm font-semibold capitalize shadow-sm">
                     {selectedJob.status?.replace(/_/g, ' ')}
                   </span>
@@ -429,16 +421,50 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                 </div>
               </div>
 
-              {/* Contact info */}
+              {/* Job Position Details */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Job Position</p>
+                <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 mb-1">Job Title</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedJob.job_title || 'Not provided'}</p>
+                  </div>
+                  {selectedJob.job_description && (
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Description</p>
+                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-4">{selectedJob.job_description}</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Salary</p>
+                      <p className="text-sm text-gray-700">{selectedJob.salary_range || 'Not listed'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 mb-1">Location</p>
+                      <p className="text-sm text-gray-700">{selectedJob.location || 'Not specified'}</p>
+                    </div>
+                  </div>
+                  {selectedJob.job_url && (
+                    <div className="pt-2 border-t">
+                      <a href={selectedJob.job_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                        View Full Job Posting <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Alumni Contact */}
               <div>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alumni Contact</p>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                       <User className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900">{selectedJob.alumni_name || 'No contact name'}</p>
+                      <p className="font-semibold text-gray-900">{selectedJob.alumni_name || 'Not provided'}</p>
                       {selectedJob.alumni_role && (
                         <p className="text-sm text-gray-600 mt-0.5">{selectedJob.alumni_role}</p>
                       )}
@@ -448,6 +474,34 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                         </Badge>
                       )}
                     </div>
+                  </div>
+                  <div className="border-t pt-3 space-y-2">
+                    {selectedJob.alumni_email ? (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
+                        <a href={`mailto:${selectedJob.alumni_email}`} className="text-sm text-blue-600 hover:underline block truncate">
+                          {selectedJob.alumni_email}
+                        </a>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
+                        <p className="text-sm text-gray-400">Not available</p>
+                      </div>
+                    )}
+                    {selectedJob.alumni_linkedin ? (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">LinkedIn</p>
+                        <a href={selectedJob.alumni_linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                          View Profile <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">LinkedIn</p>
+                        <p className="text-sm text-gray-400">Not available</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -478,88 +532,19 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                 </div>
               </div>
 
-              {/* Job Details */}
-              {(selectedJob.job_title || selectedJob.job_description || selectedJob.job_url || selectedJob.salary_range || selectedJob.location) && (
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Job Details</p>
-                  <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-                    {selectedJob.job_title && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-1">Job Title</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedJob.job_title}</p>
-                      </div>
-                    )}
-                    {selectedJob.job_description && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-1">Description</p>
-                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedJob.job_description}</p>
-                      </div>
-                    )}
-                    {selectedJob.job_url && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-1">Job Posting</p>
-                        <a href={selectedJob.job_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-                          View Job <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                    )}
-                    {selectedJob.salary_range && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-1">Salary Range</p>
-                        <p className="text-sm font-medium text-gray-900">{selectedJob.salary_range}</p>
-                      </div>
-                    )}
-                    {selectedJob.location && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-1">Location</p>
-                        <p className="text-sm text-gray-700">{selectedJob.location}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Alumni Contact Details */}
-              {(selectedJob.alumni_email || selectedJob.alumni_linkedin) && (
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contact Information</p>
-                  <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
-                    {selectedJob.alumni_email && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
-                        <a href={`mailto:${selectedJob.alumni_email}`} className="text-sm text-blue-600 hover:underline">
-                          {selectedJob.alumni_email}
-                        </a>
-                      </div>
-                    )}
-                    {selectedJob.alumni_linkedin && (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-1">LinkedIn</p>
-                        <a href={selectedJob.alumni_linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-                          View Profile <ExternalLink className="w-3 h-3" />
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* Notes */}
-              {selectedJob.notes && selectedJob.notes.trim() !== '' ? (
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+                {selectedJob.notes && selectedJob.notes.trim() !== '' ? (
                   <p className="text-sm text-gray-700 leading-relaxed bg-white border border-gray-200 rounded-xl p-4">
                     {selectedJob.notes}
                   </p>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+                ) : (
                   <p className="text-sm text-gray-400 italic bg-gray-50 rounded-xl p-4 border border-dashed border-gray-200">
                     No notes added yet.
                   </p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Detail actions */}
@@ -567,7 +552,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
               <button
                 onClick={() => {
                   handleCloseDetail();
-                  window.location.hash = `#OutreachDrafts?contact=${encodeURIComponent(selectedJob.alumni_name || '')}&company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role || '')}`;
+                  window.location.hash = `#OutreachDrafts?contact=${encodeURIComponent(selectedJob.alumni_name || '')}&company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.job_title || '')}`;
                 }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl py-2.5 px-4 transition-colors"
               >
