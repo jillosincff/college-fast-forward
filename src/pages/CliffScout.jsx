@@ -159,6 +159,9 @@ export default function CliffScout() {
             },
           },
         });
+        // Strip any platform-generated opening messages from the conversation object
+        // so they never reach our UI even if the subscription fires immediately
+        if (conv.messages) conv.messages = [];
         setConversation(conv);
       } catch (err) {
         console.error(err);
@@ -191,9 +194,13 @@ export default function CliffScout() {
     if (!subscriptionRef.current) {
       subscriptionRef.current = base44.agents.subscribeToConversation(conversation.id, (data) => {
         const allMsgs = data.messages || [];
+        // Only show messages that start from the first user message
         const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
-        if (firstUserIdx === -1) return;
-        setMessages(allMsgs.slice(firstUserIdx));
+        if (firstUserIdx === -1) return; // no user message yet, show nothing
+        const relevant = allMsgs.slice(firstUserIdx);
+        // Extra safety: never show a lone assistant message with no preceding user message
+        if (relevant[0]?.role === 'assistant') return;
+        setMessages(relevant);
       });
     }
 
