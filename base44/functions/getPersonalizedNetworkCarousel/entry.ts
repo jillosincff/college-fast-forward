@@ -328,7 +328,7 @@ Use concrete, specific language that sounds like an actual job posting.`,
       if (alumniByCompany[normalizedKey] !== undefined) continue;
       const jobNorm = normalizeForMatch(job.company);
 
-      // Registered members - only count CURRENT employees
+      // Registered members - only count CURRENT employees (companyNetworkMap already filtered by is_current)
       let count = 0;
       for (const [key, val] of Object.entries(companyNetworkMap)) {
         const netKey = normalizeForMatch(key.replace(/[^a-z0-9\s]/g, ''));
@@ -340,6 +340,7 @@ Use concrete, specific language that sounds like an actual job posting.`,
         const overlapRatio = overlappingWords.length / Math.max(jobWords.length, netWords.length);
         
         if (jobNorm.length >= 4 && netKey.length >= 4 && overlapRatio >= 0.5) {
+          // Only count alumni/parents that passed the is_current filter
           count += val.alumni.length + val.parents.length;
         }
       }
