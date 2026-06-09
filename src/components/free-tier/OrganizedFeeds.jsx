@@ -439,17 +439,28 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
 
   const handleAddToPipeline = async (lead) => {
     const company = lead.company || lead.companyName || 'Unknown';
-    const role = lead.role || lead.title || 'Position';
+    const jobTitle = lead.job_title || lead.role || lead.title || '';
+    const jobDescription = lead.hiring_description || lead.description || lead.jobDescription || '';
+    const jobUrl = lead.job_url || lead.url || '';
+    const alumniName = lead.alumnus?.name || lead.alumni_name || '';
+    const alumniEmail = lead.alumnus?.email || lead.alumni_email || '';
+    const alumniLinkedin = lead.alumnus?.linkedinUrl || lead.alumni_linkedin || '';
+    
     pinLead(lead);
     try {
       await base44.entities.NetworkingPipeline.create({
         user_email: user?.email,
-        alumni_name: role,
-        alumni_role: role,
         company,
+        job_title: jobTitle,
+        job_description: jobDescription,
+        job_url: jobUrl,
+        alumni_name: alumniName,
+        alumni_email: alumniEmail,
+        alumni_linkedin: alumniLinkedin,
+        alumni_role: lead.alumnus?.title || lead.alumni_role || '',
         status: 'identified',
         status_date: new Date().toISOString(),
-        alumni_source: 'manual',
+        alumni_source: alumniName ? 'top_match' : 'manual',
       });
       window.dispatchEvent(new CustomEvent('cliff:pipeline-refresh'));
     } catch (error) {
