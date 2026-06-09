@@ -91,20 +91,9 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
           const greeting = `Hey ${firstName}! ⚠️ Your application to **${recap.actionItem.companyName}** has been sitting for ${daysStale} days. Want me to draft a follow-up?`;
           setMessages([{ role: 'agent', text: greeting }]);
           setRecapAction(recap.actionItem);
-        } else if (recap.actionItem) {
-          // Fallback to original recap logic
-          const companyText = recap.actionItem.companyName || 'your top target';
-          if (recap.actionItem.type === 'DRAFT_ALUMNI_OUTREACH' && recap.actionItem.alumniCount > 0) {
-            const greeting = `Welcome back, ${recap.studentName || firstName}! 📎 Quick recap: We found ${recap.actionItem.alumniCount} ${schoolAbbr} alumni at ${companyText}. Let's draft a backdoor message to get your resume pulled from the black hole.`;
-            setMessages([{ role: 'agent', text: greeting }]);
-            setRecapAction(recap.actionItem);
-          } else {
-            const greeting = `Hi ${firstName}! 📎 I'm CLiFF, your career agent. Your pipeline is looking clean — let's load some warm leads or I can help with interview prep, salary negotiations, or outreach scripts.`;
-            setMessages([{ role: 'agent', text: greeting }]);
-          }
         } else {
-          const greeting = `Hi ${firstName}! 📎 I'm CLiFF, your career agent. Ask me anything — interview follow-ups, salary negotiations, or how to reach out to that alum at your target company. I'm locked in 24/7.`;
-          setMessages([{ role: 'agent', text: greeting }]);
+          // No actionable recap — use default greeting
+          setMessages([{ role: 'agent', text: defaultGreeting }]);
         }
       } catch (err) {
         console.error('Failed to load pipeline coaching:', err);
