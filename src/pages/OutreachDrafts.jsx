@@ -914,6 +914,24 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
   if (phase === 'compose') {
     const ctx = CONTEXTS.find(c => c.id === selectedContext);
     const isLinkedIn = selectedContext === 'alumni_search';
+    
+    // Parse the JSON output from LLM
+    let draftSubject = '';
+    let draftBody = '';
+    try {
+      const cleanRawText = editedMessage.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(cleanRawText);
+      draftSubject = parsed.subject || '';
+      draftBody = parsed.body || '';
+    } catch (e) {
+      // If JSON parsing fails, treat entire message as body
+      draftBody = editedMessage;
+    }
+
+    // Calculate character count for LinkedIn (subject + body)
+    const totalCharCount = (draftSubject + draftBody).length;
+    const exceedsLimit = isLinkedIn && totalCharCount > 300;
+
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px' }}>
         <button
@@ -935,34 +953,70 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
 
         {isLinkedIn && (
           <div style={{
-            background: '#E8F4FD', border: '1px solid #B3D9FF',
+            background: exceedsLimit ? '#FEE2E2' : '#E8F4FD',
+            border: `1px solid ${exceedsLimit ? '#FCA5A5' : '#B3D9FF'}`,
             borderRadius: 8, padding: '10px 14px', marginBottom: 16,
             display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#0057B8', margin: 0 }}>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: exceedsLimit ? '#DC2626' : '#0057B8', margin: 0 }}>
               LinkedIn connection requests are limited to 300 characters.
             </p>
             <span style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 12, fontWeight: 700,
-              color: editedMessage.length > 300 ? '#EF4444' : '#0057B8',
+              color: exceedsLimit ? '#EF4444' : '#0057B8',
               marginLeft: 'auto', flexShrink: 0,
             }}>
-              {editedMessage.length}/300
+              {totalCharCount}/300
             </span>
           </div>
         )}
 
+        {/* Subject field */}
+        {draftSubject && (
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ ...labelStyle, marginBottom: 8 }}>Subject:</label>
+            <input
+              value={draftSubject}
+              onChange={e => {
+                const newSubject = e.target.value;
+                const updatedMsg = JSON.stringify({
+                  subject: newSubject,
+                  body: draftBody
+                });
+                setEditedMessage(updatedMsg);
+              }}
+              style={{
+                ...inputStyle,
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Body field */}
         <textarea
-          value={editedMessage}
-          onChange={e => setEditedMessage(e.target.value)}
+          value={draftBody}
+          onChange={e => {
+            const newBody = isLinkedIn && e.target.value.length > 300
+              ? e.target.value.substring(0, 300)
+              : e.target.value;
+            const updatedMsg = JSON.stringify({
+              subject: draftSubject,
+              body: newBody
+            });
+            setEditedMessage(updatedMsg);
+          }}
           rows={8}
           style={{
             ...inputStyle,
             resize: 'vertical',
             lineHeight: 1.7,
             marginBottom: 16,
-            border: isLinkedIn && editedMessage.length > 300 ? '1px solid #EF4444' : '1px solid #E0E0E0',
+            border: exceedsLimit ? '1px solid #EF4444' : '1px solid #E0E0E0',
+            whiteSpace: 'pre-wrap',
+            wordWrap: 'break-word',
           }}
         />
 
