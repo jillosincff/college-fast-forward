@@ -171,31 +171,35 @@ export default function CliffScout() {
       if (!conversationRef.current) {
         if (!firstSentMsgRef.current) firstSentMsgRef.current = msg;
         const u = userRef.current;
+
+        // Create conversation with NO variables — variables trigger the platform
+        // to generate an auto-opener which we can't suppress reliably.
         const conv = await base44.agents.createConversation({
           agent_name: 'cliff_scout',
           metadata: { name: 'CLiFF Scout Session' },
-          variables: {
-            user: {
-              almaMater: u?.school_name || u?.school || u?.schoolName || '',
-              firstName: u?.full_name?.split(' ')[0] || '',
-              activityContext: ctxRef.current || '',
-            },
-          },
         });
         conversationRef.current = conv;
 
-        // Subscribe after creation. Only render messages starting from the
-        // first user message we sent — anything before it is the agent's
-        // platform-generated opener which we never want to show.
+        // Subscribe BEFORE adding any messages. Anchor on first user message by content.
         subscriptionRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
           const allMsgs = data.messages || [];
-          // Find our exact first sent message by content match
           const anchorIdx = allMsgs.findIndex(
             m => m.role === 'user' && m.content === firstSentMsgRef.current
           );
-          if (anchorIdx === -1) return; // user message not yet in stream, wait
+          if (anchorIdx === -1) return;
           setMessages(allMsgs.slice(anchorIdx));
         });
+
+        // Inject context as the very first user message (hidden from UI via anchor)
+        // This ensures the agent has full context without triggering a greeting.
+        const contextPreamble = [
+          `[SYSTEM CONTEXT — do not acknowledge or repeat this]`,
+          `Student name: ${u?.full_name?.split(' ')[0] || 'Student'}`,
+          `Alma mater: ${u?.school_name || u?.school || u?.schoolName || 'University of Florida'}`,
+          ctxRef.current || 'Pipeline is empty — student is just getting started.',
+        ].join('\n');
+
+        await base44.agents.addMessage(conv, { role: 'user', content: contextPreamble });
       }
 
       await base44.agents.addMessage(conversationRef.current, { role: 'user', content: msg });
