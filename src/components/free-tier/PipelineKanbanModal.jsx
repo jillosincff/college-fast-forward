@@ -478,6 +478,72 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
                 </div>
               </div>
 
+              {/* Job Details */}
+              {(selectedJob.job_title || selectedJob.job_description || selectedJob.job_url || selectedJob.salary_range || selectedJob.location) && (
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Job Details</p>
+                  <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
+                    {selectedJob.job_title && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Job Title</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedJob.job_title}</p>
+                      </div>
+                    )}
+                    {selectedJob.job_description && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Description</p>
+                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedJob.job_description}</p>
+                      </div>
+                    )}
+                    {selectedJob.job_url && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Job Posting</p>
+                        <a href={selectedJob.job_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                          View Job <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
+                    {selectedJob.salary_range && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Salary Range</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedJob.salary_range}</p>
+                      </div>
+                    )}
+                    {selectedJob.location && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Location</p>
+                        <p className="text-sm text-gray-700">{selectedJob.location}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Alumni Contact Details */}
+              {(selectedJob.alumni_email || selectedJob.alumni_linkedin) && (
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contact Information</p>
+                  <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
+                    {selectedJob.alumni_email && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">Email</p>
+                        <a href={`mailto:${selectedJob.alumni_email}`} className="text-sm text-blue-600 hover:underline">
+                          {selectedJob.alumni_email}
+                        </a>
+                      </div>
+                    )}
+                    {selectedJob.alumni_linkedin && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 mb-1">LinkedIn</p>
+                        <a href={selectedJob.alumni_linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+                          View Profile <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Notes */}
               {selectedJob.notes && selectedJob.notes.trim() !== '' ? (
                 <div>
