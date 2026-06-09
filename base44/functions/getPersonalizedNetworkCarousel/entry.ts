@@ -331,10 +331,18 @@ Use concrete, specific language that sounds like an actual job posting.`,
           count += val.alumni.length + val.parents.length;
         }
       }
-      // DiscoveredAlumni
+      // DiscoveredAlumni - use strict matching
       const discovered = (discoveredAlumni || []).filter(a => {
         const aNorm = normalizeForMatch(a.company || '');
-        return aNorm.length >= 4 && jobNorm.length >= 4 && (aNorm.includes(jobNorm) || jobNorm.includes(aNorm));
+        if (aNorm.length < 4 || jobNorm.length < 4) return false;
+        
+        // Use word-based matching instead of simple substring
+        const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
+        const alumWords = aNorm.split(/\s+/).filter(w => w.length > 2);
+        const overlappingWords = jobWords.filter(w => alumWords.some(aw => aw.includes(w) || w.includes(aw)));
+        const overlapRatio = overlappingWords.length / Math.max(jobWords.length, alumWords.length);
+        
+        return overlapRatio >= 0.5;
       });
       alumniByCompany[normalizedKey] = count + discovered.length;
     }
@@ -361,12 +369,20 @@ Use concrete, specific language that sounds like an actual job posting.`,
       const normalizedJobCompany = normalizeCompanyName(job.company);
       const jobNorm = normalizeForMatch(job.company);
 
-      // Find network entry
+      // Find network entry - use strict matching to avoid false positives
       let networkEntry = companyNetworkMap[normalizedJobCompany];
       if (!networkEntry) {
         for (const [key, val] of Object.entries(companyNetworkMap)) {
           const netKey = normalizeForMatch(key);
-          if (jobNorm.length >= 4 && netKey.length >= 4 && (jobNorm.includes(netKey) || netKey.includes(jobNorm))) {
+          // Require strong similarity - not just substring matches
+          const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
+          const netWords = netKey.split(/\s+/).filter(w => w.length > 2);
+          
+          // Check for significant word overlap (at least 50% of words match)
+          const overlappingWords = jobWords.filter(w => netWords.some(nw => nw.includes(w) || w.includes(nw)));
+          const overlapRatio = overlappingWords.length / Math.max(jobWords.length, netWords.length);
+          
+          if (jobNorm.length >= 4 && netKey.length >= 4 && overlapRatio >= 0.5) {
             networkEntry = val;
             break;
           }
@@ -377,10 +393,18 @@ Use concrete, specific language that sounds like an actual job posting.`,
       const registeredAlumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
-      // Pull DiscoveredAlumni for this company
+      // Pull DiscoveredAlumni for this company - use strict matching
       const discoveredForJob = (discoveredAlumni || []).filter(a => {
         const aNorm = normalizeForMatch(a.company || '');
-        return aNorm.length >= 4 && jobNorm.length >= 4 && (aNorm.includes(jobNorm) || jobNorm.includes(aNorm));
+        if (aNorm.length < 4 || jobNorm.length < 4) return false;
+        
+        // Use word-based matching instead of simple substring
+        const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
+        const alumWords = aNorm.split(/\s+/).filter(w => w.length > 2);
+        const overlappingWords = jobWords.filter(w => alumWords.some(aw => aw.includes(w) || w.includes(aw)));
+        const overlapRatio = overlappingWords.length / Math.max(jobWords.length, alumWords.length);
+        
+        return overlapRatio >= 0.5;
       }).map(a => ({
         id: a.id,
         full_name: a.name,
