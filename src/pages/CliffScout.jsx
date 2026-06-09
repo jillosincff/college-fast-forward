@@ -109,8 +109,7 @@ export default function CliffScout() {
   const [user, setUser] = useState(null);
   const [jobSearchCtx, setJobSearchCtx] = useState(null);
   const [greeting, setGreeting] = useState(null);
-  // Timestamp set when user first sends — we ignore all messages before this
-  const userSentAtRef = useRef(null);
+  const subscriptionRef = useRef(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -169,25 +168,14 @@ export default function CliffScout() {
     initConversation();
   }, [user]);
 
+  // Subscription is set up lazily on first send — not on conversation create
+  // This prevents the agent's auto-opening message from ever reaching the UI
   useEffect(() => {
-    if (!conversation?.id) return;
-    const unsub = base44.agents.subscribeToConversation(conversation.id, (data) => {
-      // Hard gate: only show messages if the user has actually sent something
-      if (!userSentAtRef.current) {
-        setMessages([]);
-        return;
-      }
-      const allMsgs = data.messages || [];
-      // Only surface messages from the first user message onward
-      const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
-      if (firstUserIdx === -1) {
-        setMessages([]);
-        return;
-      }
-      setMessages(allMsgs.slice(firstUserIdx));
-    });
-    return unsub;
-  }, [conversation?.id]);
+    return () => {
+      // Cleanup subscription on unmount
+      if (subscriptionRef.current) subscriptionRef.current();
+    };
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -198,7 +186,17 @@ export default function CliffScout() {
     if (!msg || sending || !conversation) return;
     setInput('');
     setSending(true);
-    userSentAtRef.current = Date.now(); // unlock the subscription gate
+
+    // Set up subscription on first send only — avoids catching agent's auto-open message
+    if (!subscriptionRef.current) {
+      subscriptionRef.current = base44.agents.subscribeToConversation(conversation.id, (data) => {
+        const allMsgs = data.messages || [];
+        const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
+        if (firstUserIdx === -1) return;
+        setMessages(allMsgs.slice(firstUserIdx));
+      });
+    }
+
     try {
       await base44.agents.addMessage(conversation, { role: 'user', content: msg });
     } catch (err) {
