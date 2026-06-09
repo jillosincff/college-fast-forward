@@ -203,7 +203,7 @@ function SchoolPrideBanner({ schoolName, alumniCount }) {
           fontFamily: dm, fontSize: 13, fontWeight: 700,
           color: '#fff', margin: 0,
         }}>
-          {schoolName || 'Your School'} · {alumniCount || '0'} Alumni & Parents Synced
+          {schoolName || 'Your School'} &middot; {alumniCount || '0'} Alumni &amp; Parents Synced
         </p>
       </div>
       <div style={{
@@ -441,7 +441,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
   );
 }
 
-export default function ApplicationPipeline({ onUpgrade, userSchool = 'University of Florida', alumniCount = 847 }) {
+export default function ApplicationPipeline({ onUpgrade, userSchool = 'University of Florida', alumniCount = 847, isPremium = false }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('to_apply');
   const [isMobile, setIsMobile] = useState(false);
@@ -568,7 +568,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
   }, [user?.email, jobs]);
 
   const totalJobs = jobs.length;
-  const atLimit = totalJobs >= FREE_LIMIT;
+  const atLimit = !isPremium && totalJobs >= FREE_LIMIT;
   const activeTabJobs = jobs.filter(j => j.stage === activeTab);
   const activeStage = STAGES.find(s => s.key === activeTab);
 
@@ -677,7 +677,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               My Application Pipeline
             </p>
             <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 11, color: '#059669', margin: '3px 0 0', fontWeight: 600, letterSpacing: '0.02em' }}>
-              🐊 Synced Network: {userSchool} Alumni & Parent Grid Active
+              🐊 Synced Network: {userSchool} Alumni &amp; Parent Grid Active
             </p>
             <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#6b7280', margin: '3px 0 0' }}>
               {totalJobs}/{FREE_LIMIT} jobs ·{' '}
@@ -705,25 +705,18 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               📊 View Kanban
             </button>
             <button
-              onClick={() => {
-                if (atLimit) {
-                  onUpgrade('Unlimited Tracking');
-                } else {
-                  setShowAdd(true);
-                }
-              }}
+              onClick={() => setShowAdd(true)}
               style={{
                 fontFamily: dm, fontSize: isMobile ? 12 : 13, fontWeight: 700,
-                color: atLimit ? '#fff' : BLUE,
-                background: atLimit ? 'linear-gradient(135deg, #ef4444, #dc2626)' : BLUE_LIGHT,
-                border: `1px solid ${atLimit ? '#dc2626' : BLUE_BORDER}`,
+                color: BLUE,
+                background: BLUE_LIGHT,
+                border: `1px solid ${BLUE_BORDER}`,
                 borderRadius: 10, padding: isMobile ? '8px 14px' : '9px 16px',
                 cursor: 'pointer', minHeight: 'auto',
-                boxShadow: atLimit ? '0 4px 12px rgba(239,68,68,0.3)' : 'none',
                 width: isMobile ? '100%' : 'auto',
               }}
             >
-              {atLimit ? '⚡ Unlock Unlimited' : '+ Add Job'}
+              + Add Job
             </button>
           </div>
         </div>
@@ -914,8 +907,8 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         )}
       </div>
 
-      {/* Limit nudge banner */}
-      {atLimit && (
+      {/* Limit nudge banner - only show for free tier users */}
+      {!isPremium && atLimit && (
         <div
           onClick={() => onUpgrade('Unlimited Tracking')}
           style={{
@@ -962,7 +955,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             }}
           >
-            📄 View Career Assets & Tools
+            📄 View Career Assets &amp; Tools
           </button>
         </div>
       )}

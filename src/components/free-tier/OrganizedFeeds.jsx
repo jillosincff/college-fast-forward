@@ -9,7 +9,7 @@ import PipelineKanbanModal from './PipelineKanbanModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount }) {
+export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedParentsCount, isPremium = false }) {
   const [selectedLead, setSelectedLead] = useState(null);
   const [isKanbanOpen, setIsKanbanOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -595,6 +595,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
             <ApplicationPipeline
               userSchool={user?.school_name || 'University of Florida'}
               alumniCount={verifiedAlumniCount || 0}
+              isPremium={isPremium}
               onUpgrade={(feature) => {
                 console.log('Upgrade clicked:', feature);
               }}

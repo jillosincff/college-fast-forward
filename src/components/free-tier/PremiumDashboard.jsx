@@ -374,6 +374,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           user={user} 
           verifiedAlumniCount={alumniCount} 
           verifiedParentsCount={parentsCount} 
+          isPremium={true}
         />
       </div>
 
