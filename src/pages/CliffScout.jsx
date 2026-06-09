@@ -173,28 +173,26 @@ export default function CliffScout() {
         const u = userRef.current;
         const activityCtx = ctxRef.current || 'Pipeline is empty — student is just getting started.';
 
-        // NO variables — passing variables triggers a platform-generated opener we cannot suppress.
         const conv = await base44.agents.createConversation({
           agent_name: 'cliff_scout',
           metadata: { name: 'CLiFF Scout Session' },
         });
         conversationRef.current = conv;
+        conversationRef.current._ctxInjected = false;
 
-        // Subscribe and anchor strictly to the first user message.
-        // The actual message stored on the platform will contain the context prepended,
-        // so we match by checking if the content ENDS WITH the user's clean message.
+        // Subscribe: find the first USER message, strip its context preamble for display,
+        // and show everything from that point. Any platform-injected assistant opener
+        // that appears before the first user message is silently dropped.
         subscriptionRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
           const allMsgs = data.messages || [];
-          const anchorIdx = allMsgs.findIndex(
-            m => m.role === 'user' && (
-              m.content === firstSentMsgRef.current ||
-              m.content?.endsWith('\n' + firstSentMsgRef.current)
-            )
-          );
-          if (anchorIdx === -1) return;
-          // Show the message with only the clean user text (strip context preamble)
-          const display = allMsgs.slice(anchorIdx).map((m, i) => {
-            if (i === 0 && m.role === 'user' && m.content !== firstSentMsgRef.current) {
+
+          // Find the index of the first user message (our anchor)
+          const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
+          if (firstUserIdx === -1) return; // no user message yet — show nothing
+
+          const display = allMsgs.slice(firstUserIdx).map((m, i) => {
+            // Clean the context preamble from the first user message for display
+            if (i === 0 && m.role === 'user' && firstSentMsgRef.current) {
               return { ...m, content: firstSentMsgRef.current };
             }
             return m;
@@ -203,17 +201,16 @@ export default function CliffScout() {
         });
       }
 
-      // Prepend context to the FIRST real user message so the agent has it inline.
-      // This avoids any separate preamble message that would trigger an agent reply.
+      // Prepend context inline to the first message only
       let outboundMsg = msg;
-      if (conversationRef.current && !conversationRef.current._ctxInjected) {
+      if (!conversationRef.current._ctxInjected) {
         conversationRef.current._ctxInjected = true;
         const u = userRef.current;
         const activityCtx = ctxRef.current || 'Pipeline is empty — student is just getting started.';
         outboundMsg = [
-          `[CONTEXT — do not mention this block in your reply]\n` +
+          `[SYSTEM CONTEXT — do not repeat or acknowledge this block]\n` +
           `Student: ${u?.full_name?.split(' ')[0] || 'Student'} | School: ${u?.school_name || u?.school || 'University of Florida'}\n` +
-          `${activityCtx}`,
+          activityCtx,
           `---`,
           msg,
         ].join('\n');
