@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target, Trash2, CheckCircle2, AlertCircle, ArrowLeft, ExternalLink, User } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const COLUMNS = [
@@ -212,8 +212,10 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
 
   const handleOpenDetail = (job) => {
     setSelectedJob(job);
-    // Open outreach drafts with context
-    window.location.hash = `#OutreachDrafts?company=${encodeURIComponent(job.company)}&role=${encodeURIComponent(job.role)}&pipeline_id=${job.id}`;
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedJob(null);
   };
 
   const handleDelete = async (job) => {
@@ -263,7 +265,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
       />
       
       {/* Modal container with slide-up animation */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[85vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[85vh] overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 duration-300" style={{ position: 'relative' }}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-blue-600 to-blue-700">
           <div>
@@ -360,11 +362,104 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
         </div>
 
         {/* Footer hint */}
-        <div className="p-4 border-t bg-gray-50 text-center">
-          <p className="text-xs text-gray-500">
-            💡 Tip: Click "Generate Message" on any job card to move it to Draft Ready
-          </p>
-        </div>
+        {!selectedJob && (
+          <div className="p-4 border-t bg-gray-50 text-center">
+            <p className="text-xs text-gray-500">
+              💡 Click any card to see details. Drag cards between columns to track progress.
+            </p>
+          </div>
+        )}
+
+        {/* Detail panel — overlays the modal when a card is clicked */}
+        {selectedJob && (
+          <div className="absolute inset-0 bg-white rounded-2xl flex flex-col z-10 animate-in slide-in-from-right-4 duration-200">
+            {/* Detail header */}
+            <div className="flex items-center gap-3 p-5 border-b">
+              <button
+                onClick={handleCloseDetail}
+                className="text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full p-1.5 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-gray-900 text-lg truncate">{selectedJob.company}</h3>
+                {selectedJob.role && <p className="text-sm text-gray-500 truncate">{selectedJob.role}</p>}
+              </div>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-700 rounded-full p-1.5">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Detail body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Status */}
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Status</p>
+                <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-sm font-semibold capitalize">
+                  {selectedJob.status?.replace(/_/g, ' ')}
+                </span>
+                {selectedJob.status_date && (
+                  <span className="ml-2 text-xs text-gray-400">
+                    Updated {new Date(selectedJob.status_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                )}
+              </div>
+
+              {/* Alumni contact */}
+              {selectedJob.alumni_name && (
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Alumni Contact</p>
+                  <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-xl p-4">
+                    <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 text-sm">{selectedJob.alumni_name}</p>
+                      {selectedJob.alumni_role && (
+                        <p className="text-xs text-gray-500 mt-0.5">{selectedJob.alumni_role}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-0.5">{selectedJob.company}</p>
+                      <Badge variant="secondary" className="text-[10px] mt-2 bg-purple-100 text-purple-700 border-purple-200">
+                        🎓 Network Contact
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              {selectedJob.notes && (
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Notes</p>
+                  <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    {selectedJob.notes}
+                  </p>
+                </div>
+              )}
+
+              {/* No additional info */}
+              {!selectedJob.alumni_name && !selectedJob.notes && (
+                <div className="text-center py-8 text-gray-400">
+                  <User className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">No alumni contact on file for this opportunity.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Detail actions */}
+            <div className="p-5 border-t bg-gray-50 flex gap-3">
+              <button
+                onClick={() => {
+                  handleCloseDetail();
+                  window.location.hash = `#OutreachDrafts?contact=${encodeURIComponent(selectedJob.alumni_name || '')}&company=${encodeURIComponent(selectedJob.company)}&role=${encodeURIComponent(selectedJob.role || '')}`;
+                }}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl py-2.5 px-4 transition-colors"
+              >
+                ✉️ Draft Outreach Message
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
