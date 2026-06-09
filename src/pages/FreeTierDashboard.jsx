@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { navigate } from '@/components/utils/navigation';
 import UpgradeModal from '@/components/free-tier/UpgradeModal';
 import FreeTierNav from '@/components/free-tier/FreeTierNav';
-import ApplicationTracker from '@/components/free-tier/ApplicationPipeline';
 import TeaserSignalsCard from '@/components/free-tier/TeaserSignalsCard';
 // CareerAssetsCard removed — resume management moved to nav dropdown
 import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
@@ -621,10 +620,6 @@ export default function FreeTierDashboard() {
         <button onClick={() => document.getElementById('cliff-feed-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
           <span style={{ fontSize: 22 }}>🚀</span>
           <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Leads</span>
-        </button>
-        <button onClick={() => document.getElementById('pipeline-section')?.scrollIntoView({ behavior: 'smooth' })} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
-          <span style={{ fontSize: 22 }}>📋</span>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 600 }}>Pipeline</span>
         </button>
         <button onClick={() => triggerUpgrade('Premium Sprint')} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '6px 4px', minHeight: 'auto', minWidth: 'auto', borderRadius: 8 }}>
           <span style={{ fontSize: 22 }}>⚡</span>
