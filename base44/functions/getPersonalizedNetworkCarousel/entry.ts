@@ -137,6 +137,7 @@ Deno.serve(async (req) => {
     - 3-4 required qualifications (degree requirements, skills, tools)
     - 1-2 nice-to-have skills
     - Compensation range if available
+    - **MUST be jobs posted within the last 14 days**
 
     Make the descriptions sound like actual job postings, not marketing copy. Use concrete, specific language about real tools and technologies relevant to the role and industry.
 
@@ -153,7 +154,8 @@ Deno.serve(async (req) => {
                 properties: {
                   name: { type: 'string' },
                   job_description: { type: 'string' },
-                  size: { type: 'string', enum: ['startup', 'mid', 'large'] }
+                  size: { type: 'string', enum: ['startup', 'mid', 'large'] },
+                  posted_date: { type: 'string', description: 'Date job was posted (YYYY-MM-DD)' }
                 },
                 required: ['name', 'job_description']
               }
@@ -166,6 +168,7 @@ Deno.serve(async (req) => {
         hiring_signal: 'warm',
         hiring_description: c.job_description || `${c.name} is hiring entry-level ${targetRole || 'professionals'}.`,
         size: c.size || 'mid',
+        posted_date: c.posted_date,
       }));
     } catch (e) {
       console.warn('[getPersonalizedNetworkCarousel] Fallback LLM also failed:', e.message);
@@ -183,6 +186,7 @@ For each company, write a real job description (150-200 words) with:
 - Specific day-to-day responsibilities relevant to that company's business
 - Required qualifications (education, tools, skills)
 - Nice-to-have skills
+- These should be jobs posted within the last 14 days
 
 Use concrete, specific language that sounds like an actual job posting.`,
           model: 'gemini_3_flash',
@@ -195,7 +199,8 @@ Use concrete, specific language that sounds like an actual job posting.`,
                   type: 'object',
                   properties: {
                     company: { type: 'string' },
-                    description: { type: 'string' }
+                    description: { type: 'string' },
+                    posted_date: { type: 'string', description: 'Date job was posted (YYYY-MM-DD)' }
                   },
                   required: ['company', 'description']
                 }
@@ -208,6 +213,7 @@ Use concrete, specific language that sounds like an actual job posting.`,
         liveCompanies = liveCompanies.map(c => ({
           ...c,
           hiring_description: descMap[c.name?.toLowerCase()] || c.hiring_description,
+          posted_date: c.posted_date || (enriched?.listings || []).find(l => l.company?.toLowerCase() === c.name?.toLowerCase())?.posted_date,
         }));
       } catch (e) {
         console.warn('[getPersonalizedNetworkCarousel] Description enrichment failed:', e.message);
@@ -215,17 +221,28 @@ Use concrete, specific language that sounds like an actual job posting.`,
     }
 
     // Convert live companies to job-card format
-    let jobPool = liveCompanies.map(c => ({
-      company: c.name,
-      role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
-      job_title: c.job_title || '',
-      job_url: c.job_url || '',
-      description: c.hiring_description || c.description || `${c.name} is actively hiring entry-level ${targetRole || 'professionals'}.`,
-      source: c.job_url || `${(c.name || '').toLowerCase().replace(/\s+/g, '')}.com/careers`,
-      sourceCategory: 'B',
-      companyTier: c.size === 'startup' ? 3 : c.size === 'mid' ? 2 : 1,
-      isLiveResult: true,
-    }));
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    
+    let jobPool = liveCompanies
+      .filter(c => {
+        // Filter out jobs older than 14 days
+        if (!c.posted_date) return true; // Keep jobs without date (assume recent)
+        const postedDate = new Date(c.posted_date);
+        return postedDate >= fourteenDaysAgo;
+      })
+      .map(c => ({
+        company: c.name,
+        role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
+        job_title: c.job_title || '',
+        job_url: c.job_url || '',
+        description: c.hiring_description || c.description || `${c.name} is actively hiring entry-level ${targetRole || 'professionals'}.`,
+        source: c.job_url || `${(c.name || '').toLowerCase().replace(/\s+/g, '')}.com/careers`,
+        sourceCategory: 'B',
+        companyTier: c.size === 'startup' ? 3 : c.size === 'mid' ? 2 : 1,
+        isLiveResult: true,
+        posted_date: c.posted_date,
+      }));
 
     // Filter senior roles and deduplicate
     jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
