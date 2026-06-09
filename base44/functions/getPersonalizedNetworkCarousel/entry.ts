@@ -282,6 +282,11 @@ Use concrete, specific language that sounds like an actual job posting.`,
       const isAlumni = persona === 'alumni' || roles.includes('alumni');
       const isParent = persona === 'parent' || roles.includes('parent');
       if (!isAlumni && !isParent) return false;
+      
+      // Only include alumni/parents who CURRENTLY work at their company
+      const isCurrent = u.is_current ?? u.data?.is_current ?? u.current_position ?? u.data?.current_position;
+      if (isCurrent === false) return false;
+      
       const rawCompany = getField(u, 'current_company', 'company', 'employer').trim();
       if (!rawCompany) return false;
       const uCode = getField(u, 'school_code').toLowerCase();
@@ -323,18 +328,28 @@ Use concrete, specific language that sounds like an actual job posting.`,
       if (alumniByCompany[normalizedKey] !== undefined) continue;
       const jobNorm = normalizeForMatch(job.company);
 
-      // Registered members
+      // Registered members - only count CURRENT employees
       let count = 0;
       for (const [key, val] of Object.entries(companyNetworkMap)) {
         const netKey = normalizeForMatch(key.replace(/[^a-z0-9\s]/g, ''));
-        if (jobNorm.length >= 4 && netKey.length >= 4 && (netKey.includes(jobNorm) || jobNorm.includes(netKey))) {
+        
+        // Use strict word-based matching
+        const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
+        const netWords = netKey.split(/\s+/).filter(w => w.length > 2);
+        const overlappingWords = jobWords.filter(w => netWords.some(nw => nw.includes(w) || w.includes(nw)));
+        const overlapRatio = overlappingWords.length / Math.max(jobWords.length, netWords.length);
+        
+        if (jobNorm.length >= 4 && netKey.length >= 4 && overlapRatio >= 0.5) {
           count += val.alumni.length + val.parents.length;
         }
       }
-      // DiscoveredAlumni - use strict matching
+      // DiscoveredAlumni - use strict matching and current employment check
       const discovered = (discoveredAlumni || []).filter(a => {
         const aNorm = normalizeForMatch(a.company || '');
         if (aNorm.length < 4 || jobNorm.length < 4) return false;
+        
+        // Only include alumni who CURRENTLY work at this company
+        if (a.is_current === false) return false;
         
         // Use word-based matching instead of simple substring
         const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
@@ -393,10 +408,13 @@ Use concrete, specific language that sounds like an actual job posting.`,
       const registeredAlumni = networkEntry?.alumni || [];
       const parentsAtCompany = networkEntry?.parents || [];
 
-      // Pull DiscoveredAlumni for this company - use strict matching
+      // Pull DiscoveredAlumni for this company - use strict matching and current employment check
       const discoveredForJob = (discoveredAlumni || []).filter(a => {
         const aNorm = normalizeForMatch(a.company || '');
         if (aNorm.length < 4 || jobNorm.length < 4) return false;
+        
+        // Only include alumni who CURRENTLY work at this company
+        if (a.is_current === false) return false;
         
         // Use word-based matching instead of simple substring
         const jobWords = jobNorm.split(/\s+/).filter(w => w.length > 2);
