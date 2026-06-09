@@ -125,7 +125,8 @@ export default function CliffScout() {
   const subscriptionRef = useRef(null);
   const ctxRef = useRef(null);
   const userRef = useRef(null);
-  const firstSentMsgRef = useRef(null); // exact content of the first user message sent
+  const firstSentMsgRef = useRef(null);
+  const userHasSentRef = useRef(false); // gate: only show messages AFTER user sends
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -163,6 +164,9 @@ export default function CliffScout() {
     setInput('');
     setSending(true);
 
+    // Gate open — from this point the subscription is allowed to update messages
+    userHasSentRef.current = true;
+
     // Optimistically show the user message immediately
     setMessages(prev => [...prev, { role: 'user', content: msg }]);
 
@@ -180,18 +184,16 @@ export default function CliffScout() {
         conversationRef.current = conv;
         conversationRef.current._ctxInjected = false;
 
-        // Subscribe: find the first USER message, strip its context preamble for display,
-        // and show everything from that point. Any platform-injected assistant opener
-        // that appears before the first user message is silently dropped.
+        // Subscribe: only process messages AFTER userHasSentRef is true.
+        // Drop any assistant-role messages that appear before the first user message.
         subscriptionRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
-          const allMsgs = data.messages || [];
+          if (!userHasSentRef.current) return; // user hasn't sent yet — ignore everything
 
-          // Find the index of the first user message (our anchor)
+          const allMsgs = data.messages || [];
           const firstUserIdx = allMsgs.findIndex(m => m.role === 'user');
-          if (firstUserIdx === -1) return; // no user message yet — show nothing
+          if (firstUserIdx === -1) return;
 
           const display = allMsgs.slice(firstUserIdx).map((m, i) => {
-            // Clean the context preamble from the first user message for display
             if (i === 0 && m.role === 'user' && firstSentMsgRef.current) {
               return { ...m, content: firstSentMsgRef.current };
             }
