@@ -3,12 +3,76 @@ import { base44 } from '@/api/base44Client';
 import MessageBubble from '@/components/cliff-scout/MessageBubble';
 import { Send, Zap, ArrowLeft } from 'lucide-react';
 
-const SUGGESTED_PROMPTS = [
-  'Find UF alumni at fintech startups in NYC',
-  'Who do I know at Google or Meta?',
-  'Show me my networking pipeline',
-  'Find contacts at mid-size consulting firms in Florida',
-];
+async function fetchJobSearchContext(userEmail) {
+  try {
+    const [pipeline, activityLog] = await Promise.all([
+      base44.entities.NetworkingPipeline.filter({ user_email: userEmail }, '-status_date', 20),
+      base44.entities.ActivityLog.filter({ student_email: userEmail }, '-created_date', 10),
+    ]);
+
+    const totalContacts = pipeline.length;
+    const statusCounts = pipeline.reduce((acc, p) => {
+      acc[p.status] = (acc[p.status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const reachedOut = (statusCounts['reached_out'] || 0) + (statusCounts['messaged'] || 0);
+    const replies = statusCounts['replied'] || 0;
+    const interviews = statusCounts['interview'] || 0;
+    const offers = statusCounts['offer'] || 0;
+    const identified = statusCounts['identified'] || 0;
+    const matched = statusCounts['matched'] || 0;
+
+    const topCompanies = [...new Set(pipeline.map(p => p.company).filter(Boolean))].slice(0, 5);
+
+    const recentActivity = activityLog.slice(0, 5).map(a => a.type).filter(Boolean);
+
+    const stale = pipeline.filter(p =>
+      ['identified', 'matched', 'reached_out'].includes(p.status) &&
+      p.status_date &&
+      (Date.now() - new Date(p.status_date).getTime()) > 7 * 24 * 60 * 60 * 1000
+    );
+
+    const staleSummary = stale.length > 0
+      ? `${stale.length} contact(s) haven't been followed up on in over 7 days (e.g. ${stale.slice(0, 2).map(s => `${s.alumni_name} at ${s.company}`).join(', ')})`
+      : null;
+
+    return {
+      totalContacts,
+      identified,
+      matched,
+      reachedOut,
+      replies,
+      interviews,
+      offers,
+      topCompanies,
+      recentActivity,
+      staleSummary,
+      pipelineEmpty: totalContacts === 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getSuggestedPrompts(ctx) {
+  if (!ctx || ctx.pipelineEmpty) {
+    return [
+      'Find UF alumni at fintech startups in NYC',
+      'Who do I know at Google or Meta?',
+      'Find contacts at consulting firms in Florida',
+      'Help me target mid-size tech companies',
+    ];
+  }
+  const prompts = [];
+  if (ctx.staleSummary) prompts.push('Help me draft follow-up messages for stale contacts');
+  if (ctx.identified > 0 || ctx.matched > 0) prompts.push('Draft outreach messages for my identified contacts');
+  if (ctx.replies > 0) prompts.push('Help me schedule coffee chats with people who replied');
+  if (ctx.interviews > 0) prompts.push('Help me prep for my upcoming interviews');
+  prompts.push('Find more alumni at my target companies');
+  prompts.push('Show me my full networking pipeline');
+  return prompts.slice(0, 4);
+}
 
 export default function CliffScout() {
   const [conversation, setConversation] = useState(null);
@@ -16,6 +80,7 @@ export default function CliffScout() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [user, setUser] = useState(null);
+  const [jobSearchCtx, setJobSearchCtx] = useState(null);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -25,17 +90,51 @@ export default function CliffScout() {
 
   useEffect(() => {
     if (!user) return;
-    base44.agents.createConversation({
-      agent_name: 'cliff_scout',
-      metadata: { name: 'CLiFF Scout Session' },
-      variables: {
-        user: {
-          almaMater: user.school_name || user.school || user.schoolName || '',
-        },
-      },
-    }).then(conv => {
-      setConversation(conv);
-    }).catch(console.error);
+
+    const initConversation = async () => {
+      const ctx = await fetchJobSearchContext(user.email);
+      setJobSearchCtx(ctx);
+
+      // Build a dynamic context summary for the agent
+      let activityContext = '';
+      if (ctx) {
+        if (ctx.pipelineEmpty) {
+          activityContext = 'The student has NO contacts in their networking pipeline yet — they are just getting started.';
+        } else {
+          const lines = [
+            `Pipeline summary: ${ctx.totalContacts} total contacts tracked.`,
+            ctx.identified > 0 && `${ctx.identified} identified (not yet reached out).`,
+            ctx.matched > 0 && `${ctx.matched} matched (ready to contact).`,
+            ctx.reachedOut > 0 && `${ctx.reachedOut} already messaged.`,
+            ctx.replies > 0 && `${ctx.replies} have replied.`,
+            ctx.interviews > 0 && `${ctx.interviews} interview(s) scheduled.`,
+            ctx.offers > 0 && `${ctx.offers} offer(s) received.`,
+            ctx.topCompanies.length > 0 && `Target companies: ${ctx.topCompanies.join(', ')}.`,
+            ctx.staleSummary && `⚠️ Follow-up needed: ${ctx.staleSummary}.`,
+          ].filter(Boolean);
+          activityContext = lines.join(' ');
+        }
+      }
+
+      try {
+        const conv = await base44.agents.createConversation({
+          agent_name: 'cliff_scout',
+          metadata: { name: 'CLiFF Scout Session' },
+          variables: {
+            user: {
+              almaMater: user.school_name || user.school || user.schoolName || '',
+              firstName: user.full_name?.split(' ')[0] || '',
+              activityContext,
+            },
+          },
+        });
+        setConversation(conv);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    initConversation();
   }, [user]);
 
   useEffect(() => {
@@ -112,7 +211,7 @@ export default function CliffScout() {
               <p className="text-sm text-slate-500 mt-1">Tell me a target company, role, or industry — I'll find your warm path in.</p>
             </div>
             <div className="flex flex-col gap-2 w-full max-w-sm">
-              {SUGGESTED_PROMPTS.map((p, i) => (
+              {getSuggestedPrompts(jobSearchCtx).map((p, i) => (
                 <button
                   key={i}
                   onClick={() => send(p)}
