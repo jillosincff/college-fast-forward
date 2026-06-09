@@ -465,11 +465,6 @@ export default function FreeTierDashboard() {
               <CliffPrioritizedFeed user={user} />
             </div>
             
-            {/* Application Pipeline (Active Tracking) */}
-            <div id="pipeline-section">
-            <ApplicationTracker onUpgrade={triggerUpgrade} />
-            
-            </div>
             <TeaserSignalsCard onUnlock={() => triggerUpgrade('Inside Track Signals')} college={college} theme={campusTheme} />
           </div>
 
