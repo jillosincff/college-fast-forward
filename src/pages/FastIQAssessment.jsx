@@ -82,8 +82,34 @@ function UpgradeGate({ onNavigate }) {
 
 // ─── Main assessment ──────────────────────────────────────────────────────────
 
+// Meta tag helper
+function setMetaTags(title, description, noIndex = true) {
+  if (typeof window === 'undefined') return;
+  document.title = title;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', description);
+  let robotsMeta = document.querySelector('meta[name="robots"]');
+  if (robotsMeta) {
+    robotsMeta.setAttribute('content', noIndex ? 'noindex, nofollow' : 'index, follow');
+  } else {
+    robotsMeta = document.createElement('meta');
+    robotsMeta.name = 'robots';
+    robotsMeta.content = noIndex ? 'noindex, nofollow' : 'index, follow';
+    document.head.appendChild(robotsMeta);
+  }
+}
+
 export default function FastIQAssessment({ onTabChange }) {
   const { user } = useAuth();
+  
+  // Set meta tags on mount
+  useEffect(() => {
+    setMetaTags(
+      'FastIQ Career Assessment | College Fast Forward',
+      'Discover your Career Archetype with FastIQ — a personalized assessment that powers your job search with AI-driven insights.',
+      true // noindex for premium features
+    );
+  }, []);
   const [phase, setPhase] = useState('intro'); // intro | questions | revealing | result
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState([]); // [{question, answer}]

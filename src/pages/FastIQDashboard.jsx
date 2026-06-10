@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { navigate } from '@/components/utils/navigation';
 import { base44 } from '@/api/base44Client';
@@ -8,7 +8,32 @@ import { checkIsFastIQ } from '@/utils/isFastIQ';
 
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59-04:00');
 
+// Meta tag helper
+function setMetaTags(title, description, noIndex = true) {
+  if (typeof window === 'undefined') return;
+  document.title = title;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', description);
+  let robotsMeta = document.querySelector('meta[name="robots"]');
+  if (robotsMeta) {
+    robotsMeta.setAttribute('content', noIndex ? 'noindex, nofollow' : 'index, follow');
+  } else {
+    robotsMeta = document.createElement('meta');
+    robotsMeta.name = 'robots';
+    robotsMeta.content = noIndex ? 'noindex, nofollow' : 'index, follow';
+    document.head.appendChild(robotsMeta);
+  }
+}
+
 export default function FastIQDashboard({ onOpenUpgrade }) {
+  // Set meta tags on mount
+  useEffect(() => {
+    setMetaTags(
+      'FastIQ Dashboard | College Fast Forward',
+      'Your AI-powered career command center — unlimited alumni outreach, resume tailoring, interview prep, and more.',
+      true // noindex for premium features
+    );
+  }, []);
   const { user } = useAuth();
   const [showBanner, setShowBanner] = useState(true);
   const isFastIQ = checkIsFastIQ(user);

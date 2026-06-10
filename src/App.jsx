@@ -164,17 +164,17 @@ const AuthenticatedApp = () => {
       <Route path="/ParentHome" element={<Navigate to="/FreeTierDashboard" replace />} />
       <Route path="/Directory" element={<Navigate to="/FreeTierDashboard" replace />} />
 
-      {/* Feature routes */}
-      <Route path="/FastIQAssessment" element={<LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper>} />
-      <Route path="/ResumeTailoring" element={<LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper>} />
-      <Route path="/MockInterview" element={<LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper>} />
-      <Route path="/LinkedInReview" element={<LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper>} />
-      <Route path="/LinkedInActionPlan" element={<LayoutWrapper currentPageName="LinkedInActionPlan"><LinkedInActionPlan /></LayoutWrapper>} />
-      <Route path="/CareerAssessment" element={<LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper>} />
-      <Route path="/FastIQDashboard" element={<LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper>} />
-      <Route path="/OutreachDrafts" element={<LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper>} />
-      <Route path="/ApplicationTracker" element={<LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper>} />
-      <Route path="/EmailConnectionSettings" element={<LayoutWrapper currentPageName="EmailConnectionSettings"><EmailConnectionSettings /></LayoutWrapper>} />
+      {/* Feature routes — ALL guarded (require auth + onboarding) */}
+      <Route path="/FastIQAssessment" element={<OnboardingGuard><LayoutWrapper currentPageName="FastIQAssessment"><FastIQAssessment /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/ResumeTailoring" element={<OnboardingGuard><LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/MockInterview" element={<OnboardingGuard><LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/LinkedInReview" element={<OnboardingGuard><LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/LinkedInActionPlan" element={<OnboardingGuard><LayoutWrapper currentPageName="LinkedInActionPlan"><LinkedInActionPlan /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/CareerAssessment" element={<OnboardingGuard><LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/FastIQDashboard" element={<OnboardingGuard><LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/OutreachDrafts" element={<OnboardingGuard><LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/ApplicationTracker" element={<OnboardingGuard><LayoutWrapper currentPageName="ApplicationTracker"><ApplicationTracker /></LayoutWrapper></OnboardingGuard>} />
+      <Route path="/EmailConnectionSettings" element={<OnboardingGuard><LayoutWrapper currentPageName="EmailConnectionSettings"><EmailConnectionSettings /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/email-callback" element={<EmailCallbackPage />} />
       <Route path="/PostJoinUpsell" element={<LayoutWrapper currentPageName="PostJoinUpsell"><PostJoinUpsell /></LayoutWrapper>} />
       <Route path="/Profile" element={<LayoutWrapper currentPageName="Profile"><Profile /></LayoutWrapper>} />
