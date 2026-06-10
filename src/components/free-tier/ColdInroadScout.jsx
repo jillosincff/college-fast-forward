@@ -44,7 +44,7 @@ export default function ColdInroadScout({ company, role, onTargetConfirmed, onBa
         
         <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>🎯 SUGGESTED CONTACTS</p>
         
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Suggested Contact Found</h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Suggested Contacts</h1>
         <p style={{ fontFamily: dm, fontSize: 14, color: '#888', margin: '0 0 32px' }}>Since no alumni work at {company}, CLiFF identified the highest-probability contact to reach out to.</p>
 
         {/* Target Card */}

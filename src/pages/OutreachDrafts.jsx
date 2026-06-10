@@ -773,7 +773,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           NEW DRAFT
         </p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
-          What kind of message?
+          Choose your outreach context
         </h1>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: '0 0 32px' }}>
           FastIQ will tailor the message to the context.
