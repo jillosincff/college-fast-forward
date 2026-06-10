@@ -10,6 +10,7 @@ Deno.serve(async (req) => {
     recipientName,
     recipientTitle,
     recipientCompany,
+    recipientEmail,
     studentName,
     studentMajor,
     targetRole,
@@ -19,6 +20,7 @@ Deno.serve(async (req) => {
     jobTitle,
     jobUrl,
     conversationContext,
+    isLinkedInRoute,
   } = await req.json();
 
   const schoolAbbrev = school || 'UF';
@@ -37,12 +39,12 @@ Start the message body with a direct personal hook — no corporate pleasantries
   const contextPrompts = {
     alumni_search: `${BANNED_PHRASES_RULE}
 
-Write a short outreach email (with subject line) from a ${schoolAbbrev} student to a ${schoolAbbrev} alumni. Return JSON: {"subject": "...", "body": "..."}
+${isLinkedInRoute ? `CRITICAL: You are writing a LinkedIn connection request invitation. You have a strict limit of 280 characters total for the body. Be ultra-concise, mention the shared school affinity, and ask for a brief chat. Do NOT include a subject line (return empty string), formal email signatures, or conversational filler. Return JSON: {"subject": "", "body": "..."}` : `Write a short outreach email (with subject line) from a ${schoolAbbrev} student to a ${schoolAbbrev} alumni. Return JSON: {"subject": "...", "body": "..."}`}
 
 The body MUST follow this structure:
-"Hi ${alumniFirstName}!\\n\\nI'm a fellow ${schoolAbbrev} student studying ${studentMajor || '[major]'}, and I saw your path to becoming a ${recipientTitle || '[title]'} at ${recipientCompany || '[company]'}.\\n\\nYour background in this space is exactly where I'm trying to grow. If you have any availability over the next couple of weeks, I'd love to grab a quick 15-minute virtual coffee to ask you a couple of questions about your journey.\\n\\nGo ${schoolAbbrev}!\\n\\nBest,\\n${firstName}"
+${isLinkedInRoute ? `"Hi ${alumniFirstName}! Fellow ${schoolAbbrev} student studying ${studentMajor || '[major]'}. Saw your path to ${recipientTitle || '[title]'} at ${recipientCompany || '[company]'}. Your background is exactly where I'm trying to grow. Would love to grab a quick 15-min virtual coffee to ask about your journey. Go ${schoolAbbrev}! Best, ${firstName}"` : `"Hi ${alumniFirstName}!\\n\\nI'm a fellow ${schoolAbbrev} student studying ${studentMajor || '[major]'}, and I saw your path to becoming a ${recipientTitle || '[title]'} at ${recipientCompany || '[company]'}.\\n\\nYour background in this space is exactly where I'm trying to grow. If you have any availability over the next couple of weeks, I'd love to grab a quick 15-minute virtual coffee to ask you a couple of questions about your journey.\\n\\nGo ${schoolAbbrev}!\\n\\nBest,\\n${firstName}"`}
 
-Keep the opening and closing lines exactly as shown. Make only the middle paragraph feel genuine and personal.`,
+${isLinkedInRoute ? 'Keep it under 280 characters. No subject line. No formal signature.' : 'Keep the opening and closing lines exactly as shown. Make only the middle paragraph feel genuine and personal.'}`,
     cff_connection: `Write a message from a college student to a professional in the College Fast Forward network who has volunteered to help students. The message should feel grateful, specific about what help they're looking for, and respectful of the person's time. Keep it conversational and under 200 words.`,
     job_application: `Write a follow-up message from a college student who recently applied for a job. The message should express continued interest, briefly reinforce why they're a fit, and ask about next steps. Professional but not stiff. Under 150 words.`,
     cold_outreach: `Write a cold outreach message from a college student to a professional at a target company they haven't met. Should be brief, specific about why they're reaching out to this person specifically, and make a clear low-commitment ask. Under 150 words.`,
@@ -85,5 +87,12 @@ Write ONLY the message text. No subject line, no preamble, no explanation. Just 
       // fallback to raw text
     }
   }
+  
+  // For LinkedIn route, ensure subject is empty and message is trimmed
+  if (isLinkedInRoute) {
+    subject = '';
+    message = message.trim();
+  }
+  
   return Response.json({ success: true, message, subject });
 });
