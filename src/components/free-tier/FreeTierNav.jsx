@@ -92,12 +92,12 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated, navRef })
                       ⬇️ Download File
                     </button>
                     <button
-                      onClick={() => { setDropdownOpen(false); navigate('ProfileEdit'); }}
+                      onClick={() => { setDropdownOpen(false); navigate('ResumeTailoring'); }}
                       style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '11px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
                       onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                       onMouseLeave={e => e.currentTarget.style.background = 'none'}
                     >
-                      🔄 Swap / Update File
+                      ✨ Tailor Your Resume
                     </button>
                     {/* ── End Resume Management ── */}
 
