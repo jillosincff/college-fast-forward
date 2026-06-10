@@ -138,13 +138,48 @@ function assignTier(company) {
   return 4;
 }
 
-function classifyCompanySize(sizeLabel) {
-  // Map LLM-provided size labels to tier numbers for frontend display
+function classifyCompanySize(sizeLabel, companyName) {
+  // Hardcoded corrections for well-known companies — overrides LLM size
+  const name = (companyName || '').toLowerCase();
+  
+  // Enterprise (1000+ employees) — definitive list
+  const enterprise = [
+    'amazon', 'google', 'microsoft', 'apple', 'meta', 'netflix', 'uber', 'lyft',
+    'jpmorgan', 'goldman sachs', 'morgan stanley', 'bank of america', 'wells fargo', 'citigroup',
+    'deloitte', 'pwc', 'ey', 'kpmg', 'mckinsey', 'bcg', 'bain', 'accenture', 'ibm',
+    'salesforce', 'oracle', 'sap', 'adobe', 'intuit', 'servicenow', 'workday',
+    'american express', 'amex', 'visa', 'mastercard', 'paypal', 'stripe', 'square',
+    'target', 'walmart', 'costco', 'home depot', 'lowe\'s', 'best buy', 'macys',
+    'coca-cola', 'pepsi', 'nestle', 'unilever', 'procter & gamble', 'p&g',
+    'johnson & johnson', 'pfizer', 'merck', 'novartis', 'roche',
+    'boeing', 'lockheed martin', 'northrop grumman', 'spacex', 'tesla',
+    'disney', 'warner bros', 'universal', 'paramount', 'sony', 'lg', 'samsung',
+    'endeavor' // Endeavor is a large entertainment conglomerate (WME, IMG, UFC)
+  ];
+  
+  // Mid-Market (100-999 employees)
+  const midMarket = [
+    'celonis', 'notion', 'airtable', 'figma', 'canva', 'miro', 'asana', 'monday.com',
+    'hubspot', 'zendesk', 'atlassian', 'slack', 'zoom', 'dropbox', 'box',
+    'shopify', 'etsy', 'wayfair', 'chewy', 'peloton', 'warby parker', 'glossier',
+    'robinhood', 'coinbase', 'affirm', 'klarna', 'afterpay',
+    'instacart', 'doordash', 'grubhub', 'postmates', 'shipt'
+  ];
+  
+  // Check hardcoded lists first
+  for (const company of enterprise) {
+    if (name.includes(company) || company.includes(name)) return 1;
+  }
+  for (const company of midMarket) {
+    if (name.includes(company) || company.includes(name)) return 2;
+  }
+  
+  // Fall back to LLM-provided size label
   if (!sizeLabel) return 1; // Default to Enterprise if unknown
   const size = sizeLabel.toLowerCase();
-  if (size === 'large' || size === 'enterprise') return 1; // Enterprise (1000+ employees)
-  if (size === 'mid') return 2; // Mid-Market (100-999 employees)
-  if (size === 'startup') return 3; // Startup (<100 employees)
+  if (size === 'large' || size === 'enterprise') return 1;
+  if (size === 'mid') return 2;
+  if (size === 'startup') return 3;
   return 1; // Default to Enterprise
 }
 
@@ -241,7 +276,7 @@ function mergeAndRank(external, internal, sizePref, goals) {
   // Assign tiers, sort, and generate why_recommended
   const companies = Array.from(companyMap.values()).map(c => {
     const opportunityTier = assignTier(c); // For sorting/ranking (based on hiring + connections)
-    const sizeTier = classifyCompanySize(c.size); // For display badge (based on company size)
+    const sizeTier = classifyCompanySize(c.size, c.name); // For display badge (based on company size)
     return { ...c, tier: opportunityTier, companyTier: sizeTier, why_recommended: generateWhyRecommended({ ...c, tier: opportunityTier }, goals) };
   });
 
@@ -376,7 +411,7 @@ Deno.serve(async (req) => {
       const fbGoals = { role, university: studentSchool };
       companies = fallbackList.map(c => {
         const opportunityTier = 3;
-        const sizeTier = classifyCompanySize(c.size);
+        const sizeTier = classifyCompanySize(c.size, c.name);
         return { ...c, tier: opportunityTier, companyTier: sizeTier, has_web_result: true, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0, sample_roles: [], is_fallback: true, why_recommended: generateWhyRecommended({ ...c, tier: opportunityTier, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0 }, fbGoals) };
       });
       console.log('Hardcoded fallback returned:', companies.length, 'companies');

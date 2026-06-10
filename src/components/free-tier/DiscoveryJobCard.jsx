@@ -18,10 +18,16 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
   // Use companyTier for size badge, fall back to inferring from company name if not set
   let companyTier = lead?.companyTier;
   if (companyTier === undefined || companyTier === null) {
-    // Fallback: assume Enterprise for well-known large companies
-    const largeCompanies = ['amazon', 'google', 'microsoft', 'apple', 'meta', 'netflix', 'jpmorgan', 'goldman', 'deloitte', 'pwc', 'ey', 'kpmg', 'mckinsey', 'bcg', 'bain', 'endeavor', 'celonis', 'salesforce', 'oracle', 'ibm', 'accenture'];
-    const isLarge = largeCompanies.some(name => (lead.company || lead.companyName || '').toLowerCase().includes(name));
-    companyTier = isLarge ? 1 : 2;
+    // Fallback: hardcoded corrections for well-known companies
+    const name = (lead.company || lead.companyName || '').toLowerCase();
+    
+    const enterprise = ['amazon', 'google', 'microsoft', 'apple', 'meta', 'netflix', 'uber', 'jpmorgan', 'goldman sachs', 'morgan stanley', 'deloitte', 'pwc', 'ey', 'kpmg', 'mckinsey', 'bcg', 'bain', 'accenture', 'ibm', 'salesforce', 'oracle', 'sap', 'adobe', 'american express', 'amex', 'visa', 'target', 'walmart', 'costco', 'home depot', 'endeavor', 'disney', 'boeing', 'tesla', 'coca-cola', 'pepsi', 'pfizer', 'johnson & johnson'];
+    const midMarket = ['celonis', 'notion', 'airtable', 'figma', 'canva', 'miro', 'asana', 'monday.com', 'hubspot', 'zendesk', 'atlassian', 'slack', 'zoom', 'dropbox', 'shopify', 'instacart', 'doordash', 'robinhood', 'coinbase', 'affirm', 'klarna', 'peloton', 'warby parker'];
+    
+    const isEnterprise = enterprise.some(c => name.includes(c) || c.includes(name));
+    const isMidMarket = midMarket.some(c => name.includes(c) || c.includes(name));
+    
+    companyTier = isEnterprise ? 1 : isMidMarket ? 2 : 3;
   }
   const TIER_BADGE = {
     1: { label: 'Enterprise', color: 'bg-slate-100 text-slate-600' },
