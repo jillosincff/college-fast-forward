@@ -13,6 +13,8 @@ Allow: /CookiePolicy
 Disallow: /FastIQ
 Disallow: /FastIQAssessment
 Disallow: /FastIQDashboard
+Disallow: /CliffScout
+Disallow: /ActionPlanArchitect
 Disallow: /FreeTierDashboard
 Disallow: /Dashboard
 Disallow: /ResumeTailoring

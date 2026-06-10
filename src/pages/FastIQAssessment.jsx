@@ -105,8 +105,8 @@ export default function FastIQAssessment({ onTabChange }) {
   // Set meta tags on mount
   useEffect(() => {
     setMetaTags(
-      'FastIQ Career Assessment | College Fast Forward',
-      'Discover your Career Archetype with FastIQ — a personalized assessment that powers your job search with AI-driven insights.',
+      'Career Assessment | CliFF',
+      'Discover your Career Archetype with CliFF — a personalized assessment that powers your job search with AI-driven insights.',
       true // noindex for premium features
     );
   }, []);

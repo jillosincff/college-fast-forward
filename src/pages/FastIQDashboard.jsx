@@ -29,7 +29,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
   // Set meta tags on mount
   useEffect(() => {
     setMetaTags(
-      'FastIQ Dashboard | College Fast Forward',
+      'Dashboard | CliFF',
       'Your AI-powered career command center — unlimited alumni outreach, resume tailoring, interview prep, and more.',
       true // noindex for premium features
     );
