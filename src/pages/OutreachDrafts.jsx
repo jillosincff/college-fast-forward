@@ -544,18 +544,47 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
     return (
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
 
-        {/* Header */}
+        {/* Header with Back Button */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16 }}>
-          <div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
-              OUTREACH DRAFTS
-            </p>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
-              Your Outreach Pipeline
-            </h1>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
-              {drafts.length} message{drafts.length !== 1 ? 's' : ''} · {drafts.filter(d => d.status === 'sent').length} sent · {drafts.filter(d => d.status === 'replied').length} replied
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <button
+              onClick={() => navigate('FreeTierDashboard')}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: 13,
+                color: '#888',
+                cursor: 'pointer',
+                fontFamily: "'DM Sans', sans-serif",
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 12px',
+                borderRadius: 8,
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#1e3a5f';
+                e.currentTarget.style.background = '#f5f5f5';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#888';
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              ← Back
+            </button>
+            <div>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
+                OUTREACH DRAFTS
+              </p>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
+                Your Outreach Pipeline
+              </h1>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', margin: 0 }}>
+                {drafts.length} message{drafts.length !== 1 ? 's' : ''} · {drafts.filter(d => d.status === 'sent').length} sent · {drafts.filter(d => d.status === 'replied').length} replied
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setPhase('new')}
