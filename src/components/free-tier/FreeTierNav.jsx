@@ -97,7 +97,7 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated, navRef })
                       onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                       onMouseLeave={e => e.currentTarget.style.background = 'none'}
                     >
-                      ✨ Tailor Your Resume
+                      🔄 Swap / Update File
                     </button>
                     {/* ── End Resume Management ── */}
 
