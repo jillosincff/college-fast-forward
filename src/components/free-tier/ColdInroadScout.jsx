@@ -42,10 +42,10 @@ export default function ColdInroadScout({ company, role, onTargetConfirmed, onBa
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', fontSize: 13, color: '#888', cursor: 'pointer', fontFamily: dm, marginBottom: 32 }}>← Back</button>
         
-        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>🎯 COLD INROAD STRATEGY</p>
+        <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>🎯 SUGGESTED CONTACTS</p>
         
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Recommended Cold Inroad Target Found</h1>
-        <p style={{ fontFamily: dm, fontSize: 14, color: '#888', margin: '0 0 32px' }}>CLiFF analyzed {company}'s structure and identified the highest-probability contact.</p>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>Suggested Contact Found</h1>
+        <p style={{ fontFamily: dm, fontSize: 14, color: '#888', margin: '0 0 32px' }}>Since no alumni work at {company}, CLiFF identified the highest-probability contact to reach out to.</p>
 
         {/* Target Card */}
         <div style={{ background: 'linear-gradient(135deg, #f0f9ff, #faf5ff)', border: '2px solid #7c3aed', borderRadius: 16, padding: '24px 28px', marginBottom: 32 }}>

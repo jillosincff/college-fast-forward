@@ -184,7 +184,8 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             </div>
           ) : (
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
-              <p className="text-xs text-gray-500">No {school} alumni found at {companyName} yet.</p>
+              <p className="text-xs text-gray-600 font-semibold mb-1">No {school} alumni found here</p>
+              <p className="text-xs text-gray-500">We'll suggest a contact to reach out to instead ↓</p>
             </div>
           )}
         </div>
