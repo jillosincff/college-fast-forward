@@ -113,15 +113,6 @@ Deno.serve(async (req) => {
       pledge_taken_at: new Date().toISOString(),
     });
 
-    // Send welcome email (non-blocking)
-    try {
-      base44.functions.invoke('sendParentWelcomeEmail', {
-        userEmail: email.toLowerCase().trim(),
-        firstName: full_name.split(' ')[0] || 'Parent',
-        studentName: '',
-      }).catch(() => {});
-    } catch {}
-
     console.log('✅ Parent created:', email);
 
     return Response.json({

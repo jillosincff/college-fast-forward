@@ -120,13 +120,6 @@ Deno.serve(async (req) => {
           pending_fastiq_gift_emails: updatedPending,
         });
 
-        await base44.asServiceRole.functions.invoke('sendParentGiftedFastIQEmail', {
-          studentEmail: lowerCaseEmail,
-          studentFirstName: full_name?.split(' ')[0] || 'there',
-          parentFirstName: parent.full_name?.split(' ')[0] || 'Your parent',
-          trialDays: 7,
-        }).catch(e => console.error('[createUserFromVerification] Gift email failed:', e.message));
-
         console.log('[createUserFromVerification] Pending FastIQ gift activated from parent:', parent.email);
       }
     } catch (giftErr) {
