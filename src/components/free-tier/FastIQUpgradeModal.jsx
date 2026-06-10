@@ -57,8 +57,8 @@ export default function FastIQUpgradeModal({ user, onClose }) {
       const { base44 } = await import('@/api/base44Client');
       await base44.integrations.Core.SendEmail({
         to: parentEmail.trim(),
-        subject: `${firstName} needs your help to activate FastIQ`,
-        body: `Hi,\n\n${user.full_name || firstName} is ready to activate FastIQ on College Fast Forward.\n\nFastIQ is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.\n\nActivate FastIQ for your family: ${window.location.origin}/#ParentHome\n\n— The College Fast Forward Team`,
+        subject: `${firstName} needs your help to activate CliFF`,
+        body: `Hi,\n\n${user.full_name || firstName} is ready to activate CliFF on College Fast Forward.\n\nCliFF is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.\n\nActivate CliFF for your family: ${window.location.origin}/#ParentHome\n\n— The College Fast Forward Team`,
       });
       setInviteSent(true);
     } catch (err) {
@@ -81,8 +81,8 @@ export default function FastIQUpgradeModal({ user, onClose }) {
         <div className="pt-6 px-2">
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 12, lineHeight: 1.2 }}>
             {isParent
-              ? `Hi ${firstName}. Let's get FastIQ set up for your student.`
-              : `Hi ${firstName}. I'm FastIQ.`}
+              ? `Hi ${firstName}. Let's get CliFF set up for your student.`
+              : `Hi ${firstName}. I'm CliFF.`}
           </h2>
           {!isParent && (
             <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontStyle: 'italic', color: '#E85D20', marginBottom: 16 }}>
@@ -91,8 +91,8 @@ export default function FastIQUpgradeModal({ user, onClose }) {
           )}
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#CCCCCC', lineHeight: 1.6, marginBottom: 20 }}>
             {isParent
-              ? "FastIQ is your student's personal career agent. It will help them find alumni, write outreach that gets replies, tailor their resume to jobs, and prep for interviews."
-              : "While you sleep, FastIQ is working — scouting target companies, discovering alumni, and building your personalized outreach. No more generic applications disappearing into a black hole."}
+              ? "CliFF is your student's personal career agent. It will help them find alumni, write outreach that gets replies, tailor their resume to jobs, and prep for interviews."
+              : "While you sleep, CliFF is working — scouting target companies, discovering alumni, and building your personalized outreach. No more generic applications disappearing into a black hole."}
           </p>
 
           <div className="bg-[#E85D20]/10 border border-[#E85D20]/30 rounded-lg p-4 mb-6">
@@ -115,7 +115,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
 
           <div className="bg-[#0A0A0A] rounded-lg p-4 mb-6">
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
-             $19.96/month ($4.99/week)
+             $4.99/week
            </p>
            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#888' }}>
              Cancel anytime.
@@ -144,13 +144,13 @@ export default function FastIQUpgradeModal({ user, onClose }) {
             )}
             {inviteSent && (
               <div className="text-center text-green-400 text-sm">
-                ✓ Invitation sent — we'll notify you when they activate FastIQ for you.
+                ✓ Invitation sent — we'll notify you when they activate CliFF for you.
               </div>
             )}
           </div>
 
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#666', marginTop: 16, textAlign: 'center' }}>
-            $19.96/month ($4.99/week). Cancel anytime.
+            $4.99/week. Cancel anytime.
           </p>
         </div>
       </DialogContent>

@@ -78,14 +78,13 @@ function PremiumNav({ user, onEditGoals, navRef }) {
                 <div style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 8, background: '#f8fafc', borderBottom: '1px solid #f3f4f6' }}>
                   <span style={{ fontSize: 14 }}>📄</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {user?.resume_filename || 'Master_Resume.pdf'}
+                    <p style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: user?.resume_filename ? '#111827' : '#9ca3af', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {user?.resume_filename || 'No resume uploaded'}
                     </p>
-                    <p style={{ fontFamily: dm, fontSize: 10, color: '#16a34a', margin: 0, fontWeight: 600 }}>🟢 98% ATS Optimized</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => { setDropdownOpen(false); if (user?.resume_url) window.open(user.resume_url, '_blank'); else alert('No resume on file. Upload one in your profile.'); }}
+                  onClick={() => { setDropdownOpen(false); if (user?.resume_url) window.open(user.resume_url, '_blank'); else navigate('ResumeTailoring'); }}
                   style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '11px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
                   onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -140,52 +139,17 @@ function StatPill({ emoji, label, value, theme, isLoading }) {
 }
 
 function PremiumActiveProfilePill({ user, onPillClick }) {
-  const [atsOpen, setAtsOpen] = useState(false);
-  const [jd, setJd] = useState('');
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const filename = user?.resume_filename || 'Master_Resume.pdf';
-
-  const handleCheck = () => {
-    if (!jd.trim()) return;
-    setLoading(true);
-    setTimeout(() => {
-      setResult({ score: 72, missing: ['cross-functional', 'stakeholder management', 'KPI'], present: ['communication', 'Python', 'data analysis'] });
-      setLoading(false);
-    }, 900);
-  };
+  const filename = user?.resume_filename;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: atsOpen ? '12px 12px 0 0' : 12, padding: '9px 14px' }}>
-        <span style={{ fontSize: 14, flexShrink: 0 }}>📄</span>
-        <button onClick={onPillClick} title="Click to manage resume in profile menu" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#15803d', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: 0, textAlign: 'left', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'underline dotted' }}>
-          Active Profile: {filename}
-        </button>
-        <span style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#16a34a', background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: 100, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}>🟢 98% ATS</span>
-        <button onClick={() => setAtsOpen(v => !v)} style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#6b7280', background: 'none', border: '1px solid #d1fae5', borderRadius: 8, padding: '3px 8px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }}>
-          {atsOpen ? '▲ Close' : '🔍 ATS Check'}
-        </button>
-      </div>
-      {atsOpen && (
-        <div style={{ background: '#fff', border: '1px solid #bbf7d0', borderTop: 'none', borderRadius: '0 0 12px 12px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <p style={{ fontFamily: dm, fontSize: 11, fontWeight: 700, color: '#374151', margin: 0 }}>Paste a job description to check your resume match:</p>
-          <textarea value={jd} onChange={e => setJd(e.target.value)} placeholder="Paste job description here..." rows={4} style={{ fontFamily: dm, fontSize: 12, color: '#374151', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 10px', resize: 'vertical', width: '100%', boxSizing: 'border-box', outline: 'none' }} />
-          <button onClick={handleCheck} disabled={loading || !jd.trim()} style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: loading ? '#9ca3af' : '#15803d', border: 'none', borderRadius: 8, padding: '9px 0', cursor: loading ? 'default' : 'pointer', minHeight: 'auto', width: '100%' }}>
-            {loading ? 'Scanning...' : '⚡ Run ATS Match'}
-          </button>
-          {result && (
-            <div style={{ background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: dm, fontSize: 12, fontWeight: 800, color: '#111827' }}>Match Score</span>
-                <span style={{ fontFamily: dm, fontSize: 14, fontWeight: 800, color: result.score >= 80 ? '#16a34a' : result.score >= 60 ? '#d97706' : '#dc2626' }}>{result.score}%</span>
-              </div>
-              <p style={{ fontFamily: dm, fontSize: 11, color: '#6b7280', margin: 0 }}>✅ Found: <strong>{result.present.join(', ')}</strong></p>
-              <p style={{ fontFamily: dm, fontSize: 11, color: '#dc2626', margin: 0 }}>❌ Missing: <strong>{result.missing.join(', ')}</strong></p>
-            </div>
-          )}
-        </div>
-      )}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: filename ? '#f0fdf4' : '#fffbeb', border: `1px solid ${filename ? '#bbf7d0' : '#fde68a'}`, borderRadius: 12, padding: '9px 14px' }}>
+      <span style={{ fontSize: 14, flexShrink: 0 }}>📄</span>
+      <button onClick={onPillClick} title="Click to manage resume in profile menu" style={{ fontFamily: dm, fontSize: 12, fontWeight: 700, color: filename ? '#15803d' : '#92400e', background: 'none', border: 'none', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', padding: 0, textAlign: 'left', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: 'underline dotted' }}>
+        {filename ? `Active Profile: ${filename}` : 'No resume uploaded yet'}
+      </button>
+      <button onClick={() => navigate('ResumeTailoring')} style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#fff', background: filename ? '#15803d' : '#d97706', border: 'none', borderRadius: 8, padding: '4px 10px', cursor: 'pointer', minHeight: 'auto', minWidth: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }}>
+        {filename ? '⚡ Tailor Resume' : '⬆️ Upload Resume'}
+      </button>
     </div>
   );
 }
@@ -201,7 +165,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   const [isMobile, setIsMobile] = useState(false);
   const [signalAdditions, setSignalAdditions] = useState([]);
   const [showNetworkModal, setShowNetworkModal] = useState(false);
-  const [networkStats, setNetworkStats] = useState({ companies: 1, alumni: 1, parents: 1 });
+  const [networkStats, setNetworkStats] = useState({ companies: 0, alumni: 0, parents: 0 });
   const [showColdDiscovery, setShowColdDiscovery] = useState(false);
   const [warmCompanyNames, setWarmCompanyNames] = useState([]);
   const [showGoalsModal, setShowGoalsModal] = useState(false);
@@ -210,10 +174,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
 
   // Listen for goals modal open event from child components
   useEffect(() => {
-    const handleOpenGoals = () => {
-      console.log('PremiumDashboard: Opening goals modal from event');
-      setShowGoalsModal(true);
-    };
+    const handleOpenGoals = () => setShowGoalsModal(true);
     window.addEventListener('cff:open-goals-modal', handleOpenGoals);
     return () => window.removeEventListener('cff:open-goals-modal', handleOpenGoals);
   }, []);
@@ -225,17 +186,15 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
         const companies = res?.data?.companies || [];
         const totalAlumni = companies.reduce((s, c) => s + c.alumniCount, 0);
         const totalParents = companies.reduce((s, c) => s + c.parentCount, 0);
-        // ALWAYS ensure minimum of 1 - never show 0
-        setNetworkStats({ 
-          companies: Math.max(1, companies.length || 1), 
-          alumni: Math.max(1, totalAlumni || 1), 
-          parents: Math.max(1, totalParents || 1) 
+        setNetworkStats({
+          companies: companies.length,
+          alumni: totalAlumni,
+          parents: totalParents,
         });
         setWarmCompanyNames(companies.map(c => c.company));
       })
       .catch(() => {
-        // Fallback: always show at least 1
-        setNetworkStats({ companies: 1, alumni: 1, parents: 1 });
+        setNetworkStats({ companies: 0, alumni: 0, parents: 0 });
       });
   }, [user?.career_goals?.target_industries]);
 
@@ -271,14 +230,13 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
   }, []);
 
   const showParentStat = parentCount === null || parentCount >= 20;
-  // Ensure we NEVER show 0 - always display at least 1
-  const alumniCount = Math.max(1, networkStats?.alumni || 1);
-  const parentsCount = Math.max(1, networkStats?.parents || 1);
-  const companiesCount = Math.max(1, networkStats?.companies || 1);
+  const alumniCount = networkStats?.alumni || 0;
+  const parentsCount = networkStats?.parents || 0;
+  const companiesCount = networkStats?.companies || 0;
   const networkCount = alumniCount + parentsCount;
   const stats = [
-    { emoji: '🤖', label: 'Agent Status', value: 'FULLY DEPLOYED' },
-    { emoji: '🎯', label: 'Resume Match', value: '98% ATS Proof' },
+    { emoji: '🤖', label: 'Agent Status', value: 'ACTIVE' },
+    { emoji: '📄', label: 'Resume', value: user?.resume_filename ? 'On File' : 'Not Uploaded' },
     { emoji: '🐊', label: 'Synced Network', value: `${networkCount}` },
   ];
 
@@ -327,7 +285,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             Let's get locked in and get you hired, {firstName} 🚀
           </h1>
           <p style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, color: 'rgba(255,255,255,0.65)', margin: '0 0 24px', lineHeight: 1.7, maxWidth: 680 }}>
-            Your career agent is officially live and working 24/7. We've already scrubbed your resume flags, bypassed the standard job-board portals, and mapped out your{' '}
+            Your career agent is live and working 24/7 — scouting roles that match your goals and mapping your{' '}
             <strong style={{ color: 'rgba(255,255,255,0.85)' }}>{shortName}</strong> alumni backdoor channels.{' '}
             <strong style={{ color: '#E85D20' }}>Let's go get this offer.</strong>
           </p>
@@ -432,105 +390,6 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           }}
         />
       )}
-    </div>
-  );
-}
-
-// Inline alumni outreach (unlocked version)
-function PremiumAlumniOutreach({ college, theme, user, selectedLead }) {
-  const t = theme || { primary: '#2563eb', bgTint: '#eff6ff' };
-  const shortName = t.shortName || college || 'your university';
-  const [target, setTarget] = useState('');
-  const [script, setScript] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const formatGreetingName = (fullName) => {
-    if (!fullName) return '[Name]';
-    return fullName.trim().split(/\s+/)[0];
-  };
-
-  // Auto-populate script when a pipeline lead is selected
-  useEffect(() => {
-    if (!selectedLead) return;
-    const recruiterName = formatGreetingName(selectedLead.recruiter?.split(',')[0]);
-    const alumLine = selectedLead.alumCount > 0
-      ? `Seeing that there ${selectedLead.alumCount === 1 ? 'is' : 'are'} ${selectedLead.alumCount} confirmed ${shortName} alumni on the team`
-      : `Seeing that ${shortName} has a verified presence in this network`;
-    const autoScript = `Hi ${recruiterName},\n\nI came across the ${selectedLead.role} opportunity at ${selectedLead.company} through College Fast Forward. ${alumLine} — that connection immediately stood out to me.\n\nI'm a current ${shortName} student actively pursuing this type of role, and I'd love to connect briefly to learn more about the opportunity and what it's like to transition from campus to the team.\n\nThank you for your time,\n${user?.full_name || '[Your Name]'}`;
-    setTarget(selectedLead.company);
-    setScript(autoScript);
-    setCopied(false);
-  }, [selectedLead]);
-
-  const generate = async () => {
-    if (!target.trim()) return;
-    setLoading(true);
-    setScript('');
-    setCopied(false);
-    await new Promise(r => setTimeout(r, 1200));
-    const majorLine = user?.major ? ` studying ${user.major}` : '';
-    const generated = `Hi [Name],\n\nI noticed you're currently at ${target.trim()} and are part of the ${shortName} network — that connection immediately stood out to me.\n\nI'm a current ${shortName} student${majorLine}, and I'm actively exploring opportunities in your field. I'd be incredibly grateful for 15 minutes to hear about your path and any advice you might have.\n\nThank you so much for being part of the ${shortName} community.\n\nWarm regards,\n${user?.full_name || '[Your Name]'}`;
-    setScript(generated);
-    setLoading(false);
-  };
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(script);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    } catch { alert(script); }
-  };
-
-  return (
-    <div style={{ background: '#fff', border: `1px solid ${t.primary}33`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-      <div style={{ background: `linear-gradient(135deg, ${t.bgTint}, rgba(255,255,255,0.8))`, padding: '16px 20px', borderBottom: `1px solid ${t.primary}33` }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 18 }}>✉️</span>
-            <p style={{ fontFamily: dm, fontSize: 13, fontWeight: 700, color: '#111827', margin: 0 }}>Alumni Outreach Generator</p>
-          </div>
-          <span style={{ fontFamily: dm, fontSize: 10, fontWeight: 700, color: '#16a34a', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 100, padding: '3px 10px' }}>UNLOCKED</span>
-        </div>
-      </div>
-      <div style={{ padding: '16px 20px' }}>
-        <p style={{ fontFamily: dm, fontSize: 12, color: '#374151', margin: '0 0 10px', lineHeight: 1.5 }}>
-          Enter a target company and we'll generate a warm, personalized outreach script:
-        </p>
-        <input
-          value={target}
-          onChange={e => setTarget(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && generate()}
-          placeholder="e.g. Goldman Sachs, Google, Deloitte..."
-          style={{ width: '100%', fontFamily: dm, fontSize: 12, color: '#374151', background: '#f9fafb', border: `1px solid ${t.primary}33`, borderRadius: 10, padding: '9px 12px', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }}
-        />
-        <button
-          onClick={generate}
-          disabled={!target.trim() || loading}
-          style={{ width: '100%', fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: target.trim() && !loading ? `linear-gradient(135deg, ${t.primary}, ${t.secondary || t.primary})` : '#d1d5db', border: 'none', borderRadius: 10, padding: '10px 0', cursor: target.trim() && !loading ? 'pointer' : 'not-allowed', minHeight: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-        >
-          {loading ? (
-            <>
-              <div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spinOA 0.7s linear infinite' }} />
-              <style>{`@keyframes spinOA{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-              Writing your script...
-            </>
-          ) : '✉️ Generate Script →'}
-        </button>
-
-        {script && (
-          <div style={{ marginTop: 14 }}>
-            <pre style={{ fontFamily: dm, fontSize: 12, color: '#374151', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, padding: '12px 14px', margin: 0, whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>{script}</pre>
-            <button
-              onClick={handleCopy}
-              style={{ marginTop: 10, width: '100%', fontFamily: dm, fontSize: 12, fontWeight: 700, color: '#fff', background: copied ? '#6b7280' : `linear-gradient(135deg, ${t.primary}, ${t.secondary || t.primary})`, border: 'none', borderRadius: 10, padding: '10px 0', cursor: 'pointer', minHeight: 'auto', transition: 'background 0.2s' }}
-            >
-              {copied ? '✅ Copied! Paste directly into LinkedIn.' : '📋 Copy Script → Paste into LinkedIn'}
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

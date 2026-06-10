@@ -61,7 +61,7 @@ export default function TrialBanner({ user }) {
         color: '#fff',
         margin: 0,
       }}>
-        ⚡ FastIQ Trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
+        ⚡ CliFF Trial — {daysLeft} day{daysLeft !== 1 ? 's' : ''} remaining
 
       </p>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>

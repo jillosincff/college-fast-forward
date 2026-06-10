@@ -60,7 +60,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
     try {
       const res = await base44.functions.invoke('createCustomerPortal', {
         customerId: user?.stripe_customer_id,
-        returnUrl: 'https://collegefastforward.com/#FastIQDashboard',
+        returnUrl: `${window.location.origin}/#/FastIQDashboard`,
       });
       if (res?.data?.success && res?.data?.url) {
         window.location.href = res.data.url;
@@ -77,7 +77,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
   const FASTIQ_FEATURES = [
     { icon: '📄', label: 'Resume Hub', desc: 'Upload, score, and tailor your resume to any job', page: 'ResumeTailoring' },
     { icon: '🎯', label: 'Company Intel', desc: 'Hiring signals at companies matching your goals', page: 'FreeTierDashboard' },
-    { icon: '🔍', label: 'Alumni Search', desc: 'Find UF alumni at any company — unlimited searches', page: 'AlumniSearch' },
+    { icon: '🔍', label: 'Alumni Search', desc: 'Find UF alumni at any company — unlimited searches', page: 'FreeTierDashboard' },
     { icon: '🤝', label: 'CFF Connections', desc: 'Warm intros from parents and alumni in the network', page: 'FreeTierDashboard' },
     { icon: '🎤', label: 'Mock Interviews', desc: 'Full STAR method interview simulation', page: 'MockInterview' },
     { icon: '🔗', label: 'LinkedIn Review', desc: 'Score and optimize every section of your profile', page: 'LinkedInReview' },
@@ -94,10 +94,10 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
       : 'Your AI-powered career engine is one step away.';
 
     const subhead = isParent
-      ? "FastIQ is your student's personal career agent — available 24/7. It combines the power of the free parent & alumni network at their school with intelligent AI that actually moves the needle."
-      : 'FastIQ combines the power of the CFF alumni & parent network with intelligent AI to help you land the right role — faster.';
+      ? "CliFF is your student's personal career agent — available 24/7. It combines the power of the free parent & alumni network at their school with intelligent AI that actually moves the needle."
+      : 'CliFF combines the power of the CFF alumni & parent network with intelligent AI to help you land the right role — faster.';
 
-    const featuresLabel = isParent ? 'WHAT FASTIQ DOES FOR YOUR STUDENT' : 'WHAT FASTIQ DOES FOR YOU';
+    const featuresLabel = isParent ? 'WHAT CLIFF DOES FOR YOUR STUDENT' : 'WHAT CLIFF DOES FOR YOU';
 
     const features = isParent ? [
       { icon: '🔍', text: 'Finds alumni at the exact companies they want to work for and crafts personalized outreach messages that get real replies' },
@@ -115,7 +115,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
       { icon: '🧠', text: 'Includes a personality & career assessment to help you figure out what you really want to do' },
     ];
 
-    const ctaLabel = isParent ? 'Unlock FastIQ for my student →' : 'Unlock FastIQ →';
+    const ctaLabel = isParent ? 'Unlock CliFF for my student →' : 'Unlock CliFF →';
 
     return (
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 24px 48px' }}>
@@ -130,7 +130,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 11, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.12em',
           color: '#E85D20', margin: '0 0 12px'
-        }}>{isParent ? 'FASTIQ™ — FOR YOUR STUDENT' : 'FASTIQ™ — YOUR AI CAREER ENGINE'}</p>
+        }}>{isParent ? 'CLIFF™ — FOR YOUR STUDENT' : 'CLIFF™ — YOUR AI CAREER ENGINE'}</p>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 30, fontWeight: 700,
@@ -188,7 +188,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 13, color: '#888', textAlign: 'center',
           margin: '8px 0 0',
         }}>
-          $29/month &middot; 5-day free trial &middot; Cancel anytime
+          $4.99/week &middot; Cancel anytime
         </p>
         </div>
       </div>
@@ -215,7 +215,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
               fontSize: 11, fontWeight: 700,
               textTransform: 'uppercase', letterSpacing: '0.15em',
               color: '#E85D20', margin: '0 0 8px'
-            }}>⚡ FASTIQ™ ACTIVE</p>
+            }}>⚡ CLIFF™ ACTIVE</p>
             <h1 style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: 26, fontWeight: 700,
@@ -229,8 +229,8 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
               margin: 0
             }}>
               {user?.persona === 'parent' 
-                ? 'FastIQ is now active for your student. Every feature below helps them navigate their career with intelligence and confidence.' 
-                : 'Every feature below is powered by FastIQ and personalized to your goals.'}
+                ? 'CliFF is now active for your student. Every feature below helps them navigate their career with intelligence and confidence.' 
+                : 'Every feature below is powered by CliFF and personalized to your goals.'}
             </p>
           </div>
 
@@ -264,7 +264,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
           fontSize: 11, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.12em',
           color: '#888', margin: '0 0 16px'
-        }}>YOUR FASTIQ FEATURES</p>
+        }}>YOUR CLIFF FEATURES</p>
 
         <div style={{
           display: 'grid',
@@ -327,7 +327,7 @@ export default function FastIQDashboard({ onOpenUpgrade }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[
-            { label: 'Plan', value: isFounding ? 'FastIQ — Founding Member (50% off forever)' : 'FastIQ Monthly' },
+            { label: 'Plan', value: isFounding ? 'CliFF — Founding Member (50% off forever)' : 'CliFF — $4.99/week' },
             { label: 'Status', value: '✅ Active' },
             { label: 'Account', value: user?.email || '—' },
           ].map(row => (
