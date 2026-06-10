@@ -15,7 +15,14 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
 
   const school = schoolAbbr || lead.schoolAbbr || 'UF';
   const mascot = MASCOT[school] || '🎓';
-  const companyTier = lead?.companyTier || 1;
+  // Use companyTier for size badge, fall back to inferring from company name if not set
+  let companyTier = lead?.companyTier;
+  if (companyTier === undefined || companyTier === null) {
+    // Fallback: assume Enterprise for well-known large companies
+    const largeCompanies = ['amazon', 'google', 'microsoft', 'apple', 'meta', 'netflix', 'jpmorgan', 'goldman', 'deloitte', 'pwc', 'ey', 'kpmg', 'mckinsey', 'bcg', 'bain', 'endeavor', 'celonis', 'salesforce', 'oracle', 'ibm', 'accenture'];
+    const isLarge = largeCompanies.some(name => (lead.company || lead.companyName || '').toLowerCase().includes(name));
+    companyTier = isLarge ? 1 : 2;
+  }
   const TIER_BADGE = {
     1: { label: 'Enterprise', color: 'bg-slate-100 text-slate-600' },
     2: { label: 'Mid-Market', color: 'bg-blue-50 text-blue-600' },

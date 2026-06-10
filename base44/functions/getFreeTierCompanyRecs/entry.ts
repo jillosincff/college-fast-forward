@@ -138,6 +138,16 @@ function assignTier(company) {
   return 4;
 }
 
+function classifyCompanySize(sizeLabel) {
+  // Map LLM-provided size labels to tier numbers for frontend display
+  if (!sizeLabel) return 1; // Default to Enterprise if unknown
+  const size = sizeLabel.toLowerCase();
+  if (size === 'large' || size === 'enterprise') return 1; // Enterprise (1000+ employees)
+  if (size === 'mid') return 2; // Mid-Market (100-999 employees)
+  if (size === 'startup') return 3; // Startup (<100 employees)
+  return 1; // Default to Enterprise
+}
+
 function generateWhyRecommended(company, goals) {
   const university = goals.university || 'your school';
   const role = goals.role || 'candidates';
@@ -230,8 +240,9 @@ function mergeAndRank(external, internal, sizePref, goals) {
 
   // Assign tiers, sort, and generate why_recommended
   const companies = Array.from(companyMap.values()).map(c => {
-    const tier = assignTier(c);
-    return { ...c, tier, why_recommended: generateWhyRecommended({ ...c, tier }, goals) };
+    const opportunityTier = assignTier(c); // For sorting/ranking (based on hiring + connections)
+    const sizeTier = classifyCompanySize(c.size); // For display badge (based on company size)
+    return { ...c, tier: opportunityTier, companyTier: sizeTier, why_recommended: generateWhyRecommended({ ...c, tier: opportunityTier }, goals) };
   });
 
   companies.sort((a, b) => {
@@ -335,6 +346,26 @@ Deno.serve(async (req) => {
           { name: 'Goldman Sachs', industry: 'Finance', size: 'large', hiring_signal: 'warm', hiring_description: 'Summer analyst applications open for investment banking division.' },
           { name: 'Deloitte', industry: 'Consulting', size: 'large', hiring_signal: 'hot', hiring_description: 'Hiring consultants and business analysts nationwide.' },
         ],
+        'Technology, Information & Media': [
+          { name: 'Amazon', industry: 'Technology', size: 'large', hiring_signal: 'hot', hiring_description: 'Hiring across logistics, technology, and business operations.' },
+          { name: 'Microsoft', industry: 'Technology', size: 'large', hiring_signal: 'warm', hiring_description: 'Software engineering and product management roles available.' },
+          { name: 'Google', industry: 'Technology', size: 'large', hiring_signal: 'warm', hiring_description: 'Entry-level software engineer and data science positions.' },
+        ],
+        'Advertising & PR': [
+          { name: 'Omnicom', industry: 'Advertising', size: 'large', hiring_signal: 'warm', hiring_description: 'Global advertising network with multiple agencies hiring.' },
+          { name: 'WPP', industry: 'Advertising', size: 'large', hiring_signal: 'warm', hiring_description: 'Marketing and communications roles across agencies.' },
+          { name: 'Publicis', industry: 'Advertising', size: 'large', hiring_signal: 'warm', hiring_description: 'Digital marketing and creative positions available.' },
+        ],
+        'Sports & Entertainment': [
+          { name: 'Endeavor', industry: 'Entertainment', size: 'mid', hiring_signal: 'warm', hiring_description: 'Sports and entertainment agency with various entry-level roles.' },
+          { name: 'Live Nation', industry: 'Entertainment', size: 'mid', hiring_signal: 'warm', hiring_description: 'Event management and marketing positions.' },
+          { name: 'ESPN', industry: 'Entertainment', size: 'large', hiring_signal: 'cool', hiring_description: 'Media production and sports broadcasting roles.' },
+        ],
+        'Professional Services': [
+          { name: 'Celonis', industry: 'Technology', size: 'mid', hiring_signal: 'hot', hiring_description: 'Process mining and business intelligence software company.' },
+          { name: 'McKinsey', industry: 'Consulting', size: 'large', hiring_signal: 'warm', hiring_description: 'Business analyst and consulting roles.' },
+          { name: 'BCG', industry: 'Consulting', size: 'large', hiring_signal: 'warm', hiring_description: 'Strategy consulting positions for recent graduates.' },
+        ],
       };
       const primaryIndustry = industriesArr[0] || '';
       const fallbackList = HARDCODED[primaryIndustry] || [
@@ -344,8 +375,9 @@ Deno.serve(async (req) => {
       ];
       const fbGoals = { role, university: studentSchool };
       companies = fallbackList.map(c => {
-        const tier = 3;
-        return { ...c, tier, has_web_result: true, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0, sample_roles: [], is_fallback: true, why_recommended: generateWhyRecommended({ ...c, tier, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0 }, fbGoals) };
+        const opportunityTier = 3;
+        const sizeTier = classifyCompanySize(c.size);
+        return { ...c, tier: opportunityTier, companyTier: sizeTier, has_web_result: true, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0, sample_roles: [], is_fallback: true, why_recommended: generateWhyRecommended({ ...c, tier: opportunityTier, cff_parent_count: 0, school_alumni_count: 0, open_to_intro_count: 0 }, fbGoals) };
       });
       console.log('Hardcoded fallback returned:', companies.length, 'companies');
     } else {
