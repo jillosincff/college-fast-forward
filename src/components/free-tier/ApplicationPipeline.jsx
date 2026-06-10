@@ -696,13 +696,20 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
             <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 11, color: '#059669', margin: '3px 0 0', fontWeight: 600, letterSpacing: '0.02em' }}>
               🐊 Synced Network: {userSchool} Alumni &amp; Parent Grid Active
             </p>
-            <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#6b7280', margin: '3px 0 0' }}>
-              {totalJobs}/{FREE_LIMIT} jobs ·{' '}
-              {atLimit
-                ? <span style={{ color: '#ef4444', fontWeight: 600 }}>Limit reached</span>
-                : <span style={{ color: '#16a34a' }}>{FREE_LIMIT - totalJobs} slots left</span>
-              }
-            </p>
+            {!isPremium && (
+              <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#6b7280', margin: '3px 0 0' }}>
+                {totalJobs}/{FREE_LIMIT} jobs ·{' '}
+                {atLimit
+                  ? <span style={{ color: '#ef4444', fontWeight: 600 }}>Limit reached</span>
+                  : <span style={{ color: '#16a34a' }}>{FREE_LIMIT - totalJobs} slots left</span>
+                }
+              </p>
+            )}
+            {isPremium && (
+              <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#16a34a', margin: '3px 0 0', fontWeight: 600 }}>
+                ✓ Unlimited Tracking Active
+              </p>
+            )}
           </div>
           <div className="flex gap-2">
             <button
