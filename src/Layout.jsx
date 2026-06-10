@@ -497,6 +497,7 @@ function SimpleHeader({ currentPage, onNavigate, user, logout }) {
                     <DropdownMenuItem onClick={() => onNavigate('MyApplications')}><FileText className="mr-2 h-4 w-4" />My Pipeline</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('MyRequests')}><FileText className="mr-2 h-4 w-4" />My Requests</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onNavigate('MyMessages')}><MessageSquare className="mr-2 h-4 w-4" />My Messages</DropdownMenuItem>
+                    {/* Cache-bust: this navigates to ResumeTailoring page */}
                     <DropdownMenuItem onClick={() => onNavigate('ResumeTailoring')}><FileText className="mr-2 h-4 w-4" />🔄 Swap / Update File</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onNavigate('AdminSetup')} className="text-orange-600 focus:bg-orange-50 focus:text-orange-700"><UserIcon className="mr-2 h-4 w-4" />Admin Setup</DropdownMenuItem>
