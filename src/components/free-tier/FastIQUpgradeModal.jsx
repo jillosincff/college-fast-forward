@@ -29,12 +29,12 @@ export default function FastIQUpgradeModal({ user, onClose }) {
     setUpgrading(true);
     logAnalyticsEvent({ event_name: 'upgrade_clicked', properties: { source: 'upgrade_modal', plan } }).catch(() => {});
     const isParent = user?.persona === 'parent' || user?.roles?.includes('parent');
-    const postCheckoutPage = isParent ? 'ParentHome' : 'FreeTierDashboard';
+    const postCheckoutPage = 'FreeTierDashboard';
     try {
       const response = await createCheckoutSession({
         plan,
-        successUrl: `${window.location.origin}/#${postCheckoutPage}?upgraded=true`,
-        cancelUrl: `${window.location.origin}/#${postCheckoutPage}`,
+        successUrl: `${window.location.origin}/#/${postCheckoutPage}?upgraded=true`,
+        cancelUrl: `${window.location.origin}/#/${postCheckoutPage}`,
         user: { id: user?.id, email: user?.email, persona: user?.persona, roles: user?.roles, full_name: user?.full_name, stripe_customer_id: user?.stripe_customer_id, family_id: user?.family_id, founding_offer_started_at: user?.founding_offer_started_at, student_emails: user?.student_emails },
       });
       const result = response?.data || response;
@@ -58,7 +58,7 @@ export default function FastIQUpgradeModal({ user, onClose }) {
       await base44.integrations.Core.SendEmail({
         to: parentEmail.trim(),
         subject: `${firstName} needs your help to activate CliFF`,
-        body: `Hi,\n\n${user.full_name || firstName} is ready to activate CliFF on College Fast Forward.\n\nCliFF is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.\n\nActivate CliFF for your family: ${window.location.origin}/#ParentHome\n\n— The College Fast Forward Team`,
+        body: `Hi,\n\n${user.full_name || firstName} is ready to activate CliFF on College Fast Forward.\n\nCliFF is their 24/7 personal career agent — it finds alumni contacts, drafts personalized outreach, and builds a daily action plan around their goals.\n\nActivate CliFF for your family: ${window.location.origin}/#/FreeTierDashboard\n\n— The College Fast Forward Team`,
       });
       setInviteSent(true);
     } catch (err) {

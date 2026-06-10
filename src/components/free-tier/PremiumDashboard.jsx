@@ -256,7 +256,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
             width: 100% !important;
           }
           .premium-ftd-sidebar {
-            display: none !important;
+            width: 100% !important;
           }
           .premium-mobile-bottom-nav {
             display: flex !important;

@@ -30,7 +30,7 @@ export default function TrialBanner({ user }) {
     try {
       const res = await createCheckoutSession({
         plan: foundingActive ? 'founding_monthly' : 'monthly',
-        success_url: `${window.location.origin}/#FreeTierDashboard?upgraded=true`,
+        success_url: `${window.location.origin}/#/FreeTierDashboard?upgraded=true`,
         cancel_url: window.location.href,
       });
       const url = res?.data?.url || res?.url;
