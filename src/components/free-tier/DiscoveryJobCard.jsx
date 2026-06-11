@@ -27,15 +27,16 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
     
     const isEnterprise = enterprise.some(c => name.includes(c) || c.includes(name));
     const isMidMarket = midMarket.some(c => name.includes(c) || c.includes(name));
-    
-    companyTier = isEnterprise ? 1 : isMidMarket ? 2 : 3;
+
+    // Don't guess: if the company isn't in a known list, leave the size unknown
+    companyTier = isEnterprise ? 1 : isMidMarket ? 2 : null;
   }
   const TIER_BADGE = {
     1: { label: 'Enterprise', color: 'bg-slate-100 text-slate-600' },
     2: { label: 'Mid-Market', color: 'bg-blue-50 text-blue-600' },
     3: { label: '🚀 Startup', color: 'bg-purple-50 text-purple-700' },
   };
-  const tierBadge = TIER_BADGE[companyTier] || TIER_BADGE[1];
+  const tierBadge = TIER_BADGE[companyTier] || null;
 
   // Normalize all possible field names
   const companyName = lead.company || lead.companyName || lead.name || '';
@@ -129,9 +130,11 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
                 📌 Saved
               </span>
             )}
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>
-              {tierBadge.label}
-            </span>
+            {tierBadge && (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>
+                {tierBadge.label}
+              </span>
+            )}
             {!isPinned && (
               <button
                 onClick={handleDismiss}
