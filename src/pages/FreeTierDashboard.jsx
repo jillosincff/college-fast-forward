@@ -9,6 +9,7 @@ import ParentNetworkWidget from '@/components/free-tier/ParentNetworkWidget';
 import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
 import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
 import CliffPrioritizedFeed from '@/components/free-tier/CliffPrioritizedFeed';
+import LockedAlumniTeaser from '@/components/free-tier/LockedAlumniTeaser';
 import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
@@ -459,6 +460,13 @@ export default function FreeTierDashboard() {
 
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Locked warm-connection teaser — real alumni match, name hidden */}
+            <LockedAlumniTeaser
+              user={user}
+              theme={campusTheme}
+              onUnlock={() => triggerUpgrade('Warm Alumni Connection')}
+            />
+
             {/* Zero-Waste Prioritized Feed */}
             <div id="cliff-feed-section">
               <CliffPrioritizedFeed user={user} />
