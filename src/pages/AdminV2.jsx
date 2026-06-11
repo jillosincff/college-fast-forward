@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import NorthStarBanner from '@/components/adminv2/NorthStarBanner';
-import SignupTiles from '@/components/adminv2/SignupTiles';
-import SchoolTable from '@/components/adminv2/SchoolTable';
-import EngagementPanel from '@/components/adminv2/EngagementPanel';
-import MessageStatsPanel from '@/components/adminv2/MessageStatsPanel';
 import WeeklyLog from '@/components/adminv2/WeeklyLog';
-import Phase2Placeholders from '@/components/adminv2/Phase2Placeholders';
 import AdminUtilities from '@/components/adminv2/AdminUtilities';
-import EmailStatsPanel from '@/components/adminv2/EmailStatsPanel';
-import FastIQTrialPanel from '@/components/adminv2/FastIQTrialPanel';
+import GrowthSection from '@/components/adminv2/cliff/GrowthSection';
+import RevenueSection from '@/components/adminv2/cliff/RevenueSection';
+import FunnelSection from '@/components/adminv2/cliff/FunnelSection';
+import AlumniDbSection from '@/components/adminv2/cliff/AlumniDbSection';
 
 export default function AdminV2() {
   const [user, setUser] = useState(null);
@@ -34,7 +30,7 @@ export default function AdminV2() {
     setLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke('getAdminDashboardData', {});
+      const res = await base44.functions.invoke('getCliffAdminMetrics', {});
       setData(res.data);
     } catch (e) {
       setError(e.message || 'Failed to load dashboard data');
@@ -71,7 +67,7 @@ export default function AdminV2() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-1">College Fast Forward · Phase 1</p>
+          <p className="text-slate-500 text-sm mt-1">CliFF · Live Metrics</p>
         </div>
         <div className="flex gap-3">
           <a
@@ -93,14 +89,10 @@ export default function AdminV2() {
 
       {data && (
         <>
-          <NorthStarBanner data={data.northStar} />
-          <SignupTiles data={data.signups} />
-          <SchoolTable schools={data.schools} grandTotal={data.grandTotal} />
-          <EngagementPanel data={data.engagement} />
-          <MessageStatsPanel data={data.messages} />
-          <EmailStatsPanel />
-          <FastIQTrialPanel />
-          <Phase2Placeholders />
+          <RevenueSection revenue={data.revenue} />
+          <FunnelSection funnel={data.funnel} activation={data.activation} />
+          <GrowthSection growth={data.growth} />
+          <AlumniDbSection alumniDb={data.alumniDb} schools={data.schools} />
           <WeeklyLog />
           <AdminUtilities />
         </>
