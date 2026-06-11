@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
+import useParentCompanies from '@/hooks/useParentCompanies';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
@@ -14,6 +15,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
   const [alumniSearching, setAlumniSearching] = useState(false);
   const [foundAlumni, setFoundAlumni] = useState(null);
 
+  const { hasParentAt } = useParentCompanies();
   const school = schoolAbbr || lead.schoolAbbr || 'UF';
   const mascot = MASCOT[school] || '🎓';
   // Use companyTier for size badge, fall back to inferring from company name if not set
@@ -183,6 +185,16 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           )}
         </div>
 
+        {/* Parent warm-path signal — only when a real network parent works here */}
+        {hasParentAt(companyName) && (
+          <div className="mt-3 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+            <span className="text-sm">🤝</span>
+            <p className="text-[11px] font-bold text-emerald-800 m-0">
+              A {school} parent in your network works at {companyName} — warm path available
+            </p>
+          </div>
+        )}
+
         {/* Alumni Search Section */}
         <div className="mt-4">
           {!alumniSearched ? (
@@ -201,7 +213,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           ) : foundAlumni && foundAlumni.length > 0 ? (
             <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-2">
               <p className="text-xs font-bold text-purple-800">{mascot} Found {school} alumni at {companyName}!</p>
-              <p className="text-[10px] text-purple-600">Pick who you'd like to reach out to:</p>
+              <p className="text-[10px] text-purple-600">Pick who you'd like to reach out to — warm intros get replies ~4x more often than cold applications:</p>
               {foundAlumni.slice(0, 3).map((a, i) => (
                 <div
                   key={i}
