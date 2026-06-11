@@ -11,9 +11,14 @@ const escapeHtml = (str) => String(str || '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
-const APP_URL = 'https://collegefastforward.com/#/FreeTierDashboard';
+const APP_BASE = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
+const APP_URL = `${APP_BASE}/#/FreeTierDashboard`;
 
-const emailWrapper = (content) => `
+// Same token scheme as handleUnsubscribe
+const makeUnsubToken = (userId, email) => btoa(`${userId}:${email}`).replace(/=/g, '');
+const unsubUrl = (userId, email) => `${APP_BASE}/#/Unsubscribe?token=${makeUnsubToken(userId, email)}`;
+
+const emailWrapper = (content, unsubscribeUrl) => `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CliFF</title></head>
@@ -29,7 +34,8 @@ const emailWrapper = (content) => `
     </div>
     <div style="text-align: center; margin-top: 24px;">
       <p style="font-size: 12px; color: #AAAAAA; margin: 0 0 4px;">College Fast Forward · support@collegefastforward.com</p>
-      <p style="font-size: 11px; color: #CCCCCC; margin: 0;">You're receiving this because you joined College Fast Forward.</p>
+      <p style="font-size: 11px; color: #CCCCCC; margin: 0 0 4px;">You're receiving this because you joined College Fast Forward.</p>
+      <p style="font-size: 11px; color: #CCCCCC; margin: 0;"><a href="${unsubscribeUrl}" style="color: #AAAAAA; text-decoration: underline;">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -49,7 +55,7 @@ const ctaButton = (label) => `
 
 const bodyText = (text) => `<p style="font-size: 15px; color: #444; line-height: 1.7; margin: 0 0 16px;">${text}</p>`;
 
-function endingTomorrowEmail(firstName) {
+function endingTomorrowEmail(firstName, unsubscribeUrl) {
   const name = escapeHtml(firstName);
   return {
     subject: 'Your CliFF Premium ends tomorrow',
@@ -62,11 +68,11 @@ function endingTomorrowEmail(firstName) {
         ${ctaButton('Keep Premium — $4.99/week')}
         ${bodyText(`<br>— Jill`)}
         <p style="font-size: 13px; color: #888; margin: 0;">P.S. The best use of your last free day? Run an alumni search at your top target company and send one outreach message. That's how interviews start.</p>
-      </div>`),
+      </div>`, unsubscribeUrl),
   };
 }
 
-function endedEmail(firstName) {
+function endedEmail(firstName, unsubscribeUrl) {
   const name = escapeHtml(firstName);
   return {
     subject: 'Your Premium access just ended — here\'s what you keep',
@@ -79,8 +85,13 @@ function endedEmail(firstName) {
         ${ctaButton('Get Premium — $4.99/week')}
         ${bodyText(`<br>— Jill`)}
         <p style="font-size: 13px; color: #888; margin: 0;">P.S. Students who reach out to just 3 alumni per week hear back from at least one. Premium makes those 3 messages take 10 minutes instead of an hour.</p>
-      </div>`),
+      </div>`, unsubscribeUrl),
   };
+}
+
+async function isUnsubscribed(base44, userId) {
+  const prefs = await base44.asServiceRole.entities.EmailPreference.filter({ user_id: userId }).catch(() => []);
+  return prefs?.[0]?.all_emails === false;
 }
 
 async function sendViaSendGrid(toEmail, subject, html) {
@@ -128,10 +139,12 @@ Deno.serve(async (req) => {
     // Dedup: skip if we already sent the ending email for THIS trial period
     if (u.cliff_trial_ending_email_at && new Date(u.cliff_trial_ending_email_at) > new Date(new Date(u.trial_end_date).getTime() - 4 * 24 * 60 * 60 * 1000)) continue;
 
+    if (await isUnsubscribed(base44, u.id)) continue;
+
     const firstName = (u.full_name || '').split(' ')[0] || 'there';
     try {
       if (!dry_run) {
-        const { subject, html } = endingTomorrowEmail(firstName);
+        const { subject, html } = endingTomorrowEmail(firstName, unsubUrl(u.id, u.email));
         await sendViaSendGrid(u.email, subject, html);
         await base44.asServiceRole.entities.User.update(u.id, { cliff_trial_ending_email_at: now.toISOString() });
       }
@@ -156,10 +169,12 @@ Deno.serve(async (req) => {
     // Dedup: skip if ended email already sent after this trial's end date
     if (u.cliff_trial_ended_email_at && new Date(u.cliff_trial_ended_email_at) >= new Date(u.trial_end_date)) continue;
 
+    if (await isUnsubscribed(base44, u.id)) continue;
+
     const firstName = (u.full_name || '').split(' ')[0] || 'there';
     try {
       if (!dry_run) {
-        const { subject, html } = endedEmail(firstName);
+        const { subject, html } = endedEmail(firstName, unsubUrl(u.id, u.email));
         await sendViaSendGrid(u.email, subject, html);
         await base44.asServiceRole.entities.User.update(u.id, { cliff_trial_ended_email_at: now.toISOString() });
       }

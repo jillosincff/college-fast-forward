@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const isAdmin = user.role === 'admin' || user.roles?.includes('admin');
-    const appUrl = Deno.env.get('APP_BASE_URL') || 'https://app.collegefastforward.com';
+    const appUrl = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
 
     // 1. Find pipeline records waiting on a reply with a known contact email
     const filter = { status: { $in: ['reached_out', 'messaged'] } };
