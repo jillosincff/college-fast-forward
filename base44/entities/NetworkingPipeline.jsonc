@@ -107,6 +107,11 @@
       "default": 0,
       "description": "Number of follow-ups sent (max 2)"
     },
+    "nudge_email_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the automated follow-up nudge email was sent to the student (max 1 per contact)"
+    },
     "outreach_message_id": {
       "type": "string",
       "description": "Links to ProAgentConversation for outreach message"
