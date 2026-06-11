@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
+import { base44 } from '@/api/base44Client';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
@@ -53,6 +54,36 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
     setDismissed(true);
     onDismiss?.();
   };
+
+  // Restore previously discovered alumni from the DiscoveredAlumni cache on mount —
+  // results shouldn't vanish on refresh, and we avoid re-running the paid Exa search.
+  useEffect(() => {
+    let cancelled = false;
+    const loadCached = async () => {
+      if (!companyName) return;
+      try {
+        const cached = await base44.entities.DiscoveredAlumni.filter({ school_code: school }, '-created_date', 100);
+        const cleanCompany = companyName.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const matches = (cached || []).filter(a => {
+          const c = (a.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          return c && (c.includes(cleanCompany) || cleanCompany.includes(c));
+        });
+        if (!cancelled && matches.length > 0) {
+          setFoundAlumni(matches.map(a => ({
+            name: a.name,
+            role_title: a.role_title,
+            company: a.company,
+            linkedin_url: a.linkedin_url,
+          })));
+          setAlumniSearched(true);
+        }
+      } catch {
+        // Cache lookup is best-effort; the search button remains available
+      }
+    };
+    loadCached();
+    return () => { cancelled = true; };
+  }, [companyName, school]);
 
   const handleSearchAlumni = async () => {
     setAlumniSearching(true);
