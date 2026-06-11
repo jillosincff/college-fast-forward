@@ -3,6 +3,7 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import OpportunityDrawer from './OpportunityDrawer';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { getColumnForStatus, COLUMN_TO_STATUS } from '@/components/pipeline/pipelineStatusMap';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -255,14 +256,15 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
           _entity: 'NetworkingPipeline',
         };
 
-        if (r.status === 'offer') {
+        // Shared status→column mapping (same as all other pipeline views)
+        const column = getColumnForStatus(r.status);
+        if (column === 'offers') {
           newCards['OFFER 🎉'].push(card);
-        } else if (r.status === 'interview') {
+        } else if (column === 'interviews') {
           newCards['INTERVIEWING'].push(card);
-        } else if (['reached_out', 'messaged', 'replied', 'coffee_chat', 'intro_made', 'no_response'].includes(r.status)) {
+        } else if (column === 'reached_out') {
           newCards['REACHED OUT'].push(card);
-        } else if (r.alumni_source === 'manual') {
-          // Only show manually added opportunities (not auto-matched ones)
+        } else {
           newCards['OPPORTUNITIES'].push(card);
         }
       });
@@ -344,7 +346,12 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     }
   };
 
-  const colToStatus = { 'OPPORTUNITIES': 'identified', 'REACHED OUT': 'reached_out', 'INTERVIEWING': 'interview', 'OFFER 🎉': 'offer' };
+  const colToStatus = {
+    'OPPORTUNITIES': COLUMN_TO_STATUS.opportunities,
+    'REACHED OUT': COLUMN_TO_STATUS.reached_out,
+    'INTERVIEWING': COLUMN_TO_STATUS.interviews,
+    'OFFER 🎉': COLUMN_TO_STATUS.offers,
+  };
 
   const onDragEnd = async (result) => {
     const { source, destination, draggableId } = result;
@@ -405,7 +412,6 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     if (!text) { setNewCard({ col: null, text: '' }); return; }
     setNewCard({ col: null, text: '' });
     const now = new Date().toISOString();
-    const colToStatus = { 'OPPORTUNITIES': 'identified', 'REACHED OUT': 'reached_out', 'INTERVIEWING': 'interview', 'OFFER 🎉': 'offer' };
     const status = colToStatus[col] || 'identified';
     // Optimistic update immediately
     const tempId = `temp_${Date.now()}`;

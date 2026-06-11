@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
+import { getColumnForStatus, COLUMN_TO_STATUS } from '@/components/pipeline/pipelineStatusMap';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 const BLUE = '#2563eb';
@@ -8,26 +9,26 @@ const BLUE_LIGHT = '#eff6ff';
 const BLUE_BORDER = '#bfdbfe';
 const FREE_LIMIT = 5;
 
-// Map pipeline stage keys → NetworkingPipeline status values
+// Stage keys map 1:1 to shared pipeline columns (single source of truth)
+const STAGE_TO_COLUMN = {
+  to_apply:     'opportunities',
+  applied:      'reached_out',
+  interviewing: 'interviews',
+  offer:        'offers',
+};
+const COLUMN_TO_STAGE = {
+  opportunities: 'to_apply',
+  reached_out:   'applied',
+  interviews:    'interviewing',
+  offers:        'offer',
+};
 const STAGE_TO_STATUS = {
-  to_apply:    'identified',
-  applied:     'reached_out',
-  interviewing:'interview',
-  offer:       'offer',
+  to_apply:    COLUMN_TO_STATUS.opportunities,
+  applied:     COLUMN_TO_STATUS.reached_out,
+  interviewing:COLUMN_TO_STATUS.interviews,
+  offer:       COLUMN_TO_STATUS.offers,
 };
-const STATUS_TO_STAGE = {
-  identified:  'to_apply',
-  matched:     'to_apply',
-  manual:      'to_apply',
-  reached_out: 'applied',
-  messaged:    'applied',
-  replied:     'applied',
-  coffee_chat: 'applied',
-  intro_made:  'applied',
-  interview:   'interviewing',
-  offer:       'offer',
-  no_response: 'applied',
-};
+const statusToStage = (status) => COLUMN_TO_STAGE[getColumnForStatus(status)];
 
 const STAGES = [
   { key: 'to_apply', label: 'Opportunities', color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb', icon: '📋' },
@@ -472,7 +473,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
           title: r.alumni_role || '',
           company: r.company || r.alumni_name || 'Unknown',
           contact: r.alumni_name || null,
-          stage: STATUS_TO_STAGE[r.status] || 'to_apply',
+          stage: statusToStage(r.status),
           location: '',
           appliedDate: r.reached_out_date ? new Date(r.reached_out_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null,
           resumeVersion: null,

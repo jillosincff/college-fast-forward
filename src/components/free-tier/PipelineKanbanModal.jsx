@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, GripVertical, Clock, Plus, Send, CheckCircle, Target, Trash2, CheckCircle2, AlertCircle, ArrowLeft, ExternalLink, User } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { getColumnForStatus, COLUMN_TO_STATUS } from '@/components/pipeline/pipelineStatusMap';
 
 const COLUMNS = [
   { 
@@ -184,13 +185,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
     if (sourceColumnId === destColumnId) return;
     
     const jobId = result.draggableId;
-    const statusMap = {
-      'opportunities': 'identified',
-      'reached_out': 'reached_out',
-      'interviews': 'interview',
-      'offers': 'offer',
-    };
-    const newStatus = statusMap[destColumnId];
+    const newStatus = COLUMN_TO_STATUS[destColumnId];
     
     if (!newStatus) return;
     
@@ -214,16 +209,7 @@ export default function PipelineKanbanModal({ isOpen, onClose, user }) {
   };
 
   const getColumnJobs = (columnId) => {
-    return jobs.filter(job => {
-      const statusMap = {
-        'opportunities': ['identified', 'matched', 'manual', 'draft_ready', 'coffee_chat', 'intro_made'],
-        'reached_out': ['reached_out', 'messaged', 'replied', 'contacted', 'secured'],
-        'interviews': ['interview'],
-        'offers': ['offer'],
-      };
-      const statuses = statusMap[columnId] || [columnId];
-      return statuses.includes(job.status);
-    });
+    return jobs.filter(job => getColumnForStatus(job.status) === columnId);
   };
 
   const handleOpenDetail = (job) => {
