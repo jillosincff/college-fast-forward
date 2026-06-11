@@ -137,6 +137,23 @@ Deno.serve(async (req) => {
             });
             console.log(`[detectOutreachReplies] 🎉 Reply detected: ${rec.alumni_name} → ${studentEmail}`);
 
+            // Also flip the matching OutreachDraft to 'replied' so the drafts list stays in sync
+            try {
+              const drafts = await base44.asServiceRole.entities.OutreachDraft.filter(
+                { created_by: studentEmail, status: 'sent' }, '-created_date', 100
+              );
+              const norm = (s) => (s || '').trim().toLowerCase();
+              const draftMatch = (drafts || []).find(d =>
+                norm(d.recipient_name) === norm(rec.alumni_name) &&
+                (!d.recipient_company || !rec.company || norm(d.recipient_company) === norm(rec.company))
+              );
+              if (draftMatch) {
+                await base44.asServiceRole.entities.OutreachDraft.update(draftMatch.id, { status: 'replied' });
+              }
+            } catch (e) {
+              console.warn(`[detectOutreachReplies] Draft sync failed: ${e.message}`);
+            }
+
             const firstName = student.full_name?.split(' ')[0] || 'there';
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: studentEmail,
