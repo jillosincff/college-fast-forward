@@ -141,7 +141,12 @@ Deno.serve(async (req) => {
 
     Make the descriptions sound like actual job postings, not marketing copy. Use concrete, specific language about real tools and technologies relevant to the role and industry.
 
-    Return 10 companies with real, substantive job descriptions. Mix large enterprises and mid-size companies.`,
+    Return 10 companies with real, substantive job descriptions. ${
+      companySizePref === 'enterprise' ? 'ALL companies MUST be large enterprises (500+ employees). Do NOT include startups or small companies.'
+      : companySizePref === 'startup' ? 'ALL companies MUST be startups (under ~50 employees). Do NOT include large enterprises.'
+      : companySizePref === 'midmarket' ? 'ALL companies MUST be mid-sized (roughly 51-500 employees). Do NOT include startups or large enterprises.'
+      : 'Mix large enterprises and mid-size companies.'
+    }`,
         add_context_from_internet: true,
         model: 'gemini_3_flash',
         response_json_schema: {

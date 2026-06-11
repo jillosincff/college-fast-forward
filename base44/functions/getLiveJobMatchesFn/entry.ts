@@ -51,9 +51,15 @@ Deno.serve(async (req) => {
       return Response.json({ companies: cached, from_cache: true });
     }
 
-    // Build size preference description
-    const sizeDesc = Array.isArray(companySizes) && companySizes.length > 0
-      ? companySizes.join(', ')
+    // Build size constraint. A single-tier preference is a HARD requirement.
+    const SIZE_RULES = {
+      startup: 'STARTUPS ONLY (roughly 1-50 employees). Do NOT include mid-sized companies or large enterprises.',
+      mid: 'MID-SIZED companies ONLY (roughly 51-500 employees). Do NOT include startups or large enterprises.',
+      large: 'LARGE ENTERPRISES ONLY (500+ employees, e.g. Fortune 1000, major corporations). Do NOT include startups or small companies.',
+    };
+    const strictSize = Array.isArray(companySizes) && companySizes.length === 1 ? companySizes[0] : null;
+    const sizeDesc = strictSize && SIZE_RULES[strictSize]
+      ? SIZE_RULES[strictSize]
       : 'any size';
 
     const locationDesc = location || 'anywhere in the US';
@@ -69,7 +75,7 @@ Student's career goals:
 - Target role: ${roleDesc}
 - Industries: ${industryDesc}
 - Location: ${locationDesc}
-- Company size preference: ${sizeDesc}
+- Company size requirement: ${sizeDesc}
 
 Find 8 real COMPANIES (not job titles) that are actively hiring for entry-level or internship positions matching these goals RIGHT NOW.
 
@@ -85,8 +91,9 @@ For each company return:
 - hiring_signal: "hot" if very actively hiring, "warm" if hiring, "cool" if uncertain
 - job_url: Direct URL to their careers page
 - industry: Specific industry
+- size: Company size — exactly one of "startup" (1-50 employees), "mid" (51-500), or "large" (500+)
 
-Be specific and realistic. Only include real companies actually known to hire for these types of roles.`,
+Be specific and realistic. Only include real companies actually known to hire for these types of roles.${strictSize ? `\nEVERY company you return MUST be size "${strictSize}". This is a hard requirement from the student.` : ''}`,
       add_context_from_internet: true,
       response_json_schema: {
         type: 'object',
@@ -102,6 +109,7 @@ Be specific and realistic. Only include real companies actually known to hire fo
                 hiring_signal: { type: 'string' },
                 job_url: { type: 'string' },
                 industry: { type: 'string' },
+                size: { type: 'string', enum: ['startup', 'mid', 'large'] },
               },
               required: ['name', 'job_title', 'hiring_description']
             }
@@ -154,8 +162,15 @@ Be specific and realistic. Only include real companies actually known to hire fo
         continue;
       }
 
+      // Size check: enforce strict company-size preference
+      if (strictSize && c.size && c.size !== strictSize) {
+        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (size mismatch): ${company} is "${c.size}", student wants "${strictSize}"`);
+        continue;
+      }
+
       validatedCompanies.push({
         ...c,
+        size: c.size || strictSize || undefined,
         has_web_result: true,
       });
     }

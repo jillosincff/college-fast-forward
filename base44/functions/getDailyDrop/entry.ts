@@ -92,13 +92,13 @@ Deno.serve(async (req) => {
     const sizePref = goals.company_size_preference || 'all';
     const location = user.location_preference || user.location || '';
 
-    // Normalize size pref → ordered array for the live search
+    // Strict size pref → only the chosen tier is searched. 'all' = no constraint.
     const sizeMap = {
-      startup: ['startup', 'mid', 'large'],
-      midmarket: ['mid', 'startup', 'large'],
-      mid: ['mid', 'startup', 'large'],
-      enterprise: ['large', 'mid', 'startup'],
-      large: ['large', 'mid', 'startup'],
+      startup: ['startup'],
+      midmarket: ['mid'],
+      mid: ['mid'],
+      enterprise: ['large'],
+      large: ['large'],
     };
     const sizeArray = sizeMap[sizePref] || ['large', 'mid', 'startup'];
 
@@ -166,8 +166,9 @@ Deno.serve(async (req) => {
       // Slots 3 & 4: prioritize insider leads (they're highest value)
       curatedSlots = deduped.slice(0, 2).map(j => ({ ...j, slotType: 'curated' }));
 
-      // Slot 5: Wildcard — pick a different company size tier to broaden horizons
-      const wildcardTierPref = sizePref === 'startup' ? 1 : sizePref === 'enterprise' ? 3 : 2;
+      // Slot 5: Wildcard — respect a strict size preference; only broaden when pref is 'all'
+      const PREF_TO_TIER = { startup: 3, midmarket: 2, mid: 2, enterprise: 1, large: 1 };
+      const wildcardTierPref = PREF_TO_TIER[sizePref] || 2;
       const wildcardPool = deduped.filter(j => (j.companyTier || 1) === wildcardTierPref);
       const wildcardSource = wildcardPool.length > 2
         ? wildcardPool[2]
