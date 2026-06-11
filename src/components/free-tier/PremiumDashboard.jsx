@@ -261,6 +261,9 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
           .premium-mobile-bottom-nav {
             display: flex !important;
           }
+          .desktop-only {
+            display: none !important;
+          }
         }
       `}</style>
 
