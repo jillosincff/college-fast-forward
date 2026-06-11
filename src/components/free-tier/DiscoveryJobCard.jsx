@@ -69,6 +69,11 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
     }
   };
 
+  const handleSelectAlumni = (alumni) => {
+    // Route directly to the alumni outreach draft for the chosen person
+    window.location.hash = `#OutreachDrafts?context=alumni_search&company=${encodeURIComponent(companyName)}&jobTitle=${encodeURIComponent(jobTitle)}&alumniName=${encodeURIComponent(alumni.name || '')}&alumniRole=${encodeURIComponent(alumni.role_title || '')}&alumniLinkedin=${encodeURIComponent(alumni.linkedin_url || '')}&skipForm=1`;
+  };
+
   if (dismissed) return null;
 
   return (
@@ -162,24 +167,37 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           ) : foundAlumni && foundAlumni.length > 0 ? (
             <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-2">
               <p className="text-xs font-bold text-purple-800">{mascot} Found {school} alumni at {companyName}!</p>
+              <p className="text-[10px] text-purple-600">Pick who you'd like to reach out to:</p>
               {foundAlumni.slice(0, 3).map((a, i) => (
-                <a
+                <div
                   key={i}
-                  href={a.linkedin_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2.5 bg-white border border-purple-100 rounded-lg px-3 py-2 hover:border-blue-300 hover:bg-blue-50 transition-colors group"
-                  style={{ minHeight: 'auto', textDecoration: 'none' }}
+                  className="flex items-center gap-2.5 bg-white border border-purple-100 rounded-lg px-3 py-2"
+                  style={{ minHeight: 'auto' }}
                 >
-                  <div className="w-6 h-6 rounded bg-[#0077b5] flex items-center justify-center flex-shrink-0">
-                    <span className="text-white font-bold text-[10px]">in</span>
-                  </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-gray-900 truncate group-hover:text-blue-700">{a.name}</p>
+                    <p className="text-xs font-semibold text-gray-900 truncate">{a.name}</p>
                     {a.role_title && <p className="text-[10px] text-gray-500 truncate">{a.role_title}</p>}
                   </div>
-                  <span className="text-[10px] text-blue-500 font-semibold shrink-0 group-hover:text-blue-700">View →</span>
-                </a>
+                  {a.linkedin_url && (
+                    <a
+                      href={a.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-6 h-6 rounded bg-[#0077b5] flex items-center justify-center flex-shrink-0"
+                      title="View LinkedIn"
+                      style={{ minHeight: 'auto', minWidth: 'auto', textDecoration: 'none' }}
+                    >
+                      <span className="text-white font-bold text-[10px]">in</span>
+                    </a>
+                  )}
+                  <button
+                    onClick={() => handleSelectAlumni(a)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors flex-shrink-0 cursor-pointer"
+                    style={{ minHeight: 'auto', minWidth: 'auto' }}
+                  >
+                    Select →
+                  </button>
+                </div>
               ))}
             </div>
           ) : (
@@ -210,7 +228,14 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
         </div>
 
         <button
-          onClick={() => onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}`)}
+          onClick={() => {
+            // If alumni were found, draft for the first alumnus instead of a cold (non-alumni) contact
+            if (foundAlumni && foundAlumni.length > 0) {
+              handleSelectAlumni(foundAlumni[0]);
+              return;
+            }
+            onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}`);
+          }}
           className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
           style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', minHeight: 'auto' }}
         >
