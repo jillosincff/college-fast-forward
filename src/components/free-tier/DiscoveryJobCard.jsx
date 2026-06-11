@@ -234,7 +234,16 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           ) : (
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
               <p className="text-xs text-gray-600 font-semibold mb-1">No {school} alumni found here</p>
-              <p className="text-xs text-gray-500">We'll suggest a contact to reach out to instead ↓</p>
+              <p className="text-xs text-gray-500 mb-2.5">No problem — CliFF can find you a contact at {companyName} to reach out to instead.</p>
+              <button
+                onClick={() => {
+                  onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}`);
+                }}
+                className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                style={{ minHeight: 'auto' }}
+              >
+                Find me a contact →
+              </button>
             </div>
           )}
         </div>
