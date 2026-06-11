@@ -208,6 +208,16 @@ const AuthenticatedApp = () => {
 
 
 function App() {
+  // Capture parent referral code (?pref=CODE) from student-shared links
+  useEffect(() => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashQuery = window.location.hash.split('?')[1] || '';
+      const hashParams = new URLSearchParams(hashQuery);
+      const pref = searchParams.get('pref') || hashParams.get('pref');
+      if (pref) localStorage.setItem('cff_parent_ref_code', pref.toUpperCase());
+    } catch {}
+  }, []);
 
   return (
     <AuthProvider>

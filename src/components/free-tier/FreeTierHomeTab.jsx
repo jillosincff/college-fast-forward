@@ -6,6 +6,7 @@ import { createCheckoutSession } from '@/functions/createCheckoutSession';
 
 import CareerRoadmap from '@/components/free-tier/CareerRoadmap';
 import TrialUsageRecap from '@/components/free-tier/TrialUsageRecap';
+import TextParentInviteCard from '@/components/free-tier/TextParentInviteCard';
 import { getUniversityBrand } from '@/lib/universityBrand';
 
 const FOUNDING_DEADLINE = new Date('2026-04-30T23:59:59');
@@ -217,6 +218,9 @@ Activate FastIQ for your family: ${window.location.origin}/#ParentHome
         </button>
       </div>
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
+
+      {/* Text-a-parent referral card — 3-day premium reward */}
+      <TextParentInviteCard user={user} />
 
       {/* Parent Email Modal */}
       {showParentModal && (
