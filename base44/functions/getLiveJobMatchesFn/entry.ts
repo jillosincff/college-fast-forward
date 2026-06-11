@@ -57,7 +57,12 @@ Deno.serve(async (req) => {
       mid: 'MID-SIZED companies ONLY (roughly 51-500 employees). Do NOT include startups or large enterprises.',
       large: 'LARGE ENTERPRISES ONLY (500+ employees, e.g. Fortune 1000, major corporations). Do NOT include startups or small companies.',
     };
-    const strictSize = Array.isArray(companySizes) && companySizes.length === 1 ? companySizes[0] : null;
+    // Normalize caller terminology (enterprise/large, midmarket/mid) and accept string or array
+    const NORMALIZE_SIZE = { startup: 'startup', mid: 'mid', midmarket: 'mid', large: 'large', enterprise: 'large' };
+    const sizeList = (Array.isArray(companySizes) ? companySizes : (companySizes ? [companySizes] : []))
+      .map(s => NORMALIZE_SIZE[String(s).toLowerCase()])
+      .filter(Boolean);
+    const strictSize = sizeList.length === 1 ? sizeList[0] : null;
     const sizeDesc = strictSize && SIZE_RULES[strictSize]
       ? SIZE_RULES[strictSize]
       : 'any size';
