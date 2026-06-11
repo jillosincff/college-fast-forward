@@ -94,6 +94,15 @@ Deno.serve(async (req) => {
       ? Math.round((activeStudentEmails.size / students.length) * 100)
       : null;
 
+    // ── Student drop-off journey ──────────────────────────────────────────
+    const studentsOnboarded = students.filter(u => u.onboarding_completed === true).length;
+    const dropoff = {
+      signedUp: students.length,
+      onboarded: studentsOnboarded,
+      builtPipeline: activeStudentEmails.size,
+      reachedOut: outreachStudentEmails.size,
+    };
+
     // ── Alumni database health ────────────────────────────────────────────
     let alumniTotal = 0, alumniVerified = 0, unresolvedMisses = 0;
     try {
@@ -145,6 +154,7 @@ Deno.serve(async (req) => {
         studentsWhoReachedOut: outreachStudentEmails.size,
         activationPct,
       },
+      dropoff,
       funnel: {
         ...funnel,
         replyRate30,

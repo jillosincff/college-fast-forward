@@ -6,6 +6,8 @@ import GrowthSection from '@/components/adminv2/cliff/GrowthSection';
 import RevenueSection from '@/components/adminv2/cliff/RevenueSection';
 import FunnelSection from '@/components/adminv2/cliff/FunnelSection';
 import AlumniDbSection from '@/components/adminv2/cliff/AlumniDbSection';
+import DropoffSection from '@/components/adminv2/cliff/DropoffSection';
+import EmailStatsSection from '@/components/adminv2/cliff/EmailStatsSection';
 
 export default function AdminV2() {
   const [user, setUser] = useState(null);
@@ -90,7 +92,9 @@ export default function AdminV2() {
       {data && (
         <>
           <RevenueSection revenue={data.revenue} />
+          <DropoffSection dropoff={data.dropoff} />
           <FunnelSection funnel={data.funnel} activation={data.activation} />
+          <EmailStatsSection />
           <GrowthSection growth={data.growth} />
           <AlumniDbSection alumniDb={data.alumniDb} schools={data.schools} />
           <WeeklyLog />

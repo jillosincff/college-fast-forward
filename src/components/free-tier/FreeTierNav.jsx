@@ -103,12 +103,12 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated, navRef })
 
                     {(user?.role === 'admin' || user?.roles?.includes('admin')) && (
                       <button
-                        onClick={() => { setDropdownOpen(false); navigate('jill-osinoff-dashboard'); }}
+                        onClick={() => { setDropdownOpen(false); navigate('admin'); }}
                         style={{ fontFamily: dm, fontSize: 13, color: '#7c3aed', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
                         onMouseEnter={e => e.currentTarget.style.background = '#faf5ff'}
                         onMouseLeave={e => e.currentTarget.style.background = 'none'}
                       >
-                        📊 Jill Osinoff Dashboard
+                        📊 Analytics Dashboard
                       </button>
                     )}
 
