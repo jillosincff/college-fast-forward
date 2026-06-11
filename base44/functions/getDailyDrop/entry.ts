@@ -78,6 +78,14 @@ Deno.serve(async (req) => {
     }
     const isSeen = (name) => seenCompanies.has((name || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
 
+    // Clear any stale drops for today (force refresh / duplicates) so the cache stays clean
+    try {
+      const staleToday = await base44.entities.UserDailyDrop.filter({ user_id: user.id, drop_date: dropDate });
+      for (const d of staleToday || []) await base44.entities.UserDailyDrop.delete(d.id);
+    } catch (e) {
+      console.warn('[getDailyDrop] Could not clear stale drops:', e.message);
+    }
+
     const goals = user.career_goals || {};
     const targetIndustries = (goals.target_industries || goals.industries || []).map(i => i.toLowerCase());
     const targetRole = goals.target_roles?.[0] || goals.role || '';
@@ -110,7 +118,8 @@ Deno.serve(async (req) => {
       ]);
       const companies = liveRes?.companies || [];
       const freshLive = companies.filter(c => !isSeen(c.name));
-      liveSlots = (freshLive.length >= 2 ? freshLive : companies).slice(0, 2).map(c => ({
+      const orderedLive = [...freshLive, ...companies.filter(c => isSeen(c.name))];
+      liveSlots = orderedLive.slice(0, 2).map(c => ({
         company: c.name,
         role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
         jobDescription: c.hiring_description || `${c.name} is actively hiring for ${targetRole || 'entry-level'} roles.`,
@@ -152,7 +161,7 @@ Deno.serve(async (req) => {
       });
       // Prefer companies the user hasn't seen in recent drops
       const freshCurated = dedupedAll.filter(j => !isSeen(j.company));
-      const deduped = freshCurated.length >= 3 ? freshCurated : dedupedAll;
+      const deduped = [...freshCurated, ...dedupedAll.filter(j => isSeen(j.company))];
 
       // Slots 3 & 4: prioritize insider leads (they're highest value)
       curatedSlots = deduped.slice(0, 2).map(j => ({ ...j, slotType: 'curated' }));
@@ -184,6 +193,13 @@ Deno.serve(async (req) => {
         { company: 'Deloitte', role: 'Business Analyst', jobDescription: 'Strategy and advisory associates across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Google', role: 'Associate Product Manager', jobDescription: 'APM program for new graduates across product and engineering.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Ramp', role: 'Finance & Strategy Analyst', jobDescription: 'Series D fintech — real ownership from day one.', jobSource: 'ramp.com/careers', jobSourceCategory: 'B', companyTier: 3, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'JPMorgan Chase', role: 'Analyst Development Program', jobDescription: 'Rotational analyst program across banking, markets, and operations.', jobSource: 'careers.jpmorgan.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Salesforce', role: 'Associate Solution Engineer', jobDescription: 'New grad program blending tech, business, and customer strategy.', jobSource: 'salesforce.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Nike', role: 'Marketing Associate', jobDescription: 'Brand and digital marketing roles for early-career talent.', jobSource: 'jobs.nike.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Accenture', role: 'Consulting Analyst', jobDescription: 'Entry-level consulting across strategy, tech, and operations.', jobSource: 'accenture.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Spotify', role: 'Associate, Strategy & Operations', jobDescription: 'Early-career roles in music-tech strategy and analytics.', jobSource: 'lifeatspotify.com', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Stripe', role: 'Business Operations Analyst', jobDescription: 'High-growth fintech — analytical roles for new grads.', jobSource: 'stripe.com/jobs', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Procter & Gamble', role: 'Brand Management Associate', jobDescription: 'Classic CPG brand-building track with real P&L ownership.', jobSource: 'pgcareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
       const existing_companies = new Set(slots.map(s => s.company.toLowerCase()));
       // Try unseen fallbacks first, then allow repeats if we still need slots

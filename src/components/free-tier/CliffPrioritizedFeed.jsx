@@ -79,7 +79,8 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await base44.functions.invoke('refreshDailyDrop', {});
+      // force_refresh regenerates a new batch while excluding companies from the current one
+      await getDailyDrop({ force_refresh: true });
       queryClient.removeQueries({ queryKey: ['dailyDrop', user?.id] });
       await queryClient.invalidateQueries({ queryKey: ['dailyDrop', user?.id] }, { throwOnError: true });
     } catch (err) {
