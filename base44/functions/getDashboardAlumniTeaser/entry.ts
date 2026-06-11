@@ -41,15 +41,21 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2. Fallback: the highest-scored real alum anywhere in this school's network
+    // 2. School-wide network stats (real counts, capped at 500)
+    const allSchool = await base44.asServiceRole.entities.DiscoveredAlumni.filter(
+      { school_code: schoolCode }, '-match_score', 500
+    ).catch(() => []);
+    const realSchool = (allSchool || []).filter(a => a.name && a.company);
+    const networkTotal = realSchool.length;
+    const verifiedTotal = realSchool.filter(a => a.verified).length;
+    const companiesMapped = new Set(realSchool.map(a => (a.company || '').toLowerCase())).size;
+
+    // 3. Fallback: the highest-scored real alum anywhere in this school's network
     if (!best) {
-      const general = await base44.asServiceRole.entities.DiscoveredAlumni.filter(
-        { school_code: schoolCode }, '-match_score', 10
-      ).catch(() => []);
-      best = (general || []).find(a => a.name && a.role_title && a.company) || null;
+      best = realSchool.find(a => a.role_title) || null;
     }
 
-    if (!best) return Response.json({ found: false });
+    if (!best) return Response.json({ found: false, network_total: networkTotal });
 
     return Response.json({
       found: true,
@@ -59,6 +65,11 @@ Deno.serve(async (req) => {
       blurred_name: blurName(best.name),
       verified: !!best.verified,
       total_at_targets: totalAtTargets,
+      target_companies_count: targetCompanies.length,
+      network_total: networkTotal,
+      network_capped: (allSchool || []).length >= 500,
+      verified_total: verifiedTotal,
+      companies_mapped: companiesMapped,
     });
   } catch (error) {
     console.error('[getDashboardAlumniTeaser] Error:', error.message);

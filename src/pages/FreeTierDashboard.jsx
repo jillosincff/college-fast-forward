@@ -10,6 +10,7 @@ import PremiumDashboard from '@/components/free-tier/PremiumDashboard';
 import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
 import CliffPrioritizedFeed from '@/components/free-tier/CliffPrioritizedFeed';
 import LockedAlumniTeaser from '@/components/free-tier/LockedAlumniTeaser';
+import NetworkPulseStrip from '@/components/free-tier/NetworkPulseStrip';
 import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
@@ -460,6 +461,9 @@ export default function FreeTierDashboard() {
 
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Network Pulse — real outcome stats from the alumni database */}
+            <NetworkPulseStrip user={user} theme={campusTheme} />
+
             {/* Locked warm-connection teaser — real alumni match, name hidden */}
             <LockedAlumniTeaser
               user={user}

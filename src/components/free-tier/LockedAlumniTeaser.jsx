@@ -1,29 +1,11 @@
-import { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import useAlumniTeaser from '@/hooks/useAlumniTeaser';
 
 const dm = "'DM Sans', system-ui, sans-serif";
-const CACHE_KEY = 'cff_alumni_teaser';
 
 // "1 warm connection found" — shows ONE real alumni match with the name locked.
 // Renders nothing if no real match exists (no fabricated data, ever).
 export default function LockedAlumniTeaser({ user, theme, onUnlock }) {
-  const [match, setMatch] = useState(null);
-
-  useEffect(() => {
-    try {
-      const cached = sessionStorage.getItem(CACHE_KEY);
-      if (cached) { setMatch(JSON.parse(cached)); return; }
-    } catch {}
-    base44.functions.invoke('getDashboardAlumniTeaser', {})
-      .then(res => {
-        const data = res?.data || res;
-        if (data?.found) {
-          setMatch(data);
-          try { sessionStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {}
-        }
-      })
-      .catch(() => {});
-  }, []);
+  const match = useAlumniTeaser();
 
   if (!match?.found) return null;
 
