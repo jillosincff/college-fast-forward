@@ -64,6 +64,20 @@ Deno.serve(async (req) => {
     // ── 2. Generate a fresh daily drop ────────────────────────────────────
     console.log(`[getDailyDrop] Generating fresh drop for ${user.email} on ${dropDate}`);
 
+    // Companies shown in the user's last 3 drops — exclude so jobs feel new each day
+    const seenCompanies = new Set();
+    try {
+      const recentDrops = await base44.entities.UserDailyDrop.filter({ user_id: user.id }, '-created_date', 3);
+      for (const d of recentDrops || []) {
+        for (const s of d.slots || []) {
+          if (s.company) seenCompanies.add(s.company.toLowerCase().replace(/[^a-z0-9]/g, ''));
+        }
+      }
+    } catch (e) {
+      console.warn('[getDailyDrop] Could not load recent drops:', e.message);
+    }
+    const isSeen = (name) => seenCompanies.has((name || '').toLowerCase().replace(/[^a-z0-9]/g, ''));
+
     const goals = user.career_goals || {};
     const targetIndustries = (goals.target_industries || goals.industries || []).map(i => i.toLowerCase());
     const targetRole = goals.target_roles?.[0] || goals.role || '';
@@ -95,7 +109,8 @@ Deno.serve(async (req) => {
         new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000)),
       ]);
       const companies = liveRes?.companies || [];
-      liveSlots = companies.slice(0, 2).map(c => ({
+      const freshLive = companies.filter(c => !isSeen(c.name));
+      liveSlots = (freshLive.length >= 2 ? freshLive : companies).slice(0, 2).map(c => ({
         company: c.name,
         role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
         jobDescription: c.hiring_description || `${c.name} is actively hiring for ${targetRole || 'entry-level'} roles.`,
@@ -131,10 +146,13 @@ Deno.serve(async (req) => {
 
       // Deduplicate against live slots by company name
       const liveCompanyKeys = new Set(liveSlots.map(s => s.company.toLowerCase().replace(/[^a-z0-9]/g, '')));
-      const deduped = allCurated.filter(j => {
+      const dedupedAll = allCurated.filter(j => {
         const key = (j.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         return !liveCompanyKeys.has(key);
       });
+      // Prefer companies the user hasn't seen in recent drops
+      const freshCurated = dedupedAll.filter(j => !isSeen(j.company));
+      const deduped = freshCurated.length >= 3 ? freshCurated : dedupedAll;
 
       // Slots 3 & 4: prioritize insider leads (they're highest value)
       curatedSlots = deduped.slice(0, 2).map(j => ({ ...j, slotType: 'curated' }));
@@ -168,7 +186,9 @@ Deno.serve(async (req) => {
         { company: 'Ramp', role: 'Finance & Strategy Analyst', jobDescription: 'Series D fintech — real ownership from day one.', jobSource: 'ramp.com/careers', jobSourceCategory: 'B', companyTier: 3, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
       const existing_companies = new Set(slots.map(s => s.company.toLowerCase()));
-      for (const fb of fallbackSlots) {
+      // Try unseen fallbacks first, then allow repeats if we still need slots
+      const orderedFallbacks = [...fallbackSlots.filter(f => !isSeen(f.company)), ...fallbackSlots.filter(f => isSeen(f.company))];
+      for (const fb of orderedFallbacks) {
         if (!existing_companies.has(fb.company.toLowerCase())) {
           slots.push(fb);
           existing_companies.add(fb.company.toLowerCase());
