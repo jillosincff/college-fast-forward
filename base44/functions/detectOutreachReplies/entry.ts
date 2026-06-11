@@ -50,7 +50,51 @@ async function findReply(accessToken, contactEmail, sinceDate) {
   return (data.messages && data.messages.length > 0) ? data.messages[0] : null;
 }
 
-function buildReplyEmail(firstName, contactName, company, appUrl) {
+// Fetch the reply's snippet text so CliFF can draft a response to it
+async function fetchMessageSnippet(accessToken, messageId) {
+  const res = await fetch(
+    `https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}?format=metadata`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!res.ok) return '';
+  const data = await res.json();
+  return data.snippet || '';
+}
+
+// CliFF drafts a suggested response the student can copy-paste
+async function draftSuggestedReply(base44, { studentName, contactName, contactRole, company, jobTitle, replySnippet }) {
+  const prompt = `You are CliFF, a career coach helping a college student respond to an alumni networking reply.
+
+Context:
+- Student: ${studentName}
+- Contact: ${contactName}${contactRole ? `, ${contactRole}` : ''}${company ? ` at ${company}` : ''}
+${jobTitle ? `- The student is interested in this role: ${jobTitle}` : ''}
+- The contact just replied to the student's outreach. Here is the reply (may be truncated): "${replySnippet}"
+
+Write a short response email (under 120 words) the student can send back. Rules:
+- Warm, genuine, low-pressure tone — sound like a real student, not a template
+- Thank them for replying
+- If the reply suggests a call/chat, accept enthusiastically and offer 2-3 flexible time windows
+- If the reply is brief/neutral, ask ONE specific, easy-to-answer question about their work or team
+- End by signing off with just the first name: ${studentName.split(' ')[0]}
+- No subject line, no placeholders like [Your Name] — output only the email body text`;
+
+  const result = await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
+  return typeof result === 'string' ? result.trim() : '';
+}
+
+function buildReplyEmail(firstName, contactName, company, appUrl, suggestedReply) {
+  const suggestionBlock = suggestedReply ? `
+        <div style="background: #F0F7FF; border: 1px solid #BFDBFE; border-radius: 10px; padding: 18px 20px; margin: 0 0 20px;">
+          <p style="font-size: 12px; font-weight: 700; color: #0021A5; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 10px;">✍️ Suggested response — drafted by CliFF</p>
+          <p style="font-size: 14px; color: #333; line-height: 1.7; margin: 0; white-space: pre-line;">${suggestedReply.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+        </div>
+        <p style="font-size: 13px; color: #666; margin: 0 0 20px;">Tweak it so it sounds like you, then hit reply in your inbox. Speed matters — respond today if you can.</p>` : '';
+
+  return buildReplyEmailHtml(firstName, contactName, company, appUrl, suggestionBlock);
+}
+
+function buildReplyEmailHtml(firstName, contactName, company, appUrl, suggestionBlock) {
   return `
     <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #1A1A1A;">
       <div style="background: #0021A5; padding: 24px 28px; border-radius: 12px 12px 0 0;">
@@ -63,6 +107,7 @@ function buildReplyEmail(firstName, contactName, company, appUrl) {
           Big news — <strong>${contactName}</strong>${company ? ` at <strong>${company}</strong>` : ''} just replied to your outreach. Check your inbox and respond within 24 hours while the conversation is warm.
         </p>
         <p style="font-size: 14px; color: #444; margin: 0 0 20px;">We've moved this contact to <strong>Replied</strong> in your pipeline.</p>
+        ${suggestionBlock}
         <a href="${appUrl}/#/FreeTierDashboard"
           style="display: block; background: #E85D20; color: #fff; text-decoration: none;
                  text-align: center; padding: 14px 24px; border-radius: 10px;
@@ -155,10 +200,29 @@ Deno.serve(async (req) => {
             }
 
             const firstName = student.full_name?.split(' ')[0] || 'there';
+
+            // CliFF drafts a suggested response based on the actual reply content
+            let suggestedReply = '';
+            try {
+              const replySnippet = await fetchMessageSnippet(accessToken, reply.id);
+              if (replySnippet) {
+                suggestedReply = await draftSuggestedReply(base44, {
+                  studentName: student.full_name || firstName,
+                  contactName: rec.alumni_name || 'the contact',
+                  contactRole: rec.alumni_role,
+                  company: rec.company,
+                  jobTitle: rec.job_title,
+                  replySnippet,
+                });
+              }
+            } catch (e) {
+              console.warn(`[detectOutreachReplies] Suggested reply generation failed: ${e.message}`);
+            }
+
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: studentEmail,
-              subject: `🎉 ${rec.alumni_name || 'Your contact'} replied to your outreach!`,
-              body: buildReplyEmail(firstName, rec.alumni_name || 'Your contact', rec.company, appUrl),
+              subject: `🎉 ${rec.alumni_name || 'Your contact'} replied — here's your next move`,
+              body: buildReplyEmail(firstName, rec.alumni_name || 'Your contact', rec.company, appUrl, suggestedReply),
               from_name: 'CliFF',
             });
 
