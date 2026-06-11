@@ -508,6 +508,8 @@ CRITICAL RULES:
       const loc = locationPref === 'remote' ? 'remote' : locationCity;
       if (loc) localStorage.setItem('cff_location', loc);
       if (planType === 'free') localStorage.setItem('cff_plan_type', 'free');
+      // Zeigarnik close: surface an "unfinished draft" card on first dashboard visit
+      localStorage.setItem('cff_first_draft_pending', 'true');
       if (blockers.includes('no_direction')) localStorage.setItem('cff_career_unsure', 'true');
       
       // CRITICAL: Update user profile with persona if already authenticated

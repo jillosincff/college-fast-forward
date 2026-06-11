@@ -11,6 +11,7 @@ import EmailSyncBanner from '@/components/free-tier/EmailSyncBanner';
 import CliffPrioritizedFeed from '@/components/free-tier/CliffPrioritizedFeed';
 import LockedAlumniTeaser from '@/components/free-tier/LockedAlumniTeaser';
 import NetworkPulseStrip from '@/components/free-tier/NetworkPulseStrip';
+import FirstDraftReadyCard from '@/components/free-tier/FirstDraftReadyCard';
 import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ } from '@/utils/isFastIQ';
@@ -461,6 +462,12 @@ export default function FreeTierDashboard() {
 
           {/* ── Left Column ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {/* Zeigarnik close — unfinished outreach draft from onboarding */}
+            <FirstDraftReadyCard
+              theme={campusTheme}
+              onOpen={() => triggerUpgrade('Your First Outreach Draft')}
+            />
+
             {/* Network Pulse — real outcome stats from the alumni database */}
             <NetworkPulseStrip user={user} theme={campusTheme} />
 
