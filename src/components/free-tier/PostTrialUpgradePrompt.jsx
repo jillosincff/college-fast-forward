@@ -40,7 +40,7 @@ export default function PostTrialUpgradePrompt({ message }) {
         fontSize: 22, fontWeight: 700,
         color: '#1A1A1A', margin: '0 0 10px',
       }}>
-        Your FastIQ trial has ended.
+        Your CliFF premium trial has ended.
       </p>
       <p style={{
         fontFamily: "'DM Sans', sans-serif",

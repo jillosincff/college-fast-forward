@@ -14,7 +14,8 @@ import NetworkPulseStrip from '@/components/free-tier/NetworkPulseStrip';
 import FirstDraftReadyCard from '@/components/free-tier/FirstDraftReadyCard';
 import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import { getThemeForSchool } from '@/lib/campusThemes';
-import { checkIsFastIQ } from '@/utils/isFastIQ';
+import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
+import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
 
 const dm = "'DM Sans', system-ui, sans-serif";
 
@@ -234,6 +235,8 @@ export default function FreeTierDashboard() {
     );
   }
 
+  const isTrialExpired = checkIsTrialExpired(user);
+
   const triggerUpgrade = (featureName) => {
     setUpgradeFeature(featureName);
     setShowUpgrade(true);
@@ -380,7 +383,14 @@ export default function FreeTierDashboard() {
           }
         `}</style>
 
-        {/* ── Psychological Blueprint Header: "They Heard Me" ── */}
+        {/* ── Header: post-expiry paywall OR new-user psychological pitch ── */}
+        {isTrialExpired ? (
+          <TrialEndedHeader
+            firstName={firstName}
+            theme={campusTheme}
+            onReactivate={() => triggerUpgrade('Premium Reactivation')}
+          />
+        ) : (
         <div className="hero-header-card" style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b)', border: '1px solid #1e293b', borderRadius: 20, padding: '24px 28px', marginBottom: 20, boxShadow: '0 4px 24px rgba(15,23,42,0.15)' }}>
           {/* Badge Row */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
@@ -413,6 +423,7 @@ export default function FreeTierDashboard() {
             </button>
           )}
         </div>
+        )}
 
         {/* CLiFF Rescue Hook — shown when student selected "not sure" during onboarding */}
         {isCareerUnsure && (
