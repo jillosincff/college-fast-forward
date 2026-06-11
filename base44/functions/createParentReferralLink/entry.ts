@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     }
 
     const origin = Deno.env.get('APP_BASE_URL') || 'https://collegefastforward.com';
-    const link = `${origin}/#/GatorAuth?pref=${code}&role=parent`;
+    const link = `${origin}/#/ParentLandingPage?pref=${code}`;
     const firstName = (user.full_name || '').split(' ')[0] || 'Your student';
     const smsBody = `Hey! I'm using CliFF (College Fast Forward) for my job search. Can you join as a parent? It takes 2 minutes and helps me get warm intros to companies. Sign up here: ${link}`;
 

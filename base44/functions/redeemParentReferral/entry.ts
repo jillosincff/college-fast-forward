@@ -1,18 +1,19 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * Called when a parent completes onboarding after arriving via a student's
- * text-referral link. Links parent ↔ student and grants the student
- * 3 days of premium trial (once).
+ * Called when a parent submits the ParentLandingPage form after arriving via
+ * a student's text-referral link. The parent is NOT authenticated — the
+ * referral code itself is the secret. Links parent ↔ student and grants the
+ * student 3 days of premium trial (once).
  */
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const parent = await base44.auth.me();
-    if (!parent) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { code } = await req.json().catch(() => ({}));
-    if (!code) return Response.json({ error: 'Missing code' }, { status: 400 });
+    const { code, parent_email, parent_name } = await req.json().catch(() => ({}));
+    if (!code || !parent_email) return Response.json({ error: 'Missing code or parent_email' }, { status: 400 });
+
+    const parentEmail = String(parent_email).toLowerCase().trim();
 
     const codes = await base44.asServiceRole.entities.InviteCode.filter({
       code: String(code).toUpperCase(),
@@ -22,7 +23,7 @@ Deno.serve(async (req) => {
     const invite = codes?.[0];
     if (!invite) return Response.json({ success: false, reason: 'invalid_code' });
     if (invite.status !== 'active') return Response.json({ success: false, reason: 'code_inactive' });
-    if (invite.inviter_email?.toLowerCase() === parent.email?.toLowerCase()) {
+    if (invite.inviter_email?.toLowerCase() === parentEmail) {
       return Response.json({ success: false, reason: 'self_referral' });
     }
 
@@ -33,13 +34,20 @@ Deno.serve(async (req) => {
     // ── Link parent ↔ student ──────────────────────────────────────────
     const parentEmails = student.parent_emails || [];
     const studentUpdate = {};
-    if (!parentEmails.includes(parent.email)) {
-      studentUpdate.parent_emails = [...parentEmails, parent.email];
+    if (!parentEmails.includes(parentEmail)) {
+      studentUpdate.parent_emails = [...parentEmails, parentEmail];
     }
 
-    const studentEmails = parent.student_emails || [];
-    if (!studentEmails.includes(student.email)) {
-      await base44.auth.updateMe({ student_emails: [...studentEmails, student.email] });
+    // Link student on the parent's record (created moments ago by createParentUser)
+    const parents = await base44.asServiceRole.entities.User.filter({ email: parentEmail });
+    const parentUser = parents?.[0];
+    if (parentUser) {
+      const studentEmails = parentUser.student_emails || [];
+      if (!studentEmails.includes(student.email)) {
+        await base44.asServiceRole.entities.User.update(parentUser.id, {
+          student_emails: [...studentEmails, student.email],
+        });
+      }
     }
 
     // ── Grant 3-day premium reward (once per student) ──────────────────
@@ -72,13 +80,13 @@ Deno.serve(async (req) => {
     const uses = (invite.current_uses || 0) + 1;
     await base44.asServiceRole.entities.InviteCode.update(invite.id, {
       current_uses: uses,
-      used_by_email: parent.email,
+      used_by_email: parentEmail,
       used_at: new Date().toISOString(),
       ...(uses >= (invite.max_uses || 1) ? { status: 'used' } : {}),
     });
 
     // ── Notify the student ─────────────────────────────────────────────
-    const parentFirstName = (parent.full_name || 'Your parent').split(' ')[0];
+    const parentFirstName = (parent_name || 'Your parent').split(' ')[0];
     base44.asServiceRole.entities.Notification.create({
       recipient_email: student.email,
       type: 'application_received',

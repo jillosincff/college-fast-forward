@@ -156,15 +156,6 @@ export default function ParentOnboarding() {
         }).catch(() => {});
       } catch {}
 
-      // Redeem student text-referral (grants student 3 days of premium)
-      try {
-        const refCode = localStorage.getItem('cff_parent_ref_code');
-        if (refCode) {
-          base44.functions.invoke('redeemParentReferral', { code: refCode }).catch(() => {});
-          localStorage.removeItem('cff_parent_ref_code');
-        }
-      } catch {}
-
       // Clean up invite session data + auth loop counters
       localStorage.removeItem('pending_invite_role');
       localStorage.removeItem('pending_invite_code');

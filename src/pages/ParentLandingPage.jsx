@@ -131,6 +131,19 @@ export default function ParentLandingPage({ onStudentClick }) {
         directory_consent_given: true,
         linkedin_url: form.linkedin?.trim() || '',
       });
+
+      // Redeem student text-referral (grants the student 3 days of premium)
+      try {
+        const refCode = localStorage.getItem('cff_parent_ref_code');
+        if (refCode) {
+          base44.functions.invoke('redeemParentReferral', {
+            code: refCode,
+            parent_email: form.email.toLowerCase().trim(),
+            parent_name: form.fullName.trim(),
+          }).catch(() => {});
+          localStorage.removeItem('cff_parent_ref_code');
+        }
+      } catch {}
       
       // Store parent role hint for future login
       localStorage.setItem('pending_invite_role', 'parent');
