@@ -70,6 +70,14 @@ function PremiumNav({ user, onEditGoals, navRef }) {
                 >
                   🎯 Update Career Goals
                 </button>
+                <button
+                  onClick={() => { setDropdownOpen(false); navigate('company-intel'); }}
+                  style={{ fontFamily: dm, fontSize: 13, color: '#374151', background: 'none', border: 'none', borderBottom: '1px solid #f3f4f6', padding: '12px 16px', cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  🏢 Company Intelligence
+                </button>
 
                 {/* ── Resume Management Section ── */}
                 <div style={{ padding: '8px 16px 4px', borderTop: '1px solid #f3f4f6' }}>

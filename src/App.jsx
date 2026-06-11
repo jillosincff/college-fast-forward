@@ -53,6 +53,7 @@ import CliffScout from '@/pages/CliffScout';
 import ActionPlanArchitect from '@/pages/ActionPlanArchitect';
 import Unsubscribe from '@/pages/Unsubscribe';
 import JillOsinoffDashboard from '@/pages/JillOsinoffDashboard';
+import CompanyIntelDashboard from '@/pages/CompanyIntelDashboard';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -185,6 +186,7 @@ const AuthenticatedApp = () => {
       <Route path="/action-plan-architect" element={<ActionPlanArchitect />} />
       <Route path="/join" element={<JoinPage />} />
       <Route path="/jill-osinoff-dashboard" element={<JillOsinoffDashboard />} />
+      <Route path="/company-intel" element={<OnboardingGuard><CompanyIntelDashboard /></OnboardingGuard>} />
 
       {/* Main routes */}
       <Route path="/" element={<StudentLandingPage />} />

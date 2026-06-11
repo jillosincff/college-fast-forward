@@ -4,38 +4,44 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    
-    // For testing purposes, always use Jill's email
-    const targetEmail = 'jill.osinoff@example.com';
-    console.log(`[getCompanyContacts] Testing with Jill's email: ${targetEmail}`);
-    console.log(`[getCompanyContacts] Target email: ${targetEmail}`);
 
-    // Get all companies being followed
-    const allFollowedCompanies = await base44.asServiceRole.entities.FollowedCompany.list(undefined, 100);
-    console.log(`[getCompanyContacts] Total followed companies: ${allFollowedCompanies?.length || 0}`);
-    
-    const followedCompanies = (allFollowedCompanies || []).filter(fc => {
-      const matches = fc.student_email === targetEmail;
-      if (matches) console.log(`[getCompanyContacts] Match: ${fc.company_name}`);
-      return matches;
-    });
-    
-    console.log(`[getCompanyContacts] Matching companies: ${followedCompanies.length}`);
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    if (!followedCompanies || followedCompanies.length === 0) {
-      return Response.json({ 
-        success: true, 
+    const defaultRole = user.career_goals?.target_roles?.[0] || 'entry level';
+
+    // Gather the student's companies: pipeline companies + followed companies
+    const [pipeline, followed] = await Promise.all([
+      base44.entities.NetworkingPipeline.filter({ user_email: user.email }, '-created_date', 100),
+      base44.entities.FollowedCompany.filter({ student_email: user.email }, '-created_date', 50),
+    ]);
+
+    // Build unique company list (pipeline first — most intent), cap at 8
+    const companyMap = new Map();
+    for (const p of pipeline || []) {
+      if (p.company && !companyMap.has(p.company.toLowerCase())) {
+        companyMap.set(p.company.toLowerCase(), { name: p.company, role: p.job_title || defaultRole });
+      }
+    }
+    for (const f of followed || []) {
+      if (f.company_name && !companyMap.has(f.company_name.toLowerCase())) {
+        companyMap.set(f.company_name.toLowerCase(), { name: f.company_name, role: defaultRole });
+      }
+    }
+    const targets = Array.from(companyMap.values()).slice(0, 8);
+
+    if (targets.length === 0) {
+      return Response.json({
+        success: true,
         companies: [],
-        message: `No companies found for ${targetEmail}`
+        message: 'No companies tracked yet. Add companies to your pipeline to see hiring manager intelligence.',
       });
     }
 
-    // Enrich each company with real data
+    // Enrich each company with real contacts
     const enrichedCompanies = await Promise.all(
-      followedCompanies.map(async (follow) => {
-        const companyName = follow.company_name;
-        const roleInterest = follow.role_interest || 'Software Engineer';
-        
+      targets.map(async ({ name: companyName, role: roleInterest }) => {
         try {
           // Step 1: Use Exa to find real hiring managers at this company
           const exaResponse = await fetch('https://api.exa.ai/search', {
@@ -51,28 +57,25 @@ Deno.serve(async (req) => {
               includeDomains: ['linkedin.com'],
             }),
           });
-          
+
           const exaData = await exaResponse.json();
-          
+
           let contacts = [];
-          
+
           if (exaData.results && exaData.results.length > 0) {
-            // Process each result to extract contact info
             for (const result of exaData.results.slice(0, 3)) {
-              // Parse name from LinkedIn title
               const parts = (result.title || '').split(/[|\-·]/).map(s => s.trim()).filter(Boolean);
               const name = parts[0]?.replace(/\s+Bio$/i, '').trim();
-              
+
               if (!name) continue;
-              
-              // Get title from highlights
+
               const highlights = result.highlights || [];
               let title = 'Manager';
               if (highlights.length > 0) {
                 const titleMatch = highlights[0].match(/([A-Za-z\s]+(?:Manager|Director|VP|Lead|Head|Chief|President|Engineer|Developer|Designer))[,\s]/i);
                 title = titleMatch ? titleMatch[1].trim() : (parts[1] || 'Manager');
               }
-              
+
               // Step 2: Try to find email using Hunter API
               let email = null;
               let confidence = null;
@@ -81,7 +84,7 @@ Deno.serve(async (req) => {
                   `https://api.hunter.io/v2/email-finder?domain=${companyName.toLowerCase().replace(/\s+/g, '')}.com&first_name=${name.split(' ')[0]}&last_name=${name.split(' ').slice(-1)[0]}&api_key=${Deno.env.get('HUNTER_API_KEY')}`
                 );
                 const hunterData = await hunterResponse.json();
-                
+
                 if (hunterData.data && hunterData.data.email) {
                   email = hunterData.data.email;
                   confidence = hunterData.data.score;
@@ -89,34 +92,29 @@ Deno.serve(async (req) => {
               } catch (hunterError) {
                 console.log(`Hunter API failed for ${name}:`, hunterError.message);
               }
-              
+
               contacts.push({
                 name,
                 title,
                 linkedinUrl: result.url,
                 email,
-                confidence: confidence,
+                confidence,
               });
             }
           }
-          
+
           return {
             company: companyName,
             roleOfInterest: roleInterest,
-            status: follow.status,
-            notes: follow.notes,
             contacts,
             contactCount: contacts.length,
             hasEmails: contacts.some(c => c.email),
           };
-          
         } catch (error) {
           console.error(`Failed to enrich ${companyName}:`, error);
           return {
             company: companyName,
             roleOfInterest: roleInterest,
-            status: follow.status,
-            notes: follow.notes,
             contacts: [],
             contactCount: 0,
             hasEmails: false,
@@ -133,7 +131,6 @@ Deno.serve(async (req) => {
       companiesWithContacts: enrichedCompanies.filter(c => c.contactCount > 0).length,
       companiesWithEmails: enrichedCompanies.filter(c => c.hasEmails).length,
     });
-
   } catch (error) {
     console.error('GetCompanyContacts error:', error);
     return Response.json({ error: error.message }, { status: 500 });
