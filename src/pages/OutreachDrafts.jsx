@@ -5,6 +5,7 @@ import { maybeActivateTrial } from '@/utils/trialActivation';
 import { navigate } from '@/components/utils/navigation';
 import ColdInroadScout from '@/components/free-tier/ColdInroadScout';
 import AutomatedAlumniActionPanel from '@/components/free-tier/AutomatedAlumniActionPanel';
+import { findPipelineMatch } from '@/components/pipeline/findPipelineMatch';
 
 const CONTEXTS = [
   { id: 'alumni_search', label: 'Alumni Outreach', icon: '🔍', desc: 'Reaching out to a UF alumni you found' },
@@ -256,10 +257,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           // RLS already scopes to the current user — filter only by the contact fields
           const allPipelines = await base44.entities.NetworkingPipeline.list('-created_date', 200);
           const ADVANCED_STATUSES = ['replied', 'coffee_chat', 'interview', 'offer'];
-          const match = allPipelines.find(p =>
-            p.alumni_name?.toLowerCase() === form.recipientName.toLowerCase() ||
-            (form.recipientCompany && p.company?.toLowerCase() === form.recipientCompany.toLowerCase())
-          );
+          const match = findPipelineMatch(allPipelines, form.recipientName, form.recipientCompany);
           if (match) {
             if (!ADVANCED_STATUSES.includes(match.status)) {
               await base44.entities.NetworkingPipeline.update(match.id, {
@@ -326,10 +324,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
         try {
           const allPipelines = await base44.entities.NetworkingPipeline.list('-created_date', 200);
           const ADVANCED = ['replied', 'coffee_chat', 'interview', 'offer'];
-          const match = allPipelines.find(p =>
-            p.alumni_name?.toLowerCase() === draft.recipient_name.toLowerCase() ||
-            (draft.recipient_company && p.company?.toLowerCase() === draft.recipient_company.toLowerCase())
-          );
+          const match = findPipelineMatch(allPipelines, draft.recipient_name, draft.recipient_company);
           if (match) {
             if (!ADVANCED.includes(match.status)) {
               await base44.entities.NetworkingPipeline.update(match.id, { status: 'reached_out', reached_out_date: now, status_date: now });
