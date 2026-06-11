@@ -144,8 +144,8 @@ export default function PremiumMobileNav({ user }) {
                 ✕ Close
               </button>
             </div>
-            <div style={{ flex: 1, overflowY: 'auto', padding: 12, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}>
-              <PremiumHiringChat user={user} selectedSignal={null} selectedJob={null} />
+            <div style={{ flex: 1, minHeight: 0, padding: 12, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)', display: 'flex', flexDirection: 'column' }}>
+              <PremiumHiringChat user={user} selectedSignal={null} selectedJob={null} fullHeight />
             </div>
           </div>
         )}

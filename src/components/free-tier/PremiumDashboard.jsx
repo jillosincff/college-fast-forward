@@ -248,7 +248,7 @@ export default function PremiumDashboard({ user: userProp, parentCount, college,
       <style>{`
         @media (max-width: 768px) {
           .premium-dashboard-container {
-            padding: 12px !important;
+            padding: 12px 12px 96px !important;
           }
           .premium-ftd-grid {
             display: flex !important;

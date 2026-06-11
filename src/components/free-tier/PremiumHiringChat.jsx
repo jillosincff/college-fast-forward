@@ -43,7 +43,7 @@ function getStarterPrompts(user) {
   return prompts;
 }
 
-export default function PremiumHiringChat({ user, selectedSignal, selectedJob }) {
+export default function PremiumHiringChat({ user, selectedSignal, selectedJob, fullHeight = false }) {
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const schoolAbbr = user?.school_abbreviation || user?.school_code?.toUpperCase() || 'your university';
 
@@ -84,7 +84,6 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
         const recapRes = await base44.functions.invoke('getAgentRecapContext', {});
         const recap = recapRes?.data ?? recapRes ?? {};
         const pipelineCount = recap.metrics?.totalInPipeline || 0;
-        const schoolAbbr = recap.schoolAbbreviation || schoolAbbr;
 
         if (recap.actionItem && recap.actionItem.type === 'STALE_APPLICATION') {
           const daysStale = recap.actionItem.daysStale || 5;
@@ -279,7 +278,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
 
   return (
     <>
-    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+    <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', ...(fullHeight ? { height: '100%', display: 'flex', flexDirection: 'column' } : {}) }}>
       {/* Header */}
       <div style={{ padding: '14px 20px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#000' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -299,7 +298,7 @@ export default function PremiumHiringChat({ user, selectedSignal, selectedJob })
       </div>
 
       {/* Messages */}
-      <div style={{ padding: '14px 16px', maxHeight: 260, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ padding: '14px 16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, ...(fullHeight ? { flex: 1, minHeight: 0 } : { maxHeight: 260 }) }}>
         {messages.map((m, i) => (
           <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <div style={{
