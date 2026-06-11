@@ -116,7 +116,7 @@ function PremiumNav({ user, onEditGoals, navRef }) {
                     onMouseEnter={e => e.currentTarget.style.background = '#faf5ff'}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}
                   >
-                    📊 Analytics Dashboard
+                    🛠️ Admin Dashboard
                   </button>
                 )}
 

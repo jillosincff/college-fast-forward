@@ -108,7 +108,7 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated, navRef })
                         onMouseEnter={e => e.currentTarget.style.background = '#faf5ff'}
                         onMouseLeave={e => e.currentTarget.style.background = 'none'}
                       >
-                        📊 Analytics Dashboard
+                        🛠️ Admin Dashboard
                       </button>
                     )}
 
