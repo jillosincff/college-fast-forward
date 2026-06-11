@@ -1,0 +1,49 @@
+{
+  "name": "AlumniSearchMiss",
+  "type": "object",
+  "properties": {
+    "company": {
+      "type": "string",
+      "description": "Company name that returned zero alumni"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "School code the search was run for (e.g. UF)"
+    },
+    "school_name": {
+      "type": "string",
+      "description": "Full school name for re-running the search"
+    },
+    "search_count": {
+      "type": "number",
+      "default": 1,
+      "description": "How many times students searched this company with no results"
+    },
+    "last_searched_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Most recent zero-result search"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once alumni were eventually found for this company/school"
+    }
+  },
+  "required": [
+    "company",
+    "school_code"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

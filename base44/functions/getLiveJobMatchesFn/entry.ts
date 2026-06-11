@@ -42,15 +42,35 @@ function buildLocationQuery(location) {
   return null;
 }
 
-// Boolean title query: role keyword AND (entry-level terms OR remaining role words)
-function buildTitleQuery(role) {
-  const ENTRY_TERMS = `intern:* | junior | associate | coordinator | 'entry level' | graduate | trainee | 'new grad'`;
+// Boolean title query: role keyword AND (level terms matching what the student is seeking)
+function buildTitleQuery(role, seeking) {
+  // "associate" intentionally excluded — it matches "Associate Director" / "Senior Associate"
+  const INTERN_TERMS = `intern | internship | co-op`;
+  const ENTRY_TERMS = `junior | coordinator | 'entry level' | graduate | trainee | 'new grad' | analyst | assistant`;
+  const levelTerms = seeking === 'internship' ? INTERN_TERMS
+    : seeking === 'fulltime' ? ENTRY_TERMS
+    : `${INTERN_TERMS} | ${ENTRY_TERMS}`;
   const words = (role || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2);
-  if (words.length === 0) return `(${ENTRY_TERMS})`;
+  if (words.length === 0) return `(${levelTerms})`;
   const primary = words[0];
   const rest = words.slice(1);
   const restClause = rest.length > 0 ? ` | ${rest.join(' | ')}` : '';
-  return `${primary} & (${ENTRY_TERMS}${restClause})`;
+  return `${primary} & (${levelTerms}${restClause})`;
+}
+
+// Hard seniority blocklist — these NEVER belong in a student feed
+const SENIOR_TITLE_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive)\b|\b(ii|iii|iv|v)\b/i;
+const INTERN_TITLE_RE = /\b(intern|internship|co-?op)\b/i;
+
+// Does the job's location actually match the student's preference?
+function jobMatchesLocation(job, city, stateName) {
+  if (!city && !stateName) return true;
+  if (job.remote_derived === true) return true;
+  const locs = (job.locations_derived || []).join(' | ').toLowerCase();
+  if (!locs) return false;
+  if (city && locs.includes(city.toLowerCase())) return true;
+  if (stateName && locs.includes(stateName.toLowerCase())) return true;
+  return false;
 }
 
 function hiringSignalFromDate(datePosted) {
@@ -107,8 +127,10 @@ Deno.serve(async (req) => {
       .filter(Boolean);
     const strictSize = sizeList.length === 1 ? sizeList[0] : null;
 
+    const seeking = career_goals.seeking || user.career_goals?.seeking || 'both';
+
     // Cache key: hash of goals so stale cache is busted when goals change
-    const goalKey = `v2|${role}|${industries.join(',')}|${location}|${companySizes}`;
+    const goalKey = `v3|${seeking}|${role}|${industries.join(',')}|${location}|${companySizes}`;
     const cached = user.job_leads_cache;
     const cachedAt = user.job_leads_cached_at;
     const cachedKey = user.job_leads_cache_key;
@@ -128,10 +150,15 @@ Deno.serve(async (req) => {
       time_frame: '7d',
       limit: '100',
       include_basic_organization_details: 'true',
-      title_advanced: buildTitleQuery(roleDesc),
+      title_advanced: buildTitleQuery(roleDesc, seeking),
     });
     const locQuery = buildLocationQuery(location);
     if (locQuery) params.set('location', locQuery);
+
+    // Parsed location pieces for strict post-filtering
+    const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const prefCity = locParts[0] || null;
+    const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
 
     const apiRes = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
       headers: { 'Authorization': `Bearer ${apiKey}` },
@@ -153,10 +180,33 @@ Deno.serve(async (req) => {
       const title = job.title?.trim();
       if (!org || !title || !job.url) continue;
 
+      const isInternTitle = INTERN_TITLE_RE.test(title);
+
+      // HARD seniority blocklist: senior/lead/director/manager/etc. never pass,
+      // even if the title also contains an entry-ish word ("Senior Associate").
+      if (!isInternTitle && SENIOR_TITLE_RE.test(title)) {
+        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (senior title): ${title}`);
+        continue;
+      }
+
+      // Match the student's seeking intent
+      if (seeking === 'internship' && !isInternTitle) {
+        continue;
+      }
+      if (seeking === 'fulltime' && isInternTitle) {
+        continue;
+      }
+
       // Entry-level guard: AI-tagged experience or entry-ish title
       const exp = job.ai_experience_level;
-      const entryTitle = /intern|junior|associate|coordinator|entry|graduate|trainee|new grad|assistant/i.test(title);
+      const entryTitle = isInternTitle || /junior|coordinator|entry|graduate|trainee|new grad|assistant|analyst/i.test(title);
       if (exp && exp !== '0-2' && !entryTitle) {
+        continue;
+      }
+
+      // Strict location enforcement — the API's location match can be loose
+      if (!jobMatchesLocation(job, prefCity, prefState)) {
+        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (location): ${title} @ ${(job.locations_derived || []).join('; ')}`);
         continue;
       }
 
