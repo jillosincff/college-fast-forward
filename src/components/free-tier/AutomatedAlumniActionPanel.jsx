@@ -42,33 +42,10 @@ export default function AutomatedAlumniActionPanel({ lead, user, onGenerate, onB
     enrichEmail();
   }, [lead?.recipientName, lead?.recipientCompany, enrichedEmail]);
 
-  const handleGenerateAndSend = async () => {
-    // Update pipeline status to 'reached_out' immediately
-    try {
-      const now = new Date().toISOString();
-      const allPipelines = await base44.entities.NetworkingPipeline.list('-created_date', 200);
-      
-      const ADVANCED_STATUSES = ['replied', 'coffee_chat', 'interview', 'offer'];
-      const match = allPipelines.find(p =>
-        p.alumni_name?.toLowerCase() === (lead.recipientName || '').toLowerCase() ||
-        (lead.recipientCompany && p.company?.toLowerCase() === lead.recipientCompany.toLowerCase())
-      );
-
-      if (match && !ADVANCED_STATUSES.includes(match.status)) {
-        await base44.entities.NetworkingPipeline.update(match.id, {
-          status: 'reached_out',
-          reached_out_date: now,
-          status_date: now,
-        });
-      }
-
-      // Broadcast Kanban refresh
-      window.dispatchEvent(new CustomEvent('cff:pipeline-refresh'));
-    } catch (err) {
-      console.error('Pipeline update failed:', err);
-    }
-
-    // Trigger message generation
+  const handleGenerateDraft = () => {
+    // NOTE: We intentionally do NOT touch the NetworkingPipeline here.
+    // The status only moves to 'reached_out' when the user actually clicks
+    // "Copy & Mark Sent" in the compose step — generating a draft is not outreach.
     onGenerate?.();
   };
 
@@ -253,7 +230,7 @@ export default function AutomatedAlumniActionPanel({ lead, user, onGenerate, onB
 
       {/* Action button */}
       <button
-        onClick={handleGenerateAndSend}
+        onClick={handleGenerateDraft}
         disabled={generating || emailEnriching}
         style={{
           width: '100%',
@@ -269,7 +246,7 @@ export default function AutomatedAlumniActionPanel({ lead, user, onGenerate, onB
           transition: 'all 0.2s',
         }}
       >
-        {generating ? '⚡ Generating personalized message...' : '🚀 Generate & Send Outreach →'}
+        {generating ? '⚡ Generating personalized message...' : '🚀 Generate Outreach Draft →'}
       </button>
 
       {/* LinkedIn fallback */}
