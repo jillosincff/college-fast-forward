@@ -89,6 +89,7 @@ Deno.serve(async (req) => {
 
     const targetRole = body.explicit_target_role || body.target_role || user.career_goals?.target_roles?.[0] || user.career_goals?.role || user.target_role || '';
     const companySizePref = body.company_size_preference || user.career_goals?.company_size_preference || 'all';
+    const seeking = body.seeking || user.career_goals?.seeking || 'both';
     const seenCompanies = new Set((body.seen_companies || []).map(c => normalizeCompanyName(c)));
     const refreshSeed = body.refresh_seed || 0;
 
@@ -115,6 +116,7 @@ Deno.serve(async (req) => {
             industries: targetIndustries.map(i => i.charAt(0).toUpperCase() + i.slice(1)),
             locations: rawLocation ? [rawLocation] : [],
             company_size_preference: companySizePref === 'startup' ? ['startup'] : companySizePref === 'midmarket' ? ['mid'] : companySizePref === 'enterprise' ? ['large'] : ['large', 'mid', 'startup'],
+            seeking,
           },
         }),
         new Promise((_, r) => setTimeout(() => r(new Error('live_timeout')), 20000)),
@@ -130,7 +132,8 @@ Deno.serve(async (req) => {
     // Fallback: use LLM to generate real job listings with full descriptions
     try {
       const fallback = await base44.asServiceRole.integrations.Core.InvokeLLM({
-        prompt: `Generate 10 realistic, detailed entry-level job listings for a "${targetRole || (targetIndustries[0] || 'Business') + ' Analyst'}" role at real companies actively hiring in ${rawLocation || 'the United States'} in 2025.
+        prompt: `Generate 10 realistic, detailed ${seeking === 'internship' ? 'INTERNSHIP' : seeking === 'fulltime' ? 'entry-level full-time job' : 'entry-level job and internship'} listings for a "${targetRole || (targetIndustries[0] || 'Business') + (seeking === 'internship' ? ' Intern' : ' Analyst')}" role at real companies actively hiring in ${rawLocation || 'the United States'} in 2025.
+${seeking === 'internship' ? 'CRITICAL: Every listing MUST be an internship or co-op for current students. Do NOT include any full-time roles.' : seeking === 'fulltime' ? 'CRITICAL: Every listing MUST be a full-time entry-level role. Do NOT include internships.' : ''}
 
     For each listing, write a REAL job description (150-250 words) that includes:
     - 3-4 specific responsibilities (what they'll actually do day-to-day)
@@ -238,7 +241,7 @@ Use concrete, specific language that sounds like an actual job posting.`,
       })
       .map(c => ({
         company: c.name,
-        role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
+        role: c.job_title || ((targetRole || `${targetIndustries[0] || 'Business'} Analyst`) + (seeking === 'internship' ? ' Intern' : '')),
         job_title: c.job_title || '',
         job_url: c.job_url || '',
         description: c.hiring_description || c.description || `${c.name} is actively hiring entry-level ${targetRole || 'professionals'}.`,
@@ -250,7 +253,15 @@ Use concrete, specific language that sounds like an actual job posting.`,
       }));
 
     // Filter senior roles and deduplicate
-    jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.role));
+    jobPool = jobPool.filter(j => !SENIOR_FILTER.test(j.job_title || j.role));
+
+    // HARD seeking enforcement: internship seekers ONLY see internships, and vice versa
+    const INTERN_RE = /\b(intern|internship|co-?op)\b/i;
+    if (seeking === 'internship') {
+      jobPool = jobPool.filter(j => INTERN_RE.test(j.job_title || j.role));
+    } else if (seeking === 'fulltime') {
+      jobPool = jobPool.filter(j => !INTERN_RE.test(j.job_title || j.role));
+    }
     const seenKeys = new Set();
     jobPool = jobPool.filter(j => {
       const key = normalizeCompanyName(j.company);

@@ -91,6 +91,7 @@ Deno.serve(async (req) => {
     const targetRole = goals.target_roles?.[0] || goals.role || '';
     const sizePref = goals.company_size_preference || 'all';
     const location = user.location_preference || user.location || '';
+    const seeking = goals.seeking || 'both';
 
     // Strict size pref → only the chosen tier is searched. 'all' = no constraint.
     const sizeMap = {
@@ -112,6 +113,7 @@ Deno.serve(async (req) => {
             industries: targetIndustries.map(i => i.charAt(0).toUpperCase() + i.slice(1)),
             locations: location ? [location] : [],
             company_size_preference: sizeArray,
+            seeking,
           },
         }),
         new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000)),
@@ -121,7 +123,7 @@ Deno.serve(async (req) => {
       const orderedLive = [...freshLive, ...companies.filter(c => isSeen(c.name))];
       liveSlots = orderedLive.slice(0, 2).map(c => ({
         company: c.name,
-        role: targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
+        role: c.job_title || targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
         jobDescription: c.hiring_description || `${c.name} is actively hiring for ${targetRole || 'entry-level'} roles.`,
         jobSource: `${c.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
         jobSourceCategory: 'B',
@@ -145,6 +147,7 @@ Deno.serve(async (req) => {
           target_industries: targetIndustries,
           target_role: targetRole,
           company_size_preference: sizePref,
+          seeking,
         }),
         new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 25000)),
       ]);
@@ -190,7 +193,15 @@ Deno.serve(async (req) => {
 
     // Ensure at least 3 slots — pad from fallback if needed
     if (slots.length < 3) {
-      const fallbackSlots = [
+      const internFallbackSlots = [
+        { company: 'Deloitte', role: 'Summer Scholar Intern', jobDescription: 'Consulting and advisory internship program across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Google', role: 'STEP Intern', jobDescription: 'Summer internship program for first and second-year students.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'JPMorgan Chase', role: 'Summer Analyst Intern', jobDescription: 'Summer analyst internship across banking, markets, and operations.', jobSource: 'careers.jpmorgan.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Nike', role: 'Marketing Intern', jobDescription: 'Brand and digital marketing internships for students.', jobSource: 'jobs.nike.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Salesforce', role: 'Futureforce Intern', jobDescription: 'Summer internship program blending tech, business, and customer strategy.', jobSource: 'salesforce.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Procter & Gamble', role: 'Brand Management Intern', jobDescription: 'Summer internship in CPG brand-building with real project ownership.', jobSource: 'pgcareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+      ];
+      const fulltimeFallbackSlots = [
         { company: 'Deloitte', role: 'Business Analyst', jobDescription: 'Strategy and advisory associates across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Google', role: 'Associate Product Manager', jobDescription: 'APM program for new graduates across product and engineering.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Ramp', role: 'Finance & Strategy Analyst', jobDescription: 'Series D fintech — real ownership from day one.', jobSource: 'ramp.com/careers', jobSourceCategory: 'B', companyTier: 3, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -202,6 +213,10 @@ Deno.serve(async (req) => {
         { company: 'Stripe', role: 'Business Operations Analyst', jobDescription: 'High-growth fintech — analytical roles for new grads.', jobSource: 'stripe.com/jobs', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Procter & Gamble', role: 'Brand Management Associate', jobDescription: 'Classic CPG brand-building track with real P&L ownership.', jobSource: 'pgcareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
+      // Match the student's seeking intent — internship seekers must NEVER see full-time fallbacks
+      const fallbackSlots = seeking === 'internship' ? internFallbackSlots
+        : seeking === 'fulltime' ? fulltimeFallbackSlots
+        : [...internFallbackSlots.slice(0, 3), ...fulltimeFallbackSlots];
       const existing_companies = new Set(slots.map(s => s.company.toLowerCase()));
       // Try unseen fallbacks first, then allow repeats if we still need slots
       const orderedFallbacks = [...fallbackSlots.filter(f => !isSeen(f.company)), ...fallbackSlots.filter(f => isSeen(f.company))];
