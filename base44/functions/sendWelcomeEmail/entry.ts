@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-// SCHEDULED SWEEP (every 15 min): finds users who completed onboarding in the
-// last 7 days and haven't received a welcome email yet, then sends a
+// SCHEDULED SWEEP (every 15 min): finds users who signed up in the last 14
+// days, completed onboarding, and haven't received a welcome email — sends a
 // persona-aware CliFF welcome (student vs parent variant).
 // Dedup via user flag cliff_welcome_email_at + EmailLog record.
 
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Allow entity automation (no user) OR admin manual call
+    // Allow scheduled automation (no user) OR admin manual call
     const caller = await base44.auth.me().catch(() => null);
     if (caller !== null && caller?.role !== 'admin' && !caller?.roles?.includes('admin')) {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
@@ -129,18 +129,20 @@ Deno.serve(async (req) => {
     if (payload.data?.email) {
       candidates = [payload.data];
     } else {
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      // 14-day signup window: covers users who finish onboarding a few days
+      // after signing up, while never "welcoming" long-time users.
+      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
       const recentUsers = await base44.asServiceRole.entities.User.list('-created_date', 1000);
       candidates = (recentUsers || []).filter(u =>
         u.email &&
         u.onboarding_completed === true &&
         !u.cliff_welcome_email_at &&
-        (u.created_date >= sevenDaysAgo || (u.updated_date >= sevenDaysAgo && u.created_date >= sevenDaysAgo))
+        u.created_date >= fourteenDaysAgo
       );
     }
 
     // Prior welcome logs (covers legacy sends before the flag existed)
-    const priorLogs = await base44.asServiceRole.entities.EmailLog.filter({ email_type: 'welcome' }).catch(() => []);
+    const priorLogs = await base44.asServiceRole.entities.EmailLog.filter({ email_type: 'welcome' }, '-sent_at', 5000).catch(() => []);
     const alreadyWelcomed = new Set((priorLogs || []).map(e => e.user_email?.toLowerCase()).filter(Boolean));
 
     const sent = [];

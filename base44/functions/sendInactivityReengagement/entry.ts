@@ -139,14 +139,16 @@ Deno.serve(async (req) => {
         .filter(Boolean)
     );
 
-    // Email preference opt-outs
+    // Email preference opt-outs — match by BOTH user_id and email,
+    // since older EmailPreference records may lack user_email
     const allPrefs = await base44.asServiceRole.entities.EmailPreference.list(undefined, 5000).catch(() => []);
-    const optedOut = new Set(
-      (allPrefs || [])
-        .filter(p => p.all_emails === false || p.reengagement_emails === false)
-        .map(p => (p.user_email || '').toLowerCase())
-        .filter(Boolean)
-    );
+    const optedOut = new Set();
+    for (const p of (allPrefs || [])) {
+      if (p.all_emails === false || p.reengagement_emails === false) {
+        if (p.user_email) optedOut.add(p.user_email.toLowerCase());
+        if (p.user_id) optedOut.add(p.user_id);
+      }
+    }
 
     const sent = [];
     const errors = [];
@@ -175,7 +177,7 @@ Deno.serve(async (req) => {
 
       // Opt-outs + recent email guard
       if (u.reengagement_unsubscribed) continue;
-      if (optedOut.has(emailLower)) continue;
+      if (optedOut.has(emailLower) || optedOut.has(u.id)) continue;
       if (recentlyEmailed.has(emailLower)) continue;
 
       const firstName = (u.full_name || '').split(' ')[0] || 'there';
