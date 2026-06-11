@@ -44,136 +44,6 @@ const SCHOOL_THEMES = {
   'default': { primary: BLUE, secondary: '#16a34a', name: 'Network' },
 };
 
-function GhostRiskGauge({ risk, companyName, isMobile }) {
-  // Don't show if risk is very low
-  if (risk < 20) return null;
-  
-  const isHigh = risk >= 75;
-  const isMedium = risk >= 40 && risk < 75;
-  const isLow = risk >= 20 && risk < 40;
-  
-  // Dynamic copy based on risk level
-  const copyData = {
-    high: {
-      emoji: '👻',
-      label: 'Ghost Risk',
-      reasonPhrase: `Recruiter activity paused at ${companyName}.`,
-      actionAdvice: 'We suggest applying but keep looking elsewhere.',
-      barColor: '#ef4444',
-      bgColor: '#fef2f2',
-      borderColor: '#fca5a5',
-      textColor: '#991b1b',
-      subTextColor: '#7f1d1d',
-    },
-    medium: {
-      emoji: '⚠️',
-      label: 'Ghost Risk',
-      reasonPhrase: 'Application viewed by HR, but no interview invites sent this week.',
-      actionAdvice: 'Keep your pipeline moving!',
-      barColor: '#f59e0b',
-      bgColor: '#fffbeb',
-      borderColor: '#fcd34d',
-      textColor: '#92400e',
-      subTextColor: '#78350f',
-    },
-    low: {
-      emoji: '✅',
-      label: 'Ghost Risk',
-      reasonPhrase: `${companyName} is actively interviewing for this role right now.`,
-      actionAdvice: 'Stand by your inbox.',
-      barColor: '#16a34a',
-      bgColor: '#f0fdf4',
-      borderColor: '#86efac',
-      textColor: '#166534',
-      subTextColor: '#14532d',
-    },
-  };
-  
-  const data = isHigh ? copyData.high : isMedium ? copyData.medium : copyData.low;
-  
-  return (
-    <div style={{
-      background: data.bgColor,
-      border: `1px solid ${data.borderColor}`,
-      borderRadius: isMobile ? 8 : 10, 
-      padding: isMobile ? '8px 10px' : '10px 12px',
-    }}>
-      {/* Header with percentage */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? 4 : 6 }}>
-        <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 11, fontWeight: 700, color: data.textColor, margin: 0 }}>
-          {data.emoji} {data.label}: {risk}%
-        </p>
-      </div>
-      
-      {/* Progress bar */}
-      <div style={{
-        width: '100%', height: isMobile ? 3 : 4,
-        background: '#e2e8f0',
-        borderRadius: 100,
-        overflow: 'hidden',
-        marginBottom: isMobile ? 6 : 8,
-      }}>
-        <div style={{
-          width: `${risk}%`, height: '100%',
-          background: data.barColor,
-          borderRadius: 100,
-          transition: 'width 0.3s ease',
-        }} />
-      </div>
-      
-      {/* Contextual copy */}
-      <p style={{
-        fontFamily: dm, fontSize: isMobile ? 8 : 10,
-        color: data.subTextColor,
-        margin: 0, lineHeight: isMobile ? 1.4 : 1.5,
-      }}>
-        {data.reasonPhrase}{' '}
-        <span style={{ fontWeight: 600, color: data.textColor }}>
-          {data.actionAdvice}
-        </span>
-      </p>
-      
-      {/* Bypass button for high risk */}
-      {isHigh && (
-        <button style={{
-          fontFamily: dm, fontSize: isMobile ? 8 : 9, fontWeight: 700,
-          color: '#fff', background: '#E85D20', border: 'none',
-          borderRadius: 6, padding: isMobile ? '5px 10px' : '6px 12px', cursor: 'pointer',
-          minHeight: 'auto', marginTop: isMobile ? 6 : 8,
-          boxShadow: '0 2px 6px rgba(232,93,32,0.3)',
-        }}>
-          🎯 Bypass Silence →
-        </button>
-      )}
-    </div>
-  );
-}
-
-function EmailSyncBadge({ synced, date, resumeName }) {
-  if (!synced) return null;
-  
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 6,
-      background: '#f8fafc', border: '1px solid #e2e8f0',
-      borderRadius: 8, padding: '6px 8px', marginTop: 6,
-    }}>
-      <span style={{ fontSize: 12 }}>📩</span>
-      <p style={{ fontFamily: dm, fontSize: 9, color: '#64748b', margin: 0 }}>
-        Auto-synced {date}
-      </p>
-      {resumeName && (
-        <>
-          <span style={{ color: '#cbd5e1', fontSize: 8 }}>·</span>
-          <p style={{ fontFamily: dm, fontSize: 9, color: '#475569', margin: 0 }}>
-            📄 {resumeName}
-          </p>
-        </>
-      )}
-    </div>
-  );
-}
-
 function SchoolPrideBanner({ schoolName, alumniCount }) {
   const theme = SCHOOL_THEMES[schoolName] || SCHOOL_THEMES.default;
   
@@ -248,10 +118,6 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
     }
   }, [isPulsing]);
   
-  // Mock data - in production, calculate from email sync & activity
-  const ghostRisk = job.stage === 'applied' ? Math.floor(Math.random() * 100) : 0;
-  const emailSynced = job.stage === 'applied' || job.stage === 'interviewing';
-  const alumniOnTeam = Math.floor(Math.random() * 5);
   
   return (
     <div
@@ -343,62 +209,13 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
       {/* Outreach activity badge */}
       {contactedBadge}
 
-      {/* Network & Sync Indicators - Wrap properly on mobile */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: isMobile ? 6 : 8 }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 4,
-          background: BLUE_LIGHT, border: `1px solid ${BLUE_BORDER}`,
-          borderRadius: 6, padding: isMobile ? '2px 6px' : '3px 8px', flexShrink: 0,
-        }}>
-          <span style={{ fontSize: isMobile ? 9 : 10 }}>🎓</span>
-          <p style={{ fontFamily: dm, fontSize: isMobile ? 8 : 9, fontWeight: 600, color: BLUE, margin: 0 }}>
-            {alumniOnTeam} {alumniOnTeam === 1 ? 'Alumni' : 'Alumni'}
-          </p>
-        </div>
-        {emailSynced && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            background: '#f0fdf4', border: '1px solid #86efac',
-            borderRadius: 6, padding: isMobile ? '2px 6px' : '3px 8px', flexShrink: 0,
-          }}>
-            <span style={{ fontSize: isMobile ? 9 : 10 }}>📩</span>
-            <p style={{ fontFamily: dm, fontSize: isMobile ? 8 : 9, fontWeight: 600, color: '#166534', margin: 0 }}>
-              Auto-Tracked
-            </p>
-          </div>
-        )}
-      </div>
-      
-      {/* Email Sync Details - Enhanced for Applied stage */}
-      {job.stage === 'applied' && emailSynced && (
-        <div style={{
-          background: '#f8fafc', border: '1px solid #e2e8f0',
-          borderRadius: isMobile ? 6 : 8, padding: isMobile ? '6px 8px' : '8px', marginTop: 8,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            <span style={{ fontSize: isMobile ? 11 : 12 }}>📩</span>
-            <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#475569', margin: 0, fontWeight: 500 }}>
-              Synced via Inbox {job.appliedDate && `(${job.appliedDate})`}
-            </p>
-          </div>
-          {job.resumeVersion && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: isMobile ? 10 : 11 }}>📄</span>
-              <p style={{ fontFamily: dm, fontSize: isMobile ? 8 : 9, color: '#64748b', margin: 0 }}>
-                {job.resumeVersion}
-              </p>
-            </div>
-          )}
-        </div>
+      {/* Reached-out date (real data from pipeline record) */}
+      {job.stage === 'applied' && job.appliedDate && (
+        <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#64748b', margin: '6px 0 0' }}>
+          📩 Reached out {job.appliedDate}
+        </p>
       )}
-      
-      {/* Ghost Risk - Inline for Applied stage */}
-      {job.stage === 'applied' && ghostRisk >= 20 && (
-        <div style={{ marginTop: isMobile ? 8 : 10 }}>
-          <GhostRiskGauge risk={ghostRisk} companyName={job.company} isMobile={isMobile} />
-        </div>
-      )}
-      
+
       {/* Stage Actions - Full width buttons on mobile */}
       <div style={{ 
         display: 'flex', 
@@ -442,7 +259,7 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
   );
 }
 
-export default function ApplicationPipeline({ onUpgrade, userSchool = 'University of Florida', alumniCount = 847, isPremium = false }) {
+export default function ApplicationPipeline({ onUpgrade, userSchool = 'University of Florida', alumniCount = 0, isPremium = false }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('to_apply');
   const [isMobile, setIsMobile] = useState(false);
