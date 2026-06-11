@@ -124,46 +124,18 @@ Deno.serve(async (req) => {
     console.log(`[getLiveJobMatchesFn] Fetching REAL jobs for: ${roleDesc} in ${location || 'anywhere'}`);
 
     // Build Fantastic.jobs query — real ATS postings from the last 7 days
-    const titleQuery = buildTitleQuery(roleDesc);
+    const params = new URLSearchParams({
+      time_frame: '7d',
+      limit: '100',
+      include_basic_organization_details: 'true',
+      title_advanced: buildTitleQuery(roleDesc),
+    });
     const locQuery = buildLocationQuery(location);
+    if (locQuery) params.set('location', locQuery);
 
-    // Try direct API first, fall back to RapidAPI (key works on one or the other)
-    let apiRes;
-    {
-      const params = new URLSearchParams({
-        time_frame: '7d',
-        limit: '100',
-        include_basic_organization_details: 'true',
-        title_advanced: titleQuery,
-      });
-      if (locQuery) params.set('location', locQuery);
-      apiRes = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
-        headers: { 'Authorization': `Bearer ${apiKey}` },
-      });
-    }
-    if (apiRes.status === 401 || apiRes.status === 403) {
-      console.log('[getLiveJobMatchesFn] Direct API auth failed, trying RapidAPI hosts...');
-      const params = new URLSearchParams({
-        limit: '100',
-        offset: '0',
-        advanced_title_filter: titleQuery,
-        include_ai: 'true',
-      });
-      if (locQuery) params.set('location_filter', locQuery);
-
-      const RAPID_HOSTS = [
-        { host: 'active-jobs-db.p.rapidapi.com', path: '/active-ats-7d' },
-        { host: 'internships-api.p.rapidapi.com', path: '/active-jb-7d' },
-        { host: 'linkedin-job-search-api.p.rapidapi.com', path: '/active-jb-7d' },
-      ];
-      for (const { host, path } of RAPID_HOSTS) {
-        apiRes = await fetch(`https://${host}${path}?${params.toString()}`, {
-          headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': host },
-        });
-        console.log(`[getLiveJobMatchesFn] RapidAPI ${host} → ${apiRes.status}`);
-        if (apiRes.ok || apiRes.status === 429) break;
-      }
-    }
+    const apiRes = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+    });
     if (!apiRes.ok) {
       const errText = await apiRes.text();
       console.error(`[getLiveJobMatchesFn] Jobs API error ${apiRes.status}: ${errText.slice(0, 300)}`);
