@@ -6,9 +6,10 @@ export default function RevenueSection({ revenue }) {
   return (
     <section>
       <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">💰 Revenue & Trials</h2>
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <MetricTile label="Paid Members" value={revenue.paidUsers} accent="text-green-400" />
-        <MetricTile label="Est. Weekly Revenue" value={`$${revenue.weeklyMRR}`} sub="paid × $4.99/wk" accent="text-green-400" />
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
+        <MetricTile label="Paying Subscribers" value={revenue.paidUsers} sub="active Stripe subscriptions" accent="text-green-400" />
+        <MetricTile label="Est. Weekly Revenue" value={`$${revenue.weeklyMRR}`} sub="payers × $4.99/wk" accent="text-green-400" />
+        <MetricTile label="Founding Members" value={revenue.foundingMembers} sub="free lifetime access" />
         <MetricTile label="Active Trials" value={revenue.activeTrials} sub={`${revenue.trialsStartedThisWeek} started this wk`} accent="text-orange-400" />
         <MetricTile
           label="Trial → Paid"

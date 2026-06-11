@@ -47,6 +47,12 @@ Deno.serve(async (req) => {
 
     // ── Revenue / trials ──────────────────────────────────────────────────
     const paidUsers = allUsers.filter(isPaid);
+    const paidBreakdown = {
+      stripeActive: allUsers.filter(u => u.subscription_status === 'active').length,
+      stripeActiveWithCustomerId: allUsers.filter(u => u.subscription_status === 'active' && u.stripe_customer_id).length,
+      fastiqTier: allUsers.filter(u => u.membership_tier === 'fastiq' && u.subscription_status !== 'active').length,
+      foundingMembers: allUsers.filter(u => u.is_founding_member === true && u.subscription_status !== 'active' && u.membership_tier !== 'fastiq').length,
+    };
     const activeTrials = allUsers.filter(isActiveTrial);
     const expiredTrials = allUsers.filter(u => u.trial_status === 'expired' && !isPaid(u));
     const trialsStartedThisWeek = allUsers.filter(u =>
@@ -141,12 +147,14 @@ Deno.serve(async (req) => {
         parentsLastWeek,
       },
       revenue: {
-        paidUsers: paidUsers.length,
+        paidUsers: paidBreakdown.stripeActive,
+        foundingMembers: paidBreakdown.foundingMembers,
+        paidBreakdown,
         activeTrials: activeTrials.length,
         expiredTrials: expiredTrials.length,
         trialsStartedThisWeek,
         trialConversionPct,
-        weeklyMRR: Math.round(paidUsers.length * 4.99 * 100) / 100,
+        weeklyMRR: Math.round(paidBreakdown.stripeActive * 4.99 * 100) / 100,
       },
       activation: {
         totalStudents: students.length,
