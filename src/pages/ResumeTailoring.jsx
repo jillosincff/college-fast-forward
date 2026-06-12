@@ -248,7 +248,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         jobDescription: jobDescription.trim(),
         sourceResumeId: resumeId || '',
       });
-      if (res.data?.success) {
+      if (res.data?.upgrade_required) {
+        setError(res.data.message || 'Upgrade to unlock full resume tailoring.');
+        setPhase('tailor');
+      } else if (res.data?.success && res.data?.tailoredResume?.tailored_content) {
         setResult(res.data);
         base44.entities.TailoredResume.filter({ user_email: user.email })
           .then(t => setTailoredResumes(t || []))

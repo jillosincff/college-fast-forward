@@ -6,7 +6,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { resumeText, jobTitle, companyName, jobDescription, sourceResumeId } = await req.json();
+    const { resumeText, jobTitle, companyName, jobDescription = '', sourceResumeId, adminTest } = await req.json();
 
     if (!resumeText) {
       return Response.json({ error: 'Resume text is required' }, { status: 400 });
@@ -16,10 +16,10 @@ Deno.serve(async (req) => {
     const effectiveJD = jobDescription || `Optimize this resume for general career readiness. Improve clarity, impact language, and professional framing. Target role: ${jobTitle || 'professional role'}. Company: ${companyName || 'any company'}.`;
 
     // Server-side trial enforcement — return basic keyword score only if trial expired
-    const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active';
+    const trialExpired = user.trial_status === 'expired' && user.subscription_status !== 'active' && !(adminTest && user.role === 'admin');
     if (trialExpired) {
       const basicResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Score this resume against the job description on a scale of 0-100 and list the top 5 missing keywords. Resume: ${resumeText.substring(0, 3000)} Job Description: ${jobDescription.substring(0, 2000)}`,
+        prompt: `Score this resume against the job description on a scale of 0-100 and list the top 5 missing keywords. Resume: ${resumeText.substring(0, 3000)} Job Description: ${effectiveJD.substring(0, 2000)}`,
         response_json_schema: {
           type: 'object',
           properties: {
@@ -75,9 +75,7 @@ Rules:
 
 Return as JSON.`;
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
+    const llmSchema = {
         type: "object",
         properties: {
           original_score: { type: "number" },
@@ -100,10 +98,31 @@ Return as JSON.`;
           },
           tailored_content: { type: "string" },
           changes_summary: { type: "string" }
-        }
-      },
-      model: "claude_sonnet_4_6"
+        },
+        required: ["original_score", "tailored_score", "changes", "tailored_content"]
+    };
+
+    let result = await base44.integrations.Core.InvokeLLM({
+      prompt,
+      response_json_schema: llmSchema,
     });
+
+    // Validate output — retry once if the tailored content came back empty
+    if (!result?.tailored_content || result.tailored_content.trim().length < 100) {
+      console.warn('Empty tailored_content, retrying');
+      result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: llmSchema,
+      });
+    }
+
+    if (!result?.tailored_content || result.tailored_content.trim().length < 100) {
+      console.error('Tailoring failed: empty tailored_content after retry');
+      return Response.json({
+        success: false,
+        error: 'The AI couldn\'t generate your tailored resume. Please try again.',
+      }, { status: 502 });
+    }
 
     // Save to TailoredResume entity
     const tailoredResume = await base44.entities.TailoredResume.create({
