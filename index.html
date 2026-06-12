@@ -7,6 +7,11 @@
     <meta name="referrer" content="no-referrer-when-downgrade" />
     <link rel="manifest" href="/manifest.json" />
     <title>College Fast Forward</title>
+    <!-- Force light background during full-page loads (prevents black flash on logout in dark mode) -->
+    <meta name="color-scheme" content="light" />
+    <style>
+      html, body { background-color: #f8f9ff; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
