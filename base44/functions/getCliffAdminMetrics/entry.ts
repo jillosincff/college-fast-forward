@@ -90,6 +90,10 @@ Deno.serve(async (req) => {
     const outreachThisWeek = pipeline.filter(p => p.reached_out_date && p.reached_out_date >= day7).length;
     const outreachLastWeek = pipeline.filter(p => p.reached_out_date && p.reached_out_date >= day14 && p.reached_out_date < day7).length;
 
+    // Active trials who actually engaged (have pipeline activity = logged in and used it)
+    const pipelineEmails = new Set(pipeline.map(p => p.user_email));
+    const activeTrialsEngaged = activeTrials.filter(u => pipelineEmails.has(u.email)).length;
+
     // ── Activation (students who actually use the core loop) ─────────────
     const studentEmails = new Set(students.map(s => s.email));
     const activeStudentEmails = new Set(pipeline.map(p => p.user_email).filter(e => studentEmails.has(e)));
@@ -151,6 +155,7 @@ Deno.serve(async (req) => {
         foundingMembers: paidBreakdown.foundingMembers,
         paidBreakdown,
         activeTrials: activeTrials.length,
+        activeTrialsEngaged,
         expiredTrials: expiredTrials.length,
         trialsStartedThisWeek,
         trialConversionPct,

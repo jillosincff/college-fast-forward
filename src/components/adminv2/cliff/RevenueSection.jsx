@@ -10,7 +10,12 @@ export default function RevenueSection({ revenue }) {
         <MetricTile label="Paying Subscribers" value={revenue.paidUsers} sub="active Stripe subscriptions" accent="text-green-400" />
         <MetricTile label="Est. Weekly Revenue" value={`$${revenue.weeklyMRR}`} sub="payers × $4.99/wk" accent="text-green-400" />
         <MetricTile label="Founding Members" value={revenue.foundingMembers} sub="free lifetime access" />
-        <MetricTile label="Active Trials" value={revenue.activeTrials} sub={`${revenue.trialsStartedThisWeek} started this wk`} accent="text-orange-400" />
+        <MetricTile
+          label="Active Trials"
+          value={revenue.activeTrials}
+          sub={`${revenue.activeTrialsEngaged ?? 0} actually used it · incl. auto-granted`}
+          accent="text-orange-400"
+        />
         <MetricTile
           label="Trial → Paid"
           value={revenue.trialConversionPct !== null ? `${revenue.trialConversionPct}%` : '—'}
