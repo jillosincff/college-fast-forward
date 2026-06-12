@@ -31,14 +31,7 @@ function getStarterPrompts(user) {
     }
   }
 
-  if (industries.length > 0) {
-    prompts.push(`Find alumni in the ${industries[0]} industry`);
-  } else if (roles.length > 1) {
-    prompts.push(`Any alumni with a ${roles[1] || roles[0]} background?`);
-  } else {
-    prompts.push("Any alumni with a marketing background?");
-  }
-
+  prompts.push("Let's do a mock interview");
   prompts.push("How do I follow up after an interview without being annoying?");
   return prompts;
 }
