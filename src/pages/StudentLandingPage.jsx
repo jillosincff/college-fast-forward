@@ -325,7 +325,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-2">
                 <h1 style={{ fontFamily: SF, fontSize: 'clamp(42px, 9vw, 72px)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#0f172a', margin: '0 0 20px' }}>
-                  The job search is a black hole.
+                  Skip the black hole.
                 </h1>
               </div>
             )}
@@ -334,7 +334,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-3">
                 <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 48px)', fontWeight: 600, color: '#3b82f6', margin: '0 0 24px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
-                  CFF finds the path around it.
+                  Land the interview.
                 </h2>
               </div>
             )}
@@ -343,7 +343,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {mounted && (
               <div className="hero-animate-4">
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 3.5vw, 18px)', color: '#334155', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 540 }}>
-                 We help you bypass the void: hidden opportunities, warm connections from alumni &amp; parents, and real human introductions — because once a person sees your resume, the algorithm stops mattering.
+                 Hidden jobs, warm alumni &amp; parent intros, and outreach that gets replies — all in one place. Because once a person sees your resume, the algorithm stops mattering.
                 </p>
               </div>
             )}
