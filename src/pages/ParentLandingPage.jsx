@@ -78,7 +78,7 @@ function FAQItem({ q, a }) {
 export default function ParentLandingPage({ onStudentClick }) {
   const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
-  const [form, setForm] = useState({ fullName: '', jobTitle: '', industry: '', linkedin: '', email: '', school: '' });
+  const [form, setForm] = useState({ fullName: '', jobTitle: '', industry: '', linkedin: '', email: '', school: '', persona: 'parent' });
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -131,6 +131,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         visible_in_directory: true,
         directory_consent_given: true,
         linkedin_url: form.linkedin?.trim() || '',
+        persona: form.persona,
       });
 
       // Redeem student text-referral (grants the student 3 days of premium)
@@ -314,6 +315,26 @@ export default function ParentLandingPage({ onStudentClick }) {
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>I'm joining as a... *</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[['parent', '👨‍👩‍👧 Parent'], ['alumni', '🎓 Alum']].map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, persona: value }))}
+                      style={{
+                        flex: 1, fontFamily: SF, fontSize: 14, fontWeight: 700,
+                        color: form.persona === value ? INDIGO : TEXT2,
+                        background: form.persona === value ? INDIGO_LIGHT : '#F8FAFC',
+                        border: `1.5px solid ${form.persona === value ? INDIGO : '#E2E8F0'}`,
+                        borderRadius: R, padding: '12px 16px', cursor: 'pointer',
+                        minHeight: 48, transition: 'all 0.15s',
+                      }}
+                    >{label}</button>
+                  ))}
+                </div>
+              </div>
               <div>
                 <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Full Name *</label>
                 <input

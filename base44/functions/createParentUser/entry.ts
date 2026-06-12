@@ -30,7 +30,11 @@ Deno.serve(async (req) => {
       visible_in_directory,
       directory_consent_given,
       linkedin_url,
+      persona,
     } = await req.json();
+
+    // Distinguish parents vs alumni — default to parent
+    const userPersona = persona === 'alumni' ? 'alumni' : 'parent';
 
     // Validate required fields
     if (!email || !full_name || !school) {
@@ -75,7 +79,7 @@ Deno.serve(async (req) => {
       email_confirm: true,
       user_metadata: {
         full_name: full_name.trim(),
-        persona: 'parent',
+        persona: userPersona,
         onboarding_completed: true,
       }
     });
@@ -90,8 +94,8 @@ Deno.serve(async (req) => {
 
     // Update user entity with parent profile data
     await base44.asServiceRole.entities.User.update(authUser.user.id, {
-      persona: 'parent',
-      roles: ['parent'],
+      persona: userPersona,
+      roles: [userPersona],
       full_name: full_name.trim(),
       school: school.trim(),
       school_name: school_name || school.trim(),
@@ -121,7 +125,7 @@ Deno.serve(async (req) => {
         id: authUser.user.id,
         email: authUser.user.email,
         full_name: full_name.trim(),
-        persona: 'parent',
+        persona: userPersona,
       },
       message: 'Parent user created successfully'
     }, { headers: corsHeaders });
