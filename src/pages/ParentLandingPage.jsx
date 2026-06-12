@@ -49,7 +49,7 @@ const SCHOOLS = ['University of Florida', 'Florida State', 'Ohio State', 'UCF', 
 
 const HOW_IT_WORKS = [
   { number: "01", title: "Fill out a quick profile", desc: "Your industry, company, and how you're willing to help. Takes 2 minutes. Seriously." },
-  { number: "02", title: "Students reach out to you directly", desc: "Only students from your school's network — no spam, no cold outreach from strangers." },
+  { number: "02", title: "Students find you when it matches", desc: "When a student from your school searches for contacts in your industry, your profile comes up — and they can reach out to you directly. No spam, no cold outreach from strangers." },
   { number: "03", title: "You respond and help how you want", desc: "Whether that's advice, a referral, or an introduction — you decide. No pressure ever." },
 ];
 
@@ -455,7 +455,7 @@ export default function ParentLandingPage({ onStudentClick }) {
             { emoji: '🎓', stat: '1,500+', label: 'Parents & Alumni' },
             { emoji: '🏢', stat: '15+', label: 'Universities' },
             { emoji: '🤝', stat: '50+', label: 'Industries' },
-            { emoji: '⚡', stat: 'Free', label: 'Always, for parents' },
+            { emoji: '⚡', stat: 'Free', label: 'Always, for parents and alumni' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px' }}>
               <span style={{ fontSize: 20 }}>{item.emoji}</span>
