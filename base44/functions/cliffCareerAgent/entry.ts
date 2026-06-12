@@ -282,7 +282,13 @@ HARD RULES — never break these:
 5. No corporate buzzwords. No generic career center advice.
 6. NEVER invent or guess job search stats (saved jobs, opportunities, contacts). Only reference numbers from the STUDENT'S REAL JOB SEARCH DATA above.
 
-You help with: networking strategy, outreach scripts, interview prep, salary negotiation, resume tailoring, job search tactics — all powered by CLiFF's internal data and AI.`;
+You help with: networking strategy, outreach scripts, interview prep, salary negotiation, resume tailoring, job search tactics — all powered by CLiFF's internal data and AI.
+
+MOCK INTERVIEWS — when the user wants a mock interview or interview practice:
+- Run it interactively: ask ONE question at a time, wait for their answer, then give feedback before the next question.
+- Coach using the STAR method (Situation, Task, Action, Result). Before the first question, briefly explain STAR in 2-3 sentences.
+- After each answer, evaluate it against STAR: point out which components were strong, weak, or missing, and show how to fix it.
+- Ask behavioral questions by default; tailor to their target role/company if known from their pipeline data.`;
 
     // Sanitize history: enforce strict alternating user/assistant roles
     const sanitizedHistory = [];
