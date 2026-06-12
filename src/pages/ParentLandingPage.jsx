@@ -57,7 +57,7 @@ const FAQS = [
   { q: "Is the parent & alumni network really free?", a: "Yes, completely. Parents and alumni join free and stay free. CliFF Premium is an optional paid upgrade for students only." },
   { q: "What does 'agreeing to respond' mean?", a: "When you join, you're committing to be an active member — if a student reaches out, you'll do your best to respond. Even a quick reply makes a difference." },
   { q: "What exactly does CliFF do?", a: "CliFF is an AI career engine for students — resume tailoring, alumni search, mock interviews, company intel, and a daily action plan." },
-  { q: "Can I buy CliFF Premium for my student?", a: "Yes. Parents can gift CliFF Premium to their student directly from their dashboard." },
+  { q: "Does joining help my own student too?", a: "Yes. If your student invited you with their referral link, they automatically earn free days of CliFF Premium when you complete your profile. And every parent who joins makes the network stronger for all students — including yours." },
   { q: "What schools are in the network?", a: "We're building networks at colleges across the country. Whatever school your student attends, that's the network you join." },
   { q: "I'm an alumni — can I join to help?", a: "Absolutely. Alumni are a crucial part of the network. Students specifically look for alumni at their target companies." },
 ];
