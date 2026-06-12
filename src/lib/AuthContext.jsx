@@ -48,7 +48,10 @@ const AuthProviderInner = ({ children }) => {
   };
 
   const logout = async () => {
-    // base44.auth.logout() navigates away immediately, so wipe local state first.
+    // The session token lives in localStorage (base44_access_token), so clearing
+    // storage fully ends the session. We intentionally do NOT call
+    // base44.auth.logout() — it round-trips through Base44's hosted logout page,
+    // which flashes the black hosted login screen before redirecting back.
     try {
       localStorage.clear();
       sessionStorage.clear();
@@ -56,11 +59,9 @@ const AuthProviderInner = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
 
-    // Pass the post-logout URL so Base44's server logout redirects here. Without it,
-    // from_url defaults to the current (now unauthenticated) page, which bounces to
-    // Base44's hosted login screen. Use the bare origin (not a hash route) so the
-    // server's from_url validation accepts it; "/" renders StudentLandingPage.
-    base44.auth.logout(window.location.origin + '/');
+    // Hard reload to the landing page so the SDK client re-initializes without a token.
+    window.location.replace(window.location.origin + '/#/StudentLandingPage');
+    window.location.reload();
   };
 
   return (
