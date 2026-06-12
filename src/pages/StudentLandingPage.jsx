@@ -643,7 +643,7 @@ export default function StudentLandingPage({ onParentClick }) {
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fefce8', border: '1px solid #fde68a', borderRadius: 100, padding: '6px 14px' }}>
                 <span style={{ fontSize: 12 }}>⚡</span>
-                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#854d0e' }}>Less than a delivery meal for 14 days</span>
+                <span style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: '#854d0e' }}>Less than a latte a week</span>
               </div>
             </div>
 
