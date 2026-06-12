@@ -27,9 +27,10 @@ export default function FreeTierNav({ user, onUpgrade, onGoalsUpdated, navRef })
       <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 12px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <img src="https://media.base44.com/images/public/684474c5723dc90efce23588/5181e2c8e_generated_image.png" alt="College Fast Forward" style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0 }} />
             <div style={{ fontFamily: dm, fontSize: 16, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-              <span className="nav-cff-abbr"><span>C</span><span style={{ color: '#2563eb' }}>FF</span></span>
-              <span className="nav-full-name" style={{ display: 'none' }}><span>College </span><span style={{ color: '#2563eb' }}>Fast Forward</span></span>
+              <span className="nav-cff-abbr"><span>C</span><span style={{ color: '#6d28d9' }}>FF</span></span>
+              <span className="nav-full-name" style={{ display: 'none' }}><span>College </span><span style={{ color: '#6d28d9' }}>Fast Forward</span></span>
             </div>
             <style>{`@media(min-width:480px){.nav-full-name{display:inline !important}.nav-cff-abbr{display:none !important}}`}</style>
             {isPremium ? (

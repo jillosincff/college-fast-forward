@@ -279,11 +279,12 @@ export default function StudentLandingPage({ onParentClick }) {
         padding: '0 clamp(16px,5vw,32px)', height: 64,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <span style={{ fontFamily: SF, fontSize: 'clamp(15px, 3vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          College{' '}
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: SF, fontSize: 'clamp(15px, 3vw, 17px)', fontWeight: 800, color: TEXT, letterSpacing: '-0.03em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <img src="https://media.base44.com/images/public/684474c5723dc90efce23588/5181e2c8e_generated_image.png" alt="College Fast Forward" style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0 }} />
+          <span>College{' '}
           <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             Fast Forward
-          </span>
+          </span></span>
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* "For Parents" hidden on mobile — shown in footer instead */}
@@ -333,7 +334,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Sub-headline */}
             {mounted && (
               <div className="hero-animate-3">
-                <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 48px)', fontWeight: 600, color: '#3b82f6', margin: '0 0 24px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+                <h2 style={{ fontFamily: SF, fontSize: 'clamp(26px, 6vw, 48px)', fontWeight: 600, color: VIOLET, margin: '0 0 24px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
                   Land the interview.
                 </h2>
               </div>
