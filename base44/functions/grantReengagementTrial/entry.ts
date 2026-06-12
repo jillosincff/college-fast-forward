@@ -99,6 +99,7 @@ Deno.serve(async (req) => {
     const cohort = await base44.asServiceRole.entities.User.filter({ source: 'csv_import_2026_04_25' }, '-created_date', 1000);
 
     const eligible = cohort.filter(u =>
+      u.persona === 'student' &&             // students only for this wave
       !u.cliff_reengagement_trial_at &&        // not already granted by this campaign
       u.subscription_status !== 'active' &&    // not paying
       !u.stripe_subscription_id &&
