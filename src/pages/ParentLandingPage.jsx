@@ -93,10 +93,11 @@ export default function ParentLandingPage({ onStudentClick }) {
     }
   }, []);
 
+  // All CTAs scroll to the inline signup form — one consistent path to join
   const go = () => {
     localStorage.setItem('pending_invite_role', 'parent');
     sessionStorage.setItem('pending_invite_role', 'parent');
-    navigate('GatorAuth');
+    document.getElementById('parent-signup-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const student = () => {
@@ -235,11 +236,11 @@ export default function ParentLandingPage({ onStudentClick }) {
 
         <div style={{ opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s ease 0.1s', maxWidth: 620, textAlign: 'center', marginBottom: 16 }}>
           <h1 style={{ fontFamily: SF, fontSize: 'clamp(32px, 5.5vw, 58px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, color: TEXT, margin: '0 0 16px' }}>
-            Help students{' '}
-            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>open doors.</span>
+            Your network is someone's{' '}
+            <span style={{ background: GRAD_INDIGO, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>big break.</span>
           </h1>
           <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(16px, 2vw, 19px)', color: TEXT2, lineHeight: 1.65, maxWidth: 500, margin: '0 auto 8px' }}>
-            Your experience can create real opportunities for the next generation.
+            Open a door for a student from your school's community — and other parents do the same for yours.
           </p>
           <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 15, color: TEXT3, margin: 0 }}>
             Add your information below — it only takes 30 seconds.
@@ -247,7 +248,7 @@ export default function ParentLandingPage({ onStudentClick }) {
         </div>
 
         {/* ── SIGNUP FORM ── */}
-        <div style={{
+        <div id="parent-signup-form" style={{
           width: '100%', maxWidth: 480,
           background: CARD, borderRadius: 20, boxShadow: SHADOW_LG, border: `1px solid ${INDIGO_BORDER}`,
           padding: 'clamp(28px, 6vw, 36px)', marginTop: 32,
@@ -325,6 +326,17 @@ export default function ParentLandingPage({ onStudentClick }) {
                 />
               </div>
               <div>
+                <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Which school would you like to support? *</label>
+                <input
+                  className="parent-input"
+                  style={inputStyle}
+                  placeholder="e.g. University of Florida"
+                  value={form.school}
+                  onChange={e => setForm(f => ({ ...f, school: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
                 <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Job Title *</label>
                 <input
                   className="parent-input"
@@ -343,17 +355,6 @@ export default function ParentLandingPage({ onStudentClick }) {
                   placeholder="e.g. Software Engineering at Google"
                   value={form.industry}
                   onChange={e => setForm(f => ({ ...f, industry: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
-                <label style={{ fontFamily: FONT, fontSize: 12, fontWeight: 600, color: TEXT2, display: 'block', marginBottom: 6, letterSpacing: '0.03em' }}>Which school would you like to support? *</label>
-                <input
-                  className="parent-input"
-                  style={inputStyle}
-                  placeholder="e.g. University of Florida"
-                  value={form.school}
-                  onChange={e => setForm(f => ({ ...f, school: e.target.value }))}
                   required
                 />
               </div>
@@ -423,15 +424,6 @@ export default function ParentLandingPage({ onStudentClick }) {
           )}
         </div>
 
-        {/* Stats */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', marginTop: 52, paddingTop: 36, borderTop: '1px solid #f1f5f9', opacity: mounted ? 1 : 0, transition: 'opacity 0.7s ease 0.5s', gap: 0, width: '100%', maxWidth: 520 }}>
-          {[{ number: '1,500+', label: 'Parents & Alumni' }, { number: '15+', label: 'Universities' }, { number: '50+', label: 'Industries' }].map((s, i) => (
-            <div key={i} style={{ textAlign: 'center', padding: '0 36px', borderRight: i < 2 ? '1px solid #f1f5f9' : 'none' }}>
-              <p style={{ fontFamily: SF, fontSize: 32, fontWeight: 800, color: INDIGO, margin: '0 0 4px', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.number}</p>
-              <p style={{ fontFamily: SF, fontSize: 11, fontWeight: 600, color: TEXT3, margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{s.label}</p>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* ── TRUSTED BY ── */}
@@ -441,7 +433,7 @@ export default function ParentLandingPage({ onStudentClick }) {
             { emoji: '🎓', stat: '1,500+', label: 'Parents & Alumni' },
             { emoji: '🏢', stat: '15+', label: 'Universities' },
             { emoji: '🤝', stat: '50+', label: 'Industries' },
-            { emoji: '⭐', stat: '4.9/5', label: 'Parent Rating' },
+            { emoji: '⚡', stat: 'Free', label: 'Always, for parents' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px' }}>
               <span style={{ fontSize: 20 }}>{item.emoji}</span>
@@ -495,6 +487,32 @@ export default function ParentLandingPage({ onStudentClick }) {
       </div>
 
 
+
+      {/* ── PARENT TESTIMONIAL ── */}
+      <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', padding: 'clamp(48px, 10vw, 80px) clamp(20px, 5vw, 40px)' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ background: 'rgba(245,243,255,0.6)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 20, padding: 'clamp(24px, 6vw, 36px)', boxShadow: SHADOW }}>
+            <p style={{ fontSize: 28, margin: '0 0 12px' }}>💬</p>
+            <p style={{ fontFamily: SF, fontSize: 'clamp(15px, 4vw, 18px)', fontWeight: 600, color: TEXT, lineHeight: 1.7, margin: '0 0 16px', fontStyle: 'italic' }}>
+              "A student messaged me about a week after I joined. We had a 20-minute call, I gave her some honest advice about breaking into marketing, and pointed her to an opening on our team. It took almost nothing from me — and it clearly meant a lot to her."
+            </p>
+            <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 700, color: INDIGO, margin: 0 }}>— Parent in the network, Marketing</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── FAQ ── */}
+      <div style={{ background: BG, borderTop: '1px solid #f1f5f9', padding: 'clamp(48px, 10vw, 80px) clamp(20px, 5vw, 40px)' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <SectionLabel text="Questions, answered" color={TEAL_DARK} />
+          <h2 style={{ fontFamily: SF, fontSize: 'clamp(22px, 5.5vw, 36px)', fontWeight: 900, color: TEXT, lineHeight: 1.2, letterSpacing: '-0.04em', margin: '0 0 clamp(16px, 4vw, 24px)', textAlign: 'center' }}>
+            Frequently asked questions
+          </h2>
+          {FAQS.map((faq, i) => (
+            <FAQItem key={i} q={faq.q} a={faq.a} />
+          ))}
+        </div>
+      </div>
 
       {/* ── FINAL CTA ── */}
       {!submitted && (
