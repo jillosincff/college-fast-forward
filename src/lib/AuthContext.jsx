@@ -56,10 +56,11 @@ const AuthProviderInner = ({ children }) => {
       localStorage.clear();
       sessionStorage.clear();
     } catch (e) { /* private browsing */ }
-    setUser(null);
-    setIsAuthenticated(false);
 
-    // Hard reload to the landing page so the SDK client re-initializes without a token.
+    // IMPORTANT: do NOT clear React auth state here. Setting user=null causes
+    // OnboardingGuard to instantly redirect to /GatorAuth (the dark login page),
+    // which flashes before the reload below. The full reload re-initializes the
+    // app unauthenticated anyway.
     window.location.replace(window.location.origin + '/#/StudentLandingPage');
     window.location.reload();
   };
