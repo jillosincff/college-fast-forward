@@ -227,7 +227,7 @@ export default function StudentLandingPage({ onParentClick }) {
     <p style={{ fontFamily: SF, fontSize: 12, fontWeight: 700, color, letterSpacing: '0.10em', textTransform: 'uppercase', margin: '0 0 12px', textAlign: 'center' }}>{text}</p>
   );
 
-  const CTAButton = ({ label = 'Get Hired →', onClick = go, fullWidth = false, style: extra = {} }) => (
+  const CTAButton = ({ label = 'Start Free →', onClick = go, fullWidth = false, style: extra = {} }) => (
     <button onClick={onClick} style={{
       fontFamily: SF, fontSize: 'clamp(15px, 4vw, 17px)', fontWeight: 700, color: '#fff',
       background: GRAD_INDIGO, border: 'none', borderRadius: 14,
@@ -296,7 +296,7 @@ export default function StudentLandingPage({ onParentClick }) {
           }}
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.03)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-          >{!isLoadingAuth && user ? 'Dashboard →' : 'Get Started →'}</button>
+          >{!isLoadingAuth && user ? 'Dashboard →' : 'Start Free →'}</button>
         </div>
       </nav>
 
@@ -365,11 +365,11 @@ export default function StudentLandingPage({ onParentClick }) {
                   onMouseLeave={e => { e.currentTarget.style.background = GRAD_INDIGO; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 20px 48px rgba(109,40,217,0.35)'; }}
                   onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.97)'; }}
                 >
-                  Start for Free →
+                  Start Free →
                 </button>
 
                 <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 'clamp(13px, 3vw, 14px)', color: '#64748b', margin: '8px 0 0', lineHeight: 1.5 }}>
-                  This guided setup takes 8–12 minutes — you'll have a personalized plan.
+                  Free to start · See your first matches in 2 minutes
                 </p>
               </div>
             )}
@@ -427,10 +427,10 @@ export default function StudentLandingPage({ onParentClick }) {
       <div style={{ background: '#fff', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '20px clamp(16px, 5vw, 32px)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexWrap: 'wrap', gap: 'clamp(12px, 4vw, 32px)', justifyContent: 'center', alignItems: 'center' }}>
           {[
-            { emoji: '🎓', stat: '2,400+', label: 'Students' },
-            { emoji: '🏢', stat: '500+', label: 'Companies Accessed' },
-            { emoji: '🤝', stat: '3 weeks', label: 'Avg. Time to Offer' },
-            { emoji: '⭐', stat: '4.9/5', label: 'Student Rating' },
+            { emoji: '🎓', stat: '2,400+', label: 'Students on CFF' },
+            { emoji: '🏢', stat: '500+', label: 'Companies in the network' },
+            { emoji: '🤝', stat: 'Warm intros', label: 'From alumni & parents' },
+            { emoji: '⚡', stat: 'Free', label: 'To get started' },
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px' }}>
               <span style={{ fontSize: 20 }}>{item.emoji}</span>
@@ -484,7 +484,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(109,40,217,0.42)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(109,40,217,0.30)'; }}
           >
-            Start for Free →
+            Start Free →
           </button>
         </div>
       </div>
@@ -586,12 +586,12 @@ export default function StudentLandingPage({ onParentClick }) {
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 28 }}>
             {[
-              { emoji: '⚡', label: 'Auto-extract insider contact lanes', color: VIOLET },
-              { emoji: '🎯', label: 'Real-time ATS formatting repair', color: INDIGO },
-              { emoji: '🔗', label: 'Campus alumni mapped to open reqs', color: TEAL_DARK },
-              { emoji: '📋', label: 'Hiring CRM — zero spreadsheets', color: PINK },
-              { emoji: '✉️', label: 'Outreach drafted in your voice', color: VIOLET },
-              { emoji: '🏆', label: 'Interview prep from real questions', color: INDIGO },
+              { emoji: '⚡', label: 'Finds the right people to message', color: VIOLET },
+              { emoji: '🎯', label: "Fixes your resume so bots don't reject it", color: INDIGO },
+              { emoji: '🔗', label: 'Matches alumni from your school to open jobs', color: TEAL_DARK },
+              { emoji: '📋', label: 'Tracks every application for you', color: PINK },
+              { emoji: '✉️', label: 'Writes your outreach messages for you', color: VIOLET },
+              { emoji: '🏆', label: 'Preps you with real interview questions', color: INDIGO },
             ].map((item, i) => (
               <div key={i} style={{ background: '#fff', borderRadius: 16, padding: 'clamp(12px, 3vw, 18px)', boxShadow: SHADOW, border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <span style={{ fontSize: 22 }}>{item.emoji}</span>
@@ -601,7 +601,7 @@ export default function StudentLandingPage({ onParentClick }) {
           </div>
           <div style={{ background: 'rgba(245,243,255,0.6)', border: `1px solid ${INDIGO_BORDER}`, borderRadius: 16, padding: 'clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px)', textAlign: 'center', boxShadow: SHADOW }}>
             <p style={{ fontFamily: SF, fontSize: 'clamp(13px, 3.5vw, 15px)', fontWeight: 600, color: INDIGO_DIM, margin: 0, lineHeight: 1.5 }}>
-              💬 "I was overwhelmed applying everywhere. The Agent organized everything, fixed my resume, and helped me reach the right people. Landed an internship in 3 weeks." — Marcus, Penn State '27
+              💬 "The warm intro feature made networking feel less random. I actually got a response from an alumna within 48 hours." — Nerissa, USC '25
             </p>
           </div>
         </div>
@@ -655,6 +655,12 @@ export default function StudentLandingPage({ onParentClick }) {
               Billed monthly ($19.96) · Cancel in 1-tap anytime
             </p>
 
+            <div style={{ background: INDIGO_LIGHT, border: `1px solid ${INDIGO_BORDER}`, borderRadius: 12, padding: '12px 16px', marginBottom: 'clamp(20px, 4vw, 24px)' }}>
+              <p style={{ fontFamily: SF, fontSize: 13, fontWeight: 600, color: INDIGO_DIM, margin: 0, lineHeight: 1.5 }}>
+                Start completely free — upgrade to Premium only when you're ready.
+              </p>
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 'clamp(24px, 5vw, 32px)' }}>
               {PRO_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
@@ -666,7 +672,7 @@ export default function StudentLandingPage({ onParentClick }) {
               ))}
             </div>
 
-            <CTAButton label="⚡ Get Started Free →" fullWidth />
+            <CTAButton label="Start Free →" fullWidth />
           </div>
         </div>
       </div>
@@ -693,7 +699,7 @@ export default function StudentLandingPage({ onParentClick }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px) scale(1.04)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.25)'; }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'; }}
           >
-            ⚡ Start for Free →
+            Start Free →
           </button>
         </div>
       </div>
