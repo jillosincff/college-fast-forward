@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     }
 
     // 3. Check confirmation text from the request body
-    const { confirmationText } = await req.json();
+    const { confirmationText, targetEmail } = await req.json();
     if (confirmationText !== 'DELETE') {
       return new Response(JSON.stringify({ 
         error: 'Incorrect confirmation text. Account deletion canceled.' 
@@ -22,9 +22,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 4. Delete user's associated data across different entities
-    const userEmail = user.email;
-    const userId = user.id;
+    // Admin can delete another user by passing targetEmail
+    let userEmail = user.email;
+    let userId = user.id;
+    if (targetEmail && targetEmail !== user.email) {
+      if (user.role !== 'admin') {
+        return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const targets = await base44.asServiceRole.entities.User.filter({ email: targetEmail });
+      if (!targets || targets.length === 0) {
+        return new Response(JSON.stringify({ error: 'Target user not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      userEmail = targets[0].email;
+      userId = targets[0].id;
+    }
 
     // A helper function to run deletions in parallel — uses service role to bypass RLS
     const deleteUserRecords = async (entity, filter) => {
