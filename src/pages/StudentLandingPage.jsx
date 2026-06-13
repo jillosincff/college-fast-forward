@@ -318,7 +318,7 @@ export default function StudentLandingPage({ onParentClick }) {
             {/* Eyebrow badge */}
             {mounted && (
               <div className="hero-animate" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(79,70,229,0.06)', border: '1px solid rgba(79,70,229,0.18)', borderRadius: 999, padding: '12px 28px', marginBottom: 32 }}>
-                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em' }}>⚡ BUILT FOR COLLEGE STUDENTS</span>
+                <span style={{ fontFamily: SF, fontSize: 'clamp(11px, 2.5vw, 13px)', fontWeight: 700, color: INDIGO, letterSpacing: '0.06em' }}>🎓 INTERNSHIPS &amp; ENTRY-LEVEL JOBS FOR COLLEGE STUDENTS</span>
               </div>
             )}
 
