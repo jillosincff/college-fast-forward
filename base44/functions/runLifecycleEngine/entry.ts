@@ -341,8 +341,8 @@ Deno.serve(async (req) => {
       const paywallCount  = paywallByEmail[u.email] || 0;
 
       // ── Segment 3 first (highest value) — CLIFF-ready ──────────────────
-      const isFree         = u.subscription_status === "free" || u.membership_tier === "free";
-      const activeRecently = daysAgo(u.last_active_at) <= 30;
+      const isFree         = u.subscription_status !== "active";
+      const activeRecently = daysAgo(u.updated_date) <= 30;
 
       if (isFree && activeRecently && paywallCount > 0) {
         const already = userLC.find((e) => e.template_id === "lifecycle_cliff_ready_v1");
@@ -364,7 +364,7 @@ Deno.serve(async (req) => {
       }
 
       // ── Segment 2 — Gone-Quiet ────────────────────────────────────────────
-      const daysSilent = daysAgo(u.last_active_at);
+      const daysSilent = daysAgo(u.updated_date);
       const wasActive  = hasCoreAction || (u.platform_visit_count || 0) > 0;
 
       if (wasActive && daysSilent >= 7 && daysSilent <= 60) {
