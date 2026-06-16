@@ -61,7 +61,7 @@ cold applications go nowhere. one warm intro changes everything.
 
 collegefastforward.com
 
-— CFF
+— The CFF Team
 
 p.s. this isn't a guilt trip. just a nudge from someone who's seen the difference it makes.
 
@@ -79,9 +79,9 @@ Unsubscribe: https://collegefastforward.com/unsubscribe?email=${enc(user.email)}
 <li>track an <strong>application</strong> — keep your pipeline organized from day one</li>
 </ul>
 <p>any of those. pick one. takes 2 minutes.</p>
-<div style="margin:28px 0;"><a href="https://www.collegefastforward.com" style="background:#2563eb;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Find an alumni now →</a></div>
+<div style="margin:28px 0;"><a href="https://www.collegefastforward.com" style="background:#7c3aed;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Find an alumni now →</a></div>
 <p>cold applications go nowhere. <strong>one warm intro changes everything.</strong></p>
-<p style="color:#555;">— CFF</p>
+<p style="color:#555;">— The CFF Team</p>
 <p style="font-size:13px;color:#999;">p.s. this isn't a guilt trip. just a nudge from someone who's seen the difference it makes.</p>
 <hr style="border:none;border-top:1px solid #eee;margin:32px 0;">
 <p style="font-size:12px;color:#aaa;">You're receiving this because you joined College Fast Forward. &nbsp;<a href="https://collegefastforward.com/unsubscribe?email=${enc(user.email)}" style="color:#aaa;">Unsubscribe</a></p>
@@ -91,9 +91,18 @@ Unsubscribe: https://collegefastforward.com/unsubscribe?email=${enc(user.email)}
     personalization: { days_since_signup: daysSince, school } };
 }
 
+function silenceBucket(days) {
+  if (!days || !isFinite(days) || isNaN(days)) return "a little while";
+  if (days < 10) return "a few days";
+  if (days < 21) return "a couple weeks";
+  if (days < 42) return "a few weeks";
+  return "over a month";
+}
+
 function templateGoneQuiet(user, pipelineByEmail) {
   const name = firstName(user.full_name);
-  const daysSilent = Math.round(daysAgo(user.last_active_at));
+  const rawDays = daysAgo(user.updated_date);
+  const silenceLabel = silenceBucket(rawDays);
 
   const entries = (pipelineByEmail[user.email] || [])
     .sort((a, b) => new Date(b.updated_date).getTime() - new Date(a.updated_date).getTime());
@@ -123,7 +132,7 @@ function templateGoneQuiet(user, pipelineByEmail) {
 
   const text = `hey ${name} —
 
-it's been about ${daysSilent} days since you were last on CFF. no big deal — job search has peaks and valleys. just didn't want you to lose ground.
+it's been ${silenceLabel} since you were last on CFF. no big deal — job search has peaks and valleys. just didn't want you to lose ground.
 
 ${pipelineBlurb}
 
@@ -133,7 +142,7 @@ your school's network is one of the most underused things in your arsenal. it's 
 
 collegefastforward.com
 
-— CFF
+— The CFF Team
 
 p.s. even 10 minutes of outreach today beats a week of waiting.
 
@@ -143,19 +152,19 @@ Unsubscribe: https://collegefastforward.com/unsubscribe?email=${enc(user.email)}
 
   const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a;line-height:1.65;font-size:16px;padding:32px 24px;">
 <p>hey ${name} —</p>
-<p>it's been about <strong>${daysSilent} days</strong> since you were last on CFF. no big deal — job search has peaks and valleys. just didn't want you to lose ground.</p>
+<p>it's been <strong>${silenceLabel}</strong> since you were last on CFF. no big deal — job search has peaks and valleys. just didn't want you to lose ground.</p>
 <p>${pipelineBlurb}</p>
 <p>the cold application black hole is real. <strong>submitting to an ATS and waiting is a coin flip at best.</strong> but one message to an alum at the company? changes the odds entirely. warm intros work because they bypass the noise.</p>
 <p>your school's network is one of the most underused things in your arsenal. <strong>it's already there.</strong></p>
-<div style="margin:28px 0;"><a href="https://www.collegefastforward.com" style="background:#2563eb;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Jump back in →</a></div>
-<p style="color:#555;">— CFF</p>
+<div style="margin:28px 0;"><a href="https://www.collegefastforward.com" style="background:#7c3aed;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Jump back in →</a></div>
+<p style="color:#555;">— The CFF Team</p>
 <p style="font-size:13px;color:#999;">p.s. even 10 minutes of outreach today beats a week of waiting.</p>
 <hr style="border:none;border-top:1px solid #eee;margin:32px 0;">
 <p style="font-size:12px;color:#aaa;">You're receiving this because you joined College Fast Forward. &nbsp;<a href="https://collegefastforward.com/unsubscribe?email=${enc(user.email)}" style="color:#aaa;">Unsubscribe</a></p>
 </div>`;
 
   return { subject, text, html, email_type: "lifecycle_gone_quiet_v1",
-    personalization: { days_silent: daysSilent, tracked_company: entryCompany,
+    personalization: { silence_label: silenceLabel, tracked_company: entryCompany,
       tracked_title: entryTitle, tracked_status: entryStatus } };
 }
 
@@ -167,7 +176,7 @@ function templateCliffReady(user, paywallCount) {
     "unlimited tracking. less than a coffee.",
     "the upgrade that pays for itself",
     "you've hit the limit. here's the unlock.",
-    "CLIFF: your entire job search, automated",
+    "CLiFF: your entire job search, automated",
   ];
   const subject = subjects[Math.floor(Math.random() * subjects.length)];
 
@@ -179,10 +188,10 @@ function templateCliffReady(user, paywallCount) {
 
 ${hitNote} that's a good sign. it means you're working your search.
 
-here's what CLIFF unlocks:
+here's what CLiFF unlocks:
 
 ✓ unlimited application tracking — no 5-app cap
-✓ auto-tracking — CLIFF spots new applications so you don't have to log them
+✓ auto-tracking — CLiFF spots new applications so you don't have to log them
 ✓ AI next-step suggestions for every tracked role
 ✓ automated follow-up nudges so no opportunity goes cold
 ✓ full pipeline — every company, every contact, every status in one place
@@ -191,11 +200,11 @@ $4.99/week. less than a coffee. billed as $19.96/month. cancel anytime.
 
 your entire job search. one place.
 
-collegefastforward.com/upgrade
+app.collegefastforward.com
 
-— CFF
+— The CFF Team
 
-p.s. the students on CLIFF send 3x more follow-ups and track 4x more contacts. the difference compounds fast.
+p.s. the students on CLiFF send 3x more follow-ups and track 4x more contacts. the difference compounds fast.
 
 ---
 You're receiving this because you joined College Fast Forward.
@@ -204,22 +213,22 @@ Unsubscribe: https://collegefastforward.com/unsubscribe?email=${enc(user.email)}
   const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a;line-height:1.65;font-size:16px;padding:32px 24px;">
 <p>hey ${name} —</p>
 <p>${hitNote} that's a good sign. <strong>it means you're working your search.</strong></p>
-<p>here's what <strong>CLIFF</strong> unlocks:</p>
+<p>here's what <strong>CLiFF</strong> unlocks:</p>
 <ul style="padding-left:20px;line-height:2.2;">
 <li>✓ <strong>unlimited application tracking</strong> — no 5-app cap</li>
-<li>✓ <strong>auto-tracking</strong> — CLIFF spots new applications so you don't have to log them</li>
+<li>✓ <strong>auto-tracking</strong> — CLiFF spots new applications so you don't have to log them</li>
 <li>✓ <strong>AI next-step suggestions</strong> for every tracked role</li>
 <li>✓ <strong>automated follow-up nudges</strong> so no opportunity goes cold</li>
 <li>✓ <strong>full pipeline</strong> — every company, every contact, every status in one place</li>
 </ul>
-<div style="background:#f0f7ff;border-left:4px solid #2563eb;padding:16px 20px;margin:24px 0;border-radius:4px;">
+<div style="background:#f0f7ff;border-left:4px solid #7c3aed;padding:16px 20px;margin:24px 0;border-radius:4px;">
 <p style="margin:0;font-size:20px;font-weight:700;">$4.99/week. Less than a coffee.</p>
 <p style="margin:6px 0 0;color:#555;font-size:14px;">Billed as $19.96/month. Cancel anytime.</p>
 </div>
 <p><strong>Your entire job search. One place.</strong></p>
-<div style="margin:28px 0;"><a href="https://www.collegefastforward.com/upgrade" style="background:#2563eb;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Unlock CLIFF →</a></div>
-<p style="color:#555;">— CFF</p>
-<p style="font-size:13px;color:#999;">p.s. the students on CLIFF send 3x more follow-ups and track 4x more contacts. the difference compounds fast.</p>
+<div style="margin:28px 0;"><a href="https://app.collegefastforward.com" style="background:#7c3aed;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;">Unlock CLiFF →</a></div>
+<p style="color:#555;">— The CFF Team</p>
+<p style="font-size:13px;color:#999;">p.s. the students on CLiFF send 3x more follow-ups and track 4x more contacts. the difference compounds fast.</p>
 <hr style="border:none;border-top:1px solid #eee;margin:32px 0;">
 <p style="font-size:12px;color:#aaa;">You're receiving this because you joined College Fast Forward. &nbsp;<a href="https://collegefastforward.com/unsubscribe?email=${enc(user.email)}" style="color:#aaa;">Unsubscribe</a></p>
 </div>`;
