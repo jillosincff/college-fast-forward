@@ -8,37 +8,33 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin only' }, { status: 403 });
     }
 
+    const body = await req.json().catch(() => ({}));
+    const limit = body.limit ?? 50;
     const db = base44.asServiceRole.entities;
     const now = new Date().toISOString();
     let approved = 0;
-    let skip = 0;
-    const pageSize = 100;
 
-    while (true) {
-      const page = await db.EngagementEmail.filter(
-        { status: 'pending_approval' },
-        '-created_date',
-        pageSize,
-        skip
-      );
+    // Fetch one extra to detect hasMore
+    const page = await db.EngagementEmail.filter(
+      { status: 'pending_approval' },
+      'created_date',
+      limit + 1
+    );
 
-      if (!page || page.length === 0) break;
+    const hasMore = page.length > limit;
+    const toProcess = page.slice(0, limit);
 
-      for (const record of page) {
-        await db.EngagementEmail.update(record.id, {
-          status: 'approved',
-          approved_at: now,
-          approved_by: 'owner',
-        });
-        approved++;
-        await new Promise(res => setTimeout(res, 100));
-      }
-
-      if (page.length < pageSize) break;
-      skip += pageSize;
+    for (const record of toProcess) {
+      await db.EngagementEmail.update(record.id, {
+        status: 'approved',
+        approved_at: now,
+        approved_by: 'owner',
+      });
+      approved++;
+      await new Promise(res => setTimeout(res, 300));
     }
 
-    return Response.json({ success: true, approved });
+    return Response.json({ success: true, approved, hasMore });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }
