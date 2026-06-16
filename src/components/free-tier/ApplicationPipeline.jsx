@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import { useAuth } from '@/lib/AuthContext';
 import { getColumnForStatus, COLUMN_TO_STATUS } from '@/components/pipeline/pipelineStatusMap';
 
@@ -351,16 +352,17 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         setJobs(prev => prev.map(j => j.id === exists.id ? { ...j, outreachContact: `${contactFirstName} (Alumni)` } : j));
       } else {
         try {
-          const record = await base44.entities.NetworkingPipeline.create({
-            user_email: user.email,
-            alumni_name: contactFirstName || company,
-            alumni_role: role || '',
-            company: company,
-            status: 'reached_out',
-            status_date: now,
-            reached_out_date: now,
-            alumni_source: 'manual',
-          });
+          const res = await addPipelineEntry({
+              alumni_name: contactFirstName || company,
+              alumni_role: role || '',
+              company: company,
+              status: 'reached_out',
+              status_date: now,
+              reached_out_date: now,
+              alumni_source: 'manual',
+            });
+            if (res.data?.error === 'free_limit_reached') { return; }
+            const record = res.data?.record;
           setJobs(prev => [...prev, {
             id: record.id,
             title: role || '',
@@ -394,8 +396,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
     if (!newTitle.trim() || !user?.email) return;
     const now = new Date().toISOString();
     try {
-      const record = await base44.entities.NetworkingPipeline.create({
-        user_email: user.email,
+      const res = await addPipelineEntry({
         alumni_name: '',
         alumni_role: newTitle,
         company: newCompany || '',
@@ -403,6 +404,11 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
         status_date: now,
         alumni_source: 'manual',
       });
+      if (res.data?.error === 'free_limit_reached') {
+        alert('You\'ve reached the 5-entry free limit. Upgrade to CLiFF Premium for unlimited tracking.');
+        return;
+      }
+      const record = res.data?.record;
       setJobs(prev => [...prev, {
         id: record.id,
         title: newTitle,

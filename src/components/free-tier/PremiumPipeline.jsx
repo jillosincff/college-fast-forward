@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { base44 } from '@/api/base44Client';
+import { addPipelineEntry } from '@/functions/addPipelineEntry';
 import OpportunityDrawer from './OpportunityDrawer';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { getColumnForStatus, COLUMN_TO_STATUS } from '@/components/pipeline/pipelineStatusMap';
@@ -418,8 +419,7 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
     const newEntry = { id: tempId, company: text, role: 'Position', source: 'Manual entry', recruiter: '—', posted: '—', logo: '🏢', alumni_source: 'manual', _entity: 'NetworkingPipeline' };
     setCards(prev => ({ ...prev, [col]: [...prev[col], newEntry] }));
     try {
-      const record = await base44.entities.NetworkingPipeline.create({
-        user_email: user?.email,
+      const res = await addPipelineEntry({
         alumni_name: text,
         alumni_role: 'Position',
         company: text,
@@ -427,6 +427,12 @@ export default function PremiumPipeline({ theme, onLeadSelect, user, college, pa
         status_date: now,
         alumni_source: 'manual',
       });
+      if (res.data?.error === 'free_limit_reached') {
+        setCards(prev => ({ ...prev, [col]: prev[col].filter(c => c.id !== tempId) }));
+        alert('You\'ve reached the 5-entry free limit. Upgrade to CLiFF Premium for unlimited tracking.');
+        return;
+      }
+      const record = res.data?.record;
       // Replace temp entry with real DB record
       setCards(prev => ({
         ...prev,
