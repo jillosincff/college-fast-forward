@@ -52,13 +52,23 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Admin only' }, { status: 403 });
     }
 
-    // Fetch all approved emails
-    const allEmails = await base44.asServiceRole.entities.EngagementEmail.list('-created_date', 200);
-    const approved = allEmails.filter(e => e.status === 'approved');
+    const body = await req.json().catch(() => ({}));
+    const limit = body.limit ?? 50;
+    const db = base44.asServiceRole.entities;
+
+    // Fetch one extra to detect hasMore
+    const page = await db.EngagementEmail.filter(
+      { status: 'approved' },
+      'created_date',
+      limit + 1
+    );
+
+    const hasMore = page.length > limit;
+    const toSend = page.slice(0, limit);
 
     const results = { sent: 0, failed: 0, errors: [] };
 
-    for (const email of approved) {
+    for (const email of toSend) {
       try {
         const msgId = await sendEmail(
           email.user_email,
@@ -67,27 +77,28 @@ Deno.serve(async (req) => {
           email.body_html,
           email.body_text,
         );
-        await base44.asServiceRole.entities.EngagementEmail.update(email.id, {
+        await db.EngagementEmail.update(email.id, {
           status: 'sent',
           sent_at: new Date().toISOString(),
           sendgrid_message_id: msgId || '',
         });
         results.sent++;
       } catch (err) {
-        await base44.asServiceRole.entities.EngagementEmail.update(email.id, {
+        await db.EngagementEmail.update(email.id, {
           status: 'failed',
           error_message: err.message,
         });
         results.failed++;
         results.errors.push({ email: email.user_email, error: err.message });
       }
+      await new Promise(res => setTimeout(res, 200));
     }
 
     return Response.json({
       success: true,
-      totalApproved: approved.length,
       sent: results.sent,
       failed: results.failed,
+      hasMore,
       errors: results.errors,
     });
   } catch (error) {
