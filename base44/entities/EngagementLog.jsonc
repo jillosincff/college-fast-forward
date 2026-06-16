@@ -1,0 +1,111 @@
+{
+  "name": "EngagementLog",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user this log entry belongs to"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name of the user"
+    },
+    "segment": {
+      "type": "string",
+      "enum": [
+        "never_activated",
+        "gone_quiet",
+        "cliff_ready"
+      ],
+      "description": "Lifecycle segment this user was classified into"
+    },
+    "email_type": {
+      "type": "string",
+      "description": "Type/template identifier for the email (e.g. never_activated_day3)"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject line"
+    },
+    "body_html": {
+      "type": "string",
+      "description": "HTML email body"
+    },
+    "body_text": {
+      "type": "string",
+      "description": "Plain text email body"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved",
+        "sent",
+        "skipped",
+        "rejected"
+      ],
+      "default": "draft",
+      "description": "Current status of this engagement log entry"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of admin who approved this entry"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this entry was approved"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was actually sent"
+    },
+    "send_error": {
+      "type": "string",
+      "description": "Error message if sending failed"
+    },
+    "personalization_data": {
+      "type": "object",
+      "description": "JSON blob of personalization context (alumni names, pipeline counts, etc.)",
+      "default": {}
+    },
+    "trigger_reason": {
+      "type": "string",
+      "description": "Human-readable explanation of why this user was classified into this segment"
+    },
+    "run_date": {
+      "type": "string",
+      "description": "Date string (YYYY-MM-DD) of the daily scan that generated this record"
+    },
+    "school_code": {
+      "type": "string",
+      "description": "School identifier (e.g. UF)"
+    },
+    "membership_tier": {
+      "type": "string",
+      "description": "User's membership tier at time of scan (e.g. free, trial, premium)"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "segment"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
