@@ -24,7 +24,8 @@
         "onboarding",
         "trial_activation",
         "trial_expired",
-        "reengagement"
+        "reengagement",
+        "lifecycle"
       ],
       "description": "Which workflow this email belongs to"
     },
@@ -37,13 +38,15 @@
       "description": "Template identifier e.g. onboarding_day0_tier1, trial_activation_day1, reengagement_1"
     },
     "tier": {
-      "type": "number",
+      "type": "string",
       "enum": [
-        1,
-        2,
-        3
+        "free",
+        "cliff",
+        "trial",
+        "founding_gator",
+        "unknown"
       ],
-      "description": "Personalization tier (1=well-staffed school, 2=developing, 3=understaffed or thin industry)"
+      "description": "Personalization tier based on user membership status"
     },
     "fastiq_routing": {
       "type": "string",
