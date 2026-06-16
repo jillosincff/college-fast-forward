@@ -412,7 +412,7 @@ Deno.serve(async (req) => {
           workflow:             "lifecycle",
           sequence_day:         0,
           template_id:          tmpl.email_type,
-          tier:                 u.membership_tier || u.subscription_status || "free",
+
           subject:              tmpl.subject,
           body_html:            tmpl.html,
           body_text:            tmpl.text,
