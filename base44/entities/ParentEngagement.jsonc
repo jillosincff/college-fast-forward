@@ -1,0 +1,67 @@
+{
+  "name": "ParentEngagement",
+  "type": "object",
+  "properties": {
+    "parent_email": {
+      "type": "string",
+      "description": "Email of the parent"
+    },
+    "parent_name": {
+      "type": "string",
+      "description": "Full name of the parent"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "open",
+        "click",
+        "bounce",
+        "unsubscribe",
+        "delivered"
+      ],
+      "description": "SendGrid event type"
+    },
+    "email_campaign": {
+      "type": "string",
+      "description": "Campaign identifier e.g. parent_blast_june_2026"
+    },
+    "clicked_url": {
+      "type": "string",
+      "description": "URL clicked (click events only)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the event occurred"
+    },
+    "sendgrid_message_id": {
+      "type": "string",
+      "description": "SendGrid sg_message_id"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address from the event"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "User agent string from the event"
+    }
+  },
+  "required": [
+    "parent_email",
+    "event_type",
+    "email_campaign"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "write": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
