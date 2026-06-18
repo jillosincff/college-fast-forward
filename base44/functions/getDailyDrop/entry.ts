@@ -87,10 +87,10 @@ Deno.serve(async (req) => {
     }
 
     const goals = user.career_goals || {};
-    const targetIndustries = (goals.target_industries || goals.industries || []).map(i => i.toLowerCase());
-    const targetRole = goals.target_roles?.[0] || goals.role || '';
+    const targetIndustries = (goals.target_industries || goals.industries || []).filter(Boolean).map(i => i.toLowerCase());
+    const targetRole = (Array.isArray(goals.target_roles) ? goals.target_roles[0] : goals.target_roles) || goals.role || '';
     const sizePref = goals.company_size_preference || 'all';
-    const location = user.location_preference || user.location || '';
+    const location = goals.location_preference || user.location_preference || user.location || '';
     const seeking = goals.seeking || 'both';
 
     // Strict size pref → only the chosen tier is searched. 'all' = no constraint.
@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
       const liveRes = await Promise.race([
         base44.asServiceRole.functions.invoke('getLiveJobMatchesFn', {
           career_goals: {
-            role: targetRole || (targetIndustries[0] ? `${targetIndustries[0]} analyst` : 'analyst'),
+            role: targetRole || (targetIndustries[0] ? `${targetIndustries[0]} analyst` : 'business analyst'),
             industries: targetIndustries.map(i => i.charAt(0).toUpperCase() + i.slice(1)),
             locations: location ? [location] : [],
             company_size_preference: sizeArray,
