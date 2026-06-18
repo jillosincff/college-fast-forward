@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getDailyDrop } from '@/functions/getDailyDrop';
+import { refreshDailyDrop } from '@/functions/refreshDailyDrop';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import MobileSwipeStack from './MobileSwipeStack';
@@ -79,10 +80,10 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      // force_refresh regenerates a new batch while excluding companies from the current one
-      await getDailyDrop({ force_refresh: true });
+      // Clear today's cached drop first, then refetch to generate a fresh one
+      await refreshDailyDrop({});
       queryClient.removeQueries({ queryKey: ['dailyDrop', user?.id] });
-      await queryClient.invalidateQueries({ queryKey: ['dailyDrop', user?.id] }, { throwOnError: true });
+      await refetch();
     } catch (err) {
       console.error('Failed to refresh:', err);
     } finally {
