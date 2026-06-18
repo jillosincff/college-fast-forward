@@ -1,5 +1,122 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
+// ── Inline Fantastic Jobs fetcher (avoids sub-function auth issues) ──────────
+const STATE_NAMES = {
+  AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
+  CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',
+  IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',
+  ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',
+  MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',
+  NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',
+  OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',
+  TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',
+  WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia',
+};
+
+function sizeFromHeadcount(n) {
+  if (!n || n <= 0) return null;
+  if (n <= 50) return 'startup';
+  if (n <= 500) return 'mid';
+  return 'large';
+}
+
+function buildLocationQuery(location) {
+  if (!location || /remote/i.test(location)) return null;
+  const parts = location.split(',').map(p => p.trim()).filter(Boolean);
+  const city = parts[0];
+  const stateAbbr = parts[1]?.toUpperCase().slice(0, 2);
+  const stateName = STATE_NAMES[stateAbbr];
+  if (city && stateName) return `"${city}" OR "${stateName}, United States"`;
+  if (city) return `"${city}"`;
+  return null;
+}
+
+function buildTitleQuery(role, seeking) {
+  const INTERN_TERMS = `intern | internship | co-op`;
+  const ENTRY_TERMS = `junior | coordinator | 'entry level' | graduate | trainee | 'new grad' | analyst | assistant`;
+  const levelTerms = seeking === 'internship' ? INTERN_TERMS : seeking === 'fulltime' ? ENTRY_TERMS : `${INTERN_TERMS} | ${ENTRY_TERMS}`;
+  const words = (role || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+  if (words.length === 0) return `(${levelTerms})`;
+  const primary = words[0];
+  const rest = words.slice(1);
+  return `${primary} & (${levelTerms}${rest.length > 0 ? ` | ${rest.join(' | ')}` : ''})`;
+}
+
+const SENIOR_RE = /\b(senior|sr\.?|lead|principal|director|manager|mgr|head|vp|vice president|chief|staff|supervisor|architect|executive)\b|\b(ii|iii|iv|v)\b/i;
+const INTERN_RE = /\b(intern|internship|co-?op)\b/i;
+
+function jobMatchesLocation(job, city, stateName) {
+  if (!city && !stateName) return true;
+  if (job.remote_derived === true) return true;
+  const locs = (job.locations_derived || []).join(' | ').toLowerCase();
+  if (!locs) return false;
+  if (city && locs.includes(city.toLowerCase())) return true;
+  if (stateName && locs.includes(stateName.toLowerCase())) return true;
+  return false;
+}
+
+async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey }) {
+  const NORMALIZE_SIZE = { startup:'startup', mid:'mid', midmarket:'mid', large:'large', enterprise:'large' };
+  const sizeList = (Array.isArray(companySizes) ? companySizes : (companySizes ? [companySizes] : []))
+    .map(s => NORMALIZE_SIZE[String(s).toLowerCase()]).filter(Boolean);
+  const strictSize = sizeList.length === 1 ? sizeList[0] : null;
+
+  const roleDesc = role || '';
+  const params = new URLSearchParams({
+    time_frame: '7d', limit: '100',
+    include_basic_organization_details: 'true',
+    title_advanced: buildTitleQuery(roleDesc, seeking),
+  });
+  const locQuery = buildLocationQuery(location);
+  if (locQuery) params.set('location', locQuery);
+
+  const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
+  const prefCity = locParts[0] || null;
+  const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
+
+  const apiRes = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
+    headers: { 'Authorization': `Bearer ${apiKey}` },
+  });
+  if (!apiRes.ok) throw new Error(`Fantastic Jobs API ${apiRes.status}`);
+  const jobs = await apiRes.json();
+  console.log(`[getDailyDrop] Fantastic Jobs returned ${Array.isArray(jobs) ? jobs.length : 0} raw postings`);
+
+  const seenOrgs = new Set();
+  const companies = [];
+  for (const job of (Array.isArray(jobs) ? jobs : [])) {
+    const org = job.organization;
+    const title = job.title?.trim();
+    if (!org || !title || !job.url) continue;
+    const isIntern = INTERN_RE.test(title);
+    if (!isIntern && SENIOR_RE.test(title)) continue;
+    if (seeking === 'internship' && !isIntern) continue;
+    if (seeking === 'fulltime' && isIntern) continue;
+    const exp = job.ai_experience_level;
+    const entryTitle = isIntern || /junior|coordinator|entry|graduate|trainee|new grad|assistant|analyst/i.test(title);
+    if (exp && exp !== '0-2' && !entryTitle) continue;
+    if (!jobMatchesLocation(job, prefCity, prefState)) continue;
+    if (job.org_linkedin_recruitment_agency_derived === true) continue;
+    const size = sizeFromHeadcount(job.org_linkedin_headcount);
+    if (strictSize && size && size !== strictSize) continue;
+    if (strictSize && !size) continue;
+    const orgKey = org.toLowerCase();
+    if (seenOrgs.has(orgKey)) continue;
+    seenOrgs.add(orgKey);
+    companies.push({
+      name: org,
+      job_title: title,
+      hiring_description: job.ai_core_responsibilities || job.ai_requirements_summary || `${org} is hiring for ${title}.`,
+      job_url: job.url,
+      size: size || undefined,
+      location: job.locations_derived?.[0] || location || '',
+      salary_range: null,
+      posted_date: job.date_posted || null,
+    });
+    if (companies.length >= 5) break;
+  }
+  return companies;
+}
+
 // Reset time: 4AM Eastern
 function getDailyDropDate() {
   const now = new Date();
@@ -103,93 +220,41 @@ Deno.serve(async (req) => {
     };
     const sizeArray = sizeMap[sizePref] || ['large', 'mid', 'startup'];
 
-    // Slots 1 & 2: Live web results (fresh, dynamic)
+    // Slots 1–5: Live results directly from Fantastic Jobs API
     let liveSlots = [];
-    try {
-      const liveRes = await Promise.race([
-        base44.asServiceRole.functions.invoke('getLiveJobMatchesFn', {
-          career_goals: {
-            role: targetRole || (targetIndustries[0] ? `${targetIndustries[0]} analyst` : 'business analyst'),
-            industries: targetIndustries.map(i => i.charAt(0).toUpperCase() + i.slice(1)),
-            locations: location ? [location] : [],
-            company_size_preference: sizeArray,
-            seeking,
-          },
-        }),
-        new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000)),
-      ]);
-      const companies = liveRes?.companies || [];
-      const freshLive = companies.filter(c => !isSeen(c.name));
-      const orderedLive = [...freshLive, ...companies.filter(c => isSeen(c.name))];
-      liveSlots = orderedLive.slice(0, 2).map(c => ({
-        company: c.name,
-        role: c.job_title || targetRole || `${targetIndustries[0] || 'Business'} Analyst`,
-        jobDescription: c.hiring_description || `${c.name} is actively hiring for ${targetRole || 'entry-level'} roles.`,
-        jobSource: `${c.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
-        jobSourceCategory: 'B',
-        companyTier: c.size === 'startup' ? 3 : c.size === 'mid' ? 2 : 1,
-        isLiveResult: true,
-        slotType: 'live',
-        leadTier: 'target',
-        alumniCount: 0,
-        parentCount: 0,
-      }));
-    } catch (e) {
-      console.warn('[getDailyDrop] Live fetch failed:', e.message);
-    }
-
-    // Slots 3 & 4: Curated pool from getPersonalizedNetworkCarousel
-    let curatedSlots = [];
-    let wildcardSlot = null;
-    try {
-      const carouselRes = await Promise.race([
-        base44.asServiceRole.functions.invoke('getPersonalizedNetworkCarousel', {
-          target_industries: targetIndustries,
-          target_role: targetRole,
-          company_size_preference: sizePref,
-          seeking,
-        }),
-        new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 25000)),
-      ]);
-
-      const insiders = carouselRes?.priorityInsiders || [];
-      const discoveries = carouselRes?.targetedDiscoveries || [];
-      const allCurated = [...insiders, ...discoveries];
-
-      // Deduplicate against live slots by company name
-      const liveCompanyKeys = new Set(liveSlots.map(s => s.company.toLowerCase().replace(/[^a-z0-9]/g, '')));
-      const dedupedAll = allCurated.filter(j => {
-        const key = (j.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        return !liveCompanyKeys.has(key);
-      });
-      // Prefer companies the user hasn't seen in recent drops
-      const freshCurated = dedupedAll.filter(j => !isSeen(j.company));
-      const deduped = [...freshCurated, ...dedupedAll.filter(j => isSeen(j.company))];
-
-      // Slots 3 & 4: prioritize insider leads (they're highest value)
-      curatedSlots = deduped.slice(0, 2).map(j => ({ ...j, slotType: 'curated' }));
-
-      // Slot 5: Wildcard — respect a strict size preference; only broaden when pref is 'all'
-      const PREF_TO_TIER = { startup: 3, midmarket: 2, mid: 2, enterprise: 1, large: 1 };
-      const wildcardTierPref = PREF_TO_TIER[sizePref] || 2;
-      const wildcardPool = deduped.filter(j => (j.companyTier || 1) === wildcardTierPref);
-      const wildcardSource = wildcardPool.length > 2
-        ? wildcardPool[2]
-        : deduped[2] || null;
-
-      if (wildcardSource) {
-        wildcardSlot = { ...wildcardSource, slotType: 'wildcard' };
+    const apiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
+    if (apiKey && (targetRole || targetIndustries.length > 0)) {
+      try {
+        const role = targetRole || `${targetIndustries[0]} analyst`;
+        const companies = await Promise.race([
+          fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey }),
+          new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 25000)),
+        ]);
+        const freshFirst = [...companies.filter(c => !isSeen(c.name)), ...companies.filter(c => isSeen(c.name))];
+        liveSlots = freshFirst.map(c => ({
+          company: c.name,
+          role: c.job_title || role,
+          jobDescription: c.hiring_description || `${c.name} is actively hiring for ${role} roles.`,
+          jobSource: c.job_url || `${c.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
+          jobSourceCategory: 'A',
+          companyTier: c.size === 'startup' ? 3 : c.size === 'mid' ? 2 : 1,
+          isLiveResult: true,
+          slotType: 'live',
+          leadTier: 'target',
+          alumniCount: 0,
+          parentCount: 0,
+          salary_range: c.salary_range || null,
+          location: c.location || null,
+          posted_date: c.posted_date || null,
+        }));
+        console.log(`[getDailyDrop] Live slots: ${liveSlots.length}`);
+      } catch (e) {
+        console.warn('[getDailyDrop] Live fetch failed:', e.message);
       }
-    } catch (e) {
-      console.warn('[getDailyDrop] Carousel fetch failed:', e.message);
     }
 
-    // Assemble final 5 slots
-    const slots = [
-      ...liveSlots,
-      ...curatedSlots,
-      ...(wildcardSlot ? [wildcardSlot] : []),
-    ].slice(0, 5);
+    // Assemble final 5 slots — live results first, no curated sub-function needed
+    const slots = liveSlots.slice(0, 5);
 
     // Ensure at least 3 slots — pad from fallback if needed
     if (slots.length < 3) {
