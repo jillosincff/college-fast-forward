@@ -9,7 +9,9 @@ export const checkIsFastIQ = (user) => {
   if (
     user.subscription_status === 'active' ||
     user.membership_tier === 'fastiq' ||
-    user.is_founding_member === true
+    user.is_founding_member === true ||
+    user.fastiq_active === true ||
+    user.is_fastiq === true
   ) return true;
 
   // Active trial access

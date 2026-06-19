@@ -365,16 +365,21 @@ Deno.serve(async (req) => {
 
         const billingUser = await findUserByCustomerId(customerId);
 
+        const isActiveSub = (status === 'active' || status === 'trialing');
         const userUpdates = {
           stripe_subscription_id: subscription.id,
           subscription_status: status,
+          // Any active paid subscription = premium access, regardless of tier name
+          fastiq_active: isActiveSub,
+          is_fastiq: isActiveSub,
         };
         if (subscriptionTier) userUpdates.subscription_tier = subscriptionTier;
         if (subscription.trial_end) userUpdates.trial_end_date = new Date(subscription.trial_end * 1000).toISOString();
         if (subscription.current_period_end) userUpdates.current_period_end = new Date(subscription.current_period_end * 1000).toISOString();
 
-        if (subscriptionTier === 'fastiq') {
-          userUpdates.fastiq_active = (status === 'active' || status === 'trialing');
+        if (isActiveSub) {
+          userUpdates.membership_tier = subscriptionTier || billingUser?.membership_tier || 'cff';
+        } else if (subscriptionTier === 'fastiq') {
           userUpdates.membership_tier = (status === 'active' || status === 'trialing') ? 'fastiq' : billingUser?.membership_tier;
         }
 
