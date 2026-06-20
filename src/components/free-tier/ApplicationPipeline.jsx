@@ -224,16 +224,18 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         </p>
       )}
 
-      {/* Stage Actions - Full width buttons on mobile */}
+      {/* Stage Actions - Move to next stage only */}
       <div style={{ 
         display: 'flex', 
-        gap: isMobile ? 6 : 6, 
+        gap: 6, 
         flexWrap: 'wrap', 
         marginTop: isMobile ? 8 : 10, 
         paddingTop: isMobile ? 8 : 10, 
         borderTop: '1px solid #f1f5f9',
         width: '100%',
+        alignItems: 'center',
       }}>
+        <span style={{ fontFamily: dm, fontSize: 9, color: '#9ca3af', fontWeight: 500, marginRight: 2 }}>Move to →</span>
         {STAGES.filter(s => s.key !== job.stage).map(s => (
           <button
             key={s.key}
@@ -245,9 +247,6 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
               borderRadius: 6, padding: isMobile ? '5px 8px' : '4px 8px',
               cursor: 'pointer', minHeight: 'auto',
               transition: 'all 0.15s',
-              flex: isMobile ? '1 1 calc(50% - 3px)' : 'none',
-              minWidth: isMobile ? 'calc(50% - 3px)' : 'auto',
-              maxWidth: isMobile ? 'calc(50% - 3px)' : 'none',
               textAlign: 'center',
             }}
             onMouseEnter={e => {
