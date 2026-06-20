@@ -125,6 +125,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }, []);
 
   const [refreshKey, setRefreshKey] = useState(0);
+  const [forceRefresh, setForceRefresh] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(null);
 
   const seenForExclusionRef = useRef((() => {
@@ -148,12 +149,17 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
         locations: effectiveLocation ? [effectiveLocation] : [],
         company_size_preference: effectiveSize && effectiveSize !== 'all' ? [effectiveSize] : [],
       },
-      force_refresh: refreshKey > 0,
+      force_refresh: forceRefresh,
     }),
     enabled: !!effectiveRole || !!target_industries?.length,
     staleTime: 0,
     gcTime: 5 * 60 * 1000,
   });
+
+  // Reset forceRefresh flag after the query has fired
+  useEffect(() => {
+    if (forceRefresh && !isLoading) setForceRefresh(false);
+  }, [isLoading, forceRefresh]);
 
   const { data: dualData, isLoading: dualLoading } = useQuery({
     queryKey: ['dualConstraintLeads', effectiveRole, JSON.stringify(target_industries), effectiveSize, effectiveLocation],
@@ -361,15 +367,12 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }
 
   const handleManualRefresh = async () => {
-    // Add currently visible companies to seen list so next batch is different
-    const currentSeen = new Set(seenCompanyKeys);
-    allFetched.forEach(l => { const k = l.company || l.companyName; if (k) currentSeen.add(k); });
-    try { sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify([...currentSeen])); } catch {}
-    seenForExclusionRef.current = Array.from(currentSeen).filter(k => !savedCompanyKeys.has(k));
-    setSeenCompanyKeys(currentSeen);
-    // Force remove cached query so React Query re-fetches from backend
+    // Clear the backend user cache so a fresh API call is made
+    try { await clearJobLeadsCache({}); } catch (err) { console.error('Backend cache clear failed:', err); }
+    // Remove React Query cache
     queryClient.removeQueries({ queryKey: ['liveJobMatches'] });
     queryClient.removeQueries({ queryKey: ['dualConstraintLeads'] });
+    setForceRefresh(true);
     setRefreshKey(k => k + 1);
     setLastRefreshed(new Date());
   };
@@ -379,11 +382,12 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     try { sessionStorage.removeItem(`cff_seen_companies_${user?.id}`); } catch {}
     seenForExclusionRef.current = [];
     setSeenCompanyKeys(new Set());
-    // Clear backend cache via SDK
+    // Clear backend user cache
     try { await clearJobLeadsCache({}); } catch (err) { console.error('Backend cache clear failed:', err); }
-    // Remove all cached query data
+    // Remove React Query cache
     queryClient.removeQueries({ queryKey: ['liveJobMatches'] });
     queryClient.removeQueries({ queryKey: ['dualConstraintLeads'] });
+    setForceRefresh(true);
     setRefreshKey(k => k + 1);
     setLastRefreshed(new Date());
   };
