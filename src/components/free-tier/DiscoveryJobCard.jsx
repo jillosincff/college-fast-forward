@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
 import useParentCompanies from '@/hooks/useParentCompanies';
+import { getStandoutInsight } from '@/functions/getStandoutInsight';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
@@ -9,6 +10,11 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [added, setAdded] = useState(false);
+  const [appliedExternally, setAppliedExternally] = useState(false);
+
+  // Standout insight state
+  const [insight, setInsight] = useState(null);
+  const [loadingInsight, setLoadingInsight] = useState(false);
 
   // Alumni search state
   const [alumniSearched, setAlumniSearched] = useState(false);
@@ -46,9 +52,9 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
   const jobDesc = lead.jobDescription || lead.description || lead.hiring_description || '';
   const jobUrl = lead.job_url || lead.jobSource || '';
 
-  const handleAddToPipeline = () => {
+  const handleAddToPipeline = (path = 'cold_apply') => {
     if (!onAddToPipeline) return;
-    onAddToPipeline(lead);
+    onAddToPipeline(lead, path);
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };
@@ -56,6 +62,30 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
   const handleDismiss = () => {
     setDismissed(true);
     onDismiss?.();
+  };
+
+  const handleApplyExternal = () => {
+    // Open in new tab (ideally a WebView on mobile)
+    if (jobUrl) window.open(jobUrl, '_blank', 'noopener,noreferrer');
+    setAppliedExternally(true);
+    // Auto-add to pipeline as cold apply so student is prompted to track
+    handleAddToPipeline('cold_apply');
+  };
+
+  const handleLoadInsight = async () => {
+    if (insight || loadingInsight) return;
+    setLoadingInsight(true);
+    try {
+      const res = await getStandoutInsight({
+        company: companyName,
+        job_title: jobTitle,
+        job_description: jobDesc,
+        job_url: jobUrl,
+      });
+      const data = res?.data || res;
+      if (data?.standout_tip) setInsight(data);
+    } catch {}
+    setLoadingInsight(false);
   };
 
   // Restore previously discovered alumni from the DiscoveredAlumni cache on mount —
@@ -195,44 +225,69 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
           </div>
         )}
 
-        {/* Alumni Search Section */}
-        <div className="mt-4">
+        {/* Standout insight */}
+        <div className="mt-3">
+          {!insight && !loadingInsight ? (
+            <button
+              onClick={handleLoadInsight}
+              className="w-full text-[11px] text-amber-700 font-semibold bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 hover:bg-amber-100 transition-colors text-left cursor-pointer"
+              style={{ minHeight: 'auto' }}
+            >
+              💡 How to stand out for this role →
+            </button>
+          ) : loadingInsight ? (
+            <div className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 animate-pulse">Asking CLIFF AI…</div>
+          ) : insight ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">💡 CLIFF Insight</span>
+                {insight.competitiveness_label && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    insight.competitiveness_label === 'Low' ? 'bg-green-100 text-green-700' :
+                    insight.competitiveness_label === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>{insight.competitiveness_label} Competition</span>
+                )}
+              </div>
+              <p className="text-[11px] text-amber-900 leading-relaxed">{insight.standout_tip}</p>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Alumni Section */}
+        <div className="mt-3">
           {!alumniSearched ? (
             <button
               onClick={handleSearchAlumni}
               disabled={alumniSearching}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100 text-xs font-bold transition-colors"
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-colors ${
+                lead.hasAlumni
+                  ? 'border-purple-400 bg-purple-600 text-white hover:bg-purple-700'
+                  : 'border-dashed border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100'
+              }`}
               style={{ minHeight: 'auto', cursor: alumniSearching ? 'not-allowed' : 'pointer' }}
             >
               {alumniSearching ? (
-                <><span className="inline-block animate-spin">⟳</span> Searching {school} alumni at {companyName}…</>
+                <><span className="inline-block animate-spin">⟳</span> Searching {school} alumni…</>
+              ) : lead.hasAlumni ? (
+                <>{mascot} {lead.alumniCount} {school} alumni here — view contacts</>
               ) : (
                 <>{mascot} Search for {school} Alumni at {companyName}</>
               )}
             </button>
           ) : foundAlumni && foundAlumni.length > 0 ? (
             <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 space-y-2">
-              <p className="text-xs font-bold text-purple-800">{mascot} Found {school} alumni at {companyName}!</p>
-              <p className="text-[10px] text-purple-600">Pick who you'd like to reach out to — warm intros get replies ~4x more often than cold applications:</p>
+              <p className="text-xs font-bold text-purple-800">{mascot} {foundAlumni.length} {school} alumni at {companyName}</p>
               {foundAlumni.slice(0, 3).map((a, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2.5 bg-white border border-purple-100 rounded-lg px-3 py-2"
-                  style={{ minHeight: 'auto' }}
-                >
+                <div key={i} className="flex items-center gap-2.5 bg-white border border-purple-100 rounded-lg px-3 py-2" style={{ minHeight: 'auto' }}>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-gray-900 truncate">{a.name}</p>
                     {a.role_title && <p className="text-[10px] text-gray-500 truncate">{a.role_title}</p>}
                   </div>
                   {a.linkedin_url && (
-                    <a
-                      href={a.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <a href={a.linkedin_url} target="_blank" rel="noopener noreferrer"
                       className="w-6 h-6 rounded bg-[#0077b5] flex items-center justify-center flex-shrink-0"
-                      title="View LinkedIn"
-                      style={{ minHeight: 'auto', minWidth: 'auto', textDecoration: 'none' }}
-                    >
+                      style={{ minHeight: 'auto', minWidth: 'auto', textDecoration: 'none' }}>
                       <span className="text-white font-bold text-[10px]">in</span>
                     </a>
                   )}
@@ -241,15 +296,14 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
                     className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors flex-shrink-0 cursor-pointer"
                     style={{ minHeight: 'auto', minWidth: 'auto' }}
                   >
-                    Select →
+                    Message →
                   </button>
                 </div>
               ))}
             </div>
           ) : (
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center">
-              <p className="text-xs text-gray-600 font-semibold mb-1">No {school} alumni found here</p>
-              <p className="text-xs text-gray-500 mb-2.5">No problem — CliFF can find you a contact at {companyName} to reach out to instead.</p>
+              <p className="text-xs text-gray-500 mb-2">No {school} alumni found — CLIFF can find a direct contact instead.</p>
               <button
                 onClick={() => {
                   onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}`);
@@ -257,45 +311,70 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
                 className="w-full py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-colors cursor-pointer"
                 style={{ minHeight: 'auto' }}
               >
-                Find me a contact →
+                Find a Hiring Manager →
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Card Action Footer */}
-      <div className="mt-5 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-        <div className="relative group">
-          <button
-            onClick={handleAddToPipeline}
-            disabled={added}
-            className={`p-2 border rounded-xl transition cursor-pointer ${added ? 'border-green-400 bg-green-50 text-green-600' : 'border-gray-200 hover:bg-gray-50 text-gray-400 hover:text-gray-600'}`}
-            style={{ minHeight: 'auto', minWidth: 'auto' }}
-          >
-            {added ? '✅' : '➕'}
-          </button>
-          {!added && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[11px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              Add to Pipeline
-            </div>
-          )}
-        </div>
-
+      {/* Three-Path Action Footer */}
+      <div className="mt-4 pt-3 border-t border-gray-100 space-y-2">
+        {/* Path 1: Alumni / Hiring Manager outreach (primary if available) */}
         <button
           onClick={() => {
-            // If alumni were found, draft for the first alumnus instead of a cold (non-alumni) contact
             if (foundAlumni && foundAlumni.length > 0) {
               handleSelectAlumni(foundAlumni[0]);
+              handleAddToPipeline('alumni_outreach');
               return;
             }
+            handleAddToPipeline(alumniSearched ? 'hiring_manager' : 'alumni_outreach');
             onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}`);
           }}
-          className="px-4 py-2 font-bold text-xs rounded-xl shadow-sm transition tracking-wide uppercase flex-1 text-center cursor-pointer text-white"
+          className="w-full px-4 py-2.5 font-bold text-xs rounded-xl shadow-sm transition tracking-wide text-center cursor-pointer text-white"
           style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', minHeight: 'auto' }}
         >
-          ⚡ Generate Message
+          ⚡ {foundAlumni?.length > 0 ? 'Draft Alumni Message' : 'Generate Outreach Message'}
         </button>
+
+        {/* Path 2 & 3: Apply externally with tracking prompt */}
+        <div className="flex gap-2">
+          {jobUrl && (
+            <button
+              onClick={handleApplyExternal}
+              className={`flex-1 py-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                appliedExternally
+                  ? 'border-green-400 bg-green-50 text-green-700'
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+              style={{ minHeight: 'auto' }}
+            >
+              {appliedExternally ? '✅ Applied — tracked!' : '🔗 Apply on Company Site'}
+            </button>
+          )}
+          <button
+            onClick={() => handleAddToPipeline('cold_apply')}
+            disabled={added}
+            className={`px-3 py-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+              added ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+            }`}
+            style={{ minHeight: 'auto', minWidth: 'auto' }}
+            title="Track this application"
+          >
+            {added ? '✅' : '+ Track'}
+          </button>
+        </div>
+
+        {/* "Application started" nudge after external apply */}
+        {appliedExternally && (
+          <p className="text-[10px] text-center text-gray-500">
+            Application started — <button
+              onClick={() => window.location.hash = '#ApplicationTracker'}
+              className="text-purple-600 font-semibold underline cursor-pointer"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+            >update your status in CFF →</button>
+          </p>
+        )}
       </div>
 
       {/* Full Description Modal */}

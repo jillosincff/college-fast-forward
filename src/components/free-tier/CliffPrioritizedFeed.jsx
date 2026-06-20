@@ -59,15 +59,18 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
     if (dropId) actionMutation.mutate({ key, dropId });
   };
 
-  const handleAddToPipeline = async (lead) => {
+  const handleAddToPipeline = async (lead, applicationPath = 'cold_apply') => {
     try {
-      await base44.entities.Opportunity.create({
-        opportunity_type: 'job',
-        title: lead.role || lead.title,
-        org_name: lead.company || lead.companyName,
-        description: lead.jobDescription || lead.description,
-        status: 'active',
-        created_by_role: user?.persona || 'student',
+      await base44.entities.NetworkingPipeline.create({
+        user_email: user.email,
+        company: lead.company || lead.companyName,
+        job_title: lead.role || lead.job_title,
+        job_description: lead.jobDescription || lead.description || '',
+        job_url: lead.job_url || lead.jobSource || '',
+        application_path: applicationPath,
+        status: 'identified',
+        location: lead.location || '',
+        posted_date: lead.posted_date || null,
       });
       handleAction(lead);
     } catch (err) {
@@ -91,7 +94,14 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
     }
   };
 
-  const visibleSlots = slots.filter(s => !actionedKeys.has(`${s.company}||${s.role}`));
+  // Sort: alumni-network slots first, then live, then curated
+  const sortedSlots = [...slots].sort((a, b) => {
+    const aScore = (a.hasAlumni ? 2 : 0) + (a.slotType === 'live' ? 1 : 0);
+    const bScore = (b.hasAlumni ? 2 : 0) + (b.slotType === 'live' ? 1 : 0);
+    return bScore - aScore;
+  });
+
+  const visibleSlots = sortedSlots.filter(s => !actionedKeys.has(`${s.company}||${s.role}`));
   const allActioned = slots.length > 0 && visibleSlots.length === 0;
   const noGoals = !target_industries?.length && !effectiveRole;
 
@@ -165,12 +175,12 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
         ) : visibleSlots.length > 0 ? (
           <>
             <div className="flex items-center gap-3 text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+              {visibleSlots.some(s => s.hasAlumni) && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block"></span>Network Opportunity</span>}
               {visibleSlots.some(s => s.slotType === 'live') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block animate-pulse"></span>Live</span>}
               {visibleSlots.some(s => s.slotType === 'curated') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span>Curated</span>}
-              {visibleSlots.some(s => s.slotType === 'wildcard') && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block"></span>Wildcard</span>}
             </div>
             <div className="block md:hidden">
-              <MobileSwipeStack leads={visibleSlots} onAddToPipeline={handleAddToPipeline} />
+              <MobileSwipeStack leads={visibleSlots} onAddToPipeline={handleAddToPipeline} schoolAbbr={schoolAbbr} />
             </div>
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {visibleSlots.map((lead, idx) => (
