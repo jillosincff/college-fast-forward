@@ -90,9 +90,11 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     return () => window.removeEventListener('cff:open-pipeline-modal', openKanbanHandler);
   }, []);
 
+  const PAGE_SIZE = 8;
   const [refreshKey, setRefreshKey] = useState(0);
   const [forceRefresh, setForceRefresh] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const seenForExclusionRef = useRef((() => {
     try {
@@ -275,28 +277,12 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }
 
   const handleManualRefresh = async () => {
-    // Clear the backend user cache so a fresh API call is made
     try { await clearJobLeadsCache({}); } catch (err) { console.error('Backend cache clear failed:', err); }
-    // Remove React Query cache
     queryClient.removeQueries({ queryKey: ['liveJobMatches'] });
     queryClient.removeQueries({ queryKey: ['dualConstraintLeads'] });
     setForceRefresh(true);
     setRefreshKey(k => k + 1);
-    setLastRefreshed(new Date());
-  };
-
-  const handleClearCache = async () => {
-    // Wipe ALL local seen/saved state so we start completely fresh
-    try { sessionStorage.removeItem(`cff_seen_companies_${user?.id}`); } catch {}
-    seenForExclusionRef.current = [];
-    setSeenCompanyKeys(new Set());
-    // Clear backend user cache
-    try { await clearJobLeadsCache({}); } catch (err) { console.error('Backend cache clear failed:', err); }
-    // Remove React Query cache
-    queryClient.removeQueries({ queryKey: ['liveJobMatches'] });
-    queryClient.removeQueries({ queryKey: ['dualConstraintLeads'] });
-    setForceRefresh(true);
-    setRefreshKey(k => k + 1);
+    setVisibleCount(PAGE_SIZE);
     setLastRefreshed(new Date());
   };
 
@@ -464,14 +450,6 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                   <span className={isFetching ? 'animate-spin inline-block' : 'inline-block'}>↻</span>
                   {isFetching ? 'Loading...' : 'New Batch'}
                 </button>
-                <button
-                  onClick={handleClearCache}
-                  disabled={isFetching}
-                  style={{ minHeight: 'auto', minWidth: 'auto' }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-200 bg-white text-red-400 hover:bg-red-50 hover:border-red-300 transition-all disabled:opacity-50"
-                >
-                  🗑️ Clear Cache
-                </button>
               </div>
             </div>
 
@@ -482,15 +460,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                 ))}
               </div>
             ) : targetOpportunities.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-                {targetOpportunities.map((lead, idx) => {
-                  const currentCompany = (lead.company || lead.companyName || '').toLowerCase().trim();
-                  
-                  if (currentCompany.includes('capsule') || currentCompany.includes('goodwin')) {
-                    return null;
-                  }
-
-                  return (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+                  {targetOpportunities.slice(0, visibleCount).map((lead, idx) => (
                     <DiscoveryJobCard
                       key={lead.company || lead.companyName || idx}
                       lead={lead}
@@ -503,9 +475,20 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                       onDismiss={() => {}}
                       insiderPill={lead._insiderPill || (lead.alumniCount > 0 ? `🎓 ${lead.alumniCount} Alumni` : lead.parentCount > 0 ? '👨‍👩‍👧 Parent Insider' : null)}
                     />
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+                {visibleCount < targetOpportunities.length && (
+                  <div className="flex justify-center mt-4">
+                    <button
+                      onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                      style={{ minHeight: 'auto', minWidth: 'auto' }}
+                      className="px-6 py-2.5 rounded-xl text-sm font-bold border border-purple-300 bg-white text-purple-600 hover:bg-purple-50 hover:border-purple-400 transition-all"
+                    >
+                      Load More ({targetOpportunities.length - visibleCount} remaining)
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="border border-dashed border-gray-200 rounded-2xl p-8 text-center text-gray-400 text-xs">
                 No matching opportunities found today. Adjust your career goals to broaden the search.

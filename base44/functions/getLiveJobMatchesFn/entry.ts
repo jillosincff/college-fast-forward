@@ -178,9 +178,9 @@ Deno.serve(async (req) => {
       [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
     }
 
-    // Filter + normalize. One job per company, max 8.
+    // Filter + normalize all valid jobs into a pool (one per company)
     const seenOrgs = new Set();
-    const companies = [];
+    const allCompanies = [];
 
     for (const job of jobList) {
       const org = job.organization;
@@ -189,49 +189,21 @@ Deno.serve(async (req) => {
 
       const isInternTitle = INTERN_TITLE_RE.test(title);
 
-      // HARD seniority blocklist: senior/lead/director/manager/etc. never pass,
-      // even if the title also contains an entry-ish word ("Senior Associate").
-      if (!isInternTitle && SENIOR_TITLE_RE.test(title)) {
-        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (senior title): ${title}`);
-        continue;
-      }
+      if (!isInternTitle && SENIOR_TITLE_RE.test(title)) continue;
+      if (seeking === 'internship' && !isInternTitle) continue;
+      if (seeking === 'fulltime' && isInternTitle) continue;
 
-      // Match the student's seeking intent
-      if (seeking === 'internship' && !isInternTitle) {
-        continue;
-      }
-      if (seeking === 'fulltime' && isInternTitle) {
-        continue;
-      }
-
-      // Entry-level guard: AI-tagged experience or entry-ish title
       const exp = job.ai_experience_level;
       const entryTitle = isInternTitle || /junior|coordinator|entry|graduate|trainee|new grad|assistant|analyst/i.test(title);
-      if (exp && exp !== '0-2' && !entryTitle) {
-        continue;
-      }
+      if (exp && exp !== '0-2' && !entryTitle) continue;
 
-      // Strict location enforcement — the API's location match can be loose
-      if (!jobMatchesLocation(job, prefCity, prefState)) {
-        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (location): ${title} @ ${(job.locations_derived || []).join('; ')}`);
-        continue;
-      }
-
-      // Skip recruitment agencies — students want the actual employer
+      if (!jobMatchesLocation(job, prefCity, prefState)) continue;
       if (job.org_linkedin_recruitment_agency_derived === true) continue;
 
-      // Strict company-size enforcement using real LinkedIn headcount
       const size = sizeFromHeadcount(job.org_linkedin_headcount);
-      if (strictSize && size && size !== strictSize) {
-        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (size): ${org} is "${size}" (${job.org_linkedin_headcount} employees), wants "${strictSize}"`);
-        continue;
-      }
-      if (strictSize && !size) {
-        console.log(`🚫 [getLiveJobMatchesFn] REJECTED (unknown size): ${org}, wants "${strictSize}"`);
-        continue;
-      }
+      if (strictSize && size && size !== strictSize) continue;
+      if (strictSize && !size) continue;
 
-      // Dedupe by company
       const orgKey = org.toLowerCase();
       if (seenOrgs.has(orgKey)) continue;
       seenOrgs.add(orgKey);
@@ -240,7 +212,7 @@ Deno.serve(async (req) => {
         || job.ai_requirements_summary
         || `${org} is hiring for ${title}.`;
 
-      companies.push({
+      allCompanies.push({
         name: org,
         job_title: title,
         hiring_description: description,
@@ -255,20 +227,18 @@ Deno.serve(async (req) => {
         has_web_result: true,
         verified_posting: true,
       });
-
-      if (companies.length >= 8) break;
     }
 
-    console.log(`[getLiveJobMatchesFn] Returning ${companies.length} verified real jobs`);
+    console.log(`[getLiveJobMatchesFn] Built pool of ${allCompanies.length} verified real jobs`);
 
-    // Cache results on user record
+    // Cache the FULL pool so Load More can paginate without re-fetching
     await base44.asServiceRole.entities.User.update(user.id, {
-      job_leads_cache: companies,
+      job_leads_cache: allCompanies,
       job_leads_cached_at: new Date().toISOString(),
       job_leads_cache_key: goalKey,
     });
 
-    return Response.json({ companies, from_cache: false });
+    return Response.json({ companies: allCompanies, from_cache: false });
 
   } catch (error) {
     console.error('[getLiveJobMatchesFn] Error:', error.message);
