@@ -217,6 +217,13 @@ function PipelineCard({ job, onMove, onRemove, onBypassGhost, isPulsing, isMobil
         </p>
       )}
 
+      {/* Resume version submitted */}
+      {job.resumeVersion && (
+        <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#7c3aed', margin: '4px 0 0', display: 'flex', alignItems: 'center', gap: 4 }}>
+          📄 Resume: <span style={{ fontWeight: 600 }}>{job.resumeVersion}</span>
+        </p>
+      )}
+
       {/* Stage Actions - Full width buttons on mobile */}
       <div style={{ 
         display: 'flex', 
@@ -288,13 +295,17 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
       .then(records => {
         const mapped = (records || []).map(r => ({
           id: r.id,
-          title: r.alumni_role || '',
+          title: r.job_title || r.alumni_role || '',
           company: r.company || r.alumni_name || 'Unknown',
           contact: r.alumni_name || null,
           stage: statusToStage(r.status),
-          location: '',
+          location: r.location || '',
           appliedDate: r.reached_out_date ? new Date(r.reached_out_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null,
-          resumeVersion: null,
+          resumeVersion: (() => {
+            const notes = r.notes || '';
+            const match = notes.match(/Resume submitted: (.+)/);
+            return match ? match[1] : null;
+          })(),
           _pipelineId: r.id,
           _status: r.status,
         }));

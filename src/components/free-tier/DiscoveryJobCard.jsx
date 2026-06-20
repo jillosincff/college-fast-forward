@@ -365,20 +365,9 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
               style={{ minHeight: 'auto', minWidth: 'auto' }}
               title="Apply on company site"
             >
-              {appliedExternally ? '✅' : '↗'}
+              {appliedExternally ? '✅ Tracked' : '↗ Apply externally'}
             </button>
           )}
-          <button
-            onClick={() => handleTrackOnly('cold_apply')}
-            disabled={added}
-            className={`px-3 py-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
-              added ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
-            }`}
-            style={{ minHeight: 'auto', minWidth: 'auto' }}
-            title="Track this application"
-          >
-            {added ? '✅' : '+ Track'}
-          </button>
         </div>
       </div>
 
