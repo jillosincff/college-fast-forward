@@ -148,91 +148,98 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
     window.location.hash = `#OutreachDrafts?context=alumni_search&company=${encodeURIComponent(companyName)}&jobTitle=${encodeURIComponent(jobTitle)}&alumniName=${encodeURIComponent(alumni.name || '')}&alumniRole=${encodeURIComponent(alumni.role_title || '')}&alumniLinkedin=${encodeURIComponent(alumni.linkedin_url || '')}&skipForm=1`;
   };
 
+  // derive top signal badges
+  const hasAlumniSignal = (foundAlumni && foundAlumni.length > 0) || lead.hasAlumni;
+  const hasParentSignal = hasParentAt(companyName);
+
   if (dismissed) return null;
 
   return (
-    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm p-5 flex flex-col justify-between min-h-[380px] hover:border-gray-300 transition-all relative">
-      <div>
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm flex flex-col justify-between hover:border-indigo-200 hover:shadow-md transition-all relative overflow-hidden">
+      {/* Top signal strip */}
+      {(hasAlumniSignal || hasParentSignal || insiderPill) && (
+        <div className={`px-4 py-1.5 flex items-center gap-2 text-[11px] font-bold ${
+          hasAlumniSignal ? 'bg-purple-600 text-white' :
+          hasParentSignal ? 'bg-emerald-600 text-white' :
+          'bg-indigo-50 text-indigo-700 border-b border-indigo-100'
+        }`}>
+          {hasAlumniSignal && <><span>👥</span> {lead.alumniCount ? `${lead.alumniCount} ` : ''}{school} alumni here — warm path</>}
+          {!hasAlumniSignal && hasParentSignal && <><span>🤝</span> Parent in your network works here</>}
+          {!hasAlumniSignal && !hasParentSignal && insiderPill && <>{insiderPill}</>}
+        </div>
+      )}
+
+      <div className="p-5">
         {/* Card Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start mb-3">
           <div className="flex-1 min-w-0 mr-2">
             <h4 className="font-extrabold leading-tight text-base truncate" style={{ color: '#4f46e5' }}>{companyName}</h4>
             {jobTitle && (
               <p className="text-xs text-slate-500 mt-0.5 font-medium truncate">{jobTitle}</p>
             )}
+            {/* Inline badges row */}
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {tierBadge && (
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>
+                  {tierBadge.label}
+                </span>
+              )}
+              {isPinned && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">
+                  📌 Saved
+                </span>
+              )}
+              {insight?.competitiveness_label && (
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                  insight.competitiveness_label === 'Low' ? 'bg-green-50 text-green-700' :
+                  insight.competitiveness_label === 'Moderate' ? 'bg-yellow-50 text-yellow-700' :
+                  'bg-red-50 text-red-700'
+                }`}>{insight.competitiveness_label} Competition</span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
-            {insiderPill && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                {insiderPill}
-              </span>
-            )}
-            {isPinned && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-50 text-green-600 border border-green-200">
-                📌 Saved
-              </span>
-            )}
-            {tierBadge && (
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wide ${tierBadge.color}`}>
-                {tierBadge.label}
-              </span>
-            )}
-            {!isPinned && (
-              <button
-                onClick={handleDismiss}
-                className="text-gray-300 hover:text-gray-500 transition text-sm leading-none"
-                title="Not interested"
-                style={{ minHeight: 'auto', minWidth: 'auto' }}
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Job Description */}
-        <div className="mt-4 text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-200">
-          {jobDesc ? (
-            <>
-              <p className="leading-relaxed text-sm">
-                {jobDesc.length > 200 ? jobDesc.slice(0, 200).trimEnd() + '…' : jobDesc}
-              </p>
-              <div className="flex items-center gap-3 mt-2">
-                {jobDesc.length > 200 && (
-                  <button
-                    onClick={() => setShowFullDesc(true)}
-                    className="text-[11px] text-purple-600 font-bold hover:text-purple-700 underline cursor-pointer"
-                    style={{ minHeight: 'auto', minWidth: 'auto' }}
-                  >
-                    Read Full Description →
-                  </button>
-                )}
-                {jobUrl && (
-                  <a
-                    href={jobUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-blue-600 font-bold hover:text-blue-700 underline"
-                    onClick={e => e.stopPropagation()}
-                  >
-                    View Posting ↗
-                  </a>
-                )}
-              </div>
-            </>
-          ) : (
-            <p className="leading-relaxed text-sm text-gray-400 italic">Click "Generate Message" to get a personalized outreach for this company.</p>
+          {!isPinned && (
+            <button
+              onClick={handleDismiss}
+              className="text-gray-300 hover:text-gray-500 transition text-sm leading-none flex-shrink-0"
+              title="Not interested"
+              aria-label="Dismiss"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+            >
+              ✕
+            </button>
           )}
         </div>
 
-        {/* Parent warm-path signal — only when a real network parent works here */}
-        {hasParentAt(companyName) && (
-          <div className="mt-3 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
-            <span className="text-sm">🤝</span>
-            <p className="text-[11px] font-bold text-emerald-800 m-0">
-              A {school} parent in your network works at {companyName} — warm path available
-            </p>
+        {/* Job Description — collapsed by default */}
+        {jobDesc ? (
+          <div className="text-xs text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <p className="leading-relaxed text-sm line-clamp-3">{jobDesc}</p>
+            <div className="flex items-center gap-3 mt-2">
+              {jobDesc.length > 120 && (
+                <button
+                  onClick={() => setShowFullDesc(true)}
+                  className="text-[11px] text-purple-600 font-bold hover:text-purple-700 underline cursor-pointer"
+                  style={{ minHeight: 'auto', minWidth: 'auto' }}
+                >
+                  Read more →
+                </button>
+              )}
+              {jobUrl && (
+                <a
+                  href={jobUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-blue-600 font-bold hover:text-blue-700 underline"
+                  onClick={e => e.stopPropagation()}
+                >
+                  View posting ↗
+                </a>
+              )}
+            </div>
           </div>
+        ) : (
+          <div className="text-xs text-gray-400 italic bg-gray-50 rounded-lg p-3 border border-gray-100">No description available for this role.</div>
         )}
 
         {/* Standout insight */}
@@ -326,46 +333,44 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
             </div>
           )}
         </div>
-      </div>
 
       {/* Three-Path Action Footer */}
       <div className="mt-4 pt-3 border-t border-gray-100 space-y-2">
-        {/* Path 1: Alumni / Hiring Manager outreach (primary if available) */}
+        {/* Path 1: Primary CTA — outreach */}
         <button
           onClick={() => {
             if (foundAlumni && foundAlumni.length > 0) {
-              // Track + navigate (track-only so card stays if user comes back)
               handleTrackOnly('alumni_outreach');
               handleSelectAlumni(foundAlumni[0]);
               return;
             }
-            // No alumni found — cold outreach, track as hiring_manager intent
             handleTrackOnly(alumniSearched ? 'hiring_manager' : 'cold_apply');
             onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}`);
           }}
-          className="w-full px-4 py-2.5 font-bold text-xs rounded-xl shadow-sm transition tracking-wide text-center cursor-pointer text-white"
+          className="w-full px-4 py-3 font-extrabold text-sm rounded-xl shadow-md transition tracking-wide text-center cursor-pointer text-white active:scale-95"
           style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', minHeight: 'auto' }}
         >
-          ⚡ {foundAlumni?.length > 0 ? 'Draft Alumni Message' : 'Generate Outreach Message'}
+          ⚡ {foundAlumni?.length > 0 ? `Message Alumni at ${companyName}` : 'Generate Outreach Message'}
         </button>
 
-        {/* Path 2 & 3: Apply in-app + external fallback */}
+        {/* Path 2: Apply via CFF (secondary) + external link */}
         <div className="flex gap-2">
           <button
             onClick={() => setShowApplyModal(true)}
-            className="flex-1 py-2 rounded-xl border border-purple-300 bg-purple-50 text-purple-700 text-xs font-semibold hover:bg-purple-100 transition-colors cursor-pointer"
+            className="flex-1 py-2.5 rounded-xl border-2 border-indigo-300 bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition-colors cursor-pointer active:scale-95"
             style={{ minHeight: 'auto' }}
           >
-            📋 Apply via CFF
+            📋 Apply &amp; Track via CFF
           </button>
           {jobUrl && (
             <button
               onClick={handleApplyExternal}
-              className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-500 text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+              className="px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-400 text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
               style={{ minHeight: 'auto', minWidth: 'auto' }}
               title="Apply on company site"
+              aria-label="Apply externally"
             >
-              {appliedExternally ? '✅ Tracked' : '↗ Apply externally'}
+              {appliedExternally ? '✅' : '↗'}
             </button>
           )}
         </div>
@@ -424,6 +429,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
