@@ -403,6 +403,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
               Your personalized feed of{' '}
               <span className="font-bold text-purple-600">{anyLoading ? '...' : targetOpportunities.length}</span> hand-picked opportunities
             </p>
+            <p className="text-xs text-blue-500 font-medium mt-1">🔄 New roles posted every 24 hours — check back tomorrow!</p>
           </div>
 
           {/* No goals nudge */}
@@ -435,6 +436,11 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                 {lastRefreshed && (
                   <span className="text-[11px] text-gray-400 hidden sm:block">
                     Refreshed {lastRefreshed.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+                {!lastRefreshed && (
+                  <span className="text-[11px] text-blue-500 hidden sm:block font-medium">
+                    🔄 New roles posted every 24 hours
                   </span>
                 )}
                 <button
