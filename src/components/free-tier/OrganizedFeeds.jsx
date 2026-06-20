@@ -545,14 +545,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                 </button>
                 <button
                   onClick={() => {
-                    Object.keys(localStorage).forEach(key => { try { localStorage.removeItem(key); } catch (e) {} });
-                    Object.keys(sessionStorage).forEach(key => { try { sessionStorage.removeItem(key); } catch (e) {} });
-                    fetch('/api/functions/clearJobLeadsCache', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      credentials: 'include',
-                    }).catch(() => {});
-                    window.location.href = window.location.origin + '/#FreeTierDashboard?t=' + Date.now();
+                    try { sessionStorage.clear(); } catch (e) {}
+                    handleManualRefresh();
                   }}
                   style={{ minHeight: 'auto', minWidth: 'auto' }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-200 bg-white text-red-400 hover:bg-red-50 hover:border-red-300 transition-all"
