@@ -253,8 +253,34 @@ Deno.serve(async (req) => {
       }
     }
 
+    // ── Pre-compute alumni counts from DiscoveredAlumni cache ──────────────
+    const schoolCode = user.school_code || '';
+    const alumniCountMap = {};
+    if (liveSlots.length > 0 && schoolCode) {
+      try {
+        const companyNames = liveSlots.map(s => s.company);
+        // Fetch alumni records for these companies in one call
+        const alumniRecords = await base44.asServiceRole.entities.DiscoveredAlumni.filter({
+          school_code: schoolCode,
+        }, null, 500);
+        for (const a of alumniRecords || []) {
+          const key = (a.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          alumniCountMap[key] = (alumniCountMap[key] || 0) + 1;
+        }
+        console.log(`[getDailyDrop] Alumni cache: ${Object.keys(alumniCountMap).length} companies with alumni`);
+      } catch (e) {
+        console.warn('[getDailyDrop] Could not load alumni counts:', e.message);
+      }
+    }
+
+    const enrichWithAlumni = (slot) => {
+      const key = (slot.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const count = alumniCountMap[key] || 0;
+      return { ...slot, alumniCount: count, hasAlumni: count > 0 };
+    };
+
     // Assemble final 5 slots — live results first, no curated sub-function needed
-    const slots = liveSlots.slice(0, 5);
+    const slots = liveSlots.slice(0, 5).map(enrichWithAlumni);
 
     // Ensure at least 3 slots — pad from fallback if needed
     if (slots.length < 3) {
@@ -291,6 +317,10 @@ Deno.serve(async (req) => {
           existing_companies.add(fb.company.toLowerCase());
         }
         if (slots.length >= 5) break;
+      }
+      // Enrich fallback slots with alumni counts too
+      for (let i = 0; i < slots.length; i++) {
+        if (!slots[i].hasAlumni) slots[i] = enrichWithAlumni(slots[i]);
       }
     }
 
