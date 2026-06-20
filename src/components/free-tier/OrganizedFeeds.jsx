@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getPersonalizedNetworkCarousel } from '@/functions/getPersonalizedNetworkCarousel';
 import { getDualConstraintLeads } from '@/functions/getDualConstraintLeads';
 import { getLiveJobMatchesFn } from '@/functions/getLiveJobMatchesFn';
+import { clearJobLeadsCache } from '@/functions/clearJobLeadsCache';
 import MatchDeepDiveModal from './MatchDeepDiveModal';
 import DiscoveryJobCard from './DiscoveryJobCard';
 import ApplicationPipeline from './ApplicationPipeline';
@@ -150,8 +151,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       force_refresh: refreshKey > 0,
     }),
     enabled: !!effectiveRole || !!target_industries?.length,
-    staleTime: 20 * 60 * 1000,  // 20 min in-memory cache
-    gcTime: 30 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
   });
 
   const { data: dualData, isLoading: dualLoading } = useQuery({
@@ -360,20 +361,29 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   }
 
   const handleManualRefresh = async () => {
-    // Clear backend cache first
-    try {
-      await fetch('/api/functions/clearJobLeadsCache', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      });
-    } catch (err) { console.error('Cache clear failed:', err); }
-    
+    // Add currently visible companies to seen list so next batch is different
     const currentSeen = new Set(seenCompanyKeys);
     allFetched.forEach(l => { const k = l.company || l.companyName; if (k) currentSeen.add(k); });
     try { sessionStorage.setItem(`cff_seen_companies_${user?.id}`, JSON.stringify([...currentSeen])); } catch {}
     seenForExclusionRef.current = Array.from(currentSeen).filter(k => !savedCompanyKeys.has(k));
     setSeenCompanyKeys(currentSeen);
+    // Force remove cached query so React Query re-fetches from backend
+    queryClient.removeQueries({ queryKey: ['liveJobMatches'] });
+    queryClient.removeQueries({ queryKey: ['dualConstraintLeads'] });
+    setRefreshKey(k => k + 1);
+    setLastRefreshed(new Date());
+  };
+
+  const handleClearCache = async () => {
+    // Wipe ALL local seen/saved state so we start completely fresh
+    try { sessionStorage.removeItem(`cff_seen_companies_${user?.id}`); } catch {}
+    seenForExclusionRef.current = [];
+    setSeenCompanyKeys(new Set());
+    // Clear backend cache via SDK
+    try { await clearJobLeadsCache({}); } catch (err) { console.error('Backend cache clear failed:', err); }
+    // Remove all cached query data
+    queryClient.removeQueries({ queryKey: ['liveJobMatches'] });
+    queryClient.removeQueries({ queryKey: ['dualConstraintLeads'] });
     setRefreshKey(k => k + 1);
     setLastRefreshed(new Date());
   };
@@ -544,12 +554,10 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                   {isFetching ? 'Loading...' : 'New Batch'}
                 </button>
                 <button
-                  onClick={() => {
-                    try { sessionStorage.clear(); } catch (e) {}
-                    handleManualRefresh();
-                  }}
+                  onClick={handleClearCache}
+                  disabled={isFetching}
                   style={{ minHeight: 'auto', minWidth: 'auto' }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-200 bg-white text-red-400 hover:bg-red-50 hover:border-red-300 transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-200 bg-white text-red-400 hover:bg-red-50 hover:border-red-300 transition-all disabled:opacity-50"
                 >
                   🗑️ Clear Cache
                 </button>
