@@ -349,13 +349,31 @@ Deno.serve(async (req) => {
       const hasCoreAction = hasResume || hasSearch || hasPipeline;
       const paywallCount  = paywallByEmail[u.email] || 0;
 
+      // ── Tiered dedup helper ──────────────────────────────────────────────
+      // Returns true if this template_id should be blocked (too recent or pending)
+      function isDuped(templateId) {
+        const match = userLC.find((e) => e.template_id === templateId);
+        if (!match) return false;
+        const age = daysAgo(match.created_date);
+        // Pending: always block until resolved
+        if (match.status === "pending_approval") return true;
+        // Sent: allow re-engagement after 30 days if still not activated
+        if (match.status === "sent") return age < 30;
+        // Rejected: reconsider after 30 days so admin gets another chance
+        if (match.status === "rejected") return age < 30;
+        // Failed: retry after 24 hours
+        if (match.status === "failed") return age < 1;
+        // Approved (not yet dispatched): treat like pending
+        if (match.status === "approved") return true;
+        return false;
+      }
+
       // ── Segment 3 first (highest value) — CLIFF-ready ──────────────────
       const isFree         = u.subscription_status !== "active";
       const activeRecently = daysAgo(u.updated_date) <= 30;
 
       if (isFree && activeRecently && paywallCount > 0) {
-        const already = userLC.find((e) => e.template_id === "lifecycle_cliff_ready_v1");
-        if (already) { counters.skip_dedup++; continue; }
+        if (isDuped("lifecycle_cliff_ready_v1")) { counters.skip_dedup++; continue; }
         counters.cliff_ready++;
         toProcess.push({ user: u, segment: "cliff_ready", paywallCount,
           trigger: `Free tier. Active within 30 days. Hit paywall ${paywallCount}x.` });
@@ -364,8 +382,7 @@ Deno.serve(async (req) => {
 
       // ── Segment 1 — Never-Activated ──────────────────────────────────────
       if (signupAge >= 3 && !hasCoreAction) {
-        const already = userLC.find((e) => e.template_id === "lifecycle_never_activated_v1");
-        if (already) { counters.skip_dedup++; continue; }
+        if (isDuped("lifecycle_never_activated_v1")) { counters.skip_dedup++; continue; }
         counters.never_activated++;
         toProcess.push({ user: u, segment: "never_activated",
           trigger: `Signed up ${Math.round(signupAge)}d ago. No resume, alumni search, or pipeline entry.` });
@@ -377,8 +394,7 @@ Deno.serve(async (req) => {
       const wasActive  = hasCoreAction || (u.platform_visit_count || 0) > 0;
 
       if (wasActive && daysSilent >= 7 && daysSilent <= 60) {
-        const already = userLC.find((e) => e.template_id === "lifecycle_gone_quiet_v1");
-        if (already) { counters.skip_dedup++; continue; }
+        if (isDuped("lifecycle_gone_quiet_v1")) { counters.skip_dedup++; continue; }
         counters.gone_quiet++;
         toProcess.push({ user: u, segment: "gone_quiet",
           trigger: `Was active. Silent for ${Math.round(daysSilent)} days.` });
