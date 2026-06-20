@@ -72,41 +72,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   const effectiveSize = company_size_preference || 'all';
   const effectiveLocation = location_preference || user?.career_goals?.location_preference || user?.location || '';
 
-  // One-time cleanup of bad cached data on mount
-  useEffect(() => {
-    const cleanupBadCache = async () => {
-      try {
-        // Clear localStorage bad keys
-        const savedKey = `cff_saved_companies_${user?.id}`;
-        const seenKey = `cff_seen_companies_${user?.id}`;
-        const jobKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'public relations', 'marketing', 'operations', 'content', 'social', 'media', 'coordinator', 'strategist', 'lead', 'head of', 'vp', 'chief', 'officer', 'partner'];
-        
-        // Clean saved companies
-        const saved = localStorage.getItem(savedKey);
-        if (saved) {
-          const keys = JSON.parse(saved);
-          const valid = keys.filter(k => k && k.length >= 3 && !jobKeywords.some(j => k.toLowerCase().includes(j)));
-          if (valid.length !== keys.length) localStorage.setItem(savedKey, JSON.stringify(valid));
-        }
-        
-        // Clean seen companies
-        const seen = sessionStorage.getItem(seenKey);
-        if (seen) {
-          const keys = JSON.parse(seen);
-          const valid = keys.filter(k => k && k.length >= 3 && !jobKeywords.some(j => k.toLowerCase().includes(j)));
-          if (valid.length !== keys.length) sessionStorage.setItem(seenKey, JSON.stringify(valid));
-        }
-        
-        // Clear backend cache
-        await fetch('/api/functions/clearJobLeadsCache', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        });
-      } catch (err) { console.error('Cache cleanup failed:', err); }
-    };
-    cleanupBadCache();
-  }, [user?.id]);
+  // No auto-clear on mount — cache is managed manually via buttons
 
   useEffect(() => {
     const handler = () => {
@@ -151,7 +117,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       },
       force_refresh: forceRefresh,
     }),
-    enabled: !!effectiveRole || !!target_industries?.length,
+    enabled: true,
     staleTime: 0,
     gcTime: 5 * 60 * 1000,
   });

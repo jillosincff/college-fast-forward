@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
 
     // Build Fantastic.jobs query — real ATS postings from the last 7 days
     const params = new URLSearchParams({
-      time_frame: '6m',
+      time_frame: '7d',
       limit: '200',
       include_basic_organization_details: 'true',
       title_advanced: buildTitleQuery(roleDesc, seeking),
