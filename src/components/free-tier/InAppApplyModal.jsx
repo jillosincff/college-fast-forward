@@ -90,16 +90,18 @@ export default function InAppApplyModal({ lead, user, onClose, onSuccess }) {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
-              {/* Applicant info (pre-filled, read-only) */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm font-bold text-purple-700">
-                  {user?.full_name?.[0] || '?'}
+              {/* Applicant info (pre-filled, read-only) — only show if user data is available */}
+              {(user?.full_name || user?.email) && (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm font-bold text-purple-700">
+                    {user?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '👤'}
+                  </div>
+                  <div>
+                    {user?.full_name && <p className="text-xs font-semibold text-gray-800">{user.full_name}</p>}
+                    {user?.email && <p className="text-[11px] text-gray-500">{user.email}</p>}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-800">{user?.full_name}</p>
-                  <p className="text-[11px] text-gray-500">{user?.email}</p>
-                </div>
-              </div>
+              )}
 
               {/* Cover note */}
               <div>
