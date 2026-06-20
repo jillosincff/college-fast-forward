@@ -45,50 +45,49 @@ const SCHOOL_THEMES = {
   'default': { primary: BLUE, secondary: '#16a34a', name: 'Network' },
 };
 
-function SchoolPrideBanner({ schoolName, alumniCount }) {
-  const theme = SCHOOL_THEMES[schoolName] || SCHOOL_THEMES.default;
-  
+function ParentNetworkBanner({ isMobile }) {
   return (
     <div style={{
-      background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
-      borderRadius: 12, padding: '12px 16px', marginBottom: 16,
+      background: 'linear-gradient(135deg, #f0fdf4, #ecfdf5)',
+      border: '1.5px solid #6ee7b7',
+      borderRadius: 12, padding: '12px 14px', marginBottom: 16,
       display: 'flex', alignItems: 'center', gap: 10,
-      boxShadow: `0 4px 12px ${theme.primary}33`,
     }}>
       <div style={{
         width: 36, height: 36, borderRadius: '50%',
-        background: 'rgba(255,255,255,0.2)',
+        background: '#d1fae5',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 18, flexShrink: 0,
       }}>
-        🎓
+        🤝
       </div>
       <div style={{ flex: 1 }}>
         <p style={{
-          fontFamily: dm, fontSize: 11, fontWeight: 700,
-          color: 'rgba(255,255,255,0.9)', margin: '0 0 2px',
-          textTransform: 'uppercase', letterSpacing: '0.08em',
+          fontFamily: dm, fontSize: 11, fontWeight: 800,
+          color: '#065f46', margin: '0 0 2px',
+          textTransform: 'uppercase', letterSpacing: '0.07em',
         }}>
-          Active Network
+          Parent Network
         </p>
-        <p style={{
-          fontFamily: dm, fontSize: 13, fontWeight: 700,
-          color: '#fff', margin: 0,
-        }}>
-          {schoolName || 'Your School'} &middot; {alumniCount || '0'} Alumni &amp; Parents Synced
+        <p style={{ fontFamily: dm, fontSize: 12, color: '#059669', margin: 0, fontWeight: 500 }}>
+          Connected · Check for connections at your target companies
         </p>
       </div>
-      <div style={{
-        background: 'rgba(255,255,255,0.2)',
-        borderRadius: 8, padding: '4px 10px',
-      }}>
-        <p style={{
-          fontFamily: dm, fontSize: 10, fontWeight: 700,
-          color: '#fff', margin: 0,
-        }}>
-          {theme.name}
-        </p>
-      </div>
+      <button
+        onClick={() => window.location.hash = '#FreeTierDashboard?tab=network'}
+        style={{
+          fontFamily: dm, fontSize: isMobile ? 10 : 11, fontWeight: 700,
+          color: '#065f46', background: '#a7f3d0',
+          border: '1.5px solid #6ee7b7',
+          borderRadius: 8, padding: '6px 10px',
+          cursor: 'pointer', minHeight: 'auto', whiteSpace: 'nowrap', flexShrink: 0,
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = '#6ee7b7'}
+        onMouseLeave={e => e.currentTarget.style.background = '#a7f3d0'}
+      >
+        Find Connections →
+      </button>
     </div>
   );
 }
@@ -519,7 +518,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
           <span style={{ fontFamily: dm, fontSize: isMobile ? 13 : 14, fontWeight: 600 }}>Back</span>
         </button>
         
-        <SchoolPrideBanner schoolName={userSchool} alumniCount={alumniCount} />
+        <ParentNetworkBanner isMobile={isMobile} />
         
         {/* Pipeline Header - Stacks on mobile */}
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: isMobile ? 12 : 0, marginBottom: isMobile ? 12 : 12 }}>
@@ -527,9 +526,7 @@ export default function ApplicationPipeline({ onUpgrade, userSchool = 'Universit
             <p style={{ fontFamily: dm, fontSize: isMobile ? 14 : 15, fontWeight: 800, color: '#111827', margin: 0 }}>
               My Application Pipeline
             </p>
-            <p style={{ fontFamily: dm, fontSize: isMobile ? 10 : 11, color: '#059669', margin: '3px 0 0', fontWeight: 600, letterSpacing: '0.02em' }}>
-              🐊 Synced Network: {userSchool} Alumni &amp; Parent Grid Active
-            </p>
+
             {!isPremium && (
               <p style={{ fontFamily: dm, fontSize: isMobile ? 9 : 10, color: '#6b7280', margin: '3px 0 0' }}>
                 {totalJobs}/{FREE_LIMIT} jobs ·{' '}

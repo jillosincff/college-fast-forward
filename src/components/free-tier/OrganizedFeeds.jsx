@@ -505,7 +505,29 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
 
         {/* ── RIGHT COLUMN (30%): Sticky Sidebar Pipeline ── */}
         <div className="lg:col-span-3">
-          <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-theme(spacing.24))] overflow-y-auto">
+          <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-theme(spacing.24))] overflow-y-auto space-y-4">
+
+            {/* Parent Network Card */}
+            <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-lg flex-shrink-0">🤝</div>
+                <div>
+                  <p className="text-xs font-bold text-emerald-900 uppercase tracking-wide">Parent Network</p>
+                  <p className="text-[11px] text-emerald-600 font-medium">Connected · check for warm paths</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
+                Parents in your network may work at your target companies. Tap to find warm introductions.
+              </p>
+              <button
+                onClick={() => window.location.hash = '#FreeTierDashboard?tab=network'}
+                className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
+                style={{ minHeight: 'auto', cursor: 'pointer' }}
+              >
+                Explore Parent Network →
+              </button>
+            </div>
+
             <ApplicationPipeline
               userSchool={user?.school_name || 'University of Florida'}
               alumniCount={verifiedAlumniCount || 0}
