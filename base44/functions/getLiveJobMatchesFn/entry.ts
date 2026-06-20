@@ -147,8 +147,8 @@ Deno.serve(async (req) => {
 
     // Build Fantastic.jobs query — real ATS postings from the last 7 days
     const params = new URLSearchParams({
-      time_frame: '7d',
-      limit: '100',
+      time_frame: '14d',
+      limit: '200',
       include_basic_organization_details: 'true',
       title_advanced: buildTitleQuery(roleDesc, seeking),
     });
@@ -171,11 +171,18 @@ Deno.serve(async (req) => {
     const jobs = await apiRes.json();
     console.log(`[getLiveJobMatchesFn] API returned ${Array.isArray(jobs) ? jobs.length : 0} real postings`);
 
+    // Shuffle jobs array so each refresh returns a different subset
+    const jobList = Array.isArray(jobs) ? [...jobs] : [];
+    for (let i = jobList.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
+    }
+
     // Filter + normalize. One job per company, max 8.
     const seenOrgs = new Set();
     const companies = [];
 
-    for (const job of (Array.isArray(jobs) ? jobs : [])) {
+    for (const job of jobList) {
       const org = job.organization;
       const title = job.title?.trim();
       if (!org || !title || !job.url) continue;
