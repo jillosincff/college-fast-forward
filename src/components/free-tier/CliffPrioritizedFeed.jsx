@@ -207,6 +207,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
                   onSelect={setSelectedLead}
                   schoolAbbr={schoolAbbr}
                   onDismiss={() => handleDismiss(lead)}
+                  user={user}
                 />
               ))}
             </div>

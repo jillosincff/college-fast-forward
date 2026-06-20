@@ -3,14 +3,16 @@ import { scoutCompanyBackdoor } from '@/functions/scoutCompanyBackdoor';
 import { base44 } from '@/api/base44Client';
 import useParentCompanies from '@/hooks/useParentCompanies';
 import { getStandoutInsight } from '@/functions/getStandoutInsight';
+import InAppApplyModal from './InAppApplyModal';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill }) {
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill, user }) {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [added, setAdded] = useState(false);
   const [appliedExternally, setAppliedExternally] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
 
   // Standout insight state
   const [insight, setInsight] = useState(null);
@@ -347,19 +349,23 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           ⚡ {foundAlumni?.length > 0 ? 'Draft Alumni Message' : 'Generate Outreach Message'}
         </button>
 
-        {/* Path 2 & 3: Apply externally with tracking prompt */}
+        {/* Path 2 & 3: Apply in-app + external fallback */}
         <div className="flex gap-2">
+          <button
+            onClick={() => setShowApplyModal(true)}
+            className="flex-1 py-2 rounded-xl border border-purple-300 bg-purple-50 text-purple-700 text-xs font-semibold hover:bg-purple-100 transition-colors cursor-pointer"
+            style={{ minHeight: 'auto' }}
+          >
+            📋 Apply via CFF
+          </button>
           {jobUrl && (
             <button
               onClick={handleApplyExternal}
-              className={`flex-1 py-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
-                appliedExternally
-                  ? 'border-green-400 bg-green-50 text-green-700'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-              style={{ minHeight: 'auto' }}
+              className="px-3 py-2 rounded-xl border border-gray-200 bg-white text-gray-500 text-xs font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+              style={{ minHeight: 'auto', minWidth: 'auto' }}
+              title="Apply on company site"
             >
-              {appliedExternally ? '✅ Applied — tracked!' : '🔗 Apply on Company Site'}
+              {appliedExternally ? '✅' : '↗'}
             </button>
           )}
           <button
@@ -374,18 +380,20 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
             {added ? '✅' : '+ Track'}
           </button>
         </div>
-
-        {/* "Application started" nudge after external apply */}
-        {appliedExternally && (
-          <p className="text-[10px] text-center text-gray-500">
-            Application started — <button
-              onClick={() => window.location.hash = '#ApplicationTracker'}
-              className="text-purple-600 font-semibold underline cursor-pointer"
-              style={{ minHeight: 'auto', minWidth: 'auto' }}
-            >update your status in CFF →</button>
-          </p>
-        )}
       </div>
+
+      {/* In-App Apply Modal */}
+      {showApplyModal && (
+        <InAppApplyModal
+          lead={lead}
+          user={user}
+          onClose={() => setShowApplyModal(false)}
+          onSuccess={() => {
+            handleTrackOnly('cold_apply');
+            setTimeout(() => setShowApplyModal(false), 2500);
+          }}
+        />
+      )}
 
       {/* Full Description Modal */}
       {showFullDesc && (
