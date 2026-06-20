@@ -13,46 +13,46 @@ export default function ResumeBuilderIntro({ user, onStart, onUpload, onSkip }) 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="space-y-8"
-      style={{ background: '#0d1117', borderRadius: 16, padding: '40px 32px', color: '#fff' }}
+      className="space-y-6"
+      style={{ background: '#fff', borderRadius: 16, padding: '40px 32px', border: '1px solid #e5e7eb' }}
     >
       {/* Greeting */}
       <div style={{ textAlign: 'center' }}>
         <p style={{
           fontFamily: dm,
-          fontSize: 14,
-          color: 'rgba(255,255,255,0.6)',
-          margin: '0 0 12px',
+          fontSize: 13,
+          color: '#6b7280',
+          margin: '0 0 10px',
           lineHeight: 1.6,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          fontWeight: 600,
         }}>
-          Hi {firstName}, I'm your Agent.
+          Resume Builder
         </p>
         <h2 style={{
           fontFamily: pf,
-          fontSize: 28,
+          fontSize: 26,
           fontWeight: 700,
-          color: '#fff',
+          color: '#111827',
           margin: 0,
-          lineHeight: 1.2,
+          lineHeight: 1.25,
         }}>
           Let's build a resume that actually gets noticed.
         </h2>
+        <p style={{
+          fontFamily: dm,
+          fontSize: 14,
+          color: '#6b7280',
+          margin: '10px 0 0',
+          lineHeight: 1.6,
+        }}>
+          Hi {firstName} — answer a few quick questions and I'll create a professional, targeted resume tailored to your goals.
+        </p>
       </div>
 
-      {/* Sub-headline */}
-      <p style={{
-        fontFamily: dm,
-        fontSize: 15,
-        color: 'rgba(255,255,255,0.75)',
-        margin: 0,
-        lineHeight: 1.6,
-        textAlign: 'center',
-      }}>
-        Answer a few quick questions and I'll create a professional, targeted resume tailored to your goals.
-      </p>
-
       {/* Benefit bullets */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, background: '#f9fafb', borderRadius: 12, padding: '16px 20px' }}>
         {[
           'ATS-friendly formatting',
           'Tailored to the types of roles you want',
@@ -60,12 +60,8 @@ export default function ResumeBuilderIntro({ user, onStart, onUpload, onSkip }) 
           'Ready to download and customize further',
         ].map((benefit, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <CheckCircle2 style={{ width: 18, height: 18, color: '#22C55E', flexShrink: 0 }} />
-            <span style={{
-              fontFamily: dm,
-              fontSize: 14,
-              color: 'rgba(255,255,255,0.8)',
-            }}>
+            <CheckCircle2 style={{ width: 16, height: 16, color: '#16a34a', flexShrink: 0 }} />
+            <span style={{ fontFamily: dm, fontSize: 14, color: '#374151' }}>
               {benefit}
             </span>
           </div>
@@ -76,13 +72,13 @@ export default function ResumeBuilderIntro({ user, onStart, onUpload, onSkip }) 
       <button
         onClick={onStart}
         style={{
-          background: '#FA4616',
+          background: '#7c3aed',
           border: 'none',
           borderRadius: 10,
           padding: '14px 28px',
           fontFamily: dm,
           fontSize: 15,
-          fontWeight: 600,
+          fontWeight: 700,
           color: '#fff',
           cursor: 'pointer',
           width: '100%',
@@ -92,49 +88,40 @@ export default function ResumeBuilderIntro({ user, onStart, onUpload, onSkip }) 
           justifyContent: 'center',
           gap: 8,
           transition: 'background 0.2s',
+          boxShadow: '0 4px 14px rgba(124,58,237,0.3)',
         }}
-        onMouseEnter={e => (e.currentTarget.style.background = '#E85D20')}
-        onMouseLeave={e => (e.currentTarget.style.background = '#FA4616')}
+        onMouseEnter={e => (e.currentTarget.style.background = '#6d28d9')}
+        onMouseLeave={e => (e.currentTarget.style.background = '#7c3aed')}
       >
         Start Building My Resume
         <ArrowRight style={{ width: 16, height: 16 }} />
       </button>
 
       {/* Secondary option */}
-      <div style={{ textAlign: 'center', paddingTop: 8 }}>
-        <p style={{
-          fontFamily: dm,
-          fontSize: 13,
-          color: 'rgba(255,255,255,0.5)',
-          margin: '0 0 8px',
-        }}>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: '#9ca3af', margin: '0 0 8px' }}>
           I already have a resume
         </p>
         <button
           onClick={onUpload}
           style={{
-            background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.2)',
+            background: '#f3f4f6',
+            border: '1px solid #e5e7eb',
             borderRadius: 8,
-            padding: '8px 16px',
+            padding: '8px 18px',
             fontFamily: dm,
             fontSize: 13,
-            color: 'rgba(255,255,255,0.7)',
+            color: '#374151',
             cursor: 'pointer',
             minHeight: 'auto',
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
+            fontWeight: 600,
             transition: 'all 0.2s',
           }}
-          onMouseEnter={e => {
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.9)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#e5e7eb'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#f3f4f6'; }}
         >
           <Upload style={{ width: 14, height: 14 }} />
           Upload for Review
@@ -142,7 +129,7 @@ export default function ResumeBuilderIntro({ user, onStart, onUpload, onSkip }) 
       </div>
 
       {/* Footer link */}
-      <div style={{ textAlign: 'center', paddingTop: 8 }}>
+      <div style={{ textAlign: 'center' }}>
         <button
           onClick={onSkip}
           style={{
@@ -150,15 +137,12 @@ export default function ResumeBuilderIntro({ user, onStart, onUpload, onSkip }) 
             border: 'none',
             fontFamily: dm,
             fontSize: 12,
-            color: 'rgba(255,255,255,0.4)',
+            color: '#9ca3af',
             cursor: 'pointer',
             padding: 0,
             minHeight: 'auto',
             textDecoration: 'underline',
-            transition: 'color 0.2s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
         >
           Skip for now
         </button>

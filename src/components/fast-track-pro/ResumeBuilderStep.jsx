@@ -253,14 +253,14 @@ Return the full resume text and a brief encouraging summary.`,
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-6 bg-white rounded-2xl p-6 border border-gray-200"
       >
-        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 rounded-xl p-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
           <div className="flex items-start gap-4">
             <div className="text-3xl">💼</div>
             <div>
-              <h2 className="text-white font-bold text-lg mb-2">Do you have a LinkedIn profile?</h2>
-              <p className="text-white/60 text-sm">We can import your experience, education, and skills to get started faster.</p>
+              <h2 className="text-gray-900 font-bold text-lg mb-1">Do you have a LinkedIn profile?</h2>
+              <p className="text-gray-500 text-sm">We can import your experience, education, and skills to get started faster.</p>
             </div>
           </div>
         </div>
@@ -268,14 +268,14 @@ Return the full resume text and a brief encouraging summary.`,
         <div className="flex flex-col gap-3">
           <button
             onClick={() => setPhase('import_linkedin')}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all"
+            className="w-full bg-purple-700 hover:bg-purple-800 text-white font-semibold py-3 px-4 rounded-xl transition-all"
             style={{ minHeight: 'auto' }}
           >
             ✓ Yes – Import from LinkedIn (Recommended)
           </button>
           <button
             onClick={() => setPhase('questions')}
-            className="w-full bg-white/5 hover:bg-white/10 border border-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-all"
+            className="w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all"
             style={{ minHeight: 'auto' }}
           >
             No – I'll enter manually
@@ -291,54 +291,54 @@ Return the full resume text and a brief encouraging summary.`,
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-5 bg-white rounded-2xl p-6 border border-gray-200"
       >
         <button
           onClick={() => setPhase('linkedin_prompt')}
-          className="text-white/40 text-xs hover:text-white/60 underline flex items-center gap-1"
+          className="text-gray-400 text-xs hover:text-gray-600 underline flex items-center gap-1"
           style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
         >
           <ArrowLeft className="w-3 h-3" /> Back
         </button>
 
         <div>
-          <h2 className="text-white font-bold text-xl mb-2">Let's pull in your experience</h2>
-          <p className="text-white/60 text-sm">Copy and paste the sections from your LinkedIn profile below. The Agent will turn them into a clean, professional resume.</p>
+          <h2 className="text-gray-900 font-bold text-xl mb-1">Let's pull in your experience</h2>
+          <p className="text-gray-500 text-sm">Copy and paste the sections from your LinkedIn profile below. The Agent will turn them into a clean, professional resume.</p>
         </div>
 
         {/* Experience Section */}
-        <div className="space-y-2">
-          <label className="text-white text-sm font-semibold">Paste your Experience section</label>
-          <p className="text-white/50 text-xs">Go to your LinkedIn → Click "Add profile section" → Experience → Copy everything under your roles</p>
+        <div className="space-y-1.5">
+          <label className="text-gray-800 text-sm font-semibold">Paste your Experience section</label>
+          <p className="text-gray-400 text-xs">Go to your LinkedIn → Click "Add profile section" → Experience → Copy everything under your roles</p>
           <textarea
             value={linkedinSections.experience}
             onChange={(e) => setLinkedinSections(prev => ({ ...prev, experience: e.target.value }))}
             placeholder="Paste Experience section here..."
-            className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/30 rounded-lg p-3 h-24 resize-none"
+            className="w-full bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg p-3 h-24 resize-none text-sm"
             disabled={importing}
           />
         </div>
 
         {/* Education Section */}
-        <div className="space-y-2">
-          <label className="text-white text-sm font-semibold">Paste your Education section (optional)</label>
+        <div className="space-y-1.5">
+          <label className="text-gray-800 text-sm font-semibold">Paste your Education section (optional)</label>
           <textarea
             value={linkedinSections.education}
             onChange={(e) => setLinkedinSections(prev => ({ ...prev, education: e.target.value }))}
             placeholder="Paste Education section here..."
-            className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/30 rounded-lg p-3 h-20 resize-none"
+            className="w-full bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg p-3 h-20 resize-none text-sm"
             disabled={importing}
           />
         </div>
 
         {/* Skills/Projects */}
-        <div className="space-y-2">
-          <label className="text-white text-sm font-semibold">Skills, Projects, or Certifications (optional)</label>
+        <div className="space-y-1.5">
+          <label className="text-gray-800 text-sm font-semibold">Skills, Projects, or Certifications (optional)</label>
           <textarea
             value={linkedinSections.extra}
             onChange={(e) => setLinkedinSections(prev => ({ ...prev, extra: e.target.value }))}
             placeholder="Paste any other relevant sections..."
-            className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/30 rounded-lg p-3 h-20 resize-none"
+            className="w-full bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg p-3 h-20 resize-none text-sm"
             disabled={importing}
           />
         </div>
@@ -346,14 +346,14 @@ Return the full resume text and a brief encouraging summary.`,
         {/* Help Section */}
         <button
           onClick={() => setShowHelp(!showHelp)}
-          className="text-blue-400 text-xs hover:text-blue-300 underline flex items-center gap-1"
+          className="text-blue-600 text-xs hover:text-blue-700 underline flex items-center gap-1"
           style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
         >
           {showHelp ? '▼' : '▶'} How to copy from LinkedIn
         </button>
 
         {showHelp && (
-          <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-xs text-white/70 space-y-1">
+          <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-800 space-y-1">
             <p>• Open your LinkedIn profile in a new tab</p>
             <p>• Scroll to Experience → Click the three dots → "Show all"</p>
             <p>• Highlight and copy the text (including bullet points)</p>
@@ -362,11 +362,11 @@ Return the full resume text and a brief encouraging summary.`,
         )}
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-3 pt-2">
+        <div className="flex flex-col gap-3 pt-1">
           <Button
             onClick={handleImportLinkedin}
             disabled={!linkedinSections.experience.trim() || importing}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white h-11 font-semibold"
+            className="w-full bg-purple-700 hover:bg-purple-800 text-white h-11 font-semibold"
             style={{ minHeight: 'auto' }}
           >
             {importing ? (
@@ -379,7 +379,7 @@ Return the full resume text and a brief encouraging summary.`,
           </Button>
           <button
             onClick={() => setPhase('questions')}
-            className="text-white/40 text-xs hover:text-white/60 underline"
+            className="text-gray-400 text-xs hover:text-gray-600 underline"
             style={{ minHeight: 'auto' }}
             disabled={importing}
           >
@@ -393,13 +393,13 @@ Return the full resume text and a brief encouraging summary.`,
   // Generating state
   if (generating) {
     return (
-      <div className="flex flex-col items-center gap-4 py-12">
+      <div className="flex flex-col items-center gap-4 py-12 bg-white rounded-2xl border border-gray-200">
         <div className="relative">
-          <Loader2 className="w-10 h-10 animate-spin text-[#FA4616]" />
+          <Loader2 className="w-10 h-10 animate-spin text-purple-700" />
           <Sparkles className="w-4 h-4 text-purple-400 absolute -top-1 -right-1 animate-pulse" />
         </div>
-        <p className="text-white/80 text-sm font-medium">Building your resume...</p>
-        <p className="text-white/40 text-xs">Strengthening bullet points & formatting</p>
+        <p className="text-gray-800 text-sm font-semibold">Building your resume...</p>
+        <p className="text-gray-400 text-xs">Strengthening bullet points & formatting</p>
       </div>
     );
   }
@@ -410,35 +410,33 @@ Return the full resume text and a brief encouraging summary.`,
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-5"
+        className="space-y-5 bg-white rounded-2xl p-6 border border-gray-200"
       >
-        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-green-400" />
-            <span className="text-green-400 font-bold text-sm">Your resume is ready!</span>
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="w-5 h-5 text-green-600" />
+            <span className="text-green-700 font-bold text-sm">Your resume is ready!</span>
           </div>
-          <p className="text-white/70 text-sm">{generatedResume.summary}</p>
+          <p className="text-gray-600 text-sm">{generatedResume.summary}</p>
         </div>
 
         {/* Resume preview */}
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between p-3 border-b border-white/10">
-            <span className="text-white/50 text-xs font-semibold">RESUME PREVIEW</span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setEditing(!editing)}
-                className="flex items-center gap-1 text-xs text-white/50 hover:text-white/80 transition-colors px-2 py-1 rounded"
-                style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
-              >
-                <Pencil className="w-3 h-3" /> {editing ? 'Preview' : 'Edit'}
-              </button>
-            </div>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+          <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-white">
+            <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide">Resume Preview</span>
+            <button
+              onClick={() => setEditing(!editing)}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 transition-colors px-2 py-1 rounded"
+              style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
+            >
+              <Pencil className="w-3 h-3" /> {editing ? 'Preview' : 'Edit'}
+            </button>
           </div>
           {editing ? (
             <Textarea
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              className="bg-transparent border-0 text-white/80 text-xs font-mono min-h-[300px] rounded-none focus:ring-0"
+              className="bg-white border-0 text-gray-800 text-xs font-mono min-h-[300px] rounded-none focus:ring-0"
               rows={20}
             />
           ) : (
@@ -450,8 +448,7 @@ Return the full resume text and a brief encouraging summary.`,
                 lineHeight: 1.7,
                 color: '#1A1A1A',
                 background: '#fff',
-                padding: '28px 32px',
-                borderRadius: 8,
+                padding: '24px 28px',
                 overflowY: 'auto',
                 maxHeight: 400,
               }}
@@ -463,14 +460,14 @@ Return the full resume text and a brief encouraging summary.`,
           <Button
             onClick={handleDownload}
             variant="outline"
-            className="flex-1 border-white/20 text-white hover:bg-white/10 bg-white/5 h-11"
+            className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 h-11"
             style={{ minHeight: 'auto' }}
           >
             <Download className="w-4 h-4 mr-2" /> Download
           </Button>
           <Button
             onClick={handleSaveResume}
-            className="flex-1 bg-[#FA4616] hover:bg-orange-600 text-white h-11 font-semibold"
+            className="flex-1 bg-purple-700 hover:bg-purple-800 text-white h-11 font-semibold"
           >
             <Check className="w-4 h-4 mr-2" /> Save & Activate
           </Button>
@@ -484,15 +481,15 @@ Return the full resume text and a brief encouraging summary.`,
 
   // Conversational builder steps
   return (
-    <div className="space-y-6" ref={scrollRef}>
+    <div className="space-y-5 bg-white rounded-2xl p-6 border border-gray-200" ref={scrollRef}>
       {/* Previous answers (collapsed) */}
       {currentStep > 0 && (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-1.5 mb-2">
           {BUILDER_STEPS.slice(0, currentStep).map((s, i) => {
             const val = s.fields.map(f => answers[f]).filter(Boolean).join(', ');
             return val ? (
-              <div key={i} className="flex items-start gap-2 text-white/30 text-xs">
-                <Check className="w-3 h-3 mt-0.5 text-green-400/50 flex-shrink-0" />
+              <div key={i} className="flex items-start gap-2 text-gray-400 text-xs">
+                <Check className="w-3 h-3 mt-0.5 text-green-500 flex-shrink-0" />
                 <span className="truncate">{val.substring(0, 60)}{val.length > 60 ? '...' : ''}</span>
               </div>
             ) : null;
@@ -509,9 +506,9 @@ Return the full resume text and a brief encouraging summary.`,
           exit={{ opacity: 0, y: -15 }}
           transition={{ duration: 0.2 }}
         >
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
-            <p className="text-white/90 text-sm font-medium mb-1">{step.question}</p>
-            <p className="text-white/40 text-xs">{step.encourage}</p>
+          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
+            <p className="text-gray-900 text-sm font-semibold mb-1">{step.question}</p>
+            <p className="text-gray-500 text-xs">{step.encourage}</p>
           </div>
 
           {/* Input fields */}
@@ -521,19 +518,19 @@ Return the full resume text and a brief encouraging summary.`,
                 value={answers.name}
                 onChange={(e) => setAnswers(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Full name"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11"
               />
               <Input
                 value={answers.phone}
                 onChange={(e) => setAnswers(prev => ({ ...prev, phone: e.target.value }))}
                 placeholder="Phone number (optional)"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11"
               />
               <Input
                 value={answers.linkedin}
                 onChange={(e) => setAnswers(prev => ({ ...prev, linkedin: e.target.value }))}
                 placeholder="LinkedIn URL (optional)"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11"
               />
             </div>
           )}
@@ -544,25 +541,25 @@ Return the full resume text and a brief encouraging summary.`,
                 value={answers.major}
                 onChange={(e) => setAnswers(prev => ({ ...prev, major: e.target.value }))}
                 placeholder="Major (e.g., Finance, Computer Science)"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11"
               />
               <Input
                 value={answers.graduation}
                 onChange={(e) => setAnswers(prev => ({ ...prev, graduation: e.target.value }))}
                 placeholder="Expected graduation (e.g., Spring 2027)"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11"
               />
               <Input
                 value={answers.gpa}
                 onChange={(e) => setAnswers(prev => ({ ...prev, gpa: e.target.value }))}
                 placeholder="GPA (optional)"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11"
               />
               <Input
                 value={answers.coursework}
                 onChange={(e) => setAnswers(prev => ({ ...prev, coursework: e.target.value }))}
                 placeholder="Relevant coursework (optional, comma-separated)"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/30 h-11"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 h-11"
               />
             </div>
           )}
@@ -577,7 +574,7 @@ Return the full resume text and a brief encouraging summary.`,
                 step.id === 'extras' ? "e.g., Dean's List Fall 2024, VP of Finance Club, Google Analytics certification..." :
                 "Tell me more..."
               }
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[120px] text-sm"
+              className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 min-h-[120px] text-sm"
               rows={5}
             />
           )}
@@ -587,7 +584,7 @@ Return the full resume text and a brief encouraging summary.`,
               value={answers.skills_text}
               onChange={(e) => setAnswers(prev => ({ ...prev, skills_text: e.target.value }))}
               placeholder="e.g., Excel, Python, SQL, Adobe Creative Suite, Bilingual (Spanish), Data analysis..."
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/30 min-h-[80px] text-sm"
+              className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 min-h-[80px] text-sm"
               rows={3}
             />
           )}
@@ -595,10 +592,10 @@ Return the full resume text and a brief encouraging summary.`,
       </AnimatePresence>
 
       {/* Nav */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 items-center">
         <button
           onClick={() => currentStep > 0 ? setCurrentStep(prev => prev - 1) : onBack()}
-          className="text-white/40 text-xs hover:text-white/60 underline flex items-center gap-1"
+          className="text-gray-400 text-xs hover:text-gray-600 underline flex items-center gap-1"
           style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
         >
           <ArrowLeft className="w-3 h-3" /> Back
@@ -607,7 +604,7 @@ Return the full resume text and a brief encouraging summary.`,
         {!canProceed() && !isLastStep && (
           <button
             onClick={handleSkip}
-            className="text-white/30 text-xs hover:text-white/50"
+            className="text-gray-400 text-xs hover:text-gray-600 underline"
             style={{ minHeight: 'auto', minWidth: 'auto', width: 'auto' }}
           >
             Skip
@@ -616,7 +613,7 @@ Return the full resume text and a brief encouraging summary.`,
         <Button
           onClick={handleNext}
           disabled={step.id === 'contact' && !answers.name.trim()}
-          className="bg-[#FA4616] hover:bg-orange-600 text-white h-10 px-6 font-semibold"
+          className="bg-purple-700 hover:bg-purple-800 text-white h-10 px-6 font-semibold"
           style={{ minHeight: 'auto', width: 'auto' }}
         >
           {isLastStep ? 'Build my resume' : 'Next'}
@@ -625,12 +622,12 @@ Return the full resume text and a brief encouraging summary.`,
       </div>
 
       {/* Progress dots */}
-      <div className="flex justify-center gap-1.5 pt-2">
+      <div className="flex justify-center gap-1.5 pt-1">
         {BUILDER_STEPS.map((_, i) => (
           <div
             key={i}
             className={`h-1.5 rounded-full transition-all ${
-              i === currentStep ? 'w-6 bg-[#FA4616]' : i < currentStep ? 'w-1.5 bg-green-400/50' : 'w-1.5 bg-white/10'
+              i === currentStep ? 'w-6 bg-purple-700' : i < currentStep ? 'w-1.5 bg-green-500' : 'w-1.5 bg-gray-200'
             }`}
           />
         ))}
