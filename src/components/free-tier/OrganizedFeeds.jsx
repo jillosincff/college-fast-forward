@@ -555,9 +555,9 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                     window.location.href = window.location.origin + '/#FreeTierDashboard?t=' + Date.now();
                   }}
                   style={{ minHeight: 'auto', minWidth: 'auto' }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-300 bg-white text-red-600 hover:bg-red-50 hover:border-red-400 transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-200 bg-white text-red-400 hover:bg-red-50 hover:border-red-300 transition-all"
                 >
-                  🗑️ Nuke Everything
+                  🗑️ Clear Cache
                 </button>
               </div>
             </div>
@@ -581,6 +581,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
                     <DiscoveryJobCard
                       key={lead.company || lead.companyName || idx}
                       lead={lead}
+                      user={user}
                       onAddToPipeline={handleAddToPipeline}
                       onColdInroad={handleColdInroad}
                       onSelect={setSelectedLead}
