@@ -59,22 +59,37 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
     if (dropId) actionMutation.mutate({ key, dropId });
   };
 
+  // Shared pipeline write — does NOT mark the card as actioned/dismissed
+  const writeToPipeline = async (lead, applicationPath = 'cold_apply') => {
+    await base44.entities.NetworkingPipeline.create({
+      user_email: user.email,
+      company: lead.company || lead.companyName,
+      job_title: lead.role || lead.job_title,
+      job_description: lead.jobDescription || lead.description || '',
+      job_url: lead.job_url || lead.jobSource || '',
+      application_path: applicationPath,
+      status: 'identified',
+      location: lead.location || '',
+      posted_date: lead.posted_date || null,
+    });
+  };
+
+  // Called when user explicitly saves/swipes — marks card as actioned and removes it from feed
   const handleAddToPipeline = async (lead, applicationPath = 'cold_apply') => {
     try {
-      await base44.entities.NetworkingPipeline.create({
-        user_email: user.email,
-        company: lead.company || lead.companyName,
-        job_title: lead.role || lead.job_title,
-        job_description: lead.jobDescription || lead.description || '',
-        job_url: lead.job_url || lead.jobSource || '',
-        application_path: applicationPath,
-        status: 'identified',
-        location: lead.location || '',
-        posted_date: lead.posted_date || null,
-      });
-      handleAction(lead);
+      await writeToPipeline(lead, applicationPath);
+      handleAction(lead); // removes card from feed
     } catch (err) {
       console.error('Failed to add to pipeline:', err);
+    }
+  };
+
+  // Track only — writes to pipeline but keeps the card visible
+  const handleTrackOnly = async (lead, applicationPath = 'cold_apply') => {
+    try {
+      await writeToPipeline(lead, applicationPath);
+    } catch (err) {
+      console.error('Failed to track:', err);
     }
   };
 
@@ -188,6 +203,7 @@ export default function CliffPrioritizedFeed({ user, schoolAbbr: schoolAbbrProp 
                   key={`${lead.company}||${lead.role}||${idx}`}
                   lead={lead}
                   onAddToPipeline={handleAddToPipeline}
+                  onTrackOnly={handleTrackOnly}
                   onSelect={setSelectedLead}
                   schoolAbbr={schoolAbbr}
                   onDismiss={() => handleDismiss(lead)}

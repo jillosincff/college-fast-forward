@@ -6,7 +6,7 @@ import { getStandoutInsight } from '@/functions/getStandoutInsight';
 
 const MASCOT = { UF: '🐊', FSU: '🏹', UCF: '⚔️', USF: '🐂', UGA: '🐾', OSU: '🌰', USC: '✌️', UCLA: '🐻', UMICH: '〽️', PSU: '🦁', TULANE: '🌊', UDEL: '🐓', UMD: '🐢' };
 
-export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill }) {
+export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, onColdInroad, onSelect, schoolAbbr, onDismiss, isPinned, insiderPill }) {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [added, setAdded] = useState(false);
@@ -52,9 +52,18 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
   const jobDesc = lead.jobDescription || lead.description || lead.hiring_description || '';
   const jobUrl = lead.job_url || lead.jobSource || '';
 
+  // Saves + dismisses card from feed
   const handleAddToPipeline = (path = 'cold_apply') => {
     if (!onAddToPipeline) return;
     onAddToPipeline(lead, path);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2500);
+  };
+
+  // Tracks without removing card from feed
+  const handleTrackOnly = (path = 'cold_apply') => {
+    if (onTrackOnly) onTrackOnly(lead, path);
+    else if (onAddToPipeline) onAddToPipeline(lead, path); // fallback for contexts without onTrackOnly
     setAdded(true);
     setTimeout(() => setAdded(false), 2500);
   };
@@ -65,11 +74,10 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
   };
 
   const handleApplyExternal = () => {
-    // Open in new tab (ideally a WebView on mobile)
     if (jobUrl) window.open(jobUrl, '_blank', 'noopener,noreferrer');
     setAppliedExternally(true);
-    // Auto-add to pipeline as cold apply so student is prompted to track
-    handleAddToPipeline('cold_apply');
+    // Track silently — does NOT remove card from feed so student can still message alumni
+    handleTrackOnly('cold_apply');
   };
 
   const handleLoadInsight = async () => {
@@ -292,7 +300,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
                     </a>
                   )}
                   <button
-                    onClick={() => handleSelectAlumni(a)}
+                    onClick={() => { handleTrackOnly('alumni_outreach'); handleSelectAlumni(a); }}
                     className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-[11px] font-bold transition-colors flex-shrink-0 cursor-pointer"
                     style={{ minHeight: 'auto', minWidth: 'auto' }}
                   >
@@ -324,11 +332,13 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
         <button
           onClick={() => {
             if (foundAlumni && foundAlumni.length > 0) {
+              // Track + navigate (track-only so card stays if user comes back)
+              handleTrackOnly('alumni_outreach');
               handleSelectAlumni(foundAlumni[0]);
-              handleAddToPipeline('alumni_outreach');
               return;
             }
-            handleAddToPipeline(alumniSearched ? 'hiring_manager' : 'alumni_outreach');
+            // No alumni found — cold outreach, track as hiring_manager intent
+            handleTrackOnly(alumniSearched ? 'hiring_manager' : 'cold_apply');
             onColdInroad ? onColdInroad(lead) : (window.location.hash = `#OutreachDrafts?context=cold_outreach&company=${encodeURIComponent(companyName)}&role=${encodeURIComponent(jobTitle)}`);
           }}
           className="w-full px-4 py-2.5 font-bold text-xs rounded-xl shadow-sm transition tracking-wide text-center cursor-pointer text-white"
@@ -353,7 +363,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onColdInroad, 
             </button>
           )}
           <button
-            onClick={() => handleAddToPipeline('cold_apply')}
+            onClick={() => handleTrackOnly('cold_apply')}
             disabled={added}
             className={`px-3 py-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
               added ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
