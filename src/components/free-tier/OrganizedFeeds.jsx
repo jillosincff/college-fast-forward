@@ -197,77 +197,21 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
   // getLiveJobMatchesFn returns { companies: [...] }
   const liveCompanies = Array.isArray(payload?.companies) ? payload.companies : [];
   
-  // Job title keywords that should NOT appear in company names
-  const jobTitleKeywords = ['intern', 'junior', 'senior', 'manager', 'director', 'coordinator', 'specialist', 'analyst', 'assistant', 'executive', 'lead', 'head', 'vp', 'chief', 'officer', 'engineer', 'developer', 'designer', 'consultant', 'associate', 'representative', 'account', 'administrator', 'supervisor', 'technician', 'scout', 'talent', 'recruiter', 'partner', 'strategist', 'operator', 'fellow', 'researcher', 'scientist', 'advisor', 'counsel', 'attorney', 'lawyer', 'agent', 'broker', 'realtor', 'contractor', 'freelancer'];
+  // Job title phrases that should NOT be used as company names
   
-  // Filter out invalid company names (job titles masquerading as companies)
+  // Filter out strings that are clearly job titles masquerading as company names
   const isValidCompanyName = (name) => {
     if (!name || typeof name !== 'string' || name.length < 3) return false;
     const lower = name.toLowerCase().trim();
-    
-    // ABSOLUTE BLOCK: If the "company name" contains any of these sequences, destroy it
-    const absoluteJobPhrases = [
-      'marketing intern', 
-      'marketing manager', 
-      'public relations', 
-      'account executive',
-      'junior account',
-      'manager trainee',
-      'operations manager',
-      'content creator',
-      'social media',
-      'business analyst',
-      'financial analyst',
-      'data analyst',
-      'software engineer',
-      'product manager',
-      'project manager',
-      'sales representative',
-      'customer service',
-      'human resources',
-      'graphic designer',
-      'ux designer',
-      'ui designer',
-      'account manager'
+    // Only block exact multi-word job title phrases
+    const jobPhrases = [
+      'marketing intern', 'marketing manager', 'public relations', 'account executive',
+      'manager trainee', 'operations manager', 'content creator', 'social media manager',
+      'business analyst', 'financial analyst', 'data analyst', 'software engineer',
+      'product manager', 'project manager', 'sales representative', 'customer service representative',
+      'human resources manager', 'graphic designer', 'account manager', 'junior account',
     ];
-    
-    if (absoluteJobPhrases.some(phrase => lower.includes(phrase))) {
-      return false;
-    }
-    
-    // Company suffixes that indicate a real business
-    const companySuffixes = ['inc', 'llc', 'corp', 'company', 'co', 'ltd', 'group', 'partners', 'associates', 'technologies', 'solutions', 'systems', 'services', 'industries', 'enterprises', 'holdings', 'ventures', 'capital', 'fund', 'bank', 'insurance', 'agency', 'firm', 'studio', 'lab', 'laboratories', 'institute', 'foundation', 'organization', 'society', 'club', 'team', 'network', 'collective', 'media', 'press', 'publishing', 'broadcasting', 'entertainment', 'productions', 'pictures', 'films', 'records', 'music', 'digital', 'interactive', 'online', 'software', 'hardware', 'computers', 'electronics', 'robotics', 'aerospace', 'automotive', 'biotech', 'pharma', 'healthcare', 'medical', 'hospital', 'clinic', 'university', 'college', 'school', 'academy', 'institute', 'restaurant', 'cafe', 'hotel', 'resort', 'retail', 'store', 'shop', 'market', 'ecommerce'];
-    if (companySuffixes.some(suffix => lower.includes(suffix))) return true;
-    
-    // BLOCK: Any job title keyword anywhere in the name
-    if (jobTitleKeywords.some(keyword => lower.includes(keyword))) {
-      return false;
-    }
-    
-    // Reject common job title patterns
-    const jobPatterns = [
-      /public relations\s+(junior|senior|assistant)/i,
-      /marketing\s+(intern|manager|coordinator)/i,
-      /software\s+(engineer|developer)/i,
-      /data\s+(analyst|scientist)/i,
-      /product\s+(manager|designer)/i,
-      /project\s+(manager|coordinator)/i,
-      /sales\s+(representative|associate|manager)/i,
-      /customer\s+(service|support|representative)/i,
-      /human\s+resources?\s+(manager|coordinator|specialist)/i,
-      /financial\s+(analyst|advisor)/i,
-      /business\s+(analyst|manager|associate)/i,
-      /operations\s+(manager|coordinator|specialist)/i,
-      /content\s+(writer|creator|manager)/i,
-      /social\s+media\s+(manager|coordinator|specialist)/i,
-      /graphic\s+designer/i,
-      /ux\s+(designer|researcher)/i,
-      /ui\s+(designer|developer)/i,
-      /account\s+(executive|manager|representative)/i,
-    ];
-    
-    if (jobPatterns.some(pattern => pattern.test(name))) return false;
-    
+    if (jobPhrases.some(phrase => lower === phrase)) return false;
     return true;
   };
   
@@ -277,7 +221,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     .map(c => ({
       company: c.name,
       companyName: c.name,
-      job_title: c.job_title || 'Entry Level Role',
+      job_title: c.job_title || '',
       hiring_description: c.hiring_description || 'Join our team in this exciting opportunity.',
       job_url: c.job_url || '',
       hiring_signal: c.hiring_signal || 'warm',
@@ -338,10 +282,8 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
     // 2. ABSOLUTE FILTER: Drop if company name is completely missing 
     if (!companyName) continue;
 
-    // 3. ABSOLUTE FILTER: Drop if it's missing a real job title or using the fallback default
-    if (!jobTitle || jobTitle === 'Entry Level Role') {
-      continue;
-    }
+    // 3. ABSOLUTE FILTER: Drop if it's missing a real job title
+    if (!jobTitle) continue;
 
     // 4. ABSOLUTE FILTER: If the company name matches the job title strings, skip it
     const cleanCo = companyName.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -427,8 +369,7 @@ export default function OrganizedFeeds({ user, verifiedAlumniCount, verifiedPare
       }
     }
 
-    // Run standard generic cleanups
-    if (!name || !title || title === 'entry level role') return false;
+    if (!name || !title) return false;
     if (name === title) return false;
 
     return isValidCompanyName(lead.company || lead.companyName);
