@@ -256,7 +256,10 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
           {/* CLIFF Insight — shown on demand or after fallback */}
           {showInsight && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 space-y-1">
-              <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">💡 CLIFF Stand-Out Tips</span>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">💡 CLIFF Stand-Out Tips</span>
+                <button onClick={() => setShowInsight(false)} className="text-amber-500 hover:text-amber-800 text-xs font-bold leading-none" style={{ minHeight: 'auto', minWidth: 'auto' }}>✕</button>
+              </div>
               {loadingInsight ? (
                 <p className="text-[11px] text-amber-700 animate-pulse">Asking CLIFF AI…</p>
               ) : insight ? (
