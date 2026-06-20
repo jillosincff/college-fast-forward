@@ -129,7 +129,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
   if (dismissed) return null;
 
   return (
-    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm flex flex-col hover:border-indigo-200 hover:shadow-md transition-all relative overflow-hidden">
+    <div className="border border-gray-200 rounded-2xl bg-white shadow-sm flex flex-col hover:border-indigo-200 hover:shadow-md transition-all relative">
 
       {/* Top signal strip */}
       {(hasAlumniSignal || hasParentSignal || insiderPill) && (
@@ -144,7 +144,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
         </div>
       )}
 
-      <div className="p-5 flex flex-col gap-3 flex-1">
+      <div className="p-5 flex flex-col gap-3 flex-1" style={{ overflow: 'visible' }}>
 
         {/* Header */}
         <div className="flex justify-between items-start">
@@ -169,14 +169,11 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
         {jobDesc ? (
           <div className="text-xs text-gray-600 bg-gray-50 rounded-lg p-3 border border-gray-100">
             <p className="leading-relaxed text-sm line-clamp-2">{jobDesc}</p>
-            <div className="flex items-center gap-3 mt-1.5">
-              {jobDesc.length > 100 && (
+            {jobDesc.length > 100 && (
+              <div className="mt-1.5">
                 <button onClick={() => setShowFullDesc(true)} className="text-[11px] text-purple-600 font-bold hover:underline cursor-pointer" style={{ minHeight: 'auto', minWidth: 'auto' }}>Read more →</button>
-              )}
-              {jobUrl && (
-                <a href={jobUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] text-blue-600 font-bold hover:underline" onClick={e => e.stopPropagation()}>View posting ↗</a>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-xs text-gray-400 italic bg-gray-50 rounded-lg p-3 border border-gray-100">No description available.</div>
@@ -333,7 +330,7 @@ export default function DiscoveryJobCard({ lead, onAddToPipeline, onTrackOnly, o
                 <p key={idx}>{para.trim()}</p>
               ))}
             </div>
-            <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
+            <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
               {jobUrl && (
                 <a href={jobUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 font-bold hover:underline">View Original Posting ↗</a>
               )}
