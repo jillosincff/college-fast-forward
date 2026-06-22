@@ -341,33 +341,31 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Secondary: Coresignal if Fantastic returns low results (< 50% of daily limit)
-    if ((freshJobs?.length || 0) < dailyLimit * 0.5) {
-      console.log('[getDailyDrop] Fantastic returned low results (%d), fetching from Coresignal...', freshJobs?.length || 0);
-      const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
-      if (coresignalApiKey) {
-        try {
-          const coresignalJobs = await fetchCoresignalJobs({ 
-            role, 
-            location, 
-            seeking, 
-            apiKey: coresignalApiKey, 
-            maxResults: dailyLimit 
-          });
-          console.log('[getDailyDrop] Coresignal returned %d jobs', coresignalJobs?.length || 0);
-          // Merge and dedupe by company+role
-          const existingKeys = new Set((freshJobs || []).map(j => `${j.name}||${j.job_title}`));
-          for (const job of coresignalJobs || []) {
-            const key = `${job.name}||${job.job_title}`;
-            if (!existingKeys.has(key)) {
-              freshJobs.push(job);
-              existingKeys.add(key);
-            }
+    // Secondary: Coresignal - ALWAYS fetch to diversify (Fantastic Jobs has stale results)
+    const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
+    if (coresignalApiKey) {
+      try {
+        console.log('[getDailyDrop] Fetching from Coresignal to diversify results...');
+        const coresignalJobs = await fetchCoresignalJobs({ 
+          role, 
+          location, 
+          seeking, 
+          apiKey: coresignalApiKey, 
+          maxResults: dailyLimit * 2 
+        });
+        console.log('[getDailyDrop] Coresignal returned %d jobs', coresignalJobs?.length || 0);
+        // Merge and dedupe by company+role
+        const existingKeys = new Set((freshJobs || []).map(j => `${j.name}||${j.job_title}`));
+        for (const job of coresignalJobs || []) {
+          const key = `${job.name}||${job.job_title}`;
+          if (!existingKeys.has(key)) {
+            freshJobs.push(job);
+            existingKeys.add(key);
           }
-          console.log('[getDailyDrop] Merged total: %d jobs', freshJobs?.length || 0);
-        } catch (e) {
-          console.error('[getDailyDrop] Coresignal fetch failed:', e.message);
         }
+        console.log('[getDailyDrop] Merged total: %d jobs', freshJobs?.length || 0);
+      } catch (e) {
+        console.error('[getDailyDrop] Coresignal fetch failed:', e.message);
       }
     }
 
