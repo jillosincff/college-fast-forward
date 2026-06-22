@@ -1,41 +1,6 @@
 User-agent: *
-# Allow public pages
 Allow: /
-Allow: /GetStarted
-Allow: /GatorAuth
-Allow: /StudentLandingPage
-Allow: /ParentLandingPage
-Allow: /Privacy
-Allow: /Terms
-Allow: /CookiePolicy
+Disallow: /#/
 
-# Block premium features from crawling
-Disallow: /FastIQ
-Disallow: /FastIQAssessment
-Disallow: /FastIQDashboard
-Disallow: /CliffScout
-Disallow: /ActionPlanArchitect
-Disallow: /FreeTierDashboard
-Disallow: /Dashboard
-Disallow: /ResumeTailoring
-Disallow: /MockInterview
-Disallow: /LinkedInReview
-Disallow: /LinkedInActionPlan
-Disallow: /CareerAssessment
-Disallow: /OutreachDrafts
-Disallow: /ApplicationTracker
-Disallow: /Profile
-Disallow: /ProfileEdit
-Disallow: /ParentProfileEdit
-Disallow: /PostJoinUpsell
-Disallow: /admin
-Disallow: /engagement-agent
-Disallow: /paywall-analytics
-Disallow: /cliff-scout
-Disallow: /action-plan-architect
-
-# Block all query param variations
-Disallow: /*?*
-
-# Sitemap location
-Sitemap: https://collegefastforward.com/sitemap.xml
+# Sitemap
+Sitemap: https://collegefastforward.base44.app/sitemap.xml
