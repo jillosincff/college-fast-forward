@@ -23,12 +23,18 @@ function formatName(user) {
   return full || user?.email?.split('@')[0] || 'User';
 }
 
+function formatIndustry(s) {
+  if (!s) return s;
+  return s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 function completionScore(user) {
   let score = 0;
-  let total = 5;
+  let total = 6;
   if (user?.full_name) score++;
   if (user?.current_company || user?.company) score++;
   if (user?.industry || user?.industries?.length) score++;
+  if (user?.career_background) score++;
   if (user?.linkedin_url) score++;
   if (user?.bio) score++;
   return { score, total, pct: Math.round((score / total) * 100) };
@@ -38,8 +44,15 @@ function getNudge(user) {
   if (!user?.linkedin_url) return 'Add your LinkedIn URL — parents with LinkedIn get 3x more intro requests';
   if (!user?.bio) return 'Add a short bio — students want to know who they\'re reaching out to';
   if (!user?.current_company && !user?.company) return 'Add your company — this is your core value to the network';
+  if (!user?.career_background) return 'Add your career background — students need context on your experience';
   return 'Your profile is complete ✓ — you\'re fully visible to the network';
 }
+
+const INTRO_LABELS = {
+  yes: { label: 'Happy to help', color: '#4CAF50' },
+  occasionally: { label: 'Occasionally available', color: '#F59E0B' },
+  not_now: { label: 'Not right now', color: '#888' },
+};
 
 export default function ParentProfileHeader({ user }) {
   const { refreshUser } = useAuth();
@@ -70,6 +83,9 @@ export default function ParentProfileHeader({ user }) {
   const company = user?.current_company || user?.company || '';
   const school = user?.school_name || user?.school || user?.university || '';
   const industry = user?.industry || (user?.industries?.length ? user.industries[0] : '');
+  const careerBackground = user?.career_background || '';
+  const introWillingness = user?.intro_willingness || 'yes';
+  const introInfo = INTRO_LABELS[introWillingness] || INTRO_LABELS.yes;
   const { pct } = completionScore(user);
   const nudge = getNudge(user);
   const isComplete = pct === 100;
@@ -86,22 +102,39 @@ export default function ParentProfileHeader({ user }) {
         }}>Edit Profile</button>
       </div>
 
-      <div style={{ padding: '0 12px 24px', marginTop: 24 }}>
-         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 0, marginBottom: 0, lineHeight: 1.2 }}>{name}</h1>
+      <div style={{ padding: '0 16px 24px', marginTop: 24 }}>
+         <h1 style={{ fontFamily: playfair, fontWeight: 700, fontSize: 24, color: '#fff', marginTop: 0, marginBottom: 4, lineHeight: 1.2 }}>{name}</h1>
+
+         {/* Intro willingness badge */}
+         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20 }}>
+           <span style={{ width: 7, height: 7, borderRadius: '50%', background: introInfo.color, flexShrink: 0 }} />
+           <span style={{ fontFamily: dmSans, fontSize: 12, fontWeight: 500, color: introInfo.color }}>
+             {introInfo.label} · Intro Availability
+           </span>
+         </div>
 
         {/* Two-column details */}
-        <div className="pp-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, marginTop: 24 }}>
+        <div className="pp-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, marginTop: 8 }}>
           {/* Left — Professional Info */}
           <div>
             <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 14 }}>Professional Info</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <InfoRow icon="🎓" label={school || 'No school set'} muted={!school} />
-              <InfoRow icon="🏢" label={company || 'No company'} muted={!company} />
-              <InfoRow icon="🏷️" label={industry ? industry.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'No industry'} muted={!industry} />
+              {company && (
+                <InfoRow icon="🏢" label={company} />
+              )}
+              {careerBackground && (
+                <InfoRow icon="💼" label={careerBackground} />
+              )}
+              {industry && (
+                <InfoRow icon="🏷️" label={formatIndustry(industry)} />
+              )}
+              {!company && !careerBackground && !industry && (
+                <InfoRow icon="🏢" label="No professional info yet" muted />
+              )}
               <InfoRow icon="✉️" label={user?.email} />
               {editingLinkedIn ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 14, flexShrink: 0 }}>💼</span>
+                  <span style={{ fontSize: 14, flexShrink: 0 }}>🔗</span>
                   <input
                     value={linkedInValue}
                     onChange={e => setLinkedInValue(e.target.value)}
@@ -118,9 +151,9 @@ export default function ParentProfileHeader({ user }) {
                   <button onClick={() => setEditingLinkedIn(false)} style={{ background: 'none', border: 'none', fontFamily: dmSans, fontSize: 12, color: '#888', cursor: 'pointer', minHeight: 'auto', padding: 0 }}>Cancel</button>
                 </div>
               ) : user?.linkedin_url ? (
-                <InfoRow icon="💼" label={<a href={user.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: ORANGE, textDecoration: 'none', fontFamily: dmSans, fontSize: 13 }}>{user.linkedin_url.replace(/https?:\/\/(www\.)?/, '').slice(0, 40)}</a>} />
+                <InfoRow icon="🔗" label={<a href={user.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ color: ORANGE, textDecoration: 'none', fontFamily: dmSans, fontSize: 13 }}>{user.linkedin_url.replace(/https?:\/\/(www\.)?/, '').slice(0, 40)}</a>} />
               ) : (
-                <InfoRow icon="💼" label={<button onClick={() => setEditingLinkedIn(true)} style={{ background: 'none', border: 'none', padding: 0, fontFamily: dmSans, fontSize: 13, color: ORANGE, cursor: 'pointer', minHeight: 'auto' }}>Add LinkedIn →</button>} />
+                <InfoRow icon="🔗" label={<button onClick={() => setEditingLinkedIn(true)} style={{ background: 'none', border: 'none', padding: 0, fontFamily: dmSans, fontSize: 13, color: ORANGE, cursor: 'pointer', minHeight: 'auto' }}>Add LinkedIn →</button>} />
               )}
             </div>
           </div>
@@ -160,6 +193,17 @@ export default function ParentProfileHeader({ user }) {
             )}
           </div>
         </div>
+
+        {/* Student's School — separate section */}
+        {school && (
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid #2A2A2A' }}>
+            <p style={{ fontFamily: dmSans, fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: ORANGE, marginBottom: 10 }}>Your Student's School</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 16, flexShrink: 0 }}>🎓</span>
+              <span style={{ fontFamily: dmSans, fontSize: 14, fontWeight: 500, color: '#fff' }}>{school}</span>
+            </div>
+          </div>
+        )}
 
         {/* Profile Completion */}
         <div style={{ marginTop: 28 }}>
