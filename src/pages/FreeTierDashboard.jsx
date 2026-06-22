@@ -19,6 +19,7 @@ import PendingTailoringWidget from '@/components/free-tier/PendingTailoringWidge
 import ToolsTab from '@/components/free-tier/ToolsTab';
 import ProgressTab from '@/components/free-tier/ProgressTab';
 import DashboardBottomNav from '@/components/free-tier/DashboardBottomNav';
+import CliffChatWidget from '@/components/free-tier/CliffChatWidget';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
@@ -354,6 +355,8 @@ export default function FreeTierDashboard() {
       {activeTab === 'tools' && (
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }}>
           <ToolsTab user={user} onUpgrade={triggerUpgrade} />
+          {/* CLIFF Chat Widget - Embedded for tools section */}
+          <CliffChatWidget mode="embedded" onOpenUpgrade={triggerUpgrade} />
         </div>
       )}
 
@@ -367,6 +370,8 @@ export default function FreeTierDashboard() {
       {/* Dashboard Tab (default) */}
       {activeTab === 'dashboard' && (
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px 100px' }} className="main-dashboard-container">
+        {/* CLIFF Chat Widget - Floating for dashboard */}
+        <CliffChatWidget mode="widget" onOpenUpgrade={triggerUpgrade} />
 ...
       </div>
       )}

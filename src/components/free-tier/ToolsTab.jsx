@@ -4,6 +4,18 @@ const dm = "'DM Sans', system-ui, sans-serif";
 
 const TOOLS = [
   {
+    id: 'chat',
+    icon: '💬',
+    title: 'CLIFF AI Chat',
+    desc: 'Your AI hiring companion. Get instant answers on resumes, interviews, networking, and job search strategy.',
+    cta: 'Start Chatting',
+    route: 'CliffChat',
+    accent: '#7c3aed',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
+    premium: false,
+  },
+  {
     id: 'resume',
     icon: '📄',
     title: 'Resume Studio',

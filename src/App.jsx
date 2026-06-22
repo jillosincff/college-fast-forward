@@ -54,6 +54,7 @@ import ActionPlanArchitect from '@/pages/ActionPlanArchitect';
 import Unsubscribe from '@/pages/Unsubscribe';
 import JillOsinoffDashboard from '@/pages/JillOsinoffDashboard';
 import CompanyIntelDashboard from '@/pages/CompanyIntelDashboard';
+import CliffChat from '@/pages/CliffChat';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -187,6 +188,7 @@ const AuthenticatedApp = () => {
       <Route path="/join" element={<JoinPage />} />
       <Route path="/jill-osinoff-dashboard" element={<JillOsinoffDashboard />} />
       <Route path="/company-intel" element={<OnboardingGuard><CompanyIntelDashboard /></OnboardingGuard>} />
+      <Route path="/cliff-chat" element={<OnboardingGuard><CliffChat /></OnboardingGuard>} />
 
       {/* Main routes */}
       <Route path="/" element={<StudentLandingPage />} />
