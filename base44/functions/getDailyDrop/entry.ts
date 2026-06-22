@@ -13,39 +13,28 @@ const STATE_NAMES = {
   WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia',
 };
 
-// ── Coresignal Job Data API fetcher ─────────────────────────────────────
+// ── Coresignal Job Data API fetcher (public job postings) ─────────────────
 async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults = 50 }) {
   const INTERN_TERMS = ['intern', 'internship', 'co-op'];
   const ENTRY_TERMS = ['junior', 'coordinator', 'entry level', 'graduate', 'trainee', 'new grad', 'analyst', 'assistant'];
   const levelTerms = seeking === 'internship' ? INTERN_TERMS : seeking === 'fulltime' ? ENTRY_TERMS : [...INTERN_TERMS, ...ENTRY_TERMS];
   
-  const locationQuery = location && !/remote/i.test(location) ? location : 'United States';
-  
   try {
-    const searchBody = {
-      size: maxResults,
-      query: {
-        bool: {
-          must: [
-            { match: { job_title: role || 'analyst' } },
-            { match: { location: locationQuery } },
-            { terms: { seniority: levelTerms } },
-            { range: { date_posted: { gte: 'now-7d/d' } } }
-          ],
-          must_not: [
-            { regexp: { job_title: '.*senior.*|.*lead.*|.*manager.*|.*director.*|.*vp.*|.*chief.*' } }
-          ]
-        }
-      }
-    };
+    // Coresignal public job postings API
+    const params = new URLSearchParams({
+      size: maxResults.toString(),
+      job_title: role || 'analyst',
+      location: location || 'United States',
+      seniority: levelTerms.join(','),
+      date_from: '30', // Last 30 days for more variety
+    });
 
-    const res = await fetch('https://api.coresignal.com/cdapi/v1/linkedin/job/collect/search', {
-      method: 'POST',
+    const res = await fetch(`https://api.coresignal.com/cdapi/v1/job/search?${params.toString()}`, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
-      body: JSON.stringify(searchBody),
     });
 
     if (!res.ok) {
@@ -136,7 +125,7 @@ async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, ma
 
   const roleDesc = role || '';
   const params = new URLSearchParams({
-    time_frame: '7d', limit: '100',
+    time_frame: '30d', limit: '200',
     include_basic_organization_details: 'true',
     title_advanced: buildTitleQuery(roleDesc, seeking),
   });
@@ -154,9 +143,16 @@ async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, ma
   const jobs = await apiRes.json();
   console.log(`[getDailyDrop] Fantastic Jobs returned ${Array.isArray(jobs) ? jobs.length : 0} raw postings`);
 
+  // Shuffle jobs for randomness
+  const jobList = Array.isArray(jobs) ? [...jobs] : [];
+  for (let i = jobList.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [jobList[i], jobList[j]] = [jobList[j], jobList[i]];
+  }
+
   const seenOrgs = new Set();
   const companies = [];
-  for (const job of (Array.isArray(jobs) ? jobs : [])) {
+  for (const job of jobList) {
     const org = job.organization;
     const title = job.title?.trim();
     if (!org || !title || !job.url) continue;
@@ -381,8 +377,6 @@ Deno.serve(async (req) => {
     const alumniCountMap = {};
     if (allLiveSlots.length > 0 && schoolCode) {
       try {
-        const companyNames = liveSlots.map(s => s.company);
-        // Fetch alumni records for these companies in one call
         const alumniRecords = await base44.asServiceRole.entities.DiscoveredAlumni.filter({
           school_code: schoolCode,
         }, null, 500);
@@ -407,6 +401,7 @@ Deno.serve(async (req) => {
 
     // Ensure at least 10 slots — pad from fallback if needed
     if (slots.length < Math.min(dailyLimit, 10)) {
+      // Expanded fallback pool with 40+ companies to reduce repeats
       const internFallbackSlots = [
         { company: 'Deloitte', role: 'Summer Scholar Intern', jobDescription: 'Consulting and advisory internship program across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Google', role: 'STEP Intern', jobDescription: 'Summer internship program for first and second-year students.', jobSource: 'careers.google.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -414,6 +409,20 @@ Deno.serve(async (req) => {
         { company: 'Nike', role: 'Marketing Intern', jobDescription: 'Brand and digital marketing internships for students.', jobSource: 'jobs.nike.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Salesforce', role: 'Futureforce Intern', jobDescription: 'Summer internship program blending tech, business, and customer strategy.', jobSource: 'salesforce.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Procter & Gamble', role: 'Brand Management Intern', jobDescription: 'Summer internship in CPG brand-building with real project ownership.', jobSource: 'pgcareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Microsoft', role: 'Software Engineering Intern', jobDescription: 'Internship program for computer science students.', jobSource: 'careers.microsoft.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Amazon', role: 'Business Intern', jobDescription: 'Business internship across operations, finance, and strategy.', jobSource: 'amazon.jobs', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Meta', role: 'Data Science Intern', jobDescription: 'Data science internship for analytics-focused students.', jobSource: 'metacareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Apple', role: 'Product Design Intern', jobDescription: 'Product design internship for creative students.', jobSource: 'apple.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Goldman Sachs', role: 'Investment Banking Intern', jobDescription: 'Summer internship in investment banking division.', jobSource: 'goldmansachs.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'McKinsey', role: 'Business Analyst Intern', jobDescription: 'Consulting internship with real client impact.', jobSource: 'mckinsey.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Boston Consulting Group', role: 'Consulting Intern', jobDescription: 'Strategy consulting internship.', jobSource: 'bcg.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Bain', role: 'Associate Consultant Intern', jobDescription: 'Case-based consulting internship.', jobSource: 'bain.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'PwC', role: 'Assurance Intern', jobDescription: 'Audit and assurance internship.', jobSource: 'pwc.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'EY', role: 'Consulting Intern', jobDescription: 'Business consulting internship.', jobSource: 'ey.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'KPMG', role: 'Audit Intern', jobDescription: 'Audit and tax internship.', jobSource: 'kpmg.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'L\'Oréal', role: 'Marketing Intern', jobDescription: 'Beauty and cosmetics marketing internship.', jobSource: 'loreal.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Unilever', role: 'Supply Chain Intern', jobDescription: 'Operations and supply chain internship.', jobSource: 'unilever.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Coca-Cola', role: 'Finance Intern', jobDescription: 'Corporate finance internship.', jobSource: 'coca-colacompany.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
       const fulltimeFallbackSlots = [
         { company: 'Deloitte', role: 'Business Analyst', jobDescription: 'Strategy and advisory associates across all US offices.', jobSource: 'deloitte.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
@@ -426,6 +435,26 @@ Deno.serve(async (req) => {
         { company: 'Spotify', role: 'Associate, Strategy & Operations', jobDescription: 'Early-career roles in music-tech strategy and analytics.', jobSource: 'lifeatspotify.com', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Stripe', role: 'Business Operations Analyst', jobDescription: 'High-growth fintech — analytical roles for new grads.', jobSource: 'stripe.com/jobs', jobSourceCategory: 'B', companyTier: 2, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
         { company: 'Procter & Gamble', role: 'Brand Management Associate', jobDescription: 'Classic CPG brand-building track with real P&L ownership.', jobSource: 'pgcareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Microsoft', role: 'Software Engineer', jobDescription: 'Full-time software engineering roles for new graduates.', jobSource: 'careers.microsoft.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Amazon', role: 'Area Manager', jobDescription: 'Operations leadership program for new graduates.', jobSource: 'amazon.jobs', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Meta', role: 'Data Analyst', jobDescription: 'Entry-level data analytics roles.', jobSource: 'metacareers.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Apple', role: 'Hardware Engineer', jobDescription: 'Hardware engineering roles for new graduates.', jobSource: 'apple.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Goldman Sachs', role: 'Investment Banking Analyst', jobDescription: 'Full-time analyst program in investment banking.', jobSource: 'goldmansachs.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'McKinsey', role: 'Business Analyst', jobDescription: 'Entry-level consulting position.', jobSource: 'mckinsey.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Boston Consulting Group', role: 'Associate', jobDescription: 'Strategy consulting associate role.', jobSource: 'bcg.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Bain', role: 'Associate Consultant', jobDescription: 'Entry-level consulting position.', jobSource: 'bain.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'PwC', role: 'Associate', jobDescription: 'Audit and assurance associate role.', jobSource: 'pwc.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'EY', role: 'Staff Consultant', jobDescription: 'Business consulting entry-level role.', jobSource: 'ey.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'KPMG', role: 'Associate Auditor', jobDescription: 'Audit and tax associate position.', jobSource: 'kpmg.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'L\'Oréal', role: 'Brand Manager', jobDescription: 'Marketing and brand management role.', jobSource: 'loreal.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Unilever', role: 'Supply Chain Manager', jobDescription: 'Operations and supply chain management.', jobSource: 'unilever.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Coca-Cola', role: 'Finance Analyst', jobDescription: 'Corporate finance analyst role.', jobSource: 'coca-colacompany.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'PepsiCo', role: 'Marketing Manager', jobDescription: 'Brand marketing and strategy role.', jobSource: 'pepsico.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Nestlé', role: 'Management Trainee', jobDescription: 'Rotational leadership development program.', jobSource: 'nestle.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Johnson & Johnson', role: 'R&D Scientist', jobDescription: 'Research and development scientist role.', jobSource: 'careers.jnj.com', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Pfizer', role: 'Sales Representative', jobDescription: 'Pharmaceutical sales role.', jobSource: 'pfizer.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'Tesla', role: 'Production Engineer', jobDescription: 'Manufacturing engineering role.', jobSource: 'tesla.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
+        { company: 'SpaceX', role: 'Avionics Engineer', jobDescription: 'Aerospace engineering role.', jobSource: 'spacex.com/careers', jobSourceCategory: 'C', companyTier: 1, slotType: 'curated', leadTier: 'target', alumniCount: 0, parentCount: 0 },
       ];
       // Match the student's seeking intent — internship seekers must NEVER see full-time fallbacks
       const fallbackSlots = seeking === 'internship' ? internFallbackSlots
