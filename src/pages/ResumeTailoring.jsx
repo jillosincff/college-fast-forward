@@ -37,6 +37,7 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
   const [error, setError] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [queuedAvailableAt, setQueuedAvailableAt] = useState(null);
   const [analysisError, setAnalysisError] = useState(false);
 
   // Auto-activate trial when user first lands on this page
@@ -251,6 +252,10 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
       if (res.data?.upgrade_required) {
         setError(res.data.message || 'Upgrade to unlock full resume tailoring.');
         setPhase('tailor');
+      } else if (res.data?.queued) {
+        // Free tier latency — show the queued screen
+        setQueuedAvailableAt(res.data.available_at);
+        setPhase('queued');
       } else if (res.data?.success && res.data?.tailoredResume?.tailored_content) {
         setResult(res.data);
         base44.entities.TailoredResume.filter({ user_email: user.email })
@@ -282,6 +287,108 @@ export default function ResumeTailoring({ onOpenUpgrade: onOpenUpgradeProp }) {
         <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
         <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 700, color: '#1A1A1A', textAlign: 'center' }}>Welcome to FastIQ!</p>
         <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', textAlign: 'center', maxWidth: 300 }}>Your subscription is now active. Unlocking all features...</p>
+      </div>
+    );
+  }
+
+  // ── PHASE: queued (free tier latency) ───────────────────────────────────
+  if (phase === 'queued') {
+    const availableAt = queuedAvailableAt ? new Date(queuedAvailableAt) : new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const timeRemaining = availableAt.getTime() - Date.now();
+    const hoursLeft = Math.max(0, Math.floor(timeRemaining / (1000 * 60 * 60)));
+    const minsLeft = Math.max(0, Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)));
+
+    return (
+      <div style={{ maxWidth: 520, margin: '80px auto', textAlign: 'center', padding: '0 24px' }}>
+        <style>{`
+          @keyframes queuePulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.9; } }
+          @keyframes shimmerLine { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+        `}</style>
+
+        {/* Queue icon */}
+        <div style={{
+          width: 72, height: 72, borderRadius: '50%',
+          background: '#fffbeb', border: '2px solid #fcd34d',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 24px', fontSize: 32,
+          animation: 'queuePulse 2s ease infinite',
+        }}>
+          ⏳
+        </div>
+
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#d97706', margin: '0 0 8px' }}>Batch Queue</p>
+
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1a1a1a', margin: '0 0 12px', lineHeight: 1.3 }}>
+          Your resume is in the queue
+        </h1>
+
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#666', margin: '0 0 28px', lineHeight: 1.6 }}>
+          We batch-process free requests to keep CLIFF available for all students. Your tailored resume will be ready in:
+        </p>
+
+        {/* Countdown */}
+        <div style={{
+          background: '#fffbeb', border: '1px solid #fcd34d',
+          borderRadius: 16, padding: '24px 20px', marginBottom: 24,
+        }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 32, fontWeight: 800, color: '#92400e', margin: '0 0 4px' }}>
+            {hoursLeft}h {minsLeft}m
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#a16207', margin: 0 }}>
+            Expected by {availableAt.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' })}
+          </p>
+
+          {/* Progress bar */}
+          <div style={{
+            background: 'rgba(255,255,255,0.5)', borderRadius: 6,
+            height: 8, overflow: 'hidden', marginTop: 16,
+          }}>
+            <div style={{
+              height: '100%', width: '8%', borderRadius: 6,
+              background: 'linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b)',
+              backgroundSize: '200px 100%',
+              animation: 'shimmerLine 2s linear infinite',
+            }} />
+          </div>
+        </div>
+
+        {/* Fast-Track CTA */}
+        <div style={{
+          background: '#faf5ff', border: '1.5px solid #c4b5fd',
+          borderRadius: 16, padding: '20px', marginBottom: 20,
+        }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#6b21a8', margin: '0 0 6px' }}>
+            ⚡ Skip the wait with Premium
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#7c3aed', margin: '0 0 16px', lineHeight: 1.5 }}>
+            Premium users get instant AI resume tailoring — results in under 60 seconds.
+          </p>
+          <button
+            onClick={() => onOpenUpgrade()}
+            style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 700,
+              color: '#fff', background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+              border: 'none', borderRadius: 10, padding: '14px 28px',
+              cursor: 'pointer', minHeight: 'auto', width: '100%',
+              boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
+            }}
+          >
+            Fast-Track This Resume →
+          </button>
+        </div>
+
+        {/* Back to hub */}
+        <button
+          onClick={() => setPhase('hub')}
+          style={{
+            background: 'none', border: 'none',
+            fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+            color: '#888', cursor: 'pointer', padding: 0, minHeight: 'auto',
+            textDecoration: 'underline',
+          }}
+        >
+          ← Back to Resume Hub
+        </button>
       </div>
     );
   }

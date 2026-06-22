@@ -15,6 +15,7 @@ import FirstDraftReadyCard from '@/components/free-tier/FirstDraftReadyCard';
 import EditGoalsModal from '@/components/free-tier/EditGoalsModal';
 import PipelineImpactBar from '@/components/free-tier/PipelineImpactBar';
 import ApplicationPipeline from '@/components/free-tier/ApplicationPipeline';
+import PendingTailoringWidget from '@/components/free-tier/PendingTailoringWidget';
 import { getThemeForSchool } from '@/lib/campusThemes';
 import { checkIsFastIQ, checkIsTrialExpired } from '@/utils/isFastIQ';
 import TrialEndedHeader from '@/components/free-tier/TrialEndedHeader';
@@ -471,6 +472,11 @@ export default function FreeTierDashboard() {
 
         {/* ── Pipeline Impact Bar — 3 simple metrics ── */}
         <PipelineImpactBar user={user} theme={campusTheme} />
+
+        {/* ── Pending Tailoring Widget — latency-as-a-feature ── */}
+        {!isPremium && (
+          <PendingTailoringWidget user={user} onUpgrade={(feature) => triggerUpgrade(feature)} />
+        )}
 
         {/* ── Main Grid ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 24, alignItems: 'start' }} className="ftd-grid">

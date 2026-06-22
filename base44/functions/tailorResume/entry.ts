@@ -39,6 +39,55 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── Latency-as-a-Feature: free users get 1 instant freebie, then 24h queue ──
+    const isPremium = user.subscription_status === 'active' ||
+      user.membership_tier === 'fastiq' ||
+      user.is_founding_member === true ||
+      user.fastiq_active === true ||
+      user.is_fastiq === true ||
+      user.trial_status === 'active' ||
+      user.fastiq_trial_active === true ||
+      user.membership_tier === 'fastiq_trial' ||
+      (user.fastiq_setup_complete && user.trial_status !== 'expired');
+
+    if (!isPremium && !(adminTest && user.role === 'admin')) {
+      // Check if this is the user's first completed tailoring
+      const existingTailored = await base44.entities.TailoredResume.filter({ user_email: user.email });
+      const completedCount = (existingTailored || []).filter(t => t.status !== 'pending').length;
+
+      if (completedCount >= 1) {
+        // Not first freebie — queue it for 24 hours
+        const availableAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+        const pendingRecord = await base44.entities.TailoredResume.create({
+          user_email: user.email,
+          source_resume_id: sourceResumeId || '',
+          company_name: companyName || '',
+          role_title: jobTitle || '',
+          job_description_text: jobDescription.substring(0, 5000),
+          tailored_content: '',
+          changes: [],
+          original_score: 0,
+          ats_score: 0,
+          keywords_added: [],
+          keywords_missing: [],
+          status: 'pending',
+          available_at: availableAt,
+          resume_text_snapshot: resumeText.substring(0, 6000),
+        });
+
+        return Response.json({
+          success: true,
+          queued: true,
+          available_at: availableAt,
+          pending_id: pendingRecord.id,
+          role_title: jobTitle || '',
+          company_name: companyName || '',
+          message: 'Your resume is in the batch queue. Expected in ~24 hours.',
+        });
+      }
+    }
+
     const prompt = `You are FASTIQ, an AI career advisor helping a UF student tailor their resume.
 
 STUDENT RESUME:

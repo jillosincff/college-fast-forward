@@ -101,6 +101,25 @@
       "type": "string",
       "format": "date-time",
       "description": "When the PDF was downloaded"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed"
+      ],
+      "default": "completed",
+      "description": "Whether this tailoring is still in the batch queue (pending) or done (completed)"
+    },
+    "available_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a pending tailoring request will be processed (24h queue for free users)"
+    },
+    "resume_text_snapshot": {
+      "type": "string",
+      "description": "Snapshot of the original resume text used for tailoring (stored for batch processing)"
     }
   },
   "required": [
