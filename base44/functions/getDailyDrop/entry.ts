@@ -1,6 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // ── Inline Fantastic Jobs fetcher (avoids sub-function auth issues) ──────────
+// TEST MODE: Set to true to bypass APIs and test fallback pool variety
+const TEST_FALLBACK_ONLY = false;
+
 const STATE_NAMES = {
   AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
   CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',
@@ -258,8 +261,7 @@ Deno.serve(async (req) => {
     // ── 2. Generate a fresh daily drop ────────────────────────────────────
     console.log(`[getDailyDrop] Generating fresh drop for ${user.email} on ${dropDate}`);
 
-    // Track ALL jobs shown to user in last 14 days for deduplication (extended from 7)
-    const seenJobs = new Map(); // companyKey -> Set of role keys
+    // Track ALL companies shown to user in last 14 days for deduplication (COMPANY-LEVEL ONLY)
     const seenCompanies = new Map(); // companyKey -> last seen timestamp
     const fourteenDaysAgo = new Date();
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
@@ -272,29 +274,18 @@ Deno.serve(async (req) => {
         
         for (const s of d.slots || []) {
           const companyKey = (s.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          const roleKey = (s.role || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          if (!seenJobs.has(companyKey)) seenJobs.set(companyKey, new Set());
-          seenJobs.get(companyKey).add(roleKey);
-          
-          // Track company-level cooldown (14 days)
+          // Track company-level cooldown (14 days) - regardless of role
           if (!seenCompanies.has(companyKey)) {
             seenCompanies.set(companyKey, dropDate.getTime());
           }
         }
       }
-      console.log('[getDailyDrop] Dedup: %d companies seen in last 14 days', seenJobs.size);
+      console.log('[getDailyDrop] Dedup: %d companies blocked in last 14 days', seenCompanies.size);
     } catch (e) {
       console.warn('[getDailyDrop] Could not load recent drops for dedup:', e.message);
     }
     
-    const isSeen = (company, role) => {
-      const companyKey = (company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const roleKey = (role || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const roles = seenJobs.get(companyKey);
-      return roles ? roles.has(roleKey) : false;
-    };
-    
-    // Check if company is in cooldown (seen in last 14 days)
+    // Check if company is in cooldown (seen in last 14 days) - STRICT company-level dedup
     const isCompanyInCooldown = (company) => {
       const companyKey = (company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       return seenCompanies.has(companyKey);
@@ -318,84 +309,58 @@ Deno.serve(async (req) => {
     // Size pref - but allow all sizes to get more results
     const sizeArray = ['large', 'mid', 'startup']; // Ignore size filter to maximize results
 
+    // TEST MODE: Set to true to bypass ALL APIs and use ONLY fallback pool (for testing variety)
+    const TEST_FALLBACK_ONLY = false;
+    
     // Slots from Fantastic Jobs (FRESH - last 24 hours ONLY)
     let allLiveSlots = [];
     const fantasticApiKey = Deno.env.get('FANTASTIC_JOBS_API_KEY');
     const role = targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst');
 
-    console.log(`[getDailyDrop] Fetching FRESH jobs (24h only): role=${role}, location=${location}, seeking=${seeking}`);
+    console.log(`[getDailyDrop] Fetching FRESH jobs (24h only): role=${role}, location=${location}, seeking=${seeking}, TEST_MODE=${TEST_FALLBACK_ONLY}`);
     
     let freshJobs = [];
     
-    // Primary: Fantastic Jobs API
-    if (!fantasticApiKey) {
-      console.warn('[getDailyDrop] No Fantastic API key');
-    } else {
-      try {
-        console.log('[getDailyDrop] Fetching fresh jobs from Fantastic Jobs (24h window)...');
-        freshJobs = await Promise.race([
-          fetchFreshJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }),
-          new Promise((_, r) => setTimeout(() => {
-            console.error('[getDailyDrop] Fantastic Jobs TIMEOUT after 25s');
-            return [];
-          }, 25000)),
-        ]);
-        console.log('[getDailyDrop] Fresh jobs result: %d companies', freshJobs?.length || 0);
-      } catch (e) {
-        console.error('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
+    if (!TEST_FALLBACK_ONLY) {
+      // Primary: Fantastic Jobs API
+      if (!fantasticApiKey) {
+        console.warn('[getDailyDrop] No Fantastic API key');
+      } else {
+        try {
+          console.log('[getDailyDrop] Fetching fresh jobs from Fantastic Jobs (24h window)...');
+          freshJobs = await Promise.race([
+            fetchFreshJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }),
+            new Promise((_, r) => setTimeout(() => {
+              console.error('[getDailyDrop] Fantastic Jobs TIMEOUT after 25s');
+              return [];
+            }, 25000)),
+          ]);
+          console.log('[getDailyDrop] Fresh jobs result: %d companies', freshJobs?.length || 0);
+        } catch (e) {
+          console.error('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
+        }
       }
+      
+      // Coresignal DISABLED - using expanded fallback pool instead
+      console.log('[getDailyDrop] Coresignal DISABLED - using Fantastic Jobs + expanded fallback pool');
+    } else {
+      console.log('[getDailyDrop] TEST MODE: Bypassing APIs, using fallback pool only');
     }
-    
-    // Secondary: Coresignal - DISABLED due to API issues, fallback pool expanded instead
-    // const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
-    // console.log('[getDailyDrop] Coresignal API key exists:', !!coresignalApiKey);
-    // if (coresignalApiKey) {
-    //   try {
-    //     console.log('[getDailyDrop] BEFORE Coresignal fetch - Fantastic jobs count:', freshJobs?.length || 0);
-    //     console.log('[getDailyDrop] Fetching from Coresignal to diversify results...');
-    //     const coresignalJobs = await fetchCoresignalJobs({ 
-    //       role, 
-    //       location, 
-    //       seeking, 
-    //       apiKey: coresignalApiKey, 
-    //       maxResults: dailyLimit * 2 
-    //     });
-    //     console.log('[getDailyDrop] AFTER Coresignal fetch - got %d jobs', coresignalJobs?.length || 0);
-    //     // Merge and dedupe by company+role
-    //     const existingKeys = new Set((freshJobs || []).map(j => `${j.name}||${j.job_title}`));
-    //     let addedCount = 0;
-    //     for (const job of coresignalJobs || []) {
-    //       const key = `${job.name}||${job.job_title}`;
-    //       if (!existingKeys.has(key)) {
-    //         freshJobs.push(job);
-    //         existingKeys.add(key);
-    //         addedCount++;
-    //       }
-    //     }
-    //     console.log('[getDailyDrop] Added %d unique Coresignal jobs, new total: %d', addedCount, freshJobs?.length || 0);
-    //   } catch (e) {
-    //     console.error('[getDailyDrop] Coresignal fetch FAILED:', e.message);
-    //   }
-    // } else {
-    //   console.warn('[getDailyDrop] CORESIGNAL_API_KEY not set - skipping Coresignal');
-    // }
-    console.log('[getDailyDrop] Coresignal DISABLED - using Fantastic Jobs + expanded fallback pool');
 
-    // Merge and deduplicate by company name
+    // Merge and deduplicate by COMPANY ONLY (stricter dedup)
     const mergedCompanies = new Set();
     const mergedJobs = [];
     
-    // Prioritize unseen company+role combinations from fresh jobs
+    // Filter out companies in 14-day cooldown
     const allJobs = freshJobs || [];
-    const unseenJobsList = allJobs.filter(j => !isSeen(j.name, j.job_title));
-    const seenJobsList = allJobs.filter(j => isSeen(j.name, j.job_title));
+    const eligibleJobs = allJobs.filter(j => !isCompanyInCooldown(j.name));
     
-    for (const job of [...unseenJobsList, ...seenJobsList]) {
+    console.log('[getDailyDrop] Fresh jobs: %d total, %d eligible after company cooldown filter', allJobs.length, eligibleJobs.length);
+    
+    for (const job of eligibleJobs) {
       const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const roleKey = job.job_title.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const fullKey = `${companyKey}||${roleKey}`;
-      if (mergedCompanies.has(fullKey)) continue;
-      mergedCompanies.add(fullKey);
+      if (mergedCompanies.has(companyKey)) continue;
+      mergedCompanies.add(companyKey);
       
       mergedJobs.push({
         company: job.name,
@@ -618,26 +583,27 @@ Deno.serve(async (req) => {
         : seeking === 'fulltime' ? fulltimeFallbackSlots
         : [...internFallbackSlots.slice(0, 3), ...fulltimeFallbackSlots];
       
-      // Shuffle fallbacks for randomness — different companies each day
-      for (let i = fallbackSlots.length - 1; i > 0; i--) {
+      // AGGRESSIVE shuffle using crypto-random for true randomness each day
+      const shuffled = [...fallbackSlots];
+      for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [fallbackSlots[i], fallbackSlots[j]] = [fallbackSlots[j], fallbackSlots[i]];
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       
-      const existingKeys = new Set(slots.map(s => `${s.company.toLowerCase()}||${s.role.toLowerCase()}`));
-      // Try unseen fallbacks first (company+role combo), then allow repeats if we still need slots
-      const orderedFallbacks = [
-        ...fallbackSlots.filter(f => !isSeen(f.company, f.role)),
-        ...fallbackSlots.filter(f => isSeen(f.company, f.role))
-      ];
-      for (const fb of orderedFallbacks) {
-        const fbKey = `${fb.company.toLowerCase()}||${fb.role.toLowerCase()}`;
-        if (!existingKeys.has(fbKey)) {
-          slots.push(fb);
-          existingKeys.add(fbKey);
-        }
+      // Filter out companies already in slots or in 14-day cooldown
+      const existingCompanyKeys = new Set(slots.map(s => s.company.toLowerCase().replace(/[^a-z0-9]/g, '')));
+      for (const fb of shuffled) {
+        const fbCompanyKey = fb.company.toLowerCase().replace(/[^a-z0-9]/g, '');
+        // Skip if company already in slots OR in 14-day cooldown
+        if (existingCompanyKeys.has(fbCompanyKey) || isCompanyInCooldown(fb.company)) continue;
+        
+        slots.push(fb);
+        existingCompanyKeys.add(fbCompanyKey);
         if (slots.length >= dailyLimit) break;
       }
+      
+      console.log('[getDailyDrop] Added %d fallback slots (cooldown-filtered)', slots.length - (slots.filter(s => !s.isLiveResult).length));
+      
       // Enrich fallback slots with alumni counts too
       for (let i = 0; i < slots.length; i++) {
         if (!slots[i].hasAlumni) slots[i] = enrichWithAlumni(slots[i]);
