@@ -238,41 +238,16 @@ Deno.serve(async (req) => {
     const isPremium = checkIsFastIQ(user);
     const dailyLimit = isPremium ? 30 : 15;
 
-    // Force refresh if requested via query param
-    const forceRefresh = body.force_refresh === true;
-    console.log(`[getDailyDrop] User: ${user.email}, forceRefresh: ${forceRefresh}, dropDate: ${dropDate}`);
+    // ALWAYS force refresh - no caching
+    console.log(`[getDailyDrop] User: ${user.email}, dropDate: ${dropDate}`);
 
-    // ── 1. Check for a valid cached drop (skip if force refresh) ─────────
-    if (!forceRefresh) {
-      const existing = await base44.entities.UserDailyDrop.filter({
-        user_id: user.id,
-        drop_date: dropDate,
-      });
-
-      if (existing && existing.length > 0) {
-        const drop = existing[0];
-        console.log(`[getDailyDrop] Cache hit for ${user.email} on ${dropDate}`);
-        return Response.json({
-          success: true,
-          slots: drop.slots || [],
-          actioned_keys: drop.actioned_keys || [],
-          drop_date: dropDate,
-          drop_id: drop.id,
-          from_cache: true,
-          is_premium: isPremium,
-          daily_limit: dailyLimit,
-        });
-      }
-    } else {
-      console.log(`[getDailyDrop] Force refresh requested for ${user.email}`);
-      // Clear stale drops for today
-      try {
-        const staleToday = await base44.entities.UserDailyDrop.filter({ user_id: user.id, drop_date: dropDate });
-        console.log(`[getDailyDrop] Clearing ${staleToday?.length || 0} stale drops`);
-        for (const d of staleToday || []) await base44.entities.UserDailyDrop.delete(d.id);
-      } catch (e) {
-        console.warn('[getDailyDrop] Could not clear stale drops:', e.message);
-      }
+    // Clear ALL existing drops for today (no cache)
+    try {
+      const existing = await base44.entities.UserDailyDrop.filter({ user_id: user.id, drop_date: dropDate });
+      console.log(`[getDailyDrop] Clearing ${existing?.length || 0} existing drops for ${dropDate}`);
+      for (const d of existing || []) await base44.entities.UserDailyDrop.delete(d.id);
+    } catch (e) {
+      console.warn('[getDailyDrop] Could not clear existing drops:', e.message);
     }
 
     // ── 2. Generate a fresh daily drop ────────────────────────────────────
