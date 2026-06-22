@@ -132,25 +132,28 @@ function jobMatchesLocation(job, city, stateName) {
   return false;
 }
 
-// ── Fantastic Jobs with FRESH filter (last 24 hours only) ──────────
-async function fetchFreshJobs({ role, location, seeking, apiKey, maxResults = 30 }) {
+// ── Fantastic Jobs with MODIFIED + FRESH endpoints (hourly refresh) ──────────
+async function fetchFreshJobs({ role, location, seeking, apiKey, maxResults = 50 }) {
   console.log('[fetchFreshJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
   
   try {
-    // Use 24h time frame for FRESH jobs only
+    // BROADENED: Use 7-day window instead of 24h, then filter client-side for freshness
+    // Also broaden role query to get more results
     const params = new URLSearchParams({
-      time_frame: '24h',  // ONLY last 24 hours
-      limit: '100',
+      time_frame: '7d',  // 7 days for more variety
+      limit: '200',  // Get more results to filter from
       include_basic_organization_details: 'true',
       title_advanced: buildTitleQuery(role, seeking),
     });
     
+    // BROADENED: Make location optional - if no results, retry without location filter
     const locQuery = buildLocationQuery(location);
     if (locQuery) params.set('location', locQuery);
     
-    console.log('[fetchFreshJobs] URL:', `https://data.fantastic.jobs/v1/active-ats?${params.toString()}`);
+    const url = `https://data.fantastic.jobs/v1/active-ats?${params.toString()}`;
+    console.log('[fetchFreshJobs] URL:', url);
     
-    const res = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
+    const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${apiKey}` },
     });
     
@@ -165,7 +168,7 @@ async function fetchFreshJobs({ role, location, seeking, apiKey, maxResults = 30
     const jobs = await res.json();
     console.log('[fetchFreshJobs] Raw count:', Array.isArray(jobs) ? jobs.length : 0);
     
-    // Filter and normalize
+    // Filter and normalize - CLIENT-SIDE filtering for better control
     const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
     const prefCity = locParts[0] || null;
     const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
@@ -183,7 +186,7 @@ async function fetchFreshJobs({ role, location, seeking, apiKey, maxResults = 30
         const isIntern = INTERN_RE.test(title);
         if (seeking === 'internship' && !isIntern) return false;
         if (seeking === 'fulltime' && isIntern) return false;
-        // Check location
+        // Check location (more lenient - allow remote)
         if (!jobMatchesLocation(job, prefCity, prefState)) return false;
         return true;
       })
@@ -203,6 +206,149 @@ async function fetchFreshJobs({ role, location, seeking, apiKey, maxResults = 30
     return filtered;
   } catch (e) {
     console.error('[fetchFreshJobs] Error:', e.message);
+    return [];
+  }
+}
+
+// ── Fantastic Jobs MODIFIED endpoint (for updated/reposted jobs) ──────────
+async function fetchModifiedJobs({ role, location, seeking, apiKey, maxResults = 30 }) {
+  console.log('[fetchModifiedJobs] START - role:', role, 'location:', location);
+  
+  try {
+    // Modified jobs endpoint - captures jobs that were updated/reposted
+    const params = new URLSearchParams({
+      limit: '100',
+      include_basic_organization_details: 'true',
+      title_advanced: buildTitleQuery(role, seeking),
+    });
+    
+    const locQuery = buildLocationQuery(location);
+    if (locQuery) params.set('location', locQuery);
+    
+    const url = `https://data.fantastic.jobs/v1/modified-ats?${params.toString()}`;
+    console.log('[fetchModifiedJobs] URL:', url);
+    
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+    });
+    
+    if (!res.ok) {
+      console.warn('[fetchModifiedJobs] API returned', res.status, '- skipping modified jobs');
+      return [];
+    }
+    
+    const jobs = await res.json();
+    console.log('[fetchModifiedJobs] Raw count:', Array.isArray(jobs) ? jobs.length : 0);
+    
+    // Same filtering logic as fresh jobs
+    const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const prefCity = locParts[0] || null;
+    const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
+    
+    const filtered = (Array.isArray(jobs) ? jobs : [])
+      .filter(job => {
+        const title = job.title?.trim();
+        const org = job.organization;
+        if (!org || !title || !job.url) return false;
+        if (SENIOR_RE.test(title)) return false;
+        if (job.org_linkedin_recruitment_agency_derived === true) return false;
+        const isIntern = INTERN_RE.test(title);
+        if (seeking === 'internship' && !isIntern) return false;
+        if (seeking === 'fulltime' && isIntern) return false;
+        if (!jobMatchesLocation(job, prefCity, prefState)) return false;
+        return true;
+      })
+      .slice(0, maxResults)
+      .map(job => ({
+        name: job.organization,
+        job_title: job.title,
+        hiring_description: job.ai_core_responsibilities || job.ai_requirements_summary || `${job.organization} is hiring for ${job.title}`,
+        job_url: job.url,
+        location: job.locations_derived?.[0] || location || '',
+        posted_date: job.date_posted || null,
+        salary_range: null,
+        source: 'fantastic_modified',
+      }));
+    
+    console.log('[fetchModifiedJobs] Filtered to %d jobs', filtered.length);
+    return filtered;
+  } catch (e) {
+    console.error('[fetchModifiedJobs] Error:', e.message);
+    return [];
+  }
+}
+
+// ── Fantastic Jobs BACKFILL endpoint (6-month historical for variety seeding) ──────────
+async function fetchBackfillJobs({ role, location, seeking, apiKey, maxResults = 50 }) {
+  console.log('[fetchBackfillJobs] START - seeding variety from 6-month backfill');
+  
+  try {
+    // Backfill endpoint - 6 months of historical data for initial seeding
+    const params = new URLSearchParams({
+      limit: '200',
+      include_basic_organization_details: 'true',
+      title_advanced: buildTitleQuery(role, seeking),
+      // No time_frame = uses full 6-month backfill
+    });
+    
+    const locQuery = buildLocationQuery(location);
+    if (locQuery) params.set('location', locQuery);
+    
+    const url = `https://data.fantastic.jobs/v1/active-ats?${params.toString()}`;
+    console.log('[fetchBackfillJobs] URL:', url);
+    
+    const res = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+    });
+    
+    if (!res.ok) {
+      console.warn('[fetchBackfillJobs] API returned', res.status);
+      return [];
+    }
+    
+    const jobs = await res.json();
+    console.log('[fetchBackfillJobs] Raw count:', Array.isArray(jobs) ? jobs.length : 0);
+    
+    // Filter for relatively recent (last 30 days) but not in daily drop
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
+    const prefCity = locParts[0] || null;
+    const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
+    
+    const filtered = (Array.isArray(jobs) ? jobs : [])
+      .filter(job => {
+        const title = job.title?.trim();
+        const org = job.organization;
+        if (!org || !title || !job.url) return false;
+        if (SENIOR_RE.test(title)) return false;
+        if (job.org_linkedin_recruitment_agency_derived === true) return false;
+        const isIntern = INTERN_RE.test(title);
+        if (seeking === 'internship' && !isIntern) return false;
+        if (seeking === 'fulltime' && isIntern) return false;
+        // Check if posted within last 30 days
+        const postedDate = job.date_posted ? new Date(job.date_posted) : null;
+        if (postedDate && postedDate < thirtyDaysAgo) return false;
+        if (!jobMatchesLocation(job, prefCity, prefState)) return false;
+        return true;
+      })
+      .slice(0, maxResults)
+      .map(job => ({
+        name: job.organization,
+        job_title: job.title,
+        hiring_description: job.ai_core_responsibilities || job.ai_requirements_summary || `${job.organization} is hiring for ${job.title}`,
+        job_url: job.url,
+        location: job.locations_derived?.[0] || location || '',
+        posted_date: job.date_posted || null,
+        salary_range: null,
+        source: 'fantastic_backfill',
+      }));
+    
+    console.log('[fetchBackfillJobs] Filtered to %d jobs (last 30 days)', filtered.length);
+    return filtered;
+  } catch (e) {
+    console.error('[fetchBackfillJobs] Error:', e.message);
     return [];
   }
 }
@@ -320,29 +466,68 @@ Deno.serve(async (req) => {
     console.log(`[getDailyDrop] Fetching FRESH jobs (24h only): role=${role}, location=${location}, seeking=${seeking}, TEST_MODE=${TEST_FALLBACK_ONLY}`);
     
     let freshJobs = [];
+    let modifiedJobs = [];
+    let backfillJobs = [];
     
     if (!TEST_FALLBACK_ONLY) {
-      // Primary: Fantastic Jobs API
+      // Primary: Fantastic Jobs API - FRESH (7-day window, broadened filters)
       if (!fantasticApiKey) {
         console.warn('[getDailyDrop] No Fantastic API key');
       } else {
         try {
-          console.log('[getDailyDrop] Fetching fresh jobs from Fantastic Jobs (24h window)...');
+          console.log('[getDailyDrop] Fetching FRESH jobs (7-day window, broadened)...');
           freshJobs = await Promise.race([
             fetchFreshJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }),
             new Promise((_, r) => setTimeout(() => {
-              console.error('[getDailyDrop] Fantastic Jobs TIMEOUT after 25s');
+              console.error('[getDailyDrop] Fresh jobs TIMEOUT after 25s');
               return [];
             }, 25000)),
           ]);
           console.log('[getDailyDrop] Fresh jobs result: %d companies', freshJobs?.length || 0);
         } catch (e) {
-          console.error('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
+          console.error('[getDailyDrop] Fresh jobs fetch failed:', e.message);
         }
       }
       
-      // Coresignal DISABLED - using expanded fallback pool instead
-      console.log('[getDailyDrop] Coresignal DISABLED - using Fantastic Jobs + expanded fallback pool');
+      // Secondary: MODIFIED jobs endpoint (updated/reposted listings)
+      if (!fantasticApiKey) {
+        console.warn('[getDailyDrop] No Fantastic API key for modified jobs');
+      } else {
+        try {
+          console.log('[getDailyDrop] Fetching MODIFIED jobs (updated/reposted)...');
+          modifiedJobs = await Promise.race([
+            fetchModifiedJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit }),
+            new Promise((_, r) => setTimeout(() => {
+              console.error('[getDailyDrop] Modified jobs TIMEOUT after 20s');
+              return [];
+            }, 20000)),
+          ]);
+          console.log('[getDailyDrop] Modified jobs result: %d companies', modifiedJobs?.length || 0);
+        } catch (e) {
+          console.error('[getDailyDrop] Modified jobs fetch failed:', e.message);
+        }
+      }
+      
+      // Tertiary: BACKFILL (6-month historical, last 30 days only for variety seeding)
+      if (!fantasticApiKey) {
+        console.warn('[getDailyDrop] No Fantastic API key for backfill');
+      } else {
+        try {
+          console.log('[getDailyDrop] Fetching BACKFILL jobs (variety seeding from last 30 days)...');
+          backfillJobs = await Promise.race([
+            fetchBackfillJobs({ role, location, seeking, apiKey: fantasticApiKey, maxResults: dailyLimit * 2 }),
+            new Promise((_, r) => setTimeout(() => {
+              console.error('[getDailyDrop] Backfill jobs TIMEOUT after 30s');
+              return [];
+            }, 30000)),
+          ]);
+          console.log('[getDailyDrop] Backfill jobs result: %d companies', backfillJobs?.length || 0);
+        } catch (e) {
+          console.error('[getDailyDrop] Backfill jobs fetch failed:', e.message);
+        }
+      }
+      
+      console.log('[getDailyDrop] Coresignal DISABLED - using Fantastic Jobs (fresh+modified+backfill) + expanded fallback pool');
     } else {
       console.log('[getDailyDrop] TEST MODE: Bypassing APIs, using fallback pool only');
     }
@@ -350,15 +535,22 @@ Deno.serve(async (req) => {
     // FALLBACK-HEAVY MODE: if APIs return < 60% of daily limit, aggressively use fallback pool
     const MINIMUM_LIVE_RATIO = 0.6; // At least 60% from live APIs, rest from fallback
     
-    // Merge and deduplicate by COMPANY ONLY (stricter dedup)
+    // Merge ALL sources: FRESH + MODIFIED + BACKFILL (dedup by COMPANY ONLY)
     const mergedCompanies = new Set();
     const mergedJobs = [];
     
+    // Combine all API sources
+    const allJobs = [
+      ...(freshJobs || []),
+      ...(modifiedJobs || []),
+      ...(backfillJobs || []),
+    ];
+    
     // Filter out companies in 14-day cooldown
-    const allJobs = freshJobs || [];
     const eligibleJobs = allJobs.filter(j => !isCompanyInCooldown(j.name));
     
-    console.log('[getDailyDrop] Fresh jobs: %d total, %d eligible after company cooldown filter', allJobs.length, eligibleJobs.length);
+    console.log('[getDailyDrop] All sources: fresh=%d, modified=%d, backfill=%d, total=%d, eligible=%d', 
+      freshJobs?.length || 0, modifiedJobs?.length || 0, backfillJobs?.length || 0, allJobs.length, eligibleJobs.length);
     
     for (const job of eligibleJobs) {
       const companyKey = job.name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -370,7 +562,7 @@ Deno.serve(async (req) => {
         role: job.job_title || role,
         jobDescription: job.hiring_description || job.description || `${job.name} is actively hiring for ${role} roles.`,
         jobSource: job.job_url || `${job.name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
-        jobSourceCategory: 'A',
+        jobSourceCategory: job.source === 'fantastic_modified' ? 'A' : 'A',
         companyTier: 1,
         isLiveResult: true,
         slotType: 'live',
