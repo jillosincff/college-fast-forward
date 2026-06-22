@@ -116,7 +116,10 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
       <div style={{ flex: 1, maxWidth: 720, margin: '0 auto', padding: '40px 24px', width: '100%' }}>
 
       <div style={{ marginBottom: 32 }}>
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 8px' }}>LINKEDIN PROFILE REVIEW</p>
+        <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 16, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+          ← Back to Dashboard
+        </button>
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 8px' }}>LinkedIn Optimizer</p>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 8px' }}>
           Let's optimize your LinkedIn.
         </h1>
@@ -141,7 +144,7 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
             <button
               onClick={handleReview}
               disabled={!url.trim()}
-              style={{ background: !url.trim() ? '#F0F0F0' : '#E85D20', border: 'none', borderRadius: 10, padding: '0 24px', fontSize: 14, fontWeight: 600, color: !url.trim() ? '#CCC' : '#fff', cursor: !url.trim() ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
+              style={{ background: !url.trim() ? '#F0F0F0' : 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '0 24px', fontSize: 14, fontWeight: 600, color: !url.trim() ? '#CCC' : '#fff', cursor: !url.trim() ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif", whiteSpace: 'nowrap', minHeight: 'auto' }}
             >
               Review My Profile →
             </button>
@@ -282,10 +285,10 @@ export default function LinkedInReview({ onOpenUpgrade: onOpenUpgradeProp }) {
 
           <div style={{ display: 'flex', gap: 10, flexDirection: 'column' }}>
             <button
-              onClick={() => navigate('LinkedInActionPlan')}
-              style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
+              onClick={() => { setAnalysis(null); setProfile(null); setError(''); }}
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '12px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', width: '100%', fontFamily: "'DM Sans', sans-serif", minHeight: 'auto' }}
             >
-              Create Action Plan →
+              ← Analyze a Different Profile
             </button>
             <button
               onClick={() => { setAnalysis(null); setProfile(null); setError(''); }}

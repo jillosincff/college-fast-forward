@@ -190,7 +190,10 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         <AssessmentSidebar />
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '48px 24px' }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#E85D20', margin: '0 0 12px' }}>CAREER ARCHETYPE ASSESSMENT</p>
+          <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: '#64748b', marginBottom: 16, padding: 0, minHeight: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+            ← Back to Dashboard
+          </button>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 12px' }}>Career Archetype</p>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 700, color: '#1A1A1A', margin: '0 0 12px', lineHeight: 1.2 }}>Who are you, really?</h1>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#888', margin: '0 0 40px', lineHeight: 1.6 }}>
             20 questions. 10 minutes. Your unique career archetype — how you think, what drives you, and which roles and environments you'll thrive in. Inspired by Ray Dalio's PrinciplesYou methodology.
@@ -221,7 +224,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
             </p>
           </div>
 
-          <button onClick={() => setPhase('assessment')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}>
+          <button onClick={() => setPhase('assessment')} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '16px', fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", width: '100%' }}>
             Start My Assessment →
           </button>
         </div>
@@ -269,13 +272,13 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
                 <button
                   key={value}
                   onClick={() => handleAnswer(value)}
-                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.borderColor = '#E85D20'; }}
+                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.borderColor = '#7c3aed'; }}
                   onMouseLeave={e => { if (!isSelected) e.currentTarget.style.borderColor = '#E0E0E0'; }}
                   title={label}
                   style={{
                     width: 56, height: 56, borderRadius: '50%',
-                    border: `2px solid ${isSelected ? '#E85D20' : '#E0E0E0'}`,
-                    background: isSelected ? '#E85D20' : '#fff',
+                    border: `2px solid ${isSelected ? '#7c3aed' : '#E0E0E0'}`,
+                    background: isSelected ? '#7c3aed' : '#fff',
                     color: isSelected ? '#fff' : '#1A1A1A',
                     fontSize: 18, fontWeight: 700, cursor: 'pointer',
                     fontFamily: "'DM Sans', sans-serif",
@@ -450,7 +453,7 @@ export default function CareerAssessment({ onOpenUpgrade: onOpenUpgradeProp }) {
 
             {/* CTAs */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 32 }}>
-            <button onClick={() => navigate('FreeTierDashboard')} style={{ background: '#E85D20', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flex: 1 }}>
+            <button onClick={() => navigate('FreeTierDashboard')} style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10, padding: '14px 24px', fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", flex: 1 }}>
               Back to Dashboard →
             </button>
             <button onClick={generatePDF} style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 10, padding: '14px 24px', fontSize: 14, color: '#555', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>

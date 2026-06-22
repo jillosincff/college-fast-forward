@@ -18,7 +18,7 @@ import StudentOnboarding from '@/pages/StudentOnboarding';
 import ResumeTailoring from '@/pages/ResumeTailoring';
 import MockInterview from '@/pages/MockInterview';
 import LinkedInReview from '@/pages/LinkedInReview';
-import LinkedInActionPlan from '@/pages/LinkedInActionPlan';
+
 import CareerAssessment from '@/pages/CareerAssessment';
 import FastIQDashboard from '@/pages/FastIQDashboard';
 import OutreachDrafts from '@/pages/OutreachDrafts';
@@ -168,7 +168,7 @@ const AuthenticatedApp = () => {
       <Route path="/ResumeTailoring" element={<OnboardingGuard><LayoutWrapper currentPageName="ResumeTailoring"><ResumeTailoring /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/MockInterview" element={<OnboardingGuard><LayoutWrapper currentPageName="MockInterview"><MockInterview /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/LinkedInReview" element={<OnboardingGuard><LayoutWrapper currentPageName="LinkedInReview"><LinkedInReview /></LayoutWrapper></OnboardingGuard>} />
-      <Route path="/LinkedInActionPlan" element={<OnboardingGuard><LayoutWrapper currentPageName="LinkedInActionPlan"><LinkedInActionPlan /></LayoutWrapper></OnboardingGuard>} />
+
       <Route path="/CareerAssessment" element={<OnboardingGuard><LayoutWrapper currentPageName="CareerAssessment"><CareerAssessment /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/FastIQDashboard" element={<OnboardingGuard><LayoutWrapper currentPageName="FastIQDashboard"><FastIQDashboard /></LayoutWrapper></OnboardingGuard>} />
       <Route path="/OutreachDrafts" element={<OnboardingGuard><LayoutWrapper currentPageName="OutreachDrafts"><OutreachDrafts /></LayoutWrapper></OnboardingGuard>} />

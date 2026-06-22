@@ -10,9 +10,9 @@ const TOOLS = [
     desc: 'Upload, tailor, and optimize your resume for any job description with AI-powered ATS matching.',
     cta: 'Open Resume Studio',
     route: 'ResumeTailoring',
-    accent: '#4F46E5',
-    bg: '#eef2ff',
-    border: '#c7d2fe',
+    accent: '#7c3aed',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
   },
   {
     id: 'mock_interview',
@@ -21,31 +21,31 @@ const TOOLS = [
     desc: 'Practice with CLiFF AI — behavioral, technical, and case interviews tailored to your target roles.',
     cta: 'Start Practicing',
     route: 'MockInterview',
-    accent: '#7c3aed',
-    bg: '#f5f3ff',
-    border: '#ddd6fe',
+    accent: '#6d28d9',
+    bg: '#faf5ff',
+    border: '#e9d5ff',
   },
   {
     id: 'linkedin',
     icon: '🔗',
     title: 'LinkedIn Optimizer',
-    desc: 'Get a full review of your LinkedIn profile and an action plan to attract recruiters.',
+    desc: 'Get a full review of your LinkedIn profile and specific rewrites for your headline, about section, and more.',
     cta: 'Review My Profile',
     route: 'LinkedInReview',
-    accent: '#0284c7',
-    bg: '#f0f9ff',
-    border: '#bae6fd',
+    accent: '#7c3aed',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
   },
   {
     id: 'career_assessment',
-    icon: '🎯',
-    title: 'Career Assessment',
-    desc: 'Discover your career archetype and get personalized role recommendations.',
+    icon: '🧠',
+    title: 'Career Archetype',
+    desc: 'Discover your unique career archetype — how you think, what drives you, and which roles you\'re built for.',
     cta: 'Take Assessment',
     route: 'CareerAssessment',
-    accent: '#ea580c',
-    bg: '#fff7ed',
-    border: '#fed7aa',
+    accent: '#6d28d9',
+    bg: '#faf5ff',
+    border: '#e9d5ff',
   },
   {
     id: 'outreach',
@@ -54,20 +54,9 @@ const TOOLS = [
     desc: 'AI-generated outreach messages for alumni and hiring managers — ready to send.',
     cta: 'View Drafts',
     route: 'OutreachDrafts',
-    accent: '#16a34a',
-    bg: '#f0fdf4',
-    border: '#bbf7d0',
-  },
-  {
-    id: 'linkedin_plan',
-    icon: '📈',
-    title: 'LinkedIn Action Plan',
-    desc: 'A step-by-step plan to optimize your presence and grow your network strategically.',
-    cta: 'Build My Plan',
-    route: 'LinkedInActionPlan',
-    accent: '#9333ea',
-    bg: '#faf5ff',
-    border: '#e9d5ff',
+    accent: '#7c3aed',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
   },
 ];
 
@@ -79,7 +68,7 @@ export default function ToolsTab({ user, onUpgrade }) {
         <h2 style={{ fontFamily: dm, fontSize: 20, fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
           🧰 Your Career Tools
         </h2>
-        <p style={{ fontFamily: dm, fontSize: 13, color: '#6b7280', margin: 0, lineHeight: 1.5 }}>
+        <p style={{ fontFamily: dm, fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
           Everything you need to land the interview — resumes, interviews, and outreach, all in one place.
         </p>
       </div>

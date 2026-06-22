@@ -571,8 +571,35 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
               ← Back
             </button>
             <div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#475569', margin: '0 0 8px' }}>
-                OUTREACH DRAFTS
+              <button
+                onClick={() => navigate('FreeTierDashboard')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 13,
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#7c3aed';
+                  e.currentTarget.style.background = '#f5f5f5';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = '#64748b';
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                ← Back
+              </button>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7c3aed', margin: '0 0 8px' }}>
+                Outreach Drafts
               </p>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, color: '#1A1A1A', margin: '0 0 4px' }}>
                 Your Outreach Pipeline
@@ -585,7 +612,7 @@ export default function OutreachDrafts({ user: userProp, onOpenUpgrade }) {
           <button
             onClick={() => setPhase('new')}
             style={{
-              background: '#1e3a5f', border: 'none', borderRadius: 10,
+              background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', border: 'none', borderRadius: 10,
               padding: '10px 20px', fontSize: 13, fontWeight: 600,
               color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
               whiteSpace: 'nowrap', flexShrink: 0,
