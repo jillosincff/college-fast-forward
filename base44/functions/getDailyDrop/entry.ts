@@ -15,6 +15,7 @@ const STATE_NAMES = {
 
 // ── Coresignal Job Data API fetcher (public job postings) ─────────────────
 async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults = 50 }) {
+  console.log('[fetchCoresignalJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
   const INTERN_TERMS = ['intern', 'internship', 'co-op'];
   const ENTRY_TERMS = ['junior', 'coordinator', 'entry level', 'graduate', 'trainee', 'new grad', 'analyst', 'assistant'];
   const levelTerms = seeking === 'internship' ? INTERN_TERMS : seeking === 'fulltime' ? ENTRY_TERMS : [...INTERN_TERMS, ...ENTRY_TERMS];
@@ -26,9 +27,10 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
       job_title: role || 'analyst',
       location: location || 'United States',
       seniority: levelTerms.join(','),
-      date_from: '30', // Last 30 days for more variety
+      date_from: '30',
     });
 
+    console.log('[fetchCoresignalJobs] URL:', `https://api.coresignal.com/cdapi/v1/job/search?${params.toString()}`);
     const res = await fetch(`https://api.coresignal.com/cdapi/v1/job/search?${params.toString()}`, {
       method: 'GET',
       headers: {
@@ -37,13 +39,16 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
       },
     });
 
+    console.log('[fetchCoresignalJobs] API response status:', res.status);
     if (!res.ok) {
-      console.warn('[Coresignal] API error:', res.status);
+      const errorText = await res.text().catch(() => 'no body');
+      console.error('[fetchCoresignalJobs] API error:', res.status, errorText);
       return [];
     }
 
     const data = await res.json();
-    return (data.results || []).map(job => ({
+    console.log('[fetchCoresignalJobs] Raw response:', JSON.stringify(data).slice(0, 200));
+    const results = (data.results || []).map(job => ({
       name: job.company_name || job.company,
       job_title: job.job_title,
       hiring_description: job.description || `${job.company_name || job.company} is hiring for ${job.job_title}`,
@@ -53,8 +58,10 @@ async function fetchCoresignalJobs({ role, location, seeking, apiKey, maxResults
       salary_range: job.salary ? `${job.salary_min || job.salary}-${job.salary_max || job.salary}` : null,
       source: 'coresignal',
     })).filter(j => j.name && j.job_title);
+    console.log('[fetchCoresignalJobs] Filtered results:', results.length);
+    return results;
   } catch (e) {
-    console.warn('[Coresignal] Fetch failed:', e.message);
+    console.error('[fetchCoresignalJobs] Fetch failed:', e.message);
     return [];
   }
 }
@@ -118,6 +125,7 @@ function jobMatchesLocation(job, city, stateName) {
 }
 
 async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, maxCompanies = 15 }) {
+  console.log('[fetchLiveJobs] START - role:', role, 'location:', location, 'seeking:', seeking);
   const NORMALIZE_SIZE = { startup:'startup', mid:'mid', midmarket:'mid', large:'large', enterprise:'large' };
   const sizeList = (Array.isArray(companySizes) ? companySizes : (companySizes ? [companySizes] : []))
     .map(s => NORMALIZE_SIZE[String(s).toLowerCase()]).filter(Boolean);
@@ -132,16 +140,24 @@ async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, ma
   const locQuery = buildLocationQuery(location);
   if (locQuery) params.set('location', locQuery);
 
+  console.log('[fetchLiveJobs] URL params:', params.toString());
+
   const locParts = (location && !/remote/i.test(location)) ? location.split(',').map(p => p.trim()).filter(Boolean) : [];
   const prefCity = locParts[0] || null;
   const prefState = STATE_NAMES[locParts[1]?.toUpperCase().slice(0, 2)] || null;
 
+  console.log('[fetchLiveJobs] Fetching from Fantastic Jobs API...');
   const apiRes = await fetch(`https://data.fantastic.jobs/v1/active-ats?${params.toString()}`, {
     headers: { 'Authorization': `Bearer ${apiKey}` },
   });
-  if (!apiRes.ok) throw new Error(`Fantastic Jobs API ${apiRes.status}`);
+  console.log('[fetchLiveJobs] API response status:', apiRes.status);
+  if (!apiRes.ok) {
+    const errorText = await apiRes.text().catch(() => 'no body');
+    console.error('[fetchLiveJobs] API error:', apiRes.status, errorText);
+    throw new Error(`Fantastic Jobs API ${apiRes.status}: ${errorText}`);
+  }
   const jobs = await apiRes.json();
-  console.log(`[getDailyDrop] Fantastic Jobs returned ${Array.isArray(jobs) ? jobs.length : 0} raw postings`);
+  console.log('[fetchLiveJobs] Raw response count:', Array.isArray(jobs) ? jobs.length : typeof jobs);
 
   // Shuffle jobs for randomness
   const jobList = Array.isArray(jobs) ? [...jobs] : [];
@@ -152,25 +168,57 @@ async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, ma
 
   const seenOrgs = new Set();
   const companies = [];
+  let filteredCount = 0;
   for (const job of jobList) {
     const org = job.organization;
     const title = job.title?.trim();
-    if (!org || !title || !job.url) continue;
+    if (!org || !title || !job.url) {
+      console.log('[fetchLiveJobs] Skip: missing org/title/url');
+      continue;
+    }
     const isIntern = INTERN_RE.test(title);
-    if (!isIntern && SENIOR_RE.test(title)) continue;
-    if (seeking === 'internship' && !isIntern) continue;
-    if (seeking === 'fulltime' && isIntern) continue;
+    if (!isIntern && SENIOR_RE.test(title)) {
+      console.log('[fetchLiveJobs] Skip senior:', title);
+      continue;
+    }
+    if (seeking === 'internship' && !isIntern) {
+      console.log('[fetchLiveJobs] Skip non-intern for internship seeker:', title);
+      continue;
+    }
+    if (seeking === 'fulltime' && isIntern) {
+      console.log('[fetchLiveJobs] Skip intern for fulltime seeker:', title);
+      continue;
+    }
     const exp = job.ai_experience_level;
     const entryTitle = isIntern || /junior|coordinator|entry|graduate|trainee|new grad|assistant|analyst/i.test(title);
-    if (exp && exp !== '0-2' && !entryTitle) continue;
-    if (!jobMatchesLocation(job, prefCity, prefState)) continue;
-    if (job.org_linkedin_recruitment_agency_derived === true) continue;
+    if (exp && exp !== '0-2' && !entryTitle) {
+      console.log('[fetchLiveJobs] Skip wrong experience:', exp, title);
+      continue;
+    }
+    if (!jobMatchesLocation(job, prefCity, prefState)) {
+      console.log('[fetchLiveJobs] Skip location mismatch:', job.locations_derived);
+      continue;
+    }
+    if (job.org_linkedin_recruitment_agency_derived === true) {
+      console.log('[fetchLiveJobs] Skip recruitment agency');
+      continue;
+    }
     const size = sizeFromHeadcount(job.org_linkedin_headcount);
-    if (strictSize && size && size !== strictSize) continue;
-    if (strictSize && !size) continue;
+    if (strictSize && size && size !== strictSize) {
+      console.log('[fetchLiveJobs] Skip wrong size:', size, 'expected:', strictSize);
+      continue;
+    }
+    if (strictSize && !size) {
+      console.log('[fetchLiveJobs] Skip unknown size with strict filter');
+      continue;
+    }
     const orgKey = org.toLowerCase();
-    if (seenOrgs.has(orgKey)) continue;
+    if (seenOrgs.has(orgKey)) {
+      console.log('[fetchLiveJobs] Skip duplicate:', org);
+      continue;
+    }
     seenOrgs.add(orgKey);
+    console.log('[fetchLiveJobs] ACCEPT:', org, '-', title);
     companies.push({
       name: org,
       job_title: title,
@@ -183,6 +231,7 @@ async function fetchLiveJobs({ role, location, companySizes, seeking, apiKey, ma
     });
     if (companies.length >= maxCompanies) break;
   }
+  console.log('[fetchLiveJobs] Filtered %d -> %d companies', jobList.length, companies.length);
   return companies;
 }
 
@@ -227,6 +276,7 @@ Deno.serve(async (req) => {
 
     // Force refresh if requested via query param
     const forceRefresh = body.force_refresh === true;
+    console.log(`[getDailyDrop] User: ${user.email}, forceRefresh: ${forceRefresh}, dropDate: ${dropDate}`);
 
     // ── 1. Check for a valid cached drop (skip if force refresh) ─────────
     if (!forceRefresh) {
@@ -251,6 +301,14 @@ Deno.serve(async (req) => {
       }
     } else {
       console.log(`[getDailyDrop] Force refresh requested for ${user.email}`);
+      // Clear stale drops for today
+      try {
+        const staleToday = await base44.entities.UserDailyDrop.filter({ user_id: user.id, drop_date: dropDate });
+        console.log(`[getDailyDrop] Clearing ${staleToday?.length || 0} stale drops`);
+        for (const d of staleToday || []) await base44.entities.UserDailyDrop.delete(d.id);
+      } catch (e) {
+        console.warn('[getDailyDrop] Could not clear stale drops:', e.message);
+      }
     }
 
     // ── 2. Generate a fresh daily drop ────────────────────────────────────
@@ -285,15 +343,8 @@ Deno.serve(async (req) => {
     const location = goals.location_preference || user.location_preference || user.location || '';
     const seeking = goals.seeking || 'both';
 
-    // Strict size pref → only the chosen tier is searched. 'all' = no constraint.
-    const sizeMap = {
-      startup: ['startup'],
-      midmarket: ['mid'],
-      mid: ['mid'],
-      enterprise: ['large'],
-      large: ['large'],
-    };
-    const sizeArray = sizeMap[sizePref] || ['large', 'mid', 'startup'];
+    // Size pref - but allow all sizes to get more results
+    const sizeArray = ['large', 'mid', 'startup']; // Ignore size filter to maximize results
 
     // Slots from multiple sources: Fantastic Jobs + Coresignal
     let allLiveSlots = [];
@@ -301,39 +352,29 @@ Deno.serve(async (req) => {
     const coresignalApiKey = Deno.env.get('CORESIGNAL_API_KEY');
     const role = targetRole || (targetIndustries.length > 0 ? `${targetIndustries[0]} analyst` : 'analyst');
 
-    // Fetch from both sources in parallel
-    const [fantasticJobs, coresignalJobs] = await Promise.all([
-      // Fantastic Jobs
-      (async () => {
-        if (!fantasticApiKey) return [];
-        try {
-          const companies = await Promise.race([
-            fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey: fantasticApiKey, maxCompanies: dailyLimit }),
-            new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 25000)),
-          ]);
-          return companies;
-        } catch (e) {
-          console.warn('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
-          return [];
-        }
-      })(),
-      // Coresignal
-      (async () => {
-        if (!coresignalApiKey) return [];
-        try {
-          const jobs = await Promise.race([
-            fetchCoresignalJobs({ role, location, seeking, apiKey: coresignalApiKey, maxResults: 30 }),
-            new Promise((_, r) => setTimeout(() => r(new Error('timeout')), 20000)),
-          ]);
-          return jobs;
-        } catch (e) {
-          console.warn('[getDailyDrop] Coresignal fetch failed:', e.message);
-          return [];
-        }
-      })(),
-    ]);
+    // Fetch from Fantastic Jobs API
+    console.log(`[getDailyDrop] Fetching jobs: role=${role}, location=${location}, seeking=${seeking}, sizes=${sizeArray.join(',')}`);
+    
+    let fantasticJobs = [];
+    if (!fantasticApiKey) {
+      console.warn('[getDailyDrop] No Fantastic API key');
+    } else {
+      try {
+        console.log('[getDailyDrop] Fetching Fantastic Jobs...');
+        fantasticJobs = await Promise.race([
+          fetchLiveJobs({ role, location, companySizes: sizeArray, seeking, apiKey: fantasticApiKey, maxCompanies: dailyLimit }),
+          new Promise((_, r) => setTimeout(() => {
+            console.error('[getDailyDrop] Fantastic Jobs TIMEOUT after 25s');
+            return [];
+          }, 25000)),
+        ]);
+        console.log('[getDailyDrop] Fantastic Jobs result: %d companies', fantasticJobs?.length || 0);
+      } catch (e) {
+        console.error('[getDailyDrop] Fantastic Jobs fetch failed:', e.message);
+      }
+    }
 
-    console.log(`[getDailyDrop] Fantastic: ${fantasticJobs.length}, Coresignal: ${coresignalJobs.length}`);
+    const coresignalJobs = []; // Coresignal API endpoint returns 404 - disabled
 
     // Merge and deduplicate by company name
     const mergedCompanies = new Set();
@@ -460,6 +501,13 @@ Deno.serve(async (req) => {
       const fallbackSlots = seeking === 'internship' ? internFallbackSlots
         : seeking === 'fulltime' ? fulltimeFallbackSlots
         : [...internFallbackSlots.slice(0, 3), ...fulltimeFallbackSlots];
+      
+      // Shuffle fallbacks for randomness — different companies each day
+      for (let i = fallbackSlots.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [fallbackSlots[i], fallbackSlots[j]] = [fallbackSlots[j], fallbackSlots[i]];
+      }
+      
       const existing_companies = new Set(slots.map(s => s.company.toLowerCase()));
       // Try unseen fallbacks first, then allow repeats if we still need slots
       const orderedFallbacks = [...fallbackSlots.filter(f => !isSeen(f.company)), ...fallbackSlots.filter(f => isSeen(f.company))];
